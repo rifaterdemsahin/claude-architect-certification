@@ -53,6 +53,11 @@ cp .env.example .env
 
 ---
 
+## 🎓 Certification Exam & Case Studies
+Review the final certification walkthrough, architecture reviews, and exam questionnaires in [docs/certification/exam_and_case_study.md](file:///C:/projects/claude-architect-certification/docs/certification/exam_and_case_study.md).
+
+---
+
 ## ⚖️ License & Governance
 
 Distributed under the MIT License. Built strictly for enterprise educational purposes, systems auditing, and reference architecture validation.
