@@ -4,3 +4,8 @@ primary_region = "lhr"
 
 [build]
   dockerfile = "Dockerfile"
+
+[[vm]]
+  memory = "1gb"
+  cpu_kind = "shared"
+  cpus = 1
