@@ -157,15 +157,18 @@
       z-index: 10;
     }
 
-    /* TRIGGER: Show preview when hovering over the cues OR the media box */
-    .overlay-cues:hover ~ .media-col .overlay-preview,
+    /* TRIGGER: Show preview when hovering over the review grid or specific cues */
     .review-grid:hover .overlay-preview {
       opacity: 1;
     }
     
+    .overlay-cues:hover {
+      box-shadow: 0 0 20px var(--primary-glow);
+    }
+    
     .review-grid:hover .bg-artifact {
-      opacity: 0.3;
-      filter: blur(5px) grayscale(0.5);
+      opacity: 0.25;
+      filter: blur(8px) brightness(0.3);
     }
 
     .media-label {
