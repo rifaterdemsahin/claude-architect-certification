@@ -32,8 +32,14 @@ Bundle all files required for a specific scene to streamline the editing process
 The `demo_script_show.html` provides several tools for the production team:
 - **Massive Sticky Audio Player:** Always accessible for quick play/pause during script review.
 - **Lower Thirds Preview:** Visualizes the "Lower Third" graphics in situ.
-- **Hover to Preview:** Mousing over the "On-Screen Elements" box triggers a live composite view, showing exactly where text and icons should be placed over the background.
-- **Production Cues:** Explicit lists of icons, text strings, and timing markers.
+- **Hover to Preview:** Mousing over the "On-Screen Elements" box triggers a live composite view, showing exactly where text and icons should be placed over the background. **All granular assets (text PNGs and Icon PNGs) must be displayed in this preview.**
+- **Production Cues:** Explicit lists of icons, text strings, and timing markers, with direct download links to individual granular PNGs.
+
+## 4. Granular Asset Requirements
+For each scene, the following granular assets must be generated:
+- **Scene Text Overlay:** Individual PNG of the on-screen text (e.g., `text_systems.png`).
+- **Scene Icons:** Individual PNGs of each icon mentioned (e.g., `icon_shield.png`, `icon_mcp.png`).
+- **Composite Overlay:** A combined PNG showing the exact intended layout (e.g., `overlay_systems.png`).
 
 ## 4. Maintenance
 To add a new module:
