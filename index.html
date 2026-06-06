@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude AI Certification for Architects</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #030712;
+      --bg-card: rgba(17, 24, 39, 0.7);
+      --border-glow: rgba(139, 92, 246, 0.15);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      
+      --primary: #8b5cf6;
+      --primary-glow: rgba(139, 92, 246, 0.4);
+      --secondary: #3b82f6;
+      --secondary-glow: rgba(59, 130, 246, 0.4);
+      --accent: #d946ef;
+      
+      --font-title: 'Outfit', sans-serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.08) 0%, transparent 40%);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      line-height: 1.6;
+      overflow-x: hidden;
+      padding-bottom: 100px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Header & Hero */
+    header {
+      padding: 60px 0 40px 0;
+      text-align: center;
+      position: relative;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 16px;
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(59, 130, 246, 0.2));
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      border-radius: 100px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #c084fc;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 16px;
+      box-shadow: 0 0 20px rgba(139, 92, 246, 0.15);
+      animation: pulse 3s infinite alternate;
+    }
+
+    h1 {
+      font-family: var(--font-title);
+      font-size: 3rem;
+      font-weight: 800;
+      line-height: 1.15;
+      background: linear-gradient(to right, #ffffff, #c084fc, #6366f1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 16px;
+      letter-spacing: -0.02em;
+    }
+
+    header p {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 700px;
+      margin: 0 auto;
+      font-weight: 300;
+    }
+
+    /* Interactive Simulation & Architecture Diagram */
+    .section-title {
+      font-family: var(--font-title);
+      font-size: 1.8rem;
+      font-weight: 600;
+      margin-bottom: 24px;
+      text-align: center;
+      background: linear-gradient(to right, #ffffff, #93c5fd);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .interactive-panel {
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 24px;
+      padding: 32px;
+      margin-bottom: 48px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .interactive-panel::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+    }
+
+    .simulation-controls {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      border: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), #7c3aed);
+      color: white;
+      box-shadow: 0 4px 15px var(--primary-glow);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateY(-2px);
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: white;
+      box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+    }
+
+    .btn-danger:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(239, 68, 68, 0.6);
+    }
+
+    /* Simulation Graph Map */
+    .flow-chart {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      margin: 40px 0;
+      flex-wrap: wrap;
+      gap: 24px;
+    }
+
+    @media (max-width: 768px) {
+      .flow-chart {
+        flex-direction: column;
+      }
+    }
+
+    .node {
+      background: rgba(31, 41, 55, 0.6);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 16px 24px;
+      width: 200px;
+      text-align: center;
+      transition: all 0.5s ease;
+      z-index: 2;
+      position: relative;
+    }
+
+    .node-active {
+      border-color: var(--primary);
+      box-shadow: 0 0 20px var(--primary-glow);
+      background: rgba(139, 92, 246, 0.1);
+    }
+
+    .node-cached {
+      border-color: #10b981;
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+      background: rgba(16, 185, 129, 0.1);
+    }
+
+    .node-fault {
+      border-color: #ef4444;
+      box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+      background: rgba(239, 68, 68, 0.1);
+      animation: shake 0.5s infinite alternate;
+    }
+
+    .node h4 {
+      font-family: var(--font-title);
+      margin-bottom: 6px;
+      font-size: 1rem;
+    }
+
+    .node p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .node-icon {
+      font-size: 1.5rem;
+      margin-bottom: 8px;
+    }
+
+    .flow-line {
+      flex: 1;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      position: relative;
+      min-width: 40px;
+      transition: all 0.5s ease;
+    }
+
+    @media (max-width: 768px) {
+      .flow-line {
+        width: 4px;
+        height: 40px;
+        min-height: 40px;
+      }
+    }
+
+    .flow-line::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+      transition: width 0.5s ease;
+    }
+
+    .flow-line-active::after {
+      width: 100%;
+      animation: flow-pulse 1.5s infinite linear;
+    }
+
+    .flow-line-cached::after {
+      width: 100%;
+      background: #10b981;
+    }
+
+    .flow-line-fault::after {
+      width: 100%;
+      background: #ef4444;
+    }
+
+    /* Simulation Status Display */
+    .status-terminal {
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 16px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.85rem;
+      height: 150px;
+      overflow-y: auto;
+      color: #38bdf8;
+      box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+    }
+
+    .status-terminal p {
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Modules Grid */
+    .modules-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px;
+      margin-bottom: 60px;
+    }
+
+    .module-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      padding: 28px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .module-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(139, 92, 246, 0.3);
+      box-shadow: 0 12px 30px rgba(139, 92, 246, 0.08);
+    }
+
+    .module-number {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--primary);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      letter-spacing: 0.1em;
+    }
+
+    .module-card h3 {
+      font-family: var(--font-title);
+      font-size: 1.35rem;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+
+    .module-card p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+      flex-grow: 1;
+    }
+
+    .module-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .link-tag {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 0.75rem;
+      color: #93c5fd;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .link-tag:hover {
+      background: rgba(147, 197, 253, 0.1);
+      border-color: rgba(147, 197, 253, 0.3);
+      color: #ffffff;
+    }
+
+    /* Certification Link Card */
+    .cert-banner {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(59, 130, 246, 0.15) 100%);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      border-radius: 24px;
+      padding: 40px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .cert-banner::after {
+      content: '🎓';
+      position: absolute;
+      right: -20px;
+      bottom: -20px;
+      font-size: 8rem;
+      opacity: 0.08;
+      pointer-events: none;
+    }
+
+    .cert-banner h2 {
+      font-family: var(--font-title);
+      font-size: 2rem;
+      margin-bottom: 12px;
+      font-weight: 700;
+    }
+
+    .cert-banner p {
+      max-width: 600px;
+      margin: 0 auto 24px auto;
+      color: var(--text-muted);
+    }
+
+    .cert-banner .btn {
+      display: inline-flex;
+      margin: 0 auto;
+    }
+
+    /* Animations */
+    @keyframes pulse {
+      0% { box-shadow: 0 0 10px rgba(139, 92, 246, 0.1); }
+      100% { box-shadow: 0 0 20px rgba(139, 92, 246, 0.3); }
+    }
+
+    @keyframes shake {
+      0% { transform: translate(1px, 1px) rotate(0deg); }
+      10% { transform: translate(-1px, -2px) rotate(-1deg); }
+      20% { transform: translate(-3px, 0px) rotate(1deg); }
+      35% { transform: translate(0px, 2px) rotate(0deg); }
+      50% { transform: translate(1px, -1px) rotate(1deg); }
+      70% { transform: translate(-1px, 2px) rotate(-1deg); }
+      90% { transform: translate(2px, 1px) rotate(0deg); }
+    }
+
+    @keyframes flow-pulse {
+      0% { opacity: 0.6; }
+      50% { opacity: 1; }
+      100% { opacity: 0.6; }
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-top: 60px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 30px;
+    }
+
+    footer a {
+      color: #93c5fd;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div class="badge">Masterclass Workspace</div>
+      <h1>Claude AI Certification for Architects</h1>
+      <p>A hands-on, production-grade guide to building secure, optimized, and sovereign AI workflows at enterprise scale.</p>
+    </header>
+
+    <!-- Interactive Architecture Sandbox -->
+    <section>
+      <h3 class="section-title">🕹️ Interactive Architecture Simulator</h3>
+      <div class="interactive-panel">
+        <div class="simulation-controls">
+          <button id="btn-standard" class="btn btn-primary">⚡ Standard Request</button>
+          <button id="btn-caching" class="btn btn-secondary">🔋 Run Cached Request</button>
+          <button id="btn-outage" class="btn btn-danger">🚨 Trigger Outage Simulation</button>
+        </div>
+
+        <div class="flow-chart">
+          <!-- User / Trigger Node -->
+          <div id="node-user" class="node">
+            <div class="node-icon">👤</div>
+            <h4>User Prompt</h4>
+            <p id="label-user">Awaiting click</p>
+          </div>
+
+          <div id="line-1" class="flow-line"></div>
+
+          <!-- Router / Loop Breaker Node -->
+          <div id="node-router" class="node">
+            <div class="node-icon">🚦</div>
+            <h4>Router / Guards</h4>
+            <p id="label-router">Security & loops checks</p>
+          </div>
+
+          <div id="line-2" class="flow-line"></div>
+
+          <!-- Prompt Caching Node -->
+          <div id="node-cache" class="node">
+            <div class="node-icon">💾</div>
+            <h4>Prompt Cache</h4>
+            <p id="label-cache">Checkpoints</p>
+          </div>
+
+          <div id="line-3" class="flow-line"></div>
+
+          <!-- MCP Server Node -->
+          <div id="node-mcp" class="node">
+            <div class="node-icon">🔒</div>
+            <h4>Fly.io MCP Server</h4>
+            <p id="label-mcp">Data bridge</p>
+          </div>
+        </div>
+
+        <div class="status-terminal" id="terminal">
+          <p>> System ready. Select an execution scenario above to trace payload flow...</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modules Roadmap -->
+    <section>
+      <h3 class="section-title">📂 Course Curriculum & Blueprint Roadmap</h3>
+      <div class="modules-grid">
+        
+        <!-- Module 1 -->
+        <div class="module-card">
+          <div class="module-number">Module 1</div>
+          <h3>Claude Ecosystem & Flows</h3>
+          <p>Anatomy of Claude, token mechanics, stateful orchestration loops, and message routing topologies.</p>
+          <div class="module-links">
+            <a href="docs/topologies/multi_agent_flow.md" class="link-tag">📄 Topology Guide</a>
+          </div>
+        </div>
+
+        <!-- Module 2 -->
+        <div class="module-card">
+          <div class="module-number">Module 2</div>
+          <h3>Model Context Protocol (MCP)</h3>
+          <p>Connecting Claude to secure private databridges (SQLite/PostgreSQL) with read-only boundaries and stdio/SSE transports on Fly.io.</p>
+          <div class="module-links">
+            <a href="src/mcp-server/" class="link-tag">📁 MCP Codebase</a>
+            <a href="src/mcp-server/README.md" class="link-tag">📄 Setup & Deploy Guide</a>
+            <a href="src/mcp-server/fly.toml" class="link-tag">📄 fly.toml</a>
+          </div>
+        </div>
+
+        <!-- Module 3 -->
+        <div class="module-card">
+          <div class="module-number">Module 3</div>
+          <h3>Zero-Data Retention (ZDR)</h3>
+          <p>Restricting API endpoints using AWS Bedrock VPC Interface Endpoints (PrivateLink) and implementing strict compliance logs.</p>
+          <div class="module-links">
+            <a href="src/security/ZDR_COMPLIANCE.md" class="link-tag">📄 ZDR Protocol</a>
+            <a href="templates/aws-bedrock-private-link.tf" class="link-tag">📄 Terraform Blueprint</a>
+          </div>
+        </div>
+
+        <!-- Module 4 -->
+        <div class="module-card">
+          <div class="module-number">Module 4</div>
+          <h3>Deterministic Routers</h3>
+          <p>Building specialized agent classifiers and execution circuit-breakers in Python to shut down rogue loops cleanly.</p>
+          <div class="module-links">
+            <a href="src/multi-agent/router.py" class="link-tag">🐍 router.py</a>
+          </div>
+        </div>
+
+        <!-- Module 5 -->
+        <div class="module-card">
+          <div class="module-number">Module 5</div>
+          <h3>Financial Engineering</h3>
+          <p>Minimizing enterprise operational overhead by up to 90% using explicit, prefix-matching prompt cache points.</p>
+          <div class="module-links">
+            <a href="src/optimization/cache_layer.py" class="link-tag">🐍 cache_layer.py</a>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Certification Exam -->
+    <section>
+      <div class="cert-banner">
+        <h2>🎓 Certification Exam & Case Study</h2>
+        <p>Audit system failures under pressure and test your knowledge on real-world enterprise outage remediation scenarios.</p>
+        <a href="docs/certification/exam_and_case_study.md" class="btn btn-primary">📝 Start Exam Walkthrough</a>
+      </div>
+    </section>
+
+    <footer>
+      <p>Built for the **Claude AI Certification for Architects** Masterclass. Reference repository: <a href="https://github.com/rifaterdemsahin/claude-architect-certification">github.com/rifaterdemsahin/claude-architect-certification</a></p>
+    </footer>
+  </div>
+
+  <script>
+    // Simulator Script
+    const term = document.getElementById('terminal');
+    const nodes = {
+      user: document.getElementById('node-user'),
+      router: document.getElementById('node-router'),
+      cache: document.getElementById('node-cache'),
+      mcp: document.getElementById('node-mcp')
+    };
+    const lines = {
+      l1: document.getElementById('line-1'),
+      l2: document.getElementById('line-2'),
+      l3: document.getElementById('line-3')
+    };
+    const labels = {
+      user: document.getElementById('label-user'),
+      router: document.getElementById('label-router'),
+      cache: document.getElementById('label-cache'),
+      mcp: document.getElementById('label-mcp')
+    };
+
+    function resetNodes() {
+      Object.values(nodes).forEach(n => n.className = 'node');
+      Object.values(lines).forEach(l => l.className = 'flow-line');
+      labels.user.textContent = 'Awaiting click';
+      labels.router.textContent = 'Security & loops checks';
+      labels.cache.textContent = 'Checkpoints';
+      labels.mcp.textContent = 'Data bridge';
+    }
+
+    function termLog(text, color = '#38bdf8') {
+      const p = document.createElement('p');
+      p.style.color = color;
+      p.textContent = `> ${text}`;
+      term.appendChild(p);
+      term.scrollTop = term.scrollHeight;
+    }
+
+    document.getElementById('btn-standard').addEventListener('click', () => {
+      resetNodes();
+      term.innerHTML = '';
+      termLog('Initiating Standard User Request...');
+      
+      setTimeout(() => {
+        nodes.user.classList.add('node-active');
+        labels.user.textContent = 'User: "Query stock in eu-west-1"';
+        lines.l1.classList.add('flow-line-active');
+        termLog('Dispatching prompt payload to Router classifier...', '#818cf8');
+      }, 300);
+
+      setTimeout(() => {
+        nodes.router.classList.add('node-active');
+        labels.router.textContent = 'Router: INVENTORY_AGENT routed';
+        lines.l2.classList.add('flow-line-active');
+        termLog('No cache token found. Evaluating full context prompt (Cache Write)...', '#818cf8');
+      }, 1000);
+
+      setTimeout(() => {
+        nodes.cache.classList.add('node-active');
+        labels.cache.textContent = 'Cache: Ephemeral Write';
+        lines.l3.classList.add('flow-line-active');
+        termLog('Writing context block to edge cache (100% cost)...', '#f43f5e');
+      }, 1800);
+
+      setTimeout(() => {
+        nodes.mcp.classList.add('node-active');
+        labels.mcp.textContent = 'MCP Server: SQLite query run';
+        termLog('SUCCESS: SQL parameters bound. Returning SKU stock data.', '#10b981');
+      }, 2600);
+    });
+
+    document.getElementById('btn-caching').addEventListener('click', () => {
+      resetNodes();
+      term.innerHTML = '';
+      termLog('Initiating Warm User Request (Identical context payload)...');
+      
+      setTimeout(() => {
+        nodes.user.classList.add('node-cached');
+        labels.user.textContent = 'User: "Optimize stock ratios"';
+        lines.l1.className = 'flow-line flow-line-cached';
+        termLog('Dispatching payload to Router...', '#10b981');
+      }, 300);
+
+      setTimeout(() => {
+        nodes.router.classList.add('node-cached');
+        labels.router.textContent = 'Router: Dispatched';
+        lines.l2.className = 'flow-line flow-line-cached';
+        termLog('Matching prefix... Ephemeral cache hit detected!', '#10b981');
+      }, 900);
+
+      setTimeout(() => {
+        nodes.cache.classList.add('node-cached');
+        labels.cache.textContent = 'Cache: 100% Hit (90% cost cut)';
+        lines.l3.className = 'flow-line flow-line-cached';
+        termLog('Cache read hit. Zero latency overhead introduced.', '#10b981');
+      }, 1500);
+
+      setTimeout(() => {
+        nodes.mcp.classList.add('node-cached');
+        labels.mcp.textContent = 'MCP Server: Response completed';
+        termLog('SUCCESS: Optimization advice dispatched to client.', '#10b981');
+      }, 2100);
+    });
+
+    document.getElementById('btn-outage').addEventListener('click', () => {
+      resetNodes();
+      term.innerHTML = '';
+      termLog('CRITICAL OUTAGE SCENARIO INITIATED: Malformed input recursion loop', '#ef4444');
+      
+      setTimeout(() => {
+        nodes.user.className = 'node node-fault';
+        labels.user.textContent = 'User: Malformed circular receipt';
+        lines.l1.className = 'flow-line flow-line-fault';
+        termLog('Agent loop depth counter triggered. Depth: 1', '#ef4444');
+      }, 400);
+
+      setTimeout(() => {
+        nodes.router.className = 'node node-fault';
+        labels.router.textContent = 'Router: Recursive cycles detected';
+        lines.l2.className = 'flow-line flow-line-fault';
+        termLog('Warning: Agent attempting recursive call. Depth: 2', '#f59e0b');
+      }, 1000);
+
+      setTimeout(() => {
+        nodes.cache.className = 'node node-fault';
+        labels.cache.textContent = 'Loop Breaker Tripped!';
+        lines.l3.className = 'flow-line flow-line-fault';
+        termLog('SHUTDOWN: max_loop_depth (3) exceeded. Circuit breaker tripped!', '#ef4444');
+      }, 1600);
+
+      setTimeout(() => {
+        nodes.mcp.className = 'node node-fault';
+        labels.mcp.textContent = 'Database Isolated';
+        termLog('ALERT: Execution halted to protect downstream DB connection pool and API tokens.', '#ef4444');
+      }, 2200);
+    });
+  </script>
+</body>
+</html>
