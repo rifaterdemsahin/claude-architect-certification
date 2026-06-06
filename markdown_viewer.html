@@ -175,32 +175,38 @@
   <script>
     const params = new URLSearchParams(window.location.search);
     let mdPath = params.get('md');
-
-    if (!mdPath) {
-      mdPath = 'README.md';
-    }
-
+    if (!mdPath) mdPath = 'README.md';
     document.getElementById('file-name').textContent = mdPath;
 
-    fetch(mdPath)
-      .then(r => {
-        if (!r.ok) throw new Error('Could not load ' + mdPath);
-        return r.text();
-      })
-      .then(text => {
-        document.getElementById('content-area').innerHTML = marked.parse(text);
-        // Update internal markdown links to go through viewer
-        document.querySelectorAll('.md-content a').forEach(a => {
-          const href = a.getAttribute('href');
-          if (href && href.endsWith('.md') && !href.startsWith('http')) {
-            a.setAttribute('href', 'markdown_viewer.html?md=' + encodeURIComponent(href));
-          }
-        });
-      })
-      .catch(err => {
-        document.getElementById('content-area').innerHTML =
-          '<div class="error"><h2>❌ Failed to Load</h2><p>' + err.message + '</p><p>Make sure the file path is correct and the server is running.</p></div>';
+    const isFileProtocol = window.location.protocol === 'file:';
+
+    function renderMarkdown(text) {
+      document.getElementById('content-area').innerHTML = marked.parse(text);
+      document.querySelectorAll('.md-content a').forEach(a => {
+        const href = a.getAttribute('href');
+        if (href && href.endsWith('.md') && !href.startsWith('http')) {
+          a.setAttribute('href', 'markdown_viewer.html?md=' + encodeURIComponent(href));
+        }
       });
+    }
+
+    if (isFileProtocol) {
+      document.getElementById('content-area').innerHTML =
+        '<div class="loading">file:// protocol detected. Fetch blocked by browser security.</div>' +
+        '<div style="background:var(--bg-card);border:1px solid rgba(255,255,255,0.06);border-radius:20px;padding:32px;margin-top:16px;text-align:center;">' +
+        '<h2 style="font-family:var(--font-title);margin-bottom:16px;">🔒 Local File Restriction</h2>' +
+        '<p style="color:var(--text-muted);margin-bottom:20px;">The markdown viewer uses <code>fetch()</code> which is blocked when opening HTML files directly via <code>file://</code>. Start a local HTTP server:</p>' +
+        '<code style="display:inline-block;background:rgba(0,0,0,0.5);padding:12px 24px;border-radius:10px;font-size:1.1rem;color:#38bdf8;margin-bottom:20px;">python3 -m http.server 8000</code>' +
+        '<p style="color:var(--text-muted);">Then open <a href="http://localhost:8000/markdown_viewer.html?md=' + encodeURIComponent(mdPath) + '" style="color:var(--secondary);text-decoration:underline;">http://localhost:8000/markdown_viewer.html?md=' + encodeURIComponent(mdPath) + '</a></p></div>';
+    } else {
+      fetch(mdPath)
+        .then(r => { if (!r.ok) throw new Error('Could not load ' + mdPath); return r.text(); })
+        .then(renderMarkdown)
+        .catch(err => {
+          document.getElementById('content-area').innerHTML =
+            '<div class="error"><h2>❌ Failed to Load</h2><p>' + err.message + '</p><p>Make sure the file exists and the path is correct.</p></div>';
+        });
+    }
   </script>
 </body>
 </html>

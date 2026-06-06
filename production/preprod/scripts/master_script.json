@@ -1,0 +1,252 @@
+{
+  "course": {
+    "title": "Claude AI Certification for Architects",
+    "pipeline": "Pre-Production → Production → Post-Production → Publication"
+  },
+  "modules": [
+    {
+      "id": 1,
+      "title": "Claude Ecosystem & Flows",
+      "description": "Anatomy of Claude, token mechanics, stateful orchestration loops, and message routing topologies.",
+      "videos": [
+        {
+          "id": 1,
+          "title": "Architecture Overview",
+          "duration": "15:00",
+          "script": "Claude API anatomy covering Messages API, streaming, and tool use. Overview of token mechanics including context window management, caching strategies, and rate limits. Architecture diagram walkthrough showing request flow from user prompt to response.",
+          "cues": [
+            "Diagram: Claude API request flow",
+            "Highlight: Token context window limits",
+            "Overlay: Streaming vs batch response comparison",
+            "Lower Third: Claude API Architecture"
+          ]
+        },
+        {
+          "id": 2,
+          "title": "Stateful Orchestration",
+          "duration": "18:00",
+          "script": "Deep dive into loops vs stateless middleware boundaries. Multi-agent routing patterns with practical examples. Security guards and router classifiers that prevent infinite loops and malicious inputs.",
+          "cues": [
+            "Diagram: Multi-agent routing topology",
+            "Highlight: Loop detection with depth counter",
+            "Overlay: Circuit breaker tripped state",
+            "Lower Third: Orchestration & Routing"
+          ]
+        },
+        {
+          "id": 3,
+          "title": "Production Wiring",
+          "duration": "12:00",
+          "script": "Connecting Claude to enterprise data sources securely. Environment configuration for API keys, VPC setup, and IAM roles. Monitoring, logging, and error handling best practices for production deployments.",
+          "cues": [
+            "Screenshot: Environment config example",
+            "Highlight: IAM role permissions",
+            "Overlay: Logging pipeline diagram",
+            "Lower Third: Production Deployment"
+          ]
+        }
+      ],
+      "links": [
+        { "label": "Topology Guide", "url": "../../docs/topologies/multi_agent_flow.md" }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Model Context Protocol (MCP)",
+      "description": "Connecting Claude to secure private databridges (SQLite/PostgreSQL) with read-only boundaries and stdio/SSE transports on Fly.io.",
+      "videos": [
+        {
+          "id": 1,
+          "title": "MCP Fundamentals",
+          "duration": "14:00",
+          "script": "What is the Model Context Protocol? Protocol architecture and design principles. Client-server model explained: stdio vs SSE transports. Tool definitions and how resources are exposed to Claude.",
+          "cues": [
+            "Diagram: MCP client-server architecture",
+            "Highlight: stdio vs SSE comparison",
+            "Overlay: Tool definition JSON schema",
+            "Lower Third: MCP Fundamentals"
+          ]
+        },
+        {
+          "id": 2,
+          "title": "Building an MCP Server",
+          "duration": "22:00",
+          "script": "Step-by-step implementation of an SQLite data bridge. PostgreSQL read-only query layer for enterprise data access. Deploying to Fly.io with fly.toml configuration and environment secrets.",
+          "cues": [
+            "Code: SQLite bridge implementation",
+            "Highlight: Read-only query boundaries",
+            "Overlay: fly.toml config structure",
+            "Lower Third: MCP Server Build"
+          ]
+        },
+        {
+          "id": 3,
+          "title": "Enterprise MCP",
+          "duration": "16:00",
+          "script": "Authentication and authorization boundaries for production MCP. Multi-server orchestration with message routing. Monitoring MCP traffic and latency with dashboards.",
+          "cues": [
+            "Diagram: Multi-server MCP topology",
+            "Highlight: Auth boundary enforcement",
+            "Overlay: Monitoring dashboard",
+            "Lower Third: Enterprise MCP"
+          ]
+        }
+      ],
+      "links": [
+        { "label": "MCP Codebase", "url": "../../src/mcp-server/" },
+        { "label": "Setup & Deploy Guide", "url": "../../src/mcp-server/README.md" },
+        { "label": "fly.toml", "url": "../../src/mcp-server/fly.toml" }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Zero-Data Retention (ZDR)",
+      "description": "Restricting API endpoints using AWS Bedrock VPC Interface Endpoints (PrivateLink) and implementing strict compliance logs.",
+      "videos": [
+        {
+          "id": 1,
+          "title": "ZDR Principles",
+          "duration": "13:00",
+          "script": "Why zero-data retention matters for enterprise compliance. AWS Bedrock architecture overview with VPC integration. PrivateLink and VPC Endpoints explained with network diagrams.",
+          "cues": [
+            "Diagram: AWS Bedrock VPC architecture",
+            "Highlight: Data flow with PrivateLink",
+            "Overlay: Compliance requirements checklist",
+            "Lower Third: ZDR Principles"
+          ]
+        },
+        {
+          "id": 2,
+          "title": "Implementing ZDR",
+          "duration": "20:00",
+          "script": "Terraform blueprint for VPC Interface Endpoints configuration. Restricting API endpoint access with security groups. Compliance logging and audit trail implementation.",
+          "cues": [
+            "Code: Terraform VPC endpoint config",
+            "Highlight: Security group rules",
+            "Overlay: Audit log structure",
+            "Lower Third: ZDR Implementation"
+          ]
+        },
+        {
+          "id": 3,
+          "title": "ZDR in Production",
+          "duration": "14:00",
+          "script": "Testing and verifying data retention boundaries with penetration tests. Incident response procedures for data leaks. Compliance certification walkthrough for SOC 2 and HIPAA.",
+          "cues": [
+            "Screenshot: Compliance test results",
+            "Highlight: Incident response flow",
+            "Overlay: Certification checklist",
+            "Lower Third: ZDR in Production"
+          ]
+        }
+      ],
+      "links": [
+        { "label": "ZDR Protocol", "url": "../../src/security/ZDR_COMPLIANCE.md" },
+        { "label": "Terraform Blueprint", "url": "../../templates/aws-bedrock-private-link.tf" }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Deterministic Routers",
+      "description": "Building specialized agent classifiers and execution circuit-breakers in Python to shut down rogue loops cleanly.",
+      "videos": [
+        {
+          "id": 1,
+          "title": "Router Architecture",
+          "duration": "14:00",
+          "script": "Why deterministic routing matters for AI safety. Agent classifier design patterns and decision trees. Comparison of rule-based vs ML-based routing approaches.",
+          "cues": [
+            "Diagram: Router architecture overview",
+            "Highlight: Decision tree vs ML classifier",
+            "Overlay: Routing decision matrix",
+            "Lower Third: Router Architecture"
+          ]
+        },
+        {
+          "id": 2,
+          "title": "Building the Router",
+          "duration": "19:00",
+          "script": "Python implementation walkthrough of router.py. Loop detection algorithm with depth counting. Circuit breaker pattern implementation with configurable thresholds.",
+          "cues": [
+            "Code: router.py core logic",
+            "Highlight: Loop depth counter",
+            "Overlay: Circuit breaker state machine",
+            "Lower Third: Router Implementation"
+          ]
+        },
+        {
+          "id": 3,
+          "title": "Router in Production",
+          "duration": "15:00",
+          "script": "Load testing results and performance benchmarks. Edge case handling: malformed input, recursion attacks, and timeout management. Integration patterns with MCP and caching layers.",
+          "cues": [
+            "Graph: Load test performance",
+            "Highlight: Edge case handling",
+            "Overlay: Integration architecture",
+            "Lower Third: Production Router"
+          ]
+        }
+      ],
+      "links": [
+        { "label": "router.py", "url": "../../src/multi-agent/router.py" }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Financial Engineering",
+      "description": "Minimizing enterprise operational overhead by up to 90% using explicit, prefix-matching prompt cache points.",
+      "videos": [
+        {
+          "id": 1,
+          "title": "Cost Optimization Fundamentals",
+          "duration": "13:00",
+          "script": "Understanding Claude pricing: input vs output token costs. Prompt caching mechanics and prefix matching explained. Cost modeling techniques for enterprise workloads.",
+          "cues": [
+            "Graph: Token cost breakdown",
+            "Highlight: Input vs output cost ratio",
+            "Overlay: Cache prefix matching diagram",
+            "Lower Third: Cost Optimization"
+          ]
+        },
+        {
+          "id": 2,
+          "title": "Implementing Caching",
+          "duration": "18:00",
+          "script": "Explicit cache point placement strategies for maximum hit rate. Cache hit ratio optimization techniques. Python implementation with cache_layer.py covering LRU and TTL strategies.",
+          "cues": [
+            "Code: cache_layer.py implementation",
+            "Highlight: Cache hit ratio metrics",
+            "Overlay: LRU vs TTL comparison",
+            "Lower Third: Cache Implementation"
+          ]
+        },
+        {
+          "id": 3,
+          "title": "Enterprise ROI",
+          "duration": "16:00",
+          "script": "Real-world cost reduction case study showing 90% savings. Monitoring cache performance with dashboards. Scaling optimization across multiple enterprise workloads and teams.",
+          "cues": [
+            "Graph: Cost reduction over time",
+            "Highlight: 90% savings milestone",
+            "Overlay: ROI dashboard",
+            "Lower Third: Enterprise ROI"
+          ]
+        }
+      ],
+      "links": [
+        { "label": "cache_layer.py", "url": "../../src/optimization/cache_layer.py" }
+      ]
+    }
+  ],
+  "exam": {
+    "title": "Certification Exam & Case Study",
+    "description": "The final exam covers all 5 modules with a hands-on case study.",
+    "scenarios": [
+      "Diagnosing a production outage scenario with recursive loops",
+      "Implementing ZDR compliance under time pressure",
+      "Building and deploying an MCP server from scratch",
+      "Optimizing prompt caching for a given workload"
+    ],
+    "link": "docs/certification/exam_and_case_study.md"
+  }
+}
