@@ -1,6 +1,6 @@
 # 🎓 Claude AI Certification for Architects: Exam & Case Study
 
-This document contains the official architectural review materials, real-world case study walkthroughs, and certification exam questions for the **Claude AI Certification for Architects** masterclass.
+This document contains the official architectural review materials, real-world case study walkthroughs, and certification exam questions for the **[Claude AI Certification for Architects](https://www.youtube.com/playlist?list=PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy)** masterclass.
 
 ---
 

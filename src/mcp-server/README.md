@@ -2,6 +2,8 @@
 
 This directory implements an enterprise-grade Model Context Protocol (MCP) server that securely connects Claude to local/private data resources (simulated via an in-memory SQLite database) while adhering to strict read-only boundaries and corporate security guidelines.
 
+This is part of **Module 2** of the **[Claude AI Certification for Architects](https://www.youtube.com/playlist?list=PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy)** masterclass.
+
 ---
 
 ## 🏛️ Architecture Overview
