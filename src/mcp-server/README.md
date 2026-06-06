@@ -69,51 +69,112 @@ npm start
 
 ## 🐳 Fly.io Containerized Deployment
 
-Deploying the MCP server to [Fly.io](https://fly.io) package-wraps the server inside a lightweight Docker container, exposes it over HTTPS, and handles routing.
+There are two primary ways to deploy your custom MCP server to [Fly.io](https://fly.io):
 
-### Prerequisites
-1. Install the [Flyctl CLI](https://fly.io/docs/hands-on/install-flyctl/).
-2. Authenticate:
-   ```bash
-   fly auth login
-   ```
-
-### Deployment Steps
-
-1. **Initialize Fly App (First Time Only)**
-   Run this from `src/mcp-server`:
-   ```bash
-   fly launch --no-deploy
-   ```
-   *This reads the existing `fly.toml` and allows you to name the app or adjust the hosting region.*
-
-2. **Deploy the Container**
-   ```bash
-   fly deploy
-   ```
-   Fly.io will:
-   - Build the image using the multi-stage `Dockerfile`.
-   - Provision a VM.
-   - Inject the `$PORT` environment variable (causing the server to boot automatically in SSE mode).
-   - Configure health checks on `/health`.
-
-3. **Verify Deployment**
-   Make a GET request to the health endpoint:
-   ```bash
-   curl https://<your-app-name>.fly.dev/health
-   ```
-   *Expected response:*
-   ```json
-   { "status": "healthy", "server": "enterprise-data-bridge" }
-   ```
+1. **Native Fly Machine Stdio/Proxy Architecture (Highly Secure & Recommended):** Runs the container entirely privately with no public internet port exposed. Locally, your client communicates securely via `flyctl` acting as an encrypted proxy bridge.
+2. **Streaming HTTP / SSE Transport Mode:** Exposes a public Express server over HTTPS using Server-Sent Events (SSE).
 
 ---
 
-## 🤖 Claude Desktop Configuration
+### Pathway A: Native Stdio/Proxy Deployment (Recommended)
 
-To connect your local Claude Desktop app to this MCP server, add it to your configuration file.
+This architecture requires **no public HTTP services**. We strip the ports from `fly.toml` to keep the container fully isolated.
 
-### Local STDIO Integration
+#### 1. Setup Configuration (`fly.toml`)
+Ensure `/src/mcp-server/fly.toml` matches:
+```toml
+# src/mcp-server/fly.toml
+app = "claude-enterprise-data-bridge"
+primary_region = "lhr" # London (or your preferred region)
+
+[build]
+  dockerfile = "Dockerfile"
+```
+
+#### 2. Run the Command Line Deployment Flow
+Run these commands from `/src/mcp-server`:
+```bash
+# 1. Authenticate with Fly.io
+fly auth login
+
+# 2. Launch the application (disabling High Availability for stateful consistency)
+fly launch --ha=false --no-deploy
+
+# 3. Deploy the container
+fly deploy
+```
+
+#### 3. Connect Claude Desktop
+Add the following block to your `claude_desktop_config.json`:
+```json
+{
+  "mcpServers": {
+    "enterprise-fly-bridge": {
+      "command": "fly",
+      "args": [
+        "mcp",
+        "run",
+        "claude-enterprise-data-bridge"
+      ]
+    }
+  }
+}
+```
+> [!NOTE]
+> The `fly mcp run` utility intercepts stdio streams locally, encrypts them, and forwards them straight to the private Fly.io microVM instance—eliminating the need to manage JWTs, APIs, or open firewall ports.
+
+---
+
+### Pathway B: Streaming HTTP / SSE Deployment
+
+If your client cannot use `flyctl` locally or requires a standard HTTP endpoint, you can expose the SSE transport publicly.
+
+#### 1. Setup Configuration (`fly.toml`)
+Temporarily restore the HTTP service block to bind a public port:
+```toml
+app = "claude-enterprise-data-bridge"
+primary_region = "lhr"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_rollback = true
+
+  [[http_service.checks]]
+    grace_period = "10s"
+    interval = "15s"
+    method = "GET"
+    path = "/health"
+    protocol = "http"
+    timeout = "2s"
+```
+
+#### 2. Deploy
+```bash
+fly deploy
+```
+
+#### 3. Connect Claude Desktop (SSE Mode)
+Add this to your `claude_desktop_config.json`:
+```json
+{
+  "mcpServers": {
+    "enterprise-data-bridge-remote-sse": {
+      "url": "https://claude-enterprise-data-bridge.fly.dev/sse"
+    }
+  }
+}
+```
+
+---
+
+## 🤖 Local Claude Desktop Integration
+
+To run and verify the server locally in STDIO mode before deployment:
+
 Add this block to your `claude_desktop_config.json` (located at `%APPDATA%\Claude\claude_desktop_config.json` on Windows or `~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):
 
 ```json
@@ -122,19 +183,6 @@ Add this block to your `claude_desktop_config.json` (located at `%APPDATA%\Claud
     "enterprise-data-bridge-local": {
       "command": "node",
       "args": ["C:/projects/claude-architect-certification/src/mcp-server/dist/index.js"]
-    }
-  }
-}
-```
-
-### Remote SSE Integration
-To use the deployed Fly.io instance directly from Claude, configure the SSE transport:
-
-```json
-{
-  "mcpServers": {
-    "enterprise-data-bridge-remote": {
-      "url": "https://<your-app-name>.fly.dev/sse"
     }
   }
 }
