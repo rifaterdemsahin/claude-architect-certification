@@ -1,12 +1,19 @@
-# 🎬 Module 1 Post-Production Plan: Editing & Visual Assembly
+# 🎬 Module 1 Post-Production: Editing Timeline & Assets Assembly
 
-## ✂️ The Raw Cut
-* **Pacing:** Remove compiler wait times, typos, and syntax corrections. Keep transitions snap-fast.
-* **Audio:** Keep voice audio levels normalized between headshot video and screen recordings.
+## 1. Editorial Directives
+* **The Raw Cut:** Trim the video files to remove compiles, terminal load delays, or minor verbal slips. Ensure high-density, snap-fast pacing.
+* **Intro Animation Placement:** Splice your custom course intro animation precisely at the **2:30** mark, serving as a transition between **Section 1 (The Hook)** and **Section 2 (The Mechanics)**.
+* **Audio Normalization:** Normalize vocal volumes across transitions.
 
-## 🎨 Visual Overlays & Cues
-* **File Paths:** Whenever referencing a file (e.g. `/src/mcp-server/src/index.ts`), overlay a clean on-screen text path.
-* **Repository Link:** Keep a prominent graphic or card pointing to the GitHub repository:
+---
+
+## 2. On-Screen Overlays & Lower Thirds
+When presenting technical materials on screen, display the following overlay text cues:
+* **Directory paths:**
+  * Root path: `/`
+  * Server workspace: `/src/mcp-server/`
+  * Entry point: `/src/mcp-server/src/index.ts`
+* **Repository Endpoint:**
   `github.com/rifaterdemsahin/claude-architect-certification`
-* **playlist Link:** Highlight the YouTube Playlist in the description and card overlays:
+* **Official YouTube Course playlist:**
   `https://www.youtube.com/playlist?list=PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy`
