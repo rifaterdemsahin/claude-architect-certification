@@ -448,6 +448,73 @@
       100% { opacity: 0.6; }
     }
 
+    /* Shared Navigation Menu */
+    .nav-bar {
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 16px 0;
+      margin-bottom: 20px;
+    }
+
+    .nav-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .nav-logo {
+      font-family: var(--font-title);
+      font-weight: 700;
+      font-size: 1.25rem;
+      color: white;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+
+    .nav-links a:hover, .nav-links a.active {
+      color: white;
+    }
+
+    .nav-btn {
+      background: linear-gradient(135deg, var(--primary), #7c3aed);
+      color: white !important;
+      padding: 8px 18px;
+      border-radius: 100px;
+      font-size: 0.85rem !important;
+      font-weight: 600 !important;
+      box-shadow: 0 4px 15px var(--primary-glow);
+      transition: all 0.3s !important;
+    }
+
+    .nav-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6);
+    }
+
     /* Footer */
     footer {
       text-align: center;
@@ -465,6 +532,19 @@
   </style>
 </head>
 <body>
+
+  <!-- Shared Navigation Menu -->
+  <nav class="nav-bar">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo">🏛️ Claude Architect</a>
+      <div class="nav-links">
+        <a href="index.html" class="active">Home</a>
+        <a href="production/postprod/demo_script.html">Demo Script</a>
+        <a href="docs/certification/exam_and_case_study.md">Exam</a>
+        <a href="https://www.youtube.com/playlist?list=PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy" target="_blank" class="nav-btn">📺 Watch Course</a>
+      </div>
+    </div>
+  </nav>
 
   <div class="container">
     <header>
