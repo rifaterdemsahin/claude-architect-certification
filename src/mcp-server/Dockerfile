@@ -1,7 +1,7 @@
 # ==============================================================================
 # Build Stage
 # ==============================================================================
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 
 WORKDIR /app
 
@@ -18,7 +18,7 @@ RUN npm run build
 # ==============================================================================
 # Production Stage
 # ==============================================================================
-FROM node:20-alpine AS runner
+FROM node:22-alpine AS runner
 
 WORKDIR /app
 
@@ -27,11 +27,13 @@ COPY package*.json ./
 RUN npm ci --only=production
 
 # Copy compiled files from builder stage
-COPY --from=builder /app/build ./build
+COPY --from=builder /app/dist ./dist
 
 # Set environment defaults
 ENV NODE_ENV=production
-ENV MCP_LOG_LEVEL=info
 
-# Use stdio transport as default
-ENTRYPOINT ["node", "build/index.js"]
+# Expose standard port for SSE web server
+EXPOSE 8080
+
+# Execute server
+ENTRYPOINT ["node", "dist/index.js"]

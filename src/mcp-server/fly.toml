@@ -1,0 +1,22 @@
+# fly.toml app configuration file for deploying the MCP server to Fly.io
+#
+# For details, see https://fly.io/docs/reference/configuration/
+
+app = "enterprise-data-bridge"
+primary_region = "iad"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_rollback = true
+
+  [[http_service.checks]]
+    grace_period = "10s"
+    interval = "15s"
+    method = "GET"
+    path = "/health"
+    protocol = "http"
+    timeout = "2s"

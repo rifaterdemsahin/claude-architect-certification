@@ -1,0 +1,39 @@
+name: Deploy MCP Server to Fly.io
+
+on:
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'src/mcp-server/**'
+      - '.github/workflows/deploy_fly.yml'
+
+jobs:
+  deploy:
+    name: Deploy App
+    runs-on: ubuntu-latest
+    concurrency: deploy-group
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'npm'
+          cache-dependency-path: './src/mcp-server/package-lock.json'
+
+      - name: Install Dependencies & Verify Build
+        run: |
+          cd src/mcp-server
+          npm ci
+          npm run build
+
+      - name: Set up Flyctl
+        uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Deploy to Fly.io
+        run: flyctl deploy --remote-only
+        working-directory: ./src/mcp-server
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
