@@ -95,6 +95,25 @@
       color: white;
     }
 
+    .nav-dropdown { position: relative; display: inline-block; }
+    .nav-dropdown .drop-trigger { cursor: pointer; padding: 8px 12px; border-radius: 8px; }
+    .nav-dropdown:hover .drop-trigger { background: rgba(139,92,246,0.1); color: white; }
+    .drop-menu {
+      display: none; position: absolute; top: 100%; left: 0;
+      background: rgba(15,23,42,0.98); backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.1); border-radius: 12px;
+      padding: 8px; min-width: 190px; z-index: 200;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    }
+    .nav-dropdown:hover .drop-menu { display: block; }
+    .drop-menu a {
+      display: block; padding: 10px 16px; border-radius: 8px;
+      color: var(--text-muted); text-decoration: none;
+      font-size: 0.85rem; white-space: nowrap; transition: all 0.2s;
+    }
+    .drop-menu a:hover { background: rgba(139,92,246,0.15); color: white; }
+
     .nav-btn {
       background: linear-gradient(135deg, var(--primary), #7c3aed);
       color: white !important;
@@ -238,10 +257,17 @@
       <a href="../../../../index.html" class="nav-logo">🏛️ Claude Architect</a>
       <div class="nav-links">
         <a href="../../../../index.html">Home</a>
-        <a href="demo_script.html" class="active">Demo Script</a>
-        <a href="demo_script_show.html">Showcase</a>
-        <a href="../../../../docs/certification/exam_and_case_study.md">Exam</a>
-        <a href="https://www.youtube.com/playlist?list=PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy" target="_blank" class="nav-btn">📺 Watch Course</a>
+        <div class="nav-dropdown">
+          <a href="../../../../production_hub.html" class="drop-trigger">Production ▾</a>
+          <div class="drop-menu">
+            <a href="../../../../production/preprod/index.html">Pre-Production</a>
+            <a href="../../../../production/prod/index.html">Production</a>
+            <a href="../../../../production/postprod/index.html">Post-Production</a>
+          </div>
+        </div>
+        <a href="../../../../sanity_checklist.html">Sanity Check</a>
+        <a href="../../../../markdown_viewer.html?md=docs/certification/exam_and_case_study.md">Exam</a>
+        <a href="https://www.youtube.com/playlist?list=PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy" target="_blank" class="nav-btn">📺 Course</a>
       </div>
     </div>
   </nav>
@@ -272,6 +298,12 @@
     </main>
 
     <footer>
+      <div style="display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; margin-bottom: 20px;">
+        <a href="../../../../index.html" style="color: var(--secondary); text-decoration: none; font-weight: 700;">🏠 Home</a>
+        <a href="../../../../production_hub.html" style="color: var(--secondary); text-decoration: none; font-weight: 700;">🏭 Production Hub</a>
+        <a href="../index.html" style="color: var(--secondary); text-decoration: none; font-weight: 700;">🎨 Post-Prod</a>
+        <a href="post_production_master.html" style="color: var(--secondary); text-decoration: none; font-weight: 700;">🎬 Showcase</a>
+      </div>
       <p>Built for the <strong><a href="https://www.youtube.com/playlist?list=PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy" target="_blank" style="color: #c084fc;">Claude AI Certification for Architects</a></strong> Masterclass. Reference repository: <a href="https://github.com/rifaterdemsahin/claude-architect-certification">github.com/rifaterdemsahin/claude-architect-certification</a></p>
     </footer>
   </div>

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Master Sanity Checklist | Claude AI Certification</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #030712;
+      --bg-card: rgba(17, 24, 39, 0.85);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --primary: #8b5cf6;
+      --secondary: #3b82f6;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --font-title: 'Outfit', sans-serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-dark);
+      background-image:
+        radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.08) 0%, transparent 40%);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      line-height: 1.6;
+      padding-bottom: 80px;
+    }
+    .container { max-width: 1000px; margin: 0 auto; padding: 0 24px; }
+
+    .nav-bar {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      position: sticky; top: 0; z-index: 100;
+      padding: 14px 0; margin-bottom: 20px;
+    }
+    .nav-container { display: flex; justify-content: space-between; align-items: center; max-width: 1000px; margin: 0 auto; padding: 0 24px; }
+    .nav-logo { font-family: var(--font-title); font-weight: 700; font-size: 1.1rem; color: white; text-decoration: none; }
+    .nav-links { display: flex; align-items: center; gap: 20px; }
+    .nav-links a { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; font-weight: 500; transition: color 0.3s; }
+    .nav-links a:hover, .nav-links a.active { color: white; }
+
+    .nav-dropdown { position: relative; display: inline-block; }
+    .nav-dropdown .drop-trigger { cursor: pointer; padding: 8px 12px; border-radius: 8px; }
+    .nav-dropdown:hover .drop-trigger { background: rgba(139,92,246,0.1); color: white; }
+    .drop-menu {
+      display: none; position: absolute; top: 100%; left: 0;
+      background: rgba(15,23,42,0.98); backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.1); border-radius: 12px;
+      padding: 8px; min-width: 190px; z-index: 200;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    }
+    .nav-dropdown:hover .drop-menu { display: block; }
+    .drop-menu a {
+      display: block; padding: 10px 16px; border-radius: 8px;
+      color: var(--text-muted); text-decoration: none;
+      font-size: 0.85rem; white-space: nowrap; transition: all 0.2s;
+    }
+    .drop-menu a:hover { background: rgba(139,92,246,0.15); color: white; }
+
+    header { padding: 30px 0 30px 0; text-align: center; }
+    h1 { font-family: var(--font-title); font-size: 2.4rem; font-weight: 800; margin-bottom: 10px; }
+    header p { color: var(--text-muted); max-width: 600px; margin: 0 auto; }
+
+    .master-progress {
+      background: var(--bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 28px;
+      margin-bottom: 32px;
+      display: flex; align-items: center; gap: 24px;
+    }
+    .master-progress-bar { flex: 1; height: 14px; background: rgba(255,255,255,0.08); border-radius: 7px; overflow: hidden; }
+    .master-progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--success)); border-radius: 7px; transition: width 0.6s ease; width: 0%; }
+    .master-progress-pct { font-family: var(--font-title); font-size: 2.2rem; font-weight: 900; color: var(--primary); min-width: 70px; text-align: right; }
+
+    .phase-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 20px;
+      padding: 28px;
+      margin-bottom: 24px;
+    }
+    .phase-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .phase-icon { font-size: 1.6rem; }
+    .phase-title { font-family: var(--font-title); font-size: 1.3rem; font-weight: 700; }
+    .phase-subtitle { color: var(--text-muted); font-size: 0.85rem; margin-left: auto; }
+
+    .checklist { list-style: none; }
+    .checklist li {
+      display: flex; align-items: flex-start; gap: 14px;
+      padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .checklist li:last-child { border-bottom: none; }
+    .check-box {
+      appearance: none; width: 22px; height: 22px;
+      border: 2px solid var(--text-muted); border-radius: 6px;
+      cursor: pointer; margin-top: 2px; flex-shrink: 0;
+      transition: all 0.2s; position: relative;
+    }
+    .check-box:checked { background: var(--success); border-color: var(--success); }
+    .check-box:checked::after { content: '✓'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-weight: 900; font-size: 14px; }
+    .item-text { flex: 1; }
+    .item-name { font-weight: 600; margin-bottom: 2px; }
+    .item-desc { color: var(--text-muted); font-size: 0.85rem; }
+    .item-status { font-size: 0.75rem; padding: 3px 10px; border-radius: 20px; font-weight: 700; }
+    .status-pending { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+    .status-done { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+
+    footer { text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
+  </style>
+</head>
+<body>
+
+  <nav class="nav-bar">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo">🏛️ Claude Architect</a>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <div class="nav-dropdown">
+          <a href="production_hub.html" class="drop-trigger">Production ▾</a>
+          <div class="drop-menu">
+            <a href="production/preprod/index.html">Pre-Production</a>
+            <a href="production/prod/index.html">Production</a>
+            <a href="production/postprod/index.html">Post-Production</a>
+          </div>
+        </div>
+        <a href="sanity_checklist.html" class="active">Sanity Check</a>
+        <a href="markdown_viewer.html?md=docs/certification/exam_and_case_study.md">Exam</a>
+        <a href="https://www.youtube.com/playlist?list=PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy" target="_blank">📺 Course</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <header>
+      <h1>Master Sanity Checklist</h1>
+      <p>End-to-end production readiness across Pre-Production, Production, and Post-Production phases.</p>
+    </header>
+
+    <div class="master-progress">
+      <div style="flex:1">
+        <div style="font-weight:700;margin-bottom:8px">Overall Progress</div>
+        <div class="master-progress-bar"><div class="master-progress-fill" id="total-bar"></div></div>
+      </div>
+      <div class="master-progress-pct" id="total-pct">0%</div>
+    </div>
+
+    <!-- Pre-Production -->
+    <div class="phase-card">
+      <div class="phase-header">
+        <span class="phase-icon">📝</span>
+        <span class="phase-title">Pre-Production</span>
+        <span class="phase-subtitle">7 items</span>
+      </div>
+      <ul class="checklist">
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Module plans drafted</div><div class="item-desc">All 5 module plans exist in production/preprod/</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Scripts finalized</div><div class="item-desc">Per-section scripts approved and uploaded</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Storyboard / scene breakdown</div><div class="item-desc">Scene list with timing and overlays defined</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Asset generation prompts ready</div><div class="item-desc">All BG, text overlay, and icon prompts written</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Audio recording schedule</div><div class="item-desc">Dates and environment booked</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Lower third designs approved</div><div class="item-desc">Per-module L3 variants signed off</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Production plan reviewed</div><div class="item-desc">Master plan read by all stakeholders</div></div></li>
+      </ul>
+    </div>
+
+    <!-- Production -->
+    <div class="phase-card">
+      <div class="phase-header">
+        <span class="phase-icon">🎬</span>
+        <span class="phase-title">Production</span>
+        <span class="phase-subtitle">6 items</span>
+      </div>
+      <ul class="checklist">
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Audio recorded per section</div><div class="item-desc">moduleX_sectionY.wav files captured</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">No clipping or noise in master</div><div class="item-desc">All audio passes quality gate</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Raw assets archived</div><div class="item-desc">Original recordings backed up before editing</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Screen recordings captured</div><div class="item-desc">IDE / dashboard walkthroughs recorded</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Camera footage backed up</div><div class="item-desc">All video sources copied to storage</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Production log completed</div><div class="item-desc">Take notes and timestamps documented</div></div></li>
+      </ul>
+    </div>
+
+    <!-- Post-Production -->
+    <div class="phase-card">
+      <div class="phase-header">
+        <span class="phase-icon">🎨</span>
+        <span class="phase-title">Post-Production</span>
+        <span class="phase-subtitle">8 items</span>
+      </div>
+      <ul class="checklist">
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Background images generated</div><div class="item-desc">All scene backgrounds created and named correctly</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Text overlays generated</div><div class="item-desc">Typography overlays match script emphasis</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Icons generated</div><div class="item-desc">All cue icons created in correct style</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Lower thirds rendered</div><div class="item-desc">All L3 assets exported with transparency</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">EDL reviewed for each scene</div><div class="item-desc">Edit design lists match audio waveform</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Composite previews checked</div><div class="item-desc">Hover previews match intended final look</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Asset bundles zipped</div><div class="item-desc">Per-scene ZIP files ready for editor handoff</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Final render approved</div><div class="item-desc">Master video exported and reviewed</div></div></li>
+      </ul>
+    </div>
+
+    <!-- Publication -->
+    <div class="phase-card">
+      <div class="phase-header">
+        <span class="phase-icon">🚀</span>
+        <span class="phase-title">Publication</span>
+        <span class="phase-subtitle">5 items</span>
+      </div>
+      <ul class="checklist">
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">YouTube thumbnail created</div><div class="item-desc">Custom thumbnail per module</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Description and tags written</div><div class="item-desc">SEO-friendly metadata ready</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">GitHub repo updated</div><div class="item-desc">All code and docs pushed to public repo</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Course playlist updated</div><div class="item-desc">New video added to YouTube playlist</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Announcement posted</div><div class="item-desc">Social / community update published</div></div></li>
+      </ul>
+    </div>
+
+    <footer>
+      <p>Claude AI Certification | Master Production Pipeline</p>
+    </footer>
+  </div>
+
+  <script>
+    function update() {
+      const boxes = document.querySelectorAll('.check-box');
+      const checked = document.querySelectorAll('.check-box:checked');
+      const pct = Math.round((checked.length / boxes.length) * 100);
+      document.getElementById('total-pct').textContent = pct + '%';
+      document.getElementById('total-bar').style.width = pct + '%';
+      // persist
+      boxes.forEach((cb, i) => localStorage.setItem('sanity_' + i, cb.checked));
+    }
+    // restore
+    document.querySelectorAll('.check-box').forEach((cb, i) => {
+      if (localStorage.getItem('sanity_' + i) === 'true') cb.checked = true;
+    });
+    update();
+  </script>
+</body>
+</html>
