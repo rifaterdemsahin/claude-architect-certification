@@ -126,9 +126,50 @@
       border-radius: 4px;
       display: inline-block;
       box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+      position: relative;
     }
     .lt-main { font-weight: 800; font-size: 1.2rem; color: white; text-transform: uppercase; letter-spacing: 0.05em; display: block; line-height: 1.2; }
     .lt-sub { font-size: 0.9rem; color: rgba(255, 255, 255, 0.9); font-weight: 500; }
+
+    .download-bundle-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: #ffffff;
+      color: #000000;
+      padding: 12px 24px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 800;
+      font-size: 0.9rem;
+      margin-top: 20px;
+      transition: all 0.3s;
+      box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
+    }
+    .download-bundle-btn:hover {
+      transform: translateY(-2px);
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 8px 25px var(--primary-glow);
+    }
+
+    .scene-id-badge {
+      position: absolute;
+      top: -15px;
+      right: -15px;
+      background: white;
+      color: black;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 0.8rem;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+      border: 2px solid var(--primary);
+    }
 
     /* Background Artifact Media */
     .artifact-media {
@@ -187,10 +228,15 @@
           </div>
 
           <div class="lower-third-preview">
+            <div class="scene-id-badge">S1</div>
             <span class="lt-main">Claude Architect Masterclass</span>
             <span class="lt-sub">Module 1: Introduction</span>
-            <div style="margin-top:10px;"><a href="assets/overlays/lt_intro.png" target="_blank" style="color:white; font-size:0.7rem;">⬇️ Download PNG Asset</a></div>
+            <div style="margin-top:10px;"><a href="assets/overlays/lt_intro.png" target="_blank" style="color:white; font-size:0.7rem;">🖼️ Lower Third PNG</a></div>
           </div>
+
+          <a href="assets/archives/m1_scene1.zip" class="download-bundle-btn">
+            📦 Download Scene 1 Assets (.zip)
+          </a>
         </div>
         <div class="artifact-media">
           <span class="media-label">Background Artifact</span>
@@ -219,10 +265,15 @@
           </div>
 
           <div class="lower-third-preview">
+            <div class="scene-id-badge">S2</div>
             <span class="lt-main">Model Context Protocol</span>
             <span class="lt-sub">Enterprise Integration Layer</span>
-            <div style="margin-top:10px;"><a href="assets/overlays/lt_mcp.png" target="_blank" style="color:white; font-size:0.7rem;">⬇️ Download PNG Asset</a></div>
+            <div style="margin-top:10px;"><a href="assets/overlays/lt_mcp.png" target="_blank" style="color:white; font-size:0.7rem;">🖼️ Lower Third PNG</a></div>
           </div>
+
+          <a href="assets/archives/m1_scene2.zip" class="download-bundle-btn">
+            📦 Download Scene 2 Assets (.zip)
+          </a>
         </div>
         <div class="artifact-media">
           <span class="media-label">Background Artifact</span>
@@ -251,10 +302,15 @@
           </div>
 
           <div class="lower-third-preview">
+            <div class="scene-id-badge">S3</div>
             <span class="lt-main">Resource Dashboard</span>
             <span class="lt-sub">Open Source Architecture Blueprint</span>
-            <div style="margin-top:10px;"><a href="assets/overlays/lt_resources.png" target="_blank" style="color:white; font-size:0.7rem;">⬇️ Download PNG Asset</a></div>
+            <div style="margin-top:10px;"><a href="assets/overlays/lt_resources.png" target="_blank" style="color:white; font-size:0.7rem;">🖼️ Lower Third PNG</a></div>
           </div>
+
+          <a href="assets/archives/m1_scene3.zip" class="download-bundle-btn">
+            📦 Download Scene 3 Assets (.zip)
+          </a>
         </div>
         <div class="artifact-media">
           <span class="media-label">Background Artifact</span>
