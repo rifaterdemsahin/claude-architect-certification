@@ -1,0 +1,29 @@
+{
+  "name": "enterprise-mcp-server",
+  "version": "1.0.0",
+  "description": "Enterprise-grade Model Context Protocol (MCP) server for Claude Architect Certification",
+  "main": "build/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node build/index.js",
+    "dev": "tsc --watch"
+  },
+  "keywords": [
+    "mcp",
+    "anthropic",
+    "claude",
+    "enterprise",
+    "architect"
+  ],
+  "author": "Enterprise Systems Architect",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.6.0",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "typescript": "^5.3.3"
+  }
+}
