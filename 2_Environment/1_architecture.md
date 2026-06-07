@@ -7,22 +7,28 @@
 
 ## 🗺️ High-Level System Architecture
 
-This project is built as a highly responsive, modern static application deployed on **GitHub Pages**, with routing handled by **Cloudflare Workers** (optional edge compute) and python APIs hosted on **Fly.io** backend.
+This project is built as a highly responsive, modern static application deployed on **GitHub Pages**, with fast edge actions handled by **Cloudflare Workers** and complex backend logic hosted on **Azure** (pay-per-operation, no idle cost) and **Supabase** for backend services.
 
 ```mermaid
 graph TD
     User["🌐 End User (Browser)"]
     GitHubPages["📦 GitHub Pages (Frontend)"]
-    CloudflareWorkers["⚡ Cloudflare Workers (Edge Auth/Routing)"]
+    CloudflareWorkers["⚡ Cloudflare Workers (Fast Edge — Auth, Routing, Caching)"]
+    Supabase["🗄️ Supabase (Backend Services — DB, Auth, Storage, Realtime)"]
     FlyIO["🐍 Fly.io (Python API Backend)"]
-    AzureKeyVault["🔒 Azure Key Vault (Secrets Management)"]
+    AzureKeyVault["🔒 Azure Key Vault (Secrets Management — pay-per-op, no idle cost)"]
+    AzureComplex["☁️ Azure (Complex Workloads — Functions, Logic Apps, AI Services)"]
     GitHubActions["🤖 GitHub Actions (CI/CD Pipeline)"]
 
     User -->|Access index.html| GitHubPages
-    User -->|Dynamic requests| CloudflareWorkers
-    CloudflareWorkers -->|Proxy APIs / Cache| FlyIO
+    User -->|Fast actions — low latency| CloudflareWorkers
+    CloudflareWorkers -->|Proxy / Cache| FlyIO
+    CloudflareWorkers -->|Simple DB/auth queries| Supabase
+    FlyIO -->|Complex processing| AzureComplex
     FlyIO -->|Retrieve secrets at runtime| AzureKeyVault
-    
+    AzureComplex -->|Retrieve secrets| AzureKeyVault
+    Supabase -->|Backend data & auth| AzureComplex
+
     GitHubActions -->|Deploy static pages| GitHubPages
     GitHubActions -->|Fetch deploy secrets| AzureKeyVault
 ```
@@ -41,15 +47,28 @@ graph TD
   - **Console Logger:** `debugLog` utility logs loading operations, API integrations, and routing info for developers if debug mode is active.
 
 ### 2. Edge Routing & Auth (`2_Environment/3_cloudflare_workers.md`)
-- Cloudflare Workers act as a performant edge compute proxy.
-- Provides rate-limiting, security headers, routing, and access control.
+- Cloudflare Workers handle **fast actions**: low-latency routing, rate-limiting, security headers, caching, and simple auth at the edge.
+- Preferred entry point for anything that needs sub-10ms response times globally.
+- Complex or stateful logic is delegated to Azure rather than handled at the edge.
 
-### 3. Backend Services (`2_Environment/4_fly_io.md`)
+### 3. Backend Services — Supabase
+- **Supabase** provides managed backend services: PostgreSQL database, row-level security auth, file storage, and realtime subscriptions.
+- Used for all standard data persistence and user auth — avoids the overhead of self-hosting a database.
+- Cloudflare Workers call Supabase directly for simple queries; Fly.io uses it for application-layer data access.
+
+### 4. Backend Services — Fly.io (`2_Environment/4_fly_io.md`)
 - Hosts backend logic using Python services (FastAPI/Flask) running on Fly.io.
 - Hosts vector database integration (Qdrant) and Ollama connections.
+- Delegates complex workloads (e.g. AI pipelines, long-running jobs) to Azure.
 
-### 4. Secrets Management (`2_Environment/5_setup_azure.md`)
+### 5. Complex Workloads — Azure
+- Azure hosts workloads too complex for Cloudflare Workers: Azure Functions, Logic Apps, and Azure AI Services.
+- **No ongoing idle cost** — all Azure resources used are pay-per-operation (Azure Key Vault at ~$0.03/10k ops, Functions on consumption plan, etc.).
+- Secrets are never stored in application code; Key Vault is the single source of truth for credentials.
+
+### 6. Secrets Management (`2_Environment/5_setup_azure.md`)
 - **Provider:** Microsoft Azure Key Vault.
+- **Cost model:** Pay-per-operation only — no reserved capacity or idle charges. Standard tier: ~$0.03/10,000 operations.
 - **Usage:** Stores all API keys, database credentials, and deployment keys. Secrets are loaded at runtime by backend environments or injected during CI/CD steps.
 
 ---
