@@ -96,5 +96,28 @@ This is the delivery-pilot framework navigation. It contains:
 
 ## 📚 Related Documents
 
-- [1_architecture.md](1_architecture.md) — System architecture overview (menu system context)
-- [2_github_pages.md](2_github_pages.md) — Frontend hosting (menu rendering)
+---
+
+## 🧪 CI/CD & GitHub Integration
+
+All tests are executed via **GitHub Actions** on every push and pull request. Key workflows:
+
+| Workflow | Trigger | Purpose |
+|----------|---------|---------|
+| **Lint & Format** | `push`, `pull_request` | Enforces code style (Prettier, Ruff) |
+| **Link Checker** | `push`, `pull_request` | Validates internal/external URLs in all `.md` files |
+| **Deploy** | `push` to `main` | Builds and deploys to GitHub Pages |
+
+### Issue & Ticket Tracking
+
+- Bugs, feature requests, and tasks are tracked as **GitHub Issues** — see [github.com/issues](https://github.com/rifaterdemsahin/claude-architect-certification/issues)
+- Failed CI/CD runs are surfaced in three places:
+  1. **GitHub Actions tab** — full logs per workflow run
+  2. **VS Code** — the GitHub Actions extension shows live workflow status inline
+  3. **Website footer** — the deployment status badge (e.g., `![Deploy](https://github.com/.../workflows/deploy/badge.svg)`) is rendered at the bottom of every page
+
+### References
+
+- [GitHub Actions documentation](https://docs.github.com/en/actions)
+- [GitHub Issues quickstart](https://docs.github.com/en/issues/tracking-your-work-with-issues/quickstart)
+- [VS Code GitHub Actions extension](https://marketplace.visualstudio.com/items?itemName=GitHub.vscode-github-actions)
