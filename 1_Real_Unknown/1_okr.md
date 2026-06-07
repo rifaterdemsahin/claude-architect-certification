@@ -36,3 +36,18 @@ My real i am afraid to pass the claude certificate exam if i fail i lose 50 poun
 ## 🧪 Outcome Tracking & Validation
 *How and when will these Key Results be evaluated? (Links back to Stage 7)*
 - Final validation checklist is located in [7_Testing_Known/README.md](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/7_Testing_Known/README.md)
+
+---
+
+## 📂 Supporting Documents in This Stage
+
+Read these in order — each one narrows the focus from "what do we want" down to "what do we track and how much does it cost."
+
+| # | File | Rationale — Why it comes after the OKR |
+|---|------|----------------------------------------|
+| 1 | **[1_okr.md](1_okr.md)** *(this file)* | Start here. Goals anchor every other decision. |
+| 2 | **[2_problem_statement.md](2_problem_statement.md)** | Defines *what is broken* and *who it affects*. Without a sharp problem statement the OKRs lack grounding — fill this in to validate that the objectives address a real pain point. |
+| 3 | **[3_hypotheses.md](3_hypotheses.md)** | Lists the assumptions baked into the OKRs. Each KR rests on at least one hypothesis (e.g., "hands-on implementation improves retention"). Document and validate them in Stage 7 before claiming success. |
+| 4 | **[4_questions.md](4_questions.md)** | Captures every open unknown that could block the OKRs (hosting platform, auth strategy, performance targets). Resolve these before writing code in Stage 5. |
+| 5 | **[5_costs.md](5_costs.md)** | Tracks infrastructure and API spend. Links KR 1.3 (production plan) to real numbers — if costs spike, revisit scope. |
+| 6 | **[6_kanban.md](6_kanban.md)** | Translates OKRs into tasks and shows real-time delivery status. Update this whenever a task moves so agents and humans stay in sync. |
