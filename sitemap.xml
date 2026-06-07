@@ -13,43 +13,55 @@
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://rifaterdemsahin.github.io/claude-architect-certification/production_hub.html</loc>
+    <loc>https://rifaterdemsahin.github.io/claude-architect-certification/markdown_renderer.html</loc>
+    <lastmod>2026-06-07</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://rifaterdemsahin.github.io/claude-architect-certification/5_Symbols/production_hub.html</loc>
     <lastmod>2026-06-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://rifaterdemsahin.github.io/claude-architect-certification/sanity_checklist.html</loc>
+    <loc>https://rifaterdemsahin.github.io/claude-architect-certification/5_Symbols/sanity_checklist.html</loc>
     <lastmod>2026-06-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://rifaterdemsahin.github.io/claude-architect-certification/markdown_viewer.html</loc>
+    <loc>https://rifaterdemsahin.github.io/claude-architect-certification/5_Symbols/markdown_renderer.html</loc>
     <lastmod>2026-06-07</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://rifaterdemsahin.github.io/claude-architect-certification/production/preprod/index.html</loc>
+    <loc>https://rifaterdemsahin.github.io/claude-architect-certification/5_Symbols/markdown_viewer.html</loc>
     <lastmod>2026-06-07</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://rifaterdemsahin.github.io/claude-architect-certification/production/prod/index.html</loc>
-    <lastmod>2026-06-07</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://rifaterdemsahin.github.io/claude-architect-certification/production/postprod/index.html</loc>
+    <loc>https://rifaterdemsahin.github.io/claude-architect-certification/5_Symbols/production/preprod/index.html</loc>
     <lastmod>2026-06-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://rifaterdemsahin.github.io/claude-architect-certification/production/publish/membership.html</loc>
+    <loc>https://rifaterdemsahin.github.io/claude-architect-certification/5_Symbols/production/prod/index.html</loc>
+    <lastmod>2026-06-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://rifaterdemsahin.github.io/claude-architect-certification/5_Symbols/production/postprod/index.html</loc>
+    <lastmod>2026-06-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://rifaterdemsahin.github.io/claude-architect-certification/5_Symbols/production/publish/membership.html</loc>
     <lastmod>2026-06-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
