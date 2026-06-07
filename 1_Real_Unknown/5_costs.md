@@ -16,14 +16,27 @@
 
 ## 🏗️ Platform Setup Costs
 
-| Service / Resource | Provider | Type | Est. Cost (Monthly) | Actual Cost (Monthly) | Status | Stage / Setup Reference |
-|--------------------|----------|------|---------------------|-----------------------|--------|--------------------------|
-| **Azure Key Vault** | Microsoft Azure | Recurring | $0.03 / 10k ops | $0.00 | Active | [2_Environment/setup_azure.md](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/2_Environment/setup_azure.md) |
-| **Backend API Host** | Fly.io | Recurring | $0.00 (Free Tier) | $0.00 | Planned | [4_Formula/README.md](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/4_Formula/README.md) |
-| **Static Hosting** | GitHub Pages | Recurring | $0.00 | $0.00 | Active | [README.md](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/README.md) |
-| **Local AI (Ollama)**| Self-hosted | One-off | $0.00 (Local HW) | $0.00 | Active | [2_Environment/setup_ai.md](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/2_Environment/setup_ai.md) |
-| **Vector DB** | Qdrant Cloud / Local | Recurring | $0.00 (Local docker) | $0.00 | Active | [2_Environment/setup_ai.md](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/2_Environment/setup_ai.md) |
-| **SSL / TLS Certs** | Let's Encrypt | Recurring | $0.00 | $0.00 | Active | N/A |
+| Service / Resource | Provider | Type | Monthly/Period Cost | Actual Cost | Status | Stage / Setup Reference |
+|--------------------|----------|------|---------------------|-------------|--------|--------------------------|
+| **Azure Key Vault** | Microsoft Azure | Recurring | £0.03 / 10k ops | £0.00 | Active | [2_Environment/setup_azure.md](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/2_Environment/setup_azure.md) |
+| **Backend & Services** | Fly.io | Recurring | £25.00 / quarter | £25.00 / quarter | Active | Host for Qdrant and all backend projects. Managed via quarterly load. |
+| **Vector DB (Qdrant)** | Fly.io | Recurring | Included in Fly.io | £0.00 | Active | Hosted on Fly.io inside the overall project sandbox. |
+| **Database** | Supabase | Recurring | £0.00 (Free Model) | £0.00 | Active | Using Supabase Free Tier. |
+| **Static Hosting & CI/CD** | GitHub Pages / Actions | Recurring | £4.00 / month | £4.00 / month | Active | Paid features for deployments, testing, and automatic issue creation. [README.md](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/README.md) |
+| **Local AI (Ollama)**| Self-hosted | One-off | £0.00 (Local HW) | £0.00 | Active | [2_Environment/setup_ai.md](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/2_Environment/setup_ai.md) |
+| **SSL / TLS Certs** | Let's Encrypt | Recurring | £0.00 | £0.00 | Active | N/A |
+
+---
+
+## 🤖 LLM & AI Subscription Costs (Shared Workspace)
+
+*These subscriptions are active and shared across various projects all the time.*
+
+| Service / Agent | Purpose | Cost (Monthly) | Status | Tool Reference |
+|-----------------|---------|----------------|--------|----------------|
+| **Gemini** | Image Creation & Multimodal Analysis | £20.00 | Active | Primary tool for generating visual assets [gemini.md](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/gemini.md) |
+| **Claude** | Primary Code Generation | £20.00 | Active | Primary tool for system code & structure [claude.md](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/claude.md) |
+| **DeepSeek V4** (OpenRouter) | Backup Coding & Reasoning | £10.00 | Active | Backup reasoning model for complex codebase tasks |
 
 ---
 
@@ -33,12 +46,13 @@
 
 | Date | Agent | API Model | Tokens Sent | Tokens Recv | Cost | Purpose / Task |
 |------|-------|-----------|-------------|-------------|------|----------------|
-| 2026-05-31 | Gemini | Gemini 1.5 Pro | N/A (Internal) | N/A (Internal) | $0.00 | Platform Kanban board & Cost Tracker template setup |
+| 2026-05-31 | Gemini | Gemini 1.5 Pro | N/A (Internal) | N/A (Internal) | £0.00 | Platform Kanban board & Cost Tracker template setup |
 
 ---
 
 ## 📈 Cost Summary
 
-- **Total Estimated Monthly Cost:** ~$0.05 - $5.00 (depending on Key Vault operations)
-- **Total Actual Monthly Cost:** $0.00
-- **Total One-off Setup Costs:** $0.00
+- **Infrastructure Cost (Monthly Rate):** £4.00 / month + £25.00 / quarter prepayment (equivalent to ~£12.33 / month total infrastructure)
+- **Shared AI Tooling Cost:** £50.00 / month
+- **Total Actual Monthly Cost (Direct):** £4.00 (excluding quarterly prepayment and shared AI subscriptions)
+

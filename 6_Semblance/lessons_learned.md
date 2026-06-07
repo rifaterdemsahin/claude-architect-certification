@@ -108,3 +108,13 @@
 
 ### Gaps & Challenges
 - None. This was a straightforward documentation update to capture essential developer tools needed for cloud integrations.
+
+## 📅 2026-06-07: Project Cost Tracker Updated
+
+### What went well
+- Accurately updated the project cost tracker (`1_Real_Unknown/5_costs.md`) to reflect modern billing reality: Fly.io quarterly preload (£25), GitHub Pages/Actions (£4/month) including test automation and issue creation, self-hosted Qdrant on Fly.io, Supabase free model, and monthly AI agent subscriptions (Gemini, Claude, DeepSeek).
+- Restructured the table layout to separate infrastructure costs from shared workspace AI subscription costs for better visibility.
+
+### Gaps & Challenges
+- Prepayments (quarterly Fly.io) need to be amortized to compute the correct monthly rate. Added the exact calculation in the summary to reflect a true monthly run rate (~£12.33 / month for infrastructure).
+

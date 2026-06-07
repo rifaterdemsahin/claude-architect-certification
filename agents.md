@@ -7,6 +7,14 @@ This document defines how AI agents interact with the **Claude AI Certification 
 ## 📅 Agent Activity Log
 
 ### 2026-06-07
+- **Task:** Update Project Cost Tracker.
+- **Action:** 
+    - Updated `1_Real_Unknown/5_costs.md` to record Fly.io quarterly load, GitHub Pages/Actions (£4/month) for deployments/testing/issues, self-hosted Qdrant on Fly.io, Supabase free model, and monthly AI/LLM subscriptions (Gemini, Claude, DeepSeek).
+    - Logged prompt history in `prompts.md`.
+- **Status:** All changes IMPLEMENTED and COMMITTED.
+- **Push Action:** SUCCESSFUL.
+- **Verification:** Verified content layout of `5_costs.md`.
+
 - **Task:** Add missing Cloud & Database VS Code Extensions.
 - **Action:** 
     - Appended Supabase, Azure Key Vault, and Fly.io extensions to `4_Formula/vscode_extensions.md`.

@@ -96,6 +96,15 @@ Record every prompt given to AI agents below. Include the date, agent, and purpo
 **Purpose:** Add missing extensions for Supabase, Azure Key Vault, and Fly.io to `4_Formula/vscode_extensions.md` and update installation commands.  
 **Output:** `4_Formula/vscode_extensions.md` updated and committed.
 
+---
+
+## 2026-06-07 — Update Project Cost Tracker
+
+**Agent:** Gemini 3.5 Flash  
+**Purpose:** Update the cost tracker with Fly.io quarterly prepayments, GitHub paid features, Supabase free model, and AI subscriptions (Gemini, Claude, DeepSeek).  
+**Output:** `1_Real_Unknown/5_costs.md` updated and committed.
+
+
 
 
 
