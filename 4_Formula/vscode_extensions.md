@@ -65,6 +65,16 @@ This project spans static HTML/CSS/JS, Python CI scripts, Mermaid diagrams, Mark
 | Bracket Pair Colorizer (built-in) | *(VS Code built-in)* | Enable via `editor.bracketPairColorization.enabled: true` |
 | TODO Highlight | `wayou.vscode-todo-highlight` | Highlights `TODO:`, `FIXME:`, `NOTE:` in all files |
 
+### ☁️ Cloud & Database (Supabase, Azure, Fly.io)
+
+| Extension | ID | Purpose |
+|---|---|---|
+| Supabase | `Supabase.vscode-supabase-extension` | Official Supabase extension for managing projects and edge functions |
+| Azure Resources | `ms-azuretools.vscode-azureresources` | Official extension to view and manage Azure Key Vaults and other services |
+| Key Vault Secrets Viewer | `bertt.key-vault-secrets-viewer` | View and manage secrets in Azure Key Vault directly from the explorer |
+| Even Better TOML | `tamasfe.even-better-toml` | Syntax highlighting and validation for `fly.toml` configurations |
+| Sprites for VS Code | `Flyio.sprites-for-vscode` | Official Fly.io extension for remote sandboxes |
+
 ---
 
 ## 🚀 One-Shot Install Command
@@ -90,7 +100,12 @@ code --install-extension ecmel.vscode-html-css \
      --install-extension eriklynd.json-tools \
      --install-extension usernamehw.errorlens \
      --install-extension oderwat.indent-rainbow \
-     --install-extension wayou.vscode-todo-highlight
+     --install-extension wayou.vscode-todo-highlight \
+     --install-extension Supabase.vscode-supabase-extension \
+     --install-extension ms-azuretools.vscode-azureresources \
+     --install-extension bertt.key-vault-secrets-viewer \
+     --install-extension tamasfe.even-better-toml \
+     --install-extension Flyio.sprites-for-vscode
 ```
 
 > **Tip:** You can also type `! code --install-extension <id>` directly in Claude Code CLI to install without leaving the session.
@@ -143,6 +158,9 @@ After installing, confirm each area works:
 - [ ] Open `.github/workflows/test_links.yml` → GitHub Actions extension shows syntax validation
 - [ ] Open any Python file in `scratch/` → Pylance shows type hints and imports
 - [ ] Open `6_Semblance/error.log` → TODO Highlight flags `FIXME:` entries
+- [ ] Open a `.toml` file (e.g., `fly.toml`) → Even Better TOML validates it and provides syntax highlighting
+- [ ] Log in via Azure Account and see Key Vaults in the Azure Resources sidebar
+- [ ] Connect to/view Supabase projects and edge functions using the Supabase extension panel
 
 ---
 

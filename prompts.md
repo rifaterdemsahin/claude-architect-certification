@@ -88,6 +88,14 @@ Record every prompt given to AI agents below. Include the date, agent, and purpo
 **Purpose:** Create a formula document listing which VS Code extensions are needed to manage this project and provide a one-shot install command.  
 **Output:** `4_Formula/vscode_extensions.md` + `.vscode/settings.json`
 
+---
+
+## 2026-06-07 — Append Missing Cloud & Database VS Code Extensions
+
+**Agent:** Gemini 3.5 Flash  
+**Purpose:** Add missing extensions for Supabase, Azure Key Vault, and Fly.io to `4_Formula/vscode_extensions.md` and update installation commands.  
+**Output:** `4_Formula/vscode_extensions.md` updated and committed.
+
 
 
 

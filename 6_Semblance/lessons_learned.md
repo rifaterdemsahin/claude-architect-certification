@@ -98,3 +98,13 @@
 ### Takeaway for Future AI Agents
 - Always calculate relative paths relative to nesting depth of the file rather than hardcoding.
 - When writing a static link checker, ensure template literals/placeholder strings are ignored or parsed separately to prevent false failures.
+
+## 📅 2026-06-07: Cloud & Database VS Code Extensions Added
+
+### What went well
+- Appended Supabase, Azure Key Vault (Azure Resources & Secrets Viewer), and Fly.io (Even Better TOML & Sprites) extensions to `vscode_extensions.md`.
+- Expanded the one-shot installation command and the verification checklist with practical steps to verify these extensions are functioning.
+- Kept the activity log and prompts log updated for full project transparency.
+
+### Gaps & Challenges
+- None. This was a straightforward documentation update to capture essential developer tools needed for cloud integrations.
