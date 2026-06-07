@@ -1,6 +1,6 @@
 // Supabase Configuration
 // Update SUPABASE_URL to your project URL after creating the project.
-const SUPABASE_URL = localStorage.getItem('supabase_url') || 'https://your-project-ref.supabase.co';
+const SUPABASE_URL = localStorage.getItem('supabase_url') || 'https://rmekfsdhglyiralxvkwc.supabase.co';
 const SUPABASE_ANON_KEY = localStorage.getItem('supabase_anon_key') || '';
 
 async function supabaseFetch(endpoint, options = {}) {

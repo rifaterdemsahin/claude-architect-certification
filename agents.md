@@ -10,4 +10,4 @@
     - Further enlarged the sticky audio player for maximum visibility.
 - **Status:** All changes IMPLEMENTED and COMMITTED locally.
 - **Push Action:** FAILED (Authentication Required). User must run `git push` manually.
-- **Verification:** Use the local `production/postprod/module-1/section-1/demo_script_show.html` in Chrome for instant preview.
+- **Verification:** Use the local `production/postprod/module-1/section-1/post_production_master.html` in Chrome for instant preview.

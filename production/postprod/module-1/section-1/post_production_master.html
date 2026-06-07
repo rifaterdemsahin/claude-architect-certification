@@ -660,7 +660,7 @@
 
     // Try Supabase first if configured
     (async function trySupabase() {
-      const supabaseUrl = localStorage.getItem('supabase_url') || '';
+      const supabaseUrl = localStorage.getItem('supabase_url') || 'https://rmekfsdhglyiralxvkwc.supabase.co';
       const supabaseKey = localStorage.getItem('supabase_anon_key') || '';
       if (supabaseUrl.includes('supabase.co') && supabaseKey) {
         try {

@@ -40,10 +40,16 @@
 
     <div class="card">
       <label for="supabase-url">Supabase Project URL</label>
-      <input id="supabase-url" type="url" placeholder="https://your-project-ref.supabase.co" value="">
+      <input id="supabase-url" type="url" placeholder="https://your-project-ref.supabase.co" value="https://rmekfsdhglyiralxvkwc.supabase.co">
       <label for="supabase-key">Anon Key</label>
-      <input id="supabase-key" type="text" value="" placeholder="Paste your Supabase anon key here">
+      <input id="supabase-key" type="text" value="" placeholder="Get this from Supabase Dashboard > Settings > API > anon public">
       <button class="btn btn-primary" id="btn-save-config" onclick="saveConfig()">Save Config</button>
+      <p style="color:var(--muted);font-size:0.85rem;margin-top:8px;">
+        ⚡ Anon key is at
+        <a href="https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/settings/api" target="_blank" style="color:var(--secondary);">
+          Project Settings → API
+        </a>
+      </p>
       <button class="btn btn-primary" id="btn-test" onclick="testConnection()">Test Connection</button>
       <span id="conn-status" class="status-badge status-pending" style="margin-left:12px;">Not tested</span>
     </div>
