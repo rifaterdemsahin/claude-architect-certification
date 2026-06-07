@@ -2,7 +2,7 @@
 
 > **Stage 1 of 7 (Real Unknown):** Track setup tasks, ongoing development, and pilot status.
 > This file is a live Kanban board. AI agents and human developers must keep this updated as they do their work.
-> **Last updated:** 2026-06-07 by Claude (synced from git log)
+> **Last updated:** 2026-06-07 by Gemini (added TSK-024 recurring references audit task)
 
 ---
 
@@ -52,6 +52,11 @@
   - **Assignee:** All Agents
   - **Details:** Audit all 7 stage folders; update content, fix broken links, remove obsolete files to `_obsolete/`.
   - **Stage Reference:** All stages
+
+- [ ] **TSK-024: Stage 1 References Audit (Recurring)**
+  - **Assignee:** All Agents
+  - **Details:** Audit `1_Real_Unknown/README.md` to ensure all files in Stage 1 are listed with their correct filenames and incoming references are updated.
+  - **Stage Reference:** `1_Real_Unknown/README.md`
 
 ---
 

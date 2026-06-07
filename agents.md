@@ -7,6 +7,15 @@ This document defines how AI agents interact with the **Claude AI Certification 
 ## 📅 Agent Activity Log
 
 ### 2026-06-07
+- **Task:** Audit Stage 1 References & Fix Broken Navigation.
+- **Action:** 
+    - Updated `1_Real_Unknown/README.md` references to list actual Stage 1 files, including `7_sanity_check.md`.
+    - Added `TSK-024` recurring references audit task to `1_Real_Unknown/6_kanban.md`.
+    - Restored broken navigation URLs for Kanban Board (`6_kanban.md`) and Cost Tracker (`5_costs.md`) in `navigation_config.json`, `index.html`, and `markdown_renderer.html`.
+- **Status:** All changes IMPLEMENTED and COMMITTED.
+- **Push Action:** SUCCESSFUL.
+- **Verification:** Verified that files table displays correct links and debug menu options resolve correctly.
+
 - **Task:** Update Project Cost Tracker.
 - **Action:** 
     - Updated `1_Real_Unknown/5_costs.md` to record Fly.io quarterly load, GitHub Pages/Actions (£4/month) for deployments/testing/issues, self-hosted Qdrant on Fly.io, Supabase free model, and monthly AI/LLM subscriptions (Gemini, Claude, DeepSeek).

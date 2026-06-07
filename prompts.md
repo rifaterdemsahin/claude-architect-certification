@@ -104,6 +104,15 @@ Record every prompt given to AI agents below. Include the date, agent, and purpo
 **Purpose:** Update the cost tracker with Fly.io quarterly prepayments, GitHub paid features, Supabase free model, and AI subscriptions (Gemini, Claude, DeepSeek).  
 **Output:** `1_Real_Unknown/5_costs.md` updated and committed.
 
+---
+
+## 2026-06-07 — Stage 1 References Update & Kanban Task
+
+**Agent:** Gemini 3.5 Flash (Medium)  
+**Purpose:** Update references in `1_Real_Unknown/README.md` to use actual filenames, add the sanity check document, fix broken navigation links, and add a recurring audit task to `6_kanban.md`.  
+**Output:** Updated `1_Real_Unknown/README.md`, `1_Real_Unknown/6_kanban.md`, `navigation_config.json`, `index.html`, and `5_Symbols/markdown_renderer.html`.
+
+
 
 
 

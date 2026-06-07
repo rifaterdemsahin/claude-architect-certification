@@ -18,12 +18,13 @@ This folder captures everything we **don't yet know** — the questions that dri
 
 | File | Description |
 |------|-------------|
-| [`problem_statement.md`](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/1_Real_Unknown/problem_statement.md) | The core problem this project solves |
-| [`okrs.md`](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/1_Real_Unknown/okrs.md) | Objectives and Key Results |
-| [`questions.md`](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/1_Real_Unknown/questions.md) | Open questions driving the work |
-| [`hypotheses.md`](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/1_Real_Unknown/hypotheses.md) | Assumptions to validate |
-| [`kanban.md`](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/1_Real_Unknown/kanban.md) | Project Kanban Board for task tracking |
-| [`costs.md`](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/1_Real_Unknown/costs.md) | Project Cost Tracker for infrastructure/API expenses |
+| [`1_okr.md`](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/1_Real_Unknown/1_okr.md) | Objectives and Key Results |
+| [`2_problem_statement.md`](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/1_Real_Unknown/2_problem_statement.md) | The core problem this project solves |
+| [`3_hypotheses.md`](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/1_Real_Unknown/3_hypotheses.md) | Assumptions to validate |
+| [`4_questions.md`](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/1_Real_Unknown/4_questions.md) | Open questions driving the work |
+| [`5_costs.md`](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/1_Real_Unknown/5_costs.md) | Project Cost Tracker for infrastructure/API expenses |
+| [`6_kanban.md`](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/1_Real_Unknown/6_kanban.md) | Project Kanban Board for task tracking |
+| [`7_sanity_check.md`](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/1_Real_Unknown/7_sanity_check.md) | Sanity Check verifying Stage 1 internal consistency |
 
 ## Rules
 

@@ -118,3 +118,14 @@
 ### Gaps & Challenges
 - Prepayments (quarterly Fly.io) need to be amortized to compute the correct monthly rate. Added the exact calculation in the summary to reflect a true monthly run rate (~£12.33 / month for infrastructure).
 
+## 📅 2026-06-07: Stage 1 References Audited & Navigation Restored
+
+### What went well
+- Successfully updated `1_Real_Unknown/README.md` to reference the actual numbered Stage 1 files, including `7_sanity_check.md`.
+- Identified and fixed broken links in the central debug navigation menu files (`navigation_config.json`, `index.html` fallback, and `5_Symbols/markdown_renderer.html` fallback) that pointed to obsolete unnumbered paths (`1_Real_Unknown/kanban.md` and `costs.md`).
+- Added `TSK-024` to `6_kanban.md` under Planned/To Do to ensure periodic audits are run as a recurring task.
+
+### Gaps & Challenges
+- Renaming files (e.g., prefixing them with step numbers) must always trigger an immediate update of the configuration files to prevent dead links on the static site.
+
+
