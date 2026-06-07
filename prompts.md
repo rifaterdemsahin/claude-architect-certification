@@ -132,10 +132,10 @@ Record every prompt given to AI agents below. Include the date, agent, and purpo
 **Agent:** Gemini 3.5 Flash (Medium)  
 **Purpose:** Restore "Production", "Sanity Check", and "Exam" menu items to the main project menu, fix raw HTML routing logic, log UI warnings/fixes, and add a detailed Semblance remediation document.  
 **Output:** Updated `navigation_config.json`, `index.html`, `markdown_renderer.html`, `6_Semblance/error.log`, `6_Semblance/fix.log`, `6_Semblance/lessons_learned.md`, and created `6_Semblance/missing_menu_items_remediation.md`.
+## 2026-06-07 — Dynamic Course Outline from Supabase on Pre-Prod Hub
 
-
-
-
-
+**Agent:** Gemini 3.5 Flash
+**Purpose:** Dynamically load and display course outline from Supabase on pre-production hub page.
+**Output:** Updated `5_Symbols/production/preprod/index.html`.
 
 
