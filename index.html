@@ -843,8 +843,6 @@
       <nav class="project-menu-nav" id="projectMenu">
         <!-- Loaded dynamically via config -->
         <a href="index.html" class="menu-link active">Home</a>
-        <a href="5_Symbols/production_hub.html" class="menu-link">Production</a>
-        <a href="5_Symbols/sanity_checklist.html" class="menu-link">Sanity Check</a>
         <a href="markdown_renderer.html?file=4_Formula/certification/exam_and_case_study.md" class="menu-link">Exam</a>
       </nav>
 
@@ -927,7 +925,7 @@
   <main class="dashboard-grid">
     
     <!-- Left column: The 7-Stage Framework -->
-    <section class="glass-card">
+    <section class="glass-card" id="framework-section">
       <h2 class="card-title">
         <i class="fa-solid fa-list-ol" style="color: var(--accent-violet);"></i>
         <span>The 7-Stage Framework</span>
@@ -1104,12 +1102,18 @@
   </div>
 
   <script>
+    // 📅 Project launch date — dev-phase items are hidden 90 days after this
+    const LAUNCH_DATE = new Date('2026-06-07');
+    const DAY_MS = 1000 * 60 * 60 * 24;
+    const daysSinceLaunch = Math.floor((Date.now() - LAUNCH_DATE.getTime()) / DAY_MS);
+    const showDevPhaseItems = daysSinceLaunch < 90;
+
     // 🗃️ Menu Configuration Fallback Data
     let navigationData = {
       projectMenu: [
         { label: "Home", url: "index.html" },
-        { label: "Production", url: "5_Symbols/production_hub.html" },
-        { label: "Sanity Check", url: "5_Symbols/sanity_checklist.html" },
+        { label: "Production", url: "5_Symbols/production_hub.html", hideAfterDays: 90 },
+        { label: "Sanity Check", url: "5_Symbols/sanity_checklist.html", hideAfterDays: 90 },
         { label: "Exam", url: "markdown_renderer.html?file=4_Formula/certification/exam_and_case_study.md" }
       ],
       debugMenu: [
@@ -1180,19 +1184,28 @@
 
       function initMenus() {
         debugLog("Initializing Project and Debug Menus.", navigationData);
-        
+
+        // Hide dev-phase sections after 90 days from launch
+        if (!showDevPhaseItems) {
+          const frameworkSection = document.getElementById("framework-section");
+          if (frameworkSection) frameworkSection.style.display = "none";
+        }
+
         // 1. Build Project Menu
         projectMenuContainer.innerHTML = "";
-        navigationData.projectMenu.forEach((item, index) => {
+        let visibleIndex = 0;
+        navigationData.projectMenu.forEach((item) => {
+          if (item.hideAfterDays && daysSinceLaunch >= item.hideAfterDays) return;
           const link = document.createElement("a");
           let finalUrl = item.url;
           if (finalUrl !== "index.html" && !finalUrl.startsWith("http") && !finalUrl.includes("markdown_renderer.html") && !finalUrl.endsWith(".html")) {
             finalUrl = `markdown_renderer.html?file=${finalUrl}`;
           }
           link.href = finalUrl;
-          link.className = `menu-link ${index === 0 ? 'active' : ''}`;
+          link.className = `menu-link ${visibleIndex === 0 ? 'active' : ''}`;
           link.textContent = item.label;
           projectMenuContainer.appendChild(link);
+          visibleIndex++;
         });
 
         // 2. Build Debug Menu
