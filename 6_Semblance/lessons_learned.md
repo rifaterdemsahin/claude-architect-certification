@@ -81,3 +81,20 @@
 - When referencing SQL tables in application code, always verify the table definition exists in the schema file, not just in seed files.
 - Script content changes to `master_script.json` must maintain the 8-part structure: Metadata → Hook → Overview → Transition → Content (with cue tags) → Summary → IVQ Transition → IVQ (with answer/explanation/distractors).
 - Any change to localStorage override key format must be applied to both `edit_scripts.html` and `scripts/index.html` simultaneously.
+
+## 📅 2026-06-07: Link Checker & Corrective Path Automation
+
+### What went well
+- Fixed all 95 broken links in `5_Symbols/production/` by writing a single-pass corrective python script `scratch/fix_broken_paths.py`.
+- The script dynamically calculated file nesting depth relative to the project root and replaced incorrect relative links (e.g. `index.html`, `favicon.png`, `production_hub.html`, etc.) with correct relative levels of `../`.
+- Redirected all local module asset references (`assets/...`) in Modules 2–5 to point to the shared assets directory under `module-1/section-1/assets/`, saving disk space and unifying the asset pipeline.
+- Improved the testing pipeline: added an exemption in `7_Testing_Known/test_links.py` to bypass dynamic javascript template string placeholders (containing `${...}`) which are resolved at runtime, preventing false positives.
+- Validated that the link checking test script now executes with a 100% clean record (0 broken links).
+
+### Gaps & Challenges
+- Manual string replacement of relative paths can be fragile if files are renamed or moved. Using a Python script that calculates relative paths based on depth is far more robust than search-and-replace, but maintaining relative depth links still requires care.
+- Dynamically generated links like `${l.url}` must always be explicitly ignored in static link validation scripts.
+
+### Takeaway for Future AI Agents
+- Always calculate relative paths relative to nesting depth of the file rather than hardcoding.
+- When writing a static link checker, ensure template literals/placeholder strings are ignored or parsed separately to prevent false failures.

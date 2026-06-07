@@ -1,0 +1,48 @@
+# 🛠 Fix Log — Delivery Pilot Template
+
+## Format
+Each entry follows: `[DATE] [STAGE] [STATUS] — Fix description`
+
+Status: `APPLIED` | `VERIFIED` | `WORKAROUND` | `PENDING`
+
+---
+
+## Fix Entries
+
+[2026-06-07] [TEST] [VERIFIED] — Programmatically recalculated correct relative paths for index.html, favicon.png, production_hub.html, etc. in 5_Symbols/production/ using scratch/fix_broken_paths.py, and resolved assets to module-1 shared folder. Updated test_links.py to bypass template literals.
+[2026-06-07] [RESTRO] [VERIFIED] — Switched to \g<1> syntax in regex substitutions to isolate group match from number 5 in 5_Symbols.
+[2026-06-07] [RESTRO] [VERIFIED] — Removed old node_modules folder and performed a clean npm install inside 5_Symbols/src/mcp-server/.
+[2026-06-02] [SETUP] [APPLIED] — fix.log initialized. Linked to error.log for cross-referencing.
+
+---
+
+## How to Use
+
+1. When a fix is applied, log it here with the matching date + stage from `error.log`.
+2. Mark status as `WORKAROUND` if a proper fix is deferred.
+3. Once verified in `7_Testing_Known`, update status to `VERIFIED`.
+
+## Fix → Test Pipeline
+
+```
+error.log entry
+    ↓
+Root cause analysis (gap_analysis.md)
+    ↓
+Fix applied → fix.log entry (APPLIED)
+    ↓
+Validation in 7_Testing_Known
+    ↓
+fix.log entry updated (VERIFIED)
+    ↓
+Lesson captured in lessons_learned.md
+```
+
+## Cross-Reference Index
+
+| Error Date | Stage | Error Summary | Fix Status |
+|------------|-------|---------------|------------|
+| 2026-06-07 | TEST | Broken paths and missing assets | VERIFIED |
+| 2026-06-07 | RESTRO | Regex replacement error | VERIFIED |
+| 2026-06-07 | RESTRO | TS compilation errors | VERIFIED |
+| 2026-06-02 | SETUP | Initialization | APPLIED |
