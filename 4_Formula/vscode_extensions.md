@@ -37,6 +37,7 @@ This project spans static HTML/CSS/JS, Python CI scripts, Mermaid diagrams, Mark
 | Extension | ID | Purpose |
 |---|---|---|
 | Markdown All in One | `yzhang.markdown-all-in-one` | TOC generation, preview, shortcuts |
+| Markdown Auto Preview | `hnw.vscode-auto-open-markdown-preview` | Automatically opens the preview pane when a `.md` file is opened — no manual `Cmd+Shift+V` needed |
 | Markdown Preview Mermaid Support | `bierner.markdown-mermaid` | Renders Mermaid diagrams in preview pane |
 | markdownlint | `davidanson.vscode-markdownlint` | Lint markdown for consistent formatting |
 
@@ -91,6 +92,7 @@ code --install-extension ecmel.vscode-html-css \
      --install-extension ms-python.vscode-pylance \
      --install-extension charliermarsh.ruff \
      --install-extension yzhang.markdown-all-in-one \
+     --install-extension hnw.vscode-auto-open-markdown-preview \
      --install-extension bierner.markdown-mermaid \
      --install-extension davidanson.vscode-markdownlint \
      --install-extension github.vscode-github-actions \
@@ -153,6 +155,7 @@ Add this to `.vscode/settings.json` at the project root:
 After installing, confirm each area works:
 
 - [ ] Open `index.html` → right-click → **Open with Live Server** → page loads in browser
+- [ ] Open any `.md` file → preview pane opens automatically (Markdown Auto Preview)
 - [ ] Edit a `.md` file → `Cmd+Shift+V` → Mermaid diagrams render in preview
 - [ ] Open `navigation_config.json` → Prettier formats on save
 - [ ] Open `.github/workflows/test_links.yml` → GitHub Actions extension shows syntax validation
