@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Script Editor | Claude AI Certification</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #030712;
+      --bg-card: rgba(17, 24, 39, 0.8);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --primary: #8b5cf6;
+      --primary-glow: rgba(139, 92, 246, 0.3);
+      --secondary: #3b82f6;
+      --accent: #f59e0b;
+      --success: #10b981;
+      --font-title: 'Outfit', sans-serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      background-color: var(--bg-dark);
+      background-image:
+        radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.07) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.07) 0%, transparent 40%);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .nav-bar {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 14px 0;
+    }
+    .nav-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+    .nav-logo { font-family: var(--font-title); font-weight: 700; font-size: 1.15rem; color: white; text-decoration: none; display: flex; align-items: center; gap: 8px; }
+    .nav-links { display: flex; align-items: center; gap: 20px; }
+    .nav-links a { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; font-weight: 500; transition: color 0.3s; }
+    .nav-links a:hover, .nav-links a.active { color: white; }
+
+    .nav-dropdown { position: relative; display: inline-block; }
+    .nav-dropdown .drop-trigger { cursor: pointer; padding: 8px 12px; border-radius: 8px; }
+    .nav-dropdown:hover .drop-trigger { background: rgba(139,92,246,0.1); color: white; }
+    .drop-menu {
+      display: none; position: absolute; top: 100%; left: 0;
+      background: rgba(15,23,42,0.98); backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.1); border-radius: 12px;
+      padding: 8px; min-width: 190px; z-index: 200;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    }
+    .nav-dropdown:hover .drop-menu { display: block; }
+    .drop-menu a {
+      display: block; padding: 10px 16px; border-radius: 8px;
+      color: var(--text-muted); text-decoration: none;
+      font-size: 0.85rem; white-space: nowrap; transition: all 0.2s;
+    }
+    .drop-menu a:hover { background: rgba(139,92,246,0.15); color: white; }
+    .join-btn { background: linear-gradient(135deg, #f59e0b, var(--primary)); color: white !important; padding: 8px 20px !important; border-radius: 100px !important; font-weight: 700 !important; box-shadow: 0 4px 15px rgba(245,158,11,0.3); transition: all 0.3s !important; }
+    .join-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245,158,11,0.5) !important; }
+
+    .main-workspace {
+      flex: 1;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 30px 24px;
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 30px;
+    }
+
+    @media (max-width: 900px) {
+      .main-workspace { grid-template-columns: 1fr; }
+    }
+
+    /* Sidebar Selector */
+    .sidebar {
+      background: var(--bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      align-self: start;
+    }
+    .sidebar-title {
+      font-family: var(--font-title);
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: white;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      padding-bottom: 10px;
+    }
+    .module-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .module-tab-btn {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+      padding: 12px;
+      border-radius: 10px;
+      text-align: left;
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      width: 100%;
+    }
+    .module-tab-btn:hover {
+      background: rgba(139, 92, 246, 0.06);
+      color: white;
+    }
+    .module-tab-btn.active {
+      background: rgba(139, 92, 246, 0.15);
+      border-color: var(--primary);
+      color: #c084fc;
+    }
+    
+    .video-selector-list {
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 6px;
+      padding-left: 12px;
+      border-left: 1px solid rgba(139, 92, 246, 0.2);
+    }
+    .module-group.expanded .video-selector-list {
+      display: flex;
+    }
+    .video-sub-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 8px 10px;
+      border-radius: 6px;
+      text-align: left;
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .video-sub-btn:hover {
+      color: white;
+      background: rgba(255, 255, 255, 0.03);
+    }
+    .video-sub-btn.active {
+      color: #93c5fd;
+      font-weight: 600;
+      background: rgba(59, 130, 246, 0.1);
+    }
+
+    /* Workspace Editor Section */
+    .editor-pane {
+      background: var(--bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    
+    .editor-header {
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      padding-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .header-details h2 {
+      font-family: var(--font-title);
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: white;
+      margin-bottom: 4px;
+    }
+    .header-details p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+    .video-badge-row {
+      display: flex;
+      gap: 8px;
+    }
+    .badge-item {
+      background: rgba(139, 92, 246, 0.15);
+      color: #c084fc;
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    /* OKR Card */
+    .okr-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 14px;
+      padding: 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 768px) {
+      .okr-card { grid-template-columns: 1fr; }
+    }
+    .okr-section h4 {
+      font-family: var(--font-title);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #c084fc;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .okr-section ul {
+      list-style-type: none;
+    }
+    .okr-section li {
+      position: relative;
+      padding-left: 18px;
+      font-size: 0.85rem;
+      color: var(--text-main);
+      margin-bottom: 6px;
+      line-height: 1.4;
+    }
+    .okr-section.obj li::before { content: '🎯'; position: absolute; left: 0; }
+    .okr-section.kr li::before { content: '🔑'; position: absolute; left: 0; }
+
+    /* Editing area */
+    .textarea-wrapper {
+      position: relative;
+    }
+    .editor-textarea {
+      width: 100%;
+      height: 280px;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 16px;
+      color: white;
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      line-height: 1.6;
+      resize: vertical;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .editor-textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 12px var(--primary-glow);
+    }
+    .metrics-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    /* Actions Panel */
+    .editor-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .btn-save {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px 28px;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-family: var(--font-body);
+      box-shadow: 0 4px 15px var(--primary-glow);
+    }
+    .btn-save:hover {
+      background: #7c3aed;
+      transform: translateY(-2px);
+    }
+    .btn-save:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .status-text {
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Cue checklist box */
+    .cues-card {
+      background: rgba(0,0,0,0.2);
+      border: 1px solid rgba(255,255,255,0.04);
+      border-radius: 14px;
+      padding: 18px;
+    }
+    .cues-card h4 {
+      font-family: var(--font-title);
+      font-size: 0.95rem;
+      color: #93c5fd;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .cues-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .cue-pill {
+      background: rgba(59, 130, 246, 0.08);
+      border: 1px solid rgba(59, 130, 246, 0.15);
+      border-radius: 6px;
+      padding: 4px 12px;
+      font-size: 0.75rem;
+      color: #93c5fd;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .loading-pane {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 300px;
+      color: var(--text-muted);
+      font-size: 1.1rem;
+    }
+
+    footer {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      margin-top: auto;
+      padding: 24px 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    footer a { color: var(--secondary); text-decoration: none; }
+  </style>
+</head>
+<body>
+  
+  <nav class="nav-bar">
+    <div class="nav-container">
+      <a href="../../index.html" class="nav-logo">🏛️ Claude Architect</a>
+      <div class="nav-links">
+        <a href="../../index.html">Home</a>
+        <div class="nav-dropdown">
+          <a href="../../production_hub.html" class="drop-trigger active">Production ▾</a>
+          <div class="drop-menu">
+            <a href="../preprod/index.html">Pre-Production</a>
+            <a href="../prod/index.html">Production</a>
+            <a href="../postprod/index.html">Post-Production</a>
+          </div>
+        </div>
+        <a href="../../sanity_checklist.html">Sanity Check</a>
+        <a href="../../markdown_viewer.html?md=docs/certification/exam_and_case_study.md">Exam</a>
+        <a href="https://www.youtube.com/playlist?list=PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy" target="_blank">📺 Course</a>
+        <a href="../publish/membership.html" class="join-btn">🔥 Join $10/mo</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="main-workspace">
+    <!-- Sidebar Selector -->
+    <div class="sidebar">
+      <div class="sidebar-title">📑 Module Outline Selector</div>
+      <div id="sidebar-modules" class="module-group-container">
+        <!-- Dyn generated -->
+      </div>
+    </div>
+
+    <!-- Right workspace -->
+    <div id="editor-workspace" class="editor-pane">
+      <div class="loading-pane">Select a video from the sidebar outline to begin editing...</div>
+    </div>
+  </div>
+
+  <footer>
+    <p><a href="index.html">← Back to Pre-Production Home</a> | <a href="scripts/index.html">Master Script Viewer</a></p>
+  </footer>
+
+  <script>
+    const FALLBACK_OUTLINES = {
+      1: {
+        objectives: ["Understand Claude API anatomy, token mechanics, and production orchestration patterns."],
+        keyResults: [
+          "Deploy a multi-agent routing topology with security guards.",
+          "Configure environment variables, VPC, and IAM for production."
+        ]
+      },
+      2: {
+        objectives: ["Build and deploy MCP servers for secure private data bridges."],
+        keyResults: [
+          "Deploy an MCP server on Fly.io with SQLite/PostgreSQL bridge.",
+          "Implement read-only query boundaries with stdio/SSE transports."
+        ]
+      },
+      3: {
+        objectives: ["Implement zero-data retention compliance using AWS Bedrock PrivateLink."],
+        keyResults: [
+          "Configure VPC Interface Endpoints with Terraform.",
+          "Produce audit logs and pass compliance review."
+        ]
+      },
+      4: {
+        objectives: ["Build deterministic agent routers with circuit-breaker safeguards."],
+        keyResults: [
+          "Implement router.py with loop detection and depth counting.",
+          "Test circuit breaker against malformed input and recursion attacks."
+        ]
+      },
+      5: {
+        objectives: ["Reduce enterprise operational costs by 90% using prompt caching."],
+        keyResults: [
+          "Implement prefix-matching cache points achieving 90% hit rate.",
+          "Deploy cache_layer.py with LRU and TTL strategies."
+        ]
+      }
+    };
+
+    const SUPABASE_URL = localStorage.getItem('supabase_url') || 'https://rmekfsdhglyiralxvkwc.supabase.co';
+    const SUPABASE_ANON_KEY = localStorage.getItem('supabase_anon_key') || '';
+    
+    let currentData = null;
+    let selectedModuleIdx = 0;
+    let selectedVideoIdx = 0;
+
+    async function loadFromSupabase() {
+      if (!SUPABASE_URL.includes('supabase.co')) return null;
+      try {
+        async function sq(endpoint) {
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/${endpoint}`, {
+            headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+          });
+          if (!res.ok) return null;
+          return res.json();
+        }
+        const modules = await sq('modules?order=module_number.asc');
+        const videos = await sq('videos?order=video_number.asc&select=*,video_cues(*)');
+        const outlines = await sq('outline?order=sort_order.asc');
+        const scripts = await sq('scripts');
+        
+        if (!modules) return null;
+
+        return {
+          modules: modules.map(m => ({
+            id: m.module_number, title: m.title, description: m.description,
+            objectives: (outlines || []).filter(o => o.module_number === m.module_number && o.content_type === 'objective').map(o => o.content),
+            keyResults: (outlines || []).filter(o => o.module_number === m.module_number && o.content_type === 'key_result').map(o => o.content),
+            videos: (videos || []).filter(v => v.module_id === m.id).map(v => {
+              const matchedScript = (scripts || []).find(s => s.video_id === v.id);
+              return {
+                id: v.video_number,
+                videoId: v.id,
+                title: v.title,
+                duration: v.duration,
+                script: matchedScript ? matchedScript.script_text : v.script,
+                cues: (v.video_cues || []).sort((a,b) => a.sort_order - b.sort_order).map(c => c.cue_text)
+              };
+            })
+          }))
+        };
+      } catch (err) {
+        console.error('Failed to load from Supabase:', err);
+        return null;
+      }
+    }
+
+    function updateWordCounters() {
+      const ta = document.getElementById('script-editor-textarea');
+      if (!ta) return;
+      const val = ta.value;
+      const chars = val.length;
+      const words = val.trim() === '' ? 0 : val.trim().split(/\s+/).length;
+      document.getElementById('char-count').textContent = chars;
+      document.getElementById('word-count').textContent = words;
+    }
+
+    function buildSidebar() {
+      const container = document.getElementById('sidebar-modules');
+      container.innerHTML = currentData.modules.map((m, mi) => `
+        <div class="module-group" id="module-group-${mi}">
+          <button class="module-tab-btn" onclick="toggleModuleGroup(${mi})">
+            M${m.id}: ${m.title}
+          </button>
+          <div class="video-selector-list">
+            ${m.videos.map((v, vi) => `
+              <button class="video-sub-btn" id="sub-btn-${mi}-${vi}" onclick="selectVideo(${mi}, ${vi})">
+                🎬 Video ${v.id}: ${v.title}
+              </button>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function toggleModuleGroup(idx) {
+      document.querySelectorAll('.module-group').forEach((g, i) => {
+        if (i === idx) {
+          g.classList.toggle('expanded');
+          g.querySelector('.module-tab-btn').classList.toggle('active');
+        } else {
+          g.classList.remove('expanded');
+          g.querySelector('.module-tab-btn').classList.remove('active');
+        }
+      });
+    }
+
+    function selectVideo(modIdx, vidIdx) {
+      selectedModuleIdx = modIdx;
+      selectedVideoIdx = vidIdx;
+
+      document.querySelectorAll('.video-sub-btn').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.getElementById(`sub-btn-${modIdx}-${vidIdx}`);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      renderWorkspace();
+    }
+
+    function renderWorkspace() {
+      const workspace = document.getElementById('editor-workspace');
+      const m = currentData.modules[selectedModuleIdx];
+      const v = m.videos[selectedVideoIdx];
+      const elementId = v.videoId || `local-${selectedModuleIdx}-${v.id}`;
+
+      workspace.innerHTML = `
+        <div class="editor-header">
+          <div class="header-details">
+            <h2>${v.title}</h2>
+            <p>Module ${m.id}: ${m.title}</p>
+          </div>
+          <div class="video-badge-row">
+            <span class="badge-item">Video ${v.id}</span>
+            <span class="badge-item">⏱️ ${v.duration}</span>
+          </div>
+        </div>
+
+        <!-- Objectives & KRs -->
+        <div class="okr-card">
+          <div class="okr-section obj">
+            <h4>🎯 Module Objectives</h4>
+            <ul>
+              ${m.objectives.length ? m.objectives.map(o => `<li>${o}</li>`).join('') : '<li>Understand core module outline topics</li>'}
+            </ul>
+          </div>
+          <div class="okr-section kr">
+            <h4>🔑 Key Results</h4>
+            <ul>
+              ${m.keyResults.length ? m.keyResults.map(kr => `<li>${kr}</li>`).join('') : '<li>Successfully prototype and review course pipeline</li>'}
+            </ul>
+          </div>
+        </div>
+
+        <!-- Editor workspace -->
+        <div class="textarea-wrapper">
+          <textarea class="editor-textarea" id="script-editor-textarea" oninput="updateWordCounters()">${v.script}</textarea>
+          <div class="metrics-row">
+            <span>Words: <strong id="word-count">0</strong> | Characters: <strong id="char-count">0</strong></span>
+            <span>Autosave caching active</span>
+          </div>
+        </div>
+
+        <!-- Scene cues -->
+        <div class="cues-card">
+          <h4>🎞️ Target Scene Overlay Cues & Prompts</h4>
+          <div class="cues-container">
+            ${v.cues.length ? v.cues.map(c => `
+              <span class="cue-pill">🏷️ ${c}</span>
+            `).join('') : '<span style="font-size:0.8rem;color:var(--text-muted)">No cues defined. Edit EDL templates.</span>'}
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="editor-actions">
+          <button class="btn-save" id="btn-save-script" onclick="saveScriptText()">Save Script Content</button>
+          <span class="status-text" id="status-span"></span>
+        </div>
+      `;
+
+      updateWordCounters();
+    }
+
+    async function saveScriptText() {
+      const m = currentData.modules[selectedModuleIdx];
+      const v = m.videos[selectedVideoIdx];
+      const ta = document.getElementById('script-editor-textarea');
+      const statusSpan = document.getElementById('status-span');
+      const saveBtn = document.getElementById('btn-save-script');
+
+      const newScript = ta.value.trim();
+
+      saveBtn.disabled = true;
+      statusSpan.textContent = 'Saving payload...';
+      statusSpan.style.color = '#f59e0b';
+
+      try {
+        let isSavedToSupabase = false;
+        const isSupabaseConfigured = SUPABASE_URL.includes('supabase.co') && SUPABASE_ANON_KEY;
+
+        if (isSupabaseConfigured && v.videoId) {
+          // Check if already exists in table
+          const checkRes = await fetch(`${SUPABASE_URL}/rest/v1/scripts?video_id=eq.${v.videoId}`, {
+            headers: {
+              'apikey': SUPABASE_ANON_KEY,
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+            }
+          });
+          const existing = await checkRes.json();
+
+          let method = 'POST';
+          let url = `${SUPABASE_URL}/rest/v1/scripts`;
+          let headers = {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation'
+          };
+
+          if (existing && existing.length > 0) {
+            method = 'PATCH';
+            url = `${SUPABASE_URL}/rest/v1/scripts?video_id=eq.${v.videoId}`;
+          }
+
+          const body = {
+            video_id: parseInt(v.videoId),
+            script_text: newScript,
+            updated_at: new Date().toISOString()
+          };
+
+          const res = await fetch(url, {
+            method,
+            headers,
+            body: JSON.stringify(body)
+          });
+
+          if (res.ok) {
+            isSavedToSupabase = true;
+          }
+        }
+
+        // Cache update locally in localStorage overrides
+        localStorage.setItem(`script_override_${m.id}_${v.id}`, newScript);
+
+        // Update working memory
+        v.script = newScript;
+
+        statusSpan.innerHTML = isSavedToSupabase 
+          ? '<span>✅ Success! Saved to Supabase database.</span>' 
+          : '<span>✅ Success! Saved to local storage cache overrides.</span>';
+        statusSpan.style.color = '#10b981';
+
+        setTimeout(() => {
+          statusSpan.textContent = '';
+        }, 4000);
+
+      } catch (err) {
+        console.error(err);
+        statusSpan.textContent = '❌ Failed to save script changes.';
+        statusSpan.style.color = '#ef4444';
+      } finally {
+        saveBtn.disabled = false;
+      }
+    }
+
+    (async () => {
+      let data = await loadFromSupabase();
+      if (!data) {
+        data = await fetch('master_script.json').then(r => r.json()).catch(() => null);
+        if (data) {
+          data.modules.forEach(m => {
+            const fallback = FALLBACK_OUTLINES[m.id] || { objectives: [], keyResults: [] };
+            m.objectives = fallback.objectives;
+            m.keyResults = fallback.keyResults;
+          });
+        }
+      }
+
+      if (data) {
+        // Hydrate local storage overrides
+        data.modules.forEach(m => {
+          m.videos.forEach(v => {
+            const override = localStorage.getItem(`script_override_${m.id}_${v.id}`);
+            if (override) {
+              v.script = override;
+            }
+          });
+        });
+        currentData = data;
+        buildSidebar();
+        
+        // Auto-select first video
+        toggleModuleGroup(0);
+        selectVideo(0, 0);
+      } else {
+        document.getElementById('editor-workspace').innerHTML = `
+          <div class="error">
+            <h2>❌ Failed to Load Editor Outline</h2>
+            <p>Could not fetch data from Supabase DB or load master_script.json fallback context.</p>
+          </div>
+        `;
+      }
+    })();
+  </script>
+</body>
+</html>

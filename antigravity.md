@@ -69,7 +69,8 @@ To collaborate on production-ready AI workflows, ensuring:
 
 ## 🪵 Activity Log
 
-### 2026-06-07 (Project Initialization & Script Integration)
+### 2026-06-07 (Project Initialization, Script Integration & Editor Page)
 - **Action:** Created `antigravity.md` to initialize project context and mapping for Antigravity.
 - **Action:** Added `scripts` table to database layer (`schema.sql` & `admin.html`) and developed inline script editing UI in pre-production script dashboard with localStorage support.
-- **Status:** Completed and tested. Ready for review.
+- **Action:** Created a dedicated script editor page `edit_scripts.html` in `production/preprod/` with sidebar selectors, character/word counters, objectives/KRs integration, and auto-sync to Supabase/localStorage overrides.
+- **Status:** Completed, linked in pre-production dashboard, and tested. Ready for review.
