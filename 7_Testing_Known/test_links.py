@@ -55,9 +55,18 @@ for root, dirs, files in os.walk(production_dir):
             links = href_pattern.findall(content) + src_pattern.findall(content)
             
             for link in links:
+                # Clean up query params and hash anchors
+                clean_link = link.split("?")[0].split("#")[0].strip()
+                if not clean_link:
+                    continue
+                
+                # Ignore remote protocols, mailto, tel, javascript, and template literals
+                if any(clean_link.lower().startswith(prefix) for prefix in ["http://", "https://", "mailto:", "tel:", "javascript:"]) or "${" in clean_link:
+                    continue
+                
                 total_links_checked += 1
-                clean_link = link.split('#')[0]
-
+                
+                # Check absolute local file links
                 if clean_link.startswith("file:///"):
                     normalized_abs = normalize_absolute_path(clean_link)
                     if normalized_abs:
