@@ -32,3 +32,4 @@ Severity levels: `CRITICAL` | `ERROR` | `WARNING` | `INFO`
 | Navigation config mismatch | UI | See fix.log |
 | Markdown render 404 | 6_Semblance | See fix.log |
 | Azure Key Vault access denied | Secrets | See fix.log |
+| 2026-06-07 | 4_Formula | MEDIUM — Stale references to `5_Symbols/docs/` and `4_Formula/vscode_extensions.md` in README.md, antigravity.md, 1_Real_Unknown/2_problem_statement.md, and 4_Formula/tools/markdown_preview_auto.md after refactor moved files into 4_Formula |

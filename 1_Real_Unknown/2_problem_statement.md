@@ -54,7 +54,7 @@
 
 | Module | Topic | Primary Artifact |
 |--------|-------|-----------------|
-| 1 | Claude Ecosystem & Token Mechanics | `5_Symbols/docs/topologies/multi_agent_flow.md` |
+| 1 | Claude Ecosystem & Token Mechanics | `4_Formula/topologies/multi_agent_flow.md` |
 | 2 | Model Context Protocol (MCP) | `5_Symbols/src/mcp-server/` (deployed on Fly.io) |
 | 3 | Zero-Data Retention (ZDR) & VPC Isolation | `5_Symbols/templates/aws-bedrock-private-link.tf` |
 | 4 | Deterministic Routers & Circuit Breakers | `5_Symbols/src/multi-agent/router.py` |

@@ -33,9 +33,9 @@ Key entry points in the workspace:
   - Local Markdown Viewer: [markdown_viewer.html](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/5_Symbols/markdown_viewer.html)
   - Sanity Review Dashboard: [sanity_checklist.html](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/5_Symbols/sanity_checklist.html)
 - **Course Certification & Planning Docs:**
-  - Master Production Plan: [production_plan.md](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/5_Symbols/docs/certification/production_plan.md)
-  - Course Outline Guide: [course_outline.md](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/5_Symbols/docs/certification/course_outline.md)
-  - Exam & Outage Case Studies: [exam_and_case_study.md](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/5_Symbols/docs/certification/exam_and_case_study.md)
+  - Master Production Plan: [production_plan.md](4_Formula/certification/production_plan.md)
+  - Course Outline Guide: [course_outline.md](4_Formula/certification/course_outline.md)
+  - Exam & Outage Case Studies: [exam_and_case_study.md](4_Formula/certification/exam_and_case_study.md)
 
 ---
 

@@ -99,6 +99,6 @@ The setting is in `.vscode/settings.json` at the project root:
 
 ## 🔗 Related Documents
 
-- `4_Formula/vscode_extensions.md` — full extension list and one-shot install
+- `4_Formula/tools/vscode_extensions.md` — full extension list and one-shot install
 - `.vscode/settings.json` — workspace settings file where the change lives
 - `CLAUDE.md` → Code Standards section
