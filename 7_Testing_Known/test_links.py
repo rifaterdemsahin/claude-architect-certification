@@ -60,11 +60,7 @@ for root, dirs, files in os.walk(production_dir):
                 if not clean_link:
                     continue
                 
-                # Ignore remote protocols, mailto, tel, javascript
-                if any(clean_link.lower().startswith(prefix) for prefix in ["http://", "https://", "mailto:", "tel:", "javascript:"]):
-                    continue
-                
-                total_links_checked += 1
+
                 
                 # Check absolute local file links
                 if clean_link.startswith("file:///"):

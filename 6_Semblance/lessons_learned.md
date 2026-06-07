@@ -61,3 +61,23 @@
 
 ### Gaps & Challenges
 - None. Having this checklist helps ensure each stage directory is systematically maintained during development runs.
+
+## 📅 2026-06-07: Script Structure Alignment & Supabase Schema Fix
+
+### What went well
+- Migrated all 15 video scripts in `master_script.json` from summary paragraphs to the full 8-part structure defined in `4_Formula/production/script.md` (Metadata, Hook, Overview, Transition, Content Block, Summary, IVQ Transition, IVQ).
+- Each script now includes pedagogical guardrails: real-world hooks, measurable objectives, production cues (`[Screenshare Starts]`/`[Screenshare Ends]`), and in-video questions with correct answer, explanation, and distractors.
+- Created `scripts/README.md` documenting the folder structure and script template, making the format accessible to new contributors.
+- Discovered and fixed a missing `outline` table in `schema.sql` — the table was referenced by both `edit_scripts.html` and `scripts/index.html` but was only defined in `outline_seed.sql`, not the authoritative schema file.
+- Added Supabase config panel to `edit_scripts.html` sidebar for inline credential management without requiring localStorage manual entry.
+- Added `SUPABASE_CONFIGURED` flag to both HTML files for cleaner early-exit when Supabase is not configured.
+
+### Gaps & Challenges
+- The `edit_scripts.html` and `scripts/index.html` share near-identical Supabase query and save logic — future refactoring could extract this to a shared `supabase-client.js` module (the existing `client.js` in `5_Symbols/src/supabase/` is a candidate).
+- localStorage override key format must stay synchronized between both HTML files. Currently both use `script_override_{moduleId}_{videoId}` — any divergence would cause save/view mismatch.
+- The `moduleIdx + 1` vs `m.id` key pattern is fragile — both represent the same value (1-5) but derived differently (0-based index + 1 vs data property). Future refactoring should normalize to use only the data property.
+
+### Takeaway for Future AI Agents
+- When referencing SQL tables in application code, always verify the table definition exists in the schema file, not just in seed files.
+- Script content changes to `master_script.json` must maintain the 8-part structure: Metadata → Hook → Overview → Transition → Content (with cue tags) → Summary → IVQ Transition → IVQ (with answer/explanation/distractors).
+- Any change to localStorage override key format must be applied to both `edit_scripts.html` and `scripts/index.html` simultaneously.
