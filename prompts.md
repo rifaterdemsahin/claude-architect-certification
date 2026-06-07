@@ -80,8 +80,13 @@ Record every prompt given to AI agents below. Include the date, agent, and purpo
 | 2026-05-31 | Gemini | Add architecture.md and sync rules | Create 2_Environment/architecture.md, add Architecture link to debug menus, write architecture updates sync rule to agent personas | Created architecture.md, updated README.md, navigation_config.json, index.html, markdown_renderer.html, and agent personas |
 | 2026-05-31 | Gemini | Add maintenance task section to kanban | Update 1_Real_Unknown/kanban.md to append the ## Maintenance checklist section | Added Maintenance section to kanban.md and committed/pushed |
 
+---
 
+## 2026-06-07 — VS Code Extensions Formula
 
+**Agent:** Claude Sonnet 4.6 (Claude Code CLI)  
+**Purpose:** Create a formula document listing which VS Code extensions are needed to manage this project and provide a one-shot install command.  
+**Output:** `4_Formula/vscode_extensions.md` + `.vscode/settings.json`
 
 
 
