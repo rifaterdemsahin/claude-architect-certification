@@ -39,6 +39,7 @@ This project spans static HTML/CSS/JS, Python CI scripts, Mermaid diagrams, Mark
 | Markdown All in One | `yzhang.markdown-all-in-one` | TOC generation, preview, shortcuts |
 | Markdown Auto Preview | `hnw.vscode-auto-open-markdown-preview` | Automatically opens the preview pane when a `.md` file is opened — no manual `Cmd+Shift+V` needed |
 | Markdown Preview Mermaid Support | `bierner.markdown-mermaid` | Renders Mermaid diagrams in preview pane |
+| MermaidChart | `MermaidChart.vscode-mermaid-chart` | Official MermaidChart extension — live diagram editing, syntax highlighting, and MermaidChart cloud sync |
 | markdownlint | `davidanson.vscode-markdownlint` | Lint markdown for consistent formatting |
 
 ### ⚙️ DevOps / CI
@@ -94,6 +95,7 @@ code --install-extension ecmel.vscode-html-css \
      --install-extension yzhang.markdown-all-in-one \
      --install-extension hnw.vscode-auto-open-markdown-preview \
      --install-extension bierner.markdown-mermaid \
+     --install-extension MermaidChart.vscode-mermaid-chart \
      --install-extension davidanson.vscode-markdownlint \
      --install-extension github.vscode-github-actions \
      --install-extension redhat.vscode-yaml \
@@ -157,6 +159,7 @@ After installing, confirm each area works:
 - [ ] Open `index.html` → right-click → **Open with Live Server** → page loads in browser
 - [ ] Open any `.md` file → preview pane opens automatically (Markdown Auto Preview)
 - [ ] Edit a `.md` file → `Cmd+Shift+V` → Mermaid diagrams render in preview
+- [ ] Open a `.mmd` or `.mermaid` file → MermaidChart extension shows live diagram preview and syntax highlighting
 - [ ] Open `navigation_config.json` → Prettier formats on save
 - [ ] Open `.github/workflows/test_links.yml` → GitHub Actions extension shows syntax validation
 - [ ] Open any Python file in `scratch/` → Pylance shows type hints and imports
