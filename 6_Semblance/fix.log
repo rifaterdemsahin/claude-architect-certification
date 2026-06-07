@@ -9,6 +9,7 @@ Status: `APPLIED` | `VERIFIED` | `WORKAROUND` | `PENDING`
 
 ## Fix Entries
 
+[2026-06-07] [STAGE5] [APPLIED] — Dynamically fetched and rendered course outline from Supabase API (or fallback master_script.json) on 5_Symbols/production/preprod/index.html.
 [2026-06-07] [STAGE6] [VERIFIED] — Restored missing menus in navigation_config.json, updated fallbacks, fixed routing logic in index.html to handle raw .html files, and added semblance remediation doc.
 [2026-06-07] [STAGE6] [APPLIED] — Fixed favicon 404 (Issue #2): changed ../../favicon.png → ../favicon.png in 5_Symbols/markdown_viewer.html and 5_Symbols/sanity_checklist.html. On GitHub Pages ../../ from 5_Symbols/ exits the repo root, resolving to rifaterdemsahin.github.io/favicon.png (404). Also corrected og:url metadata in both files.
 [2026-06-07] [CI] [APPLIED] — Added "Ensure labels exist" step before "Open GitHub issue" in test_links.yml using gh label create --force (idempotent). See ci_broken_links_label_failure.md.
