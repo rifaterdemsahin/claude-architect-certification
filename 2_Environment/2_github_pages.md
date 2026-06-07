@@ -94,6 +94,33 @@ jobs:
 | Custom domain | Free (HTTPS included) |
 | Build minutes | 2,000 min/month (GitHub Actions free tier) |
 
+> **Plan note:** This project runs on the **GitHub $4/month paid plan** (GitHub Pro). This unlocks private repo Pages, more Actions minutes, and access to the full Issues + Projects suite — which we use actively for link testing and on-the-go fixes (see below).
+
+## 🔗 Link Testing & Issue-Driven Fix Workflow
+
+We actively test all published links after every deploy and track breakages via GitHub Issues.
+
+### Workflow
+
+1. **Test links** — After each deploy, manually or automatically verify all internal and external links on the live GitHub Pages site.
+2. **Open an issue** — If a broken link or rendering problem is found, open a GitHub Issue immediately with:
+   - The broken URL
+   - Expected vs. actual behavior
+   - Screenshot or error message
+3. **Fix on the go** — Issues are fixed directly in the branch and merged to `main`. GitHub Actions redeploys automatically within ~1 minute.
+4. **Close the issue** — Once the fix is live and verified, close the issue with a reference to the commit (e.g., `Fixes #42`).
+
+### Tools Used
+
+| Tool | Purpose |
+|------|---------|
+| GitHub Issues | Track broken links, nav bugs, rendering errors |
+| GitHub Actions | Auto-redeploy on every push to `main` |
+| `markdown_renderer.html` | Verify markdown files render correctly |
+| Browser DevTools | Check console errors, 404s, and network failures |
+
+> **Tip:** Use the debug menu (bottom-right button) to quickly navigate all 7 stages and spot missing or broken document links.
+
 ## References
 
 - [GitHub Pages Docs](https://docs.github.com/en/pages)
