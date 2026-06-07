@@ -53,3 +53,23 @@ For Modules 2–5 `demo_script_show.html` (which are at depth 5):
 2. Once approved, implement the fix script and run it.
 3. Validate using `test_links.py`.
 4. Log errors and fixes in `6_Semblance/`.
+
+---
+
+## Date: 2026-06-07
+## Stage: Stage 4 (Formula - Thinking & Planning) - Dynamic Course Outline from Supabase on Pre-Prod Hub
+
+### Problem Statement
+The user requested that the course outline on `5_Symbols/production/preprod/index.html` loads from Supabase dynamically.
+
+### Approach & Strategy
+1. **Identify the Data Source:** Use the existing Supabase REST API logic (similar to `edit_scripts.html`).
+   - Retrieve `supabase_url` and `supabase_anon_key` from localStorage or default configurations.
+   - Fetch `modules`, `videos`, and `outline` data from Supabase.
+2. **Design UI for Course Outline:**
+   - Add a premium "Course Outline" container below the card grid on `5_Symbols/production/preprod/index.html`.
+   - Render modules and their nested videos beautifully with progress and details.
+   - Implement loading and error fallback states.
+3. **Execution Steps:**
+   - Add styling and JS logic to `index.html`.
+   - Verify execution and update error/fix logs if needed.
