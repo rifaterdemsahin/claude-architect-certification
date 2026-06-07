@@ -103,6 +103,14 @@ jobs:
             gh issue close "$num" --comment "Superseded by a newer link-check run."
           done
 
+      - name: Ensure labels exist
+        if: steps.link-check.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh label create "broken-links" --color "d93f0b" --description "Automated: broken link detected" --force
+          gh label create "bug" --color "d73a4a" --description "Something isn't working" --force
+
       - name: Open GitHub issue for broken links
         if: steps.link-check.outcome == 'failure'
         env:
