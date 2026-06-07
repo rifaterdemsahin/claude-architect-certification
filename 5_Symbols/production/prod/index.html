@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Production | Claude AI Certification</title>
+  <meta name="description" content="Production phase milestones and raw recording assets for the Claude AI Certification for Architects.">
+  <meta name="keywords" content="Claude AI, Systems Architect, Production, Audio Recordings, Milestones, Supabase">
+  <meta name="author" content="Rifat Erdem Sahin">
+  <link rel="icon" type="image/png" href="../../../../favicon.png">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://rifaterdemsahin.github.io/claude-architect-certification/production/prod/index.html">
+  <meta property="og:title" content="Production | Claude AI Certification">
+  <meta property="og:description" content="Track recording milestones and browse raw media logs.">
+  <meta property="og:image" content="https://rifaterdemsahin.github.io/claude-architect-certification/favicon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #030712; --bg-card: rgba(17,24,39,0.8); --text-main: #f3f4f6; --text-muted: #9ca3af;
+      --primary: #8b5cf6; --secondary: #3b82f6; --accent: #ef4444; --success: #10b981;
+      --font-title: 'Outfit', sans-serif; --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-dark);
+      background-image: radial-gradient(circle at 10% 20%, rgba(239,68,68,0.06) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(59,130,246,0.06) 0%, transparent 40%);
+      color: var(--text-main); font-family: var(--font-body); line-height: 1.6; padding-bottom: 80px;
+    }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+    .nav-bar { background: rgba(15,23,42,0.85); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(255,255,255,0.05); position: sticky; top: 0; z-index: 100; padding: 14px 0; margin-bottom: 20px; }
+    .nav-container { display: flex; justify-content: space-between; align-items: center; max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+    .nav-logo { font-family: var(--font-title); font-weight: 700; font-size: 1.1rem; color: white; text-decoration: none; }
+    .nav-links { display: flex; align-items: center; gap: 20px; }
+    .nav-links a { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; font-weight: 500; transition: color 0.3s; }
+    .nav-links a:hover { color: white; }
+    .nav-dropdown { position: relative; display: inline-block; }
+    .nav-dropdown .drop-trigger { cursor: pointer; padding: 8px 12px; border-radius: 8px; }
+    .nav-dropdown:hover .drop-trigger { background: rgba(139,92,246,0.1); color: white; }
+    .drop-menu { display: none; position: absolute; top: 100%; left: 0; background: rgba(15,23,42,0.98); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 8px; min-width: 190px; z-index: 200; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+    .nav-dropdown:hover .drop-menu { display: block; }
+    .drop-menu a { display: block; padding: 10px 16px; border-radius: 8px; color: var(--text-muted); text-decoration: none; font-size: 0.85rem; white-space: nowrap; transition: all 0.2s; }
+    .drop-menu a:hover { background: rgba(139,92,246,0.15); color: white; }
+
+    .join-btn { background: linear-gradient(135deg, #f59e0b, var(--primary)); color: white !important; padding: 8px 20px !important; border-radius: 100px !important; font-weight: 700 !important; box-shadow: 0 4px 15px rgba(245,158,11,0.3); transition: all 0.3s !important; }
+    .join-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245,158,11,0.5) !important; }
+
+    header { padding: 30px 0; text-align: center; }
+    .badge { display: inline-block; padding: 6px 16px; background: linear-gradient(135deg, rgba(239,68,68,0.2), rgba(139,92,246,0.2)); border: 1px solid rgba(239,68,68,0.3); border-radius: 100px; font-size: 0.8rem; font-weight: 600; color: #fca5a5; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 14px; }
+    h1 { font-family: var(--font-title); font-size: 2.4rem; font-weight: 800; margin-bottom: 10px; }
+    header p { color: var(--text-muted); max-width: 600px; margin: 0 auto; }
+
+    .section-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 40px; }
+    .card { background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px; padding: 28px; transition: all 0.3s; text-decoration: none; color: inherit; }
+    .card:hover { border-color: var(--accent); transform: translateY(-4px); box-shadow: 0 16px 32px rgba(0,0,0,0.3); }
+    .card-icon { font-size: 2rem; margin-bottom: 12px; }
+    .card-title { font-family: var(--font-title); font-weight: 700; font-size: 1.15rem; margin-bottom: 8px; }
+    .card-desc { color: var(--text-muted); font-size: 0.9rem; }
+    .card-meta { margin-top: 16px; font-size: 0.8rem; color: var(--text-muted); display: flex; gap: 12px; }
+
+    .milestones-section { margin-bottom: 40px; }
+    .milestones-header { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+    .milestones-header h2 { font-family: var(--font-title); font-size: 1.5rem; font-weight: 700; }
+    .milestones-progress { flex: 1; height: 10px; background: rgba(255,255,255,0.08); border-radius: 5px; overflow: hidden; }
+    .milestones-progress-fill { height: 100%; background: linear-gradient(90deg, var(--success), var(--secondary)); border-radius: 5px; transition: width 0.5s ease; }
+    .milestones-pct { font-family: var(--font-title); font-size: 1.8rem; font-weight: 900; color: var(--success); min-width: 60px; text-align: right; }
+
+    .module-milestones { margin-bottom: 24px; }
+    .module-milestones h3 { font-family: var(--font-title); font-size: 1.1rem; font-weight: 700; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; gap: 10px; }
+    .milestone-row { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: rgba(0,0,0,0.2); border-radius: 10px; margin-bottom: 8px; transition: all 0.2s; }
+    .milestone-row:hover { background: rgba(0,0,0,0.35); }
+    .milestone-check { appearance: none; width: 20px; height: 20px; border: 2px solid var(--text-muted); border-radius: 5px; cursor: pointer; flex-shrink: 0; transition: all 0.2s; position: relative; }
+    .milestone-check:checked { background: var(--success); border-color: var(--success); }
+    .milestone-check:checked::after { content: '✓'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-weight: 900; font-size: 12px; }
+    .milestone-title { font-weight: 600; font-size: 0.95rem; flex: 1; }
+    .milestone-desc { color: var(--text-muted); font-size: 0.8rem; }
+    .milestone-type { background: rgba(239,68,68,0.12); color: #fca5a5; padding: 2px 10px; border-radius: 12px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
+    .milestone-done .milestone-title { color: var(--success); }
+    .milestone-done .milestone-type { background: rgba(16,185,129,0.15); color: var(--success); }
+
+    .file-list { background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px; padding: 28px; margin-bottom: 32px; }
+    .file-list h2 { font-family: var(--font-title); font-size: 1.2rem; font-weight: 700; margin-bottom: 20px; }
+    .file-row { display: flex; align-items: center; gap: 14px; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .file-row:last-child { border-bottom: none; }
+    .file-icon { font-size: 1.3rem; }
+    .file-info { flex: 1; }
+    .file-name { font-weight: 600; font-size: 0.95rem; }
+    .file-path { color: var(--text-muted); font-size: 0.8rem; font-family: monospace; }
+    .file-action { background: var(--accent); color: white; border: none; padding: 6px 14px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer; text-decoration: none; }
+
+    .supabase-bar { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 14px 20px; margin-bottom: 24px; display: flex; align-items: center; gap: 12px; font-size: 0.85rem; }
+    .supabase-bar .status { padding: 3px 10px; border-radius: 20px; font-weight: 700; font-size: 0.75rem; }
+
+    footer { text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
+  </style>
+</head>
+<body>
+  <nav class="nav-bar">
+    <div class="nav-container">
+      <a href="../../../../index.html" class="nav-logo">🏛️ Claude Architect</a>
+      <div class="nav-links">
+        <a href="../../../../index.html">Home</a>
+        <div class="nav-dropdown">
+          <a href="../../production_hub.html" class="drop-trigger active">Production ▾</a>
+          <div class="drop-menu">
+            <a href="../preprod/index.html">Pre-Production</a>
+            <a href="../prod/index.html">Production</a>
+            <a href="../postprod/index.html">Post-Production</a>
+          </div>
+        </div>
+        <a href="../../sanity_checklist.html">Sanity Check</a>
+        <a href="../../markdown_viewer.html?md=docs/certification/exam_and_case_study.md">Exam</a>
+        <a href="https://www.youtube.com/playlist?list=PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy" target="_blank">📺 Course</a>
+        <a href="../publish/membership.html" class="join-btn">🔥 Join $10/mo</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <header>
+      <div class="badge">Phase 2 of 3</div>
+      <h1>Production</h1>
+      <p>Recording sessions, raw audio capture, screen recordings, and on-set logs. The live capture phase.</p>
+    </header>
+
+    <div class="supabase-bar" id="supabase-bar">
+      <span>⚡ Data Source:</span>
+      <span class="status" id="db-status">Loading...</span>
+      <span style="color:var(--text-muted);flex:1;text-align:right;">Milestones loaded from Supabase</span>
+    </div>
+
+    <div class="milestones-section" id="milestones-container">
+      <div class="milestones-header">
+        <h2>🎯 Hands-On Milestones</h2>
+        <div class="milestones-progress"><div class="milestones-progress-fill" id="progress-fill" style="width:0%"></div></div>
+        <span class="milestones-pct" id="progress-pct">0%</span>
+      </div>
+      <div id="milestones-list"><p style="color:var(--text-muted);text-align:center;padding:40px;">Loading milestones from database...</p></div>
+    </div>
+
+    <div class="section-grid">
+      <div class="card">
+        <div class="card-icon">🎙️</div>
+        <div class="card-title">Audio Recording Sessions</div>
+        <div class="card-desc">Master WAV files per module and section. Captured in controlled environment with no background noise.</div>
+        <div class="card-meta"><span>🎵 WAV</span><span>⏱️ Timed</span></div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🖥️</div>
+        <div class="card-title">Screen Recordings</div>
+        <div class="card-desc">IDE walkthroughs, dashboard demos, and live code execution captured in 1080p.</div>
+        <div class="card-meta"><span>🎬 MP4</span><span>📐 1080p</span></div>
+      </div>
+      <div class="card">
+        <div class="card-icon">📝</div>
+        <div class="card-title">Production Logs</div>
+        <div class="card-desc">Take sheets, timestamp notes, and retake tracking for every recording session.</div>
+        <div class="card-meta"><span>📝 Notes</span><span>📋 Logs</span></div>
+      </div>
+    </div>
+
+    <div class="file-list">
+      <h2>📁 Files in this Phase</h2>
+      <div class="file-row">
+        <span class="file-icon">📄</span>
+        <div class="file-info"><div class="file-name">Module 1 Production Plan</div><div class="file-path">production/prod/module_1_plan.md</div></div>
+        <a class="file-action" href="../../markdown_viewer.html?md=production/prod/module_1_plan.md">Open</a>
+      </div>
+      <div class="file-row">
+        <span class="file-icon">🎵</span>
+        <div class="file-info"><div class="file-name">Module 1 Section 1 Audio</div><div class="file-path">production/postprod/module-1/section-1/assets/module1_section1.wav</div></div>
+        <span class="file-action" style="background:rgba(255,255,255,0.1);color:var(--text-muted);cursor:default">Local Only</span>
+      </div>
+    </div>
+
+    <footer>
+      <p style="margin-bottom: 8px;"><a href="../../production_hub.html" style="color: var(--secondary); text-decoration: none;">← Back to Production Hub</a></p>
+      <p style="margin-bottom: 12px; font-size: 0.85rem; opacity: 0.8;">
+        Instructor: <a href="https://www.linkedin.com/in/rifaterdemsahin" target="_blank" style="color: #93c5fd; text-decoration: underline; margin-right: 16px;">Rifat Erdem Sahin LinkedIn</a>
+        GitHub Project: <a href="https://github.com/rifaterdemsahin/claude-architect-certification" target="_blank" style="color: #93c5fd; text-decoration: underline;">Project Repository</a>
+      </p>
+      <div style="margin-top: 12px; display: flex; justify-content: center; gap: 16px; align-items: center;">
+        <a href="https://github.com/rifaterdemsahin/claude-architect-certification/actions/workflows/static.yml" target="_blank">
+          <img src="https://github.com/rifaterdemsahin/claude-architect-certification/actions/workflows/static.yml/badge.svg" alt="Deploy Status" style="vertical-align: middle;">
+        </a>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    const SUPABASE_URL = localStorage.getItem('supabase_url') || 'https://rmekfsdhglyiralxvkwc.supabase.co';
+    const SUPABASE_ANON_KEY = localStorage.getItem('supabase_anon_key') || '';
+    const IS_CONNECTED = SUPABASE_URL.includes('supabase.co') && SUPABASE_ANON_KEY;
+
+    const statusEl = document.getElementById('db-status');
+    if (IS_CONNECTED) {
+      statusEl.textContent = '☁️ Connected';
+      statusEl.style.background = 'rgba(16,185,129,0.15)';
+      statusEl.style.color = '#10b981';
+    } else {
+      statusEl.textContent = '💾 Local JSON fallback';
+      statusEl.style.background = 'rgba(245,158,11,0.15)';
+      statusEl.style.color = '#f59e0b';
+    }
+
+    async function supFetch(endpoint, opts = {}) {
+      if (!IS_CONNECTED) return null;
+      try {
+        const url = `${SUPABASE_URL}/rest/v1/${endpoint}`;
+        const res = await fetch(url, { ...opts, headers: {
+          'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json', ...(opts.headers || {})
+        }});
+        if (!res.ok) return null;
+        return res.json();
+      } catch { return null; }
+    }
+
+    function renderMilestones(modules) {
+      const container = document.getElementById('milestones-list');
+      let html = '';
+      let total = 0, done = 0;
+
+      modules.forEach(m => {
+        const milestones = m.milestones || [];
+        total += milestones.length;
+        done += milestones.filter(s => s.checked).length;
+        html += `<div class="module-milestones"><h3>🎬 Module ${m.module_number}: ${m.title}</h3>`;
+        milestones.forEach(s => {
+          const cls = s.checked ? 'milestone-row milestone-done' : 'milestone-row';
+          html += `<div class="${cls}">
+            <input type="checkbox" class="milestone-check" data-id="${s.id}" ${s.checked ? 'checked' : ''} onchange="toggleMilestone(${s.id}, this)">
+            <div style="flex:1"><div class="milestone-title">${s.title}</div><div class="milestone-desc">${s.description}</div></div>
+            <span class="milestone-type">${s.type}</span>
+          </div>`;
+        });
+        html += `</div>`;
+      });
+
+      container.innerHTML = html || '<p style="color:var(--text-muted);text-align:center;padding:40px;">No milestones found. Run the seed SQL first.</p>';
+      updateProgress(done, total);
+    }
+
+    function updateProgress(done, total) {
+      const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+      document.getElementById('progress-fill').style.width = pct + '%';
+      document.getElementById('progress-pct').textContent = pct + '%';
+    }
+
+    async function toggleMilestone(id, checkbox) {
+      localStorage.setItem('milestone_' + id, checkbox.checked);
+      if (IS_CONNECTED) {
+        await supFetch('milestone_progress', {
+          method: 'POST',
+          headers: { 'Prefer': 'resolution=merge-duplicates' },
+          body: JSON.stringify({ milestone_id: id, user_id: 'default', checked: checkbox.checked })
+        });
+      }
+      // Recalculate progress
+      const checked = document.querySelectorAll('.milestone-check:checked').length;
+      const all = document.querySelectorAll('.milestone-check').length;
+      updateProgress(checked, all);
+      document.querySelectorAll('.milestone-row').forEach((r, i) => {
+        r.classList.toggle('milestone-done', r.querySelector('.milestone-check')?.checked);
+      });
+    }
+
+    (async () => {
+      if (IS_CONNECTED) {
+        // Load from Supabase
+        const milestones = await supFetch('milestones?select=*&order=module_number.asc,sort_order.asc');
+        const progress = await supFetch('milestone_progress?user_id=eq.default&select=milestone_id,checked');
+        if (milestones && milestones.length) {
+          const progressMap = {};
+          (progress || []).forEach(p => progressMap[p.milestone_id] = p.checked);
+
+          // Get module names from existing data
+          const modulesData = await supFetch('modules?select=module_number,title&order=module_number.asc');
+          const moduleNames = {};
+          (modulesData || []).forEach(m => moduleNames[m.module_number] = m.title);
+
+          // Group milestones by module
+          const byModule = {};
+          milestones.forEach(m => {
+            if (!byModule[m.module_number]) byModule[m.module_number] = [];
+            byModule[m.module_number].push({ ...m, checked: progressMap[m.id] || localStorage.getItem('milestone_' + m.id) === 'true' });
+          });
+
+          const modules = Object.keys(byModule).sort().map(k => ({
+            module_number: parseInt(k),
+            title: moduleNames[parseInt(k)] || 'Module ' + k,
+            milestones: byModule[k]
+          }));
+
+          renderMilestones(modules);
+          return;
+        }
+      }
+      // Fallback: show setup instructions
+      document.getElementById('milestones-list').innerHTML =
+        '<div style="text-align:center;padding:40px;color:var(--text-muted);">' +
+        '<h3 style="font-family:var(--font-title);margin-bottom:12px;">⚡ Supabase Not Configured</h3>' +
+        '<p style="margin-bottom:16px;">Set up your Supabase anon key to view live milestones and track progress.</p>' +
+        '<a href="../../src/supabase/admin.html" style="display:inline-block;background:var(--primary);color:white;padding:12px 24px;border-radius:10px;text-decoration:none;font-weight:700;">🔧 Configure Supabase</a>' +
+        '<p style="margin-top:12px;font-size:0.8rem;">Milestones table: <code>src/supabase/milestones_seed.sql</code></p></div>';
+    })();
+  </script>
+</body>
+</html>

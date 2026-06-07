@@ -24,3 +24,8 @@ yarn-error.log*
 # System Files
 .DS_Store
 Thumbs.db
+
+# Temp folders
+delivery-pilot-template-temp/
+scratch/
+

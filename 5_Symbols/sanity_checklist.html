@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Master Sanity Checklist | Claude AI Certification</title>
+  <meta name="description" content="Maintain quality assurance across pre-production, production, and post-production with the Master Sanity Checklist for the Claude AI Certification.">
+  <meta name="keywords" content="Claude AI, Systems Architect, Sanity Checklist, Quality Assurance, DevOps, Pipeline Validation">
+  <meta name="author" content="Rifat Erdem Sahin">
+  <link rel="icon" type="image/png" href="../../favicon.png">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://rifaterdemsahin.github.io/claude-architect-certification/sanity_checklist.html">
+  <meta property="og:title" content="Master Sanity Checklist | Claude AI Certification">
+  <meta property="og:description" content="Verify production-readiness, sync checklist progress to Supabase, and maintain certification workflow standards.">
+  <meta property="og:image" content="https://rifaterdemsahin.github.io/claude-architect-certification/favicon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #030712;
+      --bg-card: rgba(17, 24, 39, 0.85);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --primary: #8b5cf6;
+      --secondary: #3b82f6;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --font-title: 'Outfit', sans-serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-dark);
+      background-image:
+        radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.08) 0%, transparent 40%);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      line-height: 1.6;
+      padding-bottom: 80px;
+    }
+    .container { max-width: 1000px; margin: 0 auto; padding: 0 24px; }
+
+    .nav-bar {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      position: sticky; top: 0; z-index: 100;
+      padding: 14px 0; margin-bottom: 20px;
+    }
+    .nav-container { display: flex; justify-content: space-between; align-items: center; max-width: 1000px; margin: 0 auto; padding: 0 24px; }
+    .nav-logo { font-family: var(--font-title); font-weight: 700; font-size: 1.1rem; color: white; text-decoration: none; }
+    .nav-links { display: flex; align-items: center; gap: 20px; }
+    .nav-links a { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; font-weight: 500; transition: color 0.3s; }
+    .nav-links a:hover, .nav-links a.active { color: white; }
+
+    .nav-dropdown { position: relative; display: inline-block; }
+    .nav-dropdown .drop-trigger { cursor: pointer; padding: 8px 12px; border-radius: 8px; }
+    .nav-dropdown:hover .drop-trigger { background: rgba(139,92,246,0.1); color: white; }
+    .drop-menu {
+      display: none; position: absolute; top: 100%; left: 0;
+      background: rgba(15,23,42,0.98); backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.1); border-radius: 12px;
+      padding: 8px; min-width: 190px; z-index: 200;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    }
+    .nav-dropdown:hover .drop-menu { display: block; }
+    .drop-menu a {
+      display: block; padding: 10px 16px; border-radius: 8px;
+      color: var(--text-muted); text-decoration: none;
+      font-size: 0.85rem; white-space: nowrap; transition: all 0.2s;
+    }
+    .drop-menu a:hover { background: rgba(139,92,246,0.15); color: white; }
+
+    .join-btn { background: linear-gradient(135deg, #f59e0b, var(--primary)); color: white !important; padding: 8px 20px !important; border-radius: 100px !important; font-weight: 700 !important; box-shadow: 0 4px 15px rgba(245,158,11,0.3); transition: all 0.3s !important; }
+    .join-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245,158,11,0.5) !important; }
+
+    header { padding: 30px 0 30px 0; text-align: center; }
+    h1 { font-family: var(--font-title); font-size: 2.4rem; font-weight: 800; margin-bottom: 10px; }
+    header p { color: var(--text-muted); max-width: 600px; margin: 0 auto; }
+
+    .master-progress {
+      background: var(--bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 28px;
+      margin-bottom: 32px;
+      display: flex; align-items: center; gap: 24px;
+    }
+    .master-progress-bar { flex: 1; height: 14px; background: rgba(255,255,255,0.08); border-radius: 7px; overflow: hidden; }
+    .master-progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--success)); border-radius: 7px; transition: width 0.6s ease; width: 0%; }
+    .master-progress-pct { font-family: var(--font-title); font-size: 2.2rem; font-weight: 900; color: var(--primary); min-width: 70px; text-align: right; }
+
+    .phase-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 20px;
+      padding: 28px;
+      margin-bottom: 24px;
+    }
+    .phase-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .phase-icon { font-size: 1.6rem; }
+    .phase-title { font-family: var(--font-title); font-size: 1.3rem; font-weight: 700; }
+    .phase-subtitle { color: var(--text-muted); font-size: 0.85rem; margin-left: auto; }
+
+    .checklist { list-style: none; }
+    .checklist li {
+      display: flex; align-items: flex-start; gap: 14px;
+      padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .checklist li:last-child { border-bottom: none; }
+    .check-box {
+      appearance: none; width: 22px; height: 22px;
+      border: 2px solid var(--text-muted); border-radius: 6px;
+      cursor: pointer; margin-top: 2px; flex-shrink: 0;
+      transition: all 0.2s; position: relative;
+    }
+    .check-box:checked { background: var(--success); border-color: var(--success); }
+    .check-box:checked::after { content: '✓'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-weight: 900; font-size: 14px; }
+    .item-text { flex: 1; }
+    .item-name { font-weight: 600; margin-bottom: 2px; }
+    .item-desc { color: var(--text-muted); font-size: 0.85rem; }
+    .item-note {
+      margin-top: 8px; width: 100%;
+      background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 8px; padding: 8px 12px;
+      color: var(--text-main); font-size: 0.85rem;
+      font-family: var(--font-body); resize: vertical; min-height: 36px;
+      transition: border-color 0.2s;
+    }
+    .item-note:focus { outline: none; border-color: var(--primary); }
+    .item-status { font-size: 0.75rem; padding: 3px 10px; border-radius: 20px; font-weight: 700; }
+    .status-pending { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+    .status-done { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+
+    footer { text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
+  </style>
+</head>
+<body>
+
+  <nav class="nav-bar">
+    <div class="nav-container">
+      <a href="../../index.html" class="nav-logo">🏛️ Claude Architect</a>
+      <div class="nav-links">
+        <a href="../../index.html">Home</a>
+        <div class="nav-dropdown">
+          <a href="production_hub.html" class="drop-trigger">Production ▾</a>
+          <div class="drop-menu">
+            <a href="production/preprod/index.html">Pre-Production</a>
+            <a href="production/prod/index.html">Production</a>
+            <a href="production/postprod/index.html">Post-Production</a>
+          </div>
+        </div>
+        <a href="sanity_checklist.html" class="active">Sanity Check</a>
+        <a href="markdown_viewer.html?md=docs/certification/exam_and_case_study.md">Exam</a>
+        <a href="https://www.youtube.com/playlist?list=PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy" target="_blank">📺 Course</a>
+        <a href="production/publish/membership.html" class="join-btn">🔥 Join $10/mo</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <header>
+      <h1>Master Sanity Checklist</h1>
+      <p>End-to-end production readiness across Pre-Production, Production, and Post-Production phases.</p>
+    </header>
+
+    <div class="status-terminal" style="background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.05);border-radius:12px;padding:16px;margin-bottom:24px;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+        <span style="font-size:1.2rem;">⚡</span>
+        <span style="font-weight:700;">Supabase Sync</span>
+        <span id="sync-badge" class="status-badge" style="background:rgba(245,158,11,0.15);color:#f59e0b;padding:2px 10px;border-radius:20px;font-size:0.75rem;">Local Only</span>
+      </div>
+      <p style="color:var(--text-muted);font-size:0.85rem;">Notes and check state are synced to Supabase when connected. <a href="src/supabase/admin.html" style="color:var(--secondary);">Configure Supabase →</a></p>
+    </div>
+      <div style="flex:1">
+        <div style="font-weight:700;margin-bottom:8px">Overall Progress</div>
+        <div class="master-progress-bar"><div class="master-progress-fill" id="total-bar"></div></div>
+      </div>
+      <div class="master-progress-pct" id="total-pct">0%</div>
+    </div>
+
+    <!-- Pre-Production -->
+    <div class="phase-card">
+      <div class="phase-header">
+        <span class="phase-icon">📝</span>
+        <span class="phase-title">Pre-Production</span>
+        <span class="phase-subtitle">7 items</span>
+      </div>
+      <ul class="checklist">
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Module plans drafted</div><div class="item-desc">All 5 module plans exist in production/preprod/</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Scripts finalized</div><div class="item-desc">Per-section scripts approved and uploaded</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Storyboard / scene breakdown</div><div class="item-desc">Scene list with timing and overlays defined</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Asset generation prompts ready</div><div class="item-desc">All BG, text overlay, and icon prompts written</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Audio recording schedule</div><div class="item-desc">Dates and environment booked</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Lower third designs approved</div><div class="item-desc">Per-module L3 variants signed off</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Production plan reviewed</div><div class="item-desc">Master plan read by all stakeholders</div></div></li>
+      </ul>
+    </div>
+
+    <!-- Production -->
+    <div class="phase-card">
+      <div class="phase-header">
+        <span class="phase-icon">🎬</span>
+        <span class="phase-title">Production</span>
+        <span class="phase-subtitle">7 items</span>
+      </div>
+      <ul class="checklist">
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Audio recorded per section</div><div class="item-desc">moduleX_sectionY.wav files captured</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">No clipping or noise in master</div><div class="item-desc">All audio passes quality gate</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Raw assets archived</div><div class="item-desc">Original recordings backed up before editing</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Screen recordings captured</div><div class="item-desc">IDE / dashboard walkthroughs recorded</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Camera footage backed up</div><div class="item-desc">All video sources copied to storage</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Production log completed</div><div class="item-desc">Take notes and timestamps documented</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Hands-on production on all modules</div><div class="item-desc">Live recording, screen capture, and code walkthrough completed for M1–M5</div></div></li>
+      </ul>
+    </div>
+
+    <!-- Post-Production -->
+    <div class="phase-card">
+      <div class="phase-header">
+        <span class="phase-icon">🎨</span>
+        <span class="phase-title">Post-Production</span>
+        <span class="phase-subtitle">9 items</span>
+      </div>
+      <ul class="checklist">
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Background images generated</div><div class="item-desc">All scene backgrounds created and named correctly</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Text overlays generated</div><div class="item-desc">Typography overlays match script emphasis</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Icons generated</div><div class="item-desc">All cue icons created in correct style</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Lower thirds rendered</div><div class="item-desc">All L3 assets exported with transparency</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">EDL reviewed for each scene</div><div class="item-desc">Edit design lists match audio waveform</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Composite previews checked</div><div class="item-desc">Hover previews match intended final look</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Asset bundles zipped</div><div class="item-desc">Per-scene ZIP files ready for editor handoff</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Final render approved</div><div class="item-desc">Master video exported and reviewed</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">All modules created in Canva</div><div class="item-desc">Thumbnails, title cards, and lower thirds designed in Canva for M1–M5</div></div></li>
+      </ul>
+    </div>
+
+    <!-- Publication -->
+    <div class="phase-card">
+      <div class="phase-header">
+        <span class="phase-icon">🚀</span>
+        <span class="phase-title">Publication</span>
+        <span class="phase-subtitle">12 items</span>
+      </div>
+      <ul class="checklist">
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">YouTube thumbnail created</div><div class="item-desc">Custom thumbnail per module</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Description and tags written</div><div class="item-desc">SEO-friendly metadata ready</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">GitHub repo updated</div><div class="item-desc">All code and docs pushed to public repo</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Course playlist updated</div><div class="item-desc">New video added to YouTube playlist</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Announcement posted</div><div class="item-desc">Social / community update published</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">YouTube Partner Program applied</div><div class="item-desc">Reach 1K subs + 4K watch hours, apply for YPP monetization</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Channel memberships enabled</div><div class="item-desc">Set up Join button, tier badges, and member-only perks</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Module 1 set to free</div><div class="item-desc">Public — no membership required to watch and download</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Modules 2–5 set to members-only</div><div class="item-desc">$10/month join tier to access full course content</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Pricing page live</div><div class="item-desc">$10/mo membership page with feature breakdown</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Join button added to site nav</div><div class="item-desc">Prominent CTA linking to membership/pricing page</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">More courses onboarding planned</div><div class="item-desc">Pipeline for additional module series, workshops, and live streams</div></div></li>
+      </ul>
+    </div>
+
+    <footer>
+      <p style="margin-bottom: 8px;">Claude AI Certification | Master Production Pipeline</p>
+      <p style="margin-bottom: 12px; font-size: 0.85rem; opacity: 0.8;">
+        Instructor: <a href="https://www.linkedin.com/in/rifaterdemsahin" target="_blank" style="color: #93c5fd; text-decoration: underline; margin-right: 16px;">Rifat Erdem Sahin LinkedIn</a>
+        GitHub Project: <a href="https://github.com/rifaterdemsahin/claude-architect-certification" target="_blank" style="color: #93c5fd; text-decoration: underline;">Project Repository</a>
+      </p>
+      <div style="margin-top: 12px; display: flex; justify-content: center; gap: 16px; align-items: center;">
+        <a href="https://github.com/rifaterdemsahin/claude-architect-certification/actions/workflows/static.yml" target="_blank">
+          <img src="https://github.com/rifaterdemsahin/claude-architect-certification/actions/workflows/static.yml/badge.svg" alt="Deploy Status" style="vertical-align: middle;">
+        </a>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // Supabase config
+    const SUPABASE_URL = localStorage.getItem('supabase_url') || 'https://rmekfsdhglyiralxvkwc.supabase.co';
+    const SUPABASE_ANON_KEY = localStorage.getItem('supabase_anon_key') || '';
+    const IS_CONNECTED = SUPABASE_URL && SUPABASE_URL.includes('supabase.co') && SUPABASE_ANON_KEY;
+
+    function updateSyncBadge() {
+      const badge = document.getElementById('sync-badge');
+      if (IS_CONNECTED) {
+        badge.textContent = '☁️ Synced';
+        badge.style.background = 'rgba(16,185,129,0.15)';
+        badge.style.color = '#10b981';
+      } else {
+        badge.textContent = '💾 Local Only';
+        badge.style.background = 'rgba(245,158,11,0.15)';
+        badge.style.color = '#f59e0b';
+      }
+    }
+    updateSyncBadge();
+
+    async function supFetch(endpoint, opts = {}) {
+      if (!IS_CONNECTED) return null;
+      try {
+        const url = `${SUPABASE_URL}/rest/v1/${endpoint}`;
+        const res = await fetch(url, {
+          ...opts,
+          headers: {
+            'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json', 'Prefer': 'return=representation',
+            ...(opts.headers || {})
+          }
+        });
+        if (!res.ok) return null;
+        return res.json();
+      } catch { return null; }
+    }
+
+    // Add note textareas to each checklist item
+    document.querySelectorAll('.checklist li').forEach((li, idx) => {
+      const textDiv = li.querySelector('.item-text');
+      if (!textDiv) return;
+      const noteKey = 'sanity_note_' + idx;
+      const note = document.createElement('textarea');
+      note.className = 'item-note';
+      note.placeholder = 'Add production note...';
+      note.value = localStorage.getItem(noteKey) || '';
+      note.oninput = function() {
+        localStorage.setItem(noteKey, this.value);
+        if (IS_CONNECTED) {
+          supFetch('checklist_progress', {
+            method: 'POST',
+            headers: { 'Prefer': 'resolution=merge-duplicates' },
+            body: JSON.stringify({ item_id: idx + 1, user_id: 'default', notes: this.value, checked: li.querySelector('.check-box').checked })
+          });
+        }
+      };
+      textDiv.appendChild(note);
+    });
+
+    // Restore check state from Supabase if connected
+    if (IS_CONNECTED) {
+      supFetch('checklist_progress?user_id=eq.default&select=item_id,checked,notes').then(data => {
+        if (data) {
+          data.forEach(p => {
+            const idx = p.item_id - 1;
+            const cb = document.querySelectorAll('.check-box')[idx];
+            const note = document.querySelectorAll('.item-note')[idx];
+            if (cb && p.checked) cb.checked = true;
+            if (note && p.notes) { note.value = p.notes; localStorage.setItem('sanity_note_' + idx, p.notes); }
+          });
+          update();
+        }
+      });
+    } else {
+      // Restore from localStorage fallback
+      document.querySelectorAll('.item-note').forEach((n, i) => {
+        const saved = localStorage.getItem('sanity_note_' + i);
+        if (saved) n.value = saved;
+      });
+    }
+
+    function update() {
+      const boxes = document.querySelectorAll('.check-box');
+      const checked = document.querySelectorAll('.check-box:checked');
+      const pct = Math.round((checked.length / boxes.length) * 100);
+      document.getElementById('total-pct').textContent = pct + '%';
+      document.getElementById('total-bar').style.width = pct + '%';
+      boxes.forEach((cb, i) => {
+        localStorage.setItem('sanity_' + i, cb.checked);
+        if (IS_CONNECTED && cb.checked) {
+          supFetch('checklist_progress', {
+            method: 'POST',
+            headers: { 'Prefer': 'resolution=merge-duplicates' },
+            body: JSON.stringify({ item_id: i + 1, user_id: 'default', checked: cb.checked })
+          });
+        }
+      });
+    }
+
+    document.querySelectorAll('.check-box').forEach((cb, i) => {
+      if (localStorage.getItem('sanity_' + i) === 'true') cb.checked = true;
+      cb.onchange = update;
+    });
+    update();
+  </script>
+</body>
+</html>

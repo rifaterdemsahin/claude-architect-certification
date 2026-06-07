@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Markdown Document Viewer | Claude AI Certification</title>
+  <meta name="description" content="View the documentation, design topologies, pre-production guides, and certification exams for the Claude AI Certification for Architects.">
+  <meta name="keywords" content="Claude AI, Systems Architect, Documentation Viewer, Course Material, Reference Design">
+  <meta name="author" content="Rifat Erdem Sahin">
+  <link rel="icon" type="image/png" href="../../favicon.png">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://rifaterdemsahin.github.io/claude-architect-certification/markdown_viewer.html">
+  <meta property="og:title" content="Markdown Document Viewer | Claude AI Certification">
+  <meta property="og:description" content="Read course modules, system architecture guides, and exams on the dynamic document viewer.">
+  <meta property="og:image" content="https://rifaterdemsahin.github.io/claude-architect-certification/favicon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    :root {
+      --bg-dark: #030712;
+      --bg-card: rgba(17, 24, 39, 0.9);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --primary: #8b5cf6;
+      --secondary: #3b82f6;
+      --font-title: 'Outfit', sans-serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-dark);
+      background-image:
+        radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.06) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.06) 0%, transparent 40%);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      line-height: 1.7;
+      padding-bottom: 80px;
+    }
+    .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+
+    .nav-bar {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      position: sticky; top: 0; z-index: 100;
+      padding: 14px 0; margin-bottom: 20px;
+    }
+    .nav-container {
+      display: flex; justify-content: space-between; align-items: center;
+      max-width: 960px; margin: 0 auto; padding: 0 24px;
+    }
+    .nav-logo { font-family: var(--font-title); font-weight: 700; font-size: 1.1rem; color: white; text-decoration: none; }
+    .nav-links { display: flex; align-items: center; gap: 20px; }
+    .nav-links a { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; font-weight: 500; transition: color 0.3s; }
+    .nav-links a:hover { color: white; }
+
+    .nav-dropdown { position: relative; display: inline-block; }
+    .nav-dropdown .drop-trigger { cursor: pointer; padding: 8px 12px; border-radius: 8px; }
+    .nav-dropdown:hover .drop-trigger { background: rgba(139,92,246,0.1); color: white; }
+    .drop-menu {
+      display: none; position: absolute; top: 100%; left: 0;
+      background: rgba(15,23,42,0.98); backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.1); border-radius: 12px;
+      padding: 8px; min-width: 190px; z-index: 200;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    }
+    .nav-dropdown:hover .drop-menu { display: block; }
+    .drop-menu a {
+      display: block; padding: 10px 16px; border-radius: 8px;
+      color: var(--text-muted); text-decoration: none;
+      font-size: 0.85rem; white-space: nowrap; transition: all 0.2s;
+    }
+    .drop-menu a:hover { background: rgba(139,92,246,0.15); color: white; }
+
+    .join-btn { background: linear-gradient(135deg, #f59e0b, var(--primary)); color: white !important; padding: 8px 20px !important; border-radius: 100px !important; font-weight: 700 !important; box-shadow: 0 4px 15px rgba(245,158,11,0.3); transition: all 0.3s !important; }
+    .join-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245,158,11,0.5) !important; }
+
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.85rem; color: var(--text-muted);
+      margin-bottom: 24px; flex-wrap: wrap;
+    }
+    .breadcrumb a { color: var(--secondary); text-decoration: none; }
+    .breadcrumb a:hover { color: var(--primary); }
+
+    .md-content {
+      background: var(--bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 20px;
+      padding: 48px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    }
+    .md-content h1 {
+      font-family: var(--font-title); font-size: 2.4rem; font-weight: 800;
+      margin-bottom: 24px; padding-bottom: 16px;
+      border-bottom: 2px solid rgba(139, 92, 246, 0.3);
+    }
+    .md-content h2 {
+      font-family: var(--font-title); font-size: 1.6rem; font-weight: 700;
+      margin-top: 36px; margin-bottom: 16px; color: #c084fc;
+    }
+    .md-content h3 {
+      font-family: var(--font-title); font-size: 1.2rem; font-weight: 600;
+      margin-top: 28px; margin-bottom: 12px; color: #93c5fd;
+    }
+    .md-content p { margin-bottom: 16px; }
+    .md-content ul, .md-content ol { margin-bottom: 16px; padding-left: 24px; }
+    .md-content li { margin-bottom: 8px; }
+    .md-content code {
+      background: rgba(139, 92, 246, 0.15);
+      padding: 2px 8px; border-radius: 6px;
+      font-family: 'Courier New', monospace; font-size: 0.9em; color: #d8b4fe;
+    }
+    .md-content pre {
+      background: rgba(0, 0, 0, 0.5);
+      padding: 20px; border-radius: 12px;
+      overflow-x: auto; margin-bottom: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .md-content pre code { background: none; padding: 0; color: #38bdf8; }
+    .md-content blockquote {
+      border-left: 4px solid var(--primary);
+      padding-left: 20px; margin: 20px 0;
+      color: var(--text-muted); font-style: italic;
+    }
+    .md-content a { color: var(--secondary); text-decoration: none; }
+    .md-content a:hover { color: var(--primary); text-decoration: underline; }
+    .md-content table {
+      width: 100%; border-collapse: collapse; margin-bottom: 20px;
+    }
+    .md-content th, .md-content td {
+      padding: 10px 14px; border: 1px solid rgba(255, 255, 255, 0.08);
+      text-align: left;
+    }
+    .md-content th {
+      background: rgba(139, 92, 246, 0.15); font-weight: 700;
+    }
+
+    .loading { text-align: center; padding: 80px; color: var(--text-muted); }
+    .error { text-align: center; padding: 80px; color: #ef4444; }
+
+    footer { text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 40px; }
+  </style>
+</head>
+<body>
+
+  <nav class="nav-bar">
+    <div class="nav-container">
+      <a href="../../index.html" class="nav-logo">🏛️ Claude Architect</a>
+      <div class="nav-links">
+        <a href="../../index.html">Home</a>
+        <div class="nav-dropdown">
+          <a href="production_hub.html" class="drop-trigger">Production ▾</a>
+          <div class="drop-menu">
+            <a href="production/preprod/index.html">Pre-Production</a>
+            <a href="production/prod/index.html">Production</a>
+            <a href="production/postprod/index.html">Post-Production</a>
+          </div>
+        </div>
+        <a href="sanity_checklist.html">Sanity Check</a>
+        <a href="markdown_viewer.html?md=docs/certification/exam_and_case_study.md">Exam</a>
+        <a href="https://www.youtube.com/playlist?list=PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy" target="_blank">📺 Course</a>
+        <a href="production/publish/membership.html" class="join-btn">🔥 Join $10/mo</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="../../index.html">Home</a> <span>/</span>
+      <a href="production_hub.html">Production</a> <span>/</span>
+      <span id="file-name">Loading...</span>
+    </div>
+
+    <div id="content-area" class="md-content">
+      <div class="loading">Loading document...</div>
+    </div>
+
+    <footer>
+      <p style="margin-bottom: 8px;">Rendered locally via marked.js</p>
+      <p style="margin-bottom: 12px; font-size: 0.85rem; opacity: 0.8;">
+        Instructor: <a href="https://www.linkedin.com/in/rifaterdemsahin" target="_blank" style="color: #93c5fd; text-decoration: underline; margin-right: 16px;">Rifat Erdem Sahin LinkedIn</a>
+        GitHub Project: <a href="https://github.com/rifaterdemsahin/claude-architect-certification" target="_blank" style="color: #93c5fd; text-decoration: underline;">Project Repository</a>
+      </p>
+      <div style="margin-top: 12px; display: flex; justify-content: center; gap: 16px; align-items: center;">
+        <a href="https://github.com/rifaterdemsahin/claude-architect-certification/actions/workflows/static.yml" target="_blank">
+          <img src="https://github.com/rifaterdemsahin/claude-architect-certification/actions/workflows/static.yml/badge.svg" alt="Deploy Status" style="vertical-align: middle;">
+        </a>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    let mdPath = params.get('md');
+    if (!mdPath) mdPath = 'README.md';
+    document.getElementById('file-name').textContent = mdPath;
+
+    const isFileProtocol = window.location.protocol === 'file:';
+
+    function renderMarkdown(text) {
+      document.getElementById('content-area').innerHTML = marked.parse(text);
+      document.querySelectorAll('.md-content a').forEach(a => {
+        const href = a.getAttribute('href');
+        if (href && href.endsWith('.md') && !href.startsWith('http')) {
+          a.setAttribute('href', 'markdown_viewer.html?md=' + encodeURIComponent(href));
+        }
+      });
+    }
+
+    if (isFileProtocol) {
+      document.getElementById('content-area').innerHTML =
+        '<div class="loading">file:// protocol detected. Fetch blocked by browser security.</div>' +
+        '<div style="background:var(--bg-card);border:1px solid rgba(255,255,255,0.06);border-radius:20px;padding:32px;margin-top:16px;text-align:center;">' +
+        '<h2 style="font-family:var(--font-title);margin-bottom:16px;">🔒 Local File Restriction</h2>' +
+        '<p style="color:var(--text-muted);margin-bottom:20px;">The markdown viewer uses <code>fetch()</code> which is blocked when opening HTML files directly via <code>file://</code>. Start a local HTTP server:</p>' +
+        '<code style="display:inline-block;background:rgba(0,0,0,0.5);padding:12px 24px;border-radius:10px;font-size:1.1rem;color:#38bdf8;margin-bottom:20px;">python3 -m http.server 8000</code>' +
+        '<p style="color:var(--text-muted);">Then open <a href="http://localhost:8000/markdown_viewer.html?md=' + encodeURIComponent(mdPath) + '" style="color:var(--secondary);text-decoration:underline;">http://localhost:8000/markdown_viewer.html?md=' + encodeURIComponent(mdPath) + '</a></p></div>';
+    } else {
+      fetch(mdPath)
+        .then(r => { if (!r.ok) throw new Error('Could not load ' + mdPath); return r.text(); })
+        .then(renderMarkdown)
+        .catch(err => {
+          document.getElementById('content-area').innerHTML =
+            '<div class="error"><h2>❌ Failed to Load</h2><p>' + err.message + '</p><p>Make sure the file exists and the path is correct.</p></div>';
+        });
+    }
+  </script>
+</body>
+</html>
