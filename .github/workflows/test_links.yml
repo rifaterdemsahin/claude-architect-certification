@@ -1,0 +1,120 @@
+name: Test Links After Deployment
+
+on:
+  workflow_run:
+    workflows: ["Deploy static content to Pages"]
+    types: [completed]
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  test-links:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Derive GitHub Pages URL
+        id: pages-url
+        run: |
+          OWNER=$(echo "${{ github.repository }}" | cut -d'/' -f1)
+          REPO=$(echo "${{ github.repository }}" | cut -d'/' -f2)
+          echo "url=https://${OWNER}.github.io/${REPO}/" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for Pages to propagate
+        run: sleep 30
+
+      - name: Run HTTP link checker
+        id: link-check
+        run: |
+          python 7_Testing_Known/test_links.py \
+            --mode http \
+            --base-url "${{ steps.pages-url.outputs.url }}" \
+            --output-json broken_links.json
+        continue-on-error: true
+
+      - name: Build issue body
+        if: steps.link-check.outcome == 'failure'
+        id: issue-body
+        run: |
+          PAGES_URL="${{ steps.pages-url.outputs.url }}"
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+          BROKEN=$(python - <<'EOF'
+          import json, sys
+          try:
+              data = json.load(open("broken_links.json"))
+          except Exception:
+              print("_(could not parse broken_links.json)_")
+              sys.exit(0)
+          if not data:
+              print("_(no broken links recorded)_")
+              sys.exit(0)
+          rows = ["| URL | Status |", "|-----|--------|"]
+          for item in data:
+              url = item.get("url", item.get("link", "?"))
+              status = item.get("status", item.get("type", "?"))
+              rows.append(f"| {url} | {status} |")
+          print("\n".join(rows))
+          EOF
+          )
+
+          BODY="## 🚨 Broken links detected after deployment
+
+          **Site:** $PAGES_URL
+          **Workflow run:** $RUN_URL
+          **Date:** $(date -u '+%Y-%m-%d %H:%M UTC')
+
+          ### Failing links
+
+          $BROKEN
+
+          ### How to reproduce
+
+          \`\`\`bash
+          python 7_Testing_Known/test_links.py --mode http --base-url $PAGES_URL
+          \`\`\`
+
+          _This issue was opened automatically by the [test_links workflow]($RUN_URL)._"
+
+          # Write to file to avoid shell escaping issues
+          echo "$BODY" > issue_body.md
+
+      - name: Close duplicate open issues
+        if: steps.link-check.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          OPEN=$(gh issue list \
+            --label "broken-links" \
+            --state open \
+            --json number \
+            --jq '.[].number')
+          for num in $OPEN; do
+            gh issue close "$num" --comment "Superseded by a newer link-check run."
+          done
+
+      - name: Open GitHub issue for broken links
+        if: steps.link-check.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create \
+            --title "🚨 Broken links detected on GitHub Pages ($(date -u '+%Y-%m-%d'))" \
+            --body-file issue_body.md \
+            --label "broken-links,bug"
+
+      - name: Fail the workflow if links are broken
+        if: steps.link-check.outcome == 'failure'
+        run: |
+          echo "Link check failed — see the issue opened above."
+          exit 1
