@@ -1186,7 +1186,7 @@
         navigationData.projectMenu.forEach((item, index) => {
           const link = document.createElement("a");
           let finalUrl = item.url;
-          if (finalUrl !== "index.html" && !finalUrl.startsWith("http") && !finalUrl.includes("markdown_renderer.html")) {
+          if (finalUrl !== "index.html" && !finalUrl.startsWith("http") && !finalUrl.includes("markdown_renderer.html") && !finalUrl.endsWith(".html")) {
             finalUrl = `markdown_renderer.html?file=${finalUrl}`;
           }
           link.href = finalUrl;

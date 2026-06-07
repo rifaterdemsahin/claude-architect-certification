@@ -9,6 +9,7 @@ Severity levels: `CRITICAL` | `ERROR` | `WARNING` | `INFO`
 
 ## Log Entries
 
+[2026-06-07] [UI] [WARNING] — Main menu items ("Production", "Sanity Check", "Exam") missing due to dynamic override in navigation_config.json.
 [2026-06-07] [CI] [ERROR] — "Open GitHub issue for broken links" step fails because 'broken-links' label does not exist in repo; gh issue create exits non-zero on missing labels.
 [2026-06-07] [TEST] [ERROR] — Link checker reported 95 broken relative links in 5_Symbols/production/ and missing local module assets in postprod modules 2-5.
 [2026-06-07] [RESTRO] [ERROR] — Invalid group reference 15 in replace_paths.py regex due to \15 overlap.

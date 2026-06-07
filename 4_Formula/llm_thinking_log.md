@@ -1,7 +1,23 @@
 # LLM Thinking & Planning Log
 
 ## Date: 2026-06-07
-## Stage: Stage 4 (Formula - Thinking & Planning)
+## Stage: Stage 4 (Formula - Thinking & Planning) - Restoring Missing Menus
+
+### Problem Statement
+The user reported that the "Production", "Sanity Check", and "Exam" menu items were missing from the Project Menu in `index.html` on page load.
+
+### Approach & Strategy
+1. **Identify cause:** Find where menu configuration is defined. It is loaded dynamically from `navigation_config.json`.
+2. **Apply Fixes:**
+   - Update `navigation_config.json`'s `projectMenu` array to restore the missing items.
+   - Sync fallbacks in `index.html` and `markdown_renderer.html`.
+   - Update the routing check in `index.html`'s `initMenus()` to bypass wrapping URLs that end with `.html` in `markdown_renderer.html?file=`, as `production_hub.html` and `sanity_checklist.html` are raw HTML dashboards.
+3. **Log & Document:** Create semblance remediation document and append to `error.log` and `fix.log`.
+
+---
+
+## Date: 2026-06-07
+## Stage: Stage 4 (Formula - Thinking & Planning) - Broken Link Remediation
 
 ### Problem Statement
 The user has requested writing test code to spot broken links in production and fix them. Currently, `7_Testing_Known/test_links.py` exists, and when executed, reports 95 broken links in the restructured `5_Symbols/production/` folder. The primary causes of these broken links are:
