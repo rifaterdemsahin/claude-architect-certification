@@ -137,3 +137,25 @@ CREATE POLICY anon_select_course_content ON course_content FOR SELECT USING (tru
 CREATE POLICY anon_insert_checklist_progress ON checklist_progress FOR INSERT WITH CHECK (true);
 CREATE POLICY anon_update_checklist_progress ON checklist_progress FOR UPDATE USING (true);
 CREATE POLICY anon_insert_course_content ON course_content FOR INSERT WITH CHECK (true);
+
+-- 11. SCRIPTS
+CREATE TABLE IF NOT EXISTS scripts (
+  id SERIAL PRIMARY KEY,
+  video_id INTEGER REFERENCES videos(id) ON DELETE CASCADE UNIQUE,
+  script_text TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Enable RLS
+ALTER TABLE scripts ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies (safe to re-run)
+DROP POLICY IF EXISTS anon_select_scripts ON scripts;
+DROP POLICY IF EXISTS anon_insert_scripts ON scripts;
+DROP POLICY IF EXISTS anon_update_scripts ON scripts;
+
+-- Public anon policies
+CREATE POLICY anon_select_scripts ON scripts FOR SELECT USING (true);
+CREATE POLICY anon_insert_scripts ON scripts FOR INSERT WITH CHECK (true);
+CREATE POLICY anon_update_scripts ON scripts FOR UPDATE USING (true);

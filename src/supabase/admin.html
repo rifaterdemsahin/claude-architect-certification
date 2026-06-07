@@ -276,6 +276,31 @@
         await supFetch('course_content', { method: 'POST', body: JSON.stringify(courseContent) });
         log('Seeded intro/outro content.', 'ok');
 
+        // 8. Scripts
+        log('Seeding detailed video scripts...', 'info');
+        const videosList = await supFetch('videos?select=id,video_number,module_id');
+        const modulesList = await supFetch('modules?select=id,module_number');
+        const scriptsToSeed = [];
+        for (const v of videosList) {
+          const modObj = modulesList.find(m => m.id === v.module_id);
+          if (modObj) {
+            const mData = videoData.find(m => m.module_number === modObj.module_number);
+            if (mData) {
+              const vData = mData.videos.find(vd => vd.video_number === v.video_number);
+              if (vData) {
+                scriptsToSeed.push({
+                  video_id: v.id,
+                  script_text: vData.script
+                });
+              }
+            }
+          }
+        }
+        if (scriptsToSeed.length > 0) {
+          await supFetch('scripts', { method: 'POST', body: JSON.stringify(scriptsToSeed) });
+          log(`Seeded ${scriptsToSeed.length} video scripts.`, 'ok');
+        }
+
         log('✅ ALL DATA SEEDED SUCCESSFULLY.', 'ok');
       } catch (e) {
         log('Seed failed: ' + e.message, 'err');
@@ -286,7 +311,7 @@
 
     async function clearAll() {
       if (!confirm('This will DELETE all data from all tables. Continue?')) return;
-      const tables = ['course_content', 'checklist_progress', 'checklist_items', 'edl_entries', 'scene_cues', 'scenes', 'resource_links', 'video_cues', 'videos', 'modules'];
+      const tables = ['scripts', 'course_content', 'checklist_progress', 'checklist_items', 'edl_entries', 'scene_cues', 'scenes', 'resource_links', 'video_cues', 'videos', 'modules'];
       for (const t of tables) {
         try {
           await supFetch(t, { method: 'DELETE', headers: { 'Prefer': '' } });

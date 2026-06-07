@@ -64,7 +64,7 @@
     .links-section { margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.06); }
     .links-section h3 { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.1em; }
     .link-row { display: flex; gap: 10px; flex-wrap: wrap; }
-    .link-tag { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); padding: 6px 14px; border-radius: 8px; color: #93c5fd; text-decoration: none; font-size: 0.85rem; transition: all 0.2s; }
+    .link-tag { background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); padding: 6px 14px; border-radius: 8px; color: #93c5fd; text-decoration: none; font-size: 0.85rem; transition: all 0.2s; }
     .link-tag:hover { background: rgba(147,197,253,0.1); border-color: var(--secondary); color: white; }
 
     .exam-section { background: linear-gradient(135deg, rgba(139,92,246,0.1), rgba(59,130,246,0.1)); border: 1px solid rgba(139,92,246,0.2); border-radius: 20px; padding: 28px; margin-top: 32px; }
@@ -78,6 +78,152 @@
 
     .loading { text-align: center; padding: 80px; color: var(--text-muted); font-size: 1.2rem; }
     .error { text-align: center; padding: 80px; color: #ef4444; }
+
+    /* Objectives & Key Results Box */
+    .objectives-kr-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 28px;
+    }
+    @media (max-width: 768px) {
+      .objectives-kr-container { grid-template-columns: 1fr; }
+    }
+    .obj-box, .kr-box {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .obj-box h4, .kr-box h4 {
+      font-family: var(--font-title);
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #c084fc;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .obj-box ul, .kr-box ul {
+      list-style-type: none;
+      padding-left: 0;
+    }
+    .obj-box li, .kr-box li {
+      position: relative;
+      padding-left: 20px;
+      font-size: 0.9rem;
+      color: var(--text-main);
+      margin-bottom: 8px;
+      line-height: 1.5;
+    }
+    .obj-box li::before {
+      content: '🎯';
+      position: absolute;
+      left: 0;
+      top: 0;
+      font-size: 0.85rem;
+    }
+    .kr-box li::before {
+      content: '🔑';
+      position: absolute;
+      left: 0;
+      top: 0;
+      font-size: 0.85rem;
+    }
+
+    /* Script Editor Custom Classes */
+    .video-script-container {
+      margin-bottom: 16px;
+    }
+    .script-display {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      line-height: 1.7;
+      margin-bottom: 12px;
+      white-space: pre-wrap;
+    }
+    .script-edit-form {
+      margin-bottom: 12px;
+    }
+    .script-textarea {
+      width: 100%;
+      height: 120px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 8px;
+      padding: 12px;
+      color: var(--text-main);
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      line-height: 1.6;
+      resize: vertical;
+      margin-bottom: 10px;
+    }
+    .script-textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 10px rgba(139, 92, 246, 0.25);
+    }
+    .edit-actions {
+      display: flex;
+      gap: 10px;
+    }
+    .btn-save {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-save:hover {
+      background: #7c3aed;
+    }
+    .btn-cancel {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-cancel:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+    .edit-trigger-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+    .btn-edit {
+      background: rgba(139, 92, 246, 0.1);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      color: #c084fc;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-edit:hover {
+      background: rgba(139, 92, 246, 0.2);
+      color: white;
+    }
+    .save-status {
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
 
     footer { text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
   </style>
@@ -122,11 +268,139 @@
   </div>
 
   <script>
+    const FALLBACK_OUTLINES = {
+      1: {
+        objectives: ["Understand Claude API anatomy, token mechanics, and production orchestration patterns."],
+        keyResults: [
+          "Deploy a multi-agent routing topology with security guards.",
+          "Configure environment variables, VPC, and IAM for production."
+        ]
+      },
+      2: {
+        objectives: ["Build and deploy MCP servers for secure private data bridges."],
+        keyResults: [
+          "Deploy an MCP server on Fly.io with SQLite/PostgreSQL bridge.",
+          "Implement read-only query boundaries with stdio/SSE transports."
+        ]
+      },
+      3: {
+        objectives: ["Implement zero-data retention compliance using AWS Bedrock PrivateLink."],
+        keyResults: [
+          "Configure VPC Interface Endpoints with Terraform.",
+          "Produce audit logs and pass compliance review."
+        ]
+      },
+      4: {
+        objectives: ["Build deterministic agent routers with circuit-breaker safeguards."],
+        keyResults: [
+          "Implement router.py with loop detection and depth counting.",
+          "Test circuit breaker against malformed input and recursion attacks."
+        ]
+      },
+      5: {
+        objectives: ["Reduce enterprise operational costs by 90% using prompt caching."],
+        keyResults: [
+          "Implement prefix-matching cache points achieving 90% hit rate.",
+          "Deploy cache_layer.py with LRU and TTL strategies."
+        ]
+      }
+    };
+
+    window.toggleEdit = function(elementId, show) {
+      const display = document.getElementById(`script-display-${elementId}`);
+      const form = document.getElementById(`script-edit-form-${elementId}`);
+      const editBtn = document.getElementById(`btn-edit-${elementId}`);
+      
+      if (show) {
+        display.style.display = 'none';
+        form.style.display = 'block';
+        editBtn.style.display = 'none';
+      } else {
+        display.style.display = 'block';
+        form.style.display = 'none';
+        editBtn.style.display = 'block';
+      }
+    };
+
+    window.saveScript = async function(videoId, moduleIdx, videoIdx) {
+      const elementId = videoId || `local-${moduleIdx}-${videoIdx}`;
+      const textArea = document.getElementById(`script-textarea-${elementId}`);
+      const statusSpan = document.getElementById(`save-status-${elementId}`);
+      const newScript = textArea.value.trim();
+
+      statusSpan.textContent = 'Saving...';
+      statusSpan.style.color = '#f59e0b';
+
+      try {
+        let savedSuccessfully = false;
+        const isSupabaseConfigured = SUPABASE_URL.includes('supabase.co') && SUPABASE_ANON_KEY;
+
+        if (isSupabaseConfigured && videoId) {
+          // Check if record exists
+          const checkRes = await fetch(`${SUPABASE_URL}/rest/v1/scripts?video_id=eq.${videoId}`, {
+            headers: {
+              'apikey': SUPABASE_ANON_KEY,
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+            }
+          });
+          const existing = await checkRes.json();
+          
+          let method = 'POST';
+          let url = `${SUPABASE_URL}/rest/v1/scripts`;
+          let headers = {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation'
+          };
+
+          if (existing && existing.length > 0) {
+            method = 'PATCH';
+            url = `${SUPABASE_URL}/rest/v1/scripts?video_id=eq.${videoId}`;
+          }
+
+          const body = {
+            video_id: parseInt(videoId),
+            script_text: newScript,
+            updated_at: new Date().toISOString()
+          };
+
+          const saveRes = await fetch(url, {
+            method,
+            headers,
+            body: JSON.stringify(body)
+          });
+
+          if (saveRes.ok) {
+            savedSuccessfully = true;
+          }
+        }
+
+        // Cache update locally
+        localStorage.setItem(`script_override_${moduleIdx + 1}_${videoIdx}`, newScript);
+        
+        // Update loaded data memory
+        const vTarget = window.loadedData.modules[moduleIdx].videos.find(v => v.id === videoIdx);
+        if (vTarget) vTarget.script = newScript;
+
+        document.getElementById(`script-display-${elementId}`).textContent = newScript;
+        toggleEdit(elementId, false);
+
+        statusSpan.textContent = savedSuccessfully ? '✓ Saved to Supabase' : '✓ Saved locally';
+        statusSpan.style.color = '#10b981';
+        setTimeout(() => { statusSpan.textContent = ''; }, 3000);
+
+      } catch (err) {
+        console.error(err);
+        statusSpan.textContent = '❌ Save error';
+        statusSpan.style.color = '#ef4444';
+      }
+    };
+
     function render(data) {
       const nav = document.getElementById('module-nav');
       const area = document.getElementById('content-area');
       let html = '';
-      let currentModule = 0;
 
       nav.innerHTML = data.modules.map((m, i) =>
         `<button class="module-btn${i === 0 ? ' active' : ''}" onclick="showModule(${i})">M${m.id}: ${m.title}</button>`
@@ -136,11 +410,52 @@
         html += `<div class="module-card${mi === 0 ? ' active' : ''}" id="mod-${mi}">`;
         html += `<h2>Module ${m.id}: ${m.title}</h2>`;
         html += `<div class="module-desc">${m.description}</div>`;
+
+        // Render Objectives & Key Results
+        const objectives = m.objectives || [];
+        const keyResults = m.keyResults || [];
+        if (objectives.length || keyResults.length) {
+          html += `<div class="objectives-kr-container">`;
+          
+          if (objectives.length) {
+            html += `<div class="obj-box">`;
+            html += `<h4>🎯 Module Objectives</h4>`;
+            html += `<ul>${objectives.map(o => `<li>${o}</li>`).join('')}</ul>`;
+            html += `</div>`;
+          }
+          
+          if (keyResults.length) {
+            html += `<div class="kr-box">`;
+            html += `<h4>🔑 Key Results</h4>`;
+            html += `<ul>${keyResults.map(k => `<li>${k}</li>`).join('')}</ul>`;
+            html += `</div>`;
+          }
+          
+          html += `</div>`;
+        }
+
         html += `<div class="video-list">`;
         m.videos.forEach(v => {
+          const elementId = v.videoId || `local-${mi}-${v.id}`;
           html += `<div class="video-card">`;
           html += `<div class="video-header"><span class="video-title">🎬 Video ${v.id}: ${v.title}</span><span class="video-duration">${v.duration}</span></div>`;
-          html += `<div class="video-script">${v.script}</div>`;
+          
+          // Editable Script Block
+          html += `<div class="video-script-container" id="script-container-${elementId}">`;
+          html += `<div class="script-display" id="script-display-${elementId}">${v.script}</div>`;
+          html += `<div class="script-edit-form" id="script-edit-form-${elementId}" style="display: none;">`;
+          html += `<textarea class="script-textarea" id="script-textarea-${elementId}">${v.script}</textarea>`;
+          html += `<div class="edit-actions">`;
+          html += `<button class="btn-save" onclick="saveScript('${v.videoId || ''}', ${mi}, ${v.id})">Save Changes</button>`;
+          html += `<button class="btn-cancel" onclick="toggleEdit('${elementId}', false)">Cancel</button>`;
+          html += `</div>`;
+          html += `</div>`;
+          html += `<div class="edit-trigger-row">`;
+          html += `<button class="btn-edit" id="btn-edit-${elementId}" onclick="toggleEdit('${elementId}', true)">✏️ Edit Script</button>`;
+          html += `<span class="save-status" id="save-status-${elementId}"></span>`;
+          html += `</div>`;
+          html += `</div>`; // end script container
+
           html += `<div class="cue-list">${v.cues.map(c => `<span class="cue-tag">${c}</span>`).join('')}</div>`;
           html += `</div>`;
         });
@@ -185,29 +500,62 @@
         const modules = await sq('modules?order=module_number.asc');
         const videos = await sq('videos?order=video_number.asc&select=*,video_cues(*)');
         const links = await sq('resource_links?select=*,module_id(*)');
+        const outlines = await sq('outline?order=sort_order.asc');
+        const scripts = await sq('scripts');
+        
         if (!modules) return null;
 
         return {
           course: { title: 'Claude AI Certification for Architects', pipeline: 'Supabase' },
           modules: modules.map(m => ({
             id: m.module_number, title: m.title, description: m.description,
-            videos: (videos || []).filter(v => v.module_id === m.id).map(v => ({
-              id: v.video_number, title: v.title, duration: v.duration, script: v.script,
-              cues: (v.video_cues || []).sort((a,b) => a.sort_order - b.sort_order).map(c => c.cue_text)
-            })),
+            objectives: (outlines || []).filter(o => o.module_number === m.module_number && o.content_type === 'objective').map(o => o.content),
+            keyResults: (outlines || []).filter(o => o.module_number === m.module_number && o.content_type === 'key_result').map(o => o.content),
+            videos: (videos || []).filter(v => v.module_id === m.id).map(v => {
+              const matchedScript = (scripts || []).find(s => s.video_id === v.id);
+              return {
+                id: v.video_number,
+                videoId: v.id,
+                title: v.title,
+                duration: v.duration,
+                script: matchedScript ? matchedScript.script_text : v.script,
+                cues: (v.video_cues || []).sort((a,b) => a.sort_order - b.sort_order).map(c => c.cue_text)
+              };
+            }),
             links: (links || []).filter(l => l.module_id === m.id).map(l => ({ label: l.label, url: l.url }))
           })),
           exam: { title: 'Certification Exam & Case Study', description: 'The final exam covers all 5 modules.', scenarios: [], link: 'docs/certification/exam_and_case_study.md' }
         };
-      } catch { return null; }
+      } catch (err) {
+        console.error('Failed to load from Supabase:', err);
+        return null;
+      }
     }
 
     (async () => {
       let data = await loadFromSupabase();
       if (!data) {
         data = await fetch('master_script.json').then(r => r.json()).catch(() => null);
+        if (data) {
+          data.modules.forEach(m => {
+            const fallback = FALLBACK_OUTLINES[m.id] || { objectives: [], keyResults: [] };
+            m.objectives = fallback.objectives;
+            m.keyResults = fallback.keyResults;
+          });
+        }
       }
+      
       if (data) {
+        // Hydrate overrides
+        data.modules.forEach(m => {
+          m.videos.forEach(v => {
+            const override = localStorage.getItem(`script_override_${m.id}_${v.id}`);
+            if (override) {
+              v.script = override;
+            }
+          });
+        });
+        window.loadedData = data;
         render(data);
       } else {
         document.getElementById('content-area').innerHTML =
