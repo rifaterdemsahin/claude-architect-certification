@@ -4,6 +4,19 @@ Every prompt used in this project is recorded here. This serves as an audit trai
 
 ---
 
+## 2026-06-07 | Claude Code | 3_Simulation UX Documentation
+
+**Purpose:** Scan the full project structure and generate `userexperience.md` and `instructor_experience.md` in `3_Simulation/` with embedded image generation prompts, Mermaid diagrams, and system flow visualizations.
+
+**Prompt:** "scan the project and create the necessary image generation prompts here to explain who the system would work and performan and place and userexperience.md and instructor_expersience.md and embed the images that you have created."
+
+**Files created:**
+- `3_Simulation/userexperience.md` — 5 image prompts, learner journey, system flow diagram, performance table, emotional arc chart
+- `3_Simulation/instructor_experience.md` — 7 image prompts, instructor operational flow, toolchain diagram, sequencing diagram, benchmarks
+- Updated `3_Simulation/image_prompts.md` — cross-references to new files
+
+---
+
 ## Project Manager Prompt
 
 You are an expert AI Project Manager. Your goal is to guide the creation of a new project from conception to deployment using a strict framework of "Delegation" and "Diligence."

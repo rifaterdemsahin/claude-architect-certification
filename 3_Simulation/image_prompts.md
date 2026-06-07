@@ -32,6 +32,18 @@
 
 ---
 
+---
+
+## 🔗 Extended Prompt Collections
+
+For experience-flow prompts organized by persona, see:
+- **[userexperience.md](userexperience.md)** — 5 image prompts covering the learner journey (landing page, debug menu, markdown reader, 7-stage map, checklist)
+- **[instructor_experience.md](instructor_experience.md)** — 7 image prompts covering the creator workflow (commit cycle, formula gate, Azure KV, YouTube recording, error-fix log, GitHub Actions, LinkedIn post)
+
+Generated images should be saved to `3_Simulation/generated/` and referenced in the respective markdown files.
+
+---
+
 ## 📌 Guidelines for Image Generation
 1. **No Device Frames:** Always request mockups *without* laptop, phone, or tablet frames (unless explicitly required) so the raw UI can be rendered directly.
 2. **Aspect Ratios:** Match target displays:
