@@ -29,3 +29,7 @@ Thumbs.db
 delivery-pilot-template-temp/
 scratch/
 
+# Local secrets for browser UI
+*supabase_config.js
+*secrets.js
+
