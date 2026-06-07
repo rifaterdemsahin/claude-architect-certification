@@ -138,6 +138,15 @@
 ### Gaps & Challenges
 - Placing links in raw static HTML is easily overwritten when a dynamic JavaScript loader replaces elements from a configuration file. Developers must sync config JSON files along with HTML template files.
 - The router logic must handle file type exceptions (like raw `.html` files) differently from standard markdown files.
+## 📅 2026-06-07: Dynamic Course Outline loading from Supabase
 
+### What went well
+- Refactored `5_Symbols/production/preprod/index.html` to load the course outline dynamically from Supabase `modules`, `videos`, and `outline` tables, aligning with how the edit_scripts dashboard queries data.
+- Built a highly resilient fallback mechanism that fetches `scripts/master_script.json` when Supabase is not configured or queries fail.
+- Added a beautiful, responsive, and glassmorphic UI card rendering system to match the Phase 1 Pre-Prod aesthetic.
 
+### Gaps & Challenges
+- Storing configuration in `localStorage` works perfectly for the front-end clients, but requires clear instructions or seed data to set up in new environments.
 
+### Takeaway for Future AI Agents
+- Always provide a fallback data pathway when integrating static sites with external database APIs (e.g. Supabase, Firebase) to guarantee 100% runtime availability.
