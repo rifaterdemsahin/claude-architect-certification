@@ -35,13 +35,14 @@ This folder documents the **setup, constraints, and operating context** of the p
 # Ollama — pull the embedding model
 ollama pull nomic-embed-text
 
-# Qdrant — run via Docker
-docker run -p 6333:6333 qdrant/qdrant
+# Populate Qdrant — run the ingestion script (establishes connection via Fly.io endpoint)
+python scripts/ingest.py --ollama-model nomic-embed-text
 ```
 
 - **Embedding model:** `nomic-embed-text` (4096 dimensions)
-- **Vector DB:** Qdrant
-- **Secrets:** Managed via Azure Key Vault (see `.env.example`)
+- **Vector DB:** Qdrant (hosted on Fly.io — no local Docker needed)
+- **Credentials:** Retrieved at runtime from the **deliverypilot** Azure Key Vault (`AZURE_KEY_VAULT_NAME=deliverypilot`)
+- **Connection:** Ollama runs locally to generate embeddings; the ingestion script sends them to the remote Qdrant instance over HTTPS
 
 ## Rules
 
@@ -51,11 +52,9 @@ docker run -p 6333:6333 qdrant/qdrant
 
 ## 🧪 Testing Checklist
 
-[![Docker Basics & Environment Setup](https://img.youtube.com/vi/fqbchv6fWpA/0.jpg)](https://www.youtube.com/watch?v=fqbchv6fWpA)
-
 - [ ] macOS setup guide is complete and tested
 - [ ] Windows setup guide is complete and tested
 - [ ] Ollama `nomic-embed-text` model pulls successfully
-- [ ] Qdrant starts and responds on port 6333
-- [ ] Azure Key Vault created and secrets synced
+- [ ] Qdrant hosted on Fly.io responds on its HTTPS endpoint
+- [ ] Azure Key Vault (`deliverypilot`) created and secrets synced
 - [ ] Architecture diagram renders via Mermaid
