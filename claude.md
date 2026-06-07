@@ -53,10 +53,13 @@ claude-architect-certification/
 
 ### Infrastructure
 - **Static Hosting:** GitHub Pages via GitHub Actions
-- **Secrets Management:** Azure Key Vault (never commit secrets to git)
-- **AI Stack:** Qdrant + Ollama (`nomic-embed-text`, 4096 dimensions)
-- **Backend:** Fly.io for Python services
-- **CI/CD:** GitHub Actions
+- **Edge Routing & Auth:** Cloudflare Workers — fast actions, rate-limiting, caching, simple auth (<10ms globally)
+- **Backend Services:** Supabase — PostgreSQL, row-level security auth, file storage, realtime subscriptions
+- **Python Backend:** Fly.io — FastAPI/Flask services, also hosts Qdrant
+- **Secrets Management:** Azure Key Vault (never commit secrets to git; pay-per-operation, no idle cost)
+- **AI Stack:** Qdrant on Fly.io (cloud-only, no local Docker or Ollama required)
+- **CI/CD:** GitHub Actions (deploy to Pages + automated link validation → GitHub Issues)
+- **No Docker Desktop** — all containers managed by Fly.io
 
 ### Navigation & UI Rules
 
@@ -69,9 +72,12 @@ claude-architect-certification/
 - Debug button is always visible at bottom-right (small icon, e.g., bug/gear)
 - Clicking debug button toggles the Debug Menu on/off
 - Debug mode persists via `debug=true` cookie
-- Both menus use Flexbox/Grid, responsive, and read from JSON config
+- Both menus use Flexbox/Grid, responsive, and read from `navigation_config.json`
+- Navigation is a **shared JavaScript component** — do not hardcode navbars in individual HTML files; extract to the shared component
 - Search with autocomplete in the Debug Menu
 - No direct link to `markdown_renderer.html`
+- **Docs/API menus are removed** — do not re-add them
+- **Dev-phase items auto-hide after 90 days** — items marked as dev-phase disappear from the project menu automatically
 
 ### Social Links (required in `index.html`)
 - GitHub Repository link
@@ -81,6 +87,19 @@ claude-architect-certification/
 ---
 
 ## 🤖 Claude-Specific Instructions
+
+### Commit Convention
+All commits must follow **Conventional Commits** format: `type(scope): description`
+
+| Type | When to use |
+|------|------------|
+| `feat` | New functionality or content |
+| `fix` | Bug or broken reference repair |
+| `refactor` | Code restructure without behavior change |
+| `docs` | Documentation-only changes |
+| `chore` | Tooling, config, CI changes |
+
+**Scope** = the stage folder or component affected, e.g. `feat(simulation):`, `docs(4_Formula):`, `fix(ci):`, `fix(UI):`
 
 ### Behavior Guidelines
 - Always follow the 7-stage structure when creating or organizing content
@@ -95,6 +114,9 @@ claude-architect-certification/
 - **Architecture Documentation Sync** — When the system architecture changes, immediately update the architecture overview document at `2_Environment/1_architecture.md` (with updated Mermaid diagrams) to keep it working.
 - **Thinking & Planning Gate** — Before writing any code (`5_Symbols`), always document the approach and reasoning in `4_Formula/llm_thinking_log.md`. After execution, append a summary of the LLM reasoning process. `4_Formula` is the mandatory planning stage that encapsulates thinking before action.
 - **Error & Fix Logging** — When any error occurs, append an entry to `6_Semblance/error.log` (format: `[DATE] [STAGE] [SEVERITY] — Description`). When a fix is applied, append to `6_Semblance/fix.log` (format: `[DATE] [STAGE] [STATUS] — Fix description`) with status `APPLIED`. After validation in `7_Testing_Known`, update the status to `VERIFIED`. Capture learnings in `6_Semblance/lessons_learned.md`.
+- **Kanban Board Sync** — `1_Real_Unknown/kanban.md` is the task tracker. After every meaningful commit, update the kanban to reflect completed items — it should map 1-to-1 with git history milestones.
+- **Link Validation** — A Python script (`test_links.py`) and GitHub Actions workflow validate all internal links after every deploy. Broken links create GitHub Issues tagged `broken-links`. Fix these before closing the issue.
+- **3_Simulation for mockups** — Before building any UI feature, generate a mockup in `3_Simulation/` using the `image-generation` skill. Commit the mockup with `feat(simulation):` before touching `5_Symbols/`.
 
 ### Code Standards
 - Use modern CSS (Flexbox/Grid) for responsive design
@@ -185,6 +207,14 @@ When errors occur, use this skill chain:
 - [ ] Debug mode toggles via cookie
 - [ ] Search autocomplete functional
 - [ ] All markdown files render via `markdown_renderer.html`
+- [ ] Navigation is served via shared JavaScript component (no hardcoded navbars in HTML)
+- [ ] No Docs/API menu items present
+- [ ] Dev-phase items auto-hide after 90 days
+- [ ] `navigation_config.json` is updated when any stage file is added/removed
+- [ ] Automated link checker passes — no open `broken-links` GitHub Issues
+- [ ] No Ollama or Docker Desktop dependencies (all AI infra on Fly.io)
+- [ ] Supabase tables seeded correctly (check with admin seed page)
 - [ ] Secrets managed via Azure Key Vault (not in git)
 - [ ] `index.html` links to GitHub, LinkedIn, YouTube
 - [ ] README.md contains GitHub Pages URL
+- [ ] `1_Real_Unknown/kanban.md` reflects current git history milestone state
