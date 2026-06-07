@@ -37,49 +37,9 @@
       flex-direction: column;
     }
 
-    .nav-bar {
-      background: rgba(15, 23, 42, 0.85);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      padding: 14px 0;
-    }
-    .nav-container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 24px;
-    }
-    .nav-logo { font-family: var(--font-title); font-weight: 700; font-size: 1.15rem; color: white; text-decoration: none; display: flex; align-items: center; gap: 8px; }
-    .nav-links { display: flex; align-items: center; gap: 20px; }
-    .nav-links a { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; font-weight: 500; transition: color 0.3s; }
     .nav-links a:hover, .nav-links a.active { color: white; }
 
-    .nav-dropdown { position: relative; display: inline-block; }
-    .nav-dropdown .drop-trigger { cursor: pointer; padding: 8px 12px; border-radius: 8px; }
-    .nav-dropdown:hover .drop-trigger { background: rgba(139,92,246,0.1); color: white; }
-    .drop-menu {
-      display: none; position: absolute; top: 100%; left: 0;
-      background: rgba(15,23,42,0.98); backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255,255,255,0.1); border-radius: 12px;
-      padding: 8px; min-width: 190px; z-index: 200;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-    }
-    .nav-dropdown:hover .drop-menu { display: block; }
-    .drop-menu a {
-      display: block; padding: 10px 16px; border-radius: 8px;
-      color: var(--text-muted); text-decoration: none;
-      font-size: 0.85rem; white-space: nowrap; transition: all 0.2s;
-    }
-    .drop-menu a:hover { background: rgba(139,92,246,0.15); color: white; }
-    .join-btn { background: linear-gradient(135deg, #f59e0b, var(--primary)); color: white !important; padding: 8px 20px !important; border-radius: 100px !important; font-weight: 700 !important; box-shadow: 0 4px 15px rgba(245,158,11,0.3); transition: all 0.3s !important; }
-    .join-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245,158,11,0.5) !important; }
+    .nav-dropdown:hover 
 
     .main-workspace {
       flex: 1;
@@ -377,29 +337,9 @@
     }
     footer a { color: var(--secondary); text-decoration: none; }
   </style>
+  <script src="../../../shared/nav.js"></script>
 </head>
 <body>
-  
-  <nav class="nav-bar">
-    <div class="nav-container">
-      <a href="../../../index.html" class="nav-logo">🏛️ Claude Architect</a>
-      <div class="nav-links">
-        <a href="../../../index.html">Home</a>
-        <div class="nav-dropdown">
-          <a href="../../production_hub.html" class="drop-trigger active">Production ▾</a>
-          <div class="drop-menu">
-            <a href="../preprod/index.html">Pre-Production</a>
-            <a href="../prod/index.html">Production</a>
-            <a href="../postprod/index.html">Post-Production</a>
-          </div>
-        </div>
-        <a href="../../sanity_checklist.html">Sanity Check</a>
-        <a href="../../markdown_viewer.html?md=docs/certification/exam_and_case_study.md">Exam</a>
-        <a href="https://www.youtube.com/playlist?list=PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy" target="_blank">📺 Course</a>
-        <a href="../publish/membership.html" class="join-btn">🔥 Join $10/mo</a>
-      </div>
-    </div>
-  </nav>
 
   <div class="main-workspace">
     <!-- Sidebar Selector -->

@@ -1,0 +1,129 @@
+/* ================================================================
+   Shared Site Navigation — single source of truth for all pages.
+   Edit ONLY this file to update navigation across the entire site.
+   ================================================================ */
+
+.site-nav {
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 14px 0;
+}
+
+.site-nav-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.site-nav-logo {
+  font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: white;
+  text-decoration: none;
+}
+
+.site-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.site-nav-links a {
+  color: #9ca3af;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: color 0.3s;
+}
+
+.site-nav-links a:hover {
+  color: #f3f4f6;
+}
+
+.site-nav-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.site-nav-dropdown .site-drop-trigger {
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: #9ca3af;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.3s;
+}
+
+.site-nav-dropdown:hover .site-drop-trigger {
+  background: rgba(139, 92, 246, 0.1);
+  color: #f3f4f6;
+}
+
+.site-drop-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: rgba(15, 23, 42, 0.98);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 8px;
+  min-width: 190px;
+  z-index: 200;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+}
+
+.site-nav-dropdown:hover .site-drop-menu {
+  display: block;
+}
+
+.site-drop-menu a {
+  display: block;
+  padding: 10px 16px;
+  border-radius: 8px;
+  color: #9ca3af;
+  text-decoration: none;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.site-drop-menu a:hover {
+  background: rgba(139, 92, 246, 0.15);
+  color: #f3f4f6;
+}
+
+.site-nav-join {
+  background: linear-gradient(135deg, #f59e0b, #8b5cf6) !important;
+  color: white !important;
+  padding: 8px 20px !important;
+  border-radius: 100px !important;
+  font-weight: 700 !important;
+  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+  transition: all 0.3s !important;
+}
+
+.site-nav-join:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5) !important;
+  color: white !important;
+}
+
+@media (max-width: 768px) {
+  .site-nav-links { gap: 10px; }
+  .site-nav-links a { font-size: 0.78rem; }
+  .site-nav-join { padding: 6px 14px !important; }
+  .site-nav-logo { font-size: 0.95rem; }
+}
