@@ -128,4 +128,16 @@
 ### Gaps & Challenges
 - Renaming files (e.g., prefixing them with step numbers) must always trigger an immediate update of the configuration files to prevent dead links on the static site.
 
+## 📅 2026-06-07: Navigation Menus Restored & Routing Fixed
+
+### What went well
+- Restored the missing "Production", "Sanity Check", and "Exam" menus to `navigation_config.json` and synchronized both static fallback lists in HTML files.
+- Restructured `index.html`'s dynamic menu construction script to recognize raw `.html` links and direct them straight to the target pages instead of wrapping them inside `markdown_renderer.html`.
+- Created a dedicated `6_Semblance/missing_menu_items_remediation.md` document to track the incident, cause, fix, and verification.
+
+### Gaps & Challenges
+- Placing links in raw static HTML is easily overwritten when a dynamic JavaScript loader replaces elements from a configuration file. Developers must sync config JSON files along with HTML template files.
+- The router logic must handle file type exceptions (like raw `.html` files) differently from standard markdown files.
+
+
 

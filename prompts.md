@@ -125,6 +125,15 @@ Record every prompt given to AI agents below. Include the date, agent, and purpo
 **Purpose:** Update references in `1_Real_Unknown/README.md` to use actual filenames, add the sanity check document, fix broken navigation links, and add a recurring audit task to `6_kanban.md`.  
 **Output:** Updated `1_Real_Unknown/README.md`, `1_Real_Unknown/6_kanban.md`, `navigation_config.json`, `index.html`, and `5_Symbols/markdown_renderer.html`.
 
+---
+
+## 2026-06-07 — Navigation Menus Restoration & Semblance Log
+
+**Agent:** Gemini 3.5 Flash (Medium)  
+**Purpose:** Restore "Production", "Sanity Check", and "Exam" menu items to the main project menu, fix raw HTML routing logic, log UI warnings/fixes, and add a detailed Semblance remediation document.  
+**Output:** Updated `navigation_config.json`, `index.html`, `markdown_renderer.html`, `6_Semblance/error.log`, `6_Semblance/fix.log`, `6_Semblance/lessons_learned.md`, and created `6_Semblance/missing_menu_items_remediation.md`.
+
+
 
 
 
