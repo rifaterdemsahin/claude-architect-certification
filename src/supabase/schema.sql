@@ -1,6 +1,7 @@
 -- =============================================================================
--- Claude AI Certification - Supabase Schema
--- Run this in the Supabase SQL Editor to create all tables.
+-- Claude AI Certification - Run this in Supabase SQL Editor
+-- Go to: https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/sql/new
+-- Then paste and run this entire file.
 -- =============================================================================
 
 -- 1. MODULES
@@ -32,7 +33,7 @@ CREATE TABLE IF NOT EXISTS video_cues (
   sort_order INTEGER DEFAULT 0
 );
 
--- 4. RESOURCE LINKS (per module)
+-- 4. RESOURCE LINKS
 CREATE TABLE IF NOT EXISTS resource_links (
   id SERIAL PRIMARY KEY,
   module_id INTEGER REFERENCES modules(id) ON DELETE CASCADE,
@@ -40,21 +41,15 @@ CREATE TABLE IF NOT EXISTS resource_links (
   url TEXT NOT NULL
 );
 
--- 5. SCENES (post-production per module/section)
+-- 5. SCENES
 CREATE TABLE IF NOT EXISTS scenes (
   id SERIAL PRIMARY KEY,
   module_number INTEGER NOT NULL,
   section_number INTEGER NOT NULL,
   scene_number INTEGER NOT NULL,
-  script TEXT,
-  timing TEXT,
-  bg_image TEXT,
-  lt_image TEXT,
-  lt_main TEXT,
-  lt_sub TEXT,
-  overlay_lt TEXT,
-  overlay_text TEXT,
-  bundle_url TEXT,
+  script TEXT, timing TEXT,
+  bg_image TEXT, lt_image TEXT, lt_main TEXT, lt_sub TEXT,
+  overlay_lt TEXT, overlay_text TEXT, bundle_url TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   UNIQUE(module_number, section_number, scene_number)
 );
@@ -63,31 +58,24 @@ CREATE TABLE IF NOT EXISTS scenes (
 CREATE TABLE IF NOT EXISTS scene_cues (
   id SERIAL PRIMARY KEY,
   scene_id INTEGER REFERENCES scenes(id) ON DELETE CASCADE,
-  icon TEXT,
-  label TEXT,
-  prompt TEXT DEFAULT '',
-  sort_order INTEGER DEFAULT 0
+  icon TEXT, label TEXT, prompt TEXT DEFAULT '', sort_order INTEGER DEFAULT 0
 );
 
--- 7. EDL ENTRIES (per scene)
+-- 7. EDL ENTRIES
 CREATE TABLE IF NOT EXISTS edl_entries (
   id SERIAL PRIMARY KEY,
   scene_id INTEGER REFERENCES scenes(id) ON DELETE CASCADE,
-  timing TEXT,
-  description TEXT,
-  sort_order INTEGER DEFAULT 0
+  timing TEXT, description TEXT, sort_order INTEGER DEFAULT 0
 );
 
 -- 8. CHECKLIST ITEMS
 CREATE TABLE IF NOT EXISTS checklist_items (
   id SERIAL PRIMARY KEY,
-  phase TEXT NOT NULL,
-  item_name TEXT NOT NULL,
-  item_desc TEXT DEFAULT '',
-  sort_order INTEGER DEFAULT 0
+  phase TEXT NOT NULL, item_name TEXT NOT NULL,
+  item_desc TEXT DEFAULT '', sort_order INTEGER DEFAULT 0
 );
 
--- 9. CHECKLIST PROGRESS (user-specific)
+-- 9. CHECKLIST PROGRESS
 CREATE TABLE IF NOT EXISTS checklist_progress (
   id SERIAL PRIMARY KEY,
   item_id INTEGER REFERENCES checklist_items(id) ON DELETE CASCADE,
@@ -98,7 +86,7 @@ CREATE TABLE IF NOT EXISTS checklist_progress (
   UNIQUE(item_id, user_id)
 );
 
--- 10. COURSE OUTLINE CONTENT (intro/outro sections)
+-- 10. COURSE CONTENT
 CREATE TABLE IF NOT EXISTS course_content (
   id SERIAL PRIMARY KEY,
   section TEXT NOT NULL UNIQUE,
@@ -106,7 +94,7 @@ CREATE TABLE IF NOT EXISTS course_content (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Enable Row Level Security (allow anon read, restrict write)
+-- Enable RLS
 ALTER TABLE modules ENABLE ROW LEVEL SECURITY;
 ALTER TABLE videos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE video_cues ENABLE ROW LEVEL SECURITY;
@@ -118,21 +106,34 @@ ALTER TABLE checklist_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE checklist_progress ENABLE ROW LEVEL SECURITY;
 ALTER TABLE course_content ENABLE ROW LEVEL SECURITY;
 
--- Allow anonymous read access to all tables
-CREATE POLICY "anon_select_modules" ON modules FOR SELECT USING (true);
-CREATE POLICY "anon_select_videos" ON videos FOR SELECT USING (true);
-CREATE POLICY "anon_select_video_cues" ON video_cues FOR SELECT USING (true);
-CREATE POLICY "anon_select_resource_links" ON resource_links FOR SELECT USING (true);
-CREATE POLICY "anon_select_scenes" ON scenes FOR SELECT USING (true);
-CREATE POLICY "anon_select_scene_cues" ON scene_cues FOR SELECT USING (true);
-CREATE POLICY "anon_select_edl_entries" ON edl_entries FOR SELECT USING (true);
-CREATE POLICY "anon_select_checklist_items" ON checklist_items FOR SELECT USING (true);
-CREATE POLICY "anon_select_checklist_progress" ON checklist_progress FOR SELECT USING (true);
-CREATE POLICY "anon_select_course_content" ON course_content FOR SELECT USING (true);
+-- Drop existing policies (safe to re-run)
+DROP POLICY IF EXISTS anon_select_modules ON modules;
+DROP POLICY IF EXISTS anon_select_videos ON videos;
+DROP POLICY IF EXISTS anon_select_video_cues ON video_cues;
+DROP POLICY IF EXISTS anon_select_resource_links ON resource_links;
+DROP POLICY IF EXISTS anon_select_scenes ON scenes;
+DROP POLICY IF EXISTS anon_select_scene_cues ON scene_cues;
+DROP POLICY IF EXISTS anon_select_edl_entries ON edl_entries;
+DROP POLICY IF EXISTS anon_select_checklist_items ON checklist_items;
+DROP POLICY IF EXISTS anon_select_checklist_progress ON checklist_progress;
+DROP POLICY IF EXISTS anon_select_course_content ON course_content;
+DROP POLICY IF EXISTS anon_insert_checklist_progress ON checklist_progress;
+DROP POLICY IF EXISTS anon_update_checklist_progress ON checklist_progress;
+DROP POLICY IF EXISTS anon_insert_course_content ON course_content;
 
--- Allow anonymous insert/update on checklist_progress (user-scoped)
-CREATE POLICY "anon_insert_checklist_progress" ON checklist_progress FOR INSERT WITH CHECK (true);
-CREATE POLICY "anon_update_checklist_progress" ON checklist_progress FOR UPDATE USING (true);
+-- Anon read access
+CREATE POLICY anon_select_modules ON modules FOR SELECT USING (true);
+CREATE POLICY anon_select_videos ON videos FOR SELECT USING (true);
+CREATE POLICY anon_select_video_cues ON video_cues FOR SELECT USING (true);
+CREATE POLICY anon_select_resource_links ON resource_links FOR SELECT USING (true);
+CREATE POLICY anon_select_scenes ON scenes FOR SELECT USING (true);
+CREATE POLICY anon_select_scene_cues ON scene_cues FOR SELECT USING (true);
+CREATE POLICY anon_select_edl_entries ON edl_entries FOR SELECT USING (true);
+CREATE POLICY anon_select_checklist_items ON checklist_items FOR SELECT USING (true);
+CREATE POLICY anon_select_checklist_progress ON checklist_progress FOR SELECT USING (true);
+CREATE POLICY anon_select_course_content ON course_content FOR SELECT USING (true);
 
--- Allow anonymous insert on course_content (for seed)
-CREATE POLICY "anon_insert_course_content" ON course_content FOR INSERT WITH CHECK (true);
+-- Anon insert/update on progress
+CREATE POLICY anon_insert_checklist_progress ON checklist_progress FOR INSERT WITH CHECK (true);
+CREATE POLICY anon_update_checklist_progress ON checklist_progress FOR UPDATE USING (true);
+CREATE POLICY anon_insert_course_content ON course_content FOR INSERT WITH CHECK (true);
