@@ -67,6 +67,134 @@
     }
 
     footer { text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
+
+    /* Supabase Course Outline Styles */
+    .db-status {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 100px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .db-status.loading {
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.2);
+      color: var(--accent);
+    }
+    .db-status.live {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      color: #10b981;
+    }
+    .db-status.fallback {
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      color: var(--secondary);
+    }
+    
+    .outline-status {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .outline-module {
+      margin-bottom: 30px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-radius: 16px;
+      padding: 24px;
+    }
+    .outline-module:hover {
+      border-color: rgba(139, 92, 246, 0.2);
+      background: rgba(255, 255, 255, 0.03);
+    }
+    .outline-module-header {
+      margin-bottom: 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding-bottom: 12px;
+    }
+    .outline-module-title {
+      font-family: var(--font-title);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .outline-module-desc {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-top: 4px;
+    }
+    .outline-objectives {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .objective-tag {
+      background: rgba(139, 92, 246, 0.08);
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      color: #c084fc;
+      font-size: 0.75rem;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+    
+    .outline-videos {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .outline-video-card {
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      border-radius: 10px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .outline-video-card:hover {
+      border-color: rgba(59, 130, 246, 0.2);
+      background: rgba(59, 130, 246, 0.03);
+    }
+    .outline-video-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .outline-video-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #e5e7eb;
+    }
+    .outline-video-duration {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.05);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+    .outline-video-cues {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-top: 4px;
+      border-left: 2px solid rgba(245, 158, 11, 0.3);
+      padding-left: 10px;
+    }
+    .cue-item {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
   </style>
   <script src="../../../shared/nav.js"></script>
 </head>
