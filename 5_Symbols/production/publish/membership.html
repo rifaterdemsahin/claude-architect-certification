@@ -7,7 +7,100 @@
   <meta name="description" content="Unlock full access to the Claude AI Certification for Architects. Master Model Context Protocol, PrivateLink integrations, and advanced prompt engineering.">
   <meta name="keywords" content="Claude AI, Systems Architect, Member pricing, Stripe, YouTube Membership">
   <meta name="author" content="Rifat Erdem Sahin">
-  <link rel="icon" type="image/png" href="../publish/membership.html" class="join-btn">🔥 Join $10/mo</a>
+  <link rel="icon" type="image/png" href="../../../../favicon.png">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://rifaterdemsahin.github.io/claude-architect-certification/production/publish/membership.html">
+  <meta property="og:title" content="Join Members — Claude AI Certification">
+  <meta property="og:description" content="Get premium access to code blueprints, architectural templates, and complete guide materials.">
+  <meta property="og:image" content="https://rifaterdemsahin.github.io/claude-architect-certification/favicon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg-dark: #030712; --bg-card: rgba(17,24,39,0.85); --text-main: #f3f4f6; --text-muted: #9ca3af; --primary: #8b5cf6; --secondary: #3b82f6; --accent: #f59e0b; --success: #10b981; --font-title: 'Outfit', sans-serif; --font-body: 'Plus Jakarta Sans', sans-serif; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background-color: var(--bg-dark); background-image: radial-gradient(circle at 10% 20%, rgba(139,92,246,0.08) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(245,158,11,0.06) 0%, transparent 40%); color: var(--text-main); font-family: var(--font-body); line-height: 1.6; padding-top: 70px; padding-bottom: 80px; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+    .nav-bar { position: fixed; top: 0; left: 0; width: 100%; z-index: 5000; background: rgba(15,23,42,0.95); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(255,255,255,0.05); padding: 14px 0; }
+    .nav-container { display: flex; justify-content: space-between; align-items: center; max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+    .nav-logo { font-family: var(--font-title); font-weight: 700; font-size: 1.1rem; color: white; text-decoration: none; display: flex; align-items: center; gap: 8px; }
+    .nav-links { display: flex; align-items: center; gap: 20px; }
+    .nav-links a { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; font-weight: 500; transition: color 0.3s; }
+    .nav-links a:hover { color: white; }
+    .nav-dropdown { position: relative; display: inline-block; }
+    .nav-dropdown .drop-trigger { cursor: pointer; padding: 8px 12px; border-radius: 8px; }
+    .nav-dropdown:hover .drop-trigger { background: rgba(139,92,246,0.1); color: white; }
+    .drop-menu { display: none; position: absolute; top: 100%; left: 0; background: rgba(15,23,42,0.98); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 8px; min-width: 190px; z-index: 200; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+    .nav-dropdown:hover .drop-menu { display: block; }
+    .drop-menu a { display: block; padding: 10px 16px; border-radius: 8px; color: var(--text-muted); text-decoration: none; font-size: 0.85rem; white-space: nowrap; transition: all 0.2s; }
+    .drop-menu a:hover { background: rgba(139,92,246,0.15); color: white; }
+    .join-btn { background: linear-gradient(135deg, var(--accent), var(--primary)); color: white !important; padding: 8px 20px !important; border-radius: 100px !important; font-weight: 700 !important; box-shadow: 0 4px 15px rgba(245,158,11,0.3); transition: all 0.3s !important; }
+    .join-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245,158,11,0.5) !important; }
+
+    header { padding: 50px 0 40px; text-align: center; }
+    .badge { display: inline-block; padding: 6px 16px; background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(139,92,246,0.2)); border: 1px solid rgba(245,158,11,0.3); border-radius: 100px; font-size: 0.8rem; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 14px; }
+    h1 { font-family: var(--font-title); font-size: 2.8rem; font-weight: 900; margin-bottom: 10px; }
+    header p { color: var(--text-muted); max-width: 600px; margin: 0 auto; font-size: 1.1rem; }
+
+    .pricing-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 40px; max-width: 800px; margin-left: auto; margin-right: auto; }
+    .pricing-card { background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 24px; padding: 32px; text-align: center; transition: all 0.3s; position: relative; }
+    .pricing-card.featured { border-color: var(--accent); box-shadow: 0 0 40px rgba(245,158,11,0.1); }
+    .pricing-card.featured::before { content: 'BEST VALUE'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, var(--accent), var(--primary)); color: white; padding: 4px 16px; border-radius: 100px; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.1em; }
+    .pricing-tier { font-family: var(--font-title); font-size: 1.1rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 8px; }
+    .pricing-price { font-family: var(--font-title); font-size: 3.5rem; font-weight: 900; margin-bottom: 4px; }
+    .pricing-price span { font-size: 1.2rem; color: var(--text-muted); }
+    .pricing-desc { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px; }
+    .pricing-features { list-style: none; text-align: left; margin-bottom: 24px; }
+    .pricing-features li { padding: 8px 0; display: flex; align-items: center; gap: 10px; font-size: 0.9rem; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .pricing-features li::before { content: '✓'; color: var(--success); font-weight: 900; }
+    .pricing-features li.muted::before { content: '—'; color: var(--text-muted); }
+    .pricing-features li.muted { color: var(--text-muted); }
+    .pricing-cta { display: inline-block; padding: 14px 36px; border-radius: 100px; font-weight: 800; font-size: 1rem; text-decoration: none; transition: all 0.3s; }
+    .pricing-cta.free { background: rgba(255,255,255,0.06); color: white; border: 1px solid rgba(255,255,255,0.1); }
+    .pricing-cta.free:hover { background: rgba(255,255,255,0.1); }
+    .pricing-cta.paid { background: linear-gradient(135deg, var(--accent), var(--primary)); color: white; box-shadow: 0 4px 15px rgba(245,158,11,0.3); }
+    .pricing-cta.paid:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245,158,11,0.5); }
+
+    .content-grid { display: grid; gap: 24px; margin-bottom: 40px; }
+    .content-card { background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px; padding: 28px; display: flex; align-items: flex-start; gap: 16px; }
+    .content-icon { font-size: 2rem; }
+    .content-card h3 { font-family: var(--font-title); font-weight: 700; margin-bottom: 6px; }
+    .content-card p { color: var(--text-muted); font-size: 0.9rem; }
+    .content-badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 0.7rem; font-weight: 700; margin-left: 8px; }
+    .badge-free { background: rgba(16,185,129,0.15); color: var(--success); }
+    .badge-member { background: rgba(245,158,11,0.15); color: var(--accent); }
+    .badge-coming { background: rgba(255,255,255,0.06); color: var(--text-muted); }
+
+    .faq-section { background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px; padding: 28px; margin-bottom: 32px; }
+    .faq-section h2 { font-family: var(--font-title); font-size: 1.3rem; font-weight: 700; margin-bottom: 20px; }
+    .faq-item { padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .faq-item:last-child { border-bottom: none; }
+    .faq-q { font-weight: 700; margin-bottom: 6px; }
+    .faq-a { color: var(--text-muted); font-size: 0.9rem; }
+
+    footer { text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
+  </style>
+</head>
+<body>
+  <nav class="nav-bar">
+    <div class="nav-container">
+      <a href="../../../../index.html" class="nav-logo">🏛️ Claude Architect</a>
+      <div class="nav-links">
+        <a href="../../../../index.html">Home</a>
+        <div class="nav-dropdown">
+          <a href="../../production_hub.html" class="drop-trigger">Production ▾</a>
+          <div class="drop-menu">
+            <a href="../../production/preprod/index.html">Pre-Production</a>
+            <a href="../../production/prod/index.html">Production</a>
+            <a href="../../production/postprod/index.html">Post-Production</a>
+          </div>
+        </div>
+        <a href="../../sanity_checklist.html">Sanity Check</a>
+        <a href="../../markdown_viewer.html?md=docs/certification/exam_and_case_study.md">Exam</a>
+        <a href="membership.html" class="join-btn">🔥 Join $10/mo</a>
       </div>
     </div>
   </nav>
@@ -121,7 +214,7 @@
     </div>
 
     <footer>
-      <p style="margin-bottom: 8px;"><a href="../../../index.html" style="color: var(--secondary); text-decoration: none;">← Back to Home</a></p>
+      <p style="margin-bottom: 8px;"><a href="../../../../index.html" style="color: var(--secondary); text-decoration: none;">← Back to Home</a></p>
       <p style="margin-bottom: 12px; font-size: 0.85rem; opacity: 0.8;">
         Instructor: <a href="https://www.linkedin.com/in/rifaterdemsahin" target="_blank" style="color: #93c5fd; text-decoration: underline; margin-right: 16px;">Rifat Erdem Sahin LinkedIn</a>
         GitHub Project: <a href="https://github.com/rifaterdemsahin/claude-architect-certification" target="_blank" style="color: #93c5fd; text-decoration: underline;">Project Repository</a>
