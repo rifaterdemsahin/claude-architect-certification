@@ -111,6 +111,15 @@
     .item-text { flex: 1; }
     .item-name { font-weight: 600; margin-bottom: 2px; }
     .item-desc { color: var(--text-muted); font-size: 0.85rem; }
+    .item-note {
+      margin-top: 8px; width: 100%;
+      background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 8px; padding: 8px 12px;
+      color: var(--text-main); font-size: 0.85rem;
+      font-family: var(--font-body); resize: vertical; min-height: 36px;
+      transition: border-color 0.2s;
+    }
+    .item-note:focus { outline: none; border-color: var(--primary); }
     .item-status { font-size: 0.75rem; padding: 3px 10px; border-radius: 20px; font-weight: 700; }
     .status-pending { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
     .status-done { background: rgba(16, 185, 129, 0.15); color: var(--success); }
@@ -146,7 +155,14 @@
       <p>End-to-end production readiness across Pre-Production, Production, and Post-Production phases.</p>
     </header>
 
-    <div class="master-progress">
+    <div class="status-terminal" style="background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.05);border-radius:12px;padding:16px;margin-bottom:24px;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+        <span style="font-size:1.2rem;">⚡</span>
+        <span style="font-weight:700;">Supabase Sync</span>
+        <span id="sync-badge" class="status-badge" style="background:rgba(245,158,11,0.15);color:#f59e0b;padding:2px 10px;border-radius:20px;font-size:0.75rem;">Local Only</span>
+      </div>
+      <p style="color:var(--text-muted);font-size:0.85rem;">Notes and check state are synced to Supabase when connected. <a href="src/supabase/admin.html" style="color:var(--secondary);">Configure Supabase →</a></p>
+    </div>
       <div style="flex:1">
         <div style="font-weight:700;margin-bottom:8px">Overall Progress</div>
         <div class="master-progress-bar"><div class="master-progress-fill" id="total-bar"></div></div>
@@ -177,7 +193,7 @@
       <div class="phase-header">
         <span class="phase-icon">🎬</span>
         <span class="phase-title">Production</span>
-        <span class="phase-subtitle">6 items</span>
+        <span class="phase-subtitle">7 items</span>
       </div>
       <ul class="checklist">
         <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Audio recorded per section</div><div class="item-desc">moduleX_sectionY.wav files captured</div></div></li>
@@ -186,6 +202,7 @@
         <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Screen recordings captured</div><div class="item-desc">IDE / dashboard walkthroughs recorded</div></div></li>
         <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Camera footage backed up</div><div class="item-desc">All video sources copied to storage</div></div></li>
         <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Production log completed</div><div class="item-desc">Take notes and timestamps documented</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Hands-on production on all modules</div><div class="item-desc">Live recording, screen capture, and code walkthrough completed for M1–M5</div></div></li>
       </ul>
     </div>
 
@@ -194,7 +211,7 @@
       <div class="phase-header">
         <span class="phase-icon">🎨</span>
         <span class="phase-title">Post-Production</span>
-        <span class="phase-subtitle">8 items</span>
+        <span class="phase-subtitle">9 items</span>
       </div>
       <ul class="checklist">
         <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Background images generated</div><div class="item-desc">All scene backgrounds created and named correctly</div></div></li>
@@ -205,6 +222,7 @@
         <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Composite previews checked</div><div class="item-desc">Hover previews match intended final look</div></div></li>
         <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Asset bundles zipped</div><div class="item-desc">Per-scene ZIP files ready for editor handoff</div></div></li>
         <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">Final render approved</div><div class="item-desc">Master video exported and reviewed</div></div></li>
+        <li><input type="checkbox" class="check-box" onchange="update()"><div class="item-text"><div class="item-name">All modules created in Canva</div><div class="item-desc">Thumbnails, title cards, and lower thirds designed in Canva for M1–M5</div></div></li>
       </ul>
     </div>
 
@@ -230,18 +248,107 @@
   </div>
 
   <script>
+    // Supabase config
+    const SUPABASE_URL = localStorage.getItem('supabase_url') || '';
+    const SUPABASE_ANON_KEY = localStorage.getItem('supabase_anon_key') || '';
+    const IS_CONNECTED = SUPABASE_URL && SUPABASE_URL.includes('supabase.co') && SUPABASE_ANON_KEY;
+
+    function updateSyncBadge() {
+      const badge = document.getElementById('sync-badge');
+      if (IS_CONNECTED) {
+        badge.textContent = '☁️ Synced';
+        badge.style.background = 'rgba(16,185,129,0.15)';
+        badge.style.color = '#10b981';
+      } else {
+        badge.textContent = '💾 Local Only';
+        badge.style.background = 'rgba(245,158,11,0.15)';
+        badge.style.color = '#f59e0b';
+      }
+    }
+    updateSyncBadge();
+
+    async function supFetch(endpoint, opts = {}) {
+      if (!IS_CONNECTED) return null;
+      try {
+        const url = `${SUPABASE_URL}/rest/v1/${endpoint}`;
+        const res = await fetch(url, {
+          ...opts,
+          headers: {
+            'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json', 'Prefer': 'return=representation',
+            ...(opts.headers || {})
+          }
+        });
+        if (!res.ok) return null;
+        return res.json();
+      } catch { return null; }
+    }
+
+    // Add note textareas to each checklist item
+    document.querySelectorAll('.checklist li').forEach((li, idx) => {
+      const textDiv = li.querySelector('.item-text');
+      if (!textDiv) return;
+      const noteKey = 'sanity_note_' + idx;
+      const note = document.createElement('textarea');
+      note.className = 'item-note';
+      note.placeholder = 'Add production note...';
+      note.value = localStorage.getItem(noteKey) || '';
+      note.oninput = function() {
+        localStorage.setItem(noteKey, this.value);
+        if (IS_CONNECTED) {
+          supFetch('checklist_progress', {
+            method: 'POST',
+            headers: { 'Prefer': 'resolution=merge-duplicates' },
+            body: JSON.stringify({ item_id: idx + 1, user_id: 'default', notes: this.value, checked: li.querySelector('.check-box').checked })
+          });
+        }
+      };
+      textDiv.appendChild(note);
+    });
+
+    // Restore check state from Supabase if connected
+    if (IS_CONNECTED) {
+      supFetch('checklist_progress?user_id=eq.default&select=item_id,checked,notes').then(data => {
+        if (data) {
+          data.forEach(p => {
+            const idx = p.item_id - 1;
+            const cb = document.querySelectorAll('.check-box')[idx];
+            const note = document.querySelectorAll('.item-note')[idx];
+            if (cb && p.checked) cb.checked = true;
+            if (note && p.notes) { note.value = p.notes; localStorage.setItem('sanity_note_' + idx, p.notes); }
+          });
+          update();
+        }
+      });
+    } else {
+      // Restore from localStorage fallback
+      document.querySelectorAll('.item-note').forEach((n, i) => {
+        const saved = localStorage.getItem('sanity_note_' + i);
+        if (saved) n.value = saved;
+      });
+    }
+
     function update() {
       const boxes = document.querySelectorAll('.check-box');
       const checked = document.querySelectorAll('.check-box:checked');
       const pct = Math.round((checked.length / boxes.length) * 100);
       document.getElementById('total-pct').textContent = pct + '%';
       document.getElementById('total-bar').style.width = pct + '%';
-      // persist
-      boxes.forEach((cb, i) => localStorage.setItem('sanity_' + i, cb.checked));
+      boxes.forEach((cb, i) => {
+        localStorage.setItem('sanity_' + i, cb.checked);
+        if (IS_CONNECTED && cb.checked) {
+          supFetch('checklist_progress', {
+            method: 'POST',
+            headers: { 'Prefer': 'resolution=merge-duplicates' },
+            body: JSON.stringify({ item_id: i + 1, user_id: 'default', checked: cb.checked })
+          });
+        }
+      });
     }
-    // restore
+
     document.querySelectorAll('.check-box').forEach((cb, i) => {
       if (localStorage.getItem('sanity_' + i) === 'true') cb.checked = true;
+      cb.onchange = update;
     });
     update();
   </script>

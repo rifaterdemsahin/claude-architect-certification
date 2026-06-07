@@ -1,5 +1,7 @@
 # Claude AI Certification for Architects — Course Outline
 
+> **Intro:** This certification course takes you from AI prototyping to **production-grade enterprise deployment**. Over 5 modules and 15 videos, you will master secure AI architecture (MCP, ZDR, PrivateLink), performance optimization (prompt caching, deterministic routers), and the complete production pipeline (Pre-Prod → Prod → Post-Prod). Designed for senior engineers, architects, and technical leaders building AI-powered enterprise systems.
+
 ## Production Pipeline
 All content follows a structured **Pre-Production → Production → Post-Production → Publication** workflow.
 
@@ -140,3 +142,18 @@ The final exam covers all 5 modules with a hands-on case study involving:
 | Production | Audio, screen recordings, raw assets | WAV, MP4, logs |
 | Post-Production | Scene review, overlays, EDL, checklists | Review pages, JSON configs |
 | Publication | YouTube, GitHub, announcements | Thumbnails, descriptions |
+
+---
+
+## Outro — Next Steps
+
+Congratulations on reviewing the course outline! Here is your action plan:
+
+1. **Review** the course outline and identify priority modules for your team
+2. **Set up** your Supabase database and run the seed script to populate all data
+3. **Generate** visual assets for each scene using the provided AI prompts
+4. **Record** audio narration and screen captures per the production schedule
+5. **Edit** using the Post-Production Master page with composite previews and EDLs
+6. **Publish** to YouTube and update the GitHub repository
+
+> 🎓 **Ready to start?** Open the **Master Script** viewer under Pre-Production and begin with Module 1, Video 1: Architecture Overview.

@@ -656,7 +656,42 @@
     let moduleKey = params.get('module') || getCookie('last_module') || '1';
     let sectionKey = params.get('section') || getCookie('last_section') || '1';
     const key = moduleKey + '-' + sectionKey;
-    const config = SCENES_CONFIG[key];
+    let config = SCENES_CONFIG[key];
+
+    // Try Supabase first if configured
+    (async function trySupabase() {
+      const supabaseUrl = localStorage.getItem('supabase_url') || '';
+      const supabaseKey = localStorage.getItem('supabase_anon_key') || '';
+      if (supabaseUrl.includes('supabase.co') && supabaseKey) {
+        try {
+          const res = await fetch(`${supabaseUrl}/rest/v1/scenes?module_number=eq.${moduleKey}&section_number=eq.${sectionKey}&select=*,scene_cues(*),edl_entries(*)`, {
+            headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` }
+          });
+          if (res.ok) {
+            const scenes = await res.json();
+            if (scenes && scenes.length) {
+              config = {
+                title: `Module ${moduleKey}, Section ${sectionKey}`,
+                audio: 'assets/module1_section1.wav',
+                scenes: scenes.sort((a,b) => a.scene_number - b.scene_number).map(s => ({
+                  id: s.scene_number, script: s.script, bg: s.bg_image,
+                  ltImg: s.lt_image, ltMain: s.lt_main, ltSub: s.lt_sub,
+                  overlayLt: s.overlay_lt, overlayText: s.overlay_text,
+                  bundle: s.bundle_url,
+                  cues: (s.scene_cues || []).sort((a,b) => a.sort_order - b.sort_order).map(c => ({
+                    icon: c.icon, label: c.label, prompt: c.prompt || ''
+                  })),
+                  edl: (s.edl_entries || []).sort((a,b) => a.sort_order - b.sort_order).map(e => `${e.timing}: ${e.description}`)
+                }))
+              };
+              applyConfig();
+            }
+          }
+        } catch {}
+      }
+      if (config) applyConfig();
+
+    function applyConfig() {
 
     if (config) {
       setCookie('last_module', moduleKey);

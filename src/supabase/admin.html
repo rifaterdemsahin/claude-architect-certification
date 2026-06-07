@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Supabase Database Seed</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;800&family=Plus+Jakarta+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg: #030712; --card: rgba(17,24,39,0.9); --text: #f3f4f6; --muted: #9ca3af; --primary: #8b5cf6; --success: #10b981; --danger: #ef4444; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; padding: 40px; line-height: 1.6; }
+    .container { max-width: 800px; margin: 0 auto; }
+    h1 { font-family: 'Outfit', sans-serif; font-size: 2rem; margin-bottom: 10px; }
+    p { color: var(--muted); margin-bottom: 24px; }
+    .card { background: var(--card); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px; padding: 28px; margin-bottom: 20px; }
+    label { display: block; font-weight: 700; margin-bottom: 6px; font-size: 0.9rem; }
+    input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); color: white; font-size: 0.95rem; margin-bottom: 16px; }
+    input:focus { outline: none; border-color: var(--primary); }
+    .btn { padding: 12px 24px; border-radius: 10px; font-weight: 700; border: none; cursor: pointer; font-size: 0.95rem; transition: all 0.2s; font-family: inherit; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: #7c3aed; }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-success { background: var(--success); color: white; }
+    .btn-danger { background: var(--danger); color: white; }
+    .log { background: rgba(0,0,0,0.4); border-radius: 10px; padding: 16px; font-family: monospace; font-size: 0.85rem; max-height: 300px; overflow-y: auto; margin-bottom: 16px; }
+    .log p { color: #38bdf8; margin-bottom: 4px; font-family: monospace; font-size: 0.85rem; }
+    .log .ok { color: var(--success); }
+    .log .err { color: var(--danger); }
+    .log .info { color: var(--muted); }
+    .status-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; }
+    .status-ready { background: rgba(16,185,129,0.15); color: var(--success); }
+    .status-pending { background: rgba(245,158,11,0.15); color: #f59e0b; }
+    .status-error { background: rgba(239,68,68,0.15); color: var(--danger); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🚀 Supabase Database Seed</h1>
+    <p>Populate your Supabase project with all course data: modules, videos, scenes, checklists, and content.</p>
+
+    <div class="card">
+      <label for="supabase-url">Supabase Project URL</label>
+      <input id="supabase-url" type="url" placeholder="https://your-project-ref.supabase.co" value="">
+      <label for="supabase-key">Anon Key</label>
+      <input id="supabase-key" type="text" value="" placeholder="Paste your Supabase anon key here">
+      <button class="btn btn-primary" id="btn-save-config" onclick="saveConfig()">Save Config</button>
+      <button class="btn btn-primary" id="btn-test" onclick="testConnection()">Test Connection</button>
+      <span id="conn-status" class="status-badge status-pending" style="margin-left:12px;">Not tested</span>
+    </div>
+
+    <div class="card">
+      <button class="btn btn-success" id="btn-seed" onclick="seedAll()" disabled>🌱 Seed All Data</button>
+      <button class="btn btn-danger" id="btn-clear" onclick="clearAll()" style="margin-left:12px;" disabled>🗑️ Clear All Data</button>
+    </div>
+
+    <div class="card">
+      <div class="log" id="log-area"><p class="info">> Ready. Configure your Supabase URL above and test the connection.</p></div>
+    </div>
+  </div>
+
+  <script>
+    function getSupabaseUrl() {
+      const url = document.getElementById('supabase-url').value.trim();
+      localStorage.setItem('supabase_url', url);
+      return url;
+    }
+    function getAnonKey() {
+      const key = document.getElementById('supabase-key').value.trim();
+      localStorage.setItem('supabase_anon_key', key);
+      return key;
+    }
+    function saveConfig() {
+      getSupabaseUrl();
+      getAnonKey();
+      log('Config saved to localStorage.', 'ok');
+    }
+    // Restore saved values
+    document.addEventListener('DOMContentLoaded', () => {
+      const savedUrl = localStorage.getItem('supabase_url');
+      const savedKey = localStorage.getItem('supabase_anon_key');
+      if (savedUrl) document.getElementById('supabase-url').value = savedUrl;
+      if (savedKey) document.getElementById('supabase-key').value = savedKey;
+    });
+
+    function log(msg, cls = 'info') {
+      const log = document.getElementById('log-area');
+      log.innerHTML += `<p class="${cls}">> ${msg}</p>`;
+      log.scrollTop = log.scrollHeight;
+    }
+
+    async function supFetch(endpoint, opts = {}) {
+      const url = `${getSupabaseUrl()}/rest/v1/${endpoint}`;
+      const key = getAnonKey();
+      const res = await fetch(url, {
+        ...opts,
+        headers: {
+          'apikey': key, 'Authorization': `Bearer ${key}`,
+          'Content-Type': 'application/json', 'Prefer': 'return=representation',
+          ...(opts.headers || {})
+        }
+      });
+      if (!res.ok) throw new Error(`${endpoint}: ${res.status} ${res.statusText}`);
+      return res.json();
+    }
+
+    async function testConnection() {
+      const btn = document.getElementById('btn-test');
+      const status = document.getElementById('conn-status');
+      btn.disabled = true;
+      btn.textContent = 'Testing...';
+      try {
+        const result = await supFetch('modules', { method: 'GET', headers: { 'Prefer': '' } });
+        status.className = 'status-badge status-ready';
+        status.textContent = '✅ Connected';
+        document.getElementById('btn-seed').disabled = false;
+        document.getElementById('btn-clear').disabled = false;
+        log('Connection successful. Tables accessible.', 'ok');
+      } catch (e) {
+        status.className = 'status-badge status-error';
+        status.textContent = '❌ Failed';
+        log('Connection failed: ' + e.message, 'err');
+        log('Tip: Make sure the URL is correct and RLS policies allow anon access.', 'info');
+      }
+      btn.disabled = false;
+      btn.textContent = 'Test Connection';
+    }
+
+    async function seedAll() {
+      const btn = document.getElementById('btn-seed');
+      btn.disabled = true;
+      btn.textContent = 'Seeding...';
+      log('Starting full data seed...', 'info');
+
+      try {
+        // 1. Modules + videos + cues
+        const modules = [
+          { module_number: 1, title: 'Claude Ecosystem & Flows', description: 'Anatomy of Claude, token mechanics, stateful orchestration loops, and message routing topologies.' },
+          { module_number: 2, title: 'Model Context Protocol (MCP)', description: 'Connecting Claude to secure private databridges (SQLite/PostgreSQL) with read-only boundaries and stdio/SSE transports on Fly.io.' },
+          { module_number: 3, title: 'Zero-Data Retention (ZDR)', description: 'Restricting API endpoints using AWS Bedrock VPC Interface Endpoints (PrivateLink) and implementing strict compliance logs.' },
+          { module_number: 4, title: 'Deterministic Routers', description: 'Building specialized agent classifiers and execution circuit-breakers in Python to shut down rogue loops cleanly.' },
+          { module_number: 5, title: 'Financial Engineering', description: 'Minimizing enterprise operational overhead by up to 90% using explicit, prefix-matching prompt cache points.' }
+        ];
+        await supFetch('modules', { method: 'POST', body: JSON.stringify(modules) });
+        log('Seeded 5 modules.', 'ok');
+
+        // 2. Videos
+        const videoData = [
+          { module_number: 1, videos: [
+            { video_number: 1, title: 'Architecture Overview', duration: '15:00', script: 'Claude API anatomy covering Messages API, streaming, and tool use.' },
+            { video_number: 2, title: 'Stateful Orchestration', duration: '18:00', script: 'Deep dive into loops vs stateless middleware boundaries.' },
+            { video_number: 3, title: 'Production Wiring', duration: '12:00', script: 'Connecting Claude to enterprise data sources securely.' }
+          ]},
+          { module_number: 2, videos: [
+            { video_number: 1, title: 'MCP Fundamentals', duration: '14:00', script: 'What is the Model Context Protocol? Protocol architecture.' },
+            { video_number: 2, title: 'Building an MCP Server', duration: '22:00', script: 'Step-by-step implementation of an SQLite data bridge.' },
+            { video_number: 3, title: 'Enterprise MCP', duration: '16:00', script: 'Authentication and authorization boundaries for production MCP.' }
+          ]},
+          { module_number: 3, videos: [
+            { video_number: 1, title: 'ZDR Principles', duration: '13:00', script: 'Why zero-data retention matters for enterprise compliance.' },
+            { video_number: 2, title: 'Implementing ZDR', duration: '20:00', script: 'Terraform blueprint for VPC Interface Endpoints.' },
+            { video_number: 3, title: 'ZDR in Production', duration: '14:00', script: 'Testing and verifying data retention boundaries.' }
+          ]},
+          { module_number: 4, videos: [
+            { video_number: 1, title: 'Router Architecture', duration: '14:00', script: 'Why deterministic routing matters for AI safety.' },
+            { video_number: 2, title: 'Building the Router', duration: '19:00', script: 'Python implementation walkthrough of router.py.' },
+            { video_number: 3, title: 'Router in Production', duration: '15:00', script: 'Load testing results and performance benchmarks.' }
+          ]},
+          { module_number: 5, videos: [
+            { video_number: 1, title: 'Cost Optimization Fundamentals', duration: '13:00', script: 'Understanding Claude pricing.' },
+            { video_number: 2, title: 'Implementing Caching', duration: '18:00', script: 'Explicit cache point placement strategies.' },
+            { video_number: 3, title: 'Enterprise ROI', duration: '16:00', script: 'Real-world cost reduction case study.' }
+          ]}
+        ];
+        for (const m of videoData) {
+          const mods = await supFetch(`modules?module_number=eq.${m.module_number}&select=id`);
+          if (mods.length) {
+            for (const v of m.videos) {
+              await supFetch('videos', { method: 'POST', body: JSON.stringify({ ...v, module_id: mods[0].id }) });
+            }
+          }
+        }
+        log('Seeded 15 videos.', 'ok');
+
+        // 3. Scenes
+        const scenesData = [
+          { module_number: 1, section_number: 1, scene_number: 1, script: '"Welcome to Module 1..."', bg_image: 'assets/module1_section1_scene1_bg.png', lt_image: 'assets/overlays/lt_intro.png', lt_main: 'Claude Architect Masterclass', lt_sub: 'Module 1: Introduction', overlay_lt: 'assets/overlays/lt_intro.png', overlay_text: 'assets/overlays/overlay_systems.png', bundle_url: 'assets/archives/module1_section1_scene1.zip' },
+          { module_number: 1, section_number: 1, scene_number: 2, script: '"Today, we are breaking down..."', bg_image: 'assets/module1_section1_scene2_bg.png', lt_image: 'assets/overlays/lt_mcp.png', lt_main: 'Model Context Protocol', lt_sub: 'Enterprise Integration Layer', overlay_lt: 'assets/overlays/lt_mcp.png', overlay_text: 'assets/overlays/overlay_mcp.png', bundle_url: 'assets/archives/module1_section1_scene2.zip' },
+          { module_number: 1, section_number: 1, scene_number: 3, script: '"All the code, blueprints..."', bg_image: 'assets/module1_section1_scene3_bg.png', lt_image: 'assets/overlays/lt_resources.png', lt_main: 'Resource Dashboard', lt_sub: 'Open Source Architecture Blueprint', overlay_lt: 'assets/overlays/lt_resources.png', overlay_text: 'assets/overlays/overlay_github.png', bundle_url: 'assets/archives/module1_section1_scene3.zip' }
+        ];
+        const insertedScenes = await supFetch('scenes', { method: 'POST', body: JSON.stringify(scenesData) });
+        log('Seeded 3 scenes.', 'ok');
+
+        // 4. Scene cues
+        for (const s of insertedScenes) {
+          const cues = [
+            { icon: '🖼️', label: `BG: Scene ${s.scene_number}`, prompt: 'Background generation prompt', sort_order: 1 },
+            { icon: '🔤', label: 'Text overlay', prompt: 'Text generation prompt', sort_order: 2 },
+            { icon: '⏱️', label: 'Timing cues', prompt: '', sort_order: 3 }
+          ];
+          await supFetch('scene_cues', { method: 'POST', body: JSON.stringify(cues.map(c => ({ ...c, scene_id: s.id }))) });
+        }
+        log('Seeded scene cues.', 'ok');
+
+        // 5. EDL entries
+        const edlData = [
+          { scene_number: 1, entries: [
+            { timing: '0:00 - 0:03', description: 'Fade in background with zoom-in animation.', sort_order: 1 },
+            { timing: '0:03 - 0:05', description: 'Slide in Lower Third from left margin.', sort_order: 2 },
+            { timing: '0:05 - 0:07', description: 'Pop-in text overlay.', sort_order: 3 },
+            { timing: '0:10', description: 'Trigger icons with glow pulse.', sort_order: 4 }
+          ]},
+          { scene_number: 2, entries: [
+            { timing: '0:12 - 0:15', description: 'Cross-dissolve transition.', sort_order: 1 },
+            { timing: '0:15 - 0:18', description: 'Replace Lower Third.', sort_order: 2 },
+            { timing: '0:18 - 0:22', description: 'Overlay text center-screen.', sort_order: 3 },
+            { timing: '0:23', description: 'Animate data pipe icons.', sort_order: 4 }
+          ]},
+          { scene_number: 3, entries: [
+            { timing: '0:28', description: 'Focus camera on dashboard.', sort_order: 1 },
+            { timing: '0:30', description: 'Display URL pill overlay.', sort_order: 2 },
+            { timing: '0:35', description: 'Fade to black.', sort_order: 3 }
+          ]}
+        ];
+        for (const ed of edlData) {
+          const sc = insertedScenes.find(s => s.scene_number === ed.scene_number);
+          if (sc) {
+            await supFetch('edl_entries', { method: 'POST', body: JSON.stringify(ed.entries.map(e => ({ ...e, scene_id: sc.id }))) });
+          }
+        }
+        log('Seeded EDL entries.', 'ok');
+
+        // 6. Checklist items
+        const checklistItems = [
+          { phase: 'Pre-Production', item_name: 'Module plans drafted', item_desc: 'All 5 module plans exist', sort_order: 1 },
+          { phase: 'Pre-Production', item_name: 'Scripts finalized', item_desc: 'Per-section scripts approved', sort_order: 2 },
+          { phase: 'Pre-Production', item_name: 'Storyboard / scene breakdown', item_desc: 'Scene list with timing defined', sort_order: 3 },
+          { phase: 'Pre-Production', item_name: 'Asset generation prompts ready', item_desc: 'All BG, text, icon prompts written', sort_order: 4 },
+          { phase: 'Pre-Production', item_name: 'Audio recording schedule', item_desc: 'Dates and environment booked', sort_order: 5 },
+          { phase: 'Pre-Production', item_name: 'Lower third designs approved', item_desc: 'Per-module L3 variants signed off', sort_order: 6 },
+          { phase: 'Pre-Production', item_name: 'Production plan reviewed', item_desc: 'Master plan read by all stakeholders', sort_order: 7 },
+          { phase: 'Production', item_name: 'Audio recorded per section', item_desc: 'WAV files captured', sort_order: 8 },
+          { phase: 'Production', item_name: 'No clipping or noise', item_desc: 'All audio passes quality gate', sort_order: 9 },
+          { phase: 'Production', item_name: 'Raw assets archived', item_desc: 'Original recordings backed up', sort_order: 10 },
+          { phase: 'Production', item_name: 'Screen recordings captured', item_desc: 'IDE/dashboard walkthroughs recorded', sort_order: 11 },
+          { phase: 'Production', item_name: 'Camera footage backed up', item_desc: 'All video sources copied', sort_order: 12 },
+          { phase: 'Production', item_name: 'Production log completed', item_desc: 'Take notes documented', sort_order: 13 },
+          { phase: 'Post-Production', item_name: 'Background images generated', item_desc: 'All scene backgrounds created', sort_order: 14 },
+          { phase: 'Post-Production', item_name: 'Text overlays generated', item_desc: 'Typography overlays match script', sort_order: 15 },
+          { phase: 'Post-Production', item_name: 'Icons generated', item_desc: 'All cue icons created', sort_order: 16 },
+          { phase: 'Post-Production', item_name: 'Lower thirds rendered', item_desc: 'All L3 assets exported', sort_order: 17 },
+          { phase: 'Post-Production', item_name: 'EDL reviewed for each scene', item_desc: 'Edit design lists match waveform', sort_order: 18 },
+          { phase: 'Post-Production', item_name: 'Composite previews checked', item_desc: 'Hover previews match intended look', sort_order: 19 },
+          { phase: 'Post-Production', item_name: 'Asset bundles zipped', item_desc: 'Per-scene ZIP files ready', sort_order: 20 },
+          { phase: 'Post-Production', item_name: 'Final render approved', item_desc: 'Master video exported and reviewed', sort_order: 21 },
+          { phase: 'Publication', item_name: 'YouTube thumbnail created', item_desc: 'Custom thumbnail per module', sort_order: 22 },
+          { phase: 'Publication', item_name: 'Description and tags written', item_desc: 'SEO-friendly metadata ready', sort_order: 23 },
+          { phase: 'Publication', item_name: 'GitHub repo updated', item_desc: 'All code and docs pushed', sort_order: 24 },
+          { phase: 'Publication', item_name: 'Course playlist updated', item_desc: 'New video added to playlist', sort_order: 25 },
+          { phase: 'Publication', item_name: 'Announcement posted', item_desc: 'Social/community update published', sort_order: 26 }
+        ];
+        await supFetch('checklist_items', { method: 'POST', body: JSON.stringify(checklistItems) });
+        log('Seeded 26 checklist items.', 'ok');
+
+        // 7. Course content (intro/outro)
+        const courseContent = [
+          { section: 'intro', content: '## Welcome to the Claude AI Certification for Architects\n\nThis certification course takes you from AI prototyping to **production-grade enterprise deployment**. Over 5 modules and 15 videos, you will master:\n\n- 🔐 **Secure AI Architecture** — MCP, ZDR, PrivateLink\n- ⚡ **Performance Optimization** — Prompt caching, deterministic routers\n- 🏭 **Production Pipeline** — Pre-Prod → Prod → Post-Prod workflow\n\n> **Target Audience:** Senior engineers, architects, and technical leaders building AI-powered enterprise systems.' },
+          { section: 'outro', content: '## Next Steps\n\nCongratulations on completing the course outline! Here is your action plan:\n\n1. **Review** the course outline and identify priority modules\n2. **Set up** your Supabase database (run the seed script)\n3. **Generate** assets for each scene using the provided prompts\n4. **Record** audio and screen captures per the production schedule\n5. **Review** composite previews in the Post-Production Master page\n\n> 🎓 Ready to start? Open the **Master Script** viewer and begin with Module 1.' }
+        ];
+        await supFetch('course_content', { method: 'POST', body: JSON.stringify(courseContent) });
+        log('Seeded intro/outro content.', 'ok');
+
+        log('✅ ALL DATA SEEDED SUCCESSFULLY.', 'ok');
+      } catch (e) {
+        log('Seed failed: ' + e.message, 'err');
+      }
+      btn.disabled = false;
+      btn.textContent = '🌱 Seed All Data';
+    }
+
+    async function clearAll() {
+      if (!confirm('This will DELETE all data from all tables. Continue?')) return;
+      const tables = ['course_content', 'checklist_progress', 'checklist_items', 'edl_entries', 'scene_cues', 'scenes', 'resource_links', 'video_cues', 'videos', 'modules'];
+      for (const t of tables) {
+        try {
+          await supFetch(t, { method: 'DELETE', headers: { 'Prefer': '' } });
+          log(`Cleared ${t}.`, 'ok');
+        } catch (e) {
+          log(`Failed to clear ${t}: ${e.message}`, 'err');
+        }
+      }
+      log('✅ All tables cleared.', 'ok');
+    }
+  </script>
+</body>
+</html>

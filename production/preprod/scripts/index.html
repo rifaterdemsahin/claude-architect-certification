@@ -165,13 +165,51 @@
       };
     }
 
-    fetch('master_script.json')
-      .then(r => { if (!r.ok) throw new Error('Failed to load master_script.json'); return r.json(); })
-      .then(render)
-      .catch(err => {
+    const SUPABASE_URL = localStorage.getItem('supabase_url') || '';
+    const SUPABASE_ANON_KEY = localStorage.getItem('supabase_anon_key') || '';
+
+    async function loadFromSupabase() {
+      if (!SUPABASE_URL.includes('supabase.co')) return null;
+      try {
+        async function sq(endpoint) {
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/${endpoint}`, {
+            headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+          });
+          if (!res.ok) return null;
+          return res.json();
+        }
+        const modules = await sq('modules?order=module_number.asc');
+        const videos = await sq('videos?order=video_number.asc&select=*,video_cues(*)');
+        const links = await sq('resource_links?select=*,module_id(*)');
+        if (!modules) return null;
+
+        return {
+          course: { title: 'Claude AI Certification for Architects', pipeline: 'Supabase' },
+          modules: modules.map(m => ({
+            id: m.module_number, title: m.title, description: m.description,
+            videos: (videos || []).filter(v => v.module_id === m.id).map(v => ({
+              id: v.video_number, title: v.title, duration: v.duration, script: v.script,
+              cues: (v.video_cues || []).sort((a,b) => a.sort_order - b.sort_order).map(c => c.cue_text)
+            })),
+            links: (links || []).filter(l => l.module_id === m.id).map(l => ({ label: l.label, url: l.url }))
+          })),
+          exam: { title: 'Certification Exam & Case Study', description: 'The final exam covers all 5 modules.', scenarios: [], link: 'docs/certification/exam_and_case_study.md' }
+        };
+      } catch { return null; }
+    }
+
+    (async () => {
+      let data = await loadFromSupabase();
+      if (!data) {
+        data = await fetch('master_script.json').then(r => r.json()).catch(() => null);
+      }
+      if (data) {
+        render(data);
+      } else {
         document.getElementById('content-area').innerHTML =
-          '<div class="error"><h2>❌ Failed to Load Script Data</h2><p>' + err.message + '</p><p>Make sure the server is running (e.g. <code>python3 -m http.server 8000</code>) and the JSON file is accessible.</p></div>';
-      });
+          '<div class="error"><h2>❌ Failed to Load</h2><p>Could not load from Supabase or local JSON.</p></div>';
+      }
+    })();
   </script>
 </body>
 </html>
