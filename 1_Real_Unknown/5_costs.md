@@ -9,7 +9,7 @@
 
 1. **Keep it Updated**: When setting up or modifying resources, update the estimated and actual costs in the tables below.
 2. **Track Recurring vs One-Off**: Classify costs as either one-time setup costs or monthly recurring charges.
-3. **Traceability**: Link each cost entry to its setup documentation or script (e.g. `2_Environment/setup_azure.md` for Key Vault costs).
+3. **Traceability**: Link each cost entry to its setup documentation or script (e.g. `2_Environment/5_setup_azure.md` for Key Vault costs).
 4. **Log API Consumption**: Update usage and cost statistics for AI APIs or token usage during agent operations.
 
 ---
@@ -18,12 +18,12 @@
 
 | Service / Resource | Provider | Type | Monthly/Period Cost | Actual Cost | Status | Stage / Setup Reference |
 |--------------------|----------|------|---------------------|-------------|--------|--------------------------|
-| **Azure Key Vault** | Microsoft Azure | Recurring | £0.03 / 10k ops | £0.00 | Active | [2_Environment/setup_azure.md](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/2_Environment/setup_azure.md) |
+| **Azure Key Vault** | Microsoft Azure | Recurring | £0.03 / 10k ops | £0.00 | Active | [2_Environment/5_setup_azure.md](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/2_Environment/5_setup_azure.md) |
 | **Backend & Services** | Fly.io | Recurring | £25.00 / quarter | £25.00 / quarter | Active | Host for Qdrant and all backend projects. Managed via quarterly load. |
 | **Vector DB (Qdrant)** | Fly.io | Recurring | Included in Fly.io | £0.00 | Active | Hosted on Fly.io inside the overall project sandbox. |
 | **Database** | Supabase | Recurring | £0.00 (Free Model) | £0.00 | Active | Using Supabase Free Tier. |
 | **Static Hosting & CI/CD** | GitHub Pages / Actions | Recurring | £4.00 / month | £4.00 / month | Active | Paid features for deployments, testing, and automatic issue creation. [README.md](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/README.md) |
-| **Local AI (Ollama)**| Self-hosted | One-off | £0.00 (Local HW) | £0.00 | Active | [2_Environment/setup_ai.md](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/2_Environment/setup_ai.md) |
+| **Local AI (Ollama)**| Self-hosted | One-off | £0.00 (Local HW) | £0.00 | Active | [2_Environment/8_setup_ai.md](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/2_Environment/8_setup_ai.md) |
 | **SSL / TLS Certs** | Let's Encrypt | Recurring | £0.00 | £0.00 | Active | N/A |
 
 ---

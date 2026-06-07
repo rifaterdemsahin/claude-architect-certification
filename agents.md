@@ -67,4 +67,4 @@ This document defines how AI agents interact with the **Claude AI Certification 
 - **Error & Fix Logging:** Log all runtime errors to `6_Semblance/error.log` and fixes to `6_Semblance/fix.log`.
 - **Active Reflection:** Write a retrospective journal in `6_Semblance/lessons_learned.md` after every milestone.
 - **Menu Sync:** Keep `navigation_config.json` synchronized when adding/removing documents.
-- **Architecture Sync:** When architecture changes, update [architecture.md](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/2_Environment/architecture.md).
+- **Architecture Sync:** When architecture changes, update [1_architecture.md](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/2_Environment/1_architecture.md).

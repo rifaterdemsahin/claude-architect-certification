@@ -44,3 +44,14 @@ winget install -e --id Microsoft.AzureCLI
 - [ ] Run `python --version` in PowerShell and verify correct version.
 - [ ] Verify Docker Desktop is configured to use the WSL 2 engine.
 - [ ] Run `az --version` to verify Azure CLI is set up.
+
+---
+
+## 📚 Related Documents
+
+- [1_architecture.md](1_architecture.md) — System architecture overview
+- [4_fly_io.md](4_fly_io.md) — Backend hosting (Flyctl dependency)
+- [5_setup_azure.md](5_setup_azure.md) — Azure CLI setup
+- [6_setup_mac.md](6_setup_mac.md) — macOS setup (alternative)
+- [8_setup_ai.md](8_setup_ai.md) — AI stack configuration
+- [10_production_setup.md](10_production_setup.md) — Production workflow

@@ -47,7 +47,7 @@
 ## 📅 2026-05-31: Architecture Setup & Sync Rules Update
 
 ### What went well
-- Created a comprehensive `2_Environment/architecture.md` containing dynamic Mermaid charts showing system components (GitHub Pages, Cloudflare Workers, Fly.io, Azure Key Vault, GitHub Actions).
+- Created a comprehensive `2_Environment/1_architecture.md` containing dynamic Mermaid charts showing system components (GitHub Pages, Cloudflare Workers, Fly.io, Azure Key Vault, GitHub Actions).
 - Standardized rules in `agents.md` and agent profiles instructing teams to update `architecture.md` as soon as system configurations change.
 
 ### Gaps & Challenges

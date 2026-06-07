@@ -51,3 +51,13 @@ ollama pull llama3
 - [ ] Ollama service is active (`curl http://localhost:11434`)
 - [ ] Qdrant Dashboard is accessible (`http://localhost:6333/dashboard`)
 - [ ] Embedding generation is tested successfully via CLI or script
+
+---
+
+## 📚 Related Documents
+
+- [1_architecture.md](1_architecture.md) — System architecture overview (AI/ML services)
+- [4_fly_io.md](4_fly_io.md) — Backend hosting (Qdrant, Ollama integration)
+- [5_setup_azure.md](5_setup_azure.md) — Secrets management
+- [6_setup_mac.md](6_setup_mac.md) — macOS setup (Docker dependency)
+- [7_setup_windows.md](7_setup_windows.md) — Windows setup (Docker dependency)

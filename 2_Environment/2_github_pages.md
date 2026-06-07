@@ -99,3 +99,13 @@ jobs:
 - [GitHub Pages Docs](https://docs.github.com/en/pages)
 - [GitHub Actions for Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site)
 - [Custom Domains](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site)
+
+---
+
+## 📚 Related Documents
+
+- [1_architecture.md](1_architecture.md) — System architecture overview
+- [3_cloudflare_workers.md](3_cloudflare_workers.md) — Edge compute (auth, routing, caching)
+- [4_fly_io.md](4_fly_io.md) — Backend hosting (Python APIs)
+- [5_setup_azure.md](5_setup_azure.md) — Secrets management
+- [9_navigation.md](9_navigation.md) — Navigation system

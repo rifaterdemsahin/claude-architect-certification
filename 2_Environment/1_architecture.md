@@ -40,15 +40,15 @@ graph TD
   - **Debug Menu:** Configured dynamically, toggled via a floating action button on the bottom right. Persists using cookie values (`debug=true`).
   - **Console Logger:** `debugLog` utility logs loading operations, API integrations, and routing info for developers if debug mode is active.
 
-### 2. Edge Routing & Auth (`2_Environment/cloudflare_workers.md`)
+### 2. Edge Routing & Auth (`2_Environment/3_cloudflare_workers.md`)
 - Cloudflare Workers act as a performant edge compute proxy.
 - Provides rate-limiting, security headers, routing, and access control.
 
-### 3. Backend Services (`2_Environment/fly_io.md`)
+### 3. Backend Services (`2_Environment/4_fly_io.md`)
 - Hosts backend logic using Python services (FastAPI/Flask) running on Fly.io.
 - Hosts vector database integration (Qdrant) and Ollama connections.
 
-### 4. Secrets Management (`2_Environment/setup_azure.md`)
+### 4. Secrets Management (`2_Environment/5_setup_azure.md`)
 - **Provider:** Microsoft Azure Key Vault.
 - **Usage:** Stores all API keys, database credentials, and deployment keys. Secrets are loaded at runtime by backend environments or injected during CI/CD steps.
 
@@ -57,5 +57,19 @@ graph TD
 ## 🛠️ How to Keep This Document Updated
 
 1. **Keep Diagrams in Sync:** If new components are added (e.g. database layers, external OAuth providers), update the Mermaid graph above.
-2. **Review Environment Configs:** Ensure that changes here match setup instructions in `setup_mac.md`, `setup_windows.md`, and `setup_ai.md`.
+2. **Review Environment Configs:** Ensure that changes here match setup instructions in `6_setup_mac.md`, `7_setup_windows.md`, and `8_setup_ai.md`.
 3. **Verify Rendering:** Ensure that Mermaid rendering works on the compiled web page via `markdown_renderer.html`.
+
+---
+
+## 📚 Related Documents
+
+- [2_github_pages.md](2_github_pages.md) — Frontend static hosting
+- [3_cloudflare_workers.md](3_cloudflare_workers.md) — Edge compute
+- [4_fly_io.md](4_fly_io.md) — Backend hosting
+- [5_setup_azure.md](5_setup_azure.md) — Secrets management
+- [6_setup_mac.md](6_setup_mac.md) — macOS setup
+- [7_setup_windows.md](7_setup_windows.md) — Windows setup
+- [8_setup_ai.md](8_setup_ai.md) — AI stack setup
+- [9_navigation.md](9_navigation.md) — Navigation system
+- [10_production_setup.md](10_production_setup.md) — Production workflow

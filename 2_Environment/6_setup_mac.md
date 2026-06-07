@@ -47,3 +47,14 @@ brew install azure-cli
 - [ ] Run `docker --version` to ensure Docker Daemon is running.
 - [ ] Run `fly version` to check if Fly CLI is initialized.
 - [ ] Run `az --version` to confirm Azure CLI is available.
+
+---
+
+## 📚 Related Documents
+
+- [1_architecture.md](1_architecture.md) — System architecture overview
+- [4_fly_io.md](4_fly_io.md) — Backend hosting (Flyctl dependency)
+- [5_setup_azure.md](5_setup_azure.md) — Azure CLI setup
+- [7_setup_windows.md](7_setup_windows.md) — Windows setup (alternative)
+- [8_setup_ai.md](8_setup_ai.md) — AI stack configuration
+- [10_production_setup.md](10_production_setup.md) — Production workflow

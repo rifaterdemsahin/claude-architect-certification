@@ -91,3 +91,10 @@ This is the delivery-pilot framework navigation. It contains:
 - **Debug Menu** = what the developer/AI sees (framework navigation)
 - Debug button must always be accessible at bottom-right
 - Both menus must work on mobile (375px viewport)
+
+---
+
+## 📚 Related Documents
+
+- [1_architecture.md](1_architecture.md) — System architecture overview (menu system context)
+- [2_github_pages.md](2_github_pages.md) — Frontend hosting (menu rendering)

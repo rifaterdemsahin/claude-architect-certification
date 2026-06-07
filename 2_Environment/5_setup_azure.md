@@ -70,3 +70,14 @@ To pull secrets into GitHub workflows, the repository needs Azure Service Princi
 - [ ] Active subscription is verified
 - [ ] Key Vault exists and permissions are configured correctly
 - [ ] Zero secret configurations committed to source files
+
+---
+
+## 📚 Related Documents
+
+- [1_architecture.md](1_architecture.md) — System architecture overview
+- [2_github_pages.md](2_github_pages.md) — GitHub Actions deployment
+- [3_cloudflare_workers.md](3_cloudflare_workers.md) — Edge compute auth
+- [4_fly_io.md](4_fly_io.md) — Backend secrets injection
+- [6_setup_mac.md](6_setup_mac.md) — macOS setup (Azure CLI)
+- [7_setup_windows.md](7_setup_windows.md) — Windows setup (Azure CLI)

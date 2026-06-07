@@ -45,8 +45,8 @@
 
 - [ ] **TSK-022: Update Architecture Diagram**
   - **Assignee:** Claude
-  - **Details:** Sync `2_Environment/architecture.md` Mermaid diagrams with current Delivery Pilot structure (Supabase, Fly.io, Azure Key Vault, GitHub Pages).
-  - **Stage Reference:** `2_Environment/architecture.md`
+  - **Details:** Sync `2_Environment/1_architecture.md` Mermaid diagrams with current Delivery Pilot structure (Supabase, Fly.io, Azure Key Vault, GitHub Pages).
+  - **Stage Reference:** `2_Environment/1_architecture.md`
 
 - [ ] **TSK-023: Maintenance Sweep — All 7 Stages**
   - **Assignee:** All Agents

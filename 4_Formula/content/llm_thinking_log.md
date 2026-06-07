@@ -115,10 +115,10 @@ This log documents the thinking phase summaries and reasoning processes of the L
 4. **Logs Updates**: Recorded prompt details and action items in `prompts.md` and added this reasoning log.
 
 ### 📤 Outcomes & Decisions
-- Created `2_Environment/setup_mac.md`.
-- Created `2_Environment/setup_windows.md`.
-- Created `2_Environment/setup_ai.md`.
-- Created `2_Environment/setup_azure.md`.
+- Created `2_Environment/6_setup_mac.md`.
+- Created `2_Environment/7_setup_windows.md`.
+- Created `2_Environment/8_setup_ai.md`.
+- Created `2_Environment/5_setup_azure.md`.
 - Staged, committed, and pushed each file independently to main.
 
 ---

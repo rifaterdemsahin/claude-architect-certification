@@ -75,3 +75,15 @@ fly secrets set DATABASE_URL="postgresql://..." API_KEY="..."
 - [Fly.io Docs](https://fly.io/docs/)
 - [Flyctl CLI](https://fly.io/docs/flyctl/)
 - [Fly.io with Python](https://fly.io/docs/languages-and-frameworks/python/)
+
+---
+
+## 📚 Related Documents
+
+- [1_architecture.md](1_architecture.md) — System architecture overview
+- [2_github_pages.md](2_github_pages.md) — Frontend static hosting
+- [3_cloudflare_workers.md](3_cloudflare_workers.md) — Edge compute
+- [5_setup_azure.md](5_setup_azure.md) — Secrets management
+- [8_setup_ai.md](8_setup_ai.md) — AI stack configuration
+- [6_setup_mac.md](6_setup_mac.md) — macOS setup (Flyctl CLI)
+- [7_setup_windows.md](7_setup_windows.md) — Windows setup (Flyctl CLI)

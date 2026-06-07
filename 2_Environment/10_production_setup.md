@@ -87,6 +87,8 @@ The Thread Ripper is currently out of service. Until it is restored:
 
 ## Related Documents
 
-- [Setup Mac](setup_mac.md) — macOS toolchain setup
+- [1_architecture.md](1_architecture.md) — System architecture overview
+- [6_setup_mac.md](6_setup_mac.md) — macOS toolchain setup
+- [8_setup_ai.md](8_setup_ai.md) — AI stack configuration
 - `prompts.md` — Prompt history and LLM usage logs
 - `6_Semblance/error.log` — Runtime error tracking

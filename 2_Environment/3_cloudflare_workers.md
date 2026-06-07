@@ -65,3 +65,12 @@ wrangler deploy
 
 - [Cloudflare Workers Docs](https://developers.cloudflare.com/workers/)
 - [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/)
+
+---
+
+## 📚 Related Documents
+
+- [1_architecture.md](1_architecture.md) — System architecture overview
+- [2_github_pages.md](2_github_pages.md) — Frontend static hosting
+- [4_fly_io.md](4_fly_io.md) — Backend hosting
+- [5_setup_azure.md](5_setup_azure.md) — Secrets management
