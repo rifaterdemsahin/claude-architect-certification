@@ -246,6 +246,16 @@
       </a>
     </div>
 
+    <!-- Course Outline Section -->
+    <div id="course-outline-section" class="file-list">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 10px;">
+        <h2 style="margin-bottom: 0;">📋 Course Outline</h2>
+        <span id="db-status-badge" class="db-status loading">Connecting to Supabase...</span>
+      </div>
+      <div id="outline-loading" class="outline-status">Loading course outline from Supabase database...</div>
+      <div id="outline-container" class="outline-container" style="display: none;"></div>
+    </div>
+
     <div class="file-list">
       <h2>📁 Files in this Phase</h2>
       <div class="file-row">
@@ -293,5 +303,139 @@
       </div>
     </footer>
   </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const SUPABASE_URL = localStorage.getItem('supabase_url') || 'https://rmekfsdhglyiralxvkwc.supabase.co';
+      const SUPABASE_ANON_KEY = localStorage.getItem('supabase_anon_key') || '';
+      const SUPABASE_CONFIGURED = SUPABASE_URL.includes('supabase.co') && SUPABASE_ANON_KEY.length > 10;
+      
+      async function loadCourseOutline() {
+        if (!SUPABASE_CONFIGURED) {
+          console.log("Supabase not configured, using fallback master_script.json");
+          loadFallback();
+          return;
+        }
+        
+        try {
+          async function sq(endpoint) {
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/${endpoint}`, {
+              headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+            });
+            if (!res.ok) throw new Error(`Fetch error: ${res.statusText}`);
+            return res.json();
+          }
+          
+          const modules = await sq('modules?order=module_number.asc');
+          const videos = await sq('videos?order=video_number.asc&select=*,video_cues(*)');
+          const outlines = await sq('outline?order=sort_order.asc');
+          
+          if (!modules || modules.length === 0) {
+            throw new Error("No modules found");
+          }
+          
+          const mappedData = {
+            modules: modules.map(m => ({
+              id: m.module_number,
+              title: m.title,
+              description: m.description,
+              objectives: (outlines || []).filter(o => o.module_number === m.module_number && o.content_type === 'objective').map(o => o.content),
+              videos: (videos || []).filter(v => v.module_id === m.id).map(v => ({
+                id: v.video_number,
+                title: v.title,
+                duration: v.duration,
+                cues: (v.video_cues || []).sort((a,b) => a.sort_order - b.sort_order).map(c => c.cue_text)
+              }))
+            }))
+          };
+          
+          renderOutline(mappedData, true);
+        } catch (err) {
+          console.error('Failed to load course outline from Supabase, falling back:', err);
+          loadFallback();
+        }
+      }
+      
+      async function loadFallback() {
+        try {
+          const res = await fetch('scripts/master_script.json');
+          if (res.ok) {
+            const data = await res.json();
+            renderOutline(data, false);
+          } else {
+            document.getElementById('outline-loading').textContent = 'Error loading fallback outline data.';
+          }
+        } catch (err) {
+          document.getElementById('outline-loading').textContent = 'Error loading course outline.';
+          console.error(err);
+        }
+      }
+      
+      function renderOutline(data, isLive) {
+        const statusBadge = document.getElementById('db-status-badge');
+        if (isLive) {
+          statusBadge.textContent = 'Supabase Live';
+          statusBadge.className = 'db-status live';
+        } else {
+          statusBadge.textContent = 'Offline Fallback';
+          statusBadge.className = 'db-status fallback';
+        }
+        
+        const container = document.getElementById('outline-container');
+        const loader = document.getElementById('outline-loading');
+        
+        loader.style.display = 'none';
+        container.style.display = 'block';
+        container.innerHTML = '';
+        
+        const modules = data.modules || [];
+        modules.forEach(m => {
+          const modEl = document.createElement('div');
+          modEl.className = 'outline-module';
+          
+          let objectivesHtml = '';
+          if (m.objectives && m.objectives.length > 0) {
+            objectivesHtml = `
+              <div class="outline-objectives">
+                ${m.objectives.map(obj => `<span class="objective-tag">🎯 ${obj}</span>`).join('')}
+              </div>
+            `;
+          }
+          
+          let videosHtml = '';
+          if (m.videos && m.videos.length > 0) {
+            videosHtml = `
+              <div class="outline-videos">
+                ${m.videos.map(v => `
+                  <div class="outline-video-card">
+                    <div class="outline-video-meta">
+                      <span class="outline-video-title">Video ${v.id || ''}: ${v.title}</span>
+                      <span class="outline-video-duration">⏱️ ${v.duration || 'N/A'}</span>
+                    </div>
+                    ${v.cues && v.cues.length > 0 ? `
+                      <div class="outline-video-cues">
+                        ${v.cues.map(cue => `<div class="cue-item">🎬 ${cue}</div>`).join('')}
+                      </div>
+                    ` : ''}
+                  </div>
+                `).join('')}
+              </div>
+            `;
+          }
+          
+          modEl.innerHTML = `
+            <div class="outline-module-header">
+              <div class="outline-module-title">📦 Module ${m.id || m.module_number || ''}: ${m.title}</div>
+              <div class="outline-module-desc">${m.description || ''}</div>
+              ${objectivesHtml}
+            </div>
+            ${videosHtml}
+          `;
+          container.appendChild(modEl);
+        });
+      }
+      
+      loadCourseOutline();
+    });
+  </script>
 </body>
 </html>
