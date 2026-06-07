@@ -408,6 +408,13 @@
       <div id="sidebar-modules" class="module-group-container">
         <!-- Dyn generated -->
       </div>
+      <div id="supabase-config-panel" style="margin-top:auto;border-top:1px solid rgba(255,255,255,0.08);padding-top:16px;display:none;">
+        <div class="sidebar-title" style="font-size:0.9rem;">🔧 Supabase Config</div>
+        <input type="text" id="config-url-input" placeholder="Supabase URL" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(0,0,0,0.3);color:white;font-size:0.8rem;margin-bottom:8px;">
+        <input type="password" id="config-key-input" placeholder="Anon Key" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(0,0,0,0.3);color:white;font-size:0.8rem;margin-bottom:8px;">
+        <button onclick="saveSupabaseConfig()" style="width:100%;padding:8px;border-radius:8px;border:none;background:var(--primary);color:white;font-weight:700;cursor:pointer;font-size:0.8rem;">Save Config & Reload</button>
+        <span id="config-status" style="font-size:0.75rem;color:var(--text-muted);display:block;margin-top:4px;"></span>
+      </div>
     </div>
 
     <!-- Right workspace -->
@@ -417,7 +424,7 @@
   </div>
 
   <footer>
-    <p><a href="../../index.html">← Back to Pre-Production Home</a> | <a href="scripts/index.html">Master Script Viewer</a></p>
+    <p><a href="../../index.html">← Back to Pre-Production Home</a> | <a href="scripts/index.html">Master Script Viewer</a> | <a href="scripts/README.md">📖 Script Format Guide</a></p>
   </footer>
 
   <script>
@@ -462,12 +469,14 @@
     const SUPABASE_URL = localStorage.getItem('supabase_url') || 'https://rmekfsdhglyiralxvkwc.supabase.co';
     const SUPABASE_ANON_KEY = localStorage.getItem('supabase_anon_key') || '';
     
+    const SUPABASE_CONFIGURED = SUPABASE_URL.includes('supabase.co') && SUPABASE_ANON_KEY.length > 10;
+    
     let currentData = null;
     let selectedModuleIdx = 0;
     let selectedVideoIdx = 0;
 
     async function loadFromSupabase() {
-      if (!SUPABASE_URL.includes('supabase.co')) return null;
+      if (!SUPABASE_CONFIGURED) return null;
       try {
         async function sq(endpoint) {
           const res = await fetch(`${SUPABASE_URL}/rest/v1/${endpoint}`, {
@@ -515,6 +524,22 @@
       const words = val.trim() === '' ? 0 : val.trim().split(/\s+/).length;
       document.getElementById('char-count').textContent = chars;
       document.getElementById('word-count').textContent = words;
+    }
+
+    function saveSupabaseConfig() {
+      const url = document.getElementById('config-url-input').value.trim();
+      const key = document.getElementById('config-key-input').value.trim();
+      const status = document.getElementById('config-status');
+      if (url && key) {
+        localStorage.setItem('supabase_url', url);
+        localStorage.setItem('supabase_anon_key', key);
+        status.textContent = 'Saved. Reloading...';
+        status.style.color = '#10b981';
+        setTimeout(() => location.reload(), 800);
+      } else {
+        status.textContent = 'Both fields required.';
+        status.style.color = '#ef4444';
+      }
     }
 
     function buildSidebar() {
@@ -636,9 +661,8 @@
 
       try {
         let isSavedToSupabase = false;
-        const isSupabaseConfigured = SUPABASE_URL.includes('supabase.co') && SUPABASE_ANON_KEY;
 
-        if (isSupabaseConfigured && v.videoId) {
+        if (SUPABASE_CONFIGURED && v.videoId) {
           // Check if already exists in table
           const checkRes = await fetch(`${SUPABASE_URL}/rest/v1/scripts?video_id=eq.${v.videoId}`, {
             headers: {
@@ -704,9 +728,16 @@
     }
 
     (async () => {
-      let data = await loadFromSupabase();
+      let data = null;
+
+      if (SUPABASE_CONFIGURED) {
+        data = await loadFromSupabase();
+      } else {
+        document.getElementById('supabase-config-panel').style.display = 'block';
+      }
+
       if (!data) {
-        data = await fetch('master_script.json').then(r => r.json()).catch(() => null);
+        data = await fetch('scripts/master_script.json').then(r => r.json()).catch(() => null);
         if (data) {
           data.modules.forEach(m => {
             const fallback = FALLBACK_OUTLINES[m.id] || { objectives: [], keyResults: [] };

@@ -94,6 +94,25 @@ CREATE TABLE IF NOT EXISTS course_content (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- 11. SCRIPTS
+CREATE TABLE IF NOT EXISTS scripts (
+  id SERIAL PRIMARY KEY,
+  video_id INTEGER REFERENCES videos(id) ON DELETE CASCADE UNIQUE,
+  script_text TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 12. OUTLINE (objectives, key results, video topics per module)
+CREATE TABLE IF NOT EXISTS outline (
+  id SERIAL PRIMARY KEY,
+  module_number INTEGER NOT NULL,
+  video_number INTEGER DEFAULT 0,
+  content_type TEXT NOT NULL,
+  content TEXT NOT NULL,
+  sort_order INTEGER DEFAULT 0
+);
+
 -- Enable RLS
 ALTER TABLE modules ENABLE ROW LEVEL SECURITY;
 ALTER TABLE videos ENABLE ROW LEVEL SECURITY;
@@ -147,15 +166,32 @@ CREATE TABLE IF NOT EXISTS scripts (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Enable RLS
+-- 12. OUTLINE (objectives, key results, video topics per module)
+CREATE TABLE IF NOT EXISTS outline (
+  id SERIAL PRIMARY KEY,
+  module_number INTEGER NOT NULL,
+  video_number INTEGER DEFAULT 0,
+  content_type TEXT NOT NULL,
+  content TEXT NOT NULL,
+  sort_order INTEGER DEFAULT 0
+);
+
+-- Enable RLS for new tables
 ALTER TABLE scripts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE outline ENABLE ROW LEVEL SECURITY;
 
 -- Drop existing policies (safe to re-run)
 DROP POLICY IF EXISTS anon_select_scripts ON scripts;
 DROP POLICY IF EXISTS anon_insert_scripts ON scripts;
 DROP POLICY IF EXISTS anon_update_scripts ON scripts;
+DROP POLICY IF EXISTS anon_select_outline ON outline;
+DROP POLICY IF EXISTS anon_insert_outline ON outline;
 
--- Public anon policies
+-- Public anon policies for scripts
 CREATE POLICY anon_select_scripts ON scripts FOR SELECT USING (true);
 CREATE POLICY anon_insert_scripts ON scripts FOR INSERT WITH CHECK (true);
 CREATE POLICY anon_update_scripts ON scripts FOR UPDATE USING (true);
+
+-- Public anon policies for outline
+CREATE POLICY anon_select_outline ON outline FOR SELECT USING (true);
+CREATE POLICY anon_insert_outline ON outline FOR INSERT WITH CHECK (true);
