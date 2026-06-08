@@ -102,7 +102,7 @@
     /* Project Menu Navigation */
     .project-menu-nav {
       display: flex;
-      gap: 2rem;
+      gap: 1.5rem;
       align-items: center;
     }
 
@@ -130,6 +130,92 @@
 
     .menu-link:hover::after, .menu-link.active::after {
       width: 100%;
+    }
+
+    /* Dropdown Menu Group */
+    .menu-group {
+      position: relative;
+    }
+
+    .menu-group-btn {
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 0.25rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      background: none;
+      border: none;
+      font-family: var(--font-body);
+      font-size: 1rem;
+      position: relative;
+      transition: var(--transition);
+    }
+
+    .menu-group-btn::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent-violet), var(--accent-cyan));
+      transition: var(--transition);
+    }
+
+    .menu-group:hover .menu-group-btn,
+    .menu-group-btn:hover {
+      color: var(--text-primary);
+    }
+
+    .menu-group:hover .menu-group-btn::after {
+      width: 100%;
+    }
+
+    .menu-group-btn .chevron {
+      font-size: 0.6rem;
+      transition: transform 0.2s ease;
+    }
+
+    .menu-group:hover .chevron {
+      transform: rotate(180deg);
+    }
+
+    .menu-dropdown {
+      position: absolute;
+      top: calc(100% + 10px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 0.5rem;
+      min-width: 200px;
+      display: none;
+      flex-direction: column;
+      gap: 0.15rem;
+      z-index: 300;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+
+    .menu-group:hover .menu-dropdown {
+      display: flex;
+    }
+
+    .dropdown-link {
+      padding: 0.45rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      transition: var(--transition);
+    }
+
+    .dropdown-link:hover {
+      background: rgba(139, 92, 246, 0.15);
+      color: var(--text-primary);
     }
 
     .nav-btn {
@@ -1226,13 +1312,29 @@
     //    Search for "debugMenu" in both files and mirror all entries.
     let navigationData = {
       projectMenu: [
-        { label: "0. Problem", url: "problem.html" },
-        { label: "Home", url: "index.html" },
-        { label: "1. Sanity Checklist", url: "5_Symbols/sanity_checklist.html", hideAfterDays: 90 },
-        { label: "2. Outline", url: "course_outline.html" },
-        { label: "3. Script", url: "5_Symbols/production/preprod/scripts/index.html" },
-        { label: "4. Production Shot List", url: "5_Symbols/production/postprod/module-1/section-1/post_production_master.html" },
-        { label: "5. Guide", url: "markdown_renderer.html?file=4_Formula/certification/exam_and_case_study.md" }
+        {
+          label: "🎬 Preprod",
+          children: [
+            { label: "1. ❓ Problem", url: "problem.html" },
+            { label: "2. 🏠 Home", url: "index.html" },
+            { label: "3. ✅ Sanity Checklist", url: "5_Symbols/sanity_checklist.html", hideAfterDays: 90 },
+            { label: "4. 📋 Outline", url: "course_outline.html" },
+            { label: "5. 🎬 Script", url: "5_Symbols/production/preprod/scripts/index.html" }
+          ]
+        },
+        {
+          label: "🎥 Production",
+          children: [
+            { label: "6. 🎥 Shot List", url: "5_Symbols/production/postprod/module-1/section-1/post_production_master.html" }
+          ]
+        },
+        {
+          label: "📦 Post Prod",
+          children: [
+            { label: "7. 🧪 Guide", url: "markdown_renderer.html?file=4_Formula/certification/exam_and_case_study.md" }
+          ]
+        },
+        { label: "🧪 Exam", url: "markdown_renderer.html?file=4_Formula/certification/exam_and_case_study.md" }
       ],
       debugMenu: [
         { label: "📁 1. Real Unknown", url: "1_Real_Unknown/" },
@@ -1355,8 +1457,8 @@
       const debugLinksList = document.getElementById("debugLinksList");
       const projectMenuContainer = document.getElementById("projectMenu");
 
-      // Load Reusable Menu Configuration
-      fetch("navigation_config.json")
+      // Load Reusable Menu Configuration (cache-busted)
+      fetch("navigation_config.json?v=" + Date.now(), { cache: "no-store" })
         .then(res => res.json())
         .then(data => {
           debugLog("Dynamic navigation config loaded successfully.", data);
@@ -1368,6 +1470,9 @@
           initMenus();
         });
 
+      // Auto-refresh every 15 seconds (dev mode — picks up nav config changes)
+      setInterval(() => location.reload(), 15000);
+
       function initMenus() {
         debugLog("Initializing Project and Debug Menus.", navigationData);
 
@@ -1377,21 +1482,51 @@
           if (frameworkSection) frameworkSection.style.display = "none";
         }
 
-        // 1. Build Project Menu
+        // 1. Build Project Menu (supports flat items and grouped dropdowns)
         projectMenuContainer.innerHTML = "";
-        let visibleIndex = 0;
+
+        function resolveUrl(url) {
+          if (!url) return "#";
+          if (url === "index.html" || url.startsWith("http") || url.includes("markdown_renderer.html") || url.endsWith(".html")) return url;
+          return `markdown_renderer.html?file=${url}`;
+        }
+
         navigationData.projectMenu.forEach((item) => {
-          if (item.hideAfterDays && daysSinceLaunch >= item.hideAfterDays) return;
-          const link = document.createElement("a");
-          let finalUrl = item.url;
-          if (finalUrl !== "index.html" && !finalUrl.startsWith("http") && !finalUrl.includes("markdown_renderer.html") && !finalUrl.endsWith(".html")) {
-            finalUrl = `markdown_renderer.html?file=${finalUrl}`;
+          if (item.children) {
+            // Dropdown group
+            const visibleChildren = item.children.filter(c => !(c.hideAfterDays && daysSinceLaunch >= c.hideAfterDays));
+            if (!visibleChildren.length) return;
+
+            const group = document.createElement("div");
+            group.className = "menu-group";
+
+            const btn = document.createElement("button");
+            btn.className = "menu-group-btn";
+            btn.innerHTML = `${item.label} <span class="chevron">▾</span>`;
+            group.appendChild(btn);
+
+            const dropdown = document.createElement("div");
+            dropdown.className = "menu-dropdown";
+
+            visibleChildren.forEach(child => {
+              const a = document.createElement("a");
+              a.href = resolveUrl(child.url);
+              a.className = "dropdown-link";
+              a.textContent = child.label;
+              dropdown.appendChild(a);
+            });
+
+            group.appendChild(dropdown);
+            projectMenuContainer.appendChild(group);
+          } else {
+            // Flat link
+            if (item.hideAfterDays && daysSinceLaunch >= item.hideAfterDays) return;
+            const link = document.createElement("a");
+            link.href = resolveUrl(item.url);
+            link.className = "menu-link";
+            link.textContent = item.label;
+            projectMenuContainer.appendChild(link);
           }
-          link.href = finalUrl;
-          link.className = `menu-link ${visibleIndex === 0 ? 'active' : ''}`;
-          link.textContent = item.label;
-          projectMenuContainer.appendChild(link);
-          visibleIndex++;
         });
 
         // 2. Build Debug Menu
