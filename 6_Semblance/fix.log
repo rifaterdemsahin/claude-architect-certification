@@ -9,7 +9,7 @@ Status: `APPLIED` | `VERIFIED` | `WORKAROUND` | `PENDING`
 
 ## Fix Entries
 
-[2026-06-08] [5_Symbols] [PENDING] — RLS INSERT block on checklist_items: must run 5_Symbols/sql/checklist_insert_policy.sql in Supabase SQL Editor. See 6_Semblance/rls_checklist_insert.md
+[2026-06-08] [5_Symbols] [VERIFIED] — RLS INSERT block on checklist_items resolved: ran checklist_insert_policy.sql in Supabase SQL Editor; anon INSERT policy created; item added successfully. Rationale in 6_Semblance/error_insertpolicy.md
 [2026-06-08] [5_Symbols] [APPLIED] — Reorganized Project Menu into a strict sequential numbered structure (1. Sanity Checklist, 2. Outline, 3. Script, 4. Production Shot List, 5. Guide) across config files, JS navbar scripts, and HTML fallbacks.
 [2026-06-08] [5_Symbols] [APPLIED] — Implemented glassmorphic, animated saving feedback status badge with inline SVG icons for Pre-prod Master Script editor.
 [2026-06-08] [5_Symbols] [VERIFIED] — Ran supabase_seed.sql in Supabase SQL Editor; course_modules and course_videos tables created with RLS. course_outline.html now loads all 5 modules and 15 videos from Supabase successfully.
