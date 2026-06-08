@@ -1041,11 +1041,12 @@
       setBadge('saving');
       try {
         await Promise.all(
-          rows.map((li, idx) =>
-            db.from('checklist_items')
+          rows.map(async (li, idx) => {
+            const { error } = await db.from('checklist_items')
               .update({ sort_order: (idx + 1) * 10 })
-              .eq('id', parseInt(li.dataset.itemId, 10))
-          )
+              .eq('id', parseInt(li.dataset.itemId, 10));
+            if (error) throw error;
+          })
         );
         setBadge('saved');
         showToast('✅ Order saved');
