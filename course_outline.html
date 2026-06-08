@@ -535,6 +535,28 @@
 
     @keyframes savepulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
     .saving { animation: savepulse 0.8s ease-in-out infinite; }
+
+    /* ── Tell / Show / Do / Apply sub-checkboxes ────────────── */
+    .video-sub-status {
+      display: flex; gap: 0.35rem; flex-wrap: wrap;
+      margin-top: 0.5rem;
+    }
+    .sub-btn {
+      display: inline-flex; align-items: center; gap: 0.2rem;
+      padding: 2px 9px; border-radius: 5px;
+      font-size: 0.67rem; font-weight: 600;
+      cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03);
+      color: rgba(148,163,184,0.65);
+      transition: var(--transition);
+      user-select: none; white-space: nowrap;
+    }
+    .sub-btn:hover { background: rgba(255,255,255,0.07); color: var(--text-primary); }
+    .sub-active-tell  { background:rgba(139,92,246,0.14)!important; border-color:rgba(139,92,246,0.45)!important; color:#a78bfa!important; }
+    .sub-active-show  { background:rgba(6,182,212,0.12)!important;  border-color:rgba(6,182,212,0.45)!important;  color:var(--accent-cyan)!important; }
+    .sub-active-do    { background:rgba(59,130,246,0.13)!important; border-color:rgba(59,130,246,0.45)!important; color:#60a5fa!important; }
+    .sub-active-apply { background:rgba(16,185,129,0.12)!important; border-color:rgba(16,185,129,0.45)!important; color:var(--accent-green)!important; }
   </style>
   <script src="shared/nav.js" defer></script>
 </head>
@@ -581,12 +603,13 @@
     const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
     // ── Progress state (keyed by course_videos.id) ─────────
-    const progressMap = {};   // { [videoId]: 'done' | 'in_progress' | null }
+    // { [videoId]: { status, tell, show, do, apply } }
+    const progressMap   = {};
     let   totalVideoCount = 0;
 
-    // ── Update the hero stat + progress bar ────────────────
+    // ── Hero stat + progress bar ───────────────────────────
     function updateProgressDisplay() {
-      const done = Object.values(progressMap).filter(s => s === 'done').length;
+      const done = Object.values(progressMap).filter(p => p && p.status === 'done').length;
       const pct  = totalVideoCount > 0 ? Math.round((done / totalVideoCount) * 100) : 0;
       const statEl = document.getElementById('completionPct');
       const barEl  = document.getElementById('progressBarFill');
@@ -606,35 +629,60 @@
       });
     }
 
-    // ── Handle checkbox click ──────────────────────────────
+    // ── In Progress / Done toggle ──────────────────────────
     async function toggleStatus(videoId, newStatus, btn) {
       const card = document.getElementById('vc-' + videoId);
       if (!card) return;
 
-      const current   = progressMap[videoId] || null;
-      const finalStatus = current === newStatus ? null : newStatus; // toggle off if same
+      if (!progressMap[videoId]) progressMap[videoId] = {};
+      const current     = progressMap[videoId].status || null;
+      const finalStatus = current === newStatus ? null : newStatus;
 
-      // Optimistic UI update
-      progressMap[videoId] = finalStatus;
+      progressMap[videoId].status = finalStatus;
       applyCardStatus(card, finalStatus);
       updateProgressDisplay();
 
-      // Persist to Supabase
       btn.classList.add('saving');
       try {
-        if (finalStatus) {
-          const { error } = await client.from('course_video_progress').upsert(
-            { video_id: videoId, user_id: 'default', status: finalStatus, updated_at: new Date().toISOString() },
-            { onConflict: 'video_id,user_id' }
-          );
-          if (error) throw error;
-        } else {
-          const { error } = await client.from('course_video_progress')
-            .delete().eq('video_id', videoId).eq('user_id', 'default');
-          if (error) throw error;
-        }
+        const { error } = await client.from('course_video_progress').upsert(
+          { video_id: videoId, user_id: 'default', status: finalStatus, updated_at: new Date().toISOString() },
+          { onConflict: 'video_id,user_id' }
+        );
+        if (error) throw error;
       } catch (err) {
         console.error('Progress save failed:', err);
+      } finally {
+        btn.classList.remove('saving');
+      }
+    }
+
+    // ── Tell / Show / Do / Apply toggle ───────────────────
+    const SUB_META = {
+      tell:  { col: 'tell_done',  icon: '📝', label: 'Tell'  },
+      show:  { col: 'show_done',  icon: '🎬', label: 'Show'  },
+      do:    { col: 'do_done',    icon: '💻', label: 'Do'    },
+      apply: { col: 'apply_done', icon: '📋', label: 'Apply' }
+    };
+
+    async function toggleSubStatus(videoId, field, btn) {
+      if (!progressMap[videoId]) progressMap[videoId] = {};
+      const current = !!progressMap[videoId][field];
+      const newVal  = !current;
+      progressMap[videoId][field] = newVal;
+
+      const { icon, label, col } = SUB_META[field];
+      btn.textContent = (newVal ? '✓ ' : '') + icon + ' ' + label;
+      btn.classList.toggle('sub-active-' + field, newVal);
+
+      btn.classList.add('saving');
+      try {
+        const { error } = await client.from('course_video_progress').upsert(
+          { video_id: videoId, user_id: 'default', [col]: newVal, updated_at: new Date().toISOString() },
+          { onConflict: 'video_id,user_id' }
+        );
+        if (error) throw error;
+      } catch (err) {
+        console.error('Sub-status save failed:', err);
       } finally {
         btn.classList.remove('saving');
       }
@@ -655,8 +703,16 @@
         const modules = modulesRes.data;
         if (!modules || modules.length === 0) throw new Error('No course data found. Run seed.sql first.');
 
-        // Build progress lookup (ignore errors — table may not exist yet)
-        (progressRes.data || []).forEach(row => { progressMap[row.video_id] = row.status; });
+        // Build full progress map (gracefully handles missing new columns)
+        (progressRes.data || []).forEach(row => {
+          progressMap[row.video_id] = {
+            status: row.status   || null,
+            tell:   !!row.tell_done,
+            show:   !!row.show_done,
+            do:     !!row.do_done,
+            apply:  !!row.apply_done
+          };
+        });
 
         // Group OKRs by module_number
         const okrMap = {};
@@ -674,19 +730,23 @@
           topicMap[key].push(row.content);
         });
 
-        // Sort videos, attach OKRs, topics, and progress status
+        // Sort videos, attach OKRs, topics, and full progress
         totalVideoCount = 0;
         modules.forEach(m => {
           m.course_videos = (m.course_videos || []).sort((a, b) => a.sort_order - b.sort_order);
           m.okr = okrMap[m.module_number] || null;
           m.course_videos.forEach(v => {
             v.topics = topicMap[`${m.module_number}.${v.video_number}`] || [];
-            v.status = progressMap[v.id] || null;
+            const p    = progressMap[v.id] || {};
+            v.status = p.status || null;
+            v.tell   = p.tell   || false;
+            v.show   = p.show   || false;
+            v.do     = p.do     || false;
+            v.apply  = p.apply  || false;
             totalVideoCount++;
           });
         });
 
-        // Update dynamic stats
         const totalStat = document.getElementById('totalVideosStat');
         if (totalStat) totalStat.textContent = totalVideoCount;
         updateProgressDisplay();
@@ -703,7 +763,6 @@
           setTimeout(() => cards[targetIdx].scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
         }
 
-        // Toggle expand/collapse
         container.querySelectorAll('.module-header').forEach(header => {
           header.addEventListener('click', () => header.closest('.module-card').classList.toggle('expanded'));
         });
@@ -723,7 +782,7 @@
     }
 
     function renderModule(mod, idx) {
-      const videos  = (mod.course_videos || []).map(v => renderVideo(v, mod.module_number)).join('');
+      const videos  = (mod.course_videos || []).map(v => renderVideo(v)).join('');
       const links   = (mod.links || []).map(l =>
         `<a href="${l.url}" class="module-link-tag" target="_blank"><i class="fa-solid fa-link fa-xs"></i>${l.label}</a>`
       ).join('');
@@ -763,11 +822,10 @@
         </div>`;
     }
 
-    function renderVideo(v, moduleNumber) {
-      const bullets  = (v.bullets || []).map(b => `<li>${b}</li>`).join('');
-      const topics   = (v.topics  || []).map(t => `<li>${t}</li>`).join('');
-      const status   = v.status || null;
-      const statusClass = status ? 'status-' + status : '';
+    function renderVideo(v) {
+      const bullets = (v.bullets || []).map(b => `<li>${b}</li>`).join('');
+      const topics  = (v.topics  || []).map(t => `<li>${t}</li>`).join('');
+      const status  = v.status || null;
 
       const topicsHtml = topics
         ? `<div class="video-topics">
@@ -779,8 +837,15 @@
       const ipActive   = status === 'in_progress' ? ' active-inprogress' : '';
       const doneActive = status === 'done'        ? ' active-done'       : '';
 
+      // Tell / Show / Do / Apply sub-buttons
+      const subHtml = Object.entries(SUB_META).map(([key, m]) => {
+        const active = !!v[key];
+        return `<button class="sub-btn${active ? ' sub-active-' + key : ''}" data-sub="${key}"
+          onclick="toggleSubStatus(${v.id},'${key}',this)">${active ? '✓ ' : ''}${m.icon} ${m.label}</button>`;
+      }).join('');
+
       return `
-        <div class="video-card ${statusClass}" id="vc-${v.id}" data-video-id="${v.id}">
+        <div class="video-card${status ? ' status-' + status : ''}" id="vc-${v.id}" data-video-id="${v.id}">
           <div class="video-label">Video ${v.video_number}</div>
           <div class="video-title">${v.title}</div>
           <ul class="video-bullets">${bullets}</ul>
@@ -791,6 +856,7 @@
             <button class="status-btn${doneActive}" data-target="done"
               onclick="toggleStatus(${v.id},'done',this)">✅ Done</button>
           </div>
+          <div class="video-sub-status">${subHtml}</div>
         </div>`;
     }
 
