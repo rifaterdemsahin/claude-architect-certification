@@ -1470,8 +1470,14 @@
           initMenus();
         });
 
-      // Auto-refresh every 15 seconds (dev mode — picks up nav config changes)
-      setInterval(() => location.reload(), 15000);
+      // Auto-refresh nav config every 15s (cache-busted fetch, no full page reload)
+      // location.reload() without true arg is a soft reload (uses cache) — won't reflect changes
+      setInterval(() => {
+        fetch("navigation_config.json?v=" + Date.now(), { cache: "no-store" })
+          .then(res => res.json())
+          .then(data => { navigationData = data; initMenus(); })
+          .catch(() => {});
+      }, 15000);
 
       function initMenus() {
         debugLog("Initializing Project and Debug Menus.", navigationData);
