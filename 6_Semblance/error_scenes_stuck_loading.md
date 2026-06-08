@@ -120,16 +120,27 @@ CREATE POLICY anon_select_scenes ON scenes FOR SELECT USING (true);
 CREATE POLICY anon_select_scene_cues ON scene_cues FOR SELECT USING (true);
 CREATE POLICY anon_select_edl_entries ON edl_entries FOR SELECT USING (true);
 
--- Public write (already in migration_scenes_crud.sql but repeated for safety)
-CREATE POLICY IF NOT EXISTS anon_insert_scenes ON scenes FOR INSERT WITH CHECK (true);
-CREATE POLICY IF NOT EXISTS anon_update_scenes ON scenes FOR UPDATE USING (true);
-CREATE POLICY IF NOT EXISTS anon_delete_scenes ON scenes FOR DELETE USING (true);
-CREATE POLICY IF NOT EXISTS anon_insert_scene_cues ON scene_cues FOR INSERT WITH CHECK (true);
-CREATE POLICY IF NOT EXISTS anon_update_scene_cues ON scene_cues FOR UPDATE USING (true);
-CREATE POLICY IF NOT EXISTS anon_delete_scene_cues ON scene_cues FOR DELETE USING (true);
-CREATE POLICY IF NOT EXISTS anon_insert_edl_entries ON edl_entries FOR INSERT WITH CHECK (true);
-CREATE POLICY IF NOT EXISTS anon_update_edl_entries ON edl_entries FOR UPDATE USING (true);
-CREATE POLICY IF NOT EXISTS anon_delete_edl_entries ON edl_entries FOR DELETE USING (true);
+-- Public write (DROP first — CREATE POLICY has no IF NOT EXISTS in PostgreSQL)
+DROP POLICY IF EXISTS anon_insert_scenes ON scenes;
+CREATE POLICY anon_insert_scenes ON scenes FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS anon_update_scenes ON scenes;
+CREATE POLICY anon_update_scenes ON scenes FOR UPDATE USING (true);
+DROP POLICY IF EXISTS anon_delete_scenes ON scenes;
+CREATE POLICY anon_delete_scenes ON scenes FOR DELETE USING (true);
+
+DROP POLICY IF EXISTS anon_insert_scene_cues ON scene_cues;
+CREATE POLICY anon_insert_scene_cues ON scene_cues FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS anon_update_scene_cues ON scene_cues;
+CREATE POLICY anon_update_scene_cues ON scene_cues FOR UPDATE USING (true);
+DROP POLICY IF EXISTS anon_delete_scene_cues ON scene_cues;
+CREATE POLICY anon_delete_scene_cues ON scene_cues FOR DELETE USING (true);
+
+DROP POLICY IF EXISTS anon_insert_edl_entries ON edl_entries;
+CREATE POLICY anon_insert_edl_entries ON edl_entries FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS anon_update_edl_entries ON edl_entries;
+CREATE POLICY anon_update_edl_entries ON edl_entries FOR UPDATE USING (true);
+DROP POLICY IF EXISTS anon_delete_edl_entries ON edl_entries;
+CREATE POLICY anon_delete_edl_entries ON edl_entries FOR DELETE USING (true);
 ```
 
 ### Step 4 — Reload the page
