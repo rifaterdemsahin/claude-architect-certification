@@ -1503,8 +1503,8 @@
           method: 'DELETE', headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` }
         });
         if (!res.ok) throw new Error(`Delete failed: ${await res.text()}`);
+        closeSceneForm();
         await loadDataAndRender();
-        alert('🗑 Scene deleted.');
       } catch (err) {
         console.error('Delete scene error:', err);
         alert('❌ Failed to delete scene: ' + err.message);
