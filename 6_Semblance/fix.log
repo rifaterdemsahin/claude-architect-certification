@@ -9,6 +9,7 @@ Status: `APPLIED` | `VERIFIED` | `WORKAROUND` | `PENDING`
 
 ## Fix Entries
 
+[2026-06-08] [5_Symbols] [APPLIED] — Implemented glassmorphic, animated saving feedback status badge with inline SVG icons for Pre-prod Master Script editor.
 [2026-06-08] [5_Symbols] [VERIFIED] — Ran supabase_seed.sql in Supabase SQL Editor; course_modules and course_videos tables created with RLS. course_outline.html now loads all 5 modules and 15 videos from Supabase successfully.
 [2026-06-07] [STAGE5] [APPLIED] — Dynamically fetched and rendered course outline from Supabase API (or fallback master_script.json) on 5_Symbols/production/preprod/index.html.
 [2026-06-07] [STAGE6] [VERIFIED] — Restored missing menus in navigation_config.json, updated fallbacks, fixed routing logic in index.html to handle raw .html files, and added semblance remediation doc.
@@ -47,6 +48,7 @@ Lesson captured in lessons_learned.md
 
 | Error Date | Stage | Error Summary | Fix Status |
 |------------|-------|---------------|------------|
+| 2026-06-08 | 5_Symbols | Preprod Master Script save animation | APPLIED |
 | 2026-06-07 | UI | Missing menu items | VERIFIED |
 | 2026-06-07 | TEST | Broken paths and missing assets | VERIFIED |
 | 2026-06-07 | RESTRO | Regex replacement error | VERIFIED |

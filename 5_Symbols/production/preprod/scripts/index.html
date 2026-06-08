@@ -202,9 +202,72 @@
       background: rgba(139, 92, 246, 0.2);
       color: white;
     }
+    /* Success / Save animation styling */
+    @keyframes statusEntry {
+      0% {
+        opacity: 0;
+        transform: translateY(6px) scale(0.95);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+    @keyframes statusExit {
+      0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-4px) scale(0.95);
+      }
+    }
+    @keyframes pulseSuccess {
+      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+      50% { transform: scale(1.04); box-shadow: 0 0 12px 4px rgba(16, 185, 129, 0.2); }
+      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+    @keyframes spinnerRotate {
+      100% { transform: rotate(360deg); }
+    }
     .save-status {
       font-size: 0.8rem;
-      font-weight: 500;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+    .save-status.saving {
+      opacity: 1;
+      color: #fbbf24;
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.25);
+      animation: statusEntry 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    .save-status.success {
+      opacity: 1;
+      color: #34d399;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      animation: statusEntry 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards, pulseSuccess 0.6s cubic-bezier(0.25, 0.8, 0.25, 1) 0.3s;
+    }
+    .save-status.error-status {
+      opacity: 1;
+      color: #f87171;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      animation: statusEntry 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    .save-status.exit {
+      animation: statusExit 0.25s ease-in forwards;
+    }
+    .status-spinner {
+      animation: spinnerRotate 1s linear infinite;
     }
 
     footer { text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
@@ -294,8 +357,14 @@
       const statusSpan = document.getElementById(`save-status-${elementId}`);
       const newScript = textArea.value.trim();
 
-      statusSpan.textContent = 'Saving...';
-      statusSpan.style.color = '#f59e0b';
+      statusSpan.className = 'save-status saving';
+      statusSpan.innerHTML = `
+        <svg class="status-spinner" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" style="display:inline-block; vertical-align:middle;">
+          <circle cx="12" cy="12" r="10" stroke="rgba(251, 191, 36, 0.2)"></circle>
+          <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor"></path>
+        </svg>
+        <span>Saving...</span>
+      `;
 
       try {
         let savedSuccessfully = false;
@@ -352,14 +421,40 @@
         document.getElementById(`script-display-${elementId}`).textContent = newScript;
         toggleEdit(elementId, false);
 
-        statusSpan.textContent = savedSuccessfully ? '✓ Saved to Supabase' : '✓ Saved locally';
-        statusSpan.style.color = '#10b981';
-        setTimeout(() => { statusSpan.textContent = ''; }, 3000);
+        statusSpan.className = 'save-status success';
+        statusSpan.innerHTML = `
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle;">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          <span>${savedSuccessfully ? 'Saved to Supabase' : 'Saved locally'}</span>
+        `;
+        
+        setTimeout(() => {
+          statusSpan.classList.add('exit');
+          setTimeout(() => {
+            statusSpan.className = 'save-status';
+            statusSpan.innerHTML = '';
+          }, 300);
+        }, 3000);
 
       } catch (err) {
         console.error(err);
-        statusSpan.textContent = '❌ Save error';
-        statusSpan.style.color = '#ef4444';
+        statusSpan.className = 'save-status error-status';
+        statusSpan.innerHTML = `
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle;">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="15" y1="9" x2="9" y2="15"></line>
+            <line x1="9" y1="9" x2="15" y2="15"></line>
+          </svg>
+          <span>Save error</span>
+        `;
+        setTimeout(() => {
+          statusSpan.classList.add('exit');
+          setTimeout(() => {
+            statusSpan.className = 'save-status';
+            statusSpan.innerHTML = '';
+          }, 300);
+        }, 3000);
       }
     };
 

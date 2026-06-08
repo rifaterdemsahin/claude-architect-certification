@@ -73,3 +73,24 @@ The user requested that the course outline on `5_Symbols/production/preprod/inde
 3. **Execution Steps:**
    - Add styling and JS logic to `index.html`.
    - Verify execution and update error/fix logs if needed.
+
+---
+
+## Date: 2026-06-08
+## Stage: Stage 4 (Formula - Thinking & Planning) - Preprod Script Editor Saved to Supabase Animation
+
+### Problem Statement
+The user requested that when a script is saved to Supabase from the Master Script editor (`5_Symbols/production/preprod/scripts/index.html`), it should show a "Saved" status with a smooth, modern CSS animation.
+
+### Approach & Strategy
+1. **Locate Target Files:** The page is `5_Symbols/production/preprod/scripts/index.html`.
+2. **Design Animation & Styles:**
+   - Define custom CSS keyframe animations (`statusEntry`, `statusExit`, `pulseSuccess`, `spinnerRotate`) in the document's `<style>` block.
+   - Refactor the `.save-status` CSS class to create a premium, glassmorphic status badge with tailored colors (amber for saving, green for success, red for error).
+3. **Enhance Script Logic:**
+   - Update `window.saveScript` function. Instead of updating raw text content and colors directly on `statusSpan`, toggle state classes (`saving`, `success`, `error-status`, `exit`) and inject SVG icons (animated spinner for saving, checkmark for success, cross for error).
+   - Use transition/animation classes to fade-in-up, pulse upon success, and slide/fade out smoothly after 3 seconds.
+4. **Execution & Verification:**
+   - Modify `5_Symbols/production/preprod/scripts/index.html`.
+   - Verify layout and functionality.
+   - Log completion in `prompts.md`.

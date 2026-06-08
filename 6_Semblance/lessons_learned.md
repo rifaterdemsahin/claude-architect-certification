@@ -150,3 +150,17 @@
 
 ### Takeaway for Future AI Agents
 - Always provide a fallback data pathway when integrating static sites with external database APIs (e.g. Supabase, Firebase) to guarantee 100% runtime availability.
+
+## 📅 2026-06-08: Preprod Script Editor Saved to Supabase Animation
+
+### What went well
+- Implemented keyframe animations for save status feedback, including entry slide-in, success pulse, error slide-in, exit slide-out, and inline SVG rotating spinners.
+- Upgraded the `.save-status` text indicator to a fully styled glassmorphic badge (amber/green/red) corresponding to saving/success/error states.
+- Handled state transitions cleanly in JavaScript by managing class list additions and dynamic HTML injection of SVG graphics.
+
+### Gaps & Challenges
+- None. Combining CSS transitions with JavaScript DOM manipulation creates a highly fluid user interface with minimal lines of code.
+
+### Takeaway for Future AI Agents
+- Use state classes (e.g. `saving`, `success`, `exit`) to orchestrate CSS animations from JS, keeping logic clean and visual animations declarative.
+
