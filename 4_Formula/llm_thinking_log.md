@@ -76,7 +76,7 @@ The root directory is `/Users/rifaterdemsahin/Projects/claude-architect-certific
 We calculate the depth of each file relative to root:
 - Depth of `5_Symbols/production/prod/index.html` = 3. Relative path to root = `../../../`
 - Depth of `5_Symbols/production/preprod/scripts/index.html` = 4. Relative path to root = `../../../../`
-- Depth of `5_Symbols/production/postprod/module-1/section-1/post_production_master.html` = 5. Relative path to root = `../../../../../`
+- Depth of `5_Symbols/production/postprod/module-1/section-1/production_shotlist.html` = 5. Relative path to root = `../../../../../`
 
 Using the depth `D` of the file:
 1. Root `index.html` -> `../` * D + `index.html`
@@ -149,7 +149,7 @@ The user requested a restructure of the main Project Menu to follow a strict seq
 1. "1. Sanity Checklist" (url: `5_Symbols/sanity_checklist.html`)
 2. "2. Outline" (url: `course_outline.html`)
 3. "3. Script" (url: `5_Symbols/production/preprod/scripts/index.html`)
-4. "4. Production Shot List" (url: `5_Symbols/production/postprod/module-1/section-1/post_production_master.html`)
+4. "4. Production Shot List" (url: `5_Symbols/production/postprod/module-1/section-1/production_shotlist.html`)
 5. "5. Guide" (url: `markdown_renderer.html?file=4_Formula/certification/exam_and_case_study.md`)
 
 ### Approach & Strategy
@@ -201,6 +201,32 @@ The user requested that the production, pre-production, and post-production phas
    - On page load (`load()` function), retrieve the saved collapse state for each phase from `localStorage` and apply the `collapsed` class if true.
 4. **Execution & Verification:**
    - Modify the markup and styles inside `5_Symbols/sanity_checklist.html`.
-   - Test expanding and collapsing, and check if states persist after a browser reload.
-   - Make a git commit and push the changes.
+    - Test expanding and collapsing, and check if states persist after a browser reload.
+    - Make a git commit and push the changes.
 
+---
+
+## 📅 Date: 2026-06-08
+## 🧠 Stage: Stage 4 (Formula - Thinking & Planning) - Dynamic Dropdowns & Supabase Scene Mapping
+
+### ❓ Problem Statement
+The user requested:
+1. Dropdowns at the top of the Post-Production Master page (`production_shotlist.html`) to select the Module and Video.
+2. Map scenes, cues, and EDL data to Supabase to dynamically load data.
+3. Update the database seed if needed.
+4. Re-arrange the page layout to follow: Selection -> Audio Player -> Scene planning section.
+
+### 📐 Approach & Strategy
+1. **🗄️ Database Seeds**: Add data for `scenes`, `scene_cues`, and `edl_entries` in `seed.sql` and `admin.html` for both Module 1, Section 1 and Module 2, Section 1 to support testing.
+2. **🎨 Styling & Layout Refactor**: Refactor the fixed `.audio-header` layout to an inline `.audio-player-panel`. Reduce body padding to standard navbar height. Create a premium glassmorphic control panel for selectors.
+3. **⚙️ Dynamic Loading Logic**:
+   - Parse current `module` and `section` keys from URL parameters.
+   - Fetch video list and populate dropdown selections, fallback to static structures if offline.
+   - Fetch scenes with nested cues/EDLs using Supabase REST API matching the selected module/section.
+   - Resolve local asset paths dynamically with `getAssetPath` relative to the current module/section.
+   - Render the 3-column review grids dynamically in JavaScript.
+   - Trigger query parameter changes on selector update.
+
+### ✅ Decisions Made
+- Use clean URL parameter updates on dropdown changes (`window.location.search`) to trigger reload, ensuring that navigation, caching, and DOM state are cleanly reset.
+- Provide a robust static fallback data structure containing metadata for all 5 modules and 15 videos, ensuring maximum fidelity and graceful degradation.

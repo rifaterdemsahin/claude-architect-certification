@@ -176,7 +176,7 @@ erDiagram
 |-------|--------|---------|
 | Course Outline | `course_modules`, `course_videos`, `outline` | `course_outline.html` |
 | Production Pipeline | `modules`, `videos`, `video_cues`, `resource_links`, `scripts` | `production_hub.html`, preprod editors |
-| Scenes / Post-Prod | `scenes` *(FK → videos)*, `scene_cues`, `edl_entries` | `post_production_master.html` |
+| Scenes / Post-Prod | `scenes` *(FK → videos)*, `scene_cues`, `edl_entries` | `production_shotlist.html` |
 | Checklist | `checklist_items`, `checklist_progress` | `sanity_checklist.html` |
 | Misc | `course_content`, `milestones`, `milestone_progress`, `pricing`, `courses` | script editors, membership page |
 

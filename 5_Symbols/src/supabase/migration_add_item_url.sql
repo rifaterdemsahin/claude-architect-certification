@@ -26,7 +26,7 @@ UPDATE checklist_items SET item_url = '../markdown_renderer.html?file=4_Formula/
 UPDATE checklist_items SET item_url = '../markdown_renderer.html?file=1_Real_Unknown/6_kanban.md'
   WHERE item_name = 'Audio recording schedule';
 
-UPDATE checklist_items SET item_url = 'production/postprod/module-1/section-1/post_production_master.html'
+UPDATE checklist_items SET item_url = 'production/postprod/module-1/section-1/production_shotlist.html'
   WHERE item_name = 'Lower third designs approved';
 
 UPDATE checklist_items SET item_url = '../markdown_renderer.html?file=4_Formula/certification/production_plan.md'
@@ -64,10 +64,10 @@ UPDATE checklist_items SET item_url = 'production/postprod/index.html'
 UPDATE checklist_items SET item_url = 'production/postprod/index.html'
   WHERE item_name = 'Icons generated';
 
-UPDATE checklist_items SET item_url = 'production/postprod/module-1/section-1/post_production_master.html'
+UPDATE checklist_items SET item_url = 'production/postprod/module-1/section-1/production_shotlist.html'
   WHERE item_name = 'Lower thirds rendered';
 
-UPDATE checklist_items SET item_url = 'production/postprod/module-1/section-1/post_production_master.html'
+UPDATE checklist_items SET item_url = 'production/postprod/module-1/section-1/production_shotlist.html'
   WHERE item_name = 'EDL reviewed for each scene';
 
 UPDATE checklist_items SET item_url = 'production/postprod/module-1/section-1/asset_checklist.html'
