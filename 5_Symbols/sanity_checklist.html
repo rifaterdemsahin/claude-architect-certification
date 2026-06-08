@@ -204,8 +204,44 @@
       transition: all 0.2s;
     }
     .pill-backlog    { background: rgba(148,163,184,0.12); color: #94a3b8; }
-    .pill-ready      { background: rgba(16,185,129,0.15);  color: #10b981; }
+    .pill-ready      { background: rgba(59,130,246,0.15);  color: #3b82f6; }
     .pill-inprogress { background: rgba(245,158,11,0.15);  color: #f59e0b; }
+    .pill-done       { background: rgba(16,185,129,0.15);  color: #10b981; }
+
+    /* In-progress toggle button */
+    .ip-btn {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(245,158,11,0.25);
+      background: none;
+      color: rgba(245,158,11,0.35);
+      font-size: 0.6rem;
+      cursor: pointer;
+      flex-shrink: 0;
+      margin-top: 2px;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
+    .ip-btn:hover { background: rgba(245,158,11,0.1); border-color: rgba(245,158,11,0.55); color: #f59e0b; }
+    .ip-btn.active {
+      background: rgba(245,158,11,0.18);
+      border-color: #f59e0b;
+      color: #f59e0b;
+      box-shadow: 0 0 8px rgba(245,158,11,0.35);
+    }
+
+    /* Item ID badge */
+    .item-id-badge {
+      font-size: 0.6rem;
+      font-weight: 700;
+      color: rgba(156,163,175,0.3);
+      font-family: 'Courier New', monospace;
+      margin-right: 4px;
+      user-select: none;
+    }
 
     /* Risk marker — shown only when description is empty */
     .risk-marker { display: none; }
@@ -299,6 +335,85 @@
       padding-top: 20px;
       border-top: 1px solid rgba(255,255,255,0.05);
     }
+
+    /* Report button */
+    .report-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 28px auto 0;
+      padding: 10px 24px;
+      background: rgba(139,92,246,0.1);
+      border: 1px solid rgba(139,92,246,0.3);
+      border-radius: 10px;
+      color: var(--primary);
+      font-family: var(--font-body);
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .report-btn:hover { background: rgba(139,92,246,0.18); border-color: var(--primary); }
+
+    /* Report modal */
+    .report-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.7);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+    .report-modal {
+      background: #0f172a;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      width: 100%; max-width: 760px;
+      max-height: 80vh;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+    .report-modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      font-weight: 700; font-size: 1rem;
+    }
+    .report-close-btn {
+      background: none; border: none; color: var(--text-muted);
+      font-size: 1.2rem; cursor: pointer; padding: 2px 6px; border-radius: 4px;
+    }
+    .report-close-btn:hover { background: rgba(255,255,255,0.08); color: var(--text-main); }
+    .report-textarea {
+      flex: 1; overflow-y: auto;
+      padding: 16px 20px;
+      background: rgba(0,0,0,0.3);
+      color: #e2e8f0;
+      font-family: 'Courier New', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      border: none; outline: none; resize: none;
+      white-space: pre;
+    }
+    .report-footer {
+      display: flex; gap: 10px; justify-content: flex-end;
+      padding: 14px 20px;
+      border-top: 1px solid rgba(255,255,255,0.07);
+    }
+    .report-copy-btn {
+      padding: 8px 18px;
+      background: var(--primary); color: white;
+      border: none; border-radius: 8px;
+      font-family: var(--font-body); font-size: 0.85rem; font-weight: 700;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .report-copy-btn:hover { background: #7c3aed; }
+    .report-cancel-btn {
+      padding: 8px 18px;
+      background: none; color: var(--text-muted);
+      border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;
+      font-family: var(--font-body); font-size: 0.85rem;
+      cursor: pointer;
+    }
   </style>
   <script src="../shared/nav.js" defer></script>
 </head>
@@ -339,6 +454,8 @@
       </div>
     </div>
 
+    <button class="report-btn" onclick="showReport()">📋 Generate Report</button>
+
     <footer>
       <p style="margin-bottom:8px;">Claude AI Certification | Master Production Pipeline</p>
       <p style="margin-bottom:12px;font-size:0.85rem;opacity:0.8;">
@@ -353,6 +470,21 @@
     </footer>
   </div>
 
+  <!-- Report modal -->
+  <div id="report-overlay" class="report-overlay" style="display:none" onclick="if(event.target===this)closeReport()">
+    <div class="report-modal">
+      <div class="report-modal-header">
+        <span>📋 Checklist Report</span>
+        <button class="report-close-btn" onclick="closeReport()">✕</button>
+      </div>
+      <textarea id="report-output" class="report-textarea" readonly></textarea>
+      <div class="report-footer">
+        <button class="report-cancel-btn" onclick="closeReport()">Close</button>
+        <button class="report-copy-btn" id="copy-btn" onclick="copyReport()">📋 Copy Markdown</button>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const SUPABASE_URL  = 'https://rmekfsdhglyiralxvkwc.supabase.co';
@@ -360,6 +492,8 @@
     const USER_ID = 'default';
 
     const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+    let currentInProgressId = null; // only one item can be in-progress at a time
 
     const PHASE_META = {
       'Pre-Production':  { icon: '📝' },
@@ -414,7 +548,9 @@
       setBadge('saving');
       try {
         const { error } = await db.from('checklist_progress').upsert(
-          { item_id: itemId, user_id: USER_ID, checked, notes, updated_at: new Date().toISOString() },
+          { item_id: itemId, user_id: USER_ID, checked, notes,
+            in_progress: currentInProgressId === itemId,
+            updated_at: new Date().toISOString() },
           { onConflict: 'item_id,user_id' }
         );
         if (error) throw error;
@@ -448,11 +584,64 @@
     }
 
     // ── Status pill helper ───────────────────────────────────────────────────
-    // checked → In Progress | has note → Ready | else → Backlog
-    function pillHtml(checked, notes) {
-      if (checked)               return '<span class="status-pill pill-inprogress">🔄 In Progress</span>';
-      if (notes && notes.trim()) return '<span class="status-pill pill-ready">✅ Ready</span>';
+    // checked→Done | inProg→In Progress | notes→Ready | else→Backlog
+    function pillHtml(checked, notes, inProg) {
+      if (checked)               return '<span class="status-pill pill-done">✅ Done</span>';
+      if (inProg)                return '<span class="status-pill pill-inprogress">🔄 In Progress</span>';
+      if (notes && notes.trim()) return '<span class="status-pill pill-ready">📝 Ready</span>';
       return '<span class="status-pill pill-backlog">📋 Backlog</span>';
+    }
+
+    // ── In-progress toggle ───────────────────────────────────────────────────
+    function updateIPBtn(itemId, active) {
+      const btn = document.querySelector(`.ip-btn[data-id="${itemId}"]`);
+      if (btn) btn.classList.toggle('active', active);
+    }
+
+    function refreshPill(itemId) {
+      const checked = !!document.querySelector(`.check-box[data-id="${itemId}"]`)?.checked;
+      const notes   = document.querySelector(`.item-note[data-id="${itemId}"]`)?.value || '';
+      updatePill(itemId, checked, notes);
+    }
+
+    async function toggleInProgress(itemId) {
+      const prev      = currentInProgressId;
+      const turningOff = prev === itemId;
+
+      // Optimistic DOM update
+      if (prev !== null) { updateIPBtn(prev, false); refreshPill(prev); }
+      currentInProgressId = turningOff ? null : itemId;
+      if (!turningOff)  { updateIPBtn(itemId, true); refreshPill(itemId); }
+
+      setBadge('saving');
+      try {
+        if (prev !== null) {
+          const prevCb    = !!document.querySelector(`.check-box[data-id="${prev}"]`)?.checked;
+          const prevNotes = document.querySelector(`.item-note[data-id="${prev}"]`)?.value || '';
+          const { error } = await db.from('checklist_progress').upsert(
+            { item_id: prev, user_id: USER_ID, checked: prevCb, notes: prevNotes,
+              in_progress: false, updated_at: new Date().toISOString() },
+            { onConflict: 'item_id,user_id' }
+          );
+          if (error) throw error;
+        }
+        if (!turningOff) {
+          const curCb    = !!document.querySelector(`.check-box[data-id="${itemId}"]`)?.checked;
+          const curNotes = document.querySelector(`.item-note[data-id="${itemId}"]`)?.value || '';
+          const { error } = await db.from('checklist_progress').upsert(
+            { item_id: itemId, user_id: USER_ID, checked: curCb, notes: curNotes,
+              in_progress: true, updated_at: new Date().toISOString() },
+            { onConflict: 'item_id,user_id' }
+          );
+          if (error) throw error;
+        }
+        setBadge('saved');
+        showToast(turningOff ? '⏹ In Progress cleared' : '🔄 In Progress set');
+        setTimeout(() => setBadge('connected'), 2000);
+      } catch (err) {
+        setBadge('error');
+        showToast('❌ ' + err.message, true);
+      }
     }
 
     // ── Render ───────────────────────────────────────────────────────────────
@@ -460,16 +649,19 @@
       const meta = PHASE_META[phase] || { icon: '📋' };
       const rows = items.map(item => {
         const p       = progressMap[item.id] || {};
-        const checked = p.checked || false;
-        const notes   = p.notes   || '';
+        const checked = p.checked     || false;
+        const notes   = p.notes       || '';
+        const inProg  = p.in_progress || false;
         const hasDesc = !!(item.item_desc && item.item_desc.trim());
         return `
           <li data-item-id="${item.id}"${!hasDesc ? ' class="no-desc"' : ''}>
             <input type="checkbox" class="check-box" data-id="${item.id}"${checked ? ' checked' : ''}>
+            <button class="ip-btn${inProg ? ' active' : ''}" data-id="${item.id}"
+              onclick="toggleInProgress(${item.id})" title="Set as In Progress">▶</button>
             <div class="item-text">
               <div class="item-name">
-                <span class="risk-marker">💣 </span>${item.item_name}
-                ${pillHtml(checked, notes)}
+                <span class="item-id-badge">#${item.id}</span><span class="risk-marker">💣 </span>${item.item_name}
+                ${pillHtml(checked, notes, inProg)}
               </div>
               <div class="item-desc" contenteditable="true" data-id="${item.id}">${item.item_desc || ''}</div>
               <textarea class="item-note" data-id="${item.id}" placeholder="Add production note… (saves automatically)">${notes}</textarea>
@@ -510,9 +702,12 @@
         const items = itemsRes.data || [];
         if (items.length === 0) throw new Error('No checklist items found — run 5_Symbols/src/supabase/seed.sql first.');
 
-        // Build progress lookup by item_id
+        // Build progress lookup by item_id; restore in-progress state
         const progressMap = {};
-        (progressRes.data || []).forEach(p => { progressMap[p.item_id] = p; });
+        (progressRes.data || []).forEach(p => {
+          progressMap[p.item_id] = p;
+          if (p.in_progress) currentInProgressId = p.item_id;
+        });
 
         // Group items by phase in canonical order
         const phaseOrder = ['Pre-Production', 'Production', 'Post-Production', 'Publication'];
@@ -553,10 +748,10 @@
       const li    = document.querySelector(`li[data-item-id="${itemId}"]`);
       if (!li) return;
       const pills = li.querySelectorAll('.status-pill');
-      const pill  = pills[pills.length - 1]; // last pill is always the status pill
+      const pill  = pills[pills.length - 1];
       if (!pill) return;
       const next = document.createElement('span');
-      next.innerHTML = pillHtml(checked, notes);
+      next.innerHTML = pillHtml(checked, notes, currentInProgressId === itemId);
       pill.replaceWith(next.firstElementChild);
     }
 
@@ -635,8 +830,10 @@
         if (!(newItem.item_desc && newItem.item_desc.trim())) li.classList.add('no-desc');
         li.innerHTML = `
           <input type="checkbox" class="check-box" data-id="${newItem.id}">
+          <button class="ip-btn" data-id="${newItem.id}"
+            onclick="toggleInProgress(${newItem.id})" title="Set as In Progress">▶</button>
           <div class="item-text">
-            <div class="item-name"><span class="risk-marker">💣 </span>${newItem.item_name} <span class="status-pill pill-backlog">📋 Backlog</span></div>
+            <div class="item-name"><span class="item-id-badge">#${newItem.id}</span><span class="risk-marker">💣 </span>${newItem.item_name} <span class="status-pill pill-backlog">📋 Backlog</span></div>
             <div class="item-desc" contenteditable="true" data-id="${newItem.id}">${newItem.item_desc || ''}</div>
             <textarea class="item-note" data-id="${newItem.id}" placeholder="Add production note… (saves automatically)"></textarea>
           </div>`;
@@ -683,6 +880,91 @@
       } finally {
         btn.textContent = 'Save';
         btn.disabled    = false;
+      }
+    }
+
+    // ── Report ───────────────────────────────────────────────────────────────
+    function buildReport() {
+      const now   = new Date().toISOString().split('T')[0];
+      const lines = [`# Sanity Checklist Report`, `Generated: ${now}`, ``];
+
+      // In-progress item first
+      const ipLi = currentInProgressId
+        ? document.querySelector(`li[data-item-id="${currentInProgressId}"]`)
+        : null;
+      if (ipLi) {
+        const name  = ipLi.querySelector('.item-name')?.childNodes;
+        // get plain text of item name (skip badges)
+        let ipName = '';
+        ipLi.querySelectorAll('.item-name').forEach(n => {
+          ipName = n.innerText.replace(/[📋✅🔄📝#\d]+/g, '').trim().split('\n')[0].trim();
+        });
+        const idBadge = ipLi.querySelector('.item-id-badge')?.textContent || '';
+        lines.push(`## 🔄 In Progress`);
+        lines.push(`- ${idBadge} ${ipName}`);
+        lines.push(``);
+      }
+
+      // Phase sections
+      document.querySelectorAll('.phase-card').forEach(card => {
+        const phase = card.dataset.phase;
+        lines.push(`## ${phase}`);
+        lines.push(`| ID | Item | Status | Note |`);
+        lines.push(`|----|------|--------|------|`);
+        card.querySelectorAll('.checklist li').forEach(li => {
+          const idBadge = li.querySelector('.item-id-badge')?.textContent?.trim() || '';
+          const checked = li.querySelector('.check-box')?.checked || false;
+          const note    = (li.querySelector('.item-note')?.value || '').replace(/\n/g, ' ').trim();
+          const inProg  = currentInProgressId && parseInt(li.dataset.itemId) === currentInProgressId;
+          const nameEl  = li.querySelector('.item-name');
+          // Extract plain name: text nodes only, skip spans
+          let plainName = '';
+          nameEl?.childNodes.forEach(n => {
+            if (n.nodeType === Node.TEXT_NODE) plainName += n.textContent;
+          });
+          plainName = plainName.trim();
+
+          let status;
+          if (checked)          status = '✅ Done';
+          else if (inProg)      status = '🔄 In Progress';
+          else if (note)        status = '📝 Ready';
+          else                  status = '📋 Backlog';
+
+          lines.push(`| ${idBadge} | ${plainName} | ${status} | ${note || '—'} |`);
+        });
+        lines.push(``);
+      });
+
+      // Summary
+      const total     = document.querySelectorAll('.check-box').length;
+      const doneCount = document.querySelectorAll('.check-box:checked').length;
+      const pct       = total ? Math.round(doneCount / total * 100) : 0;
+      lines.push(`---`);
+      lines.push(`**Progress:** ${doneCount}/${total} done (${pct}%)`);
+      if (currentInProgressId) lines.push(`**In Progress:** #${currentInProgressId}`);
+
+      return lines.join('\n');
+    }
+
+    function showReport() {
+      document.getElementById('report-output').value = buildReport();
+      document.getElementById('report-overlay').style.display = 'flex';
+    }
+
+    function closeReport() {
+      document.getElementById('report-overlay').style.display = 'none';
+    }
+
+    async function copyReport() {
+      const text = document.getElementById('report-output').value;
+      try {
+        await navigator.clipboard.writeText(text);
+        const btn = document.getElementById('copy-btn');
+        btn.textContent = '✅ Copied!';
+        setTimeout(() => { btn.textContent = '📋 Copy Markdown'; }, 2000);
+      } catch {
+        document.getElementById('report-output').select();
+        document.execCommand('copy');
       }
     }
 

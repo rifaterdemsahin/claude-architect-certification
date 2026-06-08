@@ -289,3 +289,6 @@ CREATE POLICY anon_update_milestone_progress ON milestone_progress FOR UPDATE US
 ALTER TABLE outline ADD COLUMN IF NOT EXISTS module_id INTEGER REFERENCES course_modules(id) ON DELETE SET NULL;
 ALTER TABLE outline ADD COLUMN IF NOT EXISTS video_id  INTEGER REFERENCES course_videos(id)  ON DELETE SET NULL;
 ALTER TABLE scenes  ADD COLUMN IF NOT EXISTS video_id  INTEGER REFERENCES videos(id)          ON DELETE SET NULL;
+
+-- checklist_progress: in_progress flag (only one row per user_id may be true)
+ALTER TABLE checklist_progress ADD COLUMN IF NOT EXISTS in_progress BOOLEAN DEFAULT FALSE;
