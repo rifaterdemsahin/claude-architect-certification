@@ -9,9 +9,30 @@
  \"scenes_module_number_section_number_scene_number_key\""}
 ```
 
-## 🔍 Root Cause
+## 🔍 Root Cause (Full Chain)
 
-The `scenes` table has a **unique constraint** on `(module_number, section_number, scene_number)`. When creating a new scene, the form was always defaulting `scene_number` to `1`, causing a conflict with the first scene that already exists.
+The `scenes` table has a **unique constraint** on `(module_number, section_number, scene_number)`.
+
+The deeper root was `?section=0` in the URL:
+
+```
+?module=1&section=0
+↓
+sectionKey = '0'  (truthy string, passed the || fallback check)
+↓
+Supabase query: section_number=eq.0  → returns [] (no scenes in section 0)
+↓
+renderScenes(null)  → _scenesData empty
+↓
+openSceneForm() → nextNum defaults to 1 every time
+↓
+saveSceneForm() video-select shows section 1 (0 not in list) → saves to section 1
+↓
+Next create: DB max query on section 1 → finds scene 1 → tries to insert scene 2 ✅
+BUT load still reads section 0 → _scenesData still empty → shows "no scenes"
+↓
+User sees nothing saved, clicks Create again → scene 1 again → 23505 💥
+```
 
 ## ⚠️ First Fix (Incomplete)
 
@@ -65,5 +86,7 @@ Without this, saving a scene with a reference doc URL will fail with a column-no
 | 2026-06-09 | 🔴 `23505` duplicate key on scene_number=1 |
 | 2026-06-09 | 🛠 First fix: auto-increment from `window._scenesData` — still failed when data empty |
 | 2026-06-09 | 🔴 Still failing — `_scenesData` empty on `?section=0` URL / fallback path |
-| 2026-06-09 | ✅ Final fix: query DB for real max before INSERT — DB-authoritative, no race |
+| 2026-06-09 | 🛠 Second fix: query DB for real max before INSERT — DB-authoritative |
+| 2026-06-09 | 🔴 Root cause found: `?section=0` invalid URL param → all queries on section 0 → empty |
+| 2026-06-09 | ✅ Root fix: normalize section/module params to min 1 at parse time + `history.replaceState` |
 | 2026-06-09 | ➕ `ref_doc_url` column added via ALTER TABLE |
