@@ -1066,90 +1066,132 @@
       document.getElementById('scenes-container').appendChild(addBtn);
     }
 
+    // helper: fetch with 8s timeout
+    function fetchWithTimeout(url, opts, ms = 8000) {
+      const ctrl = new AbortController();
+      const id = setTimeout(() => ctrl.abort(), ms);
+      return fetch(url, { ...opts, signal: ctrl.signal }).finally(() => clearTimeout(id));
+    }
+
     // 📡 Fetch module details & scenes from database, or fallback
     async function loadDataAndRender() {
       const supabaseUrl = localStorage.getItem('supabase_url') || 'https://rmekfsdhglyiralxvkwc.supabase.co';
       const supabaseKey = localStorage.getItem('supabase_anon_key') || '';
-      
+      const headers = { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` };
+
       let title = `Module ${moduleKey}, Section ${sectionKey}`;
       let scenes = null;
+      let loadError = null;
 
-      if (supabaseUrl.includes('supabase.co') && supabaseKey) {
-        try {
-          // Fetch titles
-          const modRes = await fetch(`${supabaseUrl}/rest/v1/modules?module_number=eq.${moduleKey}&select=id,title`, {
-            headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` }
-          });
-          const modData = await modRes.json();
-          if (modData && modData.length) {
-            const moduleId = modData[0].id;
-            const videoRes = await fetch(`${supabaseUrl}/rest/v1/videos?module_id=eq.${moduleId}&video_number=eq.${sectionKey}&select=title`, {
-              headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` }
-            });
-            const videoData = await videoRes.json();
-            if (videoData && videoData.length) {
-              title = `Module ${moduleKey}, Section ${sectionKey}: ${videoData[0].title}`;
-            } else {
-              title = `Module ${moduleKey}, Section ${sectionKey}: ${modData[0].title}`;
+      // Show loading indicator
+      document.getElementById('scenes-container').innerHTML =
+        '<div style="text-align:center;padding:60px;"><p style="font-size:1.3rem;color:#9ca3af;">⏳ Fetching scenes from Supabase…</p></div>';
+
+      try {
+        if (supabaseUrl.includes('supabase.co') && supabaseKey) {
+
+          // 1. Try to get module/video title
+          try {
+            const modRes = await fetchWithTimeout(`${supabaseUrl}/rest/v1/modules?module_number=eq.${moduleKey}&select=id,title`, { headers });
+            if (modRes.ok) {
+              const modData = await modRes.json();
+              if (Array.isArray(modData) && modData.length) {
+                const moduleId = modData[0].id;
+                const videoRes = await fetchWithTimeout(`${supabaseUrl}/rest/v1/videos?module_id=eq.${moduleId}&video_number=eq.${sectionKey}&select=title`, { headers });
+                if (videoRes.ok) {
+                  const videoData = await videoRes.json();
+                  title = (Array.isArray(videoData) && videoData.length)
+                    ? `Module ${moduleKey}, Section ${sectionKey}: ${videoData[0].title}`
+                    : `Module ${moduleKey}, Section ${sectionKey}: ${modData[0].title}`;
+                }
+              }
             }
+          } catch (_) { /* title stays default if modules table missing */ }
+
+          // 2. Fetch scenes (plain, no nested join first)
+          const scenesRes = await fetchWithTimeout(
+            `${supabaseUrl}/rest/v1/scenes?module_number=eq.${moduleKey}&section_number=eq.${sectionKey}&select=*&order=scene_number.asc`,
+            { headers }
+          );
+
+          if (!scenesRes.ok) {
+            const errText = await scenesRes.text();
+            throw new Error(`Scenes fetch failed ${scenesRes.status}: ${errText}`);
           }
 
-          // Fetch scenes
-          const res = await fetch(`${supabaseUrl}/rest/v1/scenes?module_number=eq.${moduleKey}&section_number=eq.${sectionKey}&select=*,scene_cues(*),edl_entries(*)`, {
-            headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` }
-          });
-          if (res.ok) {
-            const dbScenes = await res.json();
-            if (dbScenes && dbScenes.length) {
-              scenes = dbScenes.sort((a,b) => a.scene_number - b.scene_number).map(s => ({
+          const dbScenes = await scenesRes.json();
+
+          if (Array.isArray(dbScenes) && dbScenes.length) {
+            // 3. For each scene fetch cues + edl separately (tolerates missing tables)
+            scenes = await Promise.all(dbScenes.map(async s => {
+              let cues = [], edl = [];
+              try {
+                const cRes = await fetchWithTimeout(`${supabaseUrl}/rest/v1/scene_cues?scene_id=eq.${s.id}&select=*&order=sort_order.asc`, { headers });
+                if (cRes.ok) cues = (await cRes.json()) || [];
+              } catch (_) {}
+              try {
+                const eRes = await fetchWithTimeout(`${supabaseUrl}/rest/v1/edl_entries?scene_id=eq.${s.id}&select=*&order=sort_order.asc`, { headers });
+                if (eRes.ok) edl = (await eRes.json()) || [];
+              } catch (_) {}
+              return {
                 dbId: s.id,
                 id: s.scene_number,
                 script: s.script,
                 timing: s.timing || '',
                 bg: s.bg_image,
                 ltImg: s.lt_image,
-                ltMain: s.lt_main,
-                ltSub: s.lt_sub,
+                ltMain: s.lt_main || '',
+                ltSub: s.lt_sub || '',
                 overlayLt: s.overlay_lt,
                 overlayText: s.overlay_text,
                 bundle: s.bundle_url,
                 audioUrl: s.audio_url || '',
-                cues: (s.scene_cues || []).sort((a,b) => a.sort_order - b.sort_order).map(c => ({
-                  icon: c.icon, label: c.label, prompt: c.prompt || ''
-                })),
-                edl: (s.edl_entries || []).sort((a,b) => a.sort_order - b.sort_order).map(e => `${e.timing}: ${e.description}`)
-              }));
-            }
+                cues: cues.map(c => ({ icon: c.icon, label: c.label, prompt: c.prompt || '' })),
+                edl: edl.map(e => `${e.timing}: ${e.description}`)
+              };
+            }));
           }
-        } catch (e) {
-          console.error("Failed to load scenes from Supabase. Falling back to local configuration.", e);
+          // dbScenes empty → scenes stays null → fallback below
         }
+      } catch (e) {
+        loadError = e;
+        console.error('[loadDataAndRender]', e);
       }
 
+      // Fallback: show local data if Supabase returned nothing
       if (!scenes) {
         if (moduleKey === '1' && sectionKey === '1') {
           scenes = SCENES_FALLBACK["1-1"];
-          title = "Module 1, Section 1: Introduction & Systems Engineering (Local Fallback)";
+          title = "Module 1, Section 1: Introduction (Local Fallback)";
         } else {
           const modInfo = MODULES_FALLBACK.find(m => m.module_number.toString() === moduleKey.toString());
           const vList = VIDEOS_FALLBACK[moduleKey] || [];
           const vInfo = vList.find(v => v.video_number.toString() === sectionKey.toString());
-          if (modInfo && vInfo) {
-            title = `${modInfo.title} > ${vInfo.title} (Local Fallback)`;
-          }
+          if (modInfo && vInfo) title = `${modInfo.title} > ${vInfo.title} (Local Fallback)`;
         }
       }
 
-      document.querySelector('.audio-title').textContent = title;
+      const audioTitleEl = document.querySelector('.audio-title');
+      if (audioTitleEl) audioTitleEl.textContent = title;
       document.title = 'Production Shot List: ' + title;
 
       const audioPlayer = document.getElementById('master-audio');
-      // Try per-scene audio URL first, fall back to filename convention
-      if (scenes && scenes.length > 0 && scenes[0].audioUrl) {
-        audioPlayer.src = toGDriveEmbedUrl(scenes[0].audioUrl);
-      } else {
-        const audioFileName = `module${moduleKey}_section${sectionKey}.wav`;
-        audioPlayer.src = getAssetPath(audioFileName, moduleKey, sectionKey);
+      if (audioPlayer) {
+        if (scenes && scenes.length > 0 && scenes[0].audioUrl) {
+          audioPlayer.src = toGDriveEmbedUrl(scenes[0].audioUrl);
+        } else {
+          audioPlayer.src = getAssetPath(`module${moduleKey}_section${sectionKey}.wav`, moduleKey, sectionKey);
+        }
+      }
+
+      // Show on-page error banner if Supabase had a problem (but still render fallback)
+      if (loadError) {
+        const banner = document.createElement('div');
+        banner.style.cssText = 'background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.4);border-radius:16px;padding:20px 28px;margin-bottom:24px;font-size:0.88rem;color:#fca5a5;line-height:1.7;';
+        banner.innerHTML = `<strong>⚠️ Supabase load error</strong> — showing local fallback.<br>
+          <code style="font-size:0.8rem;opacity:0.8;">${loadError.message}</code><br>
+          Check: scenes table exists · RLS policies applied · anon key correct (⚙️ Settings)`;
+        document.getElementById('scenes-container').before(banner);
       }
 
       renderScenes(scenes);

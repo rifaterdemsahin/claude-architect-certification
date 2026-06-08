@@ -38,3 +38,4 @@ Severity levels: `CRITICAL` | `ERROR` | `WARNING` | `INFO`
 [2026-06-08] [5_Symbols/sanity_checklist.html] [HIGH] 🔴 Drag-and-drop sort order not persisted — Supabase updateSortOrder() silently swallows errors; Promise.all resolves even when .update().eq() returns {error}; RLS UPDATE policy may also be missing on checklist_items
 [2026-06-08] 🔴 [6_Semblance] [HIGH] — Google OAuth 401 invalid_client: Authorized JavaScript origins empty on client productionhelper (327591678159-hq0cedjmjo9fgc9s6fiutrr4jlo3jhqp)
 [2026-06-08] ⚠️ [6_Semblance] [MEDIUM] — Google OAuth consent screen: "App not verified" warning shown; app in Testing mode, sensitive scope drive.readonly requires bypass via Advanced → Go to app
+[2026-06-08] 🔴 [6_Semblance] [HIGH] — Page stuck on "Loading scenes…"; Create New Scene never appears; two causes: (1) renderScenes infinite recursion via hoisted function wrapper, (2) unhandled exception from nested Supabase join on missing tables

@@ -59,3 +59,4 @@ Lesson captured in lessons_learned.md
 | 2026-06-02 | SETUP | Initialization | APPLIED |
 | 2026-06-07 | 4_Formula | APPLIED — Updated 4 files with correct post-refactor paths: README.md (topologies + exam links), antigravity.md (certification docs), 1_Real_Unknown/2_problem_statement.md (topologies), 4_Formula/tools/markdown_preview_auto.md (vscode_extensions path) |
 [2026-06-08] [5_Symbols/sanity_checklist.html] [APPLIED] 🛠 Fixed updateSortOrder() to unwrap {error} from each Supabase update — Promise.all now throws on failure so catch block fires correctly
+[2026-06-08] [5_Symbols] [APPLIED] — Fix renderScenes: merged wrapper into original, split nested join into 3 fetches, added fetchWithTimeout(8s), on-page error banner, always calls renderScenes
