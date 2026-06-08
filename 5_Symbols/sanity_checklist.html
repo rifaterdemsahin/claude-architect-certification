@@ -115,8 +115,27 @@
       gap: 14px;
       padding: 12px 0;
       border-bottom: 1px solid rgba(255,255,255,0.04);
+      transition: background 0.15s;
     }
     .checklist li:last-child { border-bottom: none; }
+
+    /* Drag-and-drop */
+    .drag-handle {
+      cursor: grab;
+      color: rgba(156,163,175,0.18);
+      font-size: 1rem;
+      line-height: 1;
+      flex-shrink: 0;
+      margin-top: 3px;
+      user-select: none;
+      transition: color 0.15s;
+      padding: 0 2px;
+    }
+    .drag-handle:hover  { color: rgba(156,163,175,0.6); }
+    .drag-handle:active { cursor: grabbing; }
+    .sortable-ghost  { opacity: 0.3; background: rgba(139,92,246,0.1); border-radius: 8px; }
+    .sortable-chosen { background: rgba(139,92,246,0.05); border-radius: 8px; }
+    .sortable-drag   { box-shadow: 0 8px 24px rgba(0,0,0,0.4); border-radius: 8px; opacity: 0.95; }
     .check-box {
       appearance: none;
       width: 22px; height: 22px;
@@ -521,6 +540,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.3/Sortable.min.js"></script>
   <script>
     const SUPABASE_URL  = 'https://rmekfsdhglyiralxvkwc.supabase.co';
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZWtmc2RoZ2x5aXJhbHh2a3djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NzYzODgsImV4cCI6MjA5NjM1MjM4OH0.ay6HsmO_CbMGDXL_Dv4DT-paAIAOqlQPfmqqx_mexSU';
@@ -695,6 +715,7 @@
           : item.item_name;
         return `
           <li data-item-id="${item.id}"${!hasDesc ? ' class="no-desc"' : ''}>
+            <span class="drag-handle" title="Drag to reorder">⠿</span>
             <input type="checkbox" class="check-box" data-id="${item.id}"${checked ? ' checked' : ''}>
             <button class="ip-btn${inProg ? ' active' : ''}" data-id="${item.id}"
               onclick="toggleInProgress(${item.id})" title="Set as In Progress">▶</button>
@@ -775,6 +796,7 @@
         setBadge('connected');
         updateProgress();
         attachListeners();
+        initSortable();
 
       } catch (err) {
         document.getElementById('phases-container').innerHTML = `
@@ -887,6 +909,7 @@
         if (!(newItem.item_desc && newItem.item_desc.trim())) li.classList.add('no-desc');
         const newEscName = newItem.item_name.replace(/"/g, '&quot;');
         li.innerHTML = `
+          <span class="drag-handle" title="Drag to reorder">⠿</span>
           <input type="checkbox" class="check-box" data-id="${newItem.id}">
           <button class="ip-btn" data-id="${newItem.id}"
             onclick="toggleInProgress(${newItem.id})" title="Set as In Progress">▶</button>
@@ -948,6 +971,48 @@
       } finally {
         btn.textContent = 'Save';
         btn.disabled    = false;
+      }
+    }
+
+    // ── Drag-and-drop reorder ────────────────────────────────────────────────
+    let sortSaveTimer;
+
+    function initSortable() {
+      document.querySelectorAll('.checklist').forEach(list => {
+        if (Sortable.get(list)) return; // already initialised for this list
+        Sortable.create(list, {
+          animation:   150,
+          handle:      '.drag-handle',
+          ghostClass:  'sortable-ghost',
+          chosenClass: 'sortable-chosen',
+          dragClass:   'sortable-drag',
+          onEnd() { scheduleSortSave(list); }
+        });
+      });
+    }
+
+    function scheduleSortSave(list) {
+      clearTimeout(sortSaveTimer);
+      sortSaveTimer = setTimeout(() => updateSortOrder(list), 600);
+    }
+
+    async function updateSortOrder(list) {
+      const rows = [...list.querySelectorAll('li[data-item-id]')];
+      setBadge('saving');
+      try {
+        await Promise.all(
+          rows.map((li, idx) =>
+            db.from('checklist_items')
+              .update({ sort_order: (idx + 1) * 10 })
+              .eq('id', parseInt(li.dataset.itemId, 10))
+          )
+        );
+        setBadge('saved');
+        showToast('✅ Order saved');
+        setTimeout(() => setBadge('connected'), 2000);
+      } catch (err) {
+        setBadge('error');
+        showToast('❌ Reorder failed: ' + err.message, true);
       }
     }
 
