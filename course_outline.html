@@ -300,6 +300,39 @@
       color: var(--accent-violet);
       font-weight: 700;
     }
+    .video-topics {
+      margin-top: 0.75rem;
+      padding-top: 0.6rem;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .topics-label {
+      font-size: 0.68rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent-violet);
+      margin-bottom: 0.35rem;
+    }
+    .video-topics-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    .video-topics-list li {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      padding-left: 1rem;
+      position: relative;
+    }
+    .video-topics-list li::before {
+      content: '▸';
+      position: absolute;
+      left: 0;
+      color: var(--accent-cyan);
+      font-size: 0.65rem;
+      top: 0.1em;
+    }
 
     /* OKR Box */
     .okr-box {
@@ -519,10 +552,11 @@
     async function loadCourse() {
       const container = document.getElementById('courseContent');
       try {
-        // Fetch modules+videos and OKRs in parallel
-        const [modulesRes, okrRes] = await Promise.all([
+        // Fetch modules+videos, module OKRs, and video topics in parallel
+        const [modulesRes, okrRes, topicsRes] = await Promise.all([
           client.from('course_modules').select('*, course_videos(*)').order('sort_order', { ascending: true }),
-          client.from('outline').select('*').eq('video_number', 0).in('content_type', ['objective', 'key_result']).order('sort_order', { ascending: true })
+          client.from('outline').select('*').eq('video_number', 0).in('content_type', ['objective', 'key_result']).order('sort_order', { ascending: true }),
+          client.from('outline').select('*').neq('video_number', 0).eq('content_type', 'topic').order('module_number').order('video_number').order('sort_order')
         ]);
 
         if (modulesRes.error) throw modulesRes.error;
@@ -537,10 +571,21 @@
           if (row.content_type === 'key_result') okrMap[row.module_number].keyResults.push(row.content);
         });
 
-        // Sort videos within each module
+        // Group topics from outline by module_number + video_number (outline → course_videos)
+        const topicMap = {};
+        (topicsRes.data || []).forEach(row => {
+          const key = `${row.module_number}.${row.video_number}`;
+          if (!topicMap[key]) topicMap[key] = [];
+          topicMap[key].push(row.content);
+        });
+
+        // Sort videos within each module and attach OKRs + outline topics
         modules.forEach(m => {
           m.course_videos = (m.course_videos || []).sort((a, b) => a.sort_order - b.sort_order);
           m.okr = okrMap[m.module_number] || null;
+          m.course_videos.forEach(v => {
+            v.topics = topicMap[`${m.module_number}.${v.video_number}`] || [];
+          });
         });
 
         container.innerHTML = modules.map((mod, idx) => renderModule(mod, idx)).join('');
@@ -619,11 +664,19 @@
 
     function renderVideo(v) {
       const bullets = (v.bullets || []).map(b => `<li>${b}</li>`).join('');
+      const topics  = (v.topics  || []).map(t => `<li>${t}</li>`).join('');
+      const topicsHtml = topics
+        ? `<div class="video-topics">
+             <div class="topics-label">📋 Topics</div>
+             <ul class="video-topics-list">${topics}</ul>
+           </div>`
+        : '';
       return `
         <div class="video-card">
           <div class="video-label">Video ${v.video_number}</div>
           <div class="video-title">${v.title}</div>
           <ul class="video-bullets">${bullets}</ul>
+          ${topicsHtml}
         </div>`;
     }
 

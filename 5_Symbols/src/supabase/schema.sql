@@ -278,3 +278,12 @@ CREATE POLICY anon_insert_outline ON outline FOR INSERT WITH CHECK (true);
 CREATE POLICY anon_insert_milestones ON milestones FOR INSERT WITH CHECK (true);
 CREATE POLICY anon_insert_milestone_progress ON milestone_progress FOR INSERT WITH CHECK (true);
 CREATE POLICY anon_update_milestone_progress ON milestone_progress FOR UPDATE USING (true);
+
+-- =============================================================================
+-- Relationship FK Columns
+-- outline → course_modules (module-level OKRs) and course_videos (video topics)
+-- scenes  → videos (each scene belongs to a production video)
+-- =============================================================================
+ALTER TABLE outline ADD COLUMN IF NOT EXISTS module_id INTEGER REFERENCES course_modules(id) ON DELETE SET NULL;
+ALTER TABLE outline ADD COLUMN IF NOT EXISTS video_id  INTEGER REFERENCES course_videos(id)  ON DELETE SET NULL;
+ALTER TABLE scenes  ADD COLUMN IF NOT EXISTS video_id  INTEGER REFERENCES videos(id)          ON DELETE SET NULL;

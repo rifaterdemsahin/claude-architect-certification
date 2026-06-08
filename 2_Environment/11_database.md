@@ -54,7 +54,19 @@ erDiagram
         int sort_order
         timestamptz created_at
     }
+    outline {
+        int id PK
+        int module_id FK
+        int video_id FK
+        int module_number
+        int video_number
+        text content_type
+        text content
+        int sort_order
+    }
     course_modules ||--o{ course_videos : "has"
+    course_modules ||--o{ outline : "module OKRs"
+    course_videos ||--o{ outline : "video topics"
 
     %% ── Production Pipeline ────────────────────────────────────────────
     modules {
@@ -96,10 +108,12 @@ erDiagram
     modules ||--o{ resource_links : "links"
     videos ||--o{ video_cues : "has"
     videos ||--|| scripts : "script"
+    videos ||--o{ scenes : "contains"
 
     %% ── Scenes & Post-Production ───────────────────────────────────────
     scenes {
         int id PK
+        int video_id FK
         int module_number
         int section_number
         int scene_number
@@ -146,14 +160,6 @@ erDiagram
     checklist_items ||--o{ checklist_progress : "tracks"
 
     %% ── Misc ───────────────────────────────────────────────────────────
-    outline {
-        int id PK
-        int module_number
-        int video_number
-        text content_type
-        text content
-        int sort_order
-    }
     course_content {
         int id PK
         text section
@@ -168,11 +174,11 @@ erDiagram
 
 | Group | Tables | Used By |
 |-------|--------|---------|
-| Course Outline | `course_modules`, `course_videos` | `course_outline.html` |
+| Course Outline | `course_modules`, `course_videos`, `outline` | `course_outline.html` |
 | Production Pipeline | `modules`, `videos`, `video_cues`, `resource_links`, `scripts` | `production_hub.html`, preprod editors |
-| Scenes / Post-Prod | `scenes`, `scene_cues`, `edl_entries` | `post_production_master.html` |
+| Scenes / Post-Prod | `scenes` *(FK → videos)*, `scene_cues`, `edl_entries` | `post_production_master.html` |
 | Checklist | `checklist_items`, `checklist_progress` | `sanity_checklist.html` |
-| Misc | `outline`, `course_content` | `course_outline.html`, script editors |
+| Misc | `course_content`, `milestones`, `milestone_progress`, `pricing`, `courses` | script editors, membership page |
 
 ---
 

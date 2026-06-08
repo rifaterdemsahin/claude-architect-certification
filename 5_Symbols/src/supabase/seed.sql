@@ -264,6 +264,20 @@ INSERT INTO outline (module_number, video_number, content_type, content, sort_or
 (5, 3, 'topic', 'Scaling optimization across multiple workloads', 3),
 (5, 0, 'link', '{"label":"cache_layer.py","url":"../../src/optimization/cache_layer.py"}', 99);
 
+-- Populate outline FK columns introduced in schema (safe to re-run)
+UPDATE outline o
+SET module_id = m.id
+FROM course_modules m
+WHERE m.module_number = o.module_number;
+
+UPDATE outline o
+SET video_id = v.id
+FROM course_videos v
+JOIN course_modules m ON v.module_id = m.id
+WHERE m.module_number = o.module_number
+  AND v.video_number  = o.video_number
+  AND o.video_number  > 0;
+
 
 -- -----------------------------------------------------------------------------
 -- 4. Milestones Seed
