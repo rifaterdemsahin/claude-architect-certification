@@ -13,6 +13,7 @@
     { "label": "   ├─ Cost Tracker", "url": "markdown_renderer.html?file=1_Real_Unknown/5_costs.md" },
     { "label": "2. Environment", "url": "2_Environment/" },
     { "label": "   ├─ Architecture", "url": "markdown_renderer.html?file=2_Environment/1_architecture.md" },
+    { "label": "   └─ Database (Supabase)", "url": "markdown_renderer.html?file=2_Environment/database.md" },
     { "label": "3. Simulation", "url": "3_Simulation/" },
     { "label": "4. Formula", "url": "markdown_renderer.html?file=4_Formula/README.md" },
     { "label": "   ├─ LLM Thinking Log", "url": "markdown_renderer.html?file=4_Formula/llm_thinking_log.md" },
