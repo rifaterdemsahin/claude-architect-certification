@@ -293,6 +293,27 @@
     .download-bundle-btn:hover {
       background: var(--primary); color: white; transform: translateY(-4px);
     }
+    .ref-doc-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(99,102,241,0.12); color: #a5b4fc;
+      border: 1px solid rgba(99,102,241,0.3);
+      padding: 10px 20px; border-radius: 10px;
+      text-decoration: none; font-weight: 700; font-size: 0.85rem;
+      margin-top: 16px; transition: all 0.2s;
+    }
+    .ref-doc-btn:hover { background: rgba(99,102,241,0.25); color: white; }
+    .scene-audio-row {
+      display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap;
+    }
+    .audio-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(16,185,129,0.12); color: #6ee7b7;
+      border: 1px solid rgba(16,185,129,0.3);
+      padding: 6px 14px; border-radius: 20px;
+      text-decoration: none; font-size: 0.78rem; font-weight: 700;
+      transition: all 0.2s;
+    }
+    .audio-chip:hover { background: rgba(16,185,129,0.25); color: white; }
 
     /* Asset Modal */
     .modal {
@@ -995,6 +1016,7 @@
         return `
           <div class="review-grid" style="position:relative;">
             <div class="scene-edit-btn">
+              <span style="font-family:monospace;font-size:0.75rem;color:var(--text-muted);margin-right:8px;">S${s.id}${s.timing ? ' · ' + s.timing : ''}</span>
               ${s.dbId ? `
                 <button onclick="openSceneForm(${s.dbId})" title="Edit scene">✏️ Edit</button>
                 <button onclick="deleteSceneById(${s.dbId}, ${s.id})" title="Delete scene" style="border-color:#ef4444;color:#ef4444;">🗑</button>
@@ -1016,9 +1038,12 @@
                 <span class="lt-sub">${s.ltSub}</span>
               </div>
 
-              <a href="${bundleUrl}" class="download-bundle-btn">
-                📦 Download Scene ${s.id} Bundle (.zip)
-              </a>
+              ${s.refDocUrl ? `<a href="${s.refDocUrl}" target="_blank" rel="noopener" class="ref-doc-btn">📄 Reference Doc</a>` : ''}
+              ${(s.musicUrl || s.sfxUrl) ? `
+                <div class="scene-audio-row">
+                  ${s.musicUrl ? `<a href="${s.musicUrl}" target="_blank" rel="noopener" class="audio-chip">🎵 Music</a>` : ''}
+                  ${s.sfxUrl  ? `<a href="${s.sfxUrl}"  target="_blank" rel="noopener" class="audio-chip">🔊 SFX</a>`   : ''}
+                </div>` : ''}
             </div>
 
             <div class="media-col">
