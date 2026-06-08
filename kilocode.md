@@ -86,7 +86,7 @@ claude-architect-certification/
 - Always follow the 7-stage structure when creating or organizing content
 - When adding files, place them in the appropriate numbered folder
 - **After every command, commit and push** — do not batch changes; each step gets its own commit. If any git errors occur, proactively troubleshoot and resolve them.
-- Use emojis (✨, 🛠, 🧪, 🐛) for scannability
+- **🎨 Emoji & Visual Style** — Use emojis generously in all markdown files to maximise scannability and visual clarity (see full guide below)
 - Focus on precision code generation and minimal footprint changes
 - **Record every prompt** in `prompts.md` — log date, agent, and purpose for each prompt given
 - **README.md must include the public GitHub Pages URL** — e.g., `https://rifaterdemsahin.github.io/<repo-name>/` (see [proxmox example](https://rifaterdemsahin.github.io/proxmox/))
@@ -134,3 +134,53 @@ claude-architect-certification/
 - [ ] Secrets managed via Azure Key Vault (not in git)
 - [ ] `index.html` links to GitHub, LinkedIn, YouTube
 - [ ] README.md contains GitHub Pages URL
+
+---
+
+## 🎨 Emoji & Visual Style Guide
+
+**Rule:** Every markdown file should use emojis on headings, list items, status columns, and log lines to make content visually scannable at a glance.
+
+### 🗂 Emoji Map by Context
+
+| 🏷 Context | ✨ Emojis to use |
+|-----------|----------------|
+| 📋 Planning & Outlines | 📋 🗺 📌 🎯 📍 🧩 |
+| ✅ Done / Success | ✅ ☑️ 🎉 🏆 💚 |
+| ⏳ In Progress | ⏳ 🔄 🚧 🏗 |
+| ❌ Blocked / Failed | ❌ 🚫 🔴 💥 🚨 |
+| 🐛 Bugs / Errors | 🐛 ⚠️ 🔥 💀 😵 |
+| 🛠 Fixes / Solutions | 🛠 🔧 🔨 ⚙️ 💡 🩹 |
+| 📚 Docs / Notes | 📚 📖 📝 📄 🗒 |
+| 🚀 Deploy / Release | 🚀 🌐 ☁️ 📦 🏁 |
+| 🧪 Testing | 🧪 🔬 🧬 🎯 🕵️ |
+| 💰 Cost / Budget | 💰 💵 💳 📊 📈 |
+| 🤖 AI / Agents | 🤖 ✨ 🧠 💬 🔮 🦾 |
+| 🏛 Architecture | 🏛 🗂 🔗 📐 🔩 🕸 |
+| 🎬 Video / Media | 🎬 🎭 🎤 📹 🎥 🎞 |
+| 🔐 Security / Secrets | 🔐 🔒 🛡 🗝 🔑 |
+| 📅 Dates / Schedule | 📅 🗓 ⏰ 📆 |
+| 🌿 Git / Branches | 🌿 🌱 🔀 🏷 📌 |
+
+### ✏️ Where to apply
+
+- 🔖 Every `##` and `###` heading — prefix with a relevant emoji
+- 📝 List items with a clear category — use emoji as a visual bullet
+- 📊 Table rows — emoji in the label column where it aids scanning
+- 🗓 Log entries — `[DATE] 🐛 [STAGE] [SEVERITY] — description`
+- 🏷 Stage references — `📁 1_Real_Unknown`, `💻 5_Symbols`, `🧪 7_Testing_Known`
+- ✅/❌/⏳ — use as inline status badges in task lists and kanban columns
+- 🔬 Kilo Code precision tasks: label diffs with `🔧`, targeted edits with `✂️`, verified outputs with `✅`
+- 🚀 Commit message bodies (keep the one-line subject clean — no emojis in the subject)
+
+### 🎯 Per-Stage Emoji Conventions
+
+| 📁 Stage | 🏷 Default Emoji |
+|---------|----------------|
+| `1_Real_Unknown` | ❓ 🎯 📌 |
+| `2_Environment` | 🌍 ⚙️ 🗺 |
+| `3_Simulation` | 🖼 ✏️ 💡 |
+| `4_Formula` | 🧠 🔬 📐 |
+| `5_Symbols` | 💻 🔩 🛠 |
+| `6_Semblance` | 🩹 🐛 ⚠️ |
+| `7_Testing_Known` | 🧪 ✅ 🏆 |

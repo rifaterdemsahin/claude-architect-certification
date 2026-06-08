@@ -7,6 +7,19 @@ This document defines how AI agents interact with the **Claude AI Certification 
 ## 📅 Agent Activity Log
 
 ### 2026-06-08
+- **Task:** 🎨 Add emoji visual style rules to all agent files (`agents.md`, `claude.md`, `gemini.md`, `kilocode.md`).
+- **Action:** Added `🎨 Emoji & Visual Style` subsection to every agent guide with emoji map by context, usage rules, and per-stage emoji sets.
+- **Status:** IMPLEMENTED, COMMITTED, PUSHED.
+
+- **Task:** ➕ Add Sanity Checklist step + inline plus-button step insertion to Pre-Production page.
+- **Action:**
+    - Added Step 7 (✅ Sanity Checklist → `5_Symbols/sanity_checklist.html`) to `5_Symbols/production/preprod/index.html`.
+    - Converted section-grid to vertical numbered steps-container.
+    - Plus (+) buttons between every step open an inline form (emoji, title, desc, URL).
+    - Custom steps persist to `localStorage`; step numbers auto-update on add/delete.
+    - Added Sanity Checklist row to Files list.
+- **Status:** IMPLEMENTED, COMMITTED, PUSHED.
+
 - **Task:** Create course_outline.html page backed by Supabase; consolidate all SQL.
 - **Action:**
     - Created `course_outline.html` at repo root — fetches `course_modules` + `course_videos` from Supabase (anon key, RLS public-read); renders expandable module cards.
@@ -83,3 +96,37 @@ This document defines how AI agents interact with the **Claude AI Certification 
   - `seed.sql` — consolidated seed data (modules, videos, outline, milestones, pricing)
   Run either of these in the Supabase SQL Editor: https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/sql
 - **Architecture Sync:** When architecture changes, update [1_architecture.md](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/2_Environment/1_architecture.md).
+- **🎨 Emoji Rule:** Use emojis generously in all markdown content to maximise scannability. Every `##`/`###` heading, list item with a clear category, status indicator, and log entry should carry an emoji. See the Emoji & Visual Style table in each agent guide.
+
+---
+
+## 🎨 Emoji & Visual Style Reference
+
+Use this map when writing markdown files, log entries, commit bodies, and doc sections.
+
+| 🏷 Context | 🎯 Emojis |
+|-----------|----------|
+| 📋 Planning / Outlines | 📋 🗺 📌 🎯 📍 🧩 |
+| ✅ Done / Success | ✅ ☑️ 🎉 🏆 💚 |
+| ⏳ In Progress | ⏳ 🔄 🚧 🏗 |
+| ❌ Blocked / Failed | ❌ 🚫 🔴 💥 🚨 |
+| 🐛 Bugs / Errors | 🐛 ⚠️ 🔥 💀 😵 |
+| 🛠 Fixes / Solutions | 🛠 🔧 🔨 ⚙️ 💡 🩹 |
+| 📚 Docs / Notes | 📚 📖 📝 📄 🗒 📑 |
+| 🚀 Deployments / Releases | 🚀 🌐 ☁️ 📦 🏁 |
+| 🧪 Testing / Validation | 🧪 🔬 🧬 🎯 🕵️ |
+| 💰 Cost / Pricing | 💰 💵 💳 📊 📈 💹 |
+| 🤖 AI / Agents | 🤖 ✨ 🧠 💬 🔮 🦾 |
+| 🏛 Architecture | 🏛 🗂 🔗 📐 🔩 🕸 |
+| 🎬 Video / Media | 🎬 🎭 🎤 📹 🎥 🎞 |
+| 🔐 Security / Secrets | 🔐 🔒 🛡 🗝 🔑 |
+| 📅 Dates / Schedule | 📅 🗓 ⏰ 🕐 📆 |
+| 🌿 Git / Branches | 🌿 🌱 🔀 🏷 📌 |
+
+### ✏️ Where to apply emojis
+- Every `##` and `###` heading in a markdown file
+- ✅/❌/⏳ status columns in tables and task lists
+- Log entries: `[2026-06-08] 🐛 [5_Symbols] [HIGH] — description`
+- Stage folder references: `📁 1_Real_Unknown`, `💻 5_Symbols`, `🧪 7_Testing_Known`
+- Bullet lists where items have a clear category (use emoji as visual bullet)
+- Commit message bodies (not the one-line subject — keep that clean)
