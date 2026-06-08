@@ -206,6 +206,7 @@
     .pill-pending    { background: rgba(148,163,184,0.12); color: #94a3b8; }
     .pill-inprogress { background: rgba(245,158,11,0.15);  color: #f59e0b; }
     .pill-done       { background: rgba(16,185,129,0.15);  color: #10b981; }
+    .pill-ready      { background: rgba(99,102,241,0.15);  color: #818cf8; }
 
     /* Add-item row */
     .add-item-row {
@@ -412,6 +413,20 @@
       return '<span class="status-pill pill-pending">Pending</span>';
     }
 
+    // ── In-progress guard ────────────────────────────────────────────────────
+    function findOtherInProgress(excludeId) {
+      let found = false;
+      document.querySelectorAll('.checklist li').forEach(li => {
+        if (found) return;
+        const liId = parseInt(li.dataset.itemId, 10);
+        if (liId === excludeId) return;
+        const cb = li.querySelector('.check-box');
+        const ta = li.querySelector('.item-note');
+        if (cb && !cb.checked && ta && ta.value.trim()) found = true;
+      });
+      return found;
+    }
+
     // ── Render ───────────────────────────────────────────────────────────────
     function renderPhase(phase, items, progressMap) {
       const meta = PHASE_META[phase] || { icon: '📋' };
@@ -419,16 +434,20 @@
         const p       = progressMap[item.id] || {};
         const checked = p.checked || false;
         const notes   = p.notes   || '';
+        const hasDesc = !!(item.item_desc && item.item_desc.trim());
+        const riskMark   = hasDesc ? '' : '💣 ';
+        const readyBadge = hasDesc ? '<span class="status-pill pill-ready">📋 Ready</span>' : '';
         return `
           <li data-item-id="${item.id}">
             <input type="checkbox" class="check-box" data-id="${item.id}"${checked ? ' checked' : ''}>
             <div class="item-text">
               <div class="item-name">
-                ${item.item_name}
+                ${riskMark}${item.item_name}
+                ${readyBadge}
                 ${pillHtml(checked, notes)}
               </div>
               <div class="item-desc">${item.item_desc || ''}</div>
-              <textarea class="item-note" data-id="${item.id}" placeholder="Add production note… (saves automatically)">${notes}</textarea>
+              <textarea class="item-note" data-id="${item.id}" data-prev-len="${notes.trim().length}" placeholder="Add production note… (saves automatically)">${notes}</textarea>
             </div>
           </li>`;
       }).join('');
@@ -506,9 +525,10 @@
     }
 
     function updatePill(itemId, checked, notes) {
-      const li   = document.querySelector(`li[data-item-id="${itemId}"]`);
+      const li    = document.querySelector(`li[data-item-id="${itemId}"]`);
       if (!li) return;
-      const pill = li.querySelector('.status-pill');
+      const pills = li.querySelectorAll('.status-pill');
+      const pill  = pills[pills.length - 1]; // last pill is always the status pill
       if (!pill) return;
       const next = document.createElement('span');
       next.innerHTML = pillHtml(checked, notes);
@@ -528,8 +548,19 @@
 
       document.querySelectorAll('.item-note').forEach(ta => {
         ta.addEventListener('input', () => {
-          const id      = parseInt(ta.dataset.id, 10);
-          const checked = document.querySelector(`.check-box[data-id="${id}"]`)?.checked || false;
+          const id        = parseInt(ta.dataset.id, 10);
+          const checked   = document.querySelector(`.check-box[data-id="${id}"]`)?.checked || false;
+          const prevLen   = parseInt(ta.dataset.prevLen || '0', 10);
+          const nowInProg = !checked && ta.value.trim().length > 0;
+
+          if (nowInProg && prevLen === 0 && findOtherInProgress(id)) {
+            showToast('⚠️ Only 1 item can be In Progress at a time', true);
+            ta.value = '';
+            ta.dataset.prevLen = '0';
+            return;
+          }
+
+          ta.dataset.prevLen = ta.value.trim().length.toString();
           updatePill(id, checked, ta.value);
           scheduleSave(id, checked, ta.value);
         });
@@ -576,12 +607,15 @@
         const list = document.getElementById(`list-${phaseSlug}`);
         const li   = document.createElement('li');
         li.dataset.itemId = newItem.id;
+        const newHasDesc   = !!(newItem.item_desc && newItem.item_desc.trim());
+        const newRiskMark  = newHasDesc ? '' : '💣 ';
+        const newReadyBadge = newHasDesc ? '<span class="status-pill pill-ready">📋 Ready</span>' : '';
         li.innerHTML = `
           <input type="checkbox" class="check-box" data-id="${newItem.id}">
           <div class="item-text">
-            <div class="item-name">${newItem.item_name} <span class="status-pill pill-pending">Pending</span></div>
+            <div class="item-name">${newRiskMark}${newItem.item_name} ${newReadyBadge}<span class="status-pill pill-pending">Pending</span></div>
             <div class="item-desc">${newItem.item_desc || ''}</div>
-            <textarea class="item-note" data-id="${newItem.id}" placeholder="Add production note… (saves automatically)"></textarea>
+            <textarea class="item-note" data-id="${newItem.id}" data-prev-len="0" placeholder="Add production note… (saves automatically)"></textarea>
           </div>`;
         list.appendChild(li);
 
@@ -599,8 +633,19 @@
           scheduleSave(id, this.checked, notes);
         });
         li.querySelector('.item-note').addEventListener('input', function() {
-          const id      = parseInt(this.dataset.id, 10);
-          const checked = document.querySelector(`.check-box[data-id="${id}"]`)?.checked || false;
+          const id        = parseInt(this.dataset.id, 10);
+          const checked   = document.querySelector(`.check-box[data-id="${id}"]`)?.checked || false;
+          const prevLen   = parseInt(this.dataset.prevLen || '0', 10);
+          const nowInProg = !checked && this.value.trim().length > 0;
+
+          if (nowInProg && prevLen === 0 && findOtherInProgress(id)) {
+            showToast('⚠️ Only 1 item can be In Progress at a time', true);
+            this.value = '';
+            this.dataset.prevLen = '0';
+            return;
+          }
+
+          this.dataset.prevLen = this.value.trim().length.toString();
           updatePill(id, checked, this.value);
           scheduleSave(id, checked, this.value);
         });
