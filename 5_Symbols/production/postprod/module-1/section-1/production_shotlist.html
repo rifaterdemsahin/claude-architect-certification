@@ -620,15 +620,15 @@
           <label>Background Image URL <span style="color:var(--text-muted);font-weight:400;font-size:0.7rem;">(Upload to Google Drive → paste share link)</span></label>
           <div class="input-with-picker">
             <input type="text" id="fBg" placeholder="https://drive.google.com/file/d/... or assets/...png">
-            <button class="btn-pick-drive" onclick="openGDrivePicker('fBg')" disabled title="Pick from Google Drive">📁 Drive</button>
-            <button class="btn-upload-drive" onclick="triggerUpload('fBg')" disabled title="Upload local file to Google Drive">⬆️ Upload</button>
+            <button class="btn-pick-drive" onclick="openGDrivePicker('fBg')" title="Pick from Google Drive">📁 Drive</button>
+            <button class="btn-upload-drive" onclick="triggerUpload('fBg')" title="Upload local file to Google Drive">⬆️ Upload</button>
           </div>
         </div>
         <div class="form-group">
           <label>Voice-over Audio URL <span style="color:var(--text-muted);font-weight:400;font-size:0.7rem;">(Upload to Google Drive → paste share link)</span></label>
           <div class="input-with-picker">
             <input type="text" id="fAudioUrl" placeholder="https://drive.google.com/file/d/... or .wav filename">
-            <button class="btn-pick-drive" onclick="openGDrivePicker('fAudioUrl')" disabled title="Pick from Google Drive">📁 Drive</button>
+            <button class="btn-pick-drive" onclick="openGDrivePicker('fAudioUrl')" title="Pick from Google Drive">📁 Drive</button>
             <button class="btn-upload-drive" onclick="triggerUpload('fAudioUrl')" disabled title="Upload local audio to Google Drive">⬆️ Upload</button>
           </div>
         </div>
@@ -636,8 +636,8 @@
           <label>Lower Third Image URL <span style="color:var(--text-muted);font-weight:400;font-size:0.7rem;">(Google Drive)</span></label>
           <div class="input-with-picker">
             <input type="text" id="fLtImg" placeholder="https://drive.google.com/file/d/... or assets/overlays/lt_intro.png">
-            <button class="btn-pick-drive" onclick="openGDrivePicker('fLtImg')" disabled title="Pick from Google Drive">📁 Drive</button>
-            <button class="btn-upload-drive" onclick="triggerUpload('fLtImg')" disabled title="Upload local file to Google Drive">⬆️ Upload</button>
+            <button class="btn-pick-drive" onclick="openGDrivePicker('fLtImg')" title="Pick from Google Drive">📁 Drive</button>
+            <button class="btn-upload-drive" onclick="triggerUpload('fLtImg')" title="Upload local file to Google Drive">⬆️ Upload</button>
           </div>
         </div>
         <div class="form-group">
@@ -652,24 +652,24 @@
           <label>Overlay Lower Third URL <span style="color:var(--text-muted);font-weight:400;font-size:0.7rem;">(Google Drive)</span></label>
           <div class="input-with-picker">
             <input type="text" id="fOverlayLt" placeholder="https://drive.google.com/file/d/... or assets/overlays/lt_intro.png">
-            <button class="btn-pick-drive" onclick="openGDrivePicker('fOverlayLt')" disabled title="Pick from Google Drive">📁 Drive</button>
-            <button class="btn-upload-drive" onclick="triggerUpload('fOverlayLt')" disabled title="Upload local file to Google Drive">⬆️ Upload</button>
+            <button class="btn-pick-drive" onclick="openGDrivePicker('fOverlayLt')" title="Pick from Google Drive">📁 Drive</button>
+            <button class="btn-upload-drive" onclick="triggerUpload('fOverlayLt')" title="Upload local file to Google Drive">⬆️ Upload</button>
           </div>
         </div>
         <div class="form-group">
           <label>Overlay Text Image URL <span style="color:var(--text-muted);font-weight:400;font-size:0.7rem;">(Google Drive)</span></label>
           <div class="input-with-picker">
             <input type="text" id="fOverlayText" placeholder="https://drive.google.com/file/d/... or assets/overlays/overlay_systems.png">
-            <button class="btn-pick-drive" onclick="openGDrivePicker('fOverlayText')" disabled title="Pick from Google Drive">📁 Drive</button>
-            <button class="btn-upload-drive" onclick="triggerUpload('fOverlayText')" disabled title="Upload local file to Google Drive">⬆️ Upload</button>
+            <button class="btn-pick-drive" onclick="openGDrivePicker('fOverlayText')" title="Pick from Google Drive">📁 Drive</button>
+            <button class="btn-upload-drive" onclick="triggerUpload('fOverlayText')" title="Upload local file to Google Drive">⬆️ Upload</button>
           </div>
         </div>
         <div class="form-group">
           <label>Bundle ZIP URL <span style="color:var(--text-muted);font-weight:400;font-size:0.7rem;">(Google Drive)</span></label>
           <div class="input-with-picker">
             <input type="text" id="fBundle" placeholder="https://drive.google.com/file/d/... or assets/archives/scene1.zip">
-            <button class="btn-pick-drive" onclick="openGDrivePicker('fBundle')" disabled title="Pick from Google Drive">📁 Drive</button>
-            <button class="btn-upload-drive" onclick="triggerUpload('fBundle')" disabled title="Upload local file to Google Drive">⬆️ Upload</button>
+            <button class="btn-pick-drive" onclick="openGDrivePicker('fBundle')" title="Pick from Google Drive">📁 Drive</button>
+            <button class="btn-upload-drive" onclick="triggerUpload('fBundle')" title="Upload local file to Google Drive">⬆️ Upload</button>
           </div>
         </div>
 
@@ -1603,6 +1603,7 @@
     // ========== Google Drive Integration ==========
     let gdriveAccessToken = null;
     let pickerApiLoaded = false;
+    let _pendingDriveAction = null; // {type:'upload'|'picker', targetInputId}
 
     async function loadPickerApi() {
       if (pickerApiLoaded) return;
@@ -1634,16 +1635,25 @@
           gdriveAccessToken = response.access_token;
           const btn = document.getElementById('btn-gdrive-login');
           if (btn) { btn.textContent = '✅ Drive Connected'; btn.classList.add('connected'); }
-          document.querySelectorAll('.btn-pick-drive').forEach(b => b.disabled = false);
-          document.querySelectorAll('.btn-upload-drive').forEach(b => b.disabled = false);
           await loadPickerApi();
+          // Execute any action that was waiting on auth
+          if (_pendingDriveAction) {
+            const action = _pendingDriveAction;
+            _pendingDriveAction = null;
+            if (action.type === 'picker') openGDrivePicker(action.targetInputId);
+            else if (action.type === 'upload') triggerUpload(action.targetInputId);
+          }
         }
       });
       tokenClient.requestAccessToken();
     }
 
     async function openGDrivePicker(targetInputId) {
-      if (!gdriveAccessToken) { alert('Connect to Google Drive first (🔗 Google Drive button).'); return; }
+      if (!gdriveAccessToken) {
+        _pendingDriveAction = { type: 'picker', targetInputId };
+        gdriveLogin();
+        return;
+      }
       await loadPickerApi();
       if (!window.google || !window.google.picker) { alert('Google Picker API not loaded yet. Try again.'); return; }
       new google.picker.PickerBuilder()
@@ -1727,9 +1737,20 @@
     }
 
     // ========== Upload local file → Google Drive ==========
+    // Field ID → Supabase column name
+    const FIELD_TO_COLUMN = {
+      fBg:          'bg_image',
+      fAudioUrl:    'audio_url',
+      fLtImg:       'lt_image',
+      fOverlayLt:   'overlay_lt',
+      fOverlayText: 'overlay_text',
+      fBundle:      'bundle_url'
+    };
+
     function triggerUpload(targetInputId) {
       if (!gdriveAccessToken) {
-        alert('Connect Google Drive first (🔗 Google Drive button).');
+        _pendingDriveAction = { type: 'upload', targetInputId };
+        gdriveLogin();
         return;
       }
       const input = document.getElementById('_driveFileInput');
@@ -1740,6 +1761,38 @@
         await uploadFileToDrive(file, targetInputId);
       };
       input.click();
+    }
+
+    // Save a single asset URL field to Supabase immediately after upload
+    async function saveFieldToSupabase(fieldId, url) {
+      const column = FIELD_TO_COLUMN[fieldId];
+      if (!column) return;
+      const sceneDbId = document.getElementById('editSceneId').value;
+      if (!sceneDbId) {
+        if (window.dbg) window.dbg(`ℹ️ New scene (unsaved) — ${column} will be saved with full form`);
+        return;
+      }
+      const supabaseUrl = localStorage.getItem('supabase_url') || 'https://rmekfsdhglyiralxvkwc.supabase.co';
+      const supabaseKey = localStorage.getItem('supabase_anon_key') || '';
+      if (!supabaseKey) return;
+      try {
+        const res = await fetch(`${supabaseUrl}/rest/v1/scenes?id=eq.${sceneDbId}`, {
+          method: 'PATCH',
+          headers: {
+            'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}`,
+            'Content-Type': 'application/json', 'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({ [column]: url })
+        });
+        if (res.ok || res.status === 204) {
+          if (window.dbg) window.dbg(`✅ Supabase: saved ${column} for scene ${sceneDbId}`);
+        } else {
+          const errText = await res.text();
+          console.error('Supabase field PATCH failed:', errText);
+        }
+      } catch (err) {
+        console.error('Supabase field save error:', err);
+      }
     }
 
     async function uploadFileToDrive(file, targetInputId) {
@@ -1778,9 +1831,11 @@
         const el = document.getElementById(targetInputId);
         if (el) el.value = url;
         if (window.dbg) window.dbg(`✅ Uploaded "${data.name}" → ${url}`);
+        // Immediately persist to Supabase if editing an existing scene
+        await saveFieldToSupabase(targetInputId, url);
         if (btn) {
-          btn.textContent = '✅ Done!';
-          setTimeout(() => { if (btn) { btn.textContent = originalText; btn.disabled = false; } }, 2500);
+          btn.textContent = '✅ Saved!';
+          setTimeout(() => { if (btn) { btn.textContent = originalText; } }, 2500);
         }
       } catch (err) {
         console.error('Drive upload error:', err);
