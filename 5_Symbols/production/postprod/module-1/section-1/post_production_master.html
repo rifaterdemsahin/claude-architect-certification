@@ -331,220 +331,45 @@
 
   <!-- Unified Nav Bar -->
 
-  <!-- Giant Sticky Audio Header -->
-  <div class="audio-header">
-    <div class="audio-container">
-      <div class="audio-info">
-        <span class="audio-label">Production Master Track</span>
-        <span class="audio-title">Module 1, Section 1: Introduction & Systems Engineering</span>
-      </div>
-      <audio controls src="assets/module1_section1.wav">
-        Your browser does not support the audio element.
-      </audio>
-    </div>
-  </div>
-
   <div class="container">
-    <header style="margin-bottom: 60px;">
+    <header style="margin-bottom: 40px;">
       <h1 style="font-size: 4rem; font-weight: 900; letter-spacing: -0.02em; margin-bottom: 10px;">Post-Production Master</h1>
       <p style="font-size: 1.4rem; color: var(--text-muted);">
         Standardized 3-Column Review Interface. <b style="color: white;">Hover section to trigger composite preview.</b>
       </p>
     </header>
 
-    <main>
-      
-      <!-- SCENE 1 -->
-      <div class="review-grid">
-        <div class="script-col">
-          <div class="script-text clickable" onclick="openModal(this.innerHTML, 'Script Track', true)">
-            "Welcome to Module 1. Moving LLMs from a <mark>playground prototype</mark> or an experimental chat window into a <mark>secure, scalable production system</mark> requires systems engineering—not just clever prompting."
-          </div>
-          
-          <div class="overlay-cues" id="cue-s1">
-            <div class="cue-header">🎬 On-Screen Elements (Hover to Preview)</div>
-            <div class="cue-item"><span class="cue-icon">🖼️</span><span class="cue-text">BG: <b>Server Room / Data Center</b></span><div class="element-prompt" data-prompt="Generate a cinematic dark tech background featuring a sleek server room or data center, purple and blue neon lighting, wide-angle perspective, depth of field, 1920x1080, suitable for video overlay"><button class="copy-prompt-btn" onclick="copyPrompt(this)">Copy</button></div></div>
-            <div class="cue-item"><span class="cue-icon">🔤</span><span class="cue-text">Text: <b>SYSTEMS ENGINEERING > CLEVER PROMPTING</b></span><div class="element-prompt" data-prompt="Create a modern, centered typography overlay with 'SYSTEMS ENGINEERING > CLEVER PROMPTING' in bold white sans-serif, slight purple glow, on dark transparent background"><button class="copy-prompt-btn" onclick="copyPrompt(this)">Copy</button></div></div>
-            <div class="cue-item"><span class="cue-icon">🛡️</span><span class="cue-text">Icons: <b>Cloud Security, Shield</b></span><div class="element-prompt" data-prompt="Generate a set of minimalist flat icons: a cloud with a shield lock, keyhole, and security boundary lines. Style: neon cyan and purple, 64x64px, transparent PNG"><button class="copy-prompt-btn" onclick="copyPrompt(this)">Copy</button></div></div>
-            <div class="cue-item"><span class="cue-icon">⏱️</span><span class="cue-text">Timing: 0:05 - 0:12</span></div>
-          </div>
-
-          <div class="lower-third-preview clickable" onclick="openModal('assets/overlays/lt_intro.png', 'Lower Third: Introduction')">
-            <div class="scene-id-badge">S1</div>
-            <span class="lt-main">Claude Architect Masterclass</span>
-            <span class="lt-sub">Module 1: Introduction</span>
-          </div>
-
-          <a href="assets/archives/module1_section1_scene1.zip" class="download-bundle-btn">
-            📦 Download Scene 1 Bundle (.zip)
-          </a>
-        </div>
-
-        <div class="media-col">
-          <div class="artifact-media">
-            <span class="media-label">Background Artifact</span>
-            <img src="assets/module1_section1_scene1_bg.png" class="bg-artifact clickable" onclick="openModal(this.src, 'Background: Scene 1')">
-            
-            <div class="overlay-preview">
-              <div style="position:absolute; bottom:20px; left:20px; width:45%;">
-                <img class="clickable" onclick="openModal(this.src, 'Preview Asset')" src="assets/overlays/lt_intro.png">
-              </div>
-              <div style="position:absolute; top:25%; left:15%; width:70%;">
-                <img class="clickable" onclick="openModal(this.src, 'Preview Asset')" src="assets/overlays/overlay_systems.png">
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="edl-col">
-          <div class="edl-header">📜 Edit Design List (EDL)</div>
-          <div class="edl-box">
-            <div class="edl-step">
-              <b>0:00 - 0:03</b>
-              Fade in background artifact with a slight zoom-in animation (Ken Burns).
-            </div>
-            <div class="edl-step">
-              <b>0:03 - 0:05</b>
-              Slide in Lower Third from left margin. Hold until end of scene.
-            </div>
-            <div class="edl-step">
-              <b>0:05 - 0:07</b>
-              Pop-in "SYSTEMS ENGINEERING" text overlay. Match audio emphasis.
-            </div>
-            <div class="edl-step">
-              <b>0:10</b>
-              Trigger Shield and Security icons with a subtle glow pulse.
-            </div>
-          </div>
-        </div>
+    <!-- Module & Video Selection Panel -->
+    <div class="selector-panel">
+      <div class="selector-group">
+        <label for="module-select">📌 Select Module</label>
+        <select id="module-select" onchange="onSelectionChange()">
+          <!-- Dynamically populated -->
+        </select>
       </div>
-
-      <!-- SCENE 2 -->
-      <div class="review-grid">
-        <div class="script-col">
-          <div class="script-text clickable" onclick="openModal(this.innerHTML, 'Script Track', true)">
-            "Today, we are breaking down the official Claude Architecture Blueprint. We are moving beyond basic API calls to understand model topologies, stateless middleware boundaries, and how the <mark>Model Context Protocol</mark> changes enterprise integration forever."
-          </div>
-
-          <div class="overlay-cues" id="cue-s2">
-            <div class="cue-header">🎬 On-Screen Elements (Hover to Preview)</div>
-            <div class="cue-item"><span class="cue-icon">🖼️</span><span class="cue-text">BG: <b>Network Nodes / API Data Flow</b></span><div class="element-prompt" data-prompt="Design a futuristic technology background showing interconnected network nodes, API data flow visualization, enterprise system architecture diagram style, dark theme with blue cyan lighting, 1920x1080"><button class="copy-prompt-btn" onclick="copyPrompt(this)">Copy</button></div></div>
-            <div class="cue-item"><span class="cue-icon">🔤</span><span class="cue-text">Text: <b>MODEL CONTEXT PROTOCOL (MCP)</b></span><div class="element-prompt" data-prompt="Create a tech-styled text overlay for 'MODEL CONTEXT PROTOCOL (MCP)' with monospace font, circuit-board border, blue to purple gradient text glow"><button class="copy-prompt-btn" onclick="copyPrompt(this)">Copy</button></div></div>
-            <div class="cue-item"><span class="cue-icon">⛓️</span><span class="cue-text">Icons: <b>Server Node, API Bridge</b></span><div class="element-prompt" data-prompt="Design an isometric server node icon with interconnected API bridge lines and data packets flowing. Modern flat vector style, dark theme, vibrant blue accents"><button class="copy-prompt-btn" onclick="copyPrompt(this)">Copy</button></div></div>
-            <div class="cue-item"><span class="cue-icon">⏱️</span><span class="cue-text">Timing: 0:15 - 0:25</span></div>
-          </div>
-
-          <div class="lower-third-preview clickable" onclick="openModal('assets/overlays/lt_mcp.png', 'Lower Third: MCP')">
-            <div class="scene-id-badge">S2</div>
-            <span class="lt-main">Model Context Protocol</span>
-            <span class="lt-sub">Enterprise Integration Layer</span>
-          </div>
-
-          <a href="assets/archives/module1_section1_scene2.zip" class="download-bundle-btn">
-            📦 Download Scene 2 Bundle (.zip)
-          </a>
-        </div>
-
-        <div class="media-col">
-          <div class="artifact-media">
-            <span class="media-label">Background Artifact</span>
-            <img src="assets/module1_section1_scene2_bg.png" class="bg-artifact clickable" onclick="openModal(this.src, 'Background: Scene 2')">
-            
-            <div class="overlay-preview">
-              <div style="position:absolute; bottom:20px; left:20px; width:45%;">
-                <img class="clickable" onclick="openModal(this.src, 'Preview Asset')" src="assets/overlays/lt_mcp.png">
-              </div>
-              <div style="position:absolute; top:25%; left:15%; width:70%;">
-                <img class="clickable" onclick="openModal(this.src, 'Preview Asset')" src="assets/overlays/overlay_mcp.png">
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="edl-col">
-          <div class="edl-header">📜 Edit Design List (EDL)</div>
-          <div class="edl-box">
-            <div class="edl-step">
-              <b>0:12 - 0:15</b>
-              Cross-dissolve transition from Scene 1 to Scene 2 background.
-            </div>
-            <div class="edl-step">
-              <b>0:15 - 0:18</b>
-              Replace Lower Third with "Model Context Protocol" variant.
-            </div>
-            <div class="edl-step">
-              <b>0:18 - 0:22</b>
-              Overlay "MCP" text center-screen. Background opacity drops to 30%.
-            </div>
-            <div class="edl-step">
-              <b>0:23</b>
-              Animate "Data Pipe" icons moving from LLM to Database.
-            </div>
-          </div>
-        </div>
+      <div class="selector-group">
+        <label for="video-select">🎬 Select Video/Section</label>
+        <select id="video-select" onchange="onSelectionChange()">
+          <!-- Dynamically populated -->
+        </select>
       </div>
+    </div>
 
-      <!-- SCENE 3 -->
-      <div class="review-grid">
-        <div class="script-col">
-          <div class="script-text clickable" onclick="openModal(this.innerHTML, 'Script Track', true)">
-            "All the code, blueprints, and architecture files we cover are live right here on our <mark>project hub</mark>."
-          </div>
-
-          <div class="overlay-cues" id="cue-s3">
-            <div class="cue-header">🎬 On-Screen Elements (Hover to Preview)</div>
-            <div class="cue-item"><span class="cue-icon">🖼️</span><span class="cue-text">BG: <b>IDE / GitHub Workspace</b></span><div class="element-prompt" data-prompt="Create a modern coding workspace background, dark mode IDE with code on screen, GitHub interface visible, soft monitor glow, minimal desk setup, cinematic depth of field, 1920x1080"><button class="copy-prompt-btn" onclick="copyPrompt(this)">Copy</button></div></div>
-            <div class="cue-item"><span class="cue-icon">🔤</span><span class="cue-text">Text: <b>github.com/rifaterdemsahin/...</b></span><div class="element-prompt" data-prompt="Generate a clickable URL pill overlay with 'github.com/rifaterdemsahin/...' in white monospace, on a semi-transparent black rounded rectangle, subtle hover glow effect"><button class="copy-prompt-btn" onclick="copyPrompt(this)">Copy</button></div></div>
-            <div class="cue-item"><span class="cue-icon">🐙</span><span class="cue-text">Icons: <b>GitHub Repository</b></span><div class="element-prompt" data-prompt="Create the GitHub Octocat logo icon, high contrast, white on dark transparent, minimal shadow for clarity on video"><button class="copy-prompt-btn" onclick="copyPrompt(this)">Copy</button></div></div>
-            <div class="cue-item"><span class="cue-icon">⏱️</span><span class="cue-text">Timing: 0:28 - End</span></div>
-          </div>
-
-          <div class="lower-third-preview clickable" onclick="openModal('assets/overlays/lt_resources.png', 'Lower Third: Resources')">
-            <div class="scene-id-badge">S3</div>
-            <span class="lt-main">Resource Dashboard</span>
-            <span class="lt-sub">Open Source Architecture Blueprint</span>
-          </div>
-
-          <a href="assets/archives/module1_section1_scene3.zip" class="download-bundle-btn">
-            📦 Download Scene 3 Bundle (.zip)
-          </a>
-        </div>
-
-        <div class="media-col">
-          <div class="artifact-media">
-            <span class="media-label">Background Artifact</span>
-            <img src="assets/module1_section1_scene3_bg.png" class="bg-artifact clickable" onclick="openModal(this.src, 'Background: Scene 3')">
-            
-            <div class="overlay-preview">
-              <div style="position:absolute; bottom:20px; left:20px; width:45%;">
-                <img class="clickable" onclick="openModal(this.src, 'Preview Asset')" src="assets/overlays/lt_resources.png">
-              </div>
-              <div style="position:absolute; top:20%; left:20%; width:60%;">
-                <img class="clickable" onclick="openModal(this.src, 'Preview Asset')" src="assets/overlays/overlay_github.png">
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="edl-col">
-          <div class="edl-header">📜 Edit Design List (EDL)</div>
-          <div class="edl-box">
-            <div class="edl-step">
-              <b>0:28</b>
-              Focus camera on the browser dashboard recording.
-            </div>
-            <div class="edl-step">
-              <b>0:30</b>
-              Display GitHub URL pill overlay.
-            </div>
-            <div class="edl-step">
-              <b>0:35</b>
-              Fade to black while speaker finishes the closing sentence.
-            </div>
-          </div>
-        </div>
+    <!-- Master Audio Player Panel -->
+    <div class="audio-player-panel">
+      <div class="audio-info">
+        <span class="audio-label">Production Master Track</span>
+        <span class="audio-title">Loading track title...</span>
       </div>
+      <audio id="master-audio" controls src="">
+        Your browser does not support the audio element.
+      </audio>
+    </div>
 
+    <main id="scenes-container">
+      <div style="text-align: center; padding: 60px; background: var(--bg-card); border-radius: 24px; border: 1px dashed rgba(255,255,255,0.1);">
+        <p style="font-size: 1.5rem; color: var(--text-muted); margin-bottom: 20px;">🔄 Loading scenes...</p>
+      </div>
     </main>
 
     <footer>
