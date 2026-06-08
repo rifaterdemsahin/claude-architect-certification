@@ -190,6 +190,85 @@
     #toast.show { opacity: 1; transform: translateY(0); }
     #toast.error-toast { background: rgba(239,68,68,0.95); box-shadow: 0 4px 20px rgba(239,68,68,0.4); }
 
+    /* Status pills */
+    .status-pill {
+      display: inline-block;
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 2px 9px;
+      border-radius: 20px;
+      margin-left: 8px;
+      vertical-align: middle;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      transition: all 0.2s;
+    }
+    .pill-pending    { background: rgba(148,163,184,0.12); color: #94a3b8; }
+    .pill-inprogress { background: rgba(245,158,11,0.15);  color: #f59e0b; }
+    .pill-done       { background: rgba(16,185,129,0.15);  color: #10b981; }
+
+    /* Add-item row */
+    .add-item-row {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px dashed rgba(255,255,255,0.06);
+    }
+    .add-item-btn {
+      background: none;
+      border: 1px dashed rgba(139,92,246,0.35);
+      color: var(--primary);
+      border-radius: 8px;
+      padding: 6px 14px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: var(--font-body);
+    }
+    .add-item-btn:hover { background: rgba(139,92,246,0.08); border-style: solid; }
+    .add-item-form {
+      display: none;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+      align-items: center;
+    }
+    .add-item-form.open { display: flex; }
+    .add-input {
+      background: rgba(0,0,0,0.35);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 7px 12px;
+      color: var(--text-main);
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      flex: 1;
+      min-width: 140px;
+    }
+    .add-input:focus { outline: none; border-color: var(--primary); }
+    .add-save-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 7px 16px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: var(--font-body);
+    }
+    .add-save-btn:hover { background: #7c3aed; }
+    .add-cancel-btn {
+      background: none;
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--text-muted);
+      border-radius: 8px;
+      padding: 7px 12px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      font-family: var(--font-body);
+    }
+
     footer {
       text-align: center;
       color: var(--text-muted);
@@ -326,6 +405,13 @@
       }
     }
 
+    // ── Status pill helper ───────────────────────────────────────────────────
+    function pillHtml(checked, notes) {
+      if (checked)            return '<span class="status-pill pill-done">Done</span>';
+      if (notes && notes.trim()) return '<span class="status-pill pill-inprogress">In Progress</span>';
+      return '<span class="status-pill pill-pending">Pending</span>';
+    }
+
     // ── Render ───────────────────────────────────────────────────────────────
     function renderPhase(phase, items, progressMap) {
       const meta = PHASE_META[phase] || { icon: '📋' };
@@ -334,24 +420,37 @@
         const checked = p.checked || false;
         const notes   = p.notes   || '';
         return `
-          <li>
+          <li data-item-id="${item.id}">
             <input type="checkbox" class="check-box" data-id="${item.id}"${checked ? ' checked' : ''}>
             <div class="item-text">
-              <div class="item-name">${item.item_name}</div>
+              <div class="item-name">
+                ${item.item_name}
+                ${pillHtml(checked, notes)}
+              </div>
               <div class="item-desc">${item.item_desc || ''}</div>
-              <textarea class="item-note" data-id="${item.id}" placeholder="Add production note…">${notes}</textarea>
+              <textarea class="item-note" data-id="${item.id}" placeholder="Add production note… (saves automatically)">${notes}</textarea>
             </div>
           </li>`;
       }).join('');
 
+      const phaseSlug = phase.replace(/\s+/g, '-').toLowerCase();
       return `
-        <div class="phase-card">
+        <div class="phase-card" data-phase="${phase}">
           <div class="phase-header">
             <span class="phase-icon">${meta.icon}</span>
             <span class="phase-title">${phase}</span>
             <span class="phase-subtitle">${items.length} items</span>
           </div>
-          <ul class="checklist">${rows}</ul>
+          <ul class="checklist" id="list-${phaseSlug}">${rows}</ul>
+          <div class="add-item-row">
+            <button class="add-item-btn" onclick="toggleAddForm(this)">+ Add item</button>
+            <div class="add-item-form" id="form-${phaseSlug}">
+              <input class="add-input" type="text" placeholder="Item name" id="name-${phaseSlug}" required>
+              <input class="add-input" type="text" placeholder="Description (optional)" id="desc-${phaseSlug}">
+              <button class="add-save-btn" onclick="addItem('${phase}', '${phaseSlug}')">Save</button>
+              <button class="add-cancel-btn" onclick="toggleAddForm(document.querySelector('[data-phase=\\'${phase}\\'] .add-item-btn'))">Cancel</button>
+            </div>
+          </div>
         </div>`;
     }
 
@@ -406,25 +505,119 @@
       }
     }
 
+    function updatePill(itemId, checked, notes) {
+      const li   = document.querySelector(`li[data-item-id="${itemId}"]`);
+      if (!li) return;
+      const pill = li.querySelector('.status-pill');
+      if (!pill) return;
+      const next = document.createElement('span');
+      next.innerHTML = pillHtml(checked, notes);
+      pill.replaceWith(next.firstElementChild);
+    }
+
     function attachListeners() {
-      // Checkboxes
       document.querySelectorAll('.check-box').forEach(cb => {
         cb.addEventListener('change', () => {
           const id    = parseInt(cb.dataset.id, 10);
           const notes = document.querySelector(`.item-note[data-id="${id}"]`)?.value || '';
           updateProgress();
+          updatePill(id, cb.checked, notes);
           scheduleSave(id, cb.checked, notes);
         });
       });
 
-      // Notes — debounce on input
       document.querySelectorAll('.item-note').forEach(ta => {
         ta.addEventListener('input', () => {
           const id      = parseInt(ta.dataset.id, 10);
           const checked = document.querySelector(`.check-box[data-id="${id}"]`)?.checked || false;
+          updatePill(id, checked, ta.value);
           scheduleSave(id, checked, ta.value);
         });
       });
+    }
+
+    // ── Add item ─────────────────────────────────────────────────────────────
+    function toggleAddForm(btn) {
+      const row  = btn.closest('.add-item-row');
+      const form = row.querySelector('.add-item-form');
+      const open = form.classList.toggle('open');
+      btn.textContent = open ? '✕ Cancel' : '+ Add item';
+      if (open) row.querySelector('.add-input').focus();
+    }
+
+    async function addItem(phase, phaseSlug) {
+      const nameEl = document.getElementById(`name-${phaseSlug}`);
+      const descEl = document.getElementById(`desc-${phaseSlug}`);
+      const name   = nameEl.value.trim();
+      if (!name) { nameEl.focus(); return; }
+
+      const btn = document.querySelector(`[data-phase="${phase}"] .add-save-btn`);
+      btn.textContent = 'Saving…';
+      btn.disabled    = true;
+
+      try {
+        // Determine next sort_order for the phase
+        const { data: existing } = await db
+          .from('checklist_items')
+          .select('sort_order')
+          .eq('phase', phase)
+          .order('sort_order', { ascending: false })
+          .limit(1);
+        const nextOrder = existing?.length ? (existing[0].sort_order + 10) : 10;
+
+        const { data: newItem, error } = await db
+          .from('checklist_items')
+          .insert({ phase, item_name: name, item_desc: descEl.value.trim(), sort_order: nextOrder })
+          .select()
+          .single();
+        if (error) throw error;
+
+        // Append new row to the list without full reload
+        const list = document.getElementById(`list-${phaseSlug}`);
+        const li   = document.createElement('li');
+        li.dataset.itemId = newItem.id;
+        li.innerHTML = `
+          <input type="checkbox" class="check-box" data-id="${newItem.id}">
+          <div class="item-text">
+            <div class="item-name">${newItem.item_name} <span class="status-pill pill-pending">Pending</span></div>
+            <div class="item-desc">${newItem.item_desc || ''}</div>
+            <textarea class="item-note" data-id="${newItem.id}" placeholder="Add production note… (saves automatically)"></textarea>
+          </div>`;
+        list.appendChild(li);
+
+        // Update subtitle count
+        const card  = document.querySelector(`[data-phase="${phase}"]`);
+        const sub   = card.querySelector('.phase-subtitle');
+        sub.textContent = `${list.children.length} items`;
+
+        // Wire new listeners
+        li.querySelector('.check-box').addEventListener('change', function() {
+          const id    = parseInt(this.dataset.id, 10);
+          const notes = document.querySelector(`.item-note[data-id="${id}"]`)?.value || '';
+          updateProgress();
+          updatePill(id, this.checked, notes);
+          scheduleSave(id, this.checked, notes);
+        });
+        li.querySelector('.item-note').addEventListener('input', function() {
+          const id      = parseInt(this.dataset.id, 10);
+          const checked = document.querySelector(`.check-box[data-id="${id}"]`)?.checked || false;
+          updatePill(id, checked, this.value);
+          scheduleSave(id, checked, this.value);
+        });
+
+        // Reset form
+        nameEl.value = '';
+        descEl.value = '';
+        const formBtn = document.querySelector(`[data-phase="${phase}"] .add-item-btn`);
+        if (formBtn) toggleAddForm(formBtn);
+        showToast('✅ Item added to Supabase');
+
+      } catch (err) {
+        showToast('❌ ' + err.message, true);
+      } finally {
+        btn.textContent = 'Save';
+        btn.disabled    = false;
+      }
     }
 
     load();
