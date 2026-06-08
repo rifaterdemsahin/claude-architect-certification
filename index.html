@@ -1093,7 +1093,8 @@
     <!-- Search Box with Autocomplete -->
     <div class="search-wrapper">
       <i class="fa-solid fa-magnifying-glass search-icon"></i>
-      <input type="text" class="search-input" id="debugSearch" placeholder="Search stages or agents...">
+      <input type="text" class="search-input" id="debugSearch" placeholder="Search stages, files, or agents... (Ctrl+K)">
+      <span id="searchMatchCount" style="position:absolute; right:0.85rem; top:50%; transform:translateY(-50%); font-size:0.75rem; color:var(--text-muted);"></span>
     </div>
 
     <!-- Debug Menu Links -->
@@ -1110,6 +1111,10 @@
     const showDevPhaseItems = daysSinceLaunch < 90;
 
     // 🗃️ Menu Configuration Fallback Data
+    // ⚠️ PERIODIC UPDATE REMINDER: When adding/removing .md files, update BOTH:
+    //    - navigation_config.json (primary, loaded via fetch)
+    //    - This fallback object below (used when JSON fetch fails)
+    //    Search for "debugMenu" in both files and mirror all entries.
     let navigationData = {
       projectMenu: [
         { label: "Home", url: "index.html" },
@@ -1120,25 +1125,92 @@
         { label: "5. Guide", url: "markdown_renderer.html?file=4_Formula/certification/exam_and_case_study.md" }
       ],
       debugMenu: [
-        { label: "1. Real Unknown", url: "1_Real_Unknown/" },
-        { label: "   ├─ Kanban Board", url: "1_Real_Unknown/6_kanban.md" },
+        { label: "📁 1. Real Unknown", url: "1_Real_Unknown/" },
+        { label: "   ├─ README", url: "1_Real_Unknown/README.md" },
+        { label: "   ├─ OKRs", url: "1_Real_Unknown/1_okr.md" },
+        { label: "   ├─ Problem Statement", url: "1_Real_Unknown/2_problem_statement.md" },
+        { label: "   ├─ Hypotheses", url: "1_Real_Unknown/3_hypotheses.md" },
+        { label: "   ├─ Questions", url: "1_Real_Unknown/4_questions.md" },
         { label: "   ├─ Cost Tracker", url: "1_Real_Unknown/5_costs.md" },
-        { label: "2. Environment", url: "2_Environment/" },
+        { label: "   ├─ Kanban Board", url: "1_Real_Unknown/6_kanban.md" },
+        { label: "   └─ Sanity Check", url: "1_Real_Unknown/7_sanity_check.md" },
+        { label: "📁 2. Environment", url: "2_Environment/" },
+        { label: "   ├─ README", url: "2_Environment/README.md" },
         { label: "   ├─ Architecture", url: "2_Environment/1_architecture.md" },
-        { label: "   ├─ Setup Azure Keyvault", url: "2_Environment/5_setup_azure.md" },
-        { label: "   └─ Database (Supabase)", url: "markdown_renderer.html?file=2_Environment/database.md" },
-        { label: "3. Simulation", url: "3_Simulation/" },
-        { label: "4. Formula", url: "4_Formula/" },
-        { label: "5. Symbols", url: "5_Symbols/" },
-        { label: "6. Semblance", url: "6_Semblance/" },
-        { label: "7. Testing Known", url: "7_Testing_Known/" },
+        { label: "   ├─ GitHub Pages", url: "2_Environment/2_github_pages.md" },
+        { label: "   ├─ Cloudflare Workers", url: "2_Environment/3_cloudflare_workers.md" },
+        { label: "   ├─ Fly.io", url: "2_Environment/4_fly_io.md" },
+        { label: "   ├─ Setup Azure Key Vault", url: "2_Environment/5_setup_azure.md" },
+        { label: "   ├─ Setup Mac", url: "2_Environment/6_setup_mac.md" },
+        { label: "   ├─ Setup Windows", url: "2_Environment/7_setup_windows.md" },
+        { label: "   ├─ Setup AI Tools", url: "2_Environment/8_setup_ai.md" },
+        { label: "   ├─ Navigation Config", url: "2_Environment/9_navigation.md" },
+        { label: "   ├─ Production Setup", url: "2_Environment/10_production_setup.md" },
+        { label: "   ├─ Database (Supabase)", url: "2_Environment/11_database.md" },
+        { label: "   └─ Supabase Backup", url: "2_Environment/12_supabase_backup.md" },
+        { label: "📁 3. Simulation", url: "3_Simulation/" },
+        { label: "   ├─ README", url: "3_Simulation/README.md" },
+        { label: "   ├─ Image Prompts", url: "3_Simulation/image_prompts.md" },
+        { label: "   ├─ Instructor Experience", url: "3_Simulation/instructor_experience.md" },
+        { label: "   └─ User Experience", url: "3_Simulation/userexperience.md" },
+        { label: "📁 4. Formula", url: "4_Formula/" },
+        { label: "   ├─ README", url: "4_Formula/README.md" },
+        { label: "   ├─ API Reference", url: "4_Formula/api_reference.md" },
+        { label: "   ├─ Decisions (ADRs)", url: "4_Formula/decisions.md" },
+        { label: "   ├─ DSL Glossary", url: "4_Formula/dsl.md" },
+        { label: "   ├─ Implementation Guide", url: "4_Formula/implementation_guide.md" },
+        { label: "   ├─ LLM Thinking Log", url: "4_Formula/llm_thinking_log.md" },
+        { label: "   ├─ Research Notes", url: "4_Formula/research_notes.md" },
+        { label: "   ├─ Certification: Course Outline", url: "4_Formula/certification/course_outline.md" },
+        { label: "   ├─ Certification: Exam & Case Study", url: "4_Formula/certification/exam_and_case_study.md" },
+        { label: "   ├─ Certification: Post-Prod Template", url: "4_Formula/certification/post_prod_template.md" },
+        { label: "   ├─ Certification: Production Plan", url: "4_Formula/certification/production_plan.md" },
+        { label: "   ├─ Delivery Pilot Log", url: "4_Formula/delivery_pilot/llm_thinking_log.md" },
+        { label: "   ├─ Production: Google Drive Structure", url: "4_Formula/production/google_drive_folder_Structure.md" },
+        { label: "   ├─ Production: MCP Google Drive", url: "4_Formula/production/mcp_google_drive.md" },
+        { label: "   ├─ Production: Outline Template", url: "4_Formula/production/outline_template.md" },
+        { label: "   ├─ Production: Prompter", url: "4_Formula/production/prompter.md" },
+        { label: "   ├─ Production: Script", url: "4_Formula/production/script.md" },
+        { label: "   ├─ Security: ZDR Checklist", url: "4_Formula/security/zdr_checklist.md" },
+        { label: "   ├─ Tools: Markdown Preview Auto", url: "4_Formula/tools/markdown_preview_auto.md" },
+        { label: "   └─ Tools: VS Code Extensions", url: "4_Formula/tools/vscode_extensions.md" },
+        { label: "📁 5. Symbols (Code)", url: "5_Symbols/" },
+        { label: "   ├─ README", url: "5_Symbols/README.md" },
+        { label: "   ├─ MCP Server README", url: "5_Symbols/src/mcp-server/README.md" },
+        { label: "   ├─ ZDR Compliance", url: "5_Symbols/src/security/ZDR_COMPLIANCE.md" },
+        { label: "   ├─ Plan: Post-Prod Module 1", url: "5_Symbols/production/postprod/module_1_plan.md" },
+        { label: "   ├─ Plan: Pre-Prod Module 1", url: "5_Symbols/production/preprod/module_1_plan.md" },
+        { label: "   ├─ Plan: Prod Module 1", url: "5_Symbols/production/prod/module_1_plan.md" },
+        { label: "   ├─ Assets README (Module 2)", url: "5_Symbols/production/postprod/module-2/section-1/assets/README.md" },
+        { label: "   ├─ Assets README (Module 3)", url: "5_Symbols/production/postprod/module-3/section-1/assets/README.md" },
+        { label: "   ├─ Assets README (Module 4)", url: "5_Symbols/production/postprod/module-4/section-1/assets/README.md" },
+        { label: "   └─ Assets README (Module 5)", url: "5_Symbols/production/postprod/module-5/section-1/assets/README.md" },
+        { label: "📁 6. Semblance", url: "6_Semblance/" },
+        { label: "   ├─ README", url: "6_Semblance/README.md" },
+        { label: "   ├─ Workarounds", url: "6_Semblance/workarounds.md" },
+        { label: "   ├─ Error Log", url: "6_Semblance/error_log.md" },
+        { label: "   ├─ Error: Insert Policy", url: "6_Semblance/error_insertpolicy.md" },
+        { label: "   ├─ CI Broken Links", url: "6_Semblance/ci_broken_links_label_failure.md" },
+        { label: "   ├─ Gap Analysis", url: "6_Semblance/gap_analysis.md" },
+        { label: "   ├─ Lessons Learned", url: "6_Semblance/lessons_learned.md" },
+        { label: "   ├─ Missing Menu Remediation", url: "6_Semblance/missing_menu_items_remediation.md" },
+        { label: "   ├─ RLS Checklist Insert", url: "6_Semblance/rls_checklist_insert.md" },
+        { label: "   └─ Archive: 2026-06-06 (and more)", url: "6_Semblance/archive/daily/" },
+        { label: "📁 7. Testing Known", url: "7_Testing_Known/" },
+        { label: "   ├─ README", url: "7_Testing_Known/README.md" },
+        { label: "   ├─ Sanity Check Report", url: "7_Testing_Known/sanity_check_report.md" },
+        { label: "   └─ Validation Report", url: "7_Testing_Known/validation_report.md" },
         { label: "---", url: "divider" },
-        { label: "agents.md", url: "agents.md" },
-        { label: "prompts.md", url: "prompts.md" },
-        { label: "claude.md", url: "claude.md" },
-        { label: "gemini.md", url: "gemini.md" },
-        { label: "copilot.md", url: "copilot.md" },
-        { label: "kilocode.md", url: "kilocode.md" }
+        { label: "📁 Root Documents", url: "" },
+        { label: "   ├─ README (repo root)", url: "README.md" },
+        { label: "   ├─ agents.md", url: "agents.md" },
+        { label: "   ├─ antigravity.md", url: "antigravity.md" },
+        { label: "   ├─ claude.md", url: "claude.md" },
+        { label: "   ├─ copilot.md", url: "copilot.md" },
+        { label: "   ├─ gemini.md", url: "gemini.md" },
+        { label: "   ├─ kilocode.md", url: "kilocode.md" },
+        { label: "   ├─ prompts.md", url: "prompts.md" },
+        { label: "   └─ todos.md", url: "todos.md" }
       ]
     };
 
@@ -1220,37 +1292,86 @@
         debugLog(`Building Debug Menu with filter: "${filterText}"`);
         debugLinksList.innerHTML = "";
         const query = filterText.toLowerCase();
+        const matchCount = document.getElementById("searchMatchCount");
+        let visibleCount = 0;
 
         navigationData.debugMenu.forEach(item => {
+          const labelLower = item.label.toLowerCase();
+          const urlLower = item.url.toLowerCase();
+          const matchesQuery = !query ||
+            labelLower.includes(query) ||
+            urlLower.includes(query) ||
+            urlLower.replace(/^markdown_renderer\.html\?file=/, "").includes(query);
+
           if (query && item.label === "---") return;
-          if (query && !item.label.toLowerCase().includes(query)) return;
+          if (query && !matchesQuery) return;
 
           if (item.label === "---") {
             const divider = document.createElement("li");
             divider.className = "debug-divider";
             debugLinksList.appendChild(divider);
           } else {
+            visibleCount++;
             const li = document.createElement("li");
             li.className = "debug-item";
             
             const a = document.createElement("a");
             let finalUrl = item.url;
-            if (finalUrl !== "index.html" && finalUrl !== "divider" && !finalUrl.startsWith("http")) {
+            if (finalUrl !== "index.html" && finalUrl !== "divider" && !finalUrl.startsWith("http") && finalUrl.length > 0) {
               finalUrl = `markdown_renderer.html?file=${finalUrl}`;
             }
             
-            a.href = finalUrl;
-            a.className = "debug-link";
-            a.innerHTML = `<span>${item.label}</span><i class="fa-solid fa-chevron-right debug-link-icon"></i>`;
+            // Heading entries (no URL) render as non-clickable labels
+            if (!item.url || item.url === "divider") {
+              a.className = "debug-link";
+              a.style.cursor = "default";
+              a.style.opacity = "0.7";
+              a.href = "#";
+              a.addEventListener("click", (e) => e.preventDefault());
+              a.innerHTML = `<span>${item.label}</span>`;
+            } else {
+              a.href = finalUrl;
+              a.className = "debug-link";
+              a.innerHTML = `<span>${item.label}</span><i class="fa-solid fa-chevron-right debug-link-icon"></i>`;
+            }
             li.appendChild(a);
             debugLinksList.appendChild(li);
           }
         });
+
+        if (matchCount) {
+          const total = navigationData.debugMenu.filter(i => i.label !== "---").length;
+          matchCount.textContent = query ? `${visibleCount}/${total}` : `${total}`;
+        }
+
+        if (visibleCount === 0 && query) {
+          const noResult = document.createElement("li");
+          noResult.className = "debug-item";
+          noResult.innerHTML = `<div class="debug-link" style="justify-content:center; opacity:0.5;">No results for "${filterText}"</div>`;
+          debugLinksList.appendChild(noResult);
+        }
       }
 
       // Search Autocomplete Listener
       debugSearch.addEventListener("input", (e) => {
         buildDebugMenu(e.target.value);
+      });
+
+      // Keyboard shortcuts: Ctrl+K / Cmd+K to focus search, Esc to close
+      document.addEventListener("keydown", (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+          e.preventDefault();
+          if (!debugMenuOverlay.classList.contains("open")) {
+            debugMenuOverlay.classList.add("open");
+            setCookie("debug", "true");
+          }
+          debugSearch.focus();
+        }
+        if (e.key === "Escape" && debugMenuOverlay.classList.contains("open")) {
+          debugMenuOverlay.classList.remove("open");
+          setCookie("debug", "false");
+          debugSearch.blur();
+        }
       });
 
       // Cookie state
