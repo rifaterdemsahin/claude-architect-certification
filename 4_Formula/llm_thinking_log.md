@@ -1,5 +1,49 @@
 # LLM Thinking & Planning Log
 
+## 📅 Date: 2026-06-08
+## 🧠 Stage: Stage 4 (Formula) — Course Metadata Table + Problem Page
+
+### ❓ Problem Statement
+User requested: (1) store all course metadata fields in a single Supabase table (`course_metadata`) with a related `course_tools` table, (2) display the combined data live on `index.html`, and (3) add a "0.Problem" page + menu item that defines the professional problem of getting the Claude Certified Architect certificate.
+
+### 📐 Approach
+
+1. **📊 Supabase schema** — Two tables:
+   - `course_metadata`: all course fields + `skills` as `jsonb` array (≤5 entries)
+   - `course_tools`: FK to `course_metadata`, one row per tool, with `display_order`
+   - RLS: anon SELECT only; upsert-safe seed with fixed UUID
+
+2. **🌐 index.html** — Added:
+   - `<!-- Course Metadata Section -->` between simulator and two-column layout
+   - Supabase JS client fetch on page load (same credentials as sanity_checklist.html)
+   - `meta-table` for course fields + `tools-table` for course_tools rows
+   - CSS for both tables inlined in `<style>`
+
+3. **❓ problem.html** — New page at repo root:
+   - Pain points grid (4 personas)
+   - Core problem statement (3 numbered challenges)
+   - Exam domain breakdown table (~25% multi-agent, ~20% MCP, etc.)
+   - Solution path (4 steps)
+   - CTAs to course outline and home
+
+4. **🗺️ Navigation** — Added `"0. Problem"` as first entry in:
+   - `navigation_config.json` `projectMenu`
+   - Hardcoded `<nav>` in `index.html`
+   - JS fallback `navigationData.projectMenu` in `index.html`
+   - Hardcoded nav in `problem.html`
+
+### ✅ Decisions Made
+- Skills stored as `jsonb` in `course_metadata` (not a third table) — max 5, simple array
+- `course_tools` as separate table with FK — relational, extensible per course
+- Fixed UUID seed (`a1b2c3d4-...`) for idempotent re-runs
+- Supabase anon key already public in codebase (sanity_checklist.html) — safe to reuse
+
+### 📝 LLM Execution Summary
+Generated SQL DDL + seed, problem.html (standalone dark-theme page), CSS additions,
+HTML section with two sub-tables, and Supabase fetch IIFE. All wired into nav.
+
+---
+
 ## Date: 2026-06-07
 ## Stage: Stage 4 (Formula - Thinking & Planning) - Restoring Missing Menus
 

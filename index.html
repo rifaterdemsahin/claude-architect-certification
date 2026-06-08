@@ -828,6 +828,99 @@
         font-size: 2.25rem;
       }
     }
+
+    /* ── Course Metadata Section ── */
+    .metadata-section {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 2rem;
+    }
+    .metadata-section .section-header {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+    }
+    .meta-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      background: var(--bg-card);
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+    }
+    .meta-table th {
+      background: rgba(139, 92, 246, 0.12);
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 0.55rem 1rem;
+      text-align: left;
+    }
+    .meta-table td {
+      padding: 0.65rem 1rem;
+      border-bottom: 1px solid var(--border-color);
+      vertical-align: top;
+    }
+    .meta-table tr:last-child td { border-bottom: none; }
+    .meta-table td:first-child {
+      color: var(--text-muted);
+      font-weight: 500;
+      width: 220px;
+      white-space: nowrap;
+    }
+    .skill-tag {
+      display: inline-block;
+      background: rgba(139, 92, 246, 0.15);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      color: #c4b5fd;
+      border-radius: 100px;
+      padding: 2px 10px;
+      font-size: 0.8rem;
+      margin: 2px 3px 2px 0;
+    }
+    .tools-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      margin-top: 1.25rem;
+      background: var(--bg-card);
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+    }
+    .tools-table th {
+      background: rgba(6, 182, 212, 0.1);
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 0.55rem 0.85rem;
+      text-align: left;
+    }
+    .tools-table td {
+      padding: 0.6rem 0.85rem;
+      border-bottom: 1px solid var(--border-color);
+      vertical-align: top;
+    }
+    .tools-table tr:last-child td { border-bottom: none; }
+    .valid-badge {
+      color: var(--accent-green);
+      font-size: 0.85rem;
+    }
+    #metaLoadState {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      text-align: center;
+      padding: 1rem;
+    }
   </style>
 </head>
 <body>
@@ -842,6 +935,7 @@
       
       <nav class="project-menu-nav" id="projectMenu">
         <!-- Loaded dynamically via config -->
+        <a href="problem.html" class="menu-link">0. Problem</a>
         <a href="index.html" class="menu-link active">Home</a>
         <a href="course_outline.html" class="menu-link">Course</a>
         <a href="markdown_renderer.html?file=4_Formula/certification/exam_and_case_study.md" class="menu-link">Exam</a>
@@ -918,6 +1012,45 @@
 
       <div class="status-terminal" id="terminal">
         <p>> System ready. Select an execution scenario above to trace payload flow...</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Course Metadata Section (fetched from Supabase) ── -->
+  <section class="metadata-section">
+    <div class="glass-card">
+      <h2 class="section-header">
+        <i class="fa-solid fa-table-list" style="color:var(--accent-violet);"></i>
+        📋 Course Overview &amp; Metadata
+        <span style="margin-left:auto;font-size:0.75rem;font-weight:400;color:var(--text-muted);">Source: Supabase · course_metadata</span>
+      </h2>
+      <div id="metaLoadState">⏳ Loading course data from Supabase…</div>
+      <table class="meta-table" id="metaTable" style="display:none;">
+        <thead><tr><th>Field</th><th>Value</th></tr></thead>
+        <tbody id="metaBody"></tbody>
+      </table>
+
+      <!-- Tools sub-table -->
+      <div id="toolsWrap" style="display:none; margin-top:1.5rem;">
+        <h3 style="font-family:var(--font-display);font-size:1.1rem;font-weight:700;margin-bottom:0.75rem;display:flex;align-items:center;gap:0.5rem;">
+          <i class="fa-solid fa-screwdriver-wrench" style="color:var(--accent-cyan);"></i>
+          🛠️ Tools Used in This Course
+          <span style="font-size:0.75rem;font-weight:400;color:var(--text-muted);margin-left:auto;">Source: Supabase · course_tools</span>
+        </h3>
+        <table class="tools-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Tool</th>
+              <th>Purpose / Use in Course</th>
+              <th>Free or Paid</th>
+              <th>Trial Available</th>
+              <th>Trial Duration &amp; Limits</th>
+              <th>Validity</th>
+            </tr>
+          </thead>
+          <tbody id="toolsBody"></tbody>
+        </table>
       </div>
     </div>
   </section>
@@ -1117,6 +1250,7 @@
     //    Search for "debugMenu" in both files and mirror all entries.
     let navigationData = {
       projectMenu: [
+        { label: "0. Problem", url: "problem.html" },
         { label: "Home", url: "index.html" },
         { label: "1. Sanity Checklist", url: "5_Symbols/sanity_checklist.html", hideAfterDays: 90 },
         { label: "2. Outline", url: "course_outline.html" },
@@ -1529,5 +1663,84 @@
       }, 2200);
     });
   </script>
+
+  <!-- ── Supabase: Course Metadata Fetch ── -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    (async () => {
+      const SUPABASE_URL  = 'https://rmekfsdhglyiralxvkwc.supabase.co';
+      const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZWtmc2RoZ2x5aXJhbHh2a3djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NzYzODgsImV4cCI6MjA5NjM1MjM4OH0.ay6HsmO_CbMGDXL_Dv4DT-paAIAOqlQPfmqqx_mexSU';
+      const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+      const loadState = document.getElementById('metaLoadState');
+      const metaTable = document.getElementById('metaTable');
+      const metaBody  = document.getElementById('metaBody');
+      const toolsWrap = document.getElementById('toolsWrap');
+      const toolsBody = document.getElementById('toolsBody');
+
+      try {
+        const { data: courses, error: cErr } = await db
+          .from('course_metadata')
+          .select('*')
+          .limit(1);
+        if (cErr) throw cErr;
+        if (!courses || courses.length === 0) {
+          loadState.textContent = '⚠️ No course data found — run 5_Symbols/sql/course_metadata.sql in Supabase.';
+          return;
+        }
+        const c = courses[0];
+
+        const fields = [
+          ['📚 Course Title',           c.course_title],
+          ['👤 Instructor',             c.instructor],
+          ['🎯 Target Audience',        c.target_audience],
+          ['⏱️ Total Duration',         c.total_duration],
+          ['📊 Difficulty Level',       c.difficulty_level],
+          ['🎓 Learning Objectives',    Array.isArray(c.learning_objectives)
+            ? c.learning_objectives.map((o, i) => `<div style="margin-bottom:4px;">${i+1}. ${o}</div>`).join('')
+            : (c.learning_objectives || '—')],
+          ['💡 Key Takeaways',          c.key_takeaways],
+          ['🌍 Real World Connections', c.real_world_connections],
+          ['📋 Recommended Background', c.recommended_background],
+          ['🧪 Proof of Learning',      c.proof_of_learning],
+          ['📝 Course Description',     c.course_description],
+          ['🏷️ Skills',                Array.isArray(c.skills)
+            ? c.skills.map(s => `<span class="skill-tag">${s}</span>`).join('')
+            : (c.skills || '—')],
+        ];
+
+        metaBody.innerHTML = fields.map(([label, value]) =>
+          `<tr><td>${label}</td><td>${value || '—'}</td></tr>`
+        ).join('');
+
+        loadState.style.display = 'none';
+        metaTable.style.display = 'table';
+
+        const { data: tools, error: tErr } = await db
+          .from('course_tools')
+          .select('*')
+          .eq('course_id', c.id)
+          .order('display_order');
+        if (!tErr && tools && tools.length > 0) {
+          toolsBody.innerHTML = tools.map((t, i) =>
+            `<tr>
+              <td style="color:var(--text-muted);text-align:center;">${i+1}</td>
+              <td><strong>${t.tool_name}</strong></td>
+              <td>${t.purpose || '—'}</td>
+              <td>${t.free_or_paid || '—'}</td>
+              <td>${t.trial_available ? '✅ Yes' : '❌ No'}</td>
+              <td>${t.trial_duration || '—'}</td>
+              <td class="valid-badge">${t.tool_validity || '—'}</td>
+            </tr>`
+          ).join('');
+          toolsWrap.style.display = 'block';
+        }
+      } catch (err) {
+        loadState.textContent = `❌ Failed to load course data: ${err.message}`;
+        console.error('Course metadata fetch error:', err);
+      }
+    })();
+  </script>
+
 </body>
 </html>
