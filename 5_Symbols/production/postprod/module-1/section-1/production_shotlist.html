@@ -516,7 +516,7 @@
             <th>Timing</th>
             <th>Script Preview</th>
             <th>Background</th>
-            <th>Voice-over</th>
+            <th>🎵 Music</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -524,11 +524,15 @@
       </table>
     </div>
 
-    <!-- Master Audio Player Panel -->
+    <!-- Voiceover Panel (Video Level) -->
     <div class="audio-player-panel">
-      <div class="audio-info">
-        <span class="audio-label">Production Master Track</span>
-        <span class="audio-title">Loading track title...</span>
+      <div class="audio-info" style="flex:1;margin-right:24px;">
+        <span class="audio-label">🎤 Voiceover — Video Level</span>
+        <div class="input-with-picker" style="margin-top:8px;">
+          <input type="text" id="fVoiceoverUrl" placeholder="Paste Drive voiceover URL or upload…" style="min-width:200px;" oninput="onVoiceoverChange(this.value)">
+          <button class="btn-pick-drive" onclick="openGDrivePicker('fVoiceoverUrl')" title="Pick from Google Drive">📁 Drive</button>
+          <button class="btn-upload-drive" onclick="triggerUpload('fVoiceoverUrl')" title="Upload voiceover audio">⬆️ Upload</button>
+        </div>
       </div>
       <audio id="master-audio" controls src="">
         Your browser does not support the audio element.
@@ -597,11 +601,19 @@
           </div>
         </div>
         <div class="form-group">
-          <label>Voice-over Audio URL <span style="color:var(--text-muted);font-weight:400;font-size:0.7rem;">(Upload to Google Drive → paste share link)</span></label>
+          <label>🎵 Music URL <span style="color:var(--text-muted);font-weight:400;font-size:0.7rem;">(Scene-level background music — Google Drive)</span></label>
           <div class="input-with-picker">
-            <input type="text" id="fAudioUrl" placeholder="https://drive.google.com/file/d/... or .wav filename">
-            <button class="btn-pick-drive" onclick="openGDrivePicker('fAudioUrl')" title="Pick from Google Drive">📁 Drive</button>
-            <button class="btn-upload-drive" onclick="triggerUpload('fAudioUrl')" disabled title="Upload local audio to Google Drive">⬆️ Upload</button>
+            <input type="text" id="fMusicUrl" placeholder="https://drive.google.com/file/d/... or .mp3 filename">
+            <button class="btn-pick-drive" onclick="openGDrivePicker('fMusicUrl')" title="Pick from Google Drive">📁 Drive</button>
+            <button class="btn-upload-drive" onclick="triggerUpload('fMusicUrl')" title="Upload music to Google Drive">⬆️ Upload</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>🔊 Sound Effects URL <span style="color:var(--text-muted);font-weight:400;font-size:0.7rem;">(Scene-level SFX — Google Drive)</span></label>
+          <div class="input-with-picker">
+            <input type="text" id="fSfxUrl" placeholder="https://drive.google.com/file/d/... or .wav filename">
+            <button class="btn-pick-drive" onclick="openGDrivePicker('fSfxUrl')" title="Pick from Google Drive">📁 Drive</button>
+            <button class="btn-upload-drive" onclick="triggerUpload('fSfxUrl')" title="Upload SFX to Google Drive">⬆️ Upload</button>
           </div>
         </div>
         <div class="form-group">
@@ -1076,7 +1088,8 @@
                 overlayLt: s.overlay_lt,
                 overlayText: s.overlay_text,
                 refDocUrl: s.ref_doc_url || '',
-                audioUrl: s.audio_url || '',
+                musicUrl: s.music_url || '',
+                sfxUrl: s.sfx_url || '',
                 cues: cues.map(c => ({ icon: c.icon, label: c.label, prompt: c.prompt || '' })),
                 edl: edl.map(e => `${e.timing}: ${e.description}`)
               };
@@ -1095,10 +1108,15 @@
       if (audioTitleEl) audioTitleEl.textContent = title;
       document.title = 'Production Shot List: ' + title;
 
+      // Load voiceover URL from localStorage (video-level)
+      const voiceoverKey = `voiceover_m${moduleKey}_s${sectionKey}`;
+      const savedVoiceover = localStorage.getItem(voiceoverKey) || '';
+      const voInput = document.getElementById('fVoiceoverUrl');
+      if (voInput) voInput.value = savedVoiceover;
       const audioPlayer = document.getElementById('master-audio');
       if (audioPlayer) {
-        if (scenes && scenes.length > 0 && scenes[0].audioUrl) {
-          audioPlayer.src = toGDriveEmbedUrl(scenes[0].audioUrl);
+        if (savedVoiceover) {
+          audioPlayer.src = toGDriveEmbedUrl(savedVoiceover);
         } else {
           audioPlayer.src = getAssetPath(`module${moduleKey}_section${sectionKey}.wav`, moduleKey, sectionKey);
         }
@@ -1219,7 +1237,8 @@
       document.getElementById('fTiming').value = '';
       document.getElementById('fScript').value = '';
       document.getElementById('fBg').value = '';
-      document.getElementById('fAudioUrl').value = '';
+      document.getElementById('fMusicUrl').value = '';
+      document.getElementById('fSfxUrl').value = '';
       document.getElementById('fLtImg').value = '';
       document.getElementById('fLtMain').value = '';
       document.getElementById('fLtSub').value = '';
@@ -1239,7 +1258,8 @@
           document.getElementById('fScript').value = scene.script || '';
           autoEstimateTiming(scene.script || '');
           document.getElementById('fBg').value = scene.bg || '';
-          document.getElementById('fAudioUrl').value = scene.audioUrl || '';
+          document.getElementById('fMusicUrl').value = scene.musicUrl || '';
+          document.getElementById('fSfxUrl').value = scene.sfxUrl || '';
           document.getElementById('fLtImg').value = scene.ltImg || '';
           document.getElementById('fLtMain').value = scene.ltMain || '';
           document.getElementById('fLtSub').value = scene.ltSub || '';
@@ -1320,7 +1340,8 @@
         timing: document.getElementById('fTiming').value,
         script: document.getElementById('fScript').value,
         bg_image: document.getElementById('fBg').value,
-        audio_url: document.getElementById('fAudioUrl').value,
+        music_url: document.getElementById('fMusicUrl').value,
+        sfx_url: document.getElementById('fSfxUrl').value,
         lt_image: document.getElementById('fLtImg').value,
         lt_main: document.getElementById('fLtMain').value,
         lt_sub: document.getElementById('fLtSub').value,
@@ -1424,13 +1445,13 @@
         const raw = s.script ? s.script.replace(/<[^>]+>/g, '') : '';
         const preview = raw.length > 90 ? raw.substring(0, 90) + '…' : (raw || '—');
         const hasBg = s.bg ? '✅' : '❌';
-        const hasAudio = s.audioUrl ? '✅' : '❌';
+        const hasMusic = s.musicUrl ? '✅' : '❌';
         return `<tr onclick="scrollToScene(${s.id})">
           <td class="cell-num">S${s.id}</td>
           <td class="cell-timing">${s.timing || '—'}</td>
           <td class="cell-script" title="${raw.replace(/"/g, '&quot;')}">${preview}</td>
           <td class="cell-status">${hasBg} BG</td>
-          <td class="cell-status">${hasAudio} VO</td>
+          <td class="cell-status">${hasMusic} 🎵</td>
           <td>${s.dbId ? `<button onclick="event.stopPropagation();openSceneForm(${s.dbId})" style="background:rgba(139,92,246,0.15);color:#a78bfa;border:1px solid rgba(139,92,246,0.35);padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.72rem;font-weight:800;">✏️ Edit</button>` : '<span style="opacity:0.35;font-size:0.7rem;">📋 local</span>'}</td>
         </tr>`;
       }).join('');
@@ -1498,8 +1519,10 @@
         .setCallback(data => {
           if (data.action === google.picker.Action.PICKED && data.docs && data.docs[0]) {
             const id = data.docs[0].id;
+            const url = `https://drive.google.com/file/d/${id}/view?usp=sharing`;
             const el = document.getElementById(targetInputId);
-            if (el) el.value = `https://drive.google.com/file/d/${id}/view?usp=sharing`;
+            if (el) el.value = url;
+            if (targetInputId === 'fVoiceoverUrl') onVoiceoverChange(url);
           }
         })
         .build().setVisible(true);
@@ -1576,12 +1599,21 @@
     // Field ID → Supabase column name
     const FIELD_TO_COLUMN = {
       fBg:          'bg_image',
-      fAudioUrl:    'audio_url',
+      fMusicUrl:    'music_url',
+      fSfxUrl:      'sfx_url',
       fLtImg:       'lt_image',
       fOverlayLt:   'overlay_lt',
       fOverlayText: 'overlay_text',
       fRefDocUrl:   'ref_doc_url'
     };
+
+    // Save voiceover URL to localStorage and update audio player (video-level)
+    function onVoiceoverChange(url) {
+      const key = `voiceover_m${moduleKey}_s${sectionKey}`;
+      localStorage.setItem(key, url);
+      const player = document.getElementById('master-audio');
+      if (player) player.src = url ? toGDriveEmbedUrl(url) : '';
+    }
 
     function triggerUpload(targetInputId) {
       if (!gdriveAccessToken) {
@@ -1667,8 +1699,12 @@
         const el = document.getElementById(targetInputId);
         if (el) el.value = url;
         if (window.dbg) window.dbg(`✅ Uploaded "${data.name}" → ${url}`);
-        // Immediately persist to Supabase if editing an existing scene
-        await saveFieldToSupabase(targetInputId, url);
+        // Voiceover is video-level (localStorage), scenes fields go to Supabase
+        if (targetInputId === 'fVoiceoverUrl') {
+          onVoiceoverChange(url);
+        } else {
+          await saveFieldToSupabase(targetInputId, url);
+        }
         if (btn) {
           btn.textContent = '✅ Saved!';
           setTimeout(() => { if (btn) { btn.textContent = originalText; } }, 2500);
