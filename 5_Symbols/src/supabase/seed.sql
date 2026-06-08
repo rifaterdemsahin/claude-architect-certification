@@ -342,3 +342,88 @@ INSERT INTO courses (title, description, module_number, tier, icon, status, sort
 ('Deterministic Routers', 'Python circuit-breakers, agent classifiers, loop detection, production hardening.', 4, 'member', '🤖', 'live', 4),
 ('Financial Engineering', '90% cost reduction with prompt caching. LRU/TTL strategies.', 5, 'member', '💰', 'live', 5),
 ('More Courses Coming', 'Additional workshops, live streams, and advanced architecture courses.', 0, 'member', '📚', 'coming', 99);
+
+
+-- -----------------------------------------------------------------------------
+-- 6. Scenes, Cues, & EDL Entries Seed
+-- -----------------------------------------------------------------------------
+TRUNCATE TABLE scenes RESTART IDENTITY CASCADE;
+
+-- Seed Scenes for Module 1, Section 1 (Video 1)
+INSERT INTO scenes (module_number, section_number, scene_number, script, bg_image, lt_image, lt_main, lt_sub, overlay_lt, overlay_text, bundle_url) VALUES
+(1, 1, 1, '"Welcome to Module 1. Moving LLMs from a <mark>playground prototype</mark> or an experimental chat window into a <mark>secure, scalable production system</mark> requires systems engineering—not just clever prompting."', 'assets/module1_section1_scene1_bg.png', 'assets/overlays/lt_intro.png', 'Claude Architect Masterclass', 'Module 1: Introduction', 'assets/overlays/lt_intro.png', 'assets/overlays/overlay_systems.png', 'assets/archives/module1_section1_scene1.zip'),
+(1, 1, 2, '"Today, we are breaking down the official Claude Architecture Blueprint. We are moving beyond basic API calls to understand model topologies, stateless middleware boundaries, and how the <mark>Model Context Protocol</mark> changes enterprise integration forever."', 'assets/module1_section1_scene2_bg.png', 'assets/overlays/lt_mcp.png', 'Model Context Protocol', 'Enterprise Integration Layer', 'assets/overlays/lt_mcp.png', 'assets/overlays/overlay_mcp.png', 'assets/archives/module1_section1_scene2.zip'),
+(1, 1, 3, '"All the code, blueprints, and architecture files we cover are live right here on our <mark>project hub</mark>."', 'assets/module1_section1_scene3_bg.png', 'assets/overlays/lt_resources.png', 'Resource Dashboard', 'Open Source Architecture Blueprint', 'assets/overlays/lt_resources.png', 'assets/overlays/overlay_github.png', 'assets/archives/module1_section1_scene3.zip');
+
+-- Seed Scenes for Module 2, Section 1 (Video 1)
+INSERT INTO scenes (module_number, section_number, scene_number, script, bg_image, lt_image, lt_main, lt_sub, overlay_lt, overlay_text, bundle_url) VALUES
+(2, 1, 1, '"Welcome to Module 2. Today, we are exploring the Model Context Protocol (MCP). We will cover how it connects Claude to secure private databridges with read-only boundaries."', 'assets/module2_section1_scene1_bg.png', 'assets/overlays/lt_mcp.png', 'Model Context Protocol', 'Section 1: Fundamentals', 'assets/overlays/lt_mcp.png', 'assets/overlays/overlay_mcp.png', 'assets/archives/module2_section1_scene1.zip');
+
+-- Seed Scene Cues for Module 1, Section 1, Scene 1
+INSERT INTO scene_cues (scene_id, icon, label, prompt, sort_order) 
+SELECT id, '🖼️', 'BG: Server Room / Data Center', 'Generate a cinematic dark tech background featuring a sleek server room or data center, purple and blue neon lighting, wide-angle perspective, depth of field, 1920x1080, suitable for video overlay', 1 FROM scenes WHERE module_number = 1 AND section_number = 1 AND scene_number = 1;
+INSERT INTO scene_cues (scene_id, icon, label, prompt, sort_order) 
+SELECT id, '🔤', 'Text: SYSTEMS ENGINEERING > CLEVER PROMPTING', 'Create a modern, centered typography overlay with ''SYSTEMS ENGINEERING > CLEVER PROMPTING'' in bold white sans-serif, slight purple glow, on dark transparent background', 2 FROM scenes WHERE module_number = 1 AND section_number = 1 AND scene_number = 1;
+INSERT INTO scene_cues (scene_id, icon, label, prompt, sort_order) 
+SELECT id, '🛡️', 'Icons: Cloud Security, Shield', 'Generate a set of minimalist flat icons: a cloud with a shield lock, keyhole, and security boundary lines. Style: neon cyan and purple, 64x64px, transparent PNG', 3 FROM scenes WHERE module_number = 1 AND section_number = 1 AND scene_number = 1;
+INSERT INTO scene_cues (scene_id, icon, label, prompt, sort_order) 
+SELECT id, '⏱️', 'Timing: 0:05 - 0:12', '', 4 FROM scenes WHERE module_number = 1 AND section_number = 1 AND scene_number = 1;
+
+-- Seed Scene Cues for Module 1, Section 1, Scene 2
+INSERT INTO scene_cues (scene_id, icon, label, prompt, sort_order) 
+SELECT id, '🖼️', 'BG: Network Nodes / API Data Flow', 'Design a futuristic technology background showing interconnected network nodes, API data flow visualization, enterprise system architecture diagram style, dark theme with blue cyan lighting, 1920x1080', 1 FROM scenes WHERE module_number = 1 AND section_number = 1 AND scene_number = 2;
+INSERT INTO scene_cues (scene_id, icon, label, prompt, sort_order) 
+SELECT id, '🔤', 'Text: MODEL CONTEXT PROTOCOL (MCP)', 'Create a tech-styled text overlay for ''MODEL CONTEXT PROTOCOL (MCP)'' with monospace font, circuit-board border, blue to purple gradient text glow', 2 FROM scenes WHERE module_number = 1 AND section_number = 1 AND scene_number = 2;
+INSERT INTO scene_cues (scene_id, icon, label, prompt, sort_order) 
+SELECT id, '⛓️', 'Icons: Server Node, API Bridge', 'Design an isometric server node icon with interconnected API bridge lines and data packets flowing. Modern flat vector style, dark theme, vibrant blue accents', 3 FROM scenes WHERE module_number = 1 AND section_number = 1 AND scene_number = 2;
+INSERT INTO scene_cues (scene_id, icon, label, prompt, sort_order) 
+SELECT id, '⏱️', 'Timing: 0:15 - 0:25', '', 4 FROM scenes WHERE module_number = 1 AND section_number = 1 AND scene_number = 2;
+
+-- Seed Scene Cues for Module 1, Section 1, Scene 3
+INSERT INTO scene_cues (scene_id, icon, label, prompt, sort_order) 
+SELECT id, '🖼️', 'BG: IDE / GitHub Workspace', 'Create a modern coding workspace background, dark mode IDE with code on screen, GitHub interface visible, soft monitor glow, minimal desk setup, cinematic depth of field, 1920x1080', 1 FROM scenes WHERE module_number = 1 AND section_number = 1 AND scene_number = 3;
+INSERT INTO scene_cues (scene_id, icon, label, prompt, sort_order) 
+SELECT id, '🔤', 'Text: github.com/rifaterdemsahin/...', 'Generate a clickable URL pill overlay with ''github.com/rifaterdemsahin/...'' in white monospace, on a semi-transparent black rounded rectangle, subtle hover glow effect', 2 FROM scenes WHERE module_number = 1 AND section_number = 1 AND scene_number = 3;
+INSERT INTO scene_cues (scene_id, icon, label, prompt, sort_order) 
+SELECT id, '🐙', 'Icons: GitHub Repository', 'Create the GitHub Octocat logo icon, high contrast, white on dark transparent, minimal shadow for clarity on video', 3 FROM scenes WHERE module_number = 1 AND section_number = 1 AND scene_number = 3;
+INSERT INTO scene_cues (scene_id, icon, label, prompt, sort_order) 
+SELECT id, '⏱️', 'Timing: 0:28 - End', '', 4 FROM scenes WHERE module_number = 1 AND section_number = 1 AND scene_number = 3;
+
+-- Seed Scene Cues for Module 2, Section 1, Scene 1
+INSERT INTO scene_cues (scene_id, icon, label, prompt, sort_order) 
+SELECT id, '🖼️', 'BG: MCP Server Architecture', 'A cinematic illustration of a server bridge, security gate and data flows, dark theme with blue and violet lights', 1 FROM scenes WHERE module_number = 2 AND section_number = 1 AND scene_number = 1;
+INSERT INTO scene_cues (scene_id, icon, label, prompt, sort_order) 
+SELECT id, '⏱️', 'Timing: 0:00 - 0:10', '', 2 FROM scenes WHERE module_number = 2 AND section_number = 1 AND scene_number = 1;
+
+-- Seed EDL for Module 1, Section 1, Scene 1
+INSERT INTO edl_entries (scene_id, timing, description, sort_order)
+SELECT id, '0:00 - 0:03', 'Fade in background artifact with a slight zoom-in animation (Ken Burns).', 1 FROM scenes WHERE module_number = 1 AND section_number = 1 AND scene_number = 1;
+INSERT INTO edl_entries (scene_id, timing, description, sort_order)
+SELECT id, '0:03 - 0:05', 'Slide in Lower Third from left margin. Hold until end of scene.', 2 FROM scenes WHERE module_number = 1 AND section_number = 1 AND scene_number = 1;
+INSERT INTO edl_entries (scene_id, timing, description, sort_order)
+SELECT id, '0:05 - 0:07', 'Pop-in ''SYSTEMS ENGINEERING'' text overlay. Match audio emphasis.', 3 FROM scenes WHERE module_number = 1 AND section_number = 1 AND scene_number = 1;
+INSERT INTO edl_entries (scene_id, timing, description, sort_order)
+SELECT id, '0:10', 'Trigger Shield and Security icons with a subtle glow pulse.', 4 FROM scenes WHERE module_number = 1 AND section_number = 1 AND scene_number = 1;
+
+-- Seed EDL for Module 1, Section 1, Scene 2
+INSERT INTO edl_entries (scene_id, timing, description, sort_order)
+SELECT id, '0:12 - 0:15', 'Cross-dissolve transition from Scene 1 to Scene 2 background.', 1 FROM scenes WHERE module_number = 1 AND section_number = 1 AND scene_number = 2;
+INSERT INTO edl_entries (scene_id, timing, description, sort_order)
+SELECT id, '0:15 - 0:18', 'Replace Lower Third with ''Model Context Protocol'' variant.', 2 FROM scenes WHERE module_number = 1 AND section_number = 1 AND scene_number = 2;
+INSERT INTO edl_entries (scene_id, timing, description, sort_order)
+SELECT id, '0:18 - 0:22', 'Overlay ''MCP'' text center-screen. Background opacity drops to 30%.', 3 FROM scenes WHERE module_number = 1 AND section_number = 1 AND scene_number = 2;
+INSERT INTO edl_entries (scene_id, timing, description, sort_order)
+SELECT id, '0:23', 'Animate ''Data Pipe'' icons moving from LLM to Database.', 4 FROM scenes WHERE module_number = 1 AND section_number = 1 AND scene_number = 2;
+
+-- Seed EDL for Module 1, Section 1, Scene 3
+INSERT INTO edl_entries (scene_id, timing, description, sort_order)
+SELECT id, '0:28', 'Focus camera on the browser dashboard recording.', 1 FROM scenes WHERE module_number = 1 AND section_number = 1 AND scene_number = 3;
+INSERT INTO edl_entries (scene_id, timing, description, sort_order)
+SELECT id, '0:30', 'Display GitHub URL pill overlay.', 2 FROM scenes WHERE module_number = 1 AND section_number = 1 AND scene_number = 3;
+INSERT INTO edl_entries (scene_id, timing, description, sort_order)
+SELECT id, '0:35', 'Fade to black while speaker finishes the closing sentence.', 3 FROM scenes WHERE module_number = 1 AND section_number = 1 AND scene_number = 3;
+
+-- Seed EDL for Module 2, Section 1, Scene 1
+INSERT INTO edl_entries (scene_id, timing, description, sort_order)
+SELECT id, '0:00 - 0:05', 'Fade in MCP diagram with fly-in elements.', 1 FROM scenes WHERE module_number = 2 AND section_number = 1 AND scene_number = 1;
+
