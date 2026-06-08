@@ -164,3 +164,17 @@
 ### Takeaway for Future AI Agents
 - Use state classes (e.g. `saving`, `success`, `exit`) to orchestrate CSS animations from JS, keeping logic clean and visual animations declarative.
 
+## 📅 2026-06-08: Project Menu Reorganization and Sequential Numbering
+
+### What went well
+- Restructured the Project Menu to follow a strict sequential layout: 1. Sanity Checklist, 2. Outline, 3. Script, 4. Production Shot List, 5. Guide.
+- Updated all configurations: navigation JSON, top-level `shared/nav.js` script, and fallback arrays in `index.html` and `markdown_renderer.html`.
+- Eliminated redundant sub-level navigation dropdowns in favor of a flat, sequentially-numbered pipeline representing the course's linear lifecycle stages.
+
+### Gaps & Challenges
+- Maintaining synchronized fallbacks in multiple files remains a potential source of drift. Centralizing the primary configuration in `navigation_config.json` solves this for most pages, but preserving local fallbacks guarantees that the menus work even when the client fails to fetch JSON (e.g., direct file system browsing).
+
+### Takeaway for Future AI Agents
+- When updating Project Menu structure, ensure you update the JSON config file, the fallback arrays, and the shared navbar JS scripts simultaneously.
+
+

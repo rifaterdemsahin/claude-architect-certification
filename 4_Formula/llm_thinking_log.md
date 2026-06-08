@@ -91,6 +91,32 @@ The user requested that when a script is saved to Supabase from the Master Scrip
    - Update `window.saveScript` function. Instead of updating raw text content and colors directly on `statusSpan`, toggle state classes (`saving`, `success`, `error-status`, `exit`) and inject SVG icons (animated spinner for saving, checkmark for success, cross for error).
    - Use transition/animation classes to fade-in-up, pulse upon success, and slide/fade out smoothly after 3 seconds.
 4. **Execution & Verification:**
-   - Modify `5_Symbols/production/preprod/scripts/index.html`.
-   - Verify layout and functionality.
-   - Log completion in `prompts.md`.
+    - Modify `5_Symbols/production/preprod/scripts/index.html`.
+    - Verify layout and functionality.
+    - Log completion in `prompts.md`.
+
+---
+
+## Date: 2026-06-08
+## Stage: Stage 4 (Formula - Thinking & Planning) - Project Menu Reorganization and Sequential Numbering
+
+### Problem Statement
+The user requested a restructure of the main Project Menu to follow a strict sequential numbered list:
+1. "1. Sanity Checklist" (url: `5_Symbols/sanity_checklist.html`)
+2. "2. Outline" (url: `course_outline.html`)
+3. "3. Script" (url: `5_Symbols/production/preprod/scripts/index.html`)
+4. "4. Production Shot List" (url: `5_Symbols/production/postprod/module-1/section-1/post_production_master.html`)
+5. "5. Guide" (url: `markdown_renderer.html?file=4_Formula/certification/exam_and_case_study.md`)
+
+### Approach & Strategy
+1. **Identify Configuration Files:**
+   - Central JSON config: `navigation_config.json`
+   - Dynamic top-level navbar script: `shared/nav.js`
+   - Static fallback structures inside: `index.html` and `5_Symbols/markdown_renderer.html`
+2. **Apply Menu Changes:**
+   - Update `projectMenu` in `navigation_config.json` to reflect the new ordered items (keeping the home link first, followed by the 5 numbered tasks).
+   - Rebuild `nav.js` to render the flat list: Home, 1. Sanity Checklist, 2. Outline, 3. Script, 4. Production Shot List, 5. Guide, Join.
+   - Synchronize the `projectMenu` fallbacks inside `index.html` and `5_Symbols/markdown_renderer.html` to prevent display discrepancy if JSON fetch fails.
+3. **Verification:**
+   - Verify that all menu link pathways resolve correctly.
+   - Stage, commit, and push modifications step-by-step.

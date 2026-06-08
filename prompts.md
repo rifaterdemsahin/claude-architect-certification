@@ -146,6 +146,15 @@ Record every prompt given to AI agents below. Include the date, agent, and purpo
 **Purpose:** Implement an animated saved status badge with tailored glassmorphic colors and SVG icons when saving to Supabase in Pre-prod Master Script editor.  
 **Output:** Updated `5_Symbols/production/preprod/scripts/index.html`.
 
+---
+
+## 2026-06-08 — Project Menu Reordering & Numbering
+
+**Agent:** Gemini 3.5 Flash (Medium)  
+**Purpose:** Reorganize the Project Menu to follow a strict sequential numbered order: 1. Sanity Checklist, 2. Outline, 3. Script, 4. Production Shot List, 5. Guide.  
+**Output:** Updated `navigation_config.json`, `index.html`, `5_Symbols/markdown_renderer.html`, and `shared/nav.js`.
+
+
 
 
 

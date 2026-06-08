@@ -33,17 +33,11 @@
         '<a href="' + ROOT + 'index.html" class="site-nav-logo">🏛️ Claude Architect</a>' +
         '<div class="site-nav-links">' +
           '<a href="' + ROOT + 'index.html">Home</a>' +
-          '<div class="site-nav-dropdown">' +
-            '<span class="site-drop-trigger">Production ▾</span>' +
-            '<div class="site-drop-menu">' +
-              '<a href="' + ROOT + '5_Symbols/production/preprod/index.html">Pre-Production</a>' +
-              '<a href="' + ROOT + '5_Symbols/production/prod/index.html">Production</a>' +
-              '<a href="' + ROOT + '5_Symbols/production/postprod/index.html">Post-Production</a>' +
-            '</div>' +
-          '</div>' +
-          '<a href="' + ROOT + '5_Symbols/sanity_checklist.html">Sanity Check</a>' +
-          '<a href="' + ROOT + '5_Symbols/markdown_viewer.html?md=docs/certification/exam_and_case_study.md">Exam</a>' +
-          '<a href="https://www.youtube.com/playlist?list=PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy" target="_blank">📺 Course</a>' +
+          '<a href="' + ROOT + '5_Symbols/sanity_checklist.html">1. Sanity Checklist</a>' +
+          '<a href="' + ROOT + 'course_outline.html">2. Outline</a>' +
+          '<a href="' + ROOT + '5_Symbols/production/preprod/scripts/index.html">3. Script</a>' +
+          '<a href="' + ROOT + '5_Symbols/production/postprod/module-1/section-1/post_production_master.html">4. Production Shot List</a>' +
+          '<a href="' + ROOT + 'markdown_renderer.html?file=4_Formula/certification/exam_and_case_study.md">5. Guide</a>' +
           '<a href="' + ROOT + '5_Symbols/production/publish/membership.html" class="site-nav-join">🔥 Join $10/mo</a>' +
         '</div>' +
       '</div>';
