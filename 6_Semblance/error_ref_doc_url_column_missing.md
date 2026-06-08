@@ -81,3 +81,4 @@ You should see `ref_doc_url | text | ''` in the result.
 |---|---|
 | 2026-06-09 | 🔴 Column `ref_doc_url` missing — form added field but schema not updated |
 | 2026-06-09 | 🛠 Fix: `ALTER TABLE scenes ADD COLUMN IF NOT EXISTS ref_doc_url TEXT DEFAULT ''` |
+| 2026-06-09 | ✅ SQL executed — column added to production Supabase `scenes` table |
