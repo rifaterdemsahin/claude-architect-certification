@@ -24,9 +24,7 @@ Key entry points in the workspace:
 
 - **Database Schemas & Data Seeds:**
   - Database Schema: [schema.sql](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/5_Symbols/src/supabase/schema.sql)
-  - Outline Seed Data: [outline_seed.sql](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/5_Symbols/src/supabase/outline_seed.sql)
-  - Milestones Seed Data: [milestones_seed.sql](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/5_Symbols/src/supabase/milestones_seed.sql)
-  - Pricing Seed Data: [pricing_seed.sql](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/5_Symbols/src/supabase/pricing_seed.sql)
+  - Database Seed: [seed.sql](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/5_Symbols/src/supabase/seed.sql)
 - **Web Dashboards & Checklists:**
   - Interactive Project Hub: [index.html](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/index.html)
   - Production Management: [production_hub.html](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/5_Symbols/production_hub.html)

@@ -78,11 +78,8 @@ This document defines how AI agents interact with the **Claude AI Certification 
 - **Error & Fix Logging:** Log all runtime errors to `6_Semblance/error.log` and fixes to `6_Semblance/fix.log`.
 - **Active Reflection:** Write a retrospective journal in `6_Semblance/lessons_learned.md` after every milestone.
 - **Menu Sync:** Keep `navigation_config.json` synchronized when adding/removing documents.
-- **SQL Canonical Location:** All Supabase SQL files (schema, seeds) live in `5_Symbols/sql/`. When creating or modifying SQL, always place the file there. Current files:
-  - `schema.sql` — full table definitions and RLS policies
-  - `supabase_seed.sql` — course_modules + course_videos seed (5 modules, 15 videos)
-  - `outline_seed.sql` — outline table seed
-  - `milestones_seed.sql` — milestones table seed
-  - `pricing_seed.sql` — membership pricing seed
-  Run any of these in the Supabase SQL Editor: https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/sql
+- **SQL Canonical Location:** All Supabase SQL files (schema, seeds) live in `5_Symbols/src/supabase/`. When creating or modifying SQL, always place the file there. Current files:
+  - `schema.sql` — full consolidated table definitions and RLS policies
+  - `seed.sql` — consolidated seed data (modules, videos, outline, milestones, pricing)
+  Run either of these in the Supabase SQL Editor: https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/sql
 - **Architecture Sync:** When architecture changes, update [1_architecture.md](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/2_Environment/1_architecture.md).

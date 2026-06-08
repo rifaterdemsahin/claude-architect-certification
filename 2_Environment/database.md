@@ -176,15 +176,11 @@ erDiagram
 
 ---
 
-## 🛠️ Seed Files
+## 🛠️ Database Setup Files
 
 | File | Purpose |
 |------|---------|
-| [`5_Symbols/sql/supabase_seed.sql`](../5_Symbols/sql/supabase_seed.sql) | `course_modules` + `course_videos` (outline view) |
-| [`5_Symbols/sql/schema.sql`](../5_Symbols/sql/schema.sql) | Full schema — all 12 production tables |
-| [`5_Symbols/sql/outline_seed.sql`](../5_Symbols/sql/outline_seed.sql) | `outline` table seed data |
-| [`5_Symbols/sql/checklist_seed.sql`](../5_Symbols/sql/checklist_seed.sql) | `checklist_items` seed data |
-| [`5_Symbols/sql/milestones_seed.sql`](../5_Symbols/sql/milestones_seed.sql) | Milestone data |
-| [`5_Symbols/sql/pricing_seed.sql`](../5_Symbols/sql/pricing_seed.sql) | Pricing data |
+| [`5_Symbols/src/supabase/schema.sql`](../5_Symbols/src/supabase/schema.sql) | Full consolidated schema defining all 18 tables and RLS policies |
+| [`5_Symbols/src/supabase/seed.sql`](../5_Symbols/src/supabase/seed.sql) | Consolidated seed data (checklist, modules, videos, outline, milestones, pricing) |
 
-> **To reset:** paste the relevant seed file into the [SQL Editor](https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/sql/new) and run it. All `CREATE TABLE IF NOT EXISTS` + `INSERT` statements are safe to re-run.
+> **To reset:** Paste the schema or seed file content into the [SQL Editor](https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/sql/new) and run it. All statements are safe to re-run.

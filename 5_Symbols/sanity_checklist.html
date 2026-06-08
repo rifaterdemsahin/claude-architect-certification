@@ -365,7 +365,7 @@
 
         if (itemsRes.error) throw itemsRes.error;
         const items = itemsRes.data || [];
-        if (items.length === 0) throw new Error('No checklist items found — run 5_Symbols/sql/checklist_seed.sql first.');
+        if (items.length === 0) throw new Error('No checklist items found — run 5_Symbols/src/supabase/seed.sql first.');
 
         // Build progress lookup by item_id
         const progressMap = {};
@@ -397,7 +397,7 @@
             <p style="margin-top:0.5rem;font-size:0.85rem;color:#9ca3af;">${err.message}</p>
             <p style="margin-top:0.75rem;font-size:0.8rem;color:#6b7280;">
               Run
-              <code style="background:rgba(255,255,255,0.08);padding:2px 8px;border-radius:4px;">5_Symbols/sql/checklist_seed.sql</code>
+              <code style="background:rgba(255,255,255,0.08);padding:2px 8px;border-radius:4px;">5_Symbols/src/supabase/seed.sql</code>
               in the
               <a href="https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/sql" target="_blank" style="color:#3b82f6;">Supabase SQL Editor</a>.
             </p>

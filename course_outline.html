@@ -527,7 +527,7 @@
 
         if (modulesRes.error) throw modulesRes.error;
         const modules = modulesRes.data;
-        if (!modules || modules.length === 0) throw new Error('No course data found. Run supabase_seed.sql first.');
+        if (!modules || modules.length === 0) throw new Error('No course data found. Run seed.sql first.');
 
         // Group OKRs by module_number
         const okrMap = {};
@@ -569,7 +569,7 @@
             <strong>Could not load course data</strong>
             <p style="margin-top:0.5rem;font-size:0.85rem">${err.message}</p>
             <p style="margin-top:0.75rem;font-size:0.8rem;color:var(--text-muted)">
-              Run <code style="background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:4px">5_Symbols/sql/supabase_seed.sql</code>
+              Run <code style="background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:4px">5_Symbols/src/supabase/seed.sql</code>
               in the <a href="https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/sql" target="_blank" style="color:var(--accent-cyan)">Supabase SQL Editor</a>.
             </p>
           </div>`;
