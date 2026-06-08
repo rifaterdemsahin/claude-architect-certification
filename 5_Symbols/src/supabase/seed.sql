@@ -10,51 +10,51 @@
 TRUNCATE TABLE checklist_items RESTART IDENTITY CASCADE;
 
 -- Pre-Production (7 items)
-INSERT INTO checklist_items (phase, item_name, item_desc, sort_order) VALUES
-('Pre-Production', 'Module plans drafted',          'All 5 module plans exist in production/preprod/',                               10),
-('Pre-Production', 'Scripts finalized',             'Per-section scripts approved and uploaded',                                     20),
-('Pre-Production', 'Storyboard / scene breakdown',  'Scene list with timing and overlays defined',                                   30),
-('Pre-Production', 'Asset generation prompts ready','All BG, text overlay, and icon prompts written',                                40),
-('Pre-Production', 'Audio recording schedule',      'Dates and environment booked',                                                  50),
-('Pre-Production', 'Lower third designs approved',  'Per-module L3 variants signed off',                                             60),
-('Pre-Production', 'Production plan reviewed',      'Master plan read by all stakeholders',                                          70);
+INSERT INTO checklist_items (phase, item_name, item_desc, sort_order, item_url) VALUES
+('Pre-Production', 'Module plans drafted',          'All 5 module plans exist in production/preprod/',                               10, '../course_outline.html'),
+('Pre-Production', 'Scripts finalized',             'Per-section scripts approved and uploaded',                                     20, 'production/preprod/scripts/index.html'),
+('Pre-Production', 'Storyboard / scene breakdown',  'Scene list with timing and overlays defined',                                   30, '../markdown_renderer.html?file=4_Formula/certification/production_plan.md'),
+('Pre-Production', 'Asset generation prompts ready','All BG, text overlay, and icon prompts written',                                40, '../markdown_renderer.html?file=4_Formula/production/prompter.md'),
+('Pre-Production', 'Audio recording schedule',      'Dates and environment booked',                                                  50, '../markdown_renderer.html?file=1_Real_Unknown/6_kanban.md'),
+('Pre-Production', 'Lower third designs approved',  'Per-module L3 variants signed off',                                             60, 'production/postprod/module-1/section-1/post_production_master.html'),
+('Pre-Production', 'Production plan reviewed',      'Master plan read by all stakeholders',                                          70, '../markdown_renderer.html?file=4_Formula/certification/production_plan.md');
 
 -- Production (7 items)
-INSERT INTO checklist_items (phase, item_name, item_desc, sort_order) VALUES
-('Production', 'Audio recorded per section',        'moduleX_sectionY.wav files captured',                                          10),
-('Production', 'No clipping or noise in master',    'All audio passes quality gate',                                                 20),
-('Production', 'Raw assets archived',               'Original recordings backed up before editing',                                  30),
-('Production', 'Screen recordings captured',        'IDE / dashboard walkthroughs recorded',                                         40),
-('Production', 'Camera footage backed up',          'All video sources copied to storage',                                           50),
-('Production', 'Production log completed',          'Take notes and timestamps documented',                                          60),
-('Production', 'Hands-on production on all modules','Live recording, screen capture, and code walkthrough completed for M1–M5',      70);
+INSERT INTO checklist_items (phase, item_name, item_desc, sort_order, item_url) VALUES
+('Production', 'Audio recorded per section',        'moduleX_sectionY.wav files captured',                                          10, 'production/prod/index.html'),
+('Production', 'No clipping or noise in master',    'All audio passes quality gate',                                                 20, '../markdown_renderer.html?file=7_Testing_Known/sanity_check_report.md'),
+('Production', 'Raw assets archived',               'Original recordings backed up before editing',                                  30, 'production/prod/index.html'),
+('Production', 'Screen recordings captured',        'IDE / dashboard walkthroughs recorded',                                         40, 'production/prod/index.html'),
+('Production', 'Camera footage backed up',          'All video sources copied to storage',                                           50, 'production/prod/index.html'),
+('Production', 'Production log completed',          'Take notes and timestamps documented',                                          60, '../markdown_renderer.html?file=6_Semblance/lessons_learned.md'),
+('Production', 'Hands-on production on all modules','Live recording, screen capture, and code walkthrough completed for M1–M5',      70, 'production_hub.html');
 
 -- Post-Production (9 items)
-INSERT INTO checklist_items (phase, item_name, item_desc, sort_order) VALUES
-('Post-Production', 'Background images generated',  'All scene backgrounds created and named correctly',                             10),
-('Post-Production', 'Text overlays generated',      'Typography overlays match script emphasis',                                     20),
-('Post-Production', 'Icons generated',              'All cue icons created in correct style',                                        30),
-('Post-Production', 'Lower thirds rendered',        'All L3 assets exported with transparency',                                      40),
-('Post-Production', 'EDL reviewed for each scene',  'Edit design lists match audio waveform',                                        50),
-('Post-Production', 'Composite previews checked',   'Hover previews match intended final look',                                      60),
-('Post-Production', 'Asset bundles zipped',         'Per-scene ZIP files ready for editor handoff',                                  70),
-('Post-Production', 'Final render approved',        'Master video exported and reviewed',                                            80),
-('Post-Production', 'All modules created in Canva', 'Thumbnails, title cards, and lower thirds designed in Canva for M1–M5',         90);
+INSERT INTO checklist_items (phase, item_name, item_desc, sort_order, item_url) VALUES
+('Post-Production', 'Background images generated',  'All scene backgrounds created and named correctly',                             10, 'production/postprod/index.html'),
+('Post-Production', 'Text overlays generated',      'Typography overlays match script emphasis',                                     20, 'production/postprod/index.html'),
+('Post-Production', 'Icons generated',              'All cue icons created in correct style',                                        30, 'production/postprod/index.html'),
+('Post-Production', 'Lower thirds rendered',        'All L3 assets exported with transparency',                                      40, 'production/postprod/module-1/section-1/post_production_master.html'),
+('Post-Production', 'EDL reviewed for each scene',  'Edit design lists match audio waveform',                                        50, 'production/postprod/module-1/section-1/post_production_master.html'),
+('Post-Production', 'Composite previews checked',   'Hover previews match intended final look',                                      60, 'production/postprod/module-1/section-1/asset_checklist.html'),
+('Post-Production', 'Asset bundles zipped',         'Per-scene ZIP files ready for editor handoff',                                  70, 'production/postprod/index.html'),
+('Post-Production', 'Final render approved',        'Master video exported and reviewed',                                            80, 'production/postprod/index.html'),
+('Post-Production', 'All modules created in Canva', 'Thumbnails, title cards, and lower thirds designed in Canva for M1–M5',         90, 'https://www.canva.com/');
 
 -- Publication (12 items)
-INSERT INTO checklist_items (phase, item_name, item_desc, sort_order) VALUES
-('Publication', 'YouTube thumbnail created',        'Custom thumbnail per module',                                                   10),
-('Publication', 'Description and tags written',     'SEO-friendly metadata ready',                                                   20),
-('Publication', 'GitHub repo updated',              'All code and docs pushed to public repo',                                       30),
-('Publication', 'Course playlist updated',          'New video added to YouTube playlist',                                           40),
-('Publication', 'Announcement posted',              'Social / community update published',                                           50),
-('Publication', 'YouTube Partner Program applied',  'Reach 1K subs + 4K watch hours, apply for YPP monetization',                   60),
-('Publication', 'Channel memberships enabled',      'Set up Join button, tier badges, and member-only perks',                        70),
-('Publication', 'Module 1 set to free',             'Public — no membership required to watch and download',                         80),
-('Publication', 'Modules 2–5 set to members-only', '$10/month join tier to access full course content',                              90),
-('Publication', 'Pricing page live',                '$10/mo membership page with feature breakdown',                                100),
-('Publication', 'Join button added to site nav',    'Prominent CTA linking to membership/pricing page',                             110),
-('Publication', 'More courses onboarding planned',  'Pipeline for additional module series, workshops, and live streams',            120);
+INSERT INTO checklist_items (phase, item_name, item_desc, sort_order, item_url) VALUES
+('Publication', 'YouTube thumbnail created',        'Custom thumbnail per module',                                                   10, 'https://studio.youtube.com/'),
+('Publication', 'Description and tags written',     'SEO-friendly metadata ready',                                                   20, 'https://studio.youtube.com/'),
+('Publication', 'GitHub repo updated',              'All code and docs pushed to public repo',                                       30, 'https://github.com/rifaterdemsahin/claude-architect-certification'),
+('Publication', 'Course playlist updated',          'New video added to YouTube playlist',                                           40, 'https://www.youtube.com/playlist?list=PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy'),
+('Publication', 'Announcement posted',              'Social / community update published',                                           50, 'https://www.linkedin.com/in/rifaterdemsahin/'),
+('Publication', 'YouTube Partner Program applied',  'Reach 1K subs + 4K watch hours, apply for YPP monetization',                   60, 'https://studio.youtube.com/'),
+('Publication', 'Channel memberships enabled',      'Set up Join button, tier badges, and member-only perks',                        70, 'https://studio.youtube.com/'),
+('Publication', 'Module 1 set to free',             'Public — no membership required to watch and download',                         80, 'https://www.youtube.com/@RifatErdemSahin'),
+('Publication', 'Modules 2–5 set to members-only', '$10/month join tier to access full course content',                              90, 'production/publish/membership.html'),
+('Publication', 'Pricing page live',                '$10/mo membership page with feature breakdown',                                100, 'production/publish/membership.html'),
+('Publication', 'Join button added to site nav',    'Prominent CTA linking to membership/pricing page',                             110, '../index.html'),
+('Publication', 'More courses onboarding planned',  'Pipeline for additional module series, workshops, and live streams',            120, '../course_outline.html');
 
 
 -- -----------------------------------------------------------------------------

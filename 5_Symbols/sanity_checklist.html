@@ -243,6 +243,41 @@
       user-select: none;
     }
 
+    /* URL link button */
+    .url-link-btn {
+      background: none; border: none; padding: 0 2px;
+      font-size: 0.72rem; cursor: pointer;
+      opacity: 0.25; transition: opacity 0.2s;
+      vertical-align: middle; line-height: 1;
+    }
+    .url-link-btn:hover { opacity: 0.75; }
+    .url-link-btn.has-url { opacity: 1; color: var(--secondary); }
+
+    /* Item name link */
+    .item-link { color: inherit; text-decoration: none; border-bottom: 1px dotted rgba(255,255,255,0.2); }
+    .item-link:hover { color: #93c5fd; border-bottom-color: var(--secondary); }
+
+    /* URL edit row */
+    .url-edit-row {
+      display: none; align-items: center; gap: 6px; margin-top: 6px;
+    }
+    .url-input {
+      flex: 1; min-width: 0;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.1); border-radius: 6px;
+      padding: 5px 10px; color: var(--text-main);
+      font-size: 0.78rem; font-family: var(--font-body);
+    }
+    .url-input:focus { outline: none; border-color: var(--secondary); }
+    .url-save-btn {
+      background: var(--secondary); color: white; border: none;
+      border-radius: 6px; padding: 5px 12px;
+      font-size: 0.78rem; font-weight: 700; cursor: pointer;
+      white-space: nowrap; font-family: var(--font-body);
+      flex-shrink: 0;
+    }
+    .url-save-btn:hover { background: #2563eb; }
+
     /* Risk marker — shown only when description is empty */
     .risk-marker { display: none; }
     li.no-desc .risk-marker { display: inline; }
@@ -652,7 +687,12 @@
         const checked = p.checked     || false;
         const notes   = p.notes       || '';
         const inProg  = p.in_progress || false;
-        const hasDesc = !!(item.item_desc && item.item_desc.trim());
+        const hasDesc    = !!(item.item_desc && item.item_desc.trim());
+        const hasUrl     = !!(item.item_url && item.item_url.trim());
+        const escapedName = item.item_name.replace(/"/g, '&quot;');
+        const nameInner  = hasUrl
+          ? `<a href="${item.item_url}" target="_blank" rel="noopener" class="item-link">${item.item_name}</a>`
+          : item.item_name;
         return `
           <li data-item-id="${item.id}"${!hasDesc ? ' class="no-desc"' : ''}>
             <input type="checkbox" class="check-box" data-id="${item.id}"${checked ? ' checked' : ''}>
@@ -660,10 +700,19 @@
               onclick="toggleInProgress(${item.id})" title="Set as In Progress">▶</button>
             <div class="item-text">
               <div class="item-name">
-                <span class="item-id-badge">#${item.id}</span><span class="risk-marker">💣 </span>${item.item_name}
+                <span class="item-id-badge">#${item.id}</span>
+                <button class="url-link-btn${hasUrl ? ' has-url' : ''}" onclick="toggleUrlEdit(${item.id})"
+                  title="${hasUrl ? 'Edit link' : 'Add link'}">🔗</button>
+                <span class="risk-marker">💣 </span>
+                <span class="item-name-text" data-name="${escapedName}">${nameInner}</span>
                 ${pillHtml(checked, notes, inProg)}
               </div>
               <div class="item-desc" contenteditable="true" data-id="${item.id}">${item.item_desc || ''}</div>
+              <div class="url-edit-row" id="url-row-${item.id}">
+                <input class="url-input" type="url" data-id="${item.id}"
+                  value="${item.item_url || ''}" placeholder="https://…">
+                <button class="url-save-btn" onclick="saveUrlFromBtn(${item.id})">Save link</button>
+              </div>
               <textarea class="item-note" data-id="${item.id}" placeholder="Add production note… (saves automatically)">${notes}</textarea>
             </div>
           </li>`;
@@ -775,6 +824,14 @@
         });
       });
 
+      document.querySelectorAll('.url-input').forEach(inp => {
+        inp.addEventListener('keydown', e => {
+          const id = parseInt(inp.dataset.id, 10);
+          if (e.key === 'Enter')  { e.preventDefault(); saveUrlFromBtn(id); }
+          if (e.key === 'Escape') toggleUrlEdit(id);
+        });
+      });
+
       document.querySelectorAll('.item-desc[contenteditable]').forEach(div => {
         div.addEventListener('input', () => {
           const id   = parseInt(div.dataset.id, 10);
@@ -828,13 +885,24 @@
         const li   = document.createElement('li');
         li.dataset.itemId = newItem.id;
         if (!(newItem.item_desc && newItem.item_desc.trim())) li.classList.add('no-desc');
+        const newEscName = newItem.item_name.replace(/"/g, '&quot;');
         li.innerHTML = `
           <input type="checkbox" class="check-box" data-id="${newItem.id}">
           <button class="ip-btn" data-id="${newItem.id}"
             onclick="toggleInProgress(${newItem.id})" title="Set as In Progress">▶</button>
           <div class="item-text">
-            <div class="item-name"><span class="item-id-badge">#${newItem.id}</span><span class="risk-marker">💣 </span>${newItem.item_name} <span class="status-pill pill-backlog">📋 Backlog</span></div>
+            <div class="item-name">
+              <span class="item-id-badge">#${newItem.id}</span>
+              <button class="url-link-btn" onclick="toggleUrlEdit(${newItem.id})" title="Add link">🔗</button>
+              <span class="risk-marker">💣 </span>
+              <span class="item-name-text" data-name="${newEscName}">${newItem.item_name}</span>
+              <span class="status-pill pill-backlog">📋 Backlog</span>
+            </div>
             <div class="item-desc" contenteditable="true" data-id="${newItem.id}">${newItem.item_desc || ''}</div>
+            <div class="url-edit-row" id="url-row-${newItem.id}">
+              <input class="url-input" type="url" data-id="${newItem.id}" value="" placeholder="https://…">
+              <button class="url-save-btn" onclick="saveUrlFromBtn(${newItem.id})">Save link</button>
+            </div>
             <textarea class="item-note" data-id="${newItem.id}" placeholder="Add production note… (saves automatically)"></textarea>
           </div>`;
         list.appendChild(li);
@@ -880,6 +948,43 @@
       } finally {
         btn.textContent = 'Save';
         btn.disabled    = false;
+      }
+    }
+
+    // ── URL link per item ────────────────────────────────────────────────────
+    function toggleUrlEdit(itemId) {
+      const row = document.getElementById(`url-row-${itemId}`);
+      if (!row) return;
+      const open = row.style.display !== 'flex';
+      row.style.display = open ? 'flex' : 'none';
+      if (open) row.querySelector('.url-input')?.focus();
+    }
+
+    function applyItemLink(itemId, url) {
+      const li      = document.querySelector(`li[data-item-id="${itemId}"]`);
+      if (!li) return;
+      const nameSpan = li.querySelector('.item-name-text');
+      const linkBtn  = li.querySelector('.url-link-btn');
+      if (!nameSpan) return;
+      const name = nameSpan.dataset.name || nameSpan.textContent.trim();
+      nameSpan.innerHTML = url
+        ? `<a href="${url}" target="_blank" rel="noopener" class="item-link">${name}</a>`
+        : name;
+      if (linkBtn) { linkBtn.classList.toggle('has-url', !!url); linkBtn.title = url ? 'Edit link' : 'Add link'; }
+    }
+
+    async function saveUrlFromBtn(itemId) {
+      const input = document.querySelector(`.url-input[data-id="${itemId}"]`);
+      if (!input) return;
+      const url = input.value.trim();
+      try {
+        const { error } = await db.from('checklist_items').update({ item_url: url }).eq('id', itemId);
+        if (error) throw error;
+        applyItemLink(itemId, url);
+        toggleUrlEdit(itemId);
+        showToast('✅ Link saved');
+      } catch (err) {
+        showToast('❌ Link save failed: ' + err.message, true);
       }
     }
 

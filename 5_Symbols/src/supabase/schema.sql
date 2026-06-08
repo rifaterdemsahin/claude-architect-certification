@@ -228,6 +228,7 @@ DROP POLICY IF EXISTS anon_select_scenes ON scenes;
 DROP POLICY IF EXISTS anon_select_scene_cues ON scene_cues;
 DROP POLICY IF EXISTS anon_select_edl_entries ON edl_entries;
 DROP POLICY IF EXISTS anon_select_checklist_items ON checklist_items;
+DROP POLICY IF EXISTS anon_insert_checklist_items ON checklist_items;
 DROP POLICY IF EXISTS anon_update_checklist_items ON checklist_items;
 DROP POLICY IF EXISTS anon_select_checklist_progress ON checklist_progress;
 DROP POLICY IF EXISTS anon_select_course_content ON course_content;
@@ -258,6 +259,7 @@ CREATE POLICY anon_select_scenes ON scenes FOR SELECT USING (true);
 CREATE POLICY anon_select_scene_cues ON scene_cues FOR SELECT USING (true);
 CREATE POLICY anon_select_edl_entries ON edl_entries FOR SELECT USING (true);
 CREATE POLICY anon_select_checklist_items ON checklist_items FOR SELECT USING (true);
+CREATE POLICY anon_insert_checklist_items ON checklist_items FOR INSERT WITH CHECK (true);
 CREATE POLICY anon_update_checklist_items ON checklist_items FOR UPDATE USING (true);
 CREATE POLICY anon_select_checklist_progress ON checklist_progress FOR SELECT USING (true);
 CREATE POLICY anon_select_course_content ON course_content FOR SELECT USING (true);
@@ -292,3 +294,5 @@ ALTER TABLE scenes  ADD COLUMN IF NOT EXISTS video_id  INTEGER REFERENCES videos
 
 -- checklist_progress: in_progress flag (only one row per user_id may be true)
 ALTER TABLE checklist_progress ADD COLUMN IF NOT EXISTS in_progress BOOLEAN DEFAULT FALSE;
+-- checklist_items: hyperlink reference per item
+ALTER TABLE checklist_items ADD COLUMN IF NOT EXISTS item_url TEXT DEFAULT '';
