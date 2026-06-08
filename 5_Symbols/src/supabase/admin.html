@@ -191,19 +191,20 @@
 
         // 3. Scenes
         const scenesData = [
-          { module_number: 1, section_number: 1, scene_number: 1, script: '"Welcome to Module 1..."', bg_image: 'assets/module1_section1_scene1_bg.png', lt_image: 'assets/overlays/lt_intro.png', lt_main: 'Claude Architect Masterclass', lt_sub: 'Module 1: Introduction', overlay_lt: 'assets/overlays/lt_intro.png', overlay_text: 'assets/overlays/overlay_systems.png', bundle_url: 'assets/archives/module1_section1_scene1.zip' },
-          { module_number: 1, section_number: 1, scene_number: 2, script: '"Today, we are breaking down..."', bg_image: 'assets/module1_section1_scene2_bg.png', lt_image: 'assets/overlays/lt_mcp.png', lt_main: 'Model Context Protocol', lt_sub: 'Enterprise Integration Layer', overlay_lt: 'assets/overlays/lt_mcp.png', overlay_text: 'assets/overlays/overlay_mcp.png', bundle_url: 'assets/archives/module1_section1_scene2.zip' },
-          { module_number: 1, section_number: 1, scene_number: 3, script: '"All the code, blueprints..."', bg_image: 'assets/module1_section1_scene3_bg.png', lt_image: 'assets/overlays/lt_resources.png', lt_main: 'Resource Dashboard', lt_sub: 'Open Source Architecture Blueprint', overlay_lt: 'assets/overlays/lt_resources.png', overlay_text: 'assets/overlays/overlay_github.png', bundle_url: 'assets/archives/module1_section1_scene3.zip' }
+          { module_number: 1, section_number: 1, scene_number: 1, script: '"Welcome to Module 1. Moving LLMs from a <mark>playground prototype</mark> or an experimental chat window into a <mark>secure, scalable production system</mark> requires systems engineering—not just clever prompting."', bg_image: 'assets/module1_section1_scene1_bg.png', lt_image: 'assets/overlays/lt_intro.png', lt_main: 'Claude Architect Masterclass', lt_sub: 'Module 1: Introduction', overlay_lt: 'assets/overlays/lt_intro.png', overlay_text: 'assets/overlays/overlay_systems.png', bundle_url: 'assets/archives/module1_section1_scene1.zip' },
+          { module_number: 1, section_number: 1, scene_number: 2, script: '"Today, we are breaking down the official Claude Architecture Blueprint. We are moving beyond basic API calls to understand model topologies, stateless middleware boundaries, and how the <mark>Model Context Protocol</mark> changes enterprise integration forever."', bg_image: 'assets/module1_section1_scene2_bg.png', lt_image: 'assets/overlays/lt_mcp.png', lt_main: 'Model Context Protocol', lt_sub: 'Enterprise Integration Layer', overlay_lt: 'assets/overlays/lt_mcp.png', overlay_text: 'assets/overlays/overlay_mcp.png', bundle_url: 'assets/archives/module1_section1_scene2.zip' },
+          { module_number: 1, section_number: 1, scene_number: 3, script: '"All the code, blueprints, and architecture files we cover are live right here on our <mark>project hub</mark>."', bg_image: 'assets/module1_section1_scene3_bg.png', lt_image: 'assets/overlays/lt_resources.png', lt_main: 'Resource Dashboard', lt_sub: 'Open Source Architecture Blueprint', overlay_lt: 'assets/overlays/lt_resources.png', overlay_text: 'assets/overlays/overlay_github.png', bundle_url: 'assets/archives/module1_section1_scene3.zip' },
+          { module_number: 2, section_number: 1, scene_number: 1, script: '"Welcome to Module 2. Today, we are exploring the Model Context Protocol (MCP). We will cover how it connects Claude to secure private databridges with read-only boundaries."', bg_image: 'assets/module2_section1_scene1_bg.png', lt_image: 'assets/overlays/lt_mcp.png', lt_main: 'Model Context Protocol', lt_sub: 'Section 1: Fundamentals', overlay_lt: 'assets/overlays/lt_mcp.png', overlay_text: 'assets/overlays/overlay_mcp.png', bundle_url: 'assets/archives/module2_section1_scene1.zip' }
         ];
         const insertedScenes = await supFetch('scenes', { method: 'POST', body: JSON.stringify(scenesData) });
-        log('Seeded 3 scenes.', 'ok');
+        log(`Seeded ${insertedScenes.length} scenes.`, 'ok');
 
         // 4. Scene cues
         for (const s of insertedScenes) {
           const cues = [
-            { icon: '🖼️', label: `BG: Scene ${s.scene_number}`, prompt: 'Background generation prompt', sort_order: 1 },
-            { icon: '🔤', label: 'Text overlay', prompt: 'Text generation prompt', sort_order: 2 },
-            { icon: '⏱️', label: 'Timing cues', prompt: '', sort_order: 3 }
+            { icon: '🖼️', label: s.module_number === 1 ? `BG: Scene ${s.scene_number}` : 'BG: MCP Server Architecture', prompt: s.module_number === 1 ? 'Background generation prompt' : 'A cinematic illustration of a server bridge, security gate and data flows, dark theme with blue and violet lights', sort_order: 1 },
+            { icon: '🔤', label: s.module_number === 1 ? 'Text overlay' : 'Text: MODEL CONTEXT PROTOCOL (MCP)', prompt: s.module_number === 1 ? 'Text generation prompt' : 'Create a tech-styled text overlay for MCP', sort_order: 2 },
+            { icon: '⏱️', label: s.module_number === 1 ? 'Timing cues' : 'Timing: 0:00 - 0:10', prompt: '', sort_order: 3 }
           ];
           await supFetch('scene_cues', { method: 'POST', body: JSON.stringify(cues.map(c => ({ ...c, scene_id: s.id }))) });
         }
@@ -211,26 +212,29 @@
 
         // 5. EDL entries
         const edlData = [
-          { scene_number: 1, entries: [
+          { module_number: 1, section_number: 1, scene_number: 1, entries: [
             { timing: '0:00 - 0:03', description: 'Fade in background with zoom-in animation.', sort_order: 1 },
             { timing: '0:03 - 0:05', description: 'Slide in Lower Third from left margin.', sort_order: 2 },
             { timing: '0:05 - 0:07', description: 'Pop-in text overlay.', sort_order: 3 },
             { timing: '0:10', description: 'Trigger icons with glow pulse.', sort_order: 4 }
           ]},
-          { scene_number: 2, entries: [
+          { module_number: 1, section_number: 1, scene_number: 2, entries: [
             { timing: '0:12 - 0:15', description: 'Cross-dissolve transition.', sort_order: 1 },
             { timing: '0:15 - 0:18', description: 'Replace Lower Third.', sort_order: 2 },
             { timing: '0:18 - 0:22', description: 'Overlay text center-screen.', sort_order: 3 },
             { timing: '0:23', description: 'Animate data pipe icons.', sort_order: 4 }
           ]},
-          { scene_number: 3, entries: [
+          { module_number: 1, section_number: 1, scene_number: 3, entries: [
             { timing: '0:28', description: 'Focus camera on dashboard.', sort_order: 1 },
             { timing: '0:30', description: 'Display URL pill overlay.', sort_order: 2 },
             { timing: '0:35', description: 'Fade to black.', sort_order: 3 }
+          ]},
+          { module_number: 2, section_number: 1, scene_number: 1, entries: [
+            { timing: '0:00 - 0:05', description: 'Fade in MCP diagram with fly-in elements.', sort_order: 1 }
           ]}
         ];
         for (const ed of edlData) {
-          const sc = insertedScenes.find(s => s.scene_number === ed.scene_number);
+          const sc = insertedScenes.find(s => s.module_number === ed.module_number && s.section_number === ed.section_number && s.scene_number === ed.scene_number);
           if (sc) {
             await supFetch('edl_entries', { method: 'POST', body: JSON.stringify(ed.entries.map(e => ({ ...e, scene_id: sc.id }))) });
           }
