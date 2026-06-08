@@ -1,177 +1,211 @@
-# 🔐 Formula: Google OAuth 2.0 + Drive Picker Integration
+# 🔐 Formula: Google OAuth 2.0 + Drive Picker + Drive Upload Integration
 
 > **Stage:** `4_Formula` — Thinking & Planning  
 > **Applies to:** `5_Symbols/production/postprod/module-1/section-1/production_shotlist.html`  
-> **Error fixed:** [`6_Semblance/error_google_oauth_no_origin.md`](../6_Semblance/error_google_oauth_no_origin.md)
+> **Related errors:** [`6_Semblance/error_google_oauth_no_origin.md`](../6_Semblance/error_google_oauth_no_origin.md) · [`6_Semblance/error_google_drive_api_disabled.md`](../6_Semblance/error_google_drive_api_disabled.md)
 
 ---
 
 ## 🧠 What Problem This Solves
 
-The production shot list needs file URLs from Google Drive (background images, audio, overlays, ZIP bundles). Without OAuth, the user must manually copy-paste share links. With it, a file picker opens in-browser and the URL is filled automatically.
+The production shot list needs file URLs from Google Drive (background images, audio, overlays, ZIP bundles). Without integration, users manually copy-paste share links. With it:
+- **📁 Drive Picker** — opens a Google file picker in-browser; selected file URL fills the field automatically
+- **⬆️ Upload** — uploads a local file to Google Drive, sets public sharing, fills the URL field, and PATCHes Supabase immediately
 
 ---
 
 ## 🏛 Architecture Overview
 
 ```
-Browser page (localhost:8765 or GitHub Pages)
+Browser (localhost:8765 / GitHub Pages)
   │
-  ├─ GIS (Google Identity Services) ──► OAuth2 Popup ──► Google Account
-  │   accounts.google.com/gsi/client         rifaterdemsahin@gmail.com
-  │                                                │
-  │                                         access_token (1hr)
+  ├─ 1. GIS (Google Identity Services) ──► OAuth2 Popup ──► Google Account
+  │      accounts.google.com/gsi/client                  access_token (1hr)
   │
-  ├─ gapi (Google API client) ──► google.picker.PickerBuilder
-  │   apis.google.com/js/api.js                    │
-  │                                         File selected in UI
-  │                                                │
-  └─ Input field ◄────────────────── drive.google.com/file/d/{id}/view
+  ├─ 2. Drive Picker (gapi) ─────────────────────────────────────────────────
+  │      apis.google.com/js/api.js ──► google.picker.PickerBuilder
+  │                                         │ User picks existing file
+  │                                         ▼
+  │                              drive.google.com/file/d/{id}/view
+  │
+  ├─ 3. Drive Upload (REST API v3) ──────────────────────────────────────────
+  │      googleapis.com/upload/drive/v3/files   ──► multipart upload
+  │      googleapis.com/drive/v3/files/{id}/permissions  ──► set public
+  │                                         │
+  │                                         ▼
+  │                              drive.google.com/file/d/{id}/view
+  │
+  └─ 4. Supabase PATCH ──────────────────────────────────────────────────────
+         rest/v1/scenes?id=eq.{sceneId}  ──► { bg_image: url } (or other column)
 ```
 
-### Two separate libraries
+---
 
-| Library | URL | Role |
+## 📦 Two Separate Libraries — Why Both
+
+| Library | CDN URL | Role |
 |---|---|---|
-| **GIS** (Google Identity Services) | `accounts.google.com/gsi/client` | Gets the OAuth2 `access_token` via popup |
-| **GAPI** (Google API client) | `apis.google.com/js/api.js` | Loads the Picker UI widget |
+| **GIS** (Google Identity Services) | `accounts.google.com/gsi/client` | OAuth2 `access_token` via popup (no redirect) |
+| **GAPI** (Google API client) | `apis.google.com/js/api.js` | Loads Picker UI widget (`gapi.load('picker', ...)`) |
 
-These are loaded separately. GIS is loaded at page load (`<head>` async). GAPI is loaded lazily only when the user clicks "Drive".
+GIS is loaded in `<head>` (async). GAPI is injected lazily only when the user first clicks Drive — avoids loading it for users who never use Drive.
 
 ---
 
 ## 🔑 Credential Map
 
-| Credential | Value | Where stored |
-|---|---|---|
-| **Client ID** | see `.env` → `GOOGLE_CLIENT_ID` | `.env`, cookie, Key Vault |
-| **Client Secret** | see `.env` → `GOOGLE_CLIENT_SECRET` | `.env`, Key Vault only (never browser) |
-| **Scope** | `https://www.googleapis.com/auth/drive.readonly` | Hardcoded in JS |
-| **Key Vault secret** | `claude-architect-GOOGLE-CLIENT-ID` | `dp-kv-deliverypilot` |
-| **Key Vault secret** | `claude-architect-GOOGLE-CLIENT-SECRET` | `dp-kv-deliverypilot` |
+| Credential | Where stored |
+|---|---|
+| **Client ID** | `.env` → `GOOGLE_CLIENT_ID` · cookie · Key Vault |
+| **Client Secret** | `.env` → `GOOGLE_CLIENT_SECRET` · Key Vault **only** (never browser) |
+| **OAuth Scopes** | `drive.file` + `drive.readonly` (hardcoded in JS) |
+| **Key Vault** | `claude-architect-GOOGLE-CLIENT-ID` · `claude-architect-GOOGLE-CLIENT-SECRET` in `dp-kv-deliverypilot` |
 
-> 🔐 Retrieve from Key Vault: `az keyvault secret show --vault-name dp-kv-deliverypilot --name claude-architect-GOOGLE-CLIENT-ID --query value -o tsv`
+> 🔐 Retrieve: `az keyvault secret show --vault-name dp-kv-deliverypilot --name claude-architect-GOOGLE-CLIENT-ID --query value -o tsv`
 
-> ⚠️ The Client Secret is **server-side only**. The browser flow (implicit/token) uses only the Client ID.
+> ⚠️ The Client Secret is **server-side only**. The browser implicit/token flow uses only the Client ID.
 
 ---
 
-## ⚙️ Google Cloud Console Setup — Step by Step
+## ⚙️ Google Cloud Console — Full Setup Steps
 
-### Step 1 — Project & APIs
+### 🗂 Step 1 — Select or create a GCP project
 
 1. Go to [console.cloud.google.com](https://console.cloud.google.com)
-2. Select or create a project (current: **gemini** project shown in screenshot)
-3. **APIs & Services → Library** → enable:
-   - ✅ **Google Drive API**
-   - ✅ **Google Picker API**
+2. Select project **leafy-winter-477609-k0** (Project ID: `327591678159`)
 
-### Step 2 — OAuth Consent Screen
+---
 
-**APIs & Services → OAuth consent screen** (or left sidebar: **Branding / Audience / Data Access**)
+### 🔌 Step 2 — Enable APIs ← **REQUIRED — do this first**
+
+Both APIs must be explicitly enabled. The OAuth client alone is not enough.
+
+#### 📁 Enable Google Drive API
+
+👉 [console.cloud.google.com/apis/library/drive.googleapis.com?project=leafy-winter-477609-k0](https://console.cloud.google.com/apis/library/drive.googleapis.com?project=leafy-winter-477609-k0)
+
+**APIs & Services → Library → search `Google Drive API` → Enable**
+
+Without this: `403 PERMISSION_DENIED — Google Drive API has not been used in project … before or it is disabled.`
+
+#### 🖼 Enable Google Picker API
+
+👉 [console.cloud.google.com/apis/library/picker.googleapis.com?project=leafy-winter-477609-k0](https://console.cloud.google.com/apis/library/picker.googleapis.com?project=leafy-winter-477609-k0)
+
+**APIs & Services → Library → search `Google Picker API` → Enable**
+
+Without this: the picker widget fails to load silently.
+
+> ⏳ After enabling, wait **2–5 minutes** for propagation before testing.
+
+---
+
+### 🪪 Step 3 — OAuth Consent Screen
+
+**APIs & Services → OAuth consent screen**
 
 | Field | Value |
 |---|---|
-| App name | `productionhelper` (or any name) |
+| App name | `productionhelper` |
 | User support email | `rifaterdemsahin@gmail.com` |
-| Publishing status | **In production** (or Testing with user added) |
+| Publishing status | Testing (add test user) OR Production |
 
-**Data Access → Add or remove scopes:**  
+**Data Access → Add scopes:**
 👉 [console.cloud.google.com/auth/scopes?project=leafy-winter-477609-k0](https://console.cloud.google.com/auth/scopes?project=leafy-winter-477609-k0)
 
 ```
+https://www.googleapis.com/auth/drive.file
 https://www.googleapis.com/auth/drive.readonly
 ```
+
+| Scope | Why |
+|---|---|
+| `drive.file` | Upload new files via API (create, update files this app created) |
+| `drive.readonly` | Read + list ALL Drive files so the Picker can show them |
 
 **Audience → Test users** (if still in Testing mode):
 ```
 rifaterdemsahin@gmail.com
 ```
 
-### Step 3 — OAuth 2.0 Client ID ← **THIS IS WHERE THE 401 HAPPENED**
+---
+
+### 🗝 Step 4 — OAuth 2.0 Client ID
 
 **APIs & Services → Credentials → productionhelper (Web application)**
 
-#### 🔴 Missing: Authorized JavaScript Origins
+👉 [console.cloud.google.com/apis/credentials](https://console.cloud.google.com/apis/credentials)
+
+#### Authorized JavaScript Origins
 
 Click **+ Add URI** for each:
 
 ```
-http://localhost:8765          ← local dev server
-http://localhost               ← local fallback
-https://rifaterdemsahin.github.io   ← GitHub Pages production
+http://localhost:8765
+http://localhost
+https://rifaterdemsahin.github.io
 ```
 
-> **Rule:** Origin = `scheme + host + port`. No path. No trailing slash.  
-> **Why it's required:** GIS sends the origin as part of the token request. Google validates it against this list. Empty list = `invalid_client`.
+> **Rule:** `scheme + host + port` only. No path. No trailing slash.  
+> Empty list → `401 invalid_client / no registered origin`
 
 #### Authorized Redirect URIs
 
-Not required for the **implicit/token flow** used by the Picker. Leave empty, or add the GitHub Pages URL if you later switch to Authorization Code flow.
-
-#### After saving
-
-- Toast confirms: *"OAuth client saved"*
-- Wait 5 min – a few hours for Google's CDN to propagate
-- The error clears on next attempt
+Not required for the implicit/token flow. Leave empty or add GitHub Pages URL if switching to Auth Code flow later.
 
 ---
 
-## 💻 How the Code Works (Flow Walkthrough)
+## 💻 JS Flow Walkthrough
 
-### 1. Page load — GIS script injected
+### 1. Page load — GIS available
 
 ```html
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 ```
 
-Makes `window.google.accounts.oauth2` available.
-
-### 2. Credential bootstrap (cookie → localStorage → default)
+### 2. Credential bootstrap (cookie → localStorage → hardcoded default)
 
 ```javascript
-const CRED_DEFAULTS = {
-  google_client_id: '327591678159-hq0cedjmjo9fgc9s6fiutrr4jlo3jhqp.apps.googleusercontent.com'
-};
-// On DOMContentLoaded:
-const resolved = getCookie('google_client_id') || localStorage.getItem('google_client_id') || CRED_DEFAULTS.google_client_id;
+const resolved = getCookie('google_client_id')
+  || localStorage.getItem('google_client_id')
+  || CRED_DEFAULTS.google_client_id;
 localStorage.setItem('google_client_id', resolved);
 setCookie('google_client_id', resolved, 365);
 ```
 
-### 3. User clicks "🔗 Google Drive"
+### 3. Pending action queue — buttons always active
+
+Buttons are enabled by default. If clicked before auth, action is queued:
 
 ```javascript
-async function gdriveLogin() {
-  const clientId = localStorage.getItem('google_client_id');
-  const tokenClient = google.accounts.oauth2.initTokenClient({
-    client_id: clientId,         // loaded from cookie/localStorage
-    scope: 'https://www.googleapis.com/auth/drive.readonly',
-    callback: async (response) => {
-      gdriveAccessToken = response.access_token;  // valid for 1 hour
-      document.querySelectorAll('.btn-pick-drive').forEach(b => b.disabled = false);
-      await loadPickerApi();
-    }
-  });
-  tokenClient.requestAccessToken();  // opens Google popup
+let _pendingDriveAction = null; // { type:'upload'|'picker', targetInputId }
+
+function triggerUpload(targetInputId) {
+  if (!gdriveAccessToken) {
+    _pendingDriveAction = { type: 'upload', targetInputId };
+    gdriveLogin();   // triggers OAuth popup
+    return;
+  }
+  // ... open file picker
 }
 ```
 
-**What the popup does:**
-- Validates the calling origin against Authorized JavaScript Origins
-- Shows consent screen if first time
-- Returns `access_token` in callback (implicit flow — no redirect needed)
-
-### 4. GAPI / Picker loaded lazily
+After successful login, pending action executes automatically:
 
 ```javascript
-async function loadPickerApi() {
-  // Injects apis.google.com/js/api.js only when needed
-  gapi.load('picker', () => { pickerApiLoaded = true; });
+callback: async (response) => {
+  gdriveAccessToken = response.access_token;
+  await loadPickerApi();
+  if (_pendingDriveAction) {
+    const action = _pendingDriveAction;
+    _pendingDriveAction = null;
+    if (action.type === 'picker') openGDrivePicker(action.targetInputId);
+    else if (action.type === 'upload') triggerUpload(action.targetInputId);
+  }
 }
 ```
 
-### 5. User clicks "📁 Drive" next to an input
+### 4. Drive Picker flow
 
 ```javascript
 async function openGDrivePicker(targetInputId) {
@@ -180,11 +214,62 @@ async function openGDrivePicker(targetInputId) {
     .setOAuthToken(gdriveAccessToken)
     .setCallback(data => {
       if (data.action === google.picker.Action.PICKED) {
-        const shareUrl = `https://drive.google.com/file/d/${data.docs[0].id}/view?usp=sharing`;
-        document.getElementById(targetInputId).value = shareUrl;
+        const url = `https://drive.google.com/file/d/${data.docs[0].id}/view?usp=sharing`;
+        document.getElementById(targetInputId).value = url;
       }
     })
     .build().setVisible(true);
+}
+```
+
+### 5. Drive Upload flow
+
+```javascript
+async function uploadFileToDrive(file, targetInputId) {
+  // 1. Multipart upload to Drive REST API v3
+  const form = new FormData();
+  form.append('metadata', new Blob([JSON.stringify({ name: file.name, mimeType: file.type })], { type: 'application/json' }));
+  form.append('file', file);
+
+  const res = await fetch(
+    'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name',
+    { method: 'POST', headers: { 'Authorization': `Bearer ${gdriveAccessToken}` }, body: form }
+  );
+  const data = await res.json(); // { id, name }
+
+  // 2. Set public sharing (anyone with link can view)
+  await fetch(`https://www.googleapis.com/drive/v3/files/${data.id}/permissions`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${gdriveAccessToken}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ role: 'reader', type: 'anyone' })
+  });
+
+  // 3. Fill URL field
+  const url = `https://drive.google.com/file/d/${data.id}/view?usp=sharing`;
+  document.getElementById(targetInputId).value = url;
+
+  // 4. Immediately PATCH Supabase if editing an existing scene
+  await saveFieldToSupabase(targetInputId, url);
+}
+```
+
+### 6. Supabase PATCH — field-level save after upload
+
+```javascript
+const FIELD_TO_COLUMN = {
+  fBg: 'bg_image', fAudioUrl: 'audio_url', fLtImg: 'lt_image',
+  fOverlayLt: 'overlay_lt', fOverlayText: 'overlay_text', fBundle: 'bundle_url'
+};
+
+async function saveFieldToSupabase(fieldId, url) {
+  const column = FIELD_TO_COLUMN[fieldId];
+  const sceneDbId = document.getElementById('editSceneId').value;
+  if (!sceneDbId) return; // new scene — saved with full form
+  await fetch(`${supabaseUrl}/rest/v1/scenes?id=eq.${sceneDbId}`, {
+    method: 'PATCH',
+    headers: { ...headers, 'Prefer': 'return=minimal' },
+    body: JSON.stringify({ [column]: url })
+  });
 }
 ```
 
@@ -192,23 +277,19 @@ async function openGDrivePicker(targetInputId) {
 
 ## 🔗 URL Conversion: Share Link → Embeddable
 
-Google Drive share links are not directly usable in `<img src>` or `<audio src>`. The `toGDriveEmbedUrl()` helper converts them:
-
-| Use case | URL pattern |
+| Use case | Output URL |
 |---|---|
-| Images / general view | `https://drive.google.com/uc?export=view&id={id}` |
-| Audio / download | `https://drive.google.com/uc?export=download&id={id}` |
-| ZIP bundles | `https://drive.google.com/uc?export=download&id={id}` |
+| Images / general | `https://drive.google.com/uc?export=view&id={id}` |
+| Audio / ZIP download | `https://drive.google.com/uc?export=download&id={id}` |
 
 ```javascript
 function toGDriveEmbedUrl(url) {
   const match = url.match(/\/file\/d\/([^/]+)/) || url.match(/id=([^&]+)/);
-  if (match) {
-    const id = match[1];
-    if (url.match(/\.(wav|mp3|ogg|m4a|flac)/i)) return `...uc?export=download&id=${id}`;
-    if (url.match(/\.(zip|tar|gz)/i))           return `...uc?export=download&id=${id}`;
-    return `...uc?export=view&id=${id}`;
-  }
+  if (!match) return url;
+  const id = match[1];
+  if (url.match(/\.(wav|mp3|ogg|m4a|flac|zip|tar|gz)/i))
+    return `https://drive.google.com/uc?export=download&id=${id}`;
+  return `https://drive.google.com/uc?export=view&id=${id}`;
 }
 ```
 
@@ -216,17 +297,27 @@ function toGDriveEmbedUrl(url) {
 
 ## 🧪 Testing Checklist
 
-- [ ] `http://localhost:8765` added to Authorized JavaScript Origins in Google Cloud Console
+### GCP Setup
+- [ ] **Google Drive API** enabled in GCP project `leafy-winter-477609-k0`
+- [ ] **Google Picker API** enabled in GCP project `leafy-winter-477609-k0`
+- [ ] `drive.file` + `drive.readonly` scopes added in OAuth consent screen
+- [ ] `http://localhost:8765` added to Authorized JavaScript Origins
 - [ ] `https://rifaterdemsahin.github.io` added to Authorized JavaScript Origins
-- [ ] `drive.readonly` scope added in Data Access
-- [ ] Test user `rifaterdemsahin@gmail.com` added (if consent screen is in Testing mode)
-- [ ] Waited 5+ min after saving
-- [ ] Page reloaded → click **🔗 Google Drive** → Google auth popup appears (no error)
-- [ ] After auth → button shows ✅ Drive Connected
-- [ ] Click **📁 Drive** next to Background Image URL → file picker opens
-- [ ] Select a file → URL auto-populates in the input
-- [ ] URL is in `drive.google.com/file/d/{id}/view` format
-- [ ] Save Scene → image loads correctly in the shot card
+- [ ] Test user `rifaterdemsahin@gmail.com` added (if consent screen is Testing)
+- [ ] Waited 2–5 min after enabling APIs / saving credentials
+
+### Picker Flow
+- [ ] Click **📁 Drive** (no prior auth) → Google OAuth popup appears
+- [ ] After consent → picker opens automatically (pending action executed)
+- [ ] Select a file → URL fills input in `drive.google.com/file/d/{id}/view` format
+
+### Upload Flow
+- [ ] Click **⬆️ Upload** (no prior auth) → Google OAuth popup appears
+- [ ] After consent → local file dialog opens automatically
+- [ ] Select a file → button shows `⏳…` then `✅ Saved!`
+- [ ] Input field filled with `drive.google.com/file/d/{id}/view` URL
+- [ ] Debug panel shows: `✅ Uploaded "{name}" → {url}` + `✅ Supabase: saved {column} for scene {id}`
+- [ ] Supabase table editor confirms column updated
 
 ---
 
@@ -234,12 +325,14 @@ function toGDriveEmbedUrl(url) {
 
 | Pitfall | Fix |
 |---|---|
-| `no registered origin` (401) | Add all origins to Authorized JavaScript Origins |
-| `popup_closed_by_user` | User closed the Google popup — retry |
-| `access_denied` | App still in Testing + user not in test list |
-| Image doesn't display after picking | Drive file not shared publicly — change to "Anyone with the link can view" |
-| Picker shows but token expired | `access_token` lasts 1hr — click 🔗 Google Drive again to re-auth |
-| `idpiframe_initialization_failed` | Cookie blocked — allow third-party cookies for `accounts.google.com` |
+| `403 PERMISSION_DENIED — Drive API not enabled` | Enable Drive API + Picker API in GCP Console → wait 2 min |
+| `401 invalid_client / no registered origin` | Add origins to Authorized JavaScript Origins |
+| `popup_closed_by_user` | User closed the popup — retry |
+| `access_denied` | App in Testing + user not in test list |
+| Image doesn't display after picking | File not shared publicly — upload flow auto-sets `reader/anyone`; for manually pasted links, share manually |
+| Token expired (1hr) | Click 🔗 Google Drive again to re-auth |
+| `idpiframe_initialization_failed` | Allow third-party cookies for `accounts.google.com` in browser settings |
+| Upload succeeds but Supabase not updated | Scene must exist (editing mode); new scenes save on full form submit |
 
 ---
 
@@ -247,6 +340,10 @@ function toGDriveEmbedUrl(url) {
 
 | Date | Event |
 |---|---|
-| 2026-06-08 | Google OAuth Client created (`productionhelper`) |
-| 2026-06-08 | 🔴 Error 401 — Authorized JavaScript Origins empty |
-| 2026-06-08 | 🛠 Fix documented — add localhost + GitHub Pages origins |
+| 2026-06-08 | 🔐 OAuth Client created (`productionhelper`) in GCP project |
+| 2026-06-08 | 🔴 `401 invalid_client` — Authorized JavaScript Origins empty → fixed |
+| 2026-06-08 | ✅ Drive Picker working — `📁 Drive` button fills URL |
+| 2026-06-09 | ➕ `⬆️ Upload` button added — local file → Drive → Supabase PATCH |
+| 2026-06-09 | 🔴 `403 PERMISSION_DENIED` — Drive API not enabled → fixed by enabling in GCP Library |
+| 2026-06-09 | ✅ Both APIs enabled: Drive API + Picker API |
+| 2026-06-09 | 🔑 OAuth scope expanded: `drive.file` (upload) + `drive.readonly` (read/picker) |
