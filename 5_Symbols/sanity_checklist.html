@@ -203,10 +203,31 @@
       letter-spacing: 0.05em;
       transition: all 0.2s;
     }
-    .pill-pending    { background: rgba(148,163,184,0.12); color: #94a3b8; }
+    .pill-backlog    { background: rgba(148,163,184,0.12); color: #94a3b8; }
+    .pill-ready      { background: rgba(16,185,129,0.15);  color: #10b981; }
     .pill-inprogress { background: rgba(245,158,11,0.15);  color: #f59e0b; }
-    .pill-done       { background: rgba(16,185,129,0.15);  color: #10b981; }
-    .pill-ready      { background: rgba(99,102,241,0.15);  color: #818cf8; }
+
+    /* Risk marker — shown only when description is empty */
+    .risk-marker { display: none; }
+    li.no-desc .risk-marker { display: inline; }
+
+    /* Inline editable description */
+    .item-desc[contenteditable="true"] {
+      cursor: text;
+      min-height: 1.1em;
+      border-radius: 4px;
+      padding: 2px 4px;
+      margin: 2px -4px 0;
+      transition: background 0.15s;
+      outline: none;
+    }
+    .item-desc[contenteditable="true"]:hover { background: rgba(255,255,255,0.04); }
+    .item-desc[contenteditable="true"]:focus { background: rgba(139,92,246,0.07); }
+    .item-desc[contenteditable="true"]:empty::before {
+      content: 'Add description…';
+      color: rgba(156,163,175,0.35);
+      pointer-events: none;
+    }
 
     /* Add-item row */
     .add-item-row {
@@ -406,25 +427,32 @@
       }
     }
 
-    // ── Status pill helper ───────────────────────────────────────────────────
-    function pillHtml(checked, notes) {
-      if (checked)            return '<span class="status-pill pill-done">Done</span>';
-      if (notes && notes.trim()) return '<span class="status-pill pill-inprogress">In Progress</span>';
-      return '<span class="status-pill pill-pending">Pending</span>';
+    // ── Description save ────────────────────────────────────────────────────
+    const descTimers = {};
+    function scheduleDescSave(itemId, desc) {
+      clearTimeout(descTimers[itemId]);
+      descTimers[itemId] = setTimeout(() => saveDesc(itemId, desc), 700);
     }
 
-    // ── In-progress guard ────────────────────────────────────────────────────
-    function findOtherInProgress(excludeId) {
-      let found = false;
-      document.querySelectorAll('.checklist li').forEach(li => {
-        if (found) return;
-        const liId = parseInt(li.dataset.itemId, 10);
-        if (liId === excludeId) return;
-        const cb = li.querySelector('.check-box');
-        const ta = li.querySelector('.item-note');
-        if (cb && !cb.checked && ta && ta.value.trim()) found = true;
-      });
-      return found;
+    async function saveDesc(itemId, desc) {
+      try {
+        const { error } = await db
+          .from('checklist_items')
+          .update({ item_desc: desc })
+          .eq('id', itemId);
+        if (error) throw error;
+        showToast('✅ Description saved');
+      } catch (err) {
+        showToast('❌ Description save failed: ' + err.message, true);
+      }
+    }
+
+    // ── Status pill helper ───────────────────────────────────────────────────
+    // checked → In Progress | has note → Ready | else → Backlog
+    function pillHtml(checked, notes) {
+      if (checked)               return '<span class="status-pill pill-inprogress">🔄 In Progress</span>';
+      if (notes && notes.trim()) return '<span class="status-pill pill-ready">✅ Ready</span>';
+      return '<span class="status-pill pill-backlog">📋 Backlog</span>';
     }
 
     // ── Render ───────────────────────────────────────────────────────────────
@@ -435,19 +463,16 @@
         const checked = p.checked || false;
         const notes   = p.notes   || '';
         const hasDesc = !!(item.item_desc && item.item_desc.trim());
-        const riskMark   = hasDesc ? '' : '💣 ';
-        const readyBadge = hasDesc ? '<span class="status-pill pill-ready">📋 Ready</span>' : '';
         return `
-          <li data-item-id="${item.id}">
+          <li data-item-id="${item.id}"${!hasDesc ? ' class="no-desc"' : ''}>
             <input type="checkbox" class="check-box" data-id="${item.id}"${checked ? ' checked' : ''}>
             <div class="item-text">
               <div class="item-name">
-                ${riskMark}${item.item_name}
-                ${readyBadge}
+                <span class="risk-marker">💣 </span>${item.item_name}
                 ${pillHtml(checked, notes)}
               </div>
-              <div class="item-desc">${item.item_desc || ''}</div>
-              <textarea class="item-note" data-id="${item.id}" data-prev-len="${notes.trim().length}" placeholder="Add production note… (saves automatically)">${notes}</textarea>
+              <div class="item-desc" contenteditable="true" data-id="${item.id}">${item.item_desc || ''}</div>
+              <textarea class="item-note" data-id="${item.id}" placeholder="Add production note… (saves automatically)">${notes}</textarea>
             </div>
           </li>`;
       }).join('');
@@ -548,21 +573,21 @@
 
       document.querySelectorAll('.item-note').forEach(ta => {
         ta.addEventListener('input', () => {
-          const id        = parseInt(ta.dataset.id, 10);
-          const checked   = document.querySelector(`.check-box[data-id="${id}"]`)?.checked || false;
-          const prevLen   = parseInt(ta.dataset.prevLen || '0', 10);
-          const nowInProg = !checked && ta.value.trim().length > 0;
-
-          if (nowInProg && prevLen === 0 && findOtherInProgress(id)) {
-            showToast('⚠️ Only 1 item can be In Progress at a time', true);
-            ta.value = '';
-            ta.dataset.prevLen = '0';
-            return;
-          }
-
-          ta.dataset.prevLen = ta.value.trim().length.toString();
+          const id      = parseInt(ta.dataset.id, 10);
+          const checked = document.querySelector(`.check-box[data-id="${id}"]`)?.checked || false;
           updatePill(id, checked, ta.value);
           scheduleSave(id, checked, ta.value);
+        });
+      });
+
+      document.querySelectorAll('.item-desc[contenteditable]').forEach(div => {
+        div.addEventListener('input', () => {
+          const id   = parseInt(div.dataset.id, 10);
+          const desc = div.textContent.trim();
+          const li   = div.closest('li');
+          if (desc) li.classList.remove('no-desc');
+          else      li.classList.add('no-desc');
+          scheduleDescSave(id, desc);
         });
       });
     }
@@ -607,15 +632,13 @@
         const list = document.getElementById(`list-${phaseSlug}`);
         const li   = document.createElement('li');
         li.dataset.itemId = newItem.id;
-        const newHasDesc   = !!(newItem.item_desc && newItem.item_desc.trim());
-        const newRiskMark  = newHasDesc ? '' : '💣 ';
-        const newReadyBadge = newHasDesc ? '<span class="status-pill pill-ready">📋 Ready</span>' : '';
+        if (!(newItem.item_desc && newItem.item_desc.trim())) li.classList.add('no-desc');
         li.innerHTML = `
           <input type="checkbox" class="check-box" data-id="${newItem.id}">
           <div class="item-text">
-            <div class="item-name">${newRiskMark}${newItem.item_name} ${newReadyBadge}<span class="status-pill pill-pending">Pending</span></div>
-            <div class="item-desc">${newItem.item_desc || ''}</div>
-            <textarea class="item-note" data-id="${newItem.id}" data-prev-len="0" placeholder="Add production note… (saves automatically)"></textarea>
+            <div class="item-name"><span class="risk-marker">💣 </span>${newItem.item_name} <span class="status-pill pill-backlog">📋 Backlog</span></div>
+            <div class="item-desc" contenteditable="true" data-id="${newItem.id}">${newItem.item_desc || ''}</div>
+            <textarea class="item-note" data-id="${newItem.id}" placeholder="Add production note… (saves automatically)"></textarea>
           </div>`;
         list.appendChild(li);
 
@@ -633,21 +656,19 @@
           scheduleSave(id, this.checked, notes);
         });
         li.querySelector('.item-note').addEventListener('input', function() {
-          const id        = parseInt(this.dataset.id, 10);
-          const checked   = document.querySelector(`.check-box[data-id="${id}"]`)?.checked || false;
-          const prevLen   = parseInt(this.dataset.prevLen || '0', 10);
-          const nowInProg = !checked && this.value.trim().length > 0;
-
-          if (nowInProg && prevLen === 0 && findOtherInProgress(id)) {
-            showToast('⚠️ Only 1 item can be In Progress at a time', true);
-            this.value = '';
-            this.dataset.prevLen = '0';
-            return;
-          }
-
-          this.dataset.prevLen = this.value.trim().length.toString();
+          const id      = parseInt(this.dataset.id, 10);
+          const checked = document.querySelector(`.check-box[data-id="${id}"]`)?.checked || false;
           updatePill(id, checked, this.value);
           scheduleSave(id, checked, this.value);
+        });
+
+        li.querySelector('.item-desc').addEventListener('input', function() {
+          const id   = parseInt(this.dataset.id, 10);
+          const desc = this.textContent.trim();
+          const liEl = this.closest('li');
+          if (desc) liEl.classList.remove('no-desc');
+          else      liEl.classList.add('no-desc');
+          scheduleDescSave(id, desc);
         });
 
         // Reset form
