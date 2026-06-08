@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pre-Prod & Prod Sanity Check → Post-Production Gate</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --bg: #030712; --card: rgba(17,24,39,0.9); --border: rgba(139,92,246,0.3);
+      --text: #f3f4f6; --muted: #9ca3af; --primary: #8b5cf6; --green: #10b981;
+      --red: #ef4444; --yellow: #f59e0b; --font-title: 'Outfit', sans-serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      background-image: radial-gradient(circle at 10% 20%, rgba(139,92,246,0.08) 0%, transparent 40%);
+      color: var(--text); font-family: var(--font-body); line-height: 1.6; padding: 40px 24px 100px;
+    }
+    .container { max-width: 1200px; margin: 0 auto; }
+    h1 { font-family: var(--font-title); font-size: 2.8rem; font-weight: 800; margin-bottom: 8px; }
+    .subtitle { color: var(--muted); font-size: 1.1rem; margin-bottom: 32px; }
+    .phase-tabs { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+    .phase-tab { padding: 10px 20px; border-radius: 100px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: all 0.3s; background: transparent; color: var(--muted); }
+    .phase-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
+    .phase-tab:hover { border-color: var(--primary); }
+    .summary-bar { display: flex; gap: 24px; margin-bottom: 32px; flex-wrap: wrap; }
+    .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px 28px; flex: 1; min-width: 140px; text-align: center; }
+    .stat-card .num { font-family: var(--font-title); font-size: 2.2rem; font-weight: 800; }
+    .stat-card .label { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 4px; }
+    .module-group { background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 28px; margin-bottom: 24px; }
+    .module-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+    .module-header h2 { font-family: var(--font-title); font-size: 1.4rem; font-weight: 600; }
+    .module-progress { font-size: 0.85rem; color: var(--muted); }
+    .checklist { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+    .check-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 10px; background: rgba(0,0,0,0.2); transition: all 0.2s; cursor: pointer; }
+    .check-item:hover { background: rgba(139,92,246,0.08); }
+    .check-item.done { opacity: 0.6; }
+    .check-item.done .item-label { text-decoration: line-through; }
+    .check-item .cb { width: 22px; height: 22px; border-radius: 6px; border: 2px solid rgba(255,255,255,0.2); cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s; font-size: 0.7rem; }
+    .check-item .cb.checked { background: var(--green); border-color: var(--green); }
+    .item-label { flex: 1; font-size: 0.9rem; }
+    .item-phase { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; letter-spacing: 0.05em; }
+    .phase-preprod { background: rgba(59,130,246,0.2); color: #60a5fa; }
+    .phase-prod { background: rgba(245,158,11,0.2); color: #fbbf24; }
+    .phase-postprod { background: rgba(139,92,246,0.2); color: #a78bfa; }
+    .phase-gate { background: rgba(239,68,68,0.2); color: #f87171; }
+    .item-missing { font-size: 0.75rem; color: var(--red); font-weight: 600; }
+    .item-ok { font-size: 0.75rem; color: var(--green); font-weight: 600; }
+    .gate-banner { background: linear-gradient(135deg, rgba(239,68,68,0.15), rgba(245,158,11,0.15)); border: 2px solid var(--yellow); border-radius: 20px; padding: 28px; margin-bottom: 32px; text-align: center; }
+    .gate-banner.passed { border-color: var(--green); background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(59,130,246,0.15)); }
+    .gate-banner h3 { font-family: var(--font-title); font-size: 1.5rem; margin-bottom: 8px; }
+    .reset-btn { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: var(--muted); padding: 6px 16px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; }
+    .reset-btn:hover { background: rgba(239,68,68,0.2); border-color: var(--red); color: var(--red); }
+    @media (max-width: 600px) { h1 { font-size: 2rem; } .module-header { flex-direction: column; align-items: flex-start; } }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>🧪 Pre-Prod → Prod → Post-Prod Gate</h1>
+  <p class="subtitle">Sanity checklist — tick what's done. The gate opens when ALL pre-prod and prod items are complete.</p>
+
+  <div class="summary-bar" id="summaryBar"></div>
+
+  <div class="phase-tabs" id="phaseTabs">
+    <button class="phase-tab active" data-filter="all">All</button>
+    <button class="phase-tab" data-filter="preprod">📋 Pre-Production</button>
+    <button class="phase-tab" data-filter="prod">🎥 Production</button>
+    <button class="phase-tab" data-filter="postprod">🎬 Post-Production</button>
+  </div>
+
+  <div id="gateBanner" class="gate-banner">
+    <h3>🚧 Gate: Pre-Production → Post-Production</h3>
+    <p id="gateText">Complete all Pre-Production and Production items below to unlock post-production.</p>
+  </div>
+
+  <div id="modulesContainer"></div>
+
+  <p style="text-align:center;margin-top:40px;color:var(--muted);font-size:0.85rem;">
+    <button class="reset-btn" onclick="resetAll()">🗑 Reset All Progress</button>
+    &nbsp; Progress saved to browser localStorage.
+  </p>
+</div>
+
+<script>
+  // ===== CHECKLIST DATA =====
+  // Each item: { id, module, label, phase, gate (true=blocks post-prod), checkIfExists (file path to verify) }
+  const CHECKLIST = [
+    // ── PRE-PRODUCTION ──
+    { id: 'pp-m1-script', module: 1, label: 'Script written & approved (Module 1)', phase: 'preprod', gate: true },
+    { id: 'pp-m1-plan',   module: 1, label: 'Pre-production plan reviewed',       phase: 'preprod', gate: true },
+    { id: 'pp-m1-story',  module: 1, label: 'Storyboard / visual action plan',     phase: 'preprod', gate: true },
+    { id: 'pp-m1-audio',  module: 1, label: 'Microphone test & audio baseline',    phase: 'preprod', gate: true },
+    { id: 'pp-m1-env',    module: 1, label: 'Workspace distraction-free (fonts, tabs closed)', phase: 'preprod', gate: true },
+    { id: 'pp-m1-term',   module: 1, label: 'Terminal diagnostics run (npm build, npm start)', phase: 'preprod', gate: true },
+
+    { id: 'pp-m2-script', module: 2, label: 'Script written & approved (Module 2)', phase: 'preprod', gate: true },
+    { id: 'pp-m2-plan',   module: 2, label: 'Pre-production plan reviewed',          phase: 'preprod', gate: true },
+    { id: 'pp-m2-story',  module: 2, label: 'Storyboard / visual action plan',       phase: 'preprod', gate: true },
+
+    { id: 'pp-m3-script', module: 3, label: 'Script written & approved (Module 3)', phase: 'preprod', gate: true },
+    { id: 'pp-m3-plan',   module: 3, label: 'Pre-production plan reviewed',          phase: 'preprod', gate: true },
+    { id: 'pp-m3-story',  module: 3, label: 'Storyboard / visual action plan',       phase: 'preprod', gate: true },
+
+    { id: 'pp-m4-script', module: 4, label: 'Script written & approved (Module 4)', phase: 'preprod', gate: true },
+    { id: 'pp-m4-plan',   module: 4, label: 'Pre-production plan reviewed',          phase: 'preprod', gate: true },
+    { id: 'pp-m4-story',  module: 4, label: 'Storyboard / visual action plan',       phase: 'preprod', gate: true },
+
+    { id: 'pp-m5-script', module: 5, label: 'Script written & approved (Module 5)', phase: 'preprod', gate: true },
+    { id: 'pp-m5-plan',   module: 5, label: 'Pre-production plan reviewed',          phase: 'preprod', gate: true },
+    { id: 'pp-m5-story',  module: 5, label: 'Storyboard / visual action plan',       phase: 'preprod', gate: true },
+
+    // ── PRODUCTION ──
+    { id: 'p-m1-record',  module: 1, label: 'Screen recording captured (M1)',       phase: 'prod', gate: true },
+    { id: 'p-m1-assets',  module: 1, label: 'Background images generated (3 scenes)', phase: 'prod', gate: true },
+    { id: 'p-m1-overlays', module: 1, label: 'Lower thirds & overlay PNGs rendered',  phase: 'prod', gate: true },
+    { id: 'p-m1-icons',   module: 1, label: 'Icon sets created (shield, cloud, etc.)', phase: 'prod', gate: true },
+    { id: 'p-m1-audio',   module: 1, label: 'Voice-over audio recorded & exported',   phase: 'prod', gate: true },
+    { id: 'p-m1-bundles', module: 1, label: 'Scene asset ZIP bundles archived',       phase: 'prod', gate: true },
+
+    { id: 'p-m2-record',  module: 2, label: 'Screen recording captured (M2)',       phase: 'prod', gate: true },
+    { id: 'p-m2-assets',  module: 2, label: 'Background images generated',          phase: 'prod', gate: true },
+    { id: 'p-m2-overlays', module: 2, label: 'Lower thirds & overlay PNGs rendered', phase: 'prod', gate: true },
+    { id: 'p-m2-audio',   module: 2, label: 'Voice-over audio recorded & exported', phase: 'prod', gate: true },
+
+    { id: 'p-m3-record',  module: 3, label: 'Screen recording captured (M3)',       phase: 'prod', gate: true },
+    { id: 'p-m3-assets',  module: 3, label: 'Background images generated',          phase: 'prod', gate: true },
+    { id: 'p-m3-overlays', module: 3, label: 'Lower thirds & overlay PNGs rendered', phase: 'prod', gate: true },
+    { id: 'p-m3-audio',   module: 3, label: 'Voice-over audio recorded & exported', phase: 'prod', gate: true },
+
+    { id: 'p-m4-record',  module: 4, label: 'Screen recording captured (M4)',       phase: 'prod', gate: true },
+    { id: 'p-m4-assets',  module: 4, label: 'Background images generated',          phase: 'prod', gate: true },
+    { id: 'p-m4-overlays', module: 4, label: 'Lower thirds & overlay PNGs rendered', phase: 'prod', gate: true },
+    { id: 'p-m4-audio',   module: 4, label: 'Voice-over audio recorded & exported', phase: 'prod', gate: true },
+
+    { id: 'p-m5-record',  module: 5, label: 'Screen recording captured (M5)',       phase: 'prod', gate: true },
+    { id: 'p-m5-assets',  module: 5, label: 'Background images generated',          phase: 'prod', gate: true },
+    { id: 'p-m5-overlays', module: 5, label: 'Lower thirds & overlay PNGs rendered', phase: 'prod', gate: true },
+    { id: 'p-m5-audio',   module: 5, label: 'Voice-over audio recorded & exported', phase: 'prod', gate: true },
+
+    // ── POST-PRODUCTION (only Module 1 is ready) ──
+    { id: 'po-m1-edl',    module: 1, label: 'EDL entries created for all scenes',    phase: 'postprod', gate: false },
+    { id: 'po-m1-cues',   module: 1, label: 'Scene cues mapped (icon, label, prompt)', phase: 'postprod', gate: false },
+    { id: 'po-m1-shotlist', module: 1, label: 'Production shotlist compiled in Supabase', phase: 'postprod', gate: false },
+    { id: 'po-m1-audio-sync', module: 1, label: 'Audio track synced to scene timings', phase: 'postprod', gate: false },
+    { id: 'po-m1-render', module: 1, label: 'Composite preview verified (hover overlay)', phase: 'postprod', gate: false },
+    { id: 'po-m1-export', module: 1, label: 'Export review & final edit pass',        phase: 'postprod', gate: false },
+  ];
+
+  // ── LOCALSTORAGE HELPERS ──
+  function getProgress() {
+    try { return JSON.parse(localStorage.getItem('sanity_preprod_progress') || '{}'); } catch { return {}; }
+  }
+  function setProgress(id, val) {
+    const p = getProgress(); p[id] = val; localStorage.setItem('sanity_preprod_progress', JSON.stringify(p));
+  }
+  function resetAll() {
+    if (!confirm('Reset all sanity check progress?')) return;
+    localStorage.removeItem('sanity_preprod_progress');
+    render();
+  }
+
+  // ── RENDER ──
+  function render(filter = 'all') {
+    const progress = getProgress();
+    const container = document.getElementById('modulesContainer');
+    const summaryBar = document.getElementById('summaryBar');
+    const gateBanner = document.getElementById('gateBanner');
+    const gateText = document.getElementById('gateText');
+
+    container.innerHTML = '';
+    let total = 0, done = 0, gateTotal = 0, gateDone = 0;
+
+    const filtered = filter === 'all' ? CHECKLIST : CHECKLIST.filter(i => i.phase === filter);
+    const modules = [...new Set(filtered.map(i => i.module))].sort();
+
+    modules.forEach(mod => {
+      const items = filtered.filter(i => i.module === mod);
+      if (!items.length) return;
+      const modDone = items.filter(i => progress[i.id]).length;
+      total += items.length; done += modDone;
+      items.forEach(i => { if (i.gate) { gateTotal++; if (progress[i.id]) gateDone++; } });
+
+      const modDiv = document.createElement('div');
+      modDiv.className = 'module-group';
+      modDiv.innerHTML = `
+        <div class="module-header">
+          <h2>🎬 Module ${mod} ${['Claude Ecosystem & Flows','Model Context Protocol','Zero-Data Retention','Deterministic Routers','Financial Engineering'][mod-1] || ''}</h2>
+          <span class="module-progress">${modDone}/${items.length} complete</span>
+        </div>
+        <ul class="checklist">${items.map(item => {
+          const checked = progress[item.id] || false;
+          const phaseClass = `phase-${item.phase}`;
+          return `<li class="check-item ${checked ? 'done' : ''}" onclick="toggleItem('${item.id}')">
+            <span class="cb ${checked ? 'checked' : ''}">${checked ? '✓' : ''}</span>
+            <span class="item-label">${item.label}</span>
+            <span class="item-phase ${phaseClass}">${item.phase}${item.gate ? ' ⚠️' : ''}</span>
+          </li>`;
+        }).join('')}</ul>`;
+      container.appendChild(modDiv);
+    });
+
+    // Summary bar
+    summaryBar.innerHTML = `
+      <div class="stat-card"><div class="num" style="color:var(--primary)">${done}/${total}</div><div class="label">Items Complete</div></div>
+      <div class="stat-card"><div class="num" style="color:var(--yellow)">${gateDone}/${gateTotal}</div><div class="label">Gate Items Done</div></div>
+      <div class="stat-card"><div class="num" style="color:${gateDone === gateTotal && gateTotal > 0 ? 'var(--green)' : 'var(--red)'}">${gateDone === gateTotal && gateTotal > 0 ? '✅ OPEN' : '🔒 LOCKED'}</div><div class="label">Post-Prod Gate</div></div>
+    `;
+
+    // Gate banner
+    const allGateDone = gateDone === gateTotal && gateTotal > 0;
+    gateBanner.className = `gate-banner ${allGateDone ? 'passed' : ''}`;
+    gateBanner.querySelector('h3').innerHTML = allGateDone ? '✅ Gate: Pre-Prod → Post-Prod — OPEN' : '🚧 Gate: Pre-Production → Post-Production';
+    gateText.textContent = allGateDone
+      ? 'All pre-production and production items complete. You can proceed to post-production!'
+      : `Complete all ${gateTotal} gate items (${gateDone} done, ${gateTotal - gateDone} remaining) to unlock post-production.`;
+  }
+
+  function toggleItem(id) {
+    const p = getProgress();
+    p[id] = !p[id];
+    localStorage.setItem('sanity_preprod_progress', JSON.stringify(p));
+    const activeTab = document.querySelector('.phase-tab.active');
+    render(activeTab ? activeTab.dataset.filter : 'all');
+  }
+
+  // ── PHASE FILTER TABS ──
+  document.getElementById('phaseTabs').addEventListener('click', (e) => {
+    const tab = e.target.closest('.phase-tab');
+    if (!tab) return;
+    document.querySelectorAll('.phase-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    render(tab.dataset.filter);
+  });
+
+  // ── INIT ──
+  render('all');
+</script>
+</body>
+</html>
