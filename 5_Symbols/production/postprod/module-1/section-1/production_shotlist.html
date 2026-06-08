@@ -495,6 +495,7 @@
         </select>
       </div>
       <button class="btn-gdrive" id="btn-gdrive-login" onclick="gdriveLogin()">🔗 Google Drive</button>
+      <span id="conn-status" title="Supabase connection status" style="font-size:0.72rem; white-space:nowrap; color:var(--text-muted); align-self:flex-end; padding-bottom:16px; cursor:help;">⏳</span>
       <button class="btn-settings" onclick="openSettings()" title="Settings">⚙️</button>
     </div>
 
@@ -1145,21 +1146,64 @@
       renderScenes(scenes);
     }
 
+    // ⚡ Credential defaults — anon key and client ID are public-safe
+    const CRED_DEFAULTS = {
+      supabase_url: 'https://rmekfsdhglyiralxvkwc.supabase.co',
+      supabase_anon_key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZWtmc2RoZ2x5aXJhbHh2a3djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NzYzODgsImV4cCI6MjA5NjM1MjM4OH0.ay6HsmO_CbMGDXL_Dv4DT-paAIAOqlQPfmqqx_mexSU',
+      google_client_id: '327591678159-hq0cedjmjo9fgc9s6fiutrr4jlo3jhqp.apps.googleusercontent.com'
+    };
+
     // Page Entry point
     window.addEventListener('DOMContentLoaded', async () => {
-      const supabaseUrl = localStorage.getItem('supabase_url') || 'https://rmekfsdhglyiralxvkwc.supabase.co';
+      // Bootstrap: cookie → localStorage → hardcoded default, then persist to both
+      for (const [key, def] of Object.entries(CRED_DEFAULTS)) {
+        const resolved = getCookie(key) || localStorage.getItem(key) || def;
+        if (resolved) { localStorage.setItem(key, resolved); setCookie(key, resolved, 365); }
+      }
+
+      // Test Supabase connection and update indicator
+      await testSupabaseConnection();
+
+      const supabaseUrl = localStorage.getItem('supabase_url') || CRED_DEFAULTS.supabase_url;
       const supabaseKey = localStorage.getItem('supabase_anon_key') || '';
-      
+
       // Load and build selectors list
       await loadSelectors(supabaseUrl, supabaseKey);
-      
+
       // Re-trigger population on module selector change
       document.getElementById('module-select').onchange = () => onSelectionChange(true);
       document.getElementById('video-select').onchange = () => onSelectionChange(false);
-      
+
       // Load scenes data
       await loadDataAndRender();
     });
+
+    async function testSupabaseConnection() {
+      const url = localStorage.getItem('supabase_url') || CRED_DEFAULTS.supabase_url;
+      const key = localStorage.getItem('supabase_anon_key') || '';
+      const el = document.getElementById('conn-status');
+      if (!el) return;
+      if (!key) { el.textContent = '🔴 No key'; el.title = 'Supabase anon key not set — open ⚙️ Settings'; return; }
+      el.textContent = '⏳ Testing…';
+      try {
+        const res = await fetch(`${url}/rest/v1/scenes?select=id&limit=1`, {
+          headers: { 'apikey': key, 'Authorization': `Bearer ${key}` }
+        });
+        if (res.ok) {
+          el.textContent = '🟢 Supabase OK';
+          el.title = 'Connected — scenes table reachable';
+          el.style.color = '#10b981';
+        } else {
+          el.textContent = `🟡 ${res.status}`;
+          el.title = 'Response: ' + res.status + ' — check anon key in ⚙️ Settings';
+          el.style.color = '#f59e0b';
+        }
+      } catch (e) {
+        el.textContent = '🔴 Offline';
+        el.title = e.message;
+        el.style.color = '#ef4444';
+      }
+    }
 
     // 🔗 Google Drive URL helper — converts share links to embed URLs
     function toGDriveEmbedUrl(url) {
@@ -1533,11 +1577,11 @@
     function saveSettings() {
       const key = document.getElementById('settingsSupabaseKey').value.trim();
       const gClientId = document.getElementById('settingsGoogleClientId').value.trim();
-      if (key) localStorage.setItem('supabase_anon_key', key);
-      else localStorage.removeItem('supabase_anon_key');
-      if (gClientId) localStorage.setItem('google_client_id', gClientId);
-      else localStorage.removeItem('google_client_id');
+      if (key) { localStorage.setItem('supabase_anon_key', key); setCookie('supabase_anon_key', key, 365); }
+      else { localStorage.removeItem('supabase_anon_key'); setCookie('supabase_anon_key', '', -1); }
+      if (gClientId) { localStorage.setItem('google_client_id', gClientId); setCookie('google_client_id', gClientId, 365); }
+      else { localStorage.removeItem('google_client_id'); setCookie('google_client_id', '', -1); }
       closeSettings();
-      loadDataAndRender();
+      testSupabaseConnection().then(() => loadDataAndRender());
     }
   </script>
