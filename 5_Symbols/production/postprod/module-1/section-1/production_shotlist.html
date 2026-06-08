@@ -127,7 +127,7 @@
     /* 3-Column Review Layout */
     .review-grid {
       display: grid;
-      grid-template-columns: 1fr 1.2fr 0.8fr; /* Info, Media, EDL */
+      grid-template-columns: 1fr 1.2fr;
       gap: 32px;
       margin-bottom: 80px;
       background: var(--bg-card);
@@ -228,34 +228,6 @@
       z-index: 20;
     }
 
-    /* Column 3: EDL (Edit Design List) */
-    .edl-col {
-      background: rgba(0, 0, 0, 0.4);
-      border-radius: 24px;
-      padding: 32px;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-    }
-    .edl-header {
-      font-size: 1rem;
-      font-weight: 900;
-      color: #10b981; /* Emerald for EDL */
-      text-transform: uppercase;
-      letter-spacing: 0.2em;
-      margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .edl-box {
-      font-size: 0.95rem;
-      color: var(--text-muted);
-    }
-    .edl-step {
-      margin-bottom: 16px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    }
-    .edl-step b { color: white; display: block; margin-bottom: 4px; }
 
     /* Prompt & Copy Styles */
     .element-prompt {
@@ -962,21 +934,6 @@
           `;
         }).join('');
 
-        const edlHtml = s.edl.map(step => {
-          const colonIdx = step.indexOf(':');
-          let timing = '';
-          let desc = step;
-          if (colonIdx !== -1) {
-            timing = step.substring(0, colonIdx).trim();
-            desc = step.substring(colonIdx + 1).trim();
-          }
-          return `
-            <div class="edl-step">
-              <b>${timing}</b>
-              <span>${desc}</span>
-            </div>
-          `;
-        }).join('');
 
         const bgUrl = getAssetPath(s.bg, moduleKey, sectionKey);
         const ltImgUrl = getAssetPath(s.ltImg, moduleKey, sectionKey);
@@ -1029,12 +986,6 @@
               </div>
             </div>
 
-            <div class="edl-col">
-              <div class="edl-header">📜 Edit Design List (EDL)</div>
-              <div class="edl-box">
-                ${edlHtml}
-              </div>
-            </div>
           </div>
         `;
       }).join('');
