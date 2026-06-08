@@ -115,9 +115,12 @@ ALTER TABLE scenes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE scene_cues ENABLE ROW LEVEL SECURITY;
 ALTER TABLE edl_entries ENABLE ROW LEVEL SECURITY;
 
--- Public read
+-- Public read (idempotent — DROP before CREATE)
+DROP POLICY IF EXISTS anon_select_scenes ON scenes;
 CREATE POLICY anon_select_scenes ON scenes FOR SELECT USING (true);
+DROP POLICY IF EXISTS anon_select_scene_cues ON scene_cues;
 CREATE POLICY anon_select_scene_cues ON scene_cues FOR SELECT USING (true);
+DROP POLICY IF EXISTS anon_select_edl_entries ON edl_entries;
 CREATE POLICY anon_select_edl_entries ON edl_entries FOR SELECT USING (true);
 
 -- Public write (DROP first — CREATE POLICY has no IF NOT EXISTS in PostgreSQL)
