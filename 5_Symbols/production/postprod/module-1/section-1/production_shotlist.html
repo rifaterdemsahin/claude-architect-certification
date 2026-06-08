@@ -952,12 +952,15 @@
 
     // 🎬 Render interactive 3-column scenes layout
     function renderScenes(scenes) {
+      window._scenesData = scenes || [];
+      populateSceneSelector(scenes);
+      renderSceneTable(scenes);
       const container = document.getElementById('scenes-container');
       if (!scenes || scenes.length === 0) {
         container.innerHTML = `
           <div style="text-align: center; padding: 60px; background: var(--bg-card); border-radius: 24px; border: 1px dashed rgba(255,255,255,0.1);">
-            <p style="font-size: 1.5rem; color: var(--text-muted); margin-bottom: 20px;">🎬 No scene data found for Module ${moduleKey}, Section ${sectionKey}.</p>
-            <p style="color: var(--text-muted); margin-bottom: 24px;">Create a new shot with script, voice-over, background, lower thirds, cues, and EDL.</p>
+            <p style="font-size: 1.5rem; color: var(--text-muted); margin-bottom: 20px;">🎬 No scenes yet for Module ${moduleKey}, Section ${sectionKey}.</p>
+            <p style="color: var(--text-muted); margin-bottom: 24px;">Create your first shot — add script, voice-over, background, lower thirds, cues, and EDL.</p>
             <button class="create-scene-btn" onclick="openSceneForm()">🎬 Create New Scene</button>
           </div>
         `;
@@ -1055,6 +1058,12 @@
           </div>
         `;
       }).join('');
+
+      // "Add another scene" button at the bottom
+      const addBtn = document.createElement('div');
+      addBtn.style.cssText = 'text-align:center;margin-top:32px;';
+      addBtn.innerHTML = '<button class="create-scene-btn" onclick="openSceneForm()">➕ Add Another Scene</button>';
+      document.getElementById('scenes-container').appendChild(addBtn);
     }
 
     // 📡 Fetch module details & scenes from database, or fallback
@@ -1442,23 +1451,6 @@
       const dbId = document.getElementById('editSceneId').value;
       const sceneNum = document.getElementById('fSceneNumber').value;
       if (dbId) await deleteSceneById(parseInt(dbId), sceneNum);
-    }
-
-    // Store scenes in window for editing
-    const origRenderScenes = renderScenes;
-    function renderScenes(scenes) {
-      window._scenesData = scenes;
-      origRenderScenes(scenes);
-      populateSceneSelector(scenes);
-      renderSceneTable(scenes);
-      // Add a "Create New Scene" button at the bottom
-      const container = document.getElementById('scenes-container');
-      if (scenes && scenes.length > 0) {
-        const btnDiv = document.createElement('div');
-        btnDiv.style.cssText = 'text-align:center;margin-top:32px;';
-        btnDiv.innerHTML = '<button class="create-scene-btn" onclick="openSceneForm()">➕ Add Another Scene</button>';
-        container.appendChild(btnDiv);
-      }
     }
 
     // ========== Scene Selector & Table ==========
