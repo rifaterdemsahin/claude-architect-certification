@@ -840,9 +840,10 @@
       return match ? decodeURIComponent(match[2]) : null;
     }
 
-    // 🛠️ Local relative asset path helper
+    // 🛠️ Local relative asset path helper (Drive URLs handled inline — no wrapper)
     function getAssetPath(rawPath, moduleNum, sectionNum) {
       if (!rawPath) return '';
+      if (rawPath.includes('drive.google.com')) return toGDriveEmbedUrl(rawPath);
       if (rawPath.startsWith('http://') || rawPath.startsWith('https://') || rawPath.startsWith('/')) {
         return rawPath;
       }
@@ -1285,13 +1286,6 @@
       return url;
     }
 
-    // Update getAssetPath to handle Google Drive URLs
-    const origGetAssetPath = getAssetPath;
-    function getAssetPath(rawPath, moduleNum, sectionNum) {
-      if (!rawPath) return '';
-      if (rawPath.includes('drive.google.com')) return toGDriveEmbedUrl(rawPath);
-      return origGetAssetPath(rawPath, moduleNum, sectionNum);
-    }
 
     // 🎬 Scene CRUD — Form open/close
     function openSceneForm(sceneDbId) {
