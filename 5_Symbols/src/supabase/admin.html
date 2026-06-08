@@ -57,6 +57,21 @@
     </div>
 
     <div class="card">
+      <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.4rem; margin-bottom: 16px;">📡 Axiom Log Ingestion</h2>
+      <label for="axiom-token">Axiom API Token</label>
+      <input id="axiom-token" type="text" placeholder="Paste your Axiom API Token (xaat-...)" value="xaat-f6066074-4199-42eb-b4c0-1417bb6a3473">
+      <label for="axiom-org">Organization ID</label>
+      <input id="axiom-org" type="text" placeholder="e.g. rifaterdemsahin-stks" value="rifaterdemsahin-stks">
+      <label for="axiom-dataset">Dataset</label>
+      <input id="axiom-dataset" type="text" placeholder="e.g. videoproduction" value="videoproduction">
+      <label for="axiom-url">API URL Base</label>
+      <input id="axiom-url" type="url" placeholder="https://api.axiom.co or https://api.eu.axiom.co" value="https://api.eu.axiom.co">
+      <button class="btn btn-primary" id="btn-save-axiom" onclick="saveAxiomConfig()">Save Axiom Config</button>
+      <button class="btn btn-danger" id="btn-test-error" onclick="triggerTestError()" style="margin-left:12px;">💥 Send Test Error</button>
+      <span id="axiom-status" style="margin-left:12px;font-size:0.85rem;"></span>
+    </div>
+
+    <div class="card">
       <button class="btn btn-success" id="btn-seed" onclick="seedAll()" disabled>🌱 Seed All Data</button>
       <button class="btn btn-danger" id="btn-clear" onclick="clearAll()" style="margin-left:12px;" disabled>🗑️ Clear All Data</button>
     </div>
@@ -82,12 +97,47 @@
       getAnonKey();
       log('Config saved to localStorage.', 'ok');
     }
+
+    function saveAxiomConfig() {
+      const token = document.getElementById('axiom-token').value.trim();
+      const org = document.getElementById('axiom-org').value.trim();
+      const dataset = document.getElementById('axiom-dataset').value.trim();
+      const url = document.getElementById('axiom-url').value.trim();
+
+      localStorage.setItem('axiom_token', token);
+      localStorage.setItem('axiom_org_id', org);
+      localStorage.setItem('axiom_dataset', dataset);
+      localStorage.setItem('axiom_api_url', url);
+
+      const status = document.getElementById('axiom-status');
+      status.textContent = '✅ Saved!';
+      status.style.color = 'var(--success)';
+      setTimeout(() => { status.textContent = ''; }, 2000);
+      log('Axiom configuration saved to localStorage.', 'ok');
+    }
+
+    function triggerTestError() {
+      log('Triggering intentional client-side test error to verify Axiom...', 'info');
+      setTimeout(() => {
+        throw new Error('Intentional UI client-side error to test Axiom logs transmission');
+      }, 50);
+    }
+
     // Restore saved values
     document.addEventListener('DOMContentLoaded', () => {
       const savedUrl = localStorage.getItem('supabase_url');
       const savedKey = localStorage.getItem('supabase_anon_key');
       if (savedUrl) document.getElementById('supabase-url').value = savedUrl;
       if (savedKey) document.getElementById('supabase-key').value = savedKey;
+
+      const savedToken = localStorage.getItem('axiom_token');
+      const savedOrg = localStorage.getItem('axiom_org_id');
+      const savedDataset = localStorage.getItem('axiom_dataset');
+      const savedAxiomUrl = localStorage.getItem('axiom_api_url');
+      if (savedToken) document.getElementById('axiom-token').value = savedToken;
+      if (savedOrg) document.getElementById('axiom-org').value = savedOrg;
+      if (savedDataset) document.getElementById('axiom-dataset').value = savedDataset;
+      if (savedAxiomUrl) document.getElementById('axiom-url').value = savedAxiomUrl;
     });
 
     function log(msg, cls = 'info') {

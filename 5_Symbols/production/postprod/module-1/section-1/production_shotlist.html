@@ -899,10 +899,17 @@
       }
     }
 
-    // Parse URL Search Parameters
+    // Parse URL Search Parameters — normalize 0 or negative to 1 (sections/modules start at 1)
     const params = new URLSearchParams(window.location.search);
     let moduleKey = params.get('module') || getCookie('last_module') || '1';
     let sectionKey = params.get('section') || getCookie('last_section') || '1';
+    if (parseInt(moduleKey) < 1) moduleKey = '1';
+    if (parseInt(sectionKey) < 1) sectionKey = '1';
+    // Rewrite URL silently if it had invalid params (no reload)
+    if (params.get('section') !== sectionKey || params.get('module') !== moduleKey) {
+      const corrected = new URLSearchParams({ module: moduleKey, section: sectionKey });
+      history.replaceState(null, '', '?' + corrected.toString());
+    }
 
     let videosDataGlobal = VIDEOS_FALLBACK;
 

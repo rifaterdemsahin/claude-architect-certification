@@ -11,9 +11,46 @@
     return new Date().toISOString().split('T')[1].split('.')[0];
   }
 
+  async function reportToAxiom(msg, stage = 'UI-Client') {
+    const token = localStorage.getItem('axiom_token') || 'xaat-f6066074-4199-42eb-b4c0-1417bb6a3473';
+    const orgId = localStorage.getItem('axiom_org_id') || 'rifaterdemsahin-stks';
+    const dataset = localStorage.getItem('axiom_dataset') || 'videoproduction';
+    const apiUrl = localStorage.getItem('axiom_api_url') || 'https://api.eu.axiom.co';
+
+    if (!token || !orgId || !dataset) return;
+
+    try {
+      const payload = [{
+        timestamp: new Date().toISOString(),
+        stage: stage,
+        severity: 'ERROR',
+        message: msg,
+        url: window.location.href,
+        userAgent: navigator.userAgent
+      }];
+
+      _fetch(`${apiUrl}/v1/datasets/${dataset}/ingest`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'X-Axiom-Org-Id': orgId
+        },
+        body: JSON.stringify(payload)
+      }).catch(err => {
+        console.warn('Axiom background reporting failed:', err);
+      });
+    } catch (e) {
+      // prevent recursion
+    }
+  }
+
   function push(type, msg) {
     LOG.push({ type, msg, time: ts() });
     render();
+    if (type === 'error') {
+      reportToAxiom(msg);
+    }
   }
 
   // ── Intercept console.error ──────────────────────────────────────────────
