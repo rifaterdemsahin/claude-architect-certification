@@ -50,18 +50,24 @@ TABLE_COUNT="${#TABLES[@]}"
 # ──────────────────────────────────────────────
 get_row_count_api() {
   local table="$1"
-  local response
-  response=$(curl -s -o /dev/null -w "%{http_code} %header{content-range}" \
-    -X GET \
+  # %header{} requires curl 7.84+; macOS ships 8.x so this is safe
+  local output
+  output=$(curl -s -o /dev/null \
+    -w "%{http_code} %header{content-range}" \
     -H "apikey: $SUPABASE_KEY" \
     -H "Authorization: Bearer $SUPABASE_KEY" \
     -H "Prefer: count=exact" \
     "${SUPABASE_URL}/rest/v1/${table}?select=*&limit=0" 2>/dev/null) || true
 
-  # content-range header: "0-0/42"  or "*/<n>"
-  local range
-  range=$(echo "$response" | grep -oE '[0-9]+$' | tail -1)
-  echo "${range:-?}"
+  local http_code="${output%% *}"
+  if [ "$http_code" = "404" ]; then
+    echo "not created"
+    return
+  fi
+  # content-range format: */N or 0-N/N
+  local count
+  count=$(echo "$output" | grep -oE '[0-9]+$' | tail -1)
+  echo "${count:-?}"
 }
 
 # ──────────────────────────────────────────────
