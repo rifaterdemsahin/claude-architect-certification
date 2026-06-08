@@ -46,8 +46,15 @@ EOF
 )
 
 API_URL=${AXIOM_API_URL:-https://api.axiom.co}
-echo "📡 Sending error to Axiom (dataset: $DATASET via $API_URL)..."
-RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "$API_URL/v1/datasets/$DATASET/ingest" \
+
+if [[ "$API_URL" == *".edge.axiom.co"* ]]; then
+  INGEST_URL="$API_URL/v1/ingest/$DATASET"
+else
+  INGEST_URL="$API_URL/v1/datasets/$DATASET/ingest"
+fi
+
+echo "📡 Sending error to Axiom (dataset: $DATASET via $INGEST_URL)..."
+RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "$INGEST_URL" \
   -H "Authorization: Bearer $AXIOM_TOKEN" \
   -H "Content-Type: application/json" \
   -H "X-Axiom-Org-Id: $AXIOM_ORG_ID" \

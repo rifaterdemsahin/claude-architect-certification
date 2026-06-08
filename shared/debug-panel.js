@@ -15,7 +15,7 @@
     const token = localStorage.getItem('axiom_token') || 'xaat-dcee4b59-5c6e-4ae4-9574-136f5986e84c';
     const orgId = localStorage.getItem('axiom_org_id') || 'rifaterdemsahin-stks';
     const dataset = localStorage.getItem('axiom_dataset') || 'videoproduction';
-    const apiUrl = localStorage.getItem('axiom_api_url') || 'https://api.eu.axiom.co';
+    const apiUrl = localStorage.getItem('axiom_api_url') || 'https://eu-central-1.aws.edge.axiom.co';
 
     if (!token || !orgId || !dataset) return;
 
@@ -29,7 +29,11 @@
         userAgent: navigator.userAgent
       }];
 
-      _fetch(`${apiUrl}/v1/datasets/${dataset}/ingest`, {
+      const ingestUrl = apiUrl.includes('.edge.axiom.co')
+        ? `${apiUrl}/v1/ingest/${dataset}`
+        : `${apiUrl}/v1/datasets/${dataset}/ingest`;
+
+      _fetch(ingestUrl, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
