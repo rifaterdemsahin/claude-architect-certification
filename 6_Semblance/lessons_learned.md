@@ -190,3 +190,22 @@
 
 ### Takeaway for Future AI Agents
 - Persisting UI presentation states (like collapsed sections or theme toggles) in `localStorage` provides a premium, customized user experience with zero backend overhead.
+
+## 📅 2026-06-08: Dynamic Selection, Layout Restructuring & Supabase Scene Mapping
+
+### What went well
+- Dynamically mapped scenes, cues, and EDL data to Supabase database, rendering all information interactively.
+- Implemented dropdown select panels at the top of the container with responsive, modern CSS design and glassmorphic styling.
+- Formulated correct local asset paths prepending `../../module-M/section-S/assets/` dynamically so that the single master post-production page is fully reusable for all modules and videos.
+- Restructured layout flow so Selector Panel is at the top, followed by the Audio player, followed by the Scene planning grids, conforming to "Selection -> Audio -> Scene list" flow.
+- Updated database seeds (`seed.sql` and `admin.html`) to include Module 2 Section 1 scenes.
+- Ran the links validator test suite with a 100% clean check (0 broken links).
+
+### Gaps & Challenges
+- Mid-task, the master file `post_production_master.html` was renamed to `production_shotlist.html` by workspace automation. Using the redirect file, the active file was identified and successfully updated without losing progress.
+- Syncing database seeds across both SQL and browser-based admins requires updating multiple codebases, emphasizing the need for robust canonical seed data.
+
+### Takeaway for Future AI Agents
+- Always check the git log or file list at the start of a follow-up task to see if refactoring, renames, or file movements occurred.
+- When mapping resources dynamically for multiple paths (e.g. Module 1 vs Module 2 assets), use a path resolver utility that abstracts folder depth.
+
