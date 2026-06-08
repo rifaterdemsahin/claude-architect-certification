@@ -13,20 +13,38 @@
 
 The `scenes` table has a **unique constraint** on `(module_number, section_number, scene_number)`. When creating a new scene, the form was always defaulting `scene_number` to `1`, causing a conflict with the first scene that already exists.
 
-## ✅ Fix Applied
+## ⚠️ First Fix (Incomplete)
 
-`openSceneForm()` now auto-calculates the next available scene number from the loaded scene data:
+`openSceneForm()` auto-calculated from `window._scenesData`:
 
 ```javascript
 const existingNums = (window._scenesData || []).map(s => s.id || 0);
 const nextNum = existingNums.length > 0 ? Math.max(...existingNums) + 1 : 1;
-document.getElementById('fSceneNumber').value = String(nextNum);
 ```
 
-This means:
-- 0 existing scenes → scene number defaults to `1`
-- 3 existing scenes (1, 2, 3) → next scene defaults to `4`
-- User can still change the number manually before saving
+**Still failed** when `_scenesData` was empty (e.g. `?section=0` URL param, fallback data, or load error) — would always default to `1`, colliding with any existing scene.
+
+## ✅ Final Fix — Query DB Before INSERT
+
+`saveSceneForm()` now queries Supabase for the real max `scene_number` right before any INSERT:
+
+```javascript
+if (!sceneDbId) {
+  const maxRes = await fetchWithTimeout(
+    `${supabaseUrl}/rest/v1/scenes?module_number=eq.${moduleNum}&section_number=eq.${sectionNum}&select=scene_number&order=scene_number.desc&limit=1`,
+    { headers }
+  );
+  if (maxRes.ok) {
+    const maxData = await maxRes.json();
+    if (maxData.length > 0) {
+      sceneNumber = maxData[0].scene_number + 1;
+      document.getElementById('fSceneNumber').value = sceneNumber;
+    }
+  }
+}
+```
+
+This is **DB-authoritative** — always gets the real max, regardless of what's loaded in memory.
 
 ## 🛠 Also: Add `ref_doc_url` column to Supabase
 
@@ -45,5 +63,7 @@ Without this, saving a scene with a reference doc URL will fail with a column-no
 | Date | Status |
 |---|---|
 | 2026-06-09 | 🔴 `23505` duplicate key on scene_number=1 |
-| 2026-06-09 | 🛠 Fixed: auto-increment scene number from `max(existing) + 1` |
-| 2026-06-09 | ➕ `ref_doc_url` column needed — run ALTER TABLE above |
+| 2026-06-09 | 🛠 First fix: auto-increment from `window._scenesData` — still failed when data empty |
+| 2026-06-09 | 🔴 Still failing — `_scenesData` empty on `?section=0` URL / fallback path |
+| 2026-06-09 | ✅ Final fix: query DB for real max before INSERT — DB-authoritative, no race |
+| 2026-06-09 | ➕ `ref_doc_url` column added via ALTER TABLE |

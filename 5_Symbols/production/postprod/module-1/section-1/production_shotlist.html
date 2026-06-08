@@ -1413,9 +1413,28 @@
       if (!supabaseKey) { alert('Supabase anon key not found. Set it in localStorage: supabase_anon_key'); return; }
 
       const sceneDbId = document.getElementById('editSceneId').value;
-      const sceneNumber = parseInt(document.getElementById('fSceneNumber').value) || 1;
+      let sceneNumber = parseInt(document.getElementById('fSceneNumber').value) || 1;
       const moduleNum = parseInt(document.getElementById('module-select').value) || 1;
       const sectionNum = parseInt(document.getElementById('video-select').value) || 1;
+      const headers = { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
+
+      // For new scenes: query DB for real max scene_number to avoid duplicate key 23505
+      if (!sceneDbId) {
+        try {
+          const maxRes = await fetchWithTimeout(
+            `${supabaseUrl}/rest/v1/scenes?module_number=eq.${moduleNum}&section_number=eq.${sectionNum}&select=scene_number&order=scene_number.desc&limit=1`,
+            { headers }
+          );
+          if (maxRes.ok) {
+            const maxData = await maxRes.json();
+            if (Array.isArray(maxData) && maxData.length > 0) {
+              sceneNumber = maxData[0].scene_number + 1;
+              document.getElementById('fSceneNumber').value = sceneNumber;
+              if (window.dbg) window.dbg(`Auto scene number → ${sceneNumber} (max in DB was ${maxData[0].scene_number})`);
+            }
+          }
+        } catch (_) {}
+      }
 
       const sceneBody = {
         module_number: moduleNum,
@@ -1432,8 +1451,6 @@
         overlay_text: document.getElementById('fOverlayText').value,
         ref_doc_url: document.getElementById('fRefDocUrl').value
       };
-
-      const headers = { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
 
       try {
         let sceneResult;
