@@ -37,3 +37,4 @@ Severity levels: `CRITICAL` | `ERROR` | `WARNING` | `INFO`
 | 2026-06-07 | 4_Formula | MEDIUM — Stale references to `5_Symbols/docs/` and `4_Formula/vscode_extensions.md` in README.md, antigravity.md, 1_Real_Unknown/2_problem_statement.md, and 4_Formula/tools/markdown_preview_auto.md after refactor moved files into 4_Formula |
 [2026-06-08] [5_Symbols/sanity_checklist.html] [HIGH] 🔴 Drag-and-drop sort order not persisted — Supabase updateSortOrder() silently swallows errors; Promise.all resolves even when .update().eq() returns {error}; RLS UPDATE policy may also be missing on checklist_items
 [2026-06-08] 🔴 [6_Semblance] [HIGH] — Google OAuth 401 invalid_client: Authorized JavaScript origins empty on client productionhelper (327591678159-hq0cedjmjo9fgc9s6fiutrr4jlo3jhqp)
+[2026-06-08] ⚠️ [6_Semblance] [MEDIUM] — Google OAuth consent screen: "App not verified" warning shown; app in Testing mode, sensitive scope drive.readonly requires bypass via Advanced → Go to app
