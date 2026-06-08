@@ -487,6 +487,54 @@
       .videos-grid { grid-template-columns: 1fr; }
       .hero-stats { gap: 1.5rem; }
     }
+
+    /* ── Progress bar ─────────────────────────────────────── */
+    .progress-bar-wrap {
+      width: 100%; max-width: 480px;
+      margin: 1.25rem auto 0;
+      background: rgba(255,255,255,0.07);
+      border-radius: 100px; height: 6px; overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%; border-radius: 100px;
+      background: linear-gradient(90deg, var(--accent-violet), var(--accent-cyan));
+      transition: width 0.7s cubic-bezier(0.4,0,0.2,1);
+      width: 0%;
+    }
+
+    /* ── Video status buttons ──────────────────────────────── */
+    .video-status {
+      display: flex; gap: 0.45rem;
+      margin-top: 0.75rem; padding-top: 0.6rem;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .status-btn {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      padding: 3px 10px; border-radius: 6px;
+      font-size: 0.72rem; font-weight: 600;
+      cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.04);
+      color: var(--text-muted);
+      transition: var(--transition);
+      user-select: none; white-space: nowrap;
+    }
+    .status-btn:hover { background: rgba(255,255,255,0.09); color: var(--text-primary); }
+    .status-btn.active-inprogress {
+      background: rgba(245,158,11,0.14);
+      border-color: rgba(245,158,11,0.45);
+      color: #f59e0b;
+    }
+    .status-btn.active-done {
+      background: rgba(16,185,129,0.14);
+      border-color: rgba(16,185,129,0.45);
+      color: var(--accent-green);
+    }
+    .video-card.status-done        { border-color: rgba(16,185,129,0.3);  background: rgba(16,185,129,0.05); }
+    .video-card.status-in_progress { border-color: rgba(245,158,11,0.25); background: rgba(245,158,11,0.04); }
+
+    @keyframes savepulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    .saving { animation: savepulse 0.8s ease-in-out infinite; }
   </style>
   <script src="shared/nav.js" defer></script>
 </head>
@@ -498,9 +546,11 @@
     <p class="hero-subtitle">From AI prototyping to production-grade enterprise deployment — master secure architecture, MCP, ZDR, deterministic routers, and prompt caching.</p>
     <div class="hero-stats">
       <div class="stat-item"><div class="stat-number">5</div><div class="stat-label">Modules</div></div>
-      <div class="stat-item"><div class="stat-number">15</div><div class="stat-label">Videos</div></div>
+      <div class="stat-item"><div class="stat-number" id="totalVideosStat">15</div><div class="stat-label">Videos</div></div>
       <div class="stat-item"><div class="stat-number">90%</div><div class="stat-label">Cost Reduction</div></div>
+      <div class="stat-item"><div class="stat-number" id="completionPct">0%</div><div class="stat-label">Complete</div></div>
     </div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBarFill"></div></div>
   </section>
 
   <div class="content-wrapper">
@@ -530,19 +580,83 @@
 
     const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
+    // ── Progress state (keyed by course_videos.id) ─────────
+    const progressMap = {};   // { [videoId]: 'done' | 'in_progress' | null }
+    let   totalVideoCount = 0;
+
+    // ── Update the hero stat + progress bar ────────────────
+    function updateProgressDisplay() {
+      const done = Object.values(progressMap).filter(s => s === 'done').length;
+      const pct  = totalVideoCount > 0 ? Math.round((done / totalVideoCount) * 100) : 0;
+      const statEl = document.getElementById('completionPct');
+      const barEl  = document.getElementById('progressBarFill');
+      if (statEl) statEl.textContent = pct + '%';
+      if (barEl)  barEl.style.width  = pct + '%';
+    }
+
+    // ── Apply status classes & button states to a card ─────
+    function applyCardStatus(card, status) {
+      card.classList.remove('status-done', 'status-in_progress');
+      if (status) card.classList.add('status-' + status);
+      card.querySelectorAll('.status-btn').forEach(btn => {
+        btn.classList.remove('active-done', 'active-inprogress');
+        if (btn.dataset.target === status) {
+          btn.classList.add(status === 'done' ? 'active-done' : 'active-inprogress');
+        }
+      });
+    }
+
+    // ── Handle checkbox click ──────────────────────────────
+    async function toggleStatus(videoId, newStatus, btn) {
+      const card = document.getElementById('vc-' + videoId);
+      if (!card) return;
+
+      const current   = progressMap[videoId] || null;
+      const finalStatus = current === newStatus ? null : newStatus; // toggle off if same
+
+      // Optimistic UI update
+      progressMap[videoId] = finalStatus;
+      applyCardStatus(card, finalStatus);
+      updateProgressDisplay();
+
+      // Persist to Supabase
+      btn.classList.add('saving');
+      try {
+        if (finalStatus) {
+          const { error } = await client.from('course_video_progress').upsert(
+            { video_id: videoId, user_id: 'default', status: finalStatus, updated_at: new Date().toISOString() },
+            { onConflict: 'video_id,user_id' }
+          );
+          if (error) throw error;
+        } else {
+          const { error } = await client.from('course_video_progress')
+            .delete().eq('video_id', videoId).eq('user_id', 'default');
+          if (error) throw error;
+        }
+      } catch (err) {
+        console.error('Progress save failed:', err);
+      } finally {
+        btn.classList.remove('saving');
+      }
+    }
+
+    // ── Load course + progress ─────────────────────────────
     async function loadCourse() {
       const container = document.getElementById('courseContent');
       try {
-        // Fetch modules+videos, module OKRs, and video topics in parallel
-        const [modulesRes, okrRes, topicsRes] = await Promise.all([
+        const [modulesRes, okrRes, topicsRes, progressRes] = await Promise.all([
           client.from('course_modules').select('*, course_videos(*)').order('sort_order', { ascending: true }),
           client.from('outline').select('*').eq('video_number', 0).in('content_type', ['objective', 'key_result']).order('sort_order', { ascending: true }),
-          client.from('outline').select('*').neq('video_number', 0).eq('content_type', 'topic').order('module_number').order('video_number').order('sort_order')
+          client.from('outline').select('*').neq('video_number', 0).eq('content_type', 'topic').order('module_number').order('video_number').order('sort_order'),
+          client.from('course_video_progress').select('*').eq('user_id', 'default')
         ]);
 
         if (modulesRes.error) throw modulesRes.error;
         const modules = modulesRes.data;
         if (!modules || modules.length === 0) throw new Error('No course data found. Run seed.sql first.');
+
+        // Build progress lookup (ignore errors — table may not exist yet)
+        (progressRes.data || []).forEach(row => { progressMap[row.video_id] = row.status; });
 
         // Group OKRs by module_number
         const okrMap = {};
@@ -552,7 +666,7 @@
           if (row.content_type === 'key_result') okrMap[row.module_number].keyResults.push(row.content);
         });
 
-        // Group topics from outline by module_number + video_number (outline → course_videos)
+        // Group topics by module_number + video_number
         const topicMap = {};
         (topicsRes.data || []).forEach(row => {
           const key = `${row.module_number}.${row.video_number}`;
@@ -560,19 +674,27 @@
           topicMap[key].push(row.content);
         });
 
-        // Sort videos within each module and attach OKRs + outline topics
+        // Sort videos, attach OKRs, topics, and progress status
+        totalVideoCount = 0;
         modules.forEach(m => {
           m.course_videos = (m.course_videos || []).sort((a, b) => a.sort_order - b.sort_order);
           m.okr = okrMap[m.module_number] || null;
           m.course_videos.forEach(v => {
             v.topics = topicMap[`${m.module_number}.${v.video_number}`] || [];
+            v.status = progressMap[v.id] || null;
+            totalVideoCount++;
           });
         });
+
+        // Update dynamic stats
+        const totalStat = document.getElementById('totalVideosStat');
+        if (totalStat) totalStat.textContent = totalVideoCount;
+        updateProgressDisplay();
 
         container.innerHTML = modules.map((mod, idx) => renderModule(mod, idx)).join('');
         document.getElementById('examCta').style.display = 'block';
 
-        // Auto-expand module from URL param ?module=N (1-indexed)
+        // Auto-expand module from URL param ?module=N
         const urlModule = parseInt(new URLSearchParams(location.search).get('module'), 10);
         const cards = container.querySelectorAll('.module-card');
         const targetIdx = urlModule >= 1 && urlModule <= cards.length ? urlModule - 1 : 0;
@@ -583,9 +705,7 @@
 
         // Toggle expand/collapse
         container.querySelectorAll('.module-header').forEach(header => {
-          header.addEventListener('click', () => {
-            header.closest('.module-card').classList.toggle('expanded');
-          });
+          header.addEventListener('click', () => header.closest('.module-card').classList.toggle('expanded'));
         });
 
       } catch (err) {
@@ -603,7 +723,7 @@
     }
 
     function renderModule(mod, idx) {
-      const videos  = (mod.course_videos || []).map(v => renderVideo(v)).join('');
+      const videos  = (mod.course_videos || []).map(v => renderVideo(v, mod.module_number)).join('');
       const links   = (mod.links || []).map(l =>
         `<a href="${l.url}" class="module-link-tag" target="_blank"><i class="fa-solid fa-link fa-xs"></i>${l.label}</a>`
       ).join('');
@@ -643,21 +763,34 @@
         </div>`;
     }
 
-    function renderVideo(v) {
-      const bullets = (v.bullets || []).map(b => `<li>${b}</li>`).join('');
-      const topics  = (v.topics  || []).map(t => `<li>${t}</li>`).join('');
+    function renderVideo(v, moduleNumber) {
+      const bullets  = (v.bullets || []).map(b => `<li>${b}</li>`).join('');
+      const topics   = (v.topics  || []).map(t => `<li>${t}</li>`).join('');
+      const status   = v.status || null;
+      const statusClass = status ? 'status-' + status : '';
+
       const topicsHtml = topics
         ? `<div class="video-topics">
              <div class="topics-label">📋 Topics</div>
              <ul class="video-topics-list">${topics}</ul>
            </div>`
         : '';
+
+      const ipActive   = status === 'in_progress' ? ' active-inprogress' : '';
+      const doneActive = status === 'done'        ? ' active-done'       : '';
+
       return `
-        <div class="video-card">
+        <div class="video-card ${statusClass}" id="vc-${v.id}" data-video-id="${v.id}">
           <div class="video-label">Video ${v.video_number}</div>
           <div class="video-title">${v.title}</div>
           <ul class="video-bullets">${bullets}</ul>
           ${topicsHtml}
+          <div class="video-status">
+            <button class="status-btn${ipActive}" data-target="in_progress"
+              onclick="toggleStatus(${v.id},'in_progress',this)">⏳ In Progress</button>
+            <button class="status-btn${doneActive}" data-target="done"
+              onclick="toggleStatus(${v.id},'done',this)">✅ Done</button>
+          </div>
         </div>`;
     }
 
