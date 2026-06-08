@@ -1059,8 +1059,10 @@
         return `
           <div class="review-grid" style="position:relative;">
             <div class="scene-edit-btn">
-              <button onclick="openSceneForm(${s.dbId})" title="Edit scene">✏️ Edit</button>
-              <button onclick="deleteSceneById(${s.dbId}, ${s.id})" title="Delete scene" style="border-color:#ef4444;color:#ef4444;">🗑</button>
+              ${s.dbId ? `
+                <button onclick="openSceneForm(${s.dbId})" title="Edit scene">✏️ Edit</button>
+                <button onclick="deleteSceneById(${s.dbId}, ${s.id})" title="Delete scene" style="border-color:#ef4444;color:#ef4444;">🗑</button>
+              ` : '<span style="opacity:0.4;font-size:0.7rem;padding:6px 10px;">📋 local</span>'}
             </div>
             <div class="script-col">
               <div class="script-text clickable" onclick="openModal(this.innerHTML, 'Script Track', true)">
@@ -1493,10 +1495,14 @@
 
     // 🗑 Delete scene
     async function deleteSceneById(dbId, sceneNum) {
+      if (!dbId || isNaN(parseInt(dbId))) {
+        alert('Cannot delete: this scene is local fallback data with no database ID.\nCreate a real scene via "Save to Supabase" first.');
+        return;
+      }
       const supabaseUrl = localStorage.getItem('supabase_url') || 'https://rmekfsdhglyiralxvkwc.supabase.co';
       const supabaseKey = localStorage.getItem('supabase_anon_key') || '';
       if (!supabaseKey) { alert('Supabase anon key not found.'); return; }
-      if (!confirm(`Delete Scene ${sceneNum}? This will also remove all cues and EDL entries.`)) return;
+      if (!confirm(`Delete Scene ${sceneNum}?`)) return;
 
       try {
         const res = await fetch(`${supabaseUrl}/rest/v1/scenes?id=eq.${dbId}`, {
@@ -1557,7 +1563,7 @@
           <td class="cell-script" title="${raw.replace(/"/g, '&quot;')}">${preview}</td>
           <td class="cell-status">${hasBg} BG</td>
           <td class="cell-status">${hasAudio} VO</td>
-          <td><button onclick="event.stopPropagation();openSceneForm(${s.dbId})" style="background:rgba(139,92,246,0.15);color:#a78bfa;border:1px solid rgba(139,92,246,0.35);padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.72rem;font-weight:800;">✏️ Edit</button></td>
+          <td>${s.dbId ? `<button onclick="event.stopPropagation();openSceneForm(${s.dbId})" style="background:rgba(139,92,246,0.15);color:#a78bfa;border:1px solid rgba(139,92,246,0.35);padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.72rem;font-weight:800;">✏️ Edit</button>` : '<span style="opacity:0.35;font-size:0.7rem;">📋 local</span>'}</td>
         </tr>`;
       }).join('');
     }
