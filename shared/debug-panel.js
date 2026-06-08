@@ -12,7 +12,7 @@
   }
 
   async function reportToAxiom(msg, stage = 'UI-Client') {
-    const token = localStorage.getItem('axiom_token') || 'xaat-f6066074-4199-42eb-b4c0-1417bb6a3473';
+    const token = localStorage.getItem('axiom_token') || 'xaat-dcee4b59-5c6e-4ae4-9574-136f5986e84c';
     const orgId = localStorage.getItem('axiom_org_id') || 'rifaterdemsahin-stks';
     const dataset = localStorage.getItem('axiom_dataset') || 'videoproduction';
     const apiUrl = localStorage.getItem('axiom_api_url') || 'https://api.eu.axiom.co';
