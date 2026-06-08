@@ -94,6 +94,7 @@
       border-radius: 20px;
       padding: 28px;
       margin-bottom: 24px;
+      transition: padding 0.25s ease;
     }
     .phase-header {
       display: flex;
@@ -102,10 +103,38 @@
       margin-bottom: 20px;
       padding-bottom: 16px;
       border-bottom: 1px solid rgba(255,255,255,0.06);
+      cursor: pointer;
+      user-select: none;
+      transition: opacity 0.2s;
+    }
+    .phase-header:hover {
+      opacity: 0.85;
     }
     .phase-icon { font-size: 1.6rem; }
     .phase-title { font-family: var(--font-title); font-size: 1.3rem; font-weight: 700; }
     .phase-subtitle { color: var(--text-muted); font-size: 0.85rem; margin-left: auto; }
+    .phase-caret {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-left: 12px;
+      transition: transform 0.25s ease;
+    }
+    .phase-card.collapsed {
+      padding-bottom: 16px;
+    }
+    .phase-card.collapsed .phase-header {
+      margin-bottom: 0;
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+    .phase-card.collapsed .phase-caret {
+      transform: rotate(-90deg);
+    }
+    .phase-card.collapsed .checklist,
+    .phase-card.collapsed .add-item-row {
+      display: none;
+    }
+
 
     /* Checklist items */
     .checklist { list-style: none; }
@@ -740,12 +769,15 @@
       }).join('');
 
       const phaseSlug = phase.replace(/\s+/g, '-').toLowerCase();
+      const isCollapsed = localStorage.getItem(`collapsed-${phaseSlug}`) === 'true';
+      const collapsedClass = isCollapsed ? ' collapsed' : '';
       return `
-        <div class="phase-card" data-phase="${phase}">
-          <div class="phase-header">
+        <div class="phase-card${collapsedClass}" data-phase="${phase}" data-phase-slug="${phaseSlug}">
+          <div class="phase-header" onclick="togglePhaseCollapse('${phaseSlug}')">
             <span class="phase-icon">${meta.icon}</span>
             <span class="phase-title">${phase}</span>
             <span class="phase-subtitle">${items.length} items</span>
+            <span class="phase-caret">▼</span>
           </div>
           <ul class="checklist" id="list-${phaseSlug}">${rows}</ul>
           <div class="add-item-row">
@@ -759,6 +791,14 @@
           </div>
         </div>`;
     }
+
+    function togglePhaseCollapse(phaseSlug) {
+      const card = document.querySelector(`[data-phase-slug="${phaseSlug}"]`);
+      if (!card) return;
+      const isCollapsed = card.classList.toggle('collapsed');
+      localStorage.setItem(`collapsed-${phaseSlug}`, isCollapsed);
+    }
+
 
     // ── Bootstrap ────────────────────────────────────────────────────────────
     async function load() {

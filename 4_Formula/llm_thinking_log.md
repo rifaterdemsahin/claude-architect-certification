@@ -136,3 +136,27 @@ The user requested to remove the `5_Symbols/sql/` directory and consolidate all 
 4. **Update References:** Update all occurrences of references to old SQL paths in HTML dashboards, shell scripts, and documentation files.
 5. **Execution & Verification:** Verify snapshot generation and database consistency.
 
+---
+
+## Date: 2026-06-08
+## Stage: Stage 4 (Formula - Thinking & Planning) - Collapsible Checklist Phases
+
+### Problem Statement
+The user requested that the production, pre-production, and post-production phases on the Master Sanity Checklist page (`5_Symbols/sanity_checklist.html`) be made collapsible.
+
+### Approach & Strategy
+1. **Identify Target File:** `5_Symbols/sanity_checklist.html`.
+2. **Implement Collapse Styling:**
+   - Add `.phase-card.collapsed` styles to transition a caret icon (`transform: rotate(-90deg)`) and hide children elements (`.checklist`, `.add-item-row`) with `display: none`.
+   - Style `.phase-header` with `cursor: pointer` and smooth hover states to make it clear that the entire header is interactive.
+   - Adjust card spacing and borders when collapsed so it shrinks neatly.
+3. **Enhance Logic & Interaction:**
+   - Add a caret indicator (`▼`) to each phase header.
+   - Add a click event handler `togglePhaseCollapse(phaseSlug)` to toggle the `collapsed` class on the `.phase-card`.
+   - Store the collapsed state in `localStorage` for each phase slug (e.g., `collapsed-${phaseSlug}`) to persist layout preferences across refreshes.
+   - On page load (`load()` function), retrieve the saved collapse state for each phase from `localStorage` and apply the `collapsed` class if true.
+4. **Execution & Verification:**
+   - Modify the markup and styles inside `5_Symbols/sanity_checklist.html`.
+   - Test expanding and collapsing, and check if states persist after a browser reload.
+   - Make a git commit and push the changes.
+

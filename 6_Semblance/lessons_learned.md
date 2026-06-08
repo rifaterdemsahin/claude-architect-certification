@@ -177,4 +177,16 @@
 ### Takeaway for Future AI Agents
 - When updating Project Menu structure, ensure you update the JSON config file, the fallback arrays, and the shared navbar JS scripts simultaneously.
 
+## 📅 2026-06-08: Collapsible Checklist Phases
 
+### What went well
+- Implemented fully collapsible phase cards on the Master Sanity Checklist dashboard (`5_Symbols/sanity_checklist.html`).
+- Added cursor pointer and hover opacity to phase headers to indicate interactivity, and styled caret rotate transitions.
+- Integrated `localStorage` persistence for collapse states (keyed by phase-slugs) to remember the user's view preferences across page refreshes.
+- Verified that all links remain fully intact and tests pass.
+
+### Gaps & Challenges
+- Drag-and-drop sortable lists must function correctly even if the checklist is initially collapsed (`display: none`). Sortable.js handles this natively, so no special initialization delay was required.
+
+### Takeaway for Future AI Agents
+- Persisting UI presentation states (like collapsed sections or theme toggles) in `localStorage` provides a premium, customized user experience with zero backend overhead.

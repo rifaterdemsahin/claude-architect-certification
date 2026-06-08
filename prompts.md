@@ -161,3 +161,12 @@ Record every prompt given to AI agents below. Include the date, agent, and purpo
 **Agent:** Gemini 3.5 Flash (Medium)  
 **Purpose:** Move all SQL schemas and seeds from `5_Symbols/sql/` to `5_Symbols/src/supabase/`, merging them into single consolidated files (`schema.sql` and `seed.sql`), deleting obsolete files, and updating all workspace references.  
 **Output:** Updated `5_Symbols/src/supabase/schema.sql`, created `5_Symbols/src/supabase/seed.sql`, deleted old files/directories, and updated references in HTML dashboard pages, scripts, and docs.
+
+---
+
+## 2026-06-08 — Collapsible Checklist Phases
+
+**Agent:** Gemini 3.5 Flash (Medium)  
+**Purpose:** Implement collapsible sections for each phase card on the Master Sanity Checklist dashboard page, with caret rotate animation and localStorage collapse state persistence.  
+**Output:** Updated `5_Symbols/sanity_checklist.html`, `4_Formula/llm_thinking_log.md`, and `6_Semblance/lessons_learned.md`.
+
