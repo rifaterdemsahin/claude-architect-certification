@@ -664,23 +664,13 @@
             <button class="btn-upload-drive" onclick="triggerUpload('fOverlayText')" title="Upload local file to Google Drive">⬆️ Upload</button>
           </div>
         </div>
-        <div class="form-group">
-          <label>Bundle ZIP URL <span style="color:var(--text-muted);font-weight:400;font-size:0.7rem;">(Google Drive)</span></label>
+        <div class="form-group full-width">
+          <label>📄 Reference Doc URL <span style="color:var(--text-muted);font-weight:400;font-size:0.7rem;">(Google Slides, Doc, or any reference link)</span></label>
           <div class="input-with-picker">
-            <input type="text" id="fBundle" placeholder="https://drive.google.com/file/d/... or assets/archives/scene1.zip">
-            <button class="btn-pick-drive" onclick="openGDrivePicker('fBundle')" title="Pick from Google Drive">📁 Drive</button>
-            <button class="btn-upload-drive" onclick="triggerUpload('fBundle')" title="Upload local file to Google Drive">⬆️ Upload</button>
+            <input type="text" id="fRefDocUrl" placeholder="https://docs.google.com/presentation/d/... or drive.google.com/file/d/...">
+            <button class="btn-pick-drive" onclick="openGDrivePicker('fRefDocUrl')" title="Pick from Google Drive">📁 Drive</button>
+            <button class="btn-upload-drive" onclick="triggerUpload('fRefDocUrl')" title="Upload to Google Drive">⬆️ Upload</button>
           </div>
-        </div>
-
-        <div class="form-group full-width">
-          <label>🎯 On-Screen Cues <button class="btn-add-row" onclick="addCueRow()">+ Add Cue</button></label>
-          <div id="cuesContainer"></div>
-        </div>
-
-        <div class="form-group full-width">
-          <label>📜 EDL Entries <button class="btn-add-row" onclick="addEdlRow()">+ Add EDL</button></label>
-          <div id="edlContainer"></div>
         </div>
       </div>
       <div class="form-actions">
@@ -1197,7 +1187,7 @@
                 ltSub: s.lt_sub || '',
                 overlayLt: s.overlay_lt,
                 overlayText: s.overlay_text,
-                bundle: s.bundle_url,
+                refDocUrl: s.ref_doc_url || '',
                 audioUrl: s.audio_url || '',
                 cues: cues.map(c => ({ icon: c.icon, label: c.label, prompt: c.prompt || '' })),
                 edl: edl.map(e => `${e.timing}: ${e.description}`)
@@ -1345,8 +1335,10 @@
       document.getElementById('sceneFormTitle').textContent = sceneDbId ? '✏️ Edit Scene' : '🎬 Create New Scene';
       document.getElementById('btnDeleteScene').style.display = sceneDbId ? 'inline-block' : 'none';
 
-      // Reset form
-      document.getElementById('fSceneNumber').value = '1';
+      // Reset form — auto-increment scene number to avoid duplicate key errors
+      const existingNums = (window._scenesData || []).map(s => s.id || 0);
+      const nextNum = existingNums.length > 0 ? Math.max(...existingNums) + 1 : 1;
+      document.getElementById('fSceneNumber').value = String(nextNum);
       document.getElementById('fTiming').value = '';
       document.getElementById('fScript').value = '';
       document.getElementById('fBg').value = '';
@@ -1356,9 +1348,7 @@
       document.getElementById('fLtSub').value = '';
       document.getElementById('fOverlayLt').value = '';
       document.getElementById('fOverlayText').value = '';
-      document.getElementById('fBundle').value = '';
-      document.getElementById('cuesContainer').innerHTML = '';
-      document.getElementById('edlContainer').innerHTML = '';
+      document.getElementById('fRefDocUrl').value = '';
       document.getElementById('fTimingHint').textContent = '';
       document.getElementById('fScriptHint').textContent = '';
       document.getElementById('loadScriptPicker').style.display = 'none';
@@ -1370,6 +1360,7 @@
           document.getElementById('fSceneNumber').value = scene.id;
           document.getElementById('fTiming').value = scene.timing || '';
           document.getElementById('fScript').value = scene.script || '';
+          autoEstimateTiming(scene.script || '');
           document.getElementById('fBg').value = scene.bg || '';
           document.getElementById('fAudioUrl').value = scene.audioUrl || '';
           document.getElementById('fLtImg').value = scene.ltImg || '';
@@ -1377,14 +1368,7 @@
           document.getElementById('fLtSub').value = scene.ltSub || '';
           document.getElementById('fOverlayLt').value = scene.overlayLt || '';
           document.getElementById('fOverlayText').value = scene.overlayText || '';
-          document.getElementById('fBundle').value = scene.bundle || '';
-
-          if (scene.cues) scene.cues.forEach(c => addCueRow(c.icon, c.label, c.prompt));
-          if (scene.edl) scene.edl.forEach(e => {
-            const colonIdx = e.indexOf(':');
-            if (colonIdx !== -1) addEdlRow(e.substring(0, colonIdx).trim(), e.substring(colonIdx + 1).trim());
-            else addEdlRow('', e);
-          });
+          document.getElementById('fRefDocUrl').value = scene.refDocUrl || '';
         }
       }
 
@@ -1433,26 +1417,6 @@
       const moduleNum = parseInt(document.getElementById('module-select').value) || 1;
       const sectionNum = parseInt(document.getElementById('video-select').value) || 1;
 
-      // Collect cues
-      const cueInputs = document.getElementById('cuesContainer').querySelectorAll('.array-field');
-      const cues = [];
-      cueInputs.forEach((el, idx) => {
-        const inputs = el.querySelectorAll('input');
-        if (inputs.length >= 3) {
-          cues.push({ icon: inputs[0].value, label: inputs[1].value, prompt: inputs[2].value, sort_order: idx });
-        }
-      });
-
-      // Collect EDL
-      const edlInputs = document.getElementById('edlContainer').querySelectorAll('.array-field');
-      const edlEntries = [];
-      edlInputs.forEach((el, idx) => {
-        const inputs = el.querySelectorAll('input');
-        if (inputs.length >= 2) {
-          edlEntries.push({ timing: inputs[0].value, description: inputs[1].value, sort_order: idx });
-        }
-      });
-
       const sceneBody = {
         module_number: moduleNum,
         section_number: sectionNum,
@@ -1466,7 +1430,7 @@
         lt_sub: document.getElementById('fLtSub').value,
         overlay_lt: document.getElementById('fOverlayLt').value,
         overlay_text: document.getElementById('fOverlayText').value,
-        bundle_url: document.getElementById('fBundle').value
+        ref_doc_url: document.getElementById('fRefDocUrl').value
       };
 
       const headers = { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
@@ -1493,32 +1457,6 @@
 
         const savedScene = Array.isArray(sceneResult) ? sceneResult[0] : sceneResult;
         const newSceneId = savedScene.id;
-
-        // Replace cues: delete all, re-insert
-        if (sceneDbId) {
-          await fetch(`${supabaseUrl}/rest/v1/scene_cues?scene_id=eq.${newSceneId}`, {
-            method: 'DELETE', headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` }
-          });
-          await fetch(`${supabaseUrl}/rest/v1/edl_entries?scene_id=eq.${newSceneId}`, {
-            method: 'DELETE', headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` }
-          });
-        }
-
-        // Insert cues
-        for (const cue of cues) {
-          await fetch(`${supabaseUrl}/rest/v1/scene_cues`, {
-            method: 'POST', headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ scene_id: newSceneId, icon: cue.icon, label: cue.label, prompt: cue.prompt, sort_order: cue.sort_order })
-          });
-        }
-
-        // Insert EDL entries
-        for (const edl of edlEntries) {
-          await fetch(`${supabaseUrl}/rest/v1/edl_entries`, {
-            method: 'POST', headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ scene_id: newSceneId, timing: edl.timing, description: edl.description, sort_order: edl.sort_order })
-          });
-        }
 
         closeSceneForm();
         await loadDataAndRender();
@@ -1744,7 +1682,7 @@
       fLtImg:       'lt_image',
       fOverlayLt:   'overlay_lt',
       fOverlayText: 'overlay_text',
-      fBundle:      'bundle_url'
+      fRefDocUrl:   'ref_doc_url'
     };
 
     function triggerUpload(targetInputId) {
