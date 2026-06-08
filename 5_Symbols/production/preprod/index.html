@@ -36,10 +36,9 @@
     h1 { font-family: var(--font-title); font-size: 2.4rem; font-weight: 800; margin-bottom: 10px; }
     header p { color: var(--text-muted); max-width: 600px; margin: 0 auto; }
 
-    .section-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 40px; }
     .card {
       background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px;
-      padding: 28px; transition: all 0.3s; text-decoration: none; color: inherit;
+      padding: 28px; transition: all 0.3s; text-decoration: none; color: inherit; display: block;
     }
     .card:hover { border-color: var(--accent); transform: translateY(-4px); box-shadow: 0 16px 32px rgba(0,0,0,0.3); }
     .card-icon { font-size: 2rem; margin-bottom: 12px; }
@@ -70,131 +69,96 @@
 
     /* Supabase Course Outline Styles */
     .db-status {
-      font-size: 0.75rem;
-      font-weight: 600;
-      padding: 4px 10px;
-      border-radius: 100px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+      font-size: 0.75rem; font-weight: 600; padding: 4px 10px; border-radius: 100px;
+      text-transform: uppercase; letter-spacing: 0.05em;
     }
-    .db-status.loading {
-      background: rgba(245, 158, 11, 0.1);
-      border: 1px solid rgba(245, 158, 11, 0.2);
-      color: var(--accent);
+    .db-status.loading { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.2); color: var(--accent); }
+    .db-status.live { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2); color: #10b981; }
+    .db-status.fallback { background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); color: var(--secondary); }
+    .outline-status { text-align: center; padding: 40px; color: var(--text-muted); font-size: 0.95rem; }
+    .outline-module { margin-bottom: 30px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: 16px; padding: 24px; }
+    .outline-module:hover { border-color: rgba(139,92,246,0.2); background: rgba(255,255,255,0.03); }
+    .outline-module-header { margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 12px; }
+    .outline-module-title { font-family: var(--font-title); font-size: 1.25rem; font-weight: 700; color: white; display: flex; align-items: center; gap: 8px; }
+    .outline-module-desc { color: var(--text-muted); font-size: 0.85rem; margin-top: 4px; }
+    .outline-objectives { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .objective-tag { background: rgba(139,92,246,0.08); border: 1px solid rgba(139,92,246,0.15); color: #c084fc; font-size: 0.75rem; padding: 3px 8px; border-radius: 6px; }
+    .outline-videos { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
+    .outline-video-card { background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.03); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 8px; transition: all 0.2s; }
+    .outline-video-card:hover { border-color: rgba(59,130,246,0.2); background: rgba(59,130,246,0.03); }
+    .outline-video-meta { display: flex; justify-content: space-between; align-items: center; }
+    .outline-video-title { font-weight: 600; font-size: 0.95rem; color: #e5e7eb; }
+    .outline-video-duration { font-size: 0.75rem; color: var(--text-muted); background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px; font-family: monospace; }
+    .outline-video-cues { display: flex; flex-direction: column; gap: 4px; margin-top: 4px; border-left: 2px solid rgba(245,158,11,0.3); padding-left: 10px; }
+    .cue-item { font-size: 0.8rem; color: var(--text-muted); }
+
+    /* ── Steps Container ── */
+    .steps-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 16px;
     }
-    .db-status.live {
-      background: rgba(16, 185, 129, 0.1);
-      border: 1px solid rgba(16, 185, 129, 0.2);
-      color: #10b981;
+    .steps-header h2 { font-family: var(--font-title); font-size: 1.15rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.07em; }
+    .steps-container { display: flex; flex-direction: column; margin-bottom: 40px; }
+    .step-item { position: relative; }
+    .step-number {
+      position: absolute; top: 12px; left: 12px; z-index: 1;
+      font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--text-muted); background: rgba(0,0,0,0.55); padding: 2px 8px; border-radius: 4px;
+      pointer-events: none;
     }
-    .db-status.fallback {
-      background: rgba(59, 130, 246, 0.1);
-      border: 1px solid rgba(59, 130, 246, 0.2);
-      color: var(--secondary);
+    .step-delete-btn {
+      position: absolute; top: 10px; right: 10px; z-index: 2;
+      background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.18);
+      color: #f87171; border-radius: 6px; padding: 3px 10px;
+      font-size: 0.7rem; font-weight: 600; cursor: pointer; transition: all 0.2s;
     }
-    
-    .outline-status {
-      text-align: center;
-      padding: 40px;
-      color: var(--text-muted);
-      font-size: 0.95rem;
+    .step-delete-btn:hover { background: rgba(239,68,68,0.22); border-color: #f87171; }
+
+    /* Step divider (the line + plus button row) */
+    .step-divider { display: flex; flex-direction: column; padding: 5px 0; }
+    .step-divider-line { display: flex; align-items: center; gap: 10px; }
+    .divider-line { flex: 1; height: 1px; background: rgba(255,255,255,0.05); }
+    .add-step-btn {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: rgba(139,92,246,0.07); border: 1px dashed rgba(139,92,246,0.25);
+      color: var(--primary); font-size: 1rem; line-height: 1; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s; flex-shrink: 0; padding: 0;
+    }
+    .add-step-btn:hover {
+      background: rgba(139,92,246,0.2); border-style: solid; border-color: var(--primary);
+      transform: scale(1.15); box-shadow: 0 0 8px rgba(139,92,246,0.25);
     }
 
-    .outline-module {
-      margin-bottom: 30px;
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid rgba(255, 255, 255, 0.04);
-      border-radius: 16px;
-      padding: 24px;
+    /* Inline add-step form */
+    .add-step-form {
+      background: rgba(139,92,246,0.04); border: 1px solid rgba(139,92,246,0.18);
+      border-radius: 14px; padding: 16px; margin-top: 6px;
+      flex-direction: column; gap: 10px; /* toggled via display:flex */
     }
-    .outline-module:hover {
-      border-color: rgba(139, 92, 246, 0.2);
-      background: rgba(255, 255, 255, 0.03);
+    .add-step-form-row { display: flex; gap: 10px; }
+    .step-emoji-input { width: 72px; flex-shrink: 0; text-align: center; }
+    .step-input {
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px; padding: 8px 12px; color: var(--text-main);
+      font-size: 0.88rem; font-family: var(--font-body); width: 100%; transition: border-color 0.2s;
     }
-    .outline-module-header {
-      margin-bottom: 16px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-      padding-bottom: 12px;
+    .step-input:focus { outline: none; border-color: var(--primary); }
+    .step-input::placeholder { color: rgba(156,163,175,0.5); }
+    .add-step-actions { display: flex; gap: 8px; }
+    .step-confirm-btn {
+      background: var(--primary); color: white; border: none;
+      padding: 8px 18px; border-radius: 8px; font-weight: 700;
+      font-size: 0.85rem; cursor: pointer; font-family: var(--font-body); transition: opacity 0.2s;
     }
-    .outline-module-title {
-      font-family: var(--font-title);
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: white;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+    .step-confirm-btn:hover { opacity: 0.85; }
+    .step-cancel-btn {
+      background: transparent; color: var(--text-muted);
+      border: 1px solid rgba(255,255,255,0.1); padding: 8px 18px;
+      border-radius: 8px; font-weight: 600; font-size: 0.85rem;
+      cursor: pointer; font-family: var(--font-body); transition: all 0.2s;
     }
-    .outline-module-desc {
-      color: var(--text-muted);
-      font-size: 0.85rem;
-      margin-top: 4px;
-    }
-    .outline-objectives {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 10px;
-    }
-    .objective-tag {
-      background: rgba(139, 92, 246, 0.08);
-      border: 1px solid rgba(139, 92, 246, 0.15);
-      color: #c084fc;
-      font-size: 0.75rem;
-      padding: 3px 8px;
-      border-radius: 6px;
-    }
-    
-    .outline-videos {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-top: 16px;
-    }
-    .outline-video-card {
-      background: rgba(0, 0, 0, 0.2);
-      border: 1px solid rgba(255, 255, 255, 0.03);
-      border-radius: 10px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      transition: all 0.2s;
-    }
-    .outline-video-card:hover {
-      border-color: rgba(59, 130, 246, 0.2);
-      background: rgba(59, 130, 246, 0.03);
-    }
-    .outline-video-meta {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .outline-video-title {
-      font-weight: 600;
-      font-size: 0.95rem;
-      color: #e5e7eb;
-    }
-    .outline-video-duration {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      background: rgba(255, 255, 255, 0.05);
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-family: monospace;
-    }
-    .outline-video-cues {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      margin-top: 4px;
-      border-left: 2px solid rgba(245, 158, 11, 0.3);
-      padding-left: 10px;
-    }
-    .cue-item {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-    }
+    .step-cancel-btn:hover { border-color: rgba(255,255,255,0.25); color: var(--text-main); }
   </style>
   <script src="../../../shared/nav.js"></script>
 </head>
@@ -207,43 +171,148 @@
       <p>Planning, scripts, storyboards, and asset prompts. Everything that happens before recording starts.</p>
     </header>
 
-    <div class="section-grid">
-      <a class="card" href="../../markdown_viewer.html?md=docs/certification/course_outline.md">
-        <div class="card-icon">📋</div>
-        <div class="card-title">Course Outline</div>
-        <div class="card-desc">Full course outline — 5 modules × 3 videos each with scripts, cues, and durations</div>
-        <div class="card-meta"><span>📄 Markdown</span><span>🎯 Outline</span></div>
-      </a>
-      <a class="card" href="scripts/index.html">
-        <div class="card-icon">🎭</div>
-        <div class="card-title">Master Script</div>
-        <div class="card-desc">Course-wide script viewer with video breakdowns, timing cues, and resource links</div>
-        <div class="card-meta"><span>🌐 HTML</span><span>📝 JSON-Driven</span></div>
-      </a>
-      <a class="card" href="edit_scripts.html">
-        <div class="card-icon">✏️</div>
-        <div class="card-title">Script Editor</div>
-        <div class="card-desc">Interactive script editor with full Supabase DB sync, character counters, and OKR panels</div>
-        <div class="card-meta"><span>🌐 HTML</span><span>📝 DB Editor</span></div>
-      </a>
-      <a class="card" href="../../markdown_viewer.html?md=production/preprod/module_1_plan.md">
-        <div class="card-icon">📄</div>
-        <div class="card-title">Module 1 Plan</div>
-        <div class="card-desc">Introduction & Systems Engineering — scripts, scenes, and overlays</div>
-        <div class="card-meta"><span>📄 Markdown</span><span>🏗️ Plan</span></div>
-      </a>
-      <a class="card" href="../../markdown_viewer.html?md=docs/certification/production_plan.md">
-        <div class="card-icon">📋</div>
-        <div class="card-title">Master Production Plan</div>
-        <div class="card-desc">Full certification course outline across all 5 modules</div>
-        <div class="card-meta"><span>📄 Markdown</span><span>🏗️ Master</span></div>
-      </a>
-      <a class="card" href="../../production/postprod/module-1/section-1/demo_script.html">
-        <div class="card-icon">🎭</div>
-        <div class="card-title">Module 1 Script</div>
-        <div class="card-desc">Final speaker script with timing cues and emphasis markers</div>
-        <div class="card-meta"><span>🌐 HTML</span><span>📝 Script</span></div>
-      </a>
+    <div class="steps-header">
+      <h2>Workflow Steps</h2>
+    </div>
+
+    <div class="steps-container" id="steps-container">
+
+      <!-- Divider: insert before step 1 -->
+      <div class="step-divider">
+        <div class="step-divider-line">
+          <div class="divider-line"></div>
+          <button class="add-step-btn" title="Insert step here" onclick="toggleAddForm(this)">+</button>
+          <div class="divider-line"></div>
+        </div>
+      </div>
+
+      <!-- Step 1 -->
+      <div class="step-item" data-step-id="course-outline" data-builtin="true">
+        <a class="card" href="../../markdown_viewer.html?md=docs/certification/course_outline.md">
+          <div class="card-icon">📋</div>
+          <div class="card-title">Course Outline</div>
+          <div class="card-desc">Full course outline — 5 modules × 3 videos each with scripts, cues, and durations</div>
+          <div class="card-meta"><span>📄 Markdown</span><span>🎯 Outline</span></div>
+        </a>
+      </div>
+
+      <div class="step-divider">
+        <div class="step-divider-line">
+          <div class="divider-line"></div>
+          <button class="add-step-btn" title="Insert step here" onclick="toggleAddForm(this)">+</button>
+          <div class="divider-line"></div>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step-item" data-step-id="master-script" data-builtin="true">
+        <a class="card" href="scripts/index.html">
+          <div class="card-icon">🎭</div>
+          <div class="card-title">Master Script</div>
+          <div class="card-desc">Course-wide script viewer with video breakdowns, timing cues, and resource links</div>
+          <div class="card-meta"><span>🌐 HTML</span><span>📝 JSON-Driven</span></div>
+        </a>
+      </div>
+
+      <div class="step-divider">
+        <div class="step-divider-line">
+          <div class="divider-line"></div>
+          <button class="add-step-btn" title="Insert step here" onclick="toggleAddForm(this)">+</button>
+          <div class="divider-line"></div>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step-item" data-step-id="script-editor" data-builtin="true">
+        <a class="card" href="edit_scripts.html">
+          <div class="card-icon">✏️</div>
+          <div class="card-title">Script Editor</div>
+          <div class="card-desc">Interactive script editor with full Supabase DB sync, character counters, and OKR panels</div>
+          <div class="card-meta"><span>🌐 HTML</span><span>📝 DB Editor</span></div>
+        </a>
+      </div>
+
+      <div class="step-divider">
+        <div class="step-divider-line">
+          <div class="divider-line"></div>
+          <button class="add-step-btn" title="Insert step here" onclick="toggleAddForm(this)">+</button>
+          <div class="divider-line"></div>
+        </div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="step-item" data-step-id="module-1-plan" data-builtin="true">
+        <a class="card" href="../../markdown_viewer.html?md=production/preprod/module_1_plan.md">
+          <div class="card-icon">📄</div>
+          <div class="card-title">Module 1 Plan</div>
+          <div class="card-desc">Introduction &amp; Systems Engineering — scripts, scenes, and overlays</div>
+          <div class="card-meta"><span>📄 Markdown</span><span>🏗️ Plan</span></div>
+        </a>
+      </div>
+
+      <div class="step-divider">
+        <div class="step-divider-line">
+          <div class="divider-line"></div>
+          <button class="add-step-btn" title="Insert step here" onclick="toggleAddForm(this)">+</button>
+          <div class="divider-line"></div>
+        </div>
+      </div>
+
+      <!-- Step 5 -->
+      <div class="step-item" data-step-id="production-plan" data-builtin="true">
+        <a class="card" href="../../markdown_viewer.html?md=docs/certification/production_plan.md">
+          <div class="card-icon">📋</div>
+          <div class="card-title">Master Production Plan</div>
+          <div class="card-desc">Full certification course outline across all 5 modules</div>
+          <div class="card-meta"><span>📄 Markdown</span><span>🏗️ Master</span></div>
+        </a>
+      </div>
+
+      <div class="step-divider">
+        <div class="step-divider-line">
+          <div class="divider-line"></div>
+          <button class="add-step-btn" title="Insert step here" onclick="toggleAddForm(this)">+</button>
+          <div class="divider-line"></div>
+        </div>
+      </div>
+
+      <!-- Step 6 -->
+      <div class="step-item" data-step-id="module-1-script" data-builtin="true">
+        <a class="card" href="../../production/postprod/module-1/section-1/demo_script.html">
+          <div class="card-icon">🎭</div>
+          <div class="card-title">Module 1 Script</div>
+          <div class="card-desc">Final speaker script with timing cues and emphasis markers</div>
+          <div class="card-meta"><span>🌐 HTML</span><span>📝 Script</span></div>
+        </a>
+      </div>
+
+      <div class="step-divider">
+        <div class="step-divider-line">
+          <div class="divider-line"></div>
+          <button class="add-step-btn" title="Insert step here" onclick="toggleAddForm(this)">+</button>
+          <div class="divider-line"></div>
+        </div>
+      </div>
+
+      <!-- Step 7: Sanity Checklist (new) -->
+      <div class="step-item" data-step-id="sanity-checklist" data-builtin="true">
+        <a class="card" href="../../sanity_checklist.html">
+          <div class="card-icon">✅</div>
+          <div class="card-title">Sanity Checklist</div>
+          <div class="card-desc">Pre-flight validation checks — confirm everything is in order before going live</div>
+          <div class="card-meta"><span>🌐 HTML</span><span>✅ Checklist</span></div>
+        </a>
+      </div>
+
+      <!-- Final divider: append after last step -->
+      <div class="step-divider">
+        <div class="step-divider-line">
+          <div class="divider-line"></div>
+          <button class="add-step-btn" title="Insert step here" onclick="toggleAddForm(this)">+</button>
+          <div class="divider-line"></div>
+        </div>
+      </div>
+
     </div>
 
     <!-- Course Outline Section -->
@@ -288,6 +357,11 @@
         <div class="file-info"><div class="file-name">Master Production Plan</div><div class="file-path">docs/certification/production_plan.md</div></div>
         <a class="file-action" href="../../markdown_viewer.html?md=docs/certification/production_plan.md">Open</a>
       </div>
+      <div class="file-row">
+        <span class="file-icon">✅</span>
+        <div class="file-info"><div class="file-name">Sanity Checklist</div><div class="file-path">5_Symbols/sanity_checklist.html</div></div>
+        <a class="file-action" href="../../sanity_checklist.html">Open</a>
+      </div>
     </div>
 
     <footer>
@@ -303,19 +377,198 @@
       </div>
     </footer>
   </div>
+
+  <!-- Template for the add-step inline form (cloned on demand) -->
+  <template id="add-step-form-tpl">
+    <div class="add-step-form">
+      <div class="add-step-form-row">
+        <input type="text" class="step-input step-emoji-input" placeholder="🔗" maxlength="4" title="Emoji icon">
+        <input type="text" class="step-input step-title-input" placeholder="Step title *">
+      </div>
+      <input type="text" class="step-input step-desc-input" placeholder="Description (optional)">
+      <input type="text" class="step-input step-url-input" placeholder="URL or relative path (e.g. ../../page.html)">
+      <div class="add-step-actions">
+        <button class="step-confirm-btn" onclick="confirmAddStep(this)">Add Step</button>
+        <button class="step-cancel-btn" onclick="cancelAddStep(this)">Cancel</button>
+      </div>
+    </div>
+  </template>
+
   <script>
+    // ── Step management ──────────────────────────────────────────────────────
+
+    function escHtml(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function createDividerEl() {
+      const d = document.createElement('div');
+      d.className = 'step-divider';
+      d.innerHTML = `
+        <div class="step-divider-line">
+          <div class="divider-line"></div>
+          <button class="add-step-btn" title="Insert step here" onclick="toggleAddForm(this)">+</button>
+          <div class="divider-line"></div>
+        </div>`;
+      return d;
+    }
+
+    function toggleAddForm(btn) {
+      const divider = btn.closest('.step-divider');
+      let form = divider.querySelector('.add-step-form');
+
+      if (!form) {
+        const tpl = document.getElementById('add-step-form-tpl');
+        form = tpl.content.cloneNode(true).querySelector('.add-step-form');
+        divider.appendChild(form);
+      }
+
+      const isOpen = form.style.display === 'flex';
+      document.querySelectorAll('.add-step-form').forEach(f => { f.style.display = 'none'; });
+
+      if (!isOpen) {
+        form.style.display = 'flex';
+        form.querySelector('.step-title-input')?.focus();
+      }
+    }
+
+    function cancelAddStep(btn) {
+      const form = btn.closest('.add-step-form');
+      form.style.display = 'none';
+      form.querySelectorAll('input').forEach(i => i.value = '');
+    }
+
+    function confirmAddStep(btn) {
+      const form = btn.closest('.add-step-form');
+      const divider = form.closest('.step-divider');
+
+      const emoji = form.querySelector('.step-emoji-input').value.trim() || '🔗';
+      const title = form.querySelector('.step-title-input').value.trim();
+      const desc  = form.querySelector('.step-desc-input').value.trim();
+      const url   = form.querySelector('.step-url-input').value.trim() || '#';
+
+      if (!title) {
+        const ti = form.querySelector('.step-title-input');
+        ti.style.borderColor = '#f87171';
+        ti.focus();
+        setTimeout(() => { ti.style.borderColor = ''; }, 1500);
+        return;
+      }
+
+      const isExternal = url.startsWith('http://') || url.startsWith('https://');
+      const stepItem = document.createElement('div');
+      stepItem.className = 'step-item';
+      stepItem.dataset.stepId = 'custom-' + Date.now();
+      stepItem.dataset.custom = 'true';
+      stepItem.innerHTML = `
+        <button class="step-delete-btn" onclick="deleteStep(this)" title="Remove this step">✕ Remove</button>
+        <a class="card" href="${escHtml(url)}"${isExternal ? ' target="_blank" rel="noopener"' : ''}>
+          <div class="card-icon">${escHtml(emoji)}</div>
+          <div class="card-title">${escHtml(title)}</div>
+          <div class="card-desc">${escHtml(desc)}</div>
+        </a>`;
+
+      const newDivider = createDividerEl();
+      divider.after(stepItem);
+      stepItem.after(newDivider);
+
+      form.style.display = 'none';
+      form.querySelectorAll('input').forEach(i => i.value = '');
+
+      updateStepNumbers();
+      saveCustomSteps();
+    }
+
+    function deleteStep(btn) {
+      if (!confirm('Remove this step?')) return;
+      const stepItem = btn.closest('.step-item');
+      const next = stepItem.nextElementSibling;
+      if (next?.classList.contains('step-divider')) next.remove();
+      stepItem.remove();
+      updateStepNumbers();
+      saveCustomSteps();
+    }
+
+    function updateStepNumbers() {
+      document.querySelectorAll('#steps-container .step-item').forEach((item, i) => {
+        let badge = item.querySelector('.step-number');
+        if (!badge) {
+          badge = document.createElement('span');
+          badge.className = 'step-number';
+          item.insertBefore(badge, item.firstChild);
+        }
+        badge.textContent = `Step ${i + 1}`;
+      });
+    }
+
+    function saveCustomSteps() {
+      const allItems = [...document.querySelectorAll('#steps-container .step-item')];
+      const custom = [];
+      allItems.forEach((item, position) => {
+        if (item.dataset.custom !== 'true') return;
+        const a = item.querySelector('a.card');
+        custom.push({
+          id: item.dataset.stepId,
+          emoji: item.querySelector('.card-icon')?.textContent || '🔗',
+          title: item.querySelector('.card-title')?.textContent || '',
+          desc:  item.querySelector('.card-desc')?.textContent  || '',
+          url:   a?.getAttribute('href') || '#',
+          position
+        });
+      });
+      localStorage.setItem('preprod_custom_steps', JSON.stringify(custom));
+    }
+
+    function loadCustomSteps() {
+      try {
+        const saved = JSON.parse(localStorage.getItem('preprod_custom_steps') || '[]');
+        if (!saved.length) return;
+        saved.sort((a, b) => a.position - b.position);
+        const allItems = [...document.querySelectorAll('#steps-container .step-item')];
+
+        saved.forEach(s => {
+          const isExternal = s.url.startsWith('http://') || s.url.startsWith('https://');
+          const stepItem = document.createElement('div');
+          stepItem.className = 'step-item';
+          stepItem.dataset.stepId = s.id;
+          stepItem.dataset.custom = 'true';
+          stepItem.innerHTML = `
+            <button class="step-delete-btn" onclick="deleteStep(this)" title="Remove this step">✕ Remove</button>
+            <a class="card" href="${escHtml(s.url)}"${isExternal ? ' target="_blank" rel="noopener"' : ''}>
+              <div class="card-icon">${escHtml(s.emoji)}</div>
+              <div class="card-title">${escHtml(s.title)}</div>
+              <div class="card-desc">${escHtml(s.desc)}</div>
+            </a>`;
+          const newDivider = createDividerEl();
+          const ref = allItems[Math.min(Math.max(s.position - 1, 0), allItems.length - 1)];
+          if (ref) {
+            const sib = ref.nextElementSibling;
+            sib?.classList.contains('step-divider') ? sib.after(stepItem) : ref.after(stepItem);
+          } else {
+            document.getElementById('steps-container').appendChild(stepItem);
+          }
+          stepItem.after(newDivider);
+        });
+        updateStepNumbers();
+      } catch (e) {
+        console.warn('Could not restore custom steps:', e);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      updateStepNumbers();
+      loadCustomSteps();
+    });
+
+    // ── Supabase course outline ──────────────────────────────────────────────
+
     document.addEventListener('DOMContentLoaded', () => {
       const SUPABASE_URL = localStorage.getItem('supabase_url') || 'https://rmekfsdhglyiralxvkwc.supabase.co';
       const SUPABASE_ANON_KEY = localStorage.getItem('supabase_anon_key') || '';
       const SUPABASE_CONFIGURED = SUPABASE_URL.includes('supabase.co') && SUPABASE_ANON_KEY.length > 10;
-      
+
       async function loadCourseOutline() {
-        if (!SUPABASE_CONFIGURED) {
-          console.log("Supabase not configured, using fallback master_script.json");
-          loadFallback();
-          return;
-        }
-        
+        if (!SUPABASE_CONFIGURED) { loadFallback(); return; }
         try {
           async function sq(endpoint) {
             const res = await fetch(`${SUPABASE_URL}/rest/v1/${endpoint}`, {
@@ -324,116 +577,72 @@
             if (!res.ok) throw new Error(`Fetch error: ${res.statusText}`);
             return res.json();
           }
-          
-          const modules = await sq('modules?order=module_number.asc');
-          const videos = await sq('videos?order=video_number.asc&select=*,video_cues(*)');
+          const modules  = await sq('modules?order=module_number.asc');
+          const videos   = await sq('videos?order=video_number.asc&select=*,video_cues(*)');
           const outlines = await sq('outline?order=sort_order.asc');
-          
-          if (!modules || modules.length === 0) {
-            throw new Error("No modules found");
-          }
-          
+          if (!modules || modules.length === 0) throw new Error('No modules found');
           const mappedData = {
             modules: modules.map(m => ({
-              id: m.module_number,
-              title: m.title,
-              description: m.description,
+              id: m.module_number, title: m.title, description: m.description,
               objectives: (outlines || []).filter(o => o.module_number === m.module_number && o.content_type === 'objective').map(o => o.content),
               videos: (videos || []).filter(v => v.module_id === m.id).map(v => ({
-                id: v.video_number,
-                title: v.title,
-                duration: v.duration,
+                id: v.video_number, title: v.title, duration: v.duration,
                 cues: (v.video_cues || []).sort((a,b) => a.sort_order - b.sort_order).map(c => c.cue_text)
               }))
             }))
           };
-          
           renderOutline(mappedData, true);
         } catch (err) {
-          console.error('Failed to load course outline from Supabase, falling back:', err);
+          console.error('Supabase outline failed, falling back:', err);
           loadFallback();
         }
       }
-      
+
       async function loadFallback() {
         try {
           const res = await fetch('scripts/master_script.json');
-          if (res.ok) {
-            const data = await res.json();
-            renderOutline(data, false);
-          } else {
-            document.getElementById('outline-loading').textContent = 'Error loading fallback outline data.';
-          }
+          if (res.ok) { renderOutline(await res.json(), false); }
+          else { document.getElementById('outline-loading').textContent = 'Error loading fallback outline data.'; }
         } catch (err) {
           document.getElementById('outline-loading').textContent = 'Error loading course outline.';
-          console.error(err);
         }
       }
-      
+
       function renderOutline(data, isLive) {
         const statusBadge = document.getElementById('db-status-badge');
-        if (isLive) {
-          statusBadge.textContent = 'Supabase Live';
-          statusBadge.className = 'db-status live';
-        } else {
-          statusBadge.textContent = 'Offline Fallback';
-          statusBadge.className = 'db-status fallback';
-        }
-        
+        if (isLive) { statusBadge.textContent = 'Supabase Live'; statusBadge.className = 'db-status live'; }
+        else        { statusBadge.textContent = 'Offline Fallback'; statusBadge.className = 'db-status fallback'; }
         const container = document.getElementById('outline-container');
-        const loader = document.getElementById('outline-loading');
-        
+        const loader    = document.getElementById('outline-loading');
         loader.style.display = 'none';
         container.style.display = 'block';
         container.innerHTML = '';
-        
-        const modules = data.modules || [];
-        modules.forEach(m => {
+        (data.modules || []).forEach(m => {
           const modEl = document.createElement('div');
           modEl.className = 'outline-module';
-          
           let objectivesHtml = '';
-          if (m.objectives && m.objectives.length > 0) {
-            objectivesHtml = `
-              <div class="outline-objectives">
-                ${m.objectives.map(obj => `<span class="objective-tag">🎯 ${obj}</span>`).join('')}
-              </div>
-            `;
-          }
-          
+          if (m.objectives?.length)
+            objectivesHtml = `<div class="outline-objectives">${m.objectives.map(obj => `<span class="objective-tag">🎯 ${obj}</span>`).join('')}</div>`;
           let videosHtml = '';
-          if (m.videos && m.videos.length > 0) {
-            videosHtml = `
-              <div class="outline-videos">
-                ${m.videos.map(v => `
-                  <div class="outline-video-card">
-                    <div class="outline-video-meta">
-                      <span class="outline-video-title">Video ${v.id || ''}: ${v.title}</span>
-                      <span class="outline-video-duration">⏱️ ${v.duration || 'N/A'}</span>
-                    </div>
-                    ${v.cues && v.cues.length > 0 ? `
-                      <div class="outline-video-cues">
-                        ${v.cues.map(cue => `<div class="cue-item">🎬 ${cue}</div>`).join('')}
-                      </div>
-                    ` : ''}
-                  </div>
-                `).join('')}
-              </div>
-            `;
-          }
-          
+          if (m.videos?.length)
+            videosHtml = `<div class="outline-videos">${m.videos.map(v => `
+              <div class="outline-video-card">
+                <div class="outline-video-meta">
+                  <span class="outline-video-title">Video ${v.id || ''}: ${v.title}</span>
+                  <span class="outline-video-duration">⏱️ ${v.duration || 'N/A'}</span>
+                </div>
+                ${v.cues?.length ? `<div class="outline-video-cues">${v.cues.map(c => `<div class="cue-item">🎬 ${c}</div>`).join('')}</div>` : ''}
+              </div>`).join('')}</div>`;
           modEl.innerHTML = `
             <div class="outline-module-header">
               <div class="outline-module-title">📦 Module ${m.id || m.module_number || ''}: ${m.title}</div>
               <div class="outline-module-desc">${m.description || ''}</div>
               ${objectivesHtml}
-            </div>
-            ${videosHtml}
-          `;
+            </div>${videosHtml}`;
           container.appendChild(modEl);
         });
       }
-      
+
       loadCourseOutline();
     });
   </script>
