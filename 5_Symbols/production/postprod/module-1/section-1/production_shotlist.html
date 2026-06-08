@@ -1207,17 +1207,18 @@
     }
 
     // 🔗 Google Drive URL helper — converts share links to embed URLs
-    function toGDriveEmbedUrl(url) {
+    function toGDriveEmbedUrl(url, hint) {
       if (!url) return '';
       if (!url.includes('drive.google.com')) return url;
-      const match = url.match(/\/file\/d\/([^/]+)/) || url.match(/id=([^&]+)/);
+      const match = url.match(/\/file\/d\/([^/?]+)/) || url.match(/[?&]id=([^&]+)/);
       if (match) {
         const id = match[1];
-        const isAudio = url.match(/\.(wav|mp3|ogg|m4a|flac)/i) || url.includes('audio');
-        const isArchive = url.match(/\.(zip|tar|gz)/i);
+        const isAudio = hint === 'audio' || url.match(/\.(wav|mp3|ogg|m4a|flac)/i);
+        const isArchive = hint === 'archive' || url.match(/\.(zip|tar|gz)/i);
         if (isArchive) return `https://drive.google.com/uc?export=download&id=${id}`;
         if (isAudio) return `https://drive.google.com/uc?export=download&id=${id}`;
-        return `https://drive.google.com/uc?export=view&id=${id}`;
+        // Images: use thumbnail API — reliable direct-image serving, no interstitial HTML
+        return `https://drive.google.com/thumbnail?id=${id}&sz=w800`;
       }
       return url;
     }
