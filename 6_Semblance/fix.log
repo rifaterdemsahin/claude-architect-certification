@@ -9,6 +9,9 @@ Status: `APPLIED` | `VERIFIED` | `WORKAROUND` | `PENDING`
 
 ## Fix Entries
 
+[2026-06-09] [5_Symbols] [VERIFIED] — Added music_url + sfx_url columns to scenes table: `ALTER TABLE scenes ADD COLUMN IF NOT EXISTS music_url TEXT DEFAULT ''; ALTER TABLE scenes ADD COLUMN IF NOT EXISTS sfx_url TEXT DEFAULT '';` — audio_url column did not exist (never created under that name), ADD COLUMN IF NOT EXISTS used safely instead of RENAME. Scene form now persists scene-level music and SFX to Supabase.
+[2026-06-09] [5_Symbols] [VERIFIED] — Drive image invisible in scene card: toGDriveEmbedUrl was using uc?export=view which returns HTML interstitial for images. Fixed to use /thumbnail?id=&sz=w800 which always returns raw image bytes. Background image now renders correctly after upload.
+
 [2026-06-08] [5_Symbols] [VERIFIED] — RLS INSERT block on checklist_items resolved: ran checklist_insert_policy.sql in Supabase SQL Editor; anon INSERT policy created; item added successfully. Rationale in 6_Semblance/error_insertpolicy.md
 [2026-06-08] [5_Symbols] [APPLIED] — Reorganized Project Menu into a strict sequential numbered structure (1. Sanity Checklist, 2. Outline, 3. Script, 4. Production Shot List, 5. Guide) across config files, JS navbar scripts, and HTML fallbacks.
 [2026-06-08] [5_Symbols] [APPLIED] — Implemented glassmorphic, animated saving feedback status badge with inline SVG icons for Pre-prod Master Script editor.

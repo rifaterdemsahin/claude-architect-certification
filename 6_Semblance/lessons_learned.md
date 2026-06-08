@@ -4,6 +4,28 @@
 
 ---
 
+## 📅 2026-06-09: Audio Restructure + Drive Image Display
+
+### 🎯 What Was Built
+Split audio into two levels matching real post-production workflow: 🎤 voiceover at video level (localStorage), 🎵 music_url + 🔊 sfx_url at scene level (Supabase). Renamed form field `fAudioUrl` → `fMusicUrl` + added `fSfxUrl`.
+
+### ✅ What Went Well
+- `ADD COLUMN IF NOT EXISTS` is always safer than `RENAME COLUMN` — no risk if schema is already ahead
+- localStorage keyed by `voiceover_m{M}_s{S}` is a clean, zero-cost persistence layer for video-level state that doesn't need a DB table
+- Drive thumbnail API (`/thumbnail?id=&sz=w800`) is the definitive fix for Drive image embedding — bookmark this pattern
+
+### 🐛 Gaps & Gotchas
+- `ALTER TABLE scenes RENAME COLUMN audio_url TO music_url` failed with `42703: column "audio_url" does not exist` — the column was never created under that name in this Supabase project. Always use `ADD COLUMN IF NOT EXISTS` rather than `RENAME COLUMN` when the history is uncertain
+- `uc?export=view` for Google Drive images returns an HTML interstitial page (virus scan warning) for files above ~25MB and increasingly for smaller files too. Never use it for `<img>` src. Use `/thumbnail?id=&sz=w800` instead
+- Upload succeeded + Supabase PATCH 200 OK + renderScenes called — yet image was invisible. Root cause was in the URL transformation, not the upload or DB pipeline. Debug in layers: verify the final `<img src>` value in DevTools before assuming the upload failed
+
+### 🔑 Takeaways for Future Agents
+- 🎨 **Drive image embedding**: always use `https://drive.google.com/thumbnail?id=FILE_ID&sz=w800` for `<img>` tags
+- 🗄 **Schema migrations**: prefer `ADD COLUMN IF NOT EXISTS` over `RENAME COLUMN` — idempotent, safe to re-run
+- 🎤 **Video-level state**: use localStorage when the data doesn't need cross-device sync; avoids needing a new DB table
+
+---
+
 ## 📅 2026-05-31: Stage 1 Kanban Implementation & Navigation Setup
 
 ### What went well
