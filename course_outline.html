@@ -301,6 +301,80 @@
       font-weight: 700;
     }
 
+    /* OKR Box */
+    .okr-box {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+    .okr-objective, .okr-kr {
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+    }
+    .okr-objective {
+      background: rgba(139,92,246,0.07);
+      border: 1px solid rgba(139,92,246,0.2);
+    }
+    .okr-kr {
+      background: rgba(16,185,129,0.06);
+      border: 1px solid rgba(16,185,129,0.2);
+    }
+    .okr-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.5rem;
+    }
+    .okr-objective .okr-label { color: var(--accent-violet); }
+    .okr-kr .okr-label { color: var(--accent-green); }
+    .okr-text { font-size: 0.85rem; color: var(--text-primary); line-height: 1.5; }
+    .okr-kr-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .okr-kr-list li {
+      font-size: 0.82rem;
+      color: var(--text-primary);
+      padding-left: 1.1rem;
+      position: relative;
+      line-height: 1.4;
+    }
+    .okr-kr-list li::before {
+      content: '✓';
+      position: absolute;
+      left: 0;
+      color: var(--accent-green);
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    @media (max-width: 600px) {
+      .okr-box { grid-template-columns: 1fr; }
+    }
+
+    /* Script link */
+    .script-link-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(245,158,11,0.08);
+      border: 1px solid rgba(245,158,11,0.25);
+      border-radius: 8px;
+      padding: 6px 14px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #f59e0b;
+      transition: var(--transition);
+      margin-bottom: 1rem;
+    }
+    .script-link-btn:hover {
+      background: rgba(245,158,11,0.15);
+      color: #fbbf24;
+    }
+
     /* Links row */
     .module-links {
       display: flex;
@@ -445,25 +519,41 @@
     async function loadCourse() {
       const container = document.getElementById('courseContent');
       try {
-        const { data: modules, error } = await client
-          .from('course_modules')
-          .select('*, course_videos(*)')
-          .order('sort_order', { ascending: true });
+        // Fetch modules+videos and OKRs in parallel
+        const [modulesRes, okrRes] = await Promise.all([
+          client.from('course_modules').select('*, course_videos(*)').order('sort_order', { ascending: true }),
+          client.from('outline').select('*').eq('video_number', 0).in('content_type', ['objective', 'key_result']).order('sort_order', { ascending: true })
+        ]);
 
-        if (error) throw error;
-        if (!modules || modules.length === 0) throw new Error('No course data found. Run the seed SQL first.');
+        if (modulesRes.error) throw modulesRes.error;
+        const modules = modulesRes.data;
+        if (!modules || modules.length === 0) throw new Error('No course data found. Run supabase_seed.sql first.');
+
+        // Group OKRs by module_number
+        const okrMap = {};
+        (okrRes.data || []).forEach(row => {
+          if (!okrMap[row.module_number]) okrMap[row.module_number] = { objective: null, keyResults: [] };
+          if (row.content_type === 'objective') okrMap[row.module_number].objective = row.content;
+          if (row.content_type === 'key_result') okrMap[row.module_number].keyResults.push(row.content);
+        });
 
         // Sort videos within each module
         modules.forEach(m => {
           m.course_videos = (m.course_videos || []).sort((a, b) => a.sort_order - b.sort_order);
+          m.okr = okrMap[m.module_number] || null;
         });
 
         container.innerHTML = modules.map((mod, idx) => renderModule(mod, idx)).join('');
         document.getElementById('examCta').style.display = 'block';
 
-        // Expand first module by default
-        const first = container.querySelector('.module-card');
-        if (first) first.classList.add('expanded');
+        // Auto-expand module from URL param ?module=N (1-indexed)
+        const urlModule = parseInt(new URLSearchParams(location.search).get('module'), 10);
+        const cards = container.querySelectorAll('.module-card');
+        const targetIdx = urlModule >= 1 && urlModule <= cards.length ? urlModule - 1 : 0;
+        if (cards[targetIdx]) {
+          cards[targetIdx].classList.add('expanded');
+          setTimeout(() => cards[targetIdx].scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+        }
 
         // Toggle expand/collapse
         container.querySelectorAll('.module-header').forEach(header => {
@@ -479,7 +569,7 @@
             <strong>Could not load course data</strong>
             <p style="margin-top:0.5rem;font-size:0.85rem">${err.message}</p>
             <p style="margin-top:0.75rem;font-size:0.8rem;color:var(--text-muted)">
-              Run <code style="background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:4px">4_Formula/certification/supabase_seed.sql</code>
+              Run <code style="background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:4px">5_Symbols/sql/supabase_seed.sql</code>
               in the <a href="https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/sql" target="_blank" style="color:var(--accent-cyan)">Supabase SQL Editor</a>.
             </p>
           </div>`;
@@ -487,13 +577,27 @@
     }
 
     function renderModule(mod, idx) {
-      const videos = (mod.course_videos || []).map(v => renderVideo(v)).join('');
-      const links  = (mod.links || []).map(l =>
+      const videos  = (mod.course_videos || []).map(v => renderVideo(v)).join('');
+      const links   = (mod.links || []).map(l =>
         `<a href="${l.url}" class="module-link-tag" target="_blank"><i class="fa-solid fa-link fa-xs"></i>${l.label}</a>`
       ).join('');
+      const scriptUrl = `5_Symbols/production/preprod/scripts/index.html?module=${mod.module_number}`;
+      const okr = mod.okr;
+
+      const okrHtml = okr ? `
+        <div class="okr-box">
+          <div class="okr-objective">
+            <div class="okr-label">🎯 Objective</div>
+            <div class="okr-text">${okr.objective || ''}</div>
+          </div>
+          <div class="okr-kr">
+            <div class="okr-label">🔑 Key Results</div>
+            <ul class="okr-kr-list">${okr.keyResults.map(k => `<li>${k}</li>`).join('')}</ul>
+          </div>
+        </div>` : '';
 
       return `
-        <div class="module-card" data-module="${mod.id}">
+        <div class="module-card" id="module-${mod.module_number}" data-module="${mod.id}">
           <div class="module-header">
             <div class="module-number-badge">M${mod.module_number}</div>
             <div class="module-meta">
@@ -503,6 +607,10 @@
             <div class="module-toggle"><i class="fa-solid fa-chevron-down"></i></div>
           </div>
           <div class="module-body">
+            ${okrHtml}
+            <a href="${scriptUrl}" class="script-link-btn">
+              <i class="fa-solid fa-file-lines"></i> View &amp; Edit Script
+            </a>
             <div class="videos-grid">${videos}</div>
             ${links ? `<div class="module-links">${links}</div>` : ''}
           </div>
