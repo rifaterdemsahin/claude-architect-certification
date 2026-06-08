@@ -154,7 +154,10 @@ Record every prompt given to AI agents below. Include the date, agent, and purpo
 **Purpose:** Reorganize the Project Menu to follow a strict sequential numbered order: 1. Sanity Checklist, 2. Outline, 3. Script, 4. Production Shot List, 5. Guide.  
 **Output:** Updated `navigation_config.json`, `index.html`, `5_Symbols/markdown_renderer.html`, and `shared/nav.js`.
 
+---
 
+## 2026-06-08 — Supabase SQL Consolidation
 
-
-
+**Agent:** Gemini 3.5 Flash (Medium)  
+**Purpose:** Move all SQL schemas and seeds from `5_Symbols/sql/` to `5_Symbols/src/supabase/`, merging them into single consolidated files (`schema.sql` and `seed.sql`), deleting obsolete files, and updating all workspace references.  
+**Output:** Updated `5_Symbols/src/supabase/schema.sql`, created `5_Symbols/src/supabase/seed.sql`, deleted old files/directories, and updated references in HTML dashboard pages, scripts, and docs.
