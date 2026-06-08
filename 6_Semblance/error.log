@@ -9,6 +9,7 @@ Severity levels: `CRITICAL` | `ERROR` | `WARNING` | `INFO`
 
 ## Log Entries
 
+[2026-06-08] [5_Symbols] [ERROR] — sanity_checklist.html: "+ Add item" throws "new row violates row-level security policy for table checklist_items" — anon INSERT policy on checklist_items has not been applied; checklist_insert_policy.sql has not been run in Supabase SQL Editor. Fix: 6_Semblance/rls_checklist_insert.md
 [2026-06-08] [5_Symbols] [ERROR] — course_outline.html: Supabase returns "Could not find the table 'public.course_modules' in the schema cache" — tables not yet created; seed SQL at 4_Formula/certification/supabase_seed.sql has never been run in the Supabase SQL Editor.
 [2026-06-07] [UI] [WARNING] — Main menu items ("Production", "Sanity Check", "Exam") missing due to dynamic override in navigation_config.json.
 [2026-06-07] [CI] [ERROR] — "Open GitHub issue for broken links" step fails because 'broken-links' label does not exist in repo; gh issue create exits non-zero on missing labels.
