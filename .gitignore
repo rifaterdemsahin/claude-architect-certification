@@ -33,3 +33,6 @@ scratch/
 *supabase_config.js
 *secrets.js
 
+# Supabase backups
+backup/
+
