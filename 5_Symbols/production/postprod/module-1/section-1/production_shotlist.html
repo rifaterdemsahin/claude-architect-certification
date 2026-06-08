@@ -363,8 +363,104 @@
     .scene-edit-btn button:hover { background: var(--primary); border-color: var(--primary); }
     .create-scene-btn { display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 14px 28px; border-radius: 14px; font-weight: 700; cursor: pointer; font-size: 1rem; margin-top: 16px; }
     #sceneAudioUpload { margin-top: 8px; }
+
+    /* Scene Table Panel */
+    .scene-table-panel {
+      background: rgba(17, 24, 39, 0.6);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      border-radius: 24px;
+      padding: 24px 32px;
+      margin-bottom: 24px;
+      overflow-x: auto;
+    }
+    .scene-table-panel .panel-header {
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin-bottom: 16px;
+    }
+    .scene-table { width: 100%; border-collapse: collapse; }
+    .scene-table th {
+      text-align: left;
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--primary);
+      padding: 6px 12px;
+      border-bottom: 2px solid rgba(139, 92, 246, 0.2);
+    }
+    .scene-table td {
+      padding: 10px 12px;
+      font-size: 0.875rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      vertical-align: middle;
+      color: var(--text-main);
+    }
+    .scene-table tbody tr:hover td { background: rgba(139, 92, 246, 0.08); cursor: pointer; }
+    .cell-script { max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-muted); font-style: italic; }
+    .cell-timing { font-family: monospace; font-size: 0.8rem; color: #10b981; }
+    .cell-num { font-weight: 900; font-size: 1rem; color: white; }
+    .cell-status { font-size: 0.8rem; }
+
+    /* Settings Overlay */
+    .settings-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(3, 7, 18, 0.92); backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      z-index: 2000; display: none; align-items: center; justify-content: center; padding: 40px;
+    }
+    .settings-overlay.open { display: flex; }
+    .settings-modal {
+      background: var(--bg-card); border: 1px solid var(--border-glow);
+      border-radius: 32px; padding: 40px; max-width: 640px; width: 100%;
+      max-height: 90vh; overflow-y: auto;
+    }
+    .settings-modal h2 { font-family: var(--font-title); font-size: 1.5rem; font-weight: 800; margin-bottom: 20px; }
+    .settings-info {
+      background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3);
+      border-radius: 12px; padding: 16px; margin-bottom: 20px;
+      font-size: 0.82rem; color: var(--text-muted); line-height: 1.85;
+    }
+    .settings-info code { background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; color: #93c5fd; font-family: monospace; font-size: 0.85em; }
+    .settings-divider { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 20px 0; }
+
+    /* Google Drive & Settings Buttons */
+    .btn-gdrive {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white; border: none; padding: 0 20px; height: 52px; border-radius: 12px;
+      font-weight: 700; cursor: pointer; white-space: nowrap; font-size: 0.9rem;
+      transition: all 0.3s; align-self: flex-end; flex-shrink: 0;
+    }
+    .btn-gdrive:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4); }
+    .btn-gdrive.connected { background: linear-gradient(135deg, #059669, #047857); }
+    .btn-settings {
+      background: rgba(255,255,255,0.06); color: var(--text-muted);
+      border: 1px solid rgba(255,255,255,0.1); width: 52px; height: 52px;
+      border-radius: 12px; cursor: pointer; font-size: 1.2rem; transition: all 0.3s;
+      align-self: flex-end; display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .btn-settings:hover { background: rgba(255,255,255,0.14); color: white; }
+
+    /* Drive picker button next to inputs */
+    .input-with-picker { display: flex; gap: 8px; }
+    .input-with-picker input { flex: 1; min-width: 0; }
+    .btn-pick-drive {
+      background: rgba(16, 185, 129, 0.1); color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.3); padding: 0 12px;
+      border-radius: 10px; cursor: pointer; font-size: 0.75rem; font-weight: 700;
+      white-space: nowrap; transition: all 0.2s; height: 42px; flex-shrink: 0;
+    }
+    .btn-pick-drive:hover:not(:disabled) { background: rgba(16, 185, 129, 0.3); }
+    .btn-pick-drive:disabled { opacity: 0.3; cursor: not-allowed; }
   </style>
   <script src="../../../../../shared/nav.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
 
@@ -392,6 +488,32 @@
           <!-- Dynamically populated -->
         </select>
       </div>
+      <div class="selector-group" style="max-width: 220px;">
+        <label for="scene-select">🎞 Jump to Scene</label>
+        <select id="scene-select" onchange="scrollToScene(this.value)">
+          <option value="">— All Scenes —</option>
+        </select>
+      </div>
+      <button class="btn-gdrive" id="btn-gdrive-login" onclick="gdriveLogin()">🔗 Google Drive</button>
+      <button class="btn-settings" onclick="openSettings()" title="Settings">⚙️</button>
+    </div>
+
+    <!-- Scene Summary Table -->
+    <div class="scene-table-panel" id="scene-table-panel" style="display:none;">
+      <div class="panel-header">📋 Scene Summary — click any row to scroll to scene card</div>
+      <table class="scene-table">
+        <thead>
+          <tr>
+            <th>Scene</th>
+            <th>Timing</th>
+            <th>Script Preview</th>
+            <th>Background</th>
+            <th>Voice-over</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="scene-table-body"></tbody>
+      </table>
     </div>
 
     <!-- Master Audio Player Panel -->
@@ -451,15 +573,24 @@
         </div>
         <div class="form-group">
           <label>Background Image URL <span style="color:var(--text-muted);font-weight:400;font-size:0.7rem;">(Upload to Google Drive → paste share link)</span></label>
-          <input type="text" id="fBg" placeholder="https://drive.google.com/file/d/... or assets/...png">
+          <div class="input-with-picker">
+            <input type="text" id="fBg" placeholder="https://drive.google.com/file/d/... or assets/...png">
+            <button class="btn-pick-drive" onclick="openGDrivePicker('fBg')" disabled title="Connect Google Drive first">📁 Drive</button>
+          </div>
         </div>
         <div class="form-group">
           <label>Voice-over Audio URL <span style="color:var(--text-muted);font-weight:400;font-size:0.7rem;">(Upload to Google Drive → paste share link)</span></label>
-          <input type="text" id="fAudioUrl" placeholder="https://drive.google.com/file/d/... or .wav filename">
+          <div class="input-with-picker">
+            <input type="text" id="fAudioUrl" placeholder="https://drive.google.com/file/d/... or .wav filename">
+            <button class="btn-pick-drive" onclick="openGDrivePicker('fAudioUrl')" disabled title="Connect Google Drive first">📁 Drive</button>
+          </div>
         </div>
         <div class="form-group">
           <label>Lower Third Image URL <span style="color:var(--text-muted);font-weight:400;font-size:0.7rem;">(Google Drive)</span></label>
-          <input type="text" id="fLtImg" placeholder="https://drive.google.com/file/d/... or assets/overlays/lt_intro.png">
+          <div class="input-with-picker">
+            <input type="text" id="fLtImg" placeholder="https://drive.google.com/file/d/... or assets/overlays/lt_intro.png">
+            <button class="btn-pick-drive" onclick="openGDrivePicker('fLtImg')" disabled title="Connect Google Drive first">📁 Drive</button>
+          </div>
         </div>
         <div class="form-group">
           <label>Lower Third Main Text</label>
@@ -471,15 +602,24 @@
         </div>
         <div class="form-group">
           <label>Overlay Lower Third URL <span style="color:var(--text-muted);font-weight:400;font-size:0.7rem;">(Google Drive)</span></label>
-          <input type="text" id="fOverlayLt" placeholder="https://drive.google.com/file/d/... or assets/overlays/lt_intro.png">
+          <div class="input-with-picker">
+            <input type="text" id="fOverlayLt" placeholder="https://drive.google.com/file/d/... or assets/overlays/lt_intro.png">
+            <button class="btn-pick-drive" onclick="openGDrivePicker('fOverlayLt')" disabled title="Connect Google Drive first">📁 Drive</button>
+          </div>
         </div>
         <div class="form-group">
           <label>Overlay Text Image URL <span style="color:var(--text-muted);font-weight:400;font-size:0.7rem;">(Google Drive)</span></label>
-          <input type="text" id="fOverlayText" placeholder="https://drive.google.com/file/d/... or assets/overlays/overlay_systems.png">
+          <div class="input-with-picker">
+            <input type="text" id="fOverlayText" placeholder="https://drive.google.com/file/d/... or assets/overlays/overlay_systems.png">
+            <button class="btn-pick-drive" onclick="openGDrivePicker('fOverlayText')" disabled title="Connect Google Drive first">📁 Drive</button>
+          </div>
         </div>
         <div class="form-group">
           <label>Bundle ZIP URL <span style="color:var(--text-muted);font-weight:400;font-size:0.7rem;">(Google Drive)</span></label>
-          <input type="text" id="fBundle" placeholder="https://drive.google.com/file/d/... or assets/archives/scene1.zip">
+          <div class="input-with-picker">
+            <input type="text" id="fBundle" placeholder="https://drive.google.com/file/d/... or assets/archives/scene1.zip">
+            <button class="btn-pick-drive" onclick="openGDrivePicker('fBundle')" disabled title="Connect Google Drive first">📁 Drive</button>
+          </div>
         </div>
 
         <div class="form-group full-width">
@@ -496,6 +636,34 @@
         <button class="btn-form-delete" id="btnDeleteScene" onclick="deleteScene()" style="display:none;">🗑 Delete Scene</button>
         <button class="btn-form-cancel" onclick="closeSceneForm()">Cancel</button>
         <button class="btn-form-save" onclick="saveSceneForm()">💾 Save to Supabase</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Overlay -->
+  <div class="settings-overlay" id="settingsOverlay">
+    <div class="settings-modal">
+      <h2>⚙️ Settings</h2>
+      <div class="settings-info">
+        <strong>🔐 Supabase Anon Key</strong> — Get it from<br>
+        <code>Supabase Dashboard → Project Settings → API → anon public key</code><br><br>
+        <strong>🔗 Google Drive OAuth</strong> — requires a Google Cloud project:<br>
+        1. Enable <code>Drive API</code> + <code>Google Picker API</code> at <code>console.cloud.google.com</code><br>
+        2. Create an <strong>OAuth 2.0 Client ID</strong> (Web application type)<br>
+        3. Add <code>http://localhost:8765</code> to <strong>Authorized JavaScript Origins</strong>
+      </div>
+      <div class="form-group" style="margin-bottom:16px;">
+        <label>Supabase Anon Key</label>
+        <input type="text" id="settingsSupabaseKey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
+      </div>
+      <hr class="settings-divider">
+      <div class="form-group" style="margin-bottom:8px;">
+        <label>Google OAuth Client ID <span style="color:var(--text-muted);font-weight:400;font-size:0.7rem;">(console.cloud.google.com → Credentials → OAuth 2.0 Client IDs)</span></label>
+        <input type="text" id="settingsGoogleClientId" placeholder="123456789-abcdef.apps.googleusercontent.com">
+      </div>
+      <div class="form-actions">
+        <button class="btn-form-cancel" onclick="closeSettings()">Cancel</button>
+        <button class="btn-form-save" onclick="saveSettings()">💾 Save & Reload</button>
       </div>
     </div>
   </div>
@@ -1236,6 +1404,8 @@
     function renderScenes(scenes) {
       window._scenesData = scenes;
       origRenderScenes(scenes);
+      populateSceneSelector(scenes);
+      renderSceneTable(scenes);
       // Add a "Create New Scene" button at the bottom
       const container = document.getElementById('scenes-container');
       if (scenes && scenes.length > 0) {
@@ -1244,5 +1414,129 @@
         btnDiv.innerHTML = '<button class="create-scene-btn" onclick="openSceneForm()">➕ Add Another Scene</button>';
         container.appendChild(btnDiv);
       }
+    }
+
+    // ========== Scene Selector & Table ==========
+    function scrollToScene(sceneId) {
+      if (!sceneId) return;
+      const scenes = window._scenesData || [];
+      const idx = scenes.findIndex(s => s.id.toString() === sceneId.toString());
+      if (idx >= 0) {
+        const cards = document.querySelectorAll('.review-grid');
+        if (cards[idx]) cards[idx].scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    function populateSceneSelector(scenes) {
+      const sel = document.getElementById('scene-select');
+      if (!sel) return;
+      if (!scenes || scenes.length === 0) {
+        sel.innerHTML = '<option value="">No scenes yet</option>';
+        return;
+      }
+      sel.innerHTML = '<option value="">— All Scenes —</option>' +
+        scenes.map(s => `<option value="${s.id}">Scene ${s.id}${s.timing ? ' · ' + s.timing : ''}</option>`).join('');
+    }
+
+    function renderSceneTable(scenes) {
+      const panel = document.getElementById('scene-table-panel');
+      const tbody = document.getElementById('scene-table-body');
+      if (!panel || !tbody) return;
+      if (!scenes || scenes.length === 0) { panel.style.display = 'none'; return; }
+      panel.style.display = 'block';
+      tbody.innerHTML = scenes.map(s => {
+        const raw = s.script ? s.script.replace(/<[^>]+>/g, '') : '';
+        const preview = raw.length > 90 ? raw.substring(0, 90) + '…' : (raw || '—');
+        const hasBg = s.bg ? '✅' : '❌';
+        const hasAudio = s.audioUrl ? '✅' : '❌';
+        return `<tr onclick="scrollToScene(${s.id})">
+          <td class="cell-num">S${s.id}</td>
+          <td class="cell-timing">${s.timing || '—'}</td>
+          <td class="cell-script" title="${raw.replace(/"/g, '&quot;')}">${preview}</td>
+          <td class="cell-status">${hasBg} BG</td>
+          <td class="cell-status">${hasAudio} VO</td>
+          <td><button onclick="event.stopPropagation();openSceneForm(${s.dbId})" style="background:rgba(139,92,246,0.15);color:#a78bfa;border:1px solid rgba(139,92,246,0.35);padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.72rem;font-weight:800;">✏️ Edit</button></td>
+        </tr>`;
+      }).join('');
+    }
+
+    // ========== Google Drive Integration ==========
+    let gdriveAccessToken = null;
+    let pickerApiLoaded = false;
+
+    async function loadPickerApi() {
+      if (pickerApiLoaded) return;
+      return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'https://apis.google.com/js/api.js';
+        script.onload = () => gapi.load('picker', () => { pickerApiLoaded = true; resolve(); });
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+    }
+
+    async function gdriveLogin() {
+      const clientId = localStorage.getItem('google_client_id') || '';
+      if (!clientId) {
+        alert('Enter your Google Client ID in ⚙️ Settings first.\n\nSteps:\n1. Go to console.cloud.google.com\n2. Enable Drive API + Picker API\n3. Create OAuth 2.0 Client ID (Web app type)\n4. Add http://localhost:8765 to Authorized JavaScript Origins');
+        openSettings();
+        return;
+      }
+      if (!window.google || !window.google.accounts) {
+        alert('Google Identity Services not ready yet. Try again in a moment.');
+        return;
+      }
+      const tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: clientId,
+        scope: 'https://www.googleapis.com/auth/drive.readonly',
+        callback: async (response) => {
+          if (response.error) { console.error('GDrive auth error:', response); return; }
+          gdriveAccessToken = response.access_token;
+          const btn = document.getElementById('btn-gdrive-login');
+          if (btn) { btn.textContent = '✅ Drive Connected'; btn.classList.add('connected'); }
+          document.querySelectorAll('.btn-pick-drive').forEach(b => b.disabled = false);
+          await loadPickerApi();
+        }
+      });
+      tokenClient.requestAccessToken();
+    }
+
+    async function openGDrivePicker(targetInputId) {
+      if (!gdriveAccessToken) { alert('Connect to Google Drive first (🔗 Google Drive button).'); return; }
+      await loadPickerApi();
+      if (!window.google || !window.google.picker) { alert('Google Picker API not loaded yet. Try again.'); return; }
+      new google.picker.PickerBuilder()
+        .addView(new google.picker.DocsView().setIncludeFolders(false))
+        .setOAuthToken(gdriveAccessToken)
+        .setCallback(data => {
+          if (data.action === google.picker.Action.PICKED && data.docs && data.docs[0]) {
+            const id = data.docs[0].id;
+            const el = document.getElementById(targetInputId);
+            if (el) el.value = `https://drive.google.com/file/d/${id}/view?usp=sharing`;
+          }
+        })
+        .build().setVisible(true);
+    }
+
+    // ========== Settings ==========
+    function openSettings() {
+      document.getElementById('settingsOverlay').classList.add('open');
+      document.getElementById('settingsSupabaseKey').value = localStorage.getItem('supabase_anon_key') || '';
+      document.getElementById('settingsGoogleClientId').value = localStorage.getItem('google_client_id') || '';
+    }
+
+    function closeSettings() {
+      document.getElementById('settingsOverlay').classList.remove('open');
+    }
+
+    function saveSettings() {
+      const key = document.getElementById('settingsSupabaseKey').value.trim();
+      const gClientId = document.getElementById('settingsGoogleClientId').value.trim();
+      if (key) localStorage.setItem('supabase_anon_key', key);
+      else localStorage.removeItem('supabase_anon_key');
+      if (gClientId) localStorage.setItem('google_client_id', gClientId);
+      else localStorage.removeItem('google_client_id');
+      closeSettings();
+      loadDataAndRender();
     }
   </script>
