@@ -797,78 +797,6 @@
       ]
     };
 
-    const SCENES_FALLBACK = {
-      "1-1": [
-        {
-          id: 1,
-          script: '"Welcome to Module 1. Moving LLMs from a <mark>playground prototype</mark> or an experimental chat window into a <mark>secure, scalable production system</mark> requires systems engineering—not just clever prompting."',
-          cues: [
-            { icon: "🖼️", label: "BG: <b>Server Room / Data Center</b>", prompt: "Generate a cinematic dark tech background featuring a sleek server room or data center, purple and blue neon lighting, wide-angle perspective, depth of field, 1920x1080, suitable for video overlay" },
-            { icon: "🔤", label: "Text: <b>SYSTEMS ENGINEERING > CLEVER PROMPTING</b>", prompt: "Create a modern, centered typography overlay with 'SYSTEMS ENGINEERING > CLEVER PROMPTING' in bold white sans-serif, slight purple glow, on dark transparent background" },
-            { icon: "🛡️", label: "Icons: <b>Cloud Security, Shield</b>", prompt: "Generate a set of minimalist flat icons: a cloud with a shield lock, keyhole, and security boundary lines. Style: neon cyan and purple, 64x64px, transparent PNG" },
-            { icon: "⏱️", label: "Timing: 0:05 - 0:12", prompt: "" }
-          ],
-          ltImg: "assets/overlays/lt_intro.png",
-          ltMain: "Claude Architect Masterclass",
-          ltSub: "Module 1: Introduction",
-          bg: "assets/module1_section1_scene1_bg.png",
-          overlayLt: "assets/overlays/lt_intro.png",
-          overlayText: "assets/overlays/overlay_systems.png",
-          bundle: "assets/archives/module1_section1_scene1.zip",
-          edl: [
-            "0:00 - 0:03: Fade in background artifact with a slight zoom-in animation (Ken Burns).",
-            "0:03 - 0:05: Slide in Lower Third from left margin. Hold until end of scene.",
-            "0:05 - 0:07: Pop-in 'SYSTEMS ENGINEERING' text overlay. Match audio emphasis.",
-            "0:10: Trigger Shield and Security icons with a subtle glow pulse."
-          ]
-        },
-        {
-          id: 2,
-          script: '"Today, we are breaking down the official Claude Architecture Blueprint. We are moving beyond basic API calls to understand model topologies, stateless middleware boundaries, and how the <mark>Model Context Protocol</mark> changes enterprise integration forever."',
-          cues: [
-            { icon: "🖼️", label: "BG: <b>Network Nodes / API Data Flow</b>", prompt: "Design a futuristic technology background showing interconnected network nodes, API data flow visualization, enterprise system architecture diagram style, dark theme with blue cyan lighting, 1920x1080" },
-            { icon: "🔤", label: "Text: <b>MODEL CONTEXT PROTOCOL (MCP)</b>", prompt: "Create a tech-styled text overlay for 'MODEL CONTEXT PROTOCOL (MCP)' with monospace font, circuit-board border, blue to purple gradient text glow" },
-            { icon: "⛓️", label: "Icons: <b>Server Node, API Bridge</b>", prompt: "Design an isometric server node icon with interconnected API bridge lines and data packets flowing. Modern flat vector style, dark theme, vibrant blue accents" },
-            { icon: "⏱️", label: "Timing: 0:15 - 0:25", prompt: "" }
-          ],
-          ltImg: "assets/overlays/lt_mcp.png",
-          ltMain: "Model Context Protocol",
-          ltSub: "Enterprise Integration Layer",
-          bg: "assets/module1_section1_scene2_bg.png",
-          overlayLt: "assets/overlays/lt_mcp.png",
-          overlayText: "assets/overlays/overlay_mcp.png",
-          bundle: "assets/archives/module1_section1_scene2.zip",
-          edl: [
-            "0:12 - 0:15: Cross-dissolve transition from Scene 1 to Scene 2 background.",
-            "0:15 - 0:18: Replace Lower Third with 'Model Context Protocol' variant.",
-            "0:18 - 0:22: Overlay 'MCP' text center-screen. Background opacity drops to 30%.",
-            "0:23: Animate 'Data Pipe' icons moving from LLM to Database."
-          ]
-        },
-        {
-          id: 3,
-          script: '"All the code, blueprints, and architecture files we cover are live right here on our <mark>project hub</mark>."',
-          cues: [
-            { icon: "🖼️", label: "BG: <b>IDE / GitHub Workspace</b>", prompt: "Create a modern coding workspace background, dark mode IDE with code on screen, GitHub interface visible, soft monitor glow, minimal desk setup, cinematic depth of field, 1920x1080" },
-            { icon: "🔤", label: "Text: <b>github.com/rifaterdemsahin/...</b>", prompt: "Generate a clickable URL pill overlay with 'github.com/rifaterdemsahin/...' in white monospace, on a semi-transparent black rounded rectangle, subtle hover glow effect" },
-            { icon: "🐙", label: "Icons: <b>GitHub Repository</b>", prompt: "Create the GitHub Octocat logo icon, high contrast, white on dark transparent, minimal shadow for clarity on video" },
-            { icon: "⏱️", label: "Timing: 0:28 - End", prompt: "" }
-          ],
-          ltImg: "assets/overlays/lt_resources.png",
-          ltMain: "Resource Dashboard",
-          ltSub: "Open Source Architecture Blueprint",
-          bg: "assets/module1_section1_scene3_bg.png",
-          overlayLt: "assets/overlays/lt_resources.png",
-          overlayText: "assets/overlays/overlay_github.png",
-          bundle: "assets/archives/module1_section1_scene3.zip",
-          edl: [
-            "0:28: Focus camera on the browser dashboard recording.",
-            "0:30: Display GitHub URL pill overlay.",
-            "0:35: Fade to black while speaker finishes the closing sentence."
-          ]
-        }
-      ]
-    };
 
     // 🍪 Cookie Helpers
     function setCookie(name, val, days) {
@@ -1210,18 +1138,7 @@
         console.error('[loadDataAndRender]', e);
       }
 
-      // Fallback: show local data if Supabase returned nothing
-      if (!scenes) {
-        if (moduleKey === '1' && sectionKey === '1') {
-          scenes = SCENES_FALLBACK["1-1"];
-          title = "Module 1, Section 1: Introduction (Local Fallback)";
-        } else {
-          const modInfo = MODULES_FALLBACK.find(m => m.module_number.toString() === moduleKey.toString());
-          const vList = VIDEOS_FALLBACK[moduleKey] || [];
-          const vInfo = vList.find(v => v.video_number.toString() === sectionKey.toString());
-          if (modInfo && vInfo) title = `${modInfo.title} > ${vInfo.title} (Local Fallback)`;
-        }
-      }
+      // No local fallback — scenes must come from Supabase (null = show empty state + Create button)
 
       const audioTitleEl = document.querySelector('.audio-title');
       if (audioTitleEl) audioTitleEl.textContent = title;
