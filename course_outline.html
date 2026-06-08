@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Claude AI Certification for Architects — Full Course Outline. 5 modules, 15 videos covering MCP, ZDR, deterministic routers, and prompt caching.">
+  <title>📚 Course Outline — Claude Architect Certification</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --bg-dark: #0b0f19;
+      --bg-card: rgba(22, 28, 45, 0.7);
+      --bg-glass: rgba(15, 23, 42, 0.6);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-glow: rgba(139, 92, 246, 0.2);
+      --text-primary: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-violet: #8b5cf6;
+      --accent-violet-glow: rgba(139, 92, 246, 0.4);
+      --accent-cyan: #06b6d4;
+      --accent-cyan-glow: rgba(6, 182, 212, 0.4);
+      --accent-green: #10b981;
+      --font-display: 'Outfit', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image:
+        radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.15) 0px, transparent 50%);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      line-height: 1.6;
+      overflow-x: hidden;
+      padding-bottom: 100px;
+    }
+
+    a { color: inherit; text-decoration: none; transition: var(--transition); }
+
+    /* Header */
+    .app-header {
+      backdrop-filter: blur(12px);
+      background-color: var(--bg-glass);
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .app-logo {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent-violet), var(--accent-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .project-menu-nav { display: flex; gap: 2rem; align-items: center; }
+    .menu-link {
+      font-weight: 500;
+      color: var(--text-muted);
+      position: relative;
+      padding: 0.25rem 0;
+    }
+    .menu-link:hover, .menu-link.active { color: var(--text-primary); }
+    .menu-link::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 0; height: 2px;
+      background: linear-gradient(90deg, var(--accent-violet), var(--accent-cyan));
+      transition: var(--transition);
+    }
+    .menu-link:hover::after, .menu-link.active::after { width: 100%; }
+    .nav-btn {
+      background: linear-gradient(135deg, var(--accent-violet), #7c3aed);
+      color: white !important;
+      padding: 6px 16px;
+      border-radius: 100px;
+      font-size: 0.85rem !important;
+      font-weight: 600 !important;
+      box-shadow: 0 4px 15px var(--accent-violet-glow);
+    }
+    .nav-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(139,92,246,0.6); }
+    .social-links { display: flex; gap: 1.25rem; align-items: center; }
+    .social-icon { color: var(--text-muted); font-size: 1.2rem; }
+    .social-icon:hover { color: var(--text-primary); transform: translateY(-2px); }
+
+    /* Hero */
+    .hero-section {
+      text-align: center;
+      padding: 5rem 2rem 3rem;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(139, 92, 246, 0.1);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      border-radius: 100px;
+      padding: 6px 18px;
+      font-size: 0.85rem;
+      color: var(--accent-violet);
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+    }
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-violet) 50%, var(--accent-cyan) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1.2;
+      margin-bottom: 1.25rem;
+    }
+    .hero-subtitle {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      max-width: 650px;
+      margin: 0 auto 2rem;
+    }
+    .hero-stats {
+      display: flex;
+      justify-content: center;
+      gap: 2.5rem;
+      flex-wrap: wrap;
+    }
+    .stat-item { text-align: center; }
+    .stat-number {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--accent-violet), var(--accent-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .stat-label { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+
+    /* Content */
+    .content-wrapper {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 2rem 4rem;
+    }
+
+    /* Loading / Error */
+    .status-box {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--text-muted);
+    }
+    .status-box .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border-color);
+      border-top-color: var(--accent-violet);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 1rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .status-box.error { color: #ef4444; }
+    .status-box.error i { font-size: 2rem; margin-bottom: 0.75rem; display: block; }
+
+    /* Module Card */
+    .module-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+      backdrop-filter: blur(10px);
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    .module-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent-violet), var(--accent-cyan));
+      opacity: 0;
+      transition: var(--transition);
+    }
+    .module-card:hover { border-color: var(--border-glow); transform: translateY(-2px); }
+    .module-card:hover::before { opacity: 1; }
+
+    .module-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 1.25rem;
+      margin-bottom: 1.25rem;
+      cursor: pointer;
+    }
+    .module-number-badge {
+      flex-shrink: 0;
+      width: 48px; height: 48px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--accent-violet), #7c3aed);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: white;
+      box-shadow: 0 4px 15px var(--accent-violet-glow);
+    }
+    .module-meta { flex: 1; }
+    .module-title {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.4rem;
+    }
+    .module-desc { font-size: 0.9rem; color: var(--text-muted); line-height: 1.5; }
+
+    .module-toggle {
+      flex-shrink: 0;
+      color: var(--text-muted);
+      font-size: 1rem;
+      transition: var(--transition);
+      padding-top: 0.25rem;
+    }
+    .module-card.expanded .module-toggle { transform: rotate(180deg); }
+
+    .module-body { display: none; }
+    .module-card.expanded .module-body { display: block; }
+
+    /* Videos */
+    .videos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+    .video-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      transition: var(--transition);
+    }
+    .video-card:hover { border-color: rgba(6,182,212,0.3); background: rgba(6,182,212,0.05); }
+    .video-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent-cyan);
+      margin-bottom: 0.4rem;
+    }
+    .video-title {
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.75rem;
+    }
+    .video-bullets {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+    .video-bullets li {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      padding-left: 1rem;
+      position: relative;
+    }
+    .video-bullets li::before {
+      content: '›';
+      position: absolute;
+      left: 0;
+      color: var(--accent-violet);
+      font-weight: 700;
+    }
+
+    /* Links row */
+    .module-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .module-link-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: rgba(6,182,212,0.08);
+      border: 1px solid rgba(6,182,212,0.2);
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 0.78rem;
+      color: var(--accent-cyan);
+      transition: var(--transition);
+    }
+    .module-link-tag:hover { background: rgba(6,182,212,0.15); }
+
+    /* Exam CTA */
+    .exam-cta {
+      background: linear-gradient(135deg, rgba(139,92,246,0.15), rgba(6,182,212,0.1));
+      border: 1px solid rgba(139,92,246,0.3);
+      border-radius: 16px;
+      padding: 2.5rem;
+      text-align: center;
+      margin-top: 2rem;
+    }
+    .exam-cta h2 {
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+    }
+    .exam-cta p { color: var(--text-muted); margin-bottom: 1.5rem; }
+    .btn-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: linear-gradient(135deg, var(--accent-violet), #7c3aed);
+      color: white;
+      padding: 12px 28px;
+      border-radius: 100px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      box-shadow: 0 4px 20px var(--accent-violet-glow);
+      transition: var(--transition);
+    }
+    .btn-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(139,92,246,0.6); }
+
+    /* Debug button */
+    #debugBtn {
+      position: fixed;
+      bottom: 24px; right: 24px;
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      z-index: 200;
+      transition: var(--transition);
+      backdrop-filter: blur(10px);
+    }
+    #debugBtn:hover { color: var(--accent-cyan); border-color: var(--accent-cyan); }
+
+    @media (max-width: 768px) {
+      .header-container { flex-wrap: wrap; gap: 0.75rem; }
+      .project-menu-nav { gap: 1rem; }
+      .hero-section { padding: 3rem 1.5rem 2rem; }
+      .content-wrapper { padding: 0 1rem 3rem; }
+      .videos-grid { grid-template-columns: 1fr; }
+      .hero-stats { gap: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="app-header">
+    <div class="header-container">
+      <a href="index.html" class="app-logo">
+        <i class="fa-solid fa-hotel"></i>
+        <span>🏛️ Claude Architect</span>
+      </a>
+      <nav class="project-menu-nav">
+        <a href="index.html" class="menu-link">Home</a>
+        <a href="course_outline.html" class="menu-link active">Course</a>
+        <a href="markdown_renderer.html?file=4_Formula/certification/exam_and_case_study.md" class="menu-link">Exam</a>
+      </nav>
+      <div class="social-links">
+        <a href="https://github.com/rifaterdemsahin/claude-architect-certification" target="_blank" class="social-icon" title="GitHub"><i class="fa-brands fa-github"></i></a>
+        <a href="https://www.linkedin.com/in/rifaterdemsahin/" target="_blank" class="social-icon" title="LinkedIn"><i class="fa-brands fa-linkedin"></i></a>
+        <a href="https://www.youtube.com/@RifatErdemSahin" target="_blank" class="social-icon" title="YouTube"><i class="fa-brands fa-youtube"></i></a>
+        <a href="https://www.youtube.com/playlist?list=PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy" target="_blank" class="nav-btn"><i class="fa-solid fa-play"></i> Watch</a>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero-section">
+    <div class="hero-badge"><i class="fa-solid fa-graduation-cap"></i> 5 Modules · 15 Videos</div>
+    <h1 class="hero-title">Course Outline</h1>
+    <p class="hero-subtitle">From AI prototyping to production-grade enterprise deployment — master secure architecture, MCP, ZDR, deterministic routers, and prompt caching.</p>
+    <div class="hero-stats">
+      <div class="stat-item"><div class="stat-number">5</div><div class="stat-label">Modules</div></div>
+      <div class="stat-item"><div class="stat-number">15</div><div class="stat-label">Videos</div></div>
+      <div class="stat-item"><div class="stat-number">90%</div><div class="stat-label">Cost Reduction</div></div>
+    </div>
+  </section>
+
+  <div class="content-wrapper">
+    <div id="courseContent">
+      <div class="status-box" id="loadingState">
+        <div class="spinner"></div>
+        <p>Loading course outline from Supabase…</p>
+      </div>
+    </div>
+
+    <div class="exam-cta" id="examCta" style="display:none">
+      <h2>🎓 Ready to Get Certified?</h2>
+      <p>Complete all 5 modules then tackle the hands-on case study exam covering ZDR, MCP, and prompt caching.</p>
+      <a href="markdown_renderer.html?file=4_Formula/certification/exam_and_case_study.md" class="btn-cta">
+        <i class="fa-solid fa-file-signature"></i> Start the Exam
+      </a>
+    </div>
+  </div>
+
+  <button id="debugBtn" title="Toggle debug menu"><i class="fa-solid fa-bug"></i></button>
+
+  <!-- Supabase JS CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL  = 'https://rmekfsdhglyiralxvkwc.supabase.co';
+    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZWtmc2RoZ2x5aXJhbHh2a3djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NzYzODgsImV4cCI6MjA5NjM1MjM4OH0.ay6HsmO_CbMGDXL_Dv4DT-paAIAOqlQPfmqqx_mexSU';
+
+    const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+    async function loadCourse() {
+      const container = document.getElementById('courseContent');
+      try {
+        const { data: modules, error } = await client
+          .from('course_modules')
+          .select('*, course_videos(*)')
+          .order('sort_order', { ascending: true });
+
+        if (error) throw error;
+        if (!modules || modules.length === 0) throw new Error('No course data found. Run the seed SQL first.');
+
+        // Sort videos within each module
+        modules.forEach(m => {
+          m.course_videos = (m.course_videos || []).sort((a, b) => a.sort_order - b.sort_order);
+        });
+
+        container.innerHTML = modules.map((mod, idx) => renderModule(mod, idx)).join('');
+        document.getElementById('examCta').style.display = 'block';
+
+        // Expand first module by default
+        const first = container.querySelector('.module-card');
+        if (first) first.classList.add('expanded');
+
+        // Toggle expand/collapse
+        container.querySelectorAll('.module-header').forEach(header => {
+          header.addEventListener('click', () => {
+            header.closest('.module-card').classList.toggle('expanded');
+          });
+        });
+
+      } catch (err) {
+        container.innerHTML = `
+          <div class="status-box error">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <strong>Could not load course data</strong>
+            <p style="margin-top:0.5rem;font-size:0.85rem">${err.message}</p>
+            <p style="margin-top:0.75rem;font-size:0.8rem;color:var(--text-muted)">
+              Run <code style="background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:4px">4_Formula/certification/supabase_seed.sql</code>
+              in the <a href="https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/sql" target="_blank" style="color:var(--accent-cyan)">Supabase SQL Editor</a>.
+            </p>
+          </div>`;
+      }
+    }
+
+    function renderModule(mod, idx) {
+      const videos = (mod.course_videos || []).map(v => renderVideo(v)).join('');
+      const links  = (mod.links || []).map(l =>
+        `<a href="${l.url}" class="module-link-tag" target="_blank"><i class="fa-solid fa-link fa-xs"></i>${l.label}</a>`
+      ).join('');
+
+      return `
+        <div class="module-card" data-module="${mod.id}">
+          <div class="module-header">
+            <div class="module-number-badge">M${mod.module_number}</div>
+            <div class="module-meta">
+              <div class="module-title">${mod.title}</div>
+              <div class="module-desc">${mod.description || ''}</div>
+            </div>
+            <div class="module-toggle"><i class="fa-solid fa-chevron-down"></i></div>
+          </div>
+          <div class="module-body">
+            <div class="videos-grid">${videos}</div>
+            ${links ? `<div class="module-links">${links}</div>` : ''}
+          </div>
+        </div>`;
+    }
+
+    function renderVideo(v) {
+      const bullets = (v.bullets || []).map(b => `<li>${b}</li>`).join('');
+      return `
+        <div class="video-card">
+          <div class="video-label">Video ${v.video_number}</div>
+          <div class="video-title">${v.title}</div>
+          <ul class="video-bullets">${bullets}</ul>
+        </div>`;
+    }
+
+    // Debug cookie toggle
+    document.getElementById('debugBtn').addEventListener('click', () => {
+      const current = document.cookie.includes('debug=true');
+      document.cookie = `debug=${!current};path=/;SameSite=Strict`;
+      alert(`Debug mode ${!current ? 'enabled' : 'disabled'}. Reload to apply.`);
+    });
+
+    loadCourse();
+  </script>
+</body>
+</html>
