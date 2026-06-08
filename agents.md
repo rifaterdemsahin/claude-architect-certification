@@ -85,10 +85,10 @@ This document defines how AI agents interact with the **Claude AI Certification 
 ## ⚙️ Agent Guidelines & Rules
 
 - **7-Stage Structure:** Always align files and updates with the 7-stage folder structure (`1_Real_Unknown` through `7_Testing_Known`).
-- **Secrets Management:** Never commit secrets. Load them at runtime via Azure Key Vault.
+- **Secrets Management:** Never commit secrets. Load them at runtime via Azure Key Vault (e.g., Supabase credentials, Axiom tokens like `AXIOM-TOKEN` and `AXIOM-ORG-ID`).
 - **Micro-commits:** Commit and push after every incremental task.
 - **Thinking & Planning Gate:** Before writing any code (`5_Symbols`), document the approach and reasoning in `4_Formula/llm_thinking_log.md`.
-- **Error & Fix Logging:** Log all runtime errors to `6_Semblance/error.log` and fixes to `6_Semblance/fix.log`.
+- **Error & Fix Logging:** Log all runtime errors to `6_Semblance/error.log` and fixes to `6_Semblance/fix.log`. Additionally, automatically send all error logs to Axiom using the ingestion helper script: `./6_Semblance/send_error.sh "<stage>" "<severity>" "<description>"`.
 - **Active Reflection:** Write a retrospective journal in `6_Semblance/lessons_learned.md` after every milestone.
 - **Menu Sync:** Keep `navigation_config.json` synchronized when adding/removing documents.
 - **SQL Canonical Location:** All Supabase SQL files (schema, seeds) live in `5_Symbols/src/supabase/`. When creating or modifying SQL, always place the file there. Current files:

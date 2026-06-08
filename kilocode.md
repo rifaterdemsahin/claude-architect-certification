@@ -95,7 +95,7 @@ claude-architect-certification/
 - **Keep Debug Menu Config Synchronized** — When markdown files are added, modified, or deleted in any stage, remember to update the debug menu configuration (`navigation_config.json` and the fallback arrays in `index.html` and `markdown_renderer.html`) to reflect these changes immediately.
 - **Architecture Documentation Sync** — When the system architecture changes, immediately update the architecture overview document at `2_Environment/1_architecture.md` (with updated Mermaid diagrams) to keep it working.
 - **Thinking & Planning Gate** — Before writing any code (`5_Symbols`), always document the approach and reasoning in `4_Formula/llm_thinking_log.md`. After execution, append a summary of the LLM reasoning process. `4_Formula` is the mandatory planning stage that encapsulates thinking before action.
-- **Error & Fix Logging** — When any error occurs, append an entry to `6_Semblance/error.log` (format: `[DATE] [STAGE] [SEVERITY] — Description`). When a fix is applied, append to `6_Semblance/fix.log` (format: `[DATE] [STAGE] [STATUS] — Fix description`) with status `APPLIED`. After validation in `7_Testing_Known`, update the status to `VERIFIED`. Capture learnings in `6_Semblance/lessons_learned.md`.
+- **Error & Fix Logging** — When any error occurs, append an entry to `6_Semblance/error.log` (format: `[DATE] [STAGE] [SEVERITY] — Description`) AND automatically send the error to Axiom using the ingestion helper script: `./6_Semblance/send_error.sh "<stage>" "<severity>" "<description>"`. When a fix is applied, append to `6_Semblance/fix.log` (format: `[DATE] [STAGE] [STATUS] — Fix description`) with status `APPLIED`. After validation in `7_Testing_Known`, update the status to `VERIFIED`. Capture learnings in `6_Semblance/lessons_learned.md`.
 
 ### Code Standards
 - Use modern CSS (Flexbox/Grid) for responsive design
@@ -108,7 +108,7 @@ claude-architect-certification/
 - Every folder must have a Testing Checklist with an embedded YouTube video
 
 ### Secrets & Environment
-- Use Azure Key Vault for all secrets — enterprise-grade security at low cost with pay-per-operation pricing
+- Use Azure Key Vault for all secrets — enterprise-grade security at low cost with pay-per-operation pricing (such as `AXIOM-TOKEN` and `AXIOM-ORG-ID` for logging integration)
 - Create a matching Key Vault per environment (dev/staging/prod) in Azure Portal
 - Never push secrets to GitHub
 - Reference `.env.example` for required variables

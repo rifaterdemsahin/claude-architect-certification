@@ -209,3 +209,19 @@
 - Always check the git log or file list at the start of a follow-up task to see if refactoring, renames, or file movements occurred.
 - When mapping resources dynamically for multiple paths (e.g. Module 1 vs Module 2 assets), use a path resolver utility that abstracts folder depth.
 
+## 📅 2026-06-08: Axiom Logging Integration and Env / Key Vault Secrets Configuration
+
+### What went well
+- Configured local `.env` and `.env.example` with the new Axiom API token, org ID, and regional endpoint support (`AXIOM_API_URL`).
+- Created a robust shell utility script at `6_Semblance/send_error.sh` for easy, unified error log ingestion to Axiom via CLI or curl.
+- Updated all agent rules files (`agents.md`, `claude.md`, `gemini.md`, `kilocode.md`, `copilot.md`) to explicitly direct agents to auto-send errors to Axiom setting up regional URLs when needed.
+- Documented Azure Key Vault secret mappings for Axiom tokens (`AXIOM-TOKEN`, `AXIOM-ORG-ID`) for secure production/CI environment deployment.
+
+### Gaps & Challenges
+- Encountered a region mismatch issue (HTTP 400 bad request) because the dataset `videoproduction` was created in Axiom's EU region (`eu-central-1`) while default endpoints target the US. Resolved this by introducing the `AXIOM_API_URL` environment override variable.
+- Encountered a HTTP 403 Forbidden error upon testing the token against the newly created `videoproduction` dataset. Verified that this is a dataset authorization scope/permissions issue in the Axiom settings console.
+
+### Takeaway for Future AI Agents
+- When interacting with Axiom, always verify the target dataset's region and use `https://api.eu.axiom.co` if it's region-locked to EU.
+- Ensure API tokens are verified to have proper Ingest permissions and scoped dataset coverage in the Axiom admin console before deploying automation.
+

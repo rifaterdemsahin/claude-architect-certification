@@ -170,3 +170,11 @@ Record every prompt given to AI agents below. Include the date, agent, and purpo
 **Purpose:** Implement collapsible sections for each phase card on the Master Sanity Checklist dashboard page, with caret rotate animation and localStorage collapse state persistence.  
 **Output:** Updated `5_Symbols/sanity_checklist.html`, `4_Formula/llm_thinking_log.md`, and `6_Semblance/lessons_learned.md`.
 
+---
+
+## 2026-06-08 — Axiom Logging Integration & Key Vault Secrets Setup
+
+**Agent:** Gemini 3.5 Flash (Medium)  
+**Purpose:** Integrate Axiom error logging, configure environment files (.env/.env.example) with the regional Axiom API URL, write send_error.sh script, and update error guidelines in all agent md files.  
+**Output:** Updated `.env`, `.env.example`, `agents.md`, `claude.md`, `gemini.md`, `kilocode.md`, `copilot.md`, `6_Semblance/error.log`, `6_Semblance/fix.log`, `6_Semblance/lessons_learned.md`, and created `6_Semblance/send_error.sh`.
+

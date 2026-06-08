@@ -113,7 +113,7 @@ All commits must follow **Conventional Commits** format: `type(scope): descripti
 - **Keep Debug Menu Config Synchronized** — When markdown files are added, modified, or deleted in any stage, remember to update the debug menu configuration (`navigation_config.json` and the fallback arrays in `index.html` and `markdown_renderer.html`) to reflect these changes immediately.
 - **Architecture Documentation Sync** — When the system architecture changes, immediately update the architecture overview document at `2_Environment/1_architecture.md` (with updated Mermaid diagrams) to keep it working.
 - **Thinking & Planning Gate** — Before writing any code (`5_Symbols`), always document the approach and reasoning in `4_Formula/llm_thinking_log.md`. After execution, append a summary of the LLM reasoning process. `4_Formula` is the mandatory planning stage that encapsulates thinking before action.
-- **Error & Fix Logging** — When any error occurs, append an entry to `6_Semblance/error.log` (format: `[DATE] [STAGE] [SEVERITY] — Description`). When a fix is applied, append to `6_Semblance/fix.log` (format: `[DATE] [STAGE] [STATUS] — Fix description`) with status `APPLIED`. After validation in `7_Testing_Known`, update the status to `VERIFIED`. Capture learnings in `6_Semblance/lessons_learned.md`.
+- **Error & Fix Logging** — When any error occurs, append an entry to `6_Semblance/error.log` (format: `[DATE] [STAGE] [SEVERITY] — Description`) AND automatically send the error to Axiom using the ingestion helper script: `./6_Semblance/send_error.sh "<stage>" "<severity>" "<description>"`. When a fix is applied, append to `6_Semblance/fix.log` (format: `[DATE] [STAGE] [STATUS] — Fix description`) with status `APPLIED`. After validation in `7_Testing_Known`, update the status to `VERIFIED`. Capture learnings in `6_Semblance/lessons_learned.md`.
 - **Kanban Board Sync** — `1_Real_Unknown/kanban.md` is the task tracker. After every meaningful commit, update the kanban to reflect completed items — it should map 1-to-1 with git history milestones.
 - **Link Validation** — A Python script (`test_links.py`) and GitHub Actions workflow validate all internal links after every deploy. Broken links create GitHub Issues tagged `broken-links`. Fix these before closing the issue.
 - **3_Simulation for mockups** — Before building any UI feature, generate a mockup in `3_Simulation/` using the `image-generation` skill. Commit the mockup with `feat(simulation):` before touching `5_Symbols/`.
@@ -129,7 +129,7 @@ All commits must follow **Conventional Commits** format: `type(scope): descripti
 - Every folder must have a Testing Checklist with an embedded YouTube video
 
 ### Secrets & Environment
-- Use Azure Key Vault for all secrets — enterprise-grade security at low cost with pay-per-operation pricing
+- Use Azure Key Vault for all secrets — enterprise-grade security at low cost with pay-per-operation pricing (such as `AXIOM-TOKEN` and `AXIOM-ORG-ID` for logging integration)
 - Create a matching Key Vault per environment (dev/staging/prod) in Azure Portal
 - Never push secrets to GitHub
 - Reference `.env.example` for required variables
@@ -182,7 +182,7 @@ The following Claude Code skills are needed to operate this project effectively.
 
 ### 📋 Error Tracking Workflow
 When errors occur, use this skill chain:
-1. Log to `6_Semblance/error.log` → root cause in `gap_analysis.md`
+1. Log to `6_Semblance/error.log` and send to Axiom via `./6_Semblance/send_error.sh "<stage>" "<severity>" "<message>"` → root cause in `gap_analysis.md`
 2. Apply fix → log to `6_Semblance/fix.log` with status `APPLIED`
 3. Run `/verify` to confirm fix in browser
 4. Run `/code-review` on the diff
