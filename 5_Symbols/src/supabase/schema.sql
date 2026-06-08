@@ -296,3 +296,34 @@ ALTER TABLE scenes  ADD COLUMN IF NOT EXISTS video_id  INTEGER REFERENCES videos
 ALTER TABLE checklist_progress ADD COLUMN IF NOT EXISTS in_progress BOOLEAN DEFAULT FALSE;
 -- checklist_items: hyperlink reference per item
 ALTER TABLE checklist_items ADD COLUMN IF NOT EXISTS item_url TEXT DEFAULT '';
+
+-- Production shot list: audio URL column for per-scene voice-over
+ALTER TABLE scenes ADD COLUMN IF NOT EXISTS audio_url TEXT DEFAULT '';
+
+-- =============================================================================
+-- CRUD Policies for Scenes (production shot list)
+-- =============================================================================
+
+-- Scenes INSERT/UPDATE/DELETE
+DROP POLICY IF EXISTS anon_insert_scenes ON scenes;
+CREATE POLICY anon_insert_scenes ON scenes FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS anon_update_scenes ON scenes;
+CREATE POLICY anon_update_scenes ON scenes FOR UPDATE USING (true);
+DROP POLICY IF EXISTS anon_delete_scenes ON scenes;
+CREATE POLICY anon_delete_scenes ON scenes FOR DELETE USING (true);
+
+-- Scene cues INSERT/UPDATE/DELETE
+DROP POLICY IF EXISTS anon_insert_scene_cues ON scene_cues;
+CREATE POLICY anon_insert_scene_cues ON scene_cues FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS anon_update_scene_cues ON scene_cues;
+CREATE POLICY anon_update_scene_cues ON scene_cues FOR UPDATE USING (true);
+DROP POLICY IF EXISTS anon_delete_scene_cues ON scene_cues;
+CREATE POLICY anon_delete_scene_cues ON scene_cues FOR DELETE USING (true);
+
+-- EDL entries INSERT/UPDATE/DELETE
+DROP POLICY IF EXISTS anon_insert_edl_entries ON edl_entries;
+CREATE POLICY anon_insert_edl_entries ON edl_entries FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS anon_update_edl_entries ON edl_entries;
+CREATE POLICY anon_update_edl_entries ON edl_entries FOR UPDATE USING (true);
+DROP POLICY IF EXISTS anon_delete_edl_entries ON edl_entries;
+CREATE POLICY anon_delete_edl_entries ON edl_entries FOR DELETE USING (true);

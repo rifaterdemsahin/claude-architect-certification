@@ -324,6 +324,45 @@
 
     /* Unified Nav Bar */
 
+    /* Scene Edit/Create Form Styles */
+    .scene-form-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(3, 7, 18, 0.85); backdrop-filter: blur(8px);
+      z-index: 1000; display: none; align-items: center; justify-content: center;
+      padding: 40px;
+    }
+    .scene-form-overlay.open { display: flex; }
+    .scene-form-modal {
+      background: var(--bg-card); border: 1px solid var(--border-glow);
+      border-radius: 32px; padding: 40px; max-width: 900px; width: 100%;
+      max-height: 90vh; overflow-y: auto; position: relative;
+    }
+    .scene-form-modal h2 { font-family: var(--font-title); font-size: 1.8rem; margin-bottom: 24px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-grid .full-width { grid-column: 1 / -1; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group label { font-size: 0.8rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 0.1em; }
+    .form-group input, .form-group textarea, .form-group select {
+      background: rgba(3, 7, 18, 0.8); color: white;
+      border: 2px solid rgba(255,255,255,0.08); border-radius: 10px;
+      padding: 10px 14px; font-family: var(--font-body); font-size: 0.9rem;
+      outline: none; transition: all 0.3s;
+    }
+    .form-group input:focus, .form-group textarea:focus { border-color: var(--primary); box-shadow: 0 0 12px var(--primary-glow); }
+    .form-group textarea { min-height: 80px; resize: vertical; }
+    .form-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; }
+    .btn-form-save { background: linear-gradient(135deg, var(--primary), #7c3aed); color: white; border: none; padding: 12px 28px; border-radius: 12px; font-weight: 700; cursor: pointer; }
+    .btn-form-cancel { background: rgba(255,255,255,0.08); color: var(--text-main); border: 1px solid rgba(255,255,255,0.1); padding: 12px 28px; border-radius: 12px; font-weight: 700; cursor: pointer; }
+    .btn-form-delete { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: none; padding: 12px 28px; border-radius: 12px; font-weight: 700; cursor: pointer; }
+    .array-field { background: rgba(0,0,0,0.3); border-radius: 12px; padding: 12px; margin-bottom: 8px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .array-field input { flex: 1; min-width: 100px; }
+    .btn-add-row { background: var(--secondary); color: white; border: none; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 700; }
+    .btn-remove-row { background: rgba(239,68,68,0.3); color: #ef4444; border: 1px solid #ef4444; padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; }
+    .scene-edit-btn { position: absolute; top: 12px; right: 12px; z-index: 30; display: flex; gap: 6px; }
+    .scene-edit-btn button { background: rgba(0,0,0,0.6); color: white; border: 1px solid rgba(255,255,255,0.15); padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 0.75rem; backdrop-filter: blur(4px); transition: all 0.2s; }
+    .scene-edit-btn button:hover { background: var(--primary); border-color: var(--primary); }
+    .create-scene-btn { display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 14px 28px; border-radius: 14px; font-weight: 700; cursor: pointer; font-size: 1rem; margin-top: 16px; }
+    #sceneAudioUpload { margin-top: 8px; }
   </style>
   <script src="../../../../../shared/nav.js"></script>
 </head>
@@ -390,6 +429,75 @@
     <img class="modal-content" id="modalImg">
     <div id="modal-text" class="modal-content" style="color: white; font-size: 2rem; font-style: italic; text-align: center; display: none;"></div>
     <div id="modal-caption"></div>
+  </div>
+
+  <!-- Scene Create/Edit Form Modal -->
+  <div class="scene-form-overlay" id="sceneFormOverlay">
+    <div class="scene-form-modal">
+      <h2 id="sceneFormTitle">🎬 Create New Scene</h2>
+      <input type="hidden" id="editSceneId" value="">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Scene Number</label>
+          <input type="number" id="fSceneNumber" value="1" min="1">
+        </div>
+        <div class="form-group">
+          <label>Timing</label>
+          <input type="text" id="fTiming" placeholder="e.g. 0:00 - 0:30">
+        </div>
+        <div class="form-group full-width">
+          <label>Script / Dialogue</label>
+          <textarea id="fScript" placeholder="Enter the script text for this scene..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Background Image URL <span style="color:var(--text-muted);font-weight:400;font-size:0.7rem;">(Upload to Google Drive → paste share link)</span></label>
+          <input type="text" id="fBg" placeholder="https://drive.google.com/file/d/... or assets/...png">
+        </div>
+        <div class="form-group">
+          <label>Voice-over Audio URL <span style="color:var(--text-muted);font-weight:400;font-size:0.7rem;">(Upload to Google Drive → paste share link)</span></label>
+          <input type="text" id="fAudioUrl" placeholder="https://drive.google.com/file/d/... or .wav filename">
+        </div>
+        <div class="form-group">
+          <label>Lower Third Image URL <span style="color:var(--text-muted);font-weight:400;font-size:0.7rem;">(Google Drive)</span></label>
+          <input type="text" id="fLtImg" placeholder="https://drive.google.com/file/d/... or assets/overlays/lt_intro.png">
+        </div>
+        <div class="form-group">
+          <label>Lower Third Main Text</label>
+          <input type="text" id="fLtMain" placeholder="Claude Architect Masterclass">
+        </div>
+        <div class="form-group">
+          <label>Lower Third Sub Text</label>
+          <input type="text" id="fLtSub" placeholder="Module 1: Introduction">
+        </div>
+        <div class="form-group">
+          <label>Overlay Lower Third URL <span style="color:var(--text-muted);font-weight:400;font-size:0.7rem;">(Google Drive)</span></label>
+          <input type="text" id="fOverlayLt" placeholder="https://drive.google.com/file/d/... or assets/overlays/lt_intro.png">
+        </div>
+        <div class="form-group">
+          <label>Overlay Text Image URL <span style="color:var(--text-muted);font-weight:400;font-size:0.7rem;">(Google Drive)</span></label>
+          <input type="text" id="fOverlayText" placeholder="https://drive.google.com/file/d/... or assets/overlays/overlay_systems.png">
+        </div>
+        <div class="form-group">
+          <label>Bundle ZIP URL <span style="color:var(--text-muted);font-weight:400;font-size:0.7rem;">(Google Drive)</span></label>
+          <input type="text" id="fBundle" placeholder="https://drive.google.com/file/d/... or assets/archives/scene1.zip">
+        </div>
+
+        <div class="form-group full-width">
+          <label>🎯 On-Screen Cues <button class="btn-add-row" onclick="addCueRow()">+ Add Cue</button></label>
+          <div id="cuesContainer"></div>
+        </div>
+
+        <div class="form-group full-width">
+          <label>📜 EDL Entries <button class="btn-add-row" onclick="addEdlRow()">+ Add EDL</button></label>
+          <div id="edlContainer"></div>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn-form-delete" id="btnDeleteScene" onclick="deleteScene()" style="display:none;">🗑 Delete Scene</button>
+        <button class="btn-form-cancel" onclick="closeSceneForm()">Cancel</button>
+        <button class="btn-form-save" onclick="saveSceneForm()">💾 Save to Supabase</button>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -679,7 +787,8 @@
         container.innerHTML = `
           <div style="text-align: center; padding: 60px; background: var(--bg-card); border-radius: 24px; border: 1px dashed rgba(255,255,255,0.1);">
             <p style="font-size: 1.5rem; color: var(--text-muted); margin-bottom: 20px;">🎬 No scene data found for Module ${moduleKey}, Section ${sectionKey}.</p>
-            <p style="color: var(--text-muted);">You can seed scenes in the <a href="../../../../src/supabase/admin.html" style="color: var(--primary); text-decoration: underline;">Database Admin</a>.</p>
+            <p style="color: var(--text-muted); margin-bottom: 24px;">Create a new shot with script, voice-over, background, lower thirds, cues, and EDL.</p>
+            <button class="create-scene-btn" onclick="openSceneForm()">🎬 Create New Scene</button>
           </div>
         `;
         return;
@@ -725,7 +834,11 @@
         const bundleUrl = getAssetPath(s.bundle, moduleKey, sectionKey);
 
         return `
-          <div class="review-grid">
+          <div class="review-grid" style="position:relative;">
+            <div class="scene-edit-btn">
+              <button onclick="openSceneForm(${s.dbId})" title="Edit scene">✏️ Edit</button>
+              <button onclick="deleteSceneById(${s.dbId}, ${s.id})" title="Delete scene" style="border-color:#ef4444;color:#ef4444;">🗑</button>
+            </div>
             <div class="script-col">
               <div class="script-text clickable" onclick="openModal(this.innerHTML, 'Script Track', true)">
                 ${s.script}
@@ -810,8 +923,10 @@
             const dbScenes = await res.json();
             if (dbScenes && dbScenes.length) {
               scenes = dbScenes.sort((a,b) => a.scene_number - b.scene_number).map(s => ({
+                dbId: s.id,
                 id: s.scene_number,
                 script: s.script,
+                timing: s.timing || '',
                 bg: s.bg_image,
                 ltImg: s.lt_image,
                 ltMain: s.lt_main,
@@ -819,6 +934,7 @@
                 overlayLt: s.overlay_lt,
                 overlayText: s.overlay_text,
                 bundle: s.bundle_url,
+                audioUrl: s.audio_url || '',
                 cues: (s.scene_cues || []).sort((a,b) => a.sort_order - b.sort_order).map(c => ({
                   icon: c.icon, label: c.label, prompt: c.prompt || ''
                 })),
@@ -849,9 +965,13 @@
       document.title = 'Production Shot List: ' + title;
 
       const audioPlayer = document.getElementById('master-audio');
-      // Resolve audio file path
-      const audioFileName = `module${moduleKey}_section${sectionKey}.wav`;
-      audioPlayer.src = getAssetPath(audioFileName, moduleKey, sectionKey);
+      // Try per-scene audio URL first, fall back to filename convention
+      if (scenes && scenes.length > 0 && scenes[0].audioUrl) {
+        audioPlayer.src = toGDriveEmbedUrl(scenes[0].audioUrl);
+      } else {
+        const audioFileName = `module${moduleKey}_section${sectionKey}.wav`;
+        audioPlayer.src = getAssetPath(audioFileName, moduleKey, sectionKey);
+      }
 
       renderScenes(scenes);
     }
@@ -871,4 +991,258 @@
       // Load scenes data
       await loadDataAndRender();
     });
+
+    // 🔗 Google Drive URL helper — converts share links to embed URLs
+    function toGDriveEmbedUrl(url) {
+      if (!url) return '';
+      if (!url.includes('drive.google.com')) return url;
+      const match = url.match(/\/file\/d\/([^/]+)/) || url.match(/id=([^&]+)/);
+      if (match) {
+        const id = match[1];
+        const isAudio = url.match(/\.(wav|mp3|ogg|m4a|flac)/i) || url.includes('audio');
+        const isArchive = url.match(/\.(zip|tar|gz)/i);
+        if (isArchive) return `https://drive.google.com/uc?export=download&id=${id}`;
+        if (isAudio) return `https://drive.google.com/uc?export=download&id=${id}`;
+        return `https://drive.google.com/uc?export=view&id=${id}`;
+      }
+      return url;
+    }
+
+    // Update getAssetPath to handle Google Drive URLs
+    const origGetAssetPath = getAssetPath;
+    function getAssetPath(rawPath, moduleNum, sectionNum) {
+      if (!rawPath) return '';
+      if (rawPath.includes('drive.google.com')) return toGDriveEmbedUrl(rawPath);
+      return origGetAssetPath(rawPath, moduleNum, sectionNum);
+    }
+
+    // 🎬 Scene CRUD — Form open/close
+    function openSceneForm(sceneDbId) {
+      const overlay = document.getElementById('sceneFormOverlay');
+      document.getElementById('editSceneId').value = sceneDbId || '';
+      document.getElementById('sceneFormTitle').textContent = sceneDbId ? '✏️ Edit Scene' : '🎬 Create New Scene';
+      document.getElementById('btnDeleteScene').style.display = sceneDbId ? 'inline-block' : 'none';
+
+      // Reset form
+      document.getElementById('fSceneNumber').value = '1';
+      document.getElementById('fTiming').value = '';
+      document.getElementById('fScript').value = '';
+      document.getElementById('fBg').value = '';
+      document.getElementById('fAudioUrl').value = '';
+      document.getElementById('fLtImg').value = '';
+      document.getElementById('fLtMain').value = '';
+      document.getElementById('fLtSub').value = '';
+      document.getElementById('fOverlayLt').value = '';
+      document.getElementById('fOverlayText').value = '';
+      document.getElementById('fBundle').value = '';
+      document.getElementById('cuesContainer').innerHTML = '';
+      document.getElementById('edlContainer').innerHTML = '';
+
+      // If editing, load existing data
+      if (sceneDbId && window._scenesData) {
+        const scene = window._scenesData.find(s => s.dbId === sceneDbId);
+        if (scene) {
+          document.getElementById('fSceneNumber').value = scene.id;
+          document.getElementById('fTiming').value = scene.timing || '';
+          document.getElementById('fScript').value = scene.script || '';
+          document.getElementById('fBg').value = scene.bg || '';
+          document.getElementById('fAudioUrl').value = scene.audioUrl || '';
+          document.getElementById('fLtImg').value = scene.ltImg || '';
+          document.getElementById('fLtMain').value = scene.ltMain || '';
+          document.getElementById('fLtSub').value = scene.ltSub || '';
+          document.getElementById('fOverlayLt').value = scene.overlayLt || '';
+          document.getElementById('fOverlayText').value = scene.overlayText || '';
+          document.getElementById('fBundle').value = scene.bundle || '';
+
+          if (scene.cues) scene.cues.forEach(c => addCueRow(c.icon, c.label, c.prompt));
+          if (scene.edl) scene.edl.forEach(e => {
+            const colonIdx = e.indexOf(':');
+            if (colonIdx !== -1) addEdlRow(e.substring(0, colonIdx).trim(), e.substring(colonIdx + 1).trim());
+            else addEdlRow('', e);
+          });
+        }
+      }
+
+      overlay.classList.add('open');
+    }
+
+    function closeSceneForm() {
+      document.getElementById('sceneFormOverlay').classList.remove('open');
+    }
+
+    // Cues dynamic rows
+    function addCueRow(icon = '', label = '', prompt = '') {
+      const container = document.getElementById('cuesContainer');
+      const div = document.createElement('div');
+      div.className = 'array-field';
+      div.innerHTML = `
+        <input type="text" placeholder="Icon emoji" value="${icon}" style="max-width:80px;" oninput="this.nextElementSibling.nextElementSibling.nextElementSibling.value=this.value">
+        <input type="text" placeholder="Label (HTML ok)" value="${label.replace(/"/g, '&quot;')}" style="flex:2;">
+        <input type="text" placeholder="Prompt (optional)" value="${prompt.replace(/"/g, '&quot;')}" style="flex:3;">
+        <button class="btn-remove-row" onclick="this.parentElement.remove()">✕</button>
+      `;
+      container.appendChild(div);
+    }
+
+    // EDL dynamic rows
+    function addEdlRow(timing = '', description = '') {
+      const container = document.getElementById('edlContainer');
+      const div = document.createElement('div');
+      div.className = 'array-field';
+      div.innerHTML = `
+        <input type="text" placeholder="Timing (e.g. 0:00)" value="${timing}" style="max-width:120px;">
+        <input type="text" placeholder="Description" value="${description.replace(/"/g, '&quot;')}" style="flex:1;">
+        <button class="btn-remove-row" onclick="this.parentElement.remove()">✕</button>
+      `;
+      container.appendChild(div);
+    }
+
+    // 💾 Save scene to Supabase
+    async function saveSceneForm() {
+      const supabaseUrl = localStorage.getItem('supabase_url') || 'https://rmekfsdhglyiralxvkwc.supabase.co';
+      const supabaseKey = localStorage.getItem('supabase_anon_key') || '';
+      if (!supabaseKey) { alert('Supabase anon key not found. Set it in localStorage: supabase_anon_key'); return; }
+
+      const sceneDbId = document.getElementById('editSceneId').value;
+      const sceneNumber = parseInt(document.getElementById('fSceneNumber').value) || 1;
+      const moduleNum = parseInt(document.getElementById('module-select').value) || 1;
+      const sectionNum = parseInt(document.getElementById('video-select').value) || 1;
+
+      // Collect cues
+      const cueInputs = document.getElementById('cuesContainer').querySelectorAll('.array-field');
+      const cues = [];
+      cueInputs.forEach((el, idx) => {
+        const inputs = el.querySelectorAll('input');
+        if (inputs.length >= 3) {
+          cues.push({ icon: inputs[0].value, label: inputs[1].value, prompt: inputs[2].value, sort_order: idx });
+        }
+      });
+
+      // Collect EDL
+      const edlInputs = document.getElementById('edlContainer').querySelectorAll('.array-field');
+      const edlEntries = [];
+      edlInputs.forEach((el, idx) => {
+        const inputs = el.querySelectorAll('input');
+        if (inputs.length >= 2) {
+          edlEntries.push({ timing: inputs[0].value, description: inputs[1].value, sort_order: idx });
+        }
+      });
+
+      const sceneBody = {
+        module_number: moduleNum,
+        section_number: sectionNum,
+        scene_number: sceneNumber,
+        timing: document.getElementById('fTiming').value,
+        script: document.getElementById('fScript').value,
+        bg_image: document.getElementById('fBg').value,
+        audio_url: document.getElementById('fAudioUrl').value,
+        lt_image: document.getElementById('fLtImg').value,
+        lt_main: document.getElementById('fLtMain').value,
+        lt_sub: document.getElementById('fLtSub').value,
+        overlay_lt: document.getElementById('fOverlayLt').value,
+        overlay_text: document.getElementById('fOverlayText').value,
+        bundle_url: document.getElementById('fBundle').value
+      };
+
+      const headers = { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
+
+      try {
+        let sceneResult;
+        if (sceneDbId) {
+          // UPDATE existing scene
+          const res = await fetch(`${supabaseUrl}/rest/v1/scenes?id=eq.${sceneDbId}`, {
+            method: 'PATCH', headers: { ...headers, 'Prefer': 'return=representation' },
+            body: JSON.stringify(sceneBody)
+          });
+          if (!res.ok) throw new Error(`Update failed: ${await res.text()}`);
+          sceneResult = await res.json();
+        } else {
+          // INSERT new scene
+          const res = await fetch(`${supabaseUrl}/rest/v1/scenes`, {
+            method: 'POST', headers,
+            body: JSON.stringify(sceneBody)
+          });
+          if (!res.ok) throw new Error(`Insert failed: ${await res.text()}`);
+          sceneResult = await res.json();
+        }
+
+        const savedScene = Array.isArray(sceneResult) ? sceneResult[0] : sceneResult;
+        const newSceneId = savedScene.id;
+
+        // Replace cues: delete all, re-insert
+        if (sceneDbId) {
+          await fetch(`${supabaseUrl}/rest/v1/scene_cues?scene_id=eq.${newSceneId}`, {
+            method: 'DELETE', headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` }
+          });
+          await fetch(`${supabaseUrl}/rest/v1/edl_entries?scene_id=eq.${newSceneId}`, {
+            method: 'DELETE', headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` }
+          });
+        }
+
+        // Insert cues
+        for (const cue of cues) {
+          await fetch(`${supabaseUrl}/rest/v1/scene_cues`, {
+            method: 'POST', headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ scene_id: newSceneId, icon: cue.icon, label: cue.label, prompt: cue.prompt, sort_order: cue.sort_order })
+          });
+        }
+
+        // Insert EDL entries
+        for (const edl of edlEntries) {
+          await fetch(`${supabaseUrl}/rest/v1/edl_entries`, {
+            method: 'POST', headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ scene_id: newSceneId, timing: edl.timing, description: edl.description, sort_order: edl.sort_order })
+          });
+        }
+
+        closeSceneForm();
+        await loadDataAndRender();
+        alert('✅ Scene saved to Supabase!');
+      } catch (err) {
+        console.error('Save scene error:', err);
+        alert('❌ Failed to save scene: ' + err.message);
+      }
+    }
+
+    // 🗑 Delete scene
+    async function deleteSceneById(dbId, sceneNum) {
+      const supabaseUrl = localStorage.getItem('supabase_url') || 'https://rmekfsdhglyiralxvkwc.supabase.co';
+      const supabaseKey = localStorage.getItem('supabase_anon_key') || '';
+      if (!supabaseKey) { alert('Supabase anon key not found.'); return; }
+      if (!confirm(`Delete Scene ${sceneNum}? This will also remove all cues and EDL entries.`)) return;
+
+      try {
+        const res = await fetch(`${supabaseUrl}/rest/v1/scenes?id=eq.${dbId}`, {
+          method: 'DELETE', headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` }
+        });
+        if (!res.ok) throw new Error(`Delete failed: ${await res.text()}`);
+        await loadDataAndRender();
+        alert('🗑 Scene deleted.');
+      } catch (err) {
+        console.error('Delete scene error:', err);
+        alert('❌ Failed to delete scene: ' + err.message);
+      }
+    }
+
+    // Also expose delete from form
+    async function deleteScene() {
+      const dbId = document.getElementById('editSceneId').value;
+      const sceneNum = document.getElementById('fSceneNumber').value;
+      if (dbId) await deleteSceneById(parseInt(dbId), sceneNum);
+    }
+
+    // Store scenes in window for editing
+    const origRenderScenes = renderScenes;
+    function renderScenes(scenes) {
+      window._scenesData = scenes;
+      origRenderScenes(scenes);
+      // Add a "Create New Scene" button at the bottom
+      const container = document.getElementById('scenes-container');
+      if (scenes && scenes.length > 0) {
+        const btnDiv = document.createElement('div');
+        btnDiv.style.cssText = 'text-align:center;margin-top:32px;';
+        btnDiv.innerHTML = '<button class="create-scene-btn" onclick="openSceneForm()">➕ Add Another Scene</button>';
+        container.appendChild(btnDiv);
+      }
+    }
   </script>
