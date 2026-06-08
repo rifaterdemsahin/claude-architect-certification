@@ -294,6 +294,44 @@
       background: var(--primary); color: white; transform: translateY(-4px);
     }
 
+    /* Asset Modal */
+    .modal {
+      display: none; position: fixed; z-index: 2000;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      align-items: center; justify-content: center;
+      flex-direction: column; gap: 16px;
+      cursor: zoom-out;
+    }
+    .modal[style*="display: block"] { display: flex !important; }
+    .modal-content {
+      max-width: 90vw; max-height: 80vh;
+      object-fit: contain;
+      border-radius: 12px;
+      box-shadow: 0 0 60px rgba(99, 102, 241, 0.4);
+      animation: modalZoomIn 0.2s ease;
+    }
+    @keyframes modalZoomIn {
+      from { transform: scale(0.92); opacity: 0; }
+      to   { transform: scale(1);    opacity: 1; }
+    }
+    .modal-close {
+      position: absolute; top: 24px; right: 40px;
+      color: white; font-size: 3rem; font-weight: 300;
+      cursor: pointer; line-height: 1; opacity: 0.7;
+      transition: opacity 0.15s;
+      user-select: none;
+    }
+    .modal-close:hover { opacity: 1; }
+    #modal-caption {
+      color: rgba(255,255,255,0.6);
+      font-size: 0.85rem; letter-spacing: 0.1em;
+      text-transform: uppercase; font-weight: 700;
+    }
+    .clickable { cursor: zoom-in; }
+
     /* Unified Nav Bar */
 
     /* Scene Edit/Create Form Styles */
@@ -703,8 +741,9 @@
       const modalText = document.getElementById("modal-text");
       const captionText = document.getElementById("modal-caption");
       
-      modal.style.display = "block";
-      
+      modal.style.display = "flex";
+      captionText.textContent = caption || '';
+
       if (isText) {
         modalImg.style.display = "none";
         modalText.style.display = "block";
