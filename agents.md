@@ -82,6 +82,17 @@ This document defines how AI agents interact with the **Claude AI Certification 
 
 ---
 
+## 🧠 Required Agent Skills
+
+| Skill | Command / Tool | Purpose |
+|-------|----------------|---------|
+| `gdrive-search` | `/gdrive-search` | Search Google Drive for reference documents |
+| `axiom-logs` | `./6_Semblance/get_logs.sh [limit]` | Pull latest error logs from Axiom dataset to diagnose issues |
+| `video-transcribe` | `/video-transcribe` | Transcribe YouTube demos into markdown |
+| `image-generation` | `/image-generation` | Generate visual mockups in `3_Simulation/` |
+
+---
+
 ## ⚙️ Agent Guidelines & Rules
 
 - **7-Stage Structure:** Always align files and updates with the 7-stage folder structure (`1_Real_Unknown` through `7_Testing_Known`).

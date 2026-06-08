@@ -150,6 +150,7 @@ The following Claude Code skills are needed to operate this project effectively.
 | Skill | Purpose |
 |-------|---------|
 | `gdrive-search` | Search Second Brain Google Drive for reference docs, images, and research artifacts |
+| `axiom-logs` | Pull latest error logs from Axiom dataset using `./6_Semblance/get_logs.sh [limit]` to diagnose issues |
 
 ### ✍️ Content & Publishing
 | Skill | Purpose |
