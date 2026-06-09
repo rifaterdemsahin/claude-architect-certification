@@ -234,6 +234,35 @@ INSERT INTO checklist_items (phase, item_name, item_desc, sort_order) VALUES
 
 document.getElementById('sql-block').textContent = SEED_SQL;
 
+// ── Cookie helpers ─────────────────────────────────────────────────────────
+function setCookie(name, value, days) {
+  const d = new Date();
+  d.setTime(d.getTime() + (days || 365) * 24 * 60 * 60 * 1000);
+  document.cookie = name + '=' + encodeURIComponent(value) + ';path=/;expires=' + d.toUTCString() + ';SameSite=Lax';
+}
+function getCookie(name) {
+  const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+  return match ? decodeURIComponent(match[2]) : '';
+}
+function loadCreds() {
+  const cookieUrl = getCookie('sb_url');
+  const cookieKey  = getCookie('sb_key');
+  const localUrl  = localStorage.getItem('sb_url');
+  const localKey   = localStorage.getItem('sb_key');
+  return {
+    url: cookieUrl || localUrl || 'https://rmekfsdhglyiralxvkwc.supabase.co',
+    key: cookieKey  || localKey  || ''
+  };
+}
+function saveCreds(url, key) {
+  setCookie('sb_url', url);
+  setCookie('sb_key', key);
+  localStorage.setItem('sb_url', url);
+  localStorage.setItem('sb_key', key);
+  localStorage.setItem('ivq_sb_url', url);
+  localStorage.setItem('ivq_sb_key', key);
+}
+
 // ── Supabase helpers ─────────────────────────────────────────────────────────
 let SB_URL = '', SB_KEY = '', USER_ID = '';
 
@@ -458,8 +487,7 @@ async function connectAndLoad() {
   SB_URL = document.getElementById('sb-url').value.trim().replace(/\/$/, '');
   SB_KEY = document.getElementById('sb-key').value.trim();
   if (!SB_URL || !SB_KEY) { showToast('Enter URL and key first'); return; }
-  localStorage.setItem('sb_url', SB_URL);
-  localStorage.setItem('sb_key', SB_KEY);
+  saveCreds(SB_URL, SB_KEY);
 
   const status = document.getElementById('conn-status');
   status.textContent = '⏳ Connecting…';
@@ -522,17 +550,16 @@ function showToast(msg) {
 
 // ── Init ─────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function() {
-  const savedUrl = localStorage.getItem('sb_url') || 'https://rmekfsdhglyiralxvkwc.supabase.co';
-  const savedKey = localStorage.getItem('sb_key') || '';
-  document.getElementById('sb-url').value = savedUrl;
-  document.getElementById('sb-key').value = savedKey;
+  const creds = loadCreds();
+  document.getElementById('sb-url').value = creds.url;
+  document.getElementById('sb-key').value = creds.key;
 
   USER_ID = localStorage.getItem('producer_user_id') || ('user-' + Math.random().toString(36).slice(2, 9));
   localStorage.setItem('producer_user_id', USER_ID);
 
-  if (savedUrl && savedKey) {
-    SB_URL = savedUrl.replace(/\/$/, '');
-    SB_KEY = savedKey;
+  if (creds.url && creds.key) {
+    SB_URL = creds.url.replace(/\/$/, '');
+    SB_KEY = creds.key;
     loadAll().catch(() => {
       document.getElementById('configDetails').setAttribute('open', '');
     });

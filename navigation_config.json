@@ -41,6 +41,10 @@
             {
               "label": "🤖 Claude Guide",
               "url": "claude.md"
+            },
+            {
+              "label": "🔀 OpenRouter Logs",
+              "url": "https://openrouter.ai/logs"
             }
           ]
         }
@@ -56,10 +60,6 @@
         {
           "label": "8. ✅ Production Checklist",
           "url": "5_Symbols/production/prod/checklist.html"
-        },
-        {
-          "label": "9. 📊 Readiness Plan",
-          "url": "markdown_renderer.html?file=5_Symbols/production/prod/readiness_plan.md"
         },
         {
           "label": "🛠️ Tools",
@@ -80,15 +80,15 @@
       "label": "📦 Post Prod",
       "children": [
         {
-          "label": "10. 🧭 Certification Guide & Exam",
+          "label": "9. 🧭 Certification Guide & Exam",
           "url": "markdown_renderer.html?file=4_Formula/certification/exam_and_case_study.md"
         },
         {
-          "label": "11. 🔥 Join $10/mo",
+          "label": "10. 🔥 Join $10/mo",
           "url": "5_Symbols/production/publish/membership.html"
         },
         {
-          "label": "12. 💰 Business Plan",
+          "label": "11. 💰 Business Plan",
           "url": "markdown_renderer.html?file=5_Symbols/production/postprod/business_plan.md"
         },
         {
@@ -103,8 +103,20 @@
               "url": "https://studio.youtube.com/"
             },
             {
+              "label": "🎬 Channel Playlist",
+              "url": "https://www.youtube.com/watch?v=F8IBooe3bXY&list=PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy/"
+            },
+            {
+              "label": "🎬 Studio Playlist Editor",
+              "url": "https://studio.youtube.com/playlist/PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy/edit"
+            },
+            {
               "label": "✨ Gemini Guide",
               "url": "gemini.md"
+            },
+            {
+              "label": "📜 Commit History",
+              "url": "https://github.com/rifaterdemsahin/claude-architect-certification/commits/main"
             }
           ]
         }
@@ -340,10 +352,6 @@
     { "label": "   ├─ 🧪 Sanity Gate (Pre-Prod→Post)", "url": "5_Symbols/production/preprod/sanity_check.html" },
     { "label": "   ├─ ✅ Production Checklist", "url": "5_Symbols/production/prod/checklist.html" },
     {
-      "label": "   ├─ 📊 Production Readiness Plan",
-      "url": "markdown_renderer.html?file=5_Symbols/production/prod/readiness_plan.md"
-    },
-    {
       "label": "   ├─ 📦 Assets README (Module 2)",
       "url": "markdown_renderer.html?file=5_Symbols/production/postprod/module-2/section-1/assets/README.md"
     },
@@ -380,6 +388,10 @@
     {
       "label": "   ├─ 🔗 CI Broken Links",
       "url": "markdown_renderer.html?file=6_Semblance/ci_broken_links_label_failure.md"
+    },
+    {
+      "label": "   ├─ 🔗 CI Setup-Node Caching Error",
+      "url": "markdown_renderer.html?file=6_Semblance/error_ci_setup_node_cache_missing_path.md"
     },
     {
       "label": "   ├─ 🔍 Gap Analysis",

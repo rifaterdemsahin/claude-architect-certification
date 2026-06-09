@@ -105,7 +105,6 @@
     { label: '🎥 Production', children: [
       { label: '7. 📸 Shot List & Assets', url: '5_Symbols/production_shotlist.html' },
       { label: '8. ✅ Production Checklist', url: '5_Symbols/production/prod/checklist.html' },
-      { label: '9. 📊 Readiness Plan', url: 'markdown_renderer.html?file=5_Symbols/production/prod/readiness_plan.md' },
       {
         label: '🛠️ Tools',
         children: [
@@ -115,14 +114,16 @@
       }
     ]},
     { label: '📦 Post Prod', children: [
-      { label: '10. 🧭 Certification Guide & Exam', url: 'markdown_renderer.html?file=4_Formula/certification/exam_and_case_study.md' },
-      { label: '11. 🔥 Join $10/mo', url: '5_Symbols/production/publish/membership.html' },
-      { label: '12. 💰 Business Plan', url: 'markdown_renderer.html?file=5_Symbols/production/postprod/business_plan.md' },
+      { label: '9. 🧭 Certification Guide & Exam', url: 'markdown_renderer.html?file=4_Formula/certification/exam_and_case_study.md' },
+      { label: '10. 🔥 Join $10/mo', url: '5_Symbols/production/publish/membership.html' },
+      { label: '11. 💰 Business Plan', url: 'markdown_renderer.html?file=5_Symbols/production/postprod/business_plan.md' },
       {
         label: '🛠️ Tools',
         children: [
           { label: '🎨 Canva', url: 'https://canva.com' },
           { label: '📺 YouTube Studio', url: 'https://studio.youtube.com/' },
+          { label: '🎬 Channel Playlist', url: 'https://www.youtube.com/watch?v=F8IBooe3bXY&list=PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy/' },
+          { label: '🎬 Studio Playlist Editor', url: 'https://studio.youtube.com/playlist/PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy/edit' },
           { label: '✨ Gemini Guide', url: 'gemini.md' }
         ]
       }

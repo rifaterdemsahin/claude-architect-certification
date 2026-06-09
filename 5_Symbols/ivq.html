@@ -135,7 +135,8 @@
       <div class="config-row">
         <input id="sb-url" type="text" placeholder="Supabase URL (https://xxx.supabase.co)">
         <input id="sb-key" type="password" placeholder="Anon / service role key">
-        <button class="btn btn-primary" onclick="connect()">Connect</button>
+        <button class="btn btn-green" onclick="testConnection()">🔍 Test</button>
+        <button class="btn btn-primary" onclick="connect()">💾 Connect & Save</button>
       </div>
     </details>
 
@@ -264,6 +265,25 @@ CREATE POLICY "allow_all_ivq" ON ivq_questions FOR ALL USING (true) WITH CHECK (
           ...(opts.headers || {})
         }
       });
+    }
+
+    async function testConnection() {
+      const testUrl = document.getElementById('sb-url').value.trim().replace(/\/$/, '');
+      const testKey = document.getElementById('sb-key').value.trim();
+      if (!testUrl || !testKey) { toast('Enter URL and key first', 'error'); return; }
+      const prevUrl = SB_URL, prevKey = SB_KEY;
+      SB_URL = testUrl; SB_KEY = testKey;
+      try {
+        const r = await api('videos?limit=1');
+        if (r.ok) {
+          toast('✅ Connection successful', 'success');
+        } else {
+          throw new Error('HTTP ' + r.status + ': ' + (await r.text()).slice(0, 80));
+        }
+      } catch(e) {
+        toast('❌ Connection failed: ' + e.message, 'error');
+      }
+      SB_URL = prevUrl; SB_KEY = prevKey;
     }
 
     async function connect() {
