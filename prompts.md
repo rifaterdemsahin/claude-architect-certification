@@ -210,3 +210,11 @@ Record every prompt given to AI agents below. Include the date, agent, and purpo
 **Purpose:** Create a new dropdown group "Tools" under the main Production navigation menu and add a link to the self-hosted Kokoro Audio Generator.  
 **Output:** Updated `navigation_config.json`, `index.html`, `5_Symbols/markdown_renderer.html`, and `shared/nav.js`.
 
+---
+
+## 2026-06-09 — Phase-Specific Tools Nested Menu Configuration
+
+**Agent:** Antigravity AI (Gemini 1.5 Pro)  
+**Purpose:** Restructure the main navigation bar to nest Tools links as child items inside the existing Preprod, Production, and Post Prod phase dropdowns (attaching GitHub Repo, Supabase, Google Cloud API, Audio Generator, Google Drive, Canva, and YouTube Studio).  
+**Output:** Updated `navigation_config.json`, `index.html`, `5_Symbols/markdown_renderer.html`, and `shared/nav.js`.
+
