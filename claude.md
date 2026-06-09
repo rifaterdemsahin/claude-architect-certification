@@ -106,6 +106,7 @@ All commits must follow **Conventional Commits** format: `type(scope): descripti
 - When adding files, place them in the appropriate numbered folder
 - **After every command, commit and push** — do not batch changes; each step gets its own commit. If any git errors occur, proactively troubleshoot and resolve them.
 - **🎨 Emoji & Visual Style** — Use emojis generously in all markdown files to maximise scannability and visual clarity (see full guide below)
+- **📖 README.md Every Folder** — Every directory in the project MUST have a `README.md` explaining its purpose. This is critical for AI agent onboarding — an agent should instantly understand a folder's contents without scanning every file. When creating a new directory, create a matching `README.md`. Keep them concise: purpose, what belongs here, files table, and rules.
 - **Record every prompt** in `prompts.md` — log date, agent, and purpose for each prompt given
 - **README.md must include the public GitHub Pages URL** — e.g., `https://rifaterdemsahin.github.io/<repo-name>/` (see [proxmox example](https://rifaterdemsahin.github.io/proxmox/))
 - **Keep `index.html` at the repo root** — GitHub Pages requires it at the root for the site to work
@@ -268,3 +269,46 @@ When errors occur, use this skill chain:
 | `5_Symbols` | 💻 🔩 🛠 |
 | `6_Semblance` | 🩹 🐛 ⚠️ |
 | `7_Testing_Known` | 🧪 ✅ 🏆 |
+
+---
+
+## 🏷️ File Classification Labels
+
+Every file in this repo belongs to one of three labels. Always apply the correct label when creating or referencing files.
+
+| 🏷 Label | 🔖 Emoji | Description |
+|---------|---------|-------------|
+| **COURSE CONTENT** | 🎓 | The certification training material being created — scripts, outlines, production files, course UI |
+| **DELIVERY PILOT** | 🚀 | The reusable project framework/template — agent guides, 7-stage structure, nav system, CI/CD |
+| **POC** | 🔬 | The proof-of-concept product being built — working app code, Supabase integrations, MCP server |
+
+### 🎓 COURSE CONTENT files
+- `4_Formula/certification/` — course_outline.md, exam_and_case_study.md, post_prod_template.md, production_plan.md
+- `4_Formula/production/` — outline_template.md, prompter.md, script.md, google_drive_folder_Structure.md, mcp_google_drive.md
+- `4_Formula/audio_structure_music_sfx_voiceover.md`
+- `course_outline.html` (root)
+- `3_Simulation/userexperience.md`, `3_Simulation/instructor_experience.md`
+- `5_Symbols/ivq.html`, `5_Symbols/production_hub.html`, `5_Symbols/production_shotlist.html`
+- `5_Symbols/production/` — all preprod / prod / postprod / publish sub-folders
+
+### 🚀 DELIVERY PILOT files
+- `claude.md`, `gemini.md`, `agents.md`, `copilot.md`, `kilocode.md`
+- `1_Real_Unknown/` — OKR, problem, hypotheses, questions, costs, kanban, sanity check
+- `2_Environment/` — architecture, GitHub Pages, Cloudflare, Fly.io, Azure, Mac/Win/AI setup, navigation
+- `4_Formula/llm_thinking_log.md`, `decisions.md`, `research_notes.md`, `implementation_guide.md`, `dsl.md`
+- `4_Formula/mcp_deployment_formula.md`, `axiom_logging_setup.md`, `axiom_query_guide.md`, `api_reference.md`
+- `4_Formula/tools/`, `4_Formula/topologies/`, `4_Formula/security/`, `4_Formula/delivery_pilot/`
+- `6_Semblance/` — all error logs, gap analysis, lessons learned, workarounds
+- `7_Testing_Known/` — validation and sanity reports
+- `shared/`, `navigation_config.json`, `index.html`, `markdown_renderer.html`, `problem.html`
+- `robots.txt`, `sitemap.xml`, `.github/`, `.vscode/`, `prompts.md`, `todos.md`
+
+### 🔬 POC files
+- `5_Symbols/src/multi-agent/` — multi-agent system implementation
+- `5_Symbols/src/mcp-server/` — MCP server implementation
+- `5_Symbols/src/supabase/admin.html` — Supabase admin UI
+- `5_Symbols/src/security/ZDR_COMPLIANCE.md`, `5_Symbols/src/optimization/`, `5_Symbols/src/utils/`
+- `5_Symbols/markdown_renderer.html`, `5_Symbols/markdown_viewer.html`
+- `5_Symbols/sanity_checklist.html`, `5_Symbols/production/settings.html`
+- `5_Symbols/sql/` — all database schema and seed SQL files
+- `2_Environment/11_database.md`, `2_Environment/12_supabase_backup.md`, `2_Environment/12_supabase_stats.md`, `2_Environment/13_google_drive_setup.md`

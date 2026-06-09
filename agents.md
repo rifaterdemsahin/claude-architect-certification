@@ -168,6 +168,7 @@ This document defines how AI agents interact with the **Claude AI Certification 
   Run either of these in the Supabase SQL Editor: https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/sql
 - **Architecture Sync:** When architecture changes, update [1_architecture.md](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/2_Environment/1_architecture.md).
 - **🎨 Emoji Rule:** Use emojis generously in all markdown content to maximise scannability. Every `##`/`###` heading, list item with a clear category, status indicator, and log entry should carry an emoji. See the Emoji & Visual Style table in each agent guide.
+- **📖 README.md Every Folder:** Every directory in the project MUST have a `README.md` explaining its purpose. This is critical for AI agent context — it lets any agent instantly understand what a folder contains without scanning every file. When creating a new directory, create a matching `README.md`. Keep them concise: purpose, what belongs here, files table, and rules.
 
 ---
 
@@ -201,3 +202,53 @@ Use this map when writing markdown files, log entries, commit bodies, and doc se
 - Stage folder references: `📁 1_Real_Unknown`, `💻 5_Symbols`, `🧪 7_Testing_Known`
 - Bullet lists where items have a clear category (use emoji as visual bullet)
 - Commit message bodies (not the one-line subject — keep that clean)
+
+---
+
+## 🏷️ File Classification Labels
+
+Every file in this repo belongs to one of three labels. When creating or modifying files, annotate them mentally and keep this mapping current.
+
+| 🏷 Label | 🔖 Emoji | Description |
+|---------|---------|-------------|
+| **COURSE CONTENT** | 🎓 | The certification training material being created — scripts, outlines, production files, course UI |
+| **DELIVERY PILOT** | 🚀 | The reusable project framework/template — agent guides, 7-stage structure, nav system, CI/CD |
+| **POC** | 🔬 | The proof-of-concept product being built — working app code, Supabase integrations, MCP server |
+
+### 🎓 COURSE CONTENT files
+Files that contain or support the actual certification course material:
+- `4_Formula/certification/` — `course_outline.md`, `exam_and_case_study.md`, `post_prod_template.md`, `production_plan.md`
+- `4_Formula/production/` — `outline_template.md`, `prompter.md`, `script.md`, `google_drive_folder_Structure.md`, `mcp_google_drive.md`
+- `4_Formula/audio_structure_music_sfx_voiceover.md`
+- `course_outline.html` (root)
+- `3_Simulation/userexperience.md`, `3_Simulation/instructor_experience.md`
+- `5_Symbols/ivq.html` — Interactive Video Quiz
+- `5_Symbols/production_hub.html`, `5_Symbols/production_shotlist.html`
+- `5_Symbols/production/` — all preprod / prod / postprod / publish sub-folders
+
+### 🚀 DELIVERY PILOT files
+Files that define the delivery pilot reusable framework:
+- `claude.md`, `gemini.md`, `agents.md`, `copilot.md`, `kilocode.md` — agent guides
+- `1_Real_Unknown/` — OKR, problem statement, hypotheses, questions, costs, kanban, sanity check
+- `2_Environment/` — architecture, GitHub Pages, Cloudflare Workers, Fly.io, Azure, Mac/Windows/AI setup, navigation
+- `4_Formula/llm_thinking_log.md`, `decisions.md`, `research_notes.md`, `implementation_guide.md`, `dsl.md`
+- `4_Formula/mcp_deployment_formula.md`, `axiom_logging_setup.md`, `axiom_query_guide.md`, `api_reference.md`
+- `4_Formula/google_oauth_drive_picker.md`, `vscode_mermaid_setup.md`
+- `4_Formula/tools/`, `4_Formula/topologies/`, `4_Formula/security/`, `4_Formula/delivery_pilot/`
+- `6_Semblance/` — error logs, gap analysis, lessons learned, workarounds
+- `7_Testing_Known/` — validation reports, sanity check reports
+- `shared/` — `nav.js`, `nav.css`, `debug-panel.js`
+- `navigation_config.json`, `index.html`, `markdown_renderer.html`, `problem.html`
+- `robots.txt`, `sitemap.xml`, `.github/`, `.vscode/`, `prompts.md`, `todos.md`
+
+### 🔬 POC files
+Files that are the actual proof-of-concept product implementation:
+- `5_Symbols/src/multi-agent/` — multi-agent system implementation
+- `5_Symbols/src/mcp-server/` — MCP server implementation
+- `5_Symbols/src/supabase/admin.html` — Supabase admin UI
+- `5_Symbols/src/security/ZDR_COMPLIANCE.md`
+- `5_Symbols/src/optimization/`, `5_Symbols/src/utils/`
+- `5_Symbols/markdown_renderer.html`, `5_Symbols/markdown_viewer.html`
+- `5_Symbols/sanity_checklist.html`, `5_Symbols/production/settings.html`
+- `5_Symbols/sql/` — all database schema and seed SQL files
+- `2_Environment/11_database.md`, `2_Environment/12_supabase_backup.md`, `2_Environment/12_supabase_stats.md`, `2_Environment/13_google_drive_setup.md`
