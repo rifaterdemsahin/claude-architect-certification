@@ -40,3 +40,5 @@ Severity levels: `CRITICAL` | `ERROR` | `WARNING` | `INFO`
 [2026-06-08] ⚠️ [6_Semblance] [MEDIUM] — Google OAuth consent screen: "App not verified" warning shown; app in Testing mode, sensitive scope drive.readonly requires bypass via Advanced → Go to app
 [2026-06-08] 🔴 [6_Semblance] [HIGH] — Page stuck on "Loading scenes…"; Create New Scene never appears; two causes: (1) renderScenes infinite recursion via hoisted function wrapper, (2) unhandled exception from nested Supabase join on missing tables
 [2026-06-08] 🔴 [6_Semblance] [HIGH] — Axiom API ingestion returned HTTP 403 Forbidden on dataset 'videoproduction'. Root cause: API Token 'xaat-f6066074-4199-42eb-b4c0-1417bb6a3473' lacks Ingest permission or is not scoped for the new 'videoproduction' dataset in the 'rifaterdemsahin-stks' workspace. Fix: Update token permissions in Axiom settings dashboard.
+[2026-06-09] 🔴 [CI] [HIGH] — setup-node: "Some specified paths were not resolved, unable to cache dependencies" due to incorrect path './src/mcp-server/package-lock.json' (correct path is '5_Symbols/src/mcp-server/package-lock.json'). Fix: 6_Semblance/error_ci_setup_node_cache_missing_path.md
+

@@ -345,3 +345,25 @@ The user requested:
 ### ✅ Decisions Made
 - Use clean URL parameter updates on dropdown changes (`window.location.search`) to trigger reload, ensuring that navigation, caching, and DOM state are cleanly reset.
 - Provide a robust static fallback data structure containing metadata for all 5 modules and 15 videos, ensuring maximum fidelity and graceful degradation.
+
+---
+
+## 📅 Date: 2026-06-09
+## 🧠 Stage: Stage 4 (Formula - Thinking & Planning) - Correcting MCP Server Build and Deploy Paths in CI/CD
+
+### ❓ Problem Statement
+The GitHub Actions workflow runs failed with the error: "Some specified paths were not resolved, unable to cache dependencies" (e.g., in run https://github.com/rifaterdemsahin/claude-architect-certification/actions/runs/27233036485/job/80417859563).
+This was caused by `setup-node` trying to resolve `./src/mcp-server/package-lock.json` and build tasks attempting to `cd src/mcp-server` at the root level. However, the MCP server codebase is actually located in the stage folder `5_Symbols/src/mcp-server`.
+
+### 📐 Approach & Strategy
+1. **🛠 Fix CI/CD configurations**:
+   - Update `.github/workflows/test_mcp.yml` to point `cache-dependency-path` to `5_Symbols/src/mcp-server/package-lock.json` and change all `cd src/mcp-server` to `cd 5_Symbols/src/mcp-server`.
+   - Update `.github/workflows/deploy_fly.yml` to match the correct paths for `paths` triggers, `cache-dependency-path`, build steps (`cd`), and `working-directory`.
+2. **📝 Log error & fix**:
+   - Append log entry to `6_Semblance/error.log`.
+   - Append log entry to `6_Semblance/fix.log`.
+   - Call `./6_Semblance/send_error.sh` to ingest the error in Axiom.
+   - Create `6_Semblance/error_ci_setup_node_cache_missing_path.md` detailing the incident and fix.
+3. **🌿 Git Workflow**:
+   - Commit and push all changes.
+

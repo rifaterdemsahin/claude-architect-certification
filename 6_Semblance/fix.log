@@ -64,3 +64,5 @@ Lesson captured in lessons_learned.md
 [2026-06-08] [5_Symbols/sanity_checklist.html] [APPLIED] 🛠 Fixed updateSortOrder() to unwrap {error} from each Supabase update — Promise.all now throws on failure so catch block fires correctly
 [2026-06-08] [5_Symbols] [APPLIED] — Fix renderScenes: merged wrapper into original, split nested join into 3 fetches, added fetchWithTimeout(8s), on-page error banner, always calls renderScenes
 [2026-06-08] [6_Semblance] [WORKAROUND] — Added regional Axiom API URL support (`AXIOM_API_URL`) to allow targeting the EU central primary region of the `videoproduction` dataset. Ingestion requires user to update Axiom API token permissions.
+[2026-06-09] [CI] [APPLIED] — Corrected setup-node cache-dependency-path and step paths to '5_Symbols/src/mcp-server/' in test_mcp.yml and deploy_fly.yml. Details: 6_Semblance/error_ci_setup_node_cache_missing_path.md
+
