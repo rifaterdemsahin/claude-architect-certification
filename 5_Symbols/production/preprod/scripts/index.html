@@ -271,6 +271,13 @@
     }
 
     footer { text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
+
+    .module-title-link { color: inherit; text-decoration: none; transition: color 0.2s; }
+    .module-title-link:hover { color: #c084fc; }
+    .module-title-arrow { font-size: 0.7rem; color: var(--text-muted); margin-left: 8px; text-decoration: none; opacity: 0.6; vertical-align: middle; transition: opacity 0.2s; }
+    .module-title-arrow:hover { opacity: 1; color: #c084fc; }
+    .scene-title-link { color: inherit; text-decoration: none; transition: color 0.2s; }
+    .scene-title-link:hover { color: #93c5fd; }
   </style>
   <script src="../../../../shared/nav.js"></script>
 </head>
@@ -458,6 +465,16 @@
       }
     };
 
+    function getModuleUrl(id) {
+      if (id === 1) return '../../postprod/module-1/section-1/post_production_master.html';
+      return `../../postprod/module-${id}/section-1/demo_script_show.html`;
+    }
+
+    function getSceneUrl(id) {
+      if (id === 1) return '../../postprod/module-1/section-1/demo_script.html';
+      return `../../postprod/module-${id}/section-1/demo_script_show.html`;
+    }
+
     function render(data) {
       const nav = document.getElementById('module-nav');
       const area = document.getElementById('content-area');
@@ -469,7 +486,7 @@
 
       data.modules.forEach((m, mi) => {
         html += `<div class="module-card${mi === 0 ? ' active' : ''}" id="mod-${mi}">`;
-        html += `<h2>Module ${m.id}: ${m.title}</h2>`;
+        html += `<h2><a class="module-title-link" href="${getModuleUrl(m.id)}">Module ${m.id}: ${m.title}</a><a class="module-title-arrow" href="${getModuleUrl(m.id)}">↗</a></h2>`;
         html += `<div class="module-desc">${m.description}</div>`;
 
         // Render Objectives & Key Results
@@ -499,7 +516,7 @@
         m.videos.forEach(v => {
           const elementId = v.videoId || `local-${mi}-${v.id}`;
           html += `<div class="video-card">`;
-          html += `<div class="video-header"><span class="video-title">🎬 Video ${v.id}: ${v.title}</span><span class="video-duration">${v.duration}</span></div>`;
+          html += `<div class="video-header"><span class="video-title">🎬 <a class="scene-title-link" href="${getSceneUrl(m.id)}">Video ${v.id}: ${v.title}</a></span><span class="video-duration">${v.duration}</span></div>`;
           
           // Editable Script Block
           html += `<div class="video-script-container" id="script-container-${elementId}">`;
