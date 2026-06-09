@@ -287,6 +287,40 @@
 
     footer { text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
 
+    /* Code References */
+    .code-refs-section { margin-top: 24px; padding-top: 18px; border-top: 1px solid rgba(255,255,255,0.06); }
+    .code-refs-section h3 { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.08em; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .code-refs-grid { display: grid; gap: 6px; margin-bottom: 6px; }
+    .code-ref-row { display: flex; align-items: flex-start; gap: 8px; padding: 8px 12px; border-radius: 9px; }
+    .code-ref-row.github-ref { border: 1px solid rgba(59,130,246,0.14); background: rgba(59,130,246,0.04); }
+    .code-ref-row.custom-ref { border: 1px solid rgba(139,92,246,0.14); background: rgba(139,92,246,0.04); }
+    .code-ref-icon { font-size: 0.9rem; flex-shrink: 0; margin-top: 2px; }
+    .code-ref-body { flex: 1; min-width: 0; }
+    .code-ref-label { font-size: 0.85rem; font-weight: 600; }
+    .code-ref-label a { color: #93c5fd; text-decoration: none; word-break: break-all; transition: color 0.2s; }
+    .code-ref-label a:hover { color: #fff; text-decoration: underline; }
+    .code-ref-note { font-size: 0.76rem; color: var(--text-muted); margin-top: 2px; }
+    .code-ref-badge { display: inline-block; font-size: 0.68rem; padding: 1px 7px; border-radius: 4px; margin-left: 6px; font-weight: 700; letter-spacing: 0.05em; vertical-align: middle; text-decoration: none !important; }
+    .code-ref-badge.gh { background: rgba(59,130,246,0.18); color: #93c5fd; }
+    .code-ref-badge.db { background: rgba(139,92,246,0.18); color: #c084fc; }
+    .code-ref-badge.browse { background: rgba(16,185,129,0.15); color: #34d399; cursor: pointer; }
+    .code-ref-actions-col { display: flex; gap: 4px; flex-shrink: 0; }
+    .code-ref-inline-edit { display: none; margin-top: 8px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 8px; }
+    .code-ref-inline-edit.open { display: block; }
+    .code-ref-inline-edit input, .code-ref-inline-edit textarea { width: 100%; padding: 6px 10px; border-radius: 7px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.35); color: var(--text-main); font-size: 0.82rem; margin-bottom: 5px; font-family: var(--font-body); }
+    .code-ref-inline-edit textarea { resize: vertical; min-height: 38px; }
+    .code-ref-inline-edit input:focus, .code-ref-inline-edit textarea:focus { outline: none; border-color: var(--primary); }
+    .code-ref-inline-edit .edit-row { display: flex; gap: 6px; }
+    .code-ref-add { margin-top: 10px; display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+    .code-ref-add input { flex: 1; min-width: 130px; padding: 7px 11px; border-radius: 8px; border: 1px dashed rgba(139,92,246,0.3); background: rgba(139,92,246,0.03); color: var(--text-main); font-size: 0.82rem; font-family: var(--font-body); transition: border-color 0.2s; }
+    .code-ref-add input:focus { outline: none; border-color: var(--primary); }
+
+    /* SQL Setup panel */
+    .sql-setup-panel { background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 18px 22px; margin-top: 24px; }
+    .sql-setup-panel summary { cursor: pointer; font-family: var(--font-title); font-size: 0.95rem; color: var(--text-muted); user-select: none; }
+    .sql-setup-panel summary:hover { color: var(--text-main); }
+    .sql-setup-panel pre { background: rgba(0,0,0,0.4); border-radius: 10px; padding: 14px; font-size: 0.76rem; color: #94a3b8; overflow-x: auto; white-space: pre-wrap; max-height: 220px; overflow-y: auto; margin-top: 12px; }
+
     .module-title-link { color: inherit; text-decoration: none; transition: color 0.2s; }
     .module-title-link:hover { color: #c084fc; }
     .module-title-arrow { font-size: 0.7rem; color: var(--text-muted); margin-left: 8px; text-decoration: none; opacity: 0.6; vertical-align: middle; transition: opacity 0.2s; }
@@ -368,6 +402,12 @@
     <footer>
       <p><a href="../../preprod/index.html" style="color: var(--secondary); text-decoration: none;">← Back to Pre-Production</a></p>
     </footer>
+
+    <details class="sql-setup-panel">
+      <summary>📝 SQL Setup for code_references (run once in Supabase)</summary>
+      <pre id="code-refs-sql-block"></pre>
+      <button class="btn btn-ghost btn-sm" style="margin-top:10px;" onclick="navigator.clipboard.writeText(document.getElementById('code-refs-sql-block').textContent).then(()=>alert('📋 Copied!'))">📋 Copy SQL</button>
+    </details>
   </div>
 
   <script>
@@ -408,6 +448,49 @@
         ]
       }
     };
+
+    const GITHUB_BASE = 'https://github.com/rifaterdemsahin/claude-architect-certification/blob/main/5_Symbols/src/';
+    const TREE_BASE   = 'https://github.com/rifaterdemsahin/claude-architect-certification/tree/main/5_Symbols/src';
+
+    const STATIC_CODE_REFS = {
+      1: [
+        { label: 'mcp-server/src/index.ts',    url: GITHUB_BASE + 'mcp-server/src/index.ts',    note: 'MCP server entry — tool registration and Claude API routing' },
+        { label: 'mcp-server/src/keyvault.ts', url: GITHUB_BASE + 'mcp-server/src/keyvault.ts', note: 'Azure Key Vault integration for secrets management' },
+        { label: 'supabase/client.js',          url: GITHUB_BASE + 'supabase/client.js',          note: 'Supabase client wrapper — auth, REST helpers' },
+      ],
+      2: [
+        { label: 'mcp-server/mcp.config.json', url: GITHUB_BASE + 'mcp-server/mcp.config.json', note: 'MCP server config — tools, transports, permissions' },
+        { label: 'mcp-server/Dockerfile',       url: GITHUB_BASE + 'mcp-server/Dockerfile',       note: 'Container spec for Fly.io deployment' },
+        { label: 'mcp-server/fly.toml',         url: GITHUB_BASE + 'mcp-server/fly.toml',         note: 'Fly.io deployment config — region, scaling, env' },
+      ],
+      3: [
+        { label: 'security/ZDR_COMPLIANCE.md', url: GITHUB_BASE + 'security/ZDR_COMPLIANCE.md', note: 'Zero-data-retention compliance checklist and audit notes' },
+        { label: 'supabase/schema.sql',          url: GITHUB_BASE + 'supabase/schema.sql',          note: 'Full DB schema with RLS policies' },
+      ],
+      4: [
+        { label: 'multi-agent/router.py',    url: GITHUB_BASE + 'multi-agent/router.py',    note: 'Deterministic agent router with circuit-breaker and loop detection' },
+        { label: 'multi-agent/fallbacks.py', url: GITHUB_BASE + 'multi-agent/fallbacks.py', note: 'Fallback handlers for malformed input and recursion attacks' },
+      ],
+      5: [
+        { label: 'optimization/cache_layer.py', url: GITHUB_BASE + 'optimization/cache_layer.py', note: 'LRU + TTL cache for prompt caching — targets 90% hit rate' },
+        { label: 'supabase/seed.sql',            url: GITHUB_BASE + 'supabase/seed.sql',            note: 'Seed data for all course tables' },
+      ]
+    };
+
+    const CODE_REFS_SQL = `-- Run once in Supabase SQL Editor to enable custom code references
+CREATE TABLE IF NOT EXISTS code_references (
+  id          SERIAL PRIMARY KEY,
+  module_id   INTEGER NOT NULL,
+  label       TEXT NOT NULL,
+  url         TEXT NOT NULL,
+  note        TEXT DEFAULT '',
+  sort_order  INTEGER DEFAULT 99,
+  created_at  TIMESTAMPTZ DEFAULT NOW(),
+  updated_at  TIMESTAMPTZ DEFAULT NOW()
+);
+-- Enable Row Level Security (adjust policies to your auth setup)
+ALTER TABLE code_references ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "allow_all" ON code_references FOR ALL USING (true) WITH CHECK (true);`;
 
     const INTRO_TEMPLATE = `Format: Talking Head | Duration: [DURATION]
 
@@ -612,6 +695,11 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
       }
     };
 
+    document.addEventListener('DOMContentLoaded', function() {
+      const sqlEl = document.getElementById('code-refs-sql-block');
+      if (sqlEl) sqlEl.textContent = CODE_REFS_SQL;
+    });
+
     function getModuleUrl(id) {
       if (id === 1) return '../../postprod/module-1/section-1/post_production_master.html';
       return `../../postprod/module-${id}/section-1/demo_script_show.html`;
@@ -718,6 +806,32 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
           });
           html += `</div></div>`;
         }
+
+        // Code References panel
+        const staticRefs = STATIC_CODE_REFS[m.id] || [];
+        html += `<div class="code-refs-section">`;
+        html += `<h3>💻 Code References <a class="code-ref-badge browse" href="${TREE_BASE}" target="_blank" rel="noopener">Browse src/ ↗</a></h3>`;
+        if (staticRefs.length) {
+          html += `<div class="code-refs-grid">`;
+          staticRefs.forEach(ref => {
+            html += `<div class="code-ref-row github-ref">
+              <span class="code-ref-icon">📄</span>
+              <div class="code-ref-body">
+                <div class="code-ref-label"><a href="${ref.url}" target="_blank" rel="noopener">${ref.label}</a><span class="code-ref-badge gh">GitHub</span></div>
+                ${ref.note ? `<div class="code-ref-note">${ref.note}</div>` : ''}
+              </div>
+            </div>`;
+          });
+          html += `</div>`;
+        }
+        html += `<div class="code-refs-grid" id="cref-dynamic-${m.id}"></div>`;
+        html += `<div class="code-ref-add">
+          <input id="cref-new-label-${m.id}" placeholder="Label (e.g. src/my_file.py)">
+          <input id="cref-new-url-${m.id}" placeholder="GitHub URL" onkeydown="if(event.key==='Enter')addCodeRefUI(${m.id})">
+          <button class="btn btn-sm btn-primary" onclick="addCodeRefUI(${m.id})">+ Add Ref</button>
+        </div>`;
+        html += `</div>`; // end code-refs-section
+
         html += `</div>`;
       });
 
@@ -1024,6 +1138,124 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
       }
     }
 
+    // ── Code References helpers ──────────────────────────────────────────────────
+    function esc2(str) {
+      return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    async function fetchCodeRefs(moduleId) {
+      if (!SUPABASE_URL.includes('supabase.co') || !SUPABASE_ANON_KEY) return [];
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/code_references?module_id=eq.${moduleId}&order=sort_order.asc,id.asc`, {
+          headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+        });
+        return res.ok ? res.json() : [];
+      } catch { return []; }
+    }
+
+    async function insertCodeRef(moduleId, label, url, note) {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/code_references`, {
+        method: 'POST',
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+        body: JSON.stringify({ module_id: moduleId, label, url, note: note || '', sort_order: 99 })
+      });
+      if (!res.ok) throw new Error(await res.text());
+      return (await res.json())[0];
+    }
+
+    async function patchCodeRef(id, label, url, note) {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/code_references?id=eq.${id}`, {
+        method: 'PATCH',
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+        body: JSON.stringify({ label, url, note: note || '', updated_at: new Date().toISOString() })
+      });
+      if (!res.ok) throw new Error(await res.text());
+    }
+
+    async function removeCodeRef(id) {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/code_references?id=eq.${id}`, {
+        method: 'DELETE',
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Prefer': 'return=minimal' }
+      });
+      if (!res.ok) throw new Error(await res.text());
+    }
+
+    function buildCodeRefRow(ref) {
+      const id = ref.id;
+      return `<div class="code-ref-row custom-ref" id="cref-row-${id}">
+        <span class="code-ref-icon">🔗</span>
+        <div class="code-ref-body">
+          <div class="code-ref-label"><a href="${esc2(ref.url)}" target="_blank" rel="noopener">${esc2(ref.label)}</a><span class="code-ref-badge db">Supabase</span></div>
+          <div class="code-ref-note" id="cref-note-${id}">${esc2(ref.note || '')}</div>
+          <div class="code-ref-inline-edit" id="cref-edit-${id}">
+            <input id="cref-elabel-${id}" value="${esc2(ref.label)}" placeholder="Label">
+            <input id="cref-eurl-${id}" value="${esc2(ref.url)}" placeholder="GitHub URL">
+            <textarea id="cref-enote-${id}" placeholder="Note (optional)">${esc2(ref.note || '')}</textarea>
+            <div class="edit-row">
+              <button class="btn btn-primary btn-sm" onclick="saveCodeRefUI(${id})">💾 Save</button>
+              <button class="btn btn-ghost btn-sm" onclick="closeCodeRefEdit(${id})">Cancel</button>
+            </div>
+          </div>
+        </div>
+        <div class="code-ref-actions-col">
+          <button class="btn btn-ghost btn-sm" title="Edit" onclick="openCodeRefEdit(${id})">✏️</button>
+          <button class="btn btn-danger btn-sm" title="Delete" onclick="deleteCodeRefUI(${id})">🗑</button>
+        </div>
+      </div>`;
+    }
+
+    window.openCodeRefEdit = function(id) {
+      document.getElementById('cref-edit-' + id).classList.add('open');
+    };
+    window.closeCodeRefEdit = function(id) {
+      document.getElementById('cref-edit-' + id).classList.remove('open');
+    };
+    window.saveCodeRefUI = async function(id) {
+      const label = document.getElementById('cref-elabel-' + id).value.trim();
+      const url   = document.getElementById('cref-eurl-'   + id).value.trim();
+      const note  = document.getElementById('cref-enote-'  + id).value.trim();
+      if (!label || !url) { alert('Label and URL are required'); return; }
+      try {
+        await patchCodeRef(id, label, url, note);
+        document.querySelector(`#cref-row-${id} .code-ref-label a`).href = url;
+        document.querySelector(`#cref-row-${id} .code-ref-label a`).textContent = label;
+        const noteEl = document.getElementById('cref-note-' + id);
+        if (noteEl) noteEl.textContent = note;
+        closeCodeRefEdit(id);
+      } catch(e) { alert('❌ ' + e.message); }
+    };
+    window.deleteCodeRefUI = async function(id) {
+      if (!confirm('Delete this code reference?')) return;
+      try {
+        await removeCodeRef(id);
+        const row = document.getElementById('cref-row-' + id);
+        if (row) row.remove();
+      } catch(e) { alert('❌ ' + e.message); }
+    };
+    window.addCodeRefUI = async function(moduleId) {
+      const label = document.getElementById('cref-new-label-' + moduleId).value.trim();
+      const url   = document.getElementById('cref-new-url-'   + moduleId).value.trim();
+      if (!label || !url) { alert('Enter a label and a GitHub URL first'); return; }
+      try {
+        const ref = await insertCodeRef(moduleId, label, url, '');
+        const grid = document.getElementById('cref-dynamic-' + moduleId);
+        if (grid) {
+          const tmp = document.createElement('div');
+          tmp.innerHTML = buildCodeRefRow(ref);
+          grid.appendChild(tmp.firstElementChild);
+        }
+        document.getElementById('cref-new-label-' + moduleId).value = '';
+        document.getElementById('cref-new-url-'   + moduleId).value = '';
+      } catch(e) { alert('❌ ' + e.message); }
+    };
+
+    async function hydrateModuleCodeRefs(moduleId) {
+      const refs = await fetchCodeRefs(moduleId);
+      const grid = document.getElementById('cref-dynamic-' + moduleId);
+      if (!grid) return;
+      if (refs.length) grid.innerHTML = refs.map(buildCodeRefRow).join('');
+    }
+
     (async () => {
       let data = await loadFromSupabase();
       if (!data) {
@@ -1050,6 +1282,7 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
         window.loadedData = data;
         render(data);
         updateGoogleConfigUI();
+        data.modules.forEach(m => hydrateModuleCodeRefs(m.id));
       } else {
         document.getElementById('content-area').innerHTML =
           '<div class="error"><h2>❌ Failed to Load</h2><p>Could not load from Supabase or local JSON.</p></div>';
