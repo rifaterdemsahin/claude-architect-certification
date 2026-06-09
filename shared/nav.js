@@ -23,7 +23,7 @@
   var FALLBACK = [
     { label: '🎬 Preprod', children: [
       { label: '1. ❓ Problem', url: 'problem.html' },
-      { label: '2. 🏠 Home', url: 'index.html' },
+      { label: '2. 📋 Producer Checklist', url: '5_Symbols/production/preprod/sanity_check.html' },
       { label: '3. ✅ Sanity Checklist', url: '5_Symbols/sanity_checklist.html', hideAfterDays: 90 },
       { label: '4. 📋 Outline', url: 'course_outline.html' },
       { label: '5. 🎬 Script', url: '5_Symbols/production/preprod/scripts/index.html' },
@@ -40,7 +40,6 @@
     ]},
     { label: '🎥 Production', children: [
       { label: '7. 📸 Shot List & Assets', url: '5_Symbols/production_shotlist.html' },
-      { label: '8. 📊 Readiness Plan', url: 'markdown_renderer.html?file=5_Symbols/production/prod/readiness_plan.md' },
       {
         label: '🛠️ Tools',
         children: [
