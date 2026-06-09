@@ -7,6 +7,18 @@ This document defines how AI agents interact with the **Claude AI Certification 
 ## 📅 Agent Activity Log
 
 ### 2026-06-09
+- **Task:** 🛠️ Fix GitHub Actions npm dependency caching and workspace path reference failures.
+- **Action:**
+    - Documented approach in `4_Formula/llm_thinking_log.md`.
+    - Modified `.github/workflows/test_mcp.yml` and `.github/workflows/deploy_fly.yml` to update the cache dependency path to `5_Symbols/src/mcp-server/package-lock.json` and working directory directories to point to the stage folder `5_Symbols/src/mcp-server/`.
+    - Appended error details to `6_Semblance/error.log` and `6_Semblance/fix.log`.
+    - Created a detailed Semblance error page at `6_Semblance/error_ci_setup_node_cache_missing_path.md`.
+    - Ingested error telemetry to Axiom using the ingestion helper script `./6_Semblance/send_error.sh`.
+    - Added link to the new error page in `navigation_config.json` and fallback configurations inside `index.html` and `markdown_renderer.html`.
+    - Corrected a broken settings link in `5_Symbols/production/preprod/scripts/index.html` resolving it to `../../settings.html`.
+    - Verified all paths and references locally using `test_links.py`.
+- **Status:** IMPLEMENTED, COMMITTED, PUSHED.
+
 - **Task:** 🎨 Add core self-learning value proposition to Membership page.
 - **Action:**
     - Documented approach in `4_Formula/llm_thinking_log.md`.
