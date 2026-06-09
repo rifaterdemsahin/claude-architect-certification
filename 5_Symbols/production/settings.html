@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Production Settings | Claude AI Certification</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #030712; --bg-card: rgba(17,24,39,0.85); --text-main: #f3f4f6; --text-muted: #9ca3af;
+      --primary: #8b5cf6; --secondary: #3b82f6; --accent: #f59e0b;
+      --font-title: 'Outfit', sans-serif; --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-dark);
+      background-image: radial-gradient(circle at 10% 20%, rgba(139,92,246,0.08) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(59,130,246,0.08) 0%, transparent 40%);
+      color: var(--text-main); font-family: var(--font-body); line-height: 1.6; padding-top: 70px; padding-bottom: 80px;
+    }
+    .container { max-width: 680px; margin: 0 auto; padding: 0 24px; }
+    .badge { display: inline-block; padding: 6px 16px; background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(139,92,246,0.2)); border: 1px solid rgba(245,158,11,0.3); border-radius: 100px; font-size: 0.8rem; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 14px; }
+    h1 { font-family: var(--font-title); font-size: 2rem; font-weight: 800; margin-bottom: 8px; }
+    header p { color: var(--text-muted); margin-bottom: 32px; }
+
+    .settings-card { background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 18px; padding: 28px; margin-bottom: 20px; }
+    .settings-card h2 { font-family: var(--font-title); font-size: 1.1rem; font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+    .settings-card p { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 18px; }
+
+    .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+    .field label { font-size: 0.78rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+    .field input { background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 10px 14px; color: var(--text-main); font-size: 0.9rem; font-family: var(--font-body); width: 100%; }
+    .field input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 10px rgba(139,92,246,0.2); }
+    .field-hint { font-size: 0.73rem; color: #4b5563; }
+
+    .status-row { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+    .status-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .status-dot.set { background: #34d399; }
+    .status-dot.unset { background: #ef4444; }
+    .status-label { font-size: 0.82rem; color: var(--text-muted); }
+
+    .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn-primary { background: var(--primary); color: white; border: none; padding: 9px 20px; border-radius: 9px; font-size: 0.85rem; font-weight: 700; cursor: pointer; transition: all 0.2s; font-family: var(--font-body); }
+    .btn-primary:hover { background: #7c3aed; }
+    .btn-danger { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25); color: #f87171; padding: 9px 16px; border-radius: 9px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: var(--font-body); }
+    .btn-danger:hover { background: rgba(239,68,68,0.2); }
+
+    .toast { display: none; padding: 10px 16px; border-radius: 9px; font-size: 0.82rem; font-weight: 600; margin-top: 12px; }
+    .toast.ok { background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3); color: #34d399; display: block; }
+    .toast.err { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #f87171; display: block; }
+
+    footer { text-align: center; margin-top: 40px; color: var(--text-muted); font-size: 0.85rem; }
+    footer a { color: var(--secondary); text-decoration: none; }
+  </style>
+  <script src="../../shared/nav.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="badge">Production</div>
+      <h1>⚙️ Production Settings</h1>
+      <p>Configure shared credentials and storage locations used across all production pages. Settings are saved as cookies and reused automatically.</p>
+    </header>
+
+    <!-- Google Drive -->
+    <div class="settings-card">
+      <h2>☁️ Google Drive</h2>
+      <p>Set the master production folder where generated audio files are saved. All pages read this location automatically.</p>
+
+      <div class="status-row">
+        <div class="status-dot" id="folder-dot"></div>
+        <span class="status-label" id="folder-status-label">Not configured</span>
+      </div>
+
+      <div class="field">
+        <label>Production Folder ID</label>
+        <input type="text" id="folder-id-input" placeholder="Paste your Google Drive folder ID…" />
+        <span class="field-hint">Open the folder in Google Drive → copy the ID from the URL after /folders/</span>
+      </div>
+
+      <div class="field">
+        <label>Google OAuth Client ID</label>
+        <input type="password" id="client-id-input" placeholder="Paste your Google Client ID…" />
+        <span class="field-hint">From Google Cloud Console → Credentials → OAuth 2.0 Client ID</span>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-primary" onclick="saveDriveSettings()">💾 Save Drive Settings</button>
+        <button class="btn-danger" onclick="clearDriveSettings()">🗑 Clear</button>
+      </div>
+      <div class="toast" id="drive-toast"></div>
+    </div>
+
+    <footer>
+      <p><a href="preprod/index.html">← Pre-Production</a> &nbsp;·&nbsp; <a href="prod/index.html">Production</a> &nbsp;·&nbsp; <a href="postprod/index.html">Post-Production</a></p>
+    </footer>
+  </div>
+
+  <script>
+    function getCookie(name) {
+      const m = document.cookie.match(new RegExp('(?:^|; )' + name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '=([^;]*)'));
+      return m ? decodeURIComponent(m[1]) : null;
+    }
+    function setCookie(name, val, days) {
+      document.cookie = `${name}=${encodeURIComponent(val)};max-age=${days * 86400};path=/;SameSite=Lax`;
+    }
+    function clearCookie(name) {
+      document.cookie = `${name}=;max-age=0;path=/;SameSite=Lax`;
+    }
+
+    function updateUI() {
+      const folderId = getCookie('prod_drive_folder_id') || localStorage.getItem('prod_drive_folder_id') || '';
+      const clientId = getCookie('google_client_id') || localStorage.getItem('google_client_id') || '';
+      document.getElementById('folder-id-input').value = folderId;
+      document.getElementById('client-id-input').value = clientId;
+
+      const dot = document.getElementById('folder-dot');
+      const label = document.getElementById('folder-status-label');
+      if (folderId) {
+        dot.className = 'status-dot set';
+        label.textContent = `Folder configured: ${folderId.slice(0, 20)}…`;
+      } else {
+        dot.className = 'status-dot unset';
+        label.textContent = 'No folder configured — audio will use fallback folder name';
+      }
+    }
+
+    function showToast(id, msg, type) {
+      const el = document.getElementById(id);
+      el.textContent = msg;
+      el.className = `toast ${type}`;
+      setTimeout(() => { el.className = 'toast'; }, 3500);
+    }
+
+    function saveDriveSettings() {
+      const folderId = document.getElementById('folder-id-input').value.trim();
+      const clientId = document.getElementById('client-id-input').value.trim();
+      if (!folderId && !clientId) { showToast('drive-toast', 'Enter at least one value to save.', 'err'); return; }
+      if (folderId) { setCookie('prod_drive_folder_id', folderId, 365); localStorage.setItem('prod_drive_folder_id', folderId); }
+      if (clientId) { setCookie('google_client_id', clientId, 365); localStorage.setItem('google_client_id', clientId); }
+      showToast('drive-toast', '✅ Settings saved — all production pages will use these values.', 'ok');
+      updateUI();
+    }
+
+    function clearDriveSettings() {
+      clearCookie('prod_drive_folder_id'); localStorage.removeItem('prod_drive_folder_id');
+      clearCookie('google_client_id'); localStorage.removeItem('google_client_id');
+      document.getElementById('folder-id-input').value = '';
+      document.getElementById('client-id-input').value = '';
+      showToast('drive-toast', 'Settings cleared.', 'ok');
+      updateUI();
+    }
+
+    updateUI();
+  </script>
+</body>
+</html>

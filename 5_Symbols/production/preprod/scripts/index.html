@@ -368,6 +368,19 @@
     .gdrive-msg { font-size: 0.78rem; font-weight: 600; min-width: 60px; }
     .gdrive-msg.ok { color: #34d399; }
     .gdrive-msg.cleared { color: #9ca3af; }
+
+    /* Save Audio modal */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: flex; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(4px); }
+    .modal-box { background: #0f172a; border: 1px solid rgba(255,255,255,0.12); border-radius: 18px; padding: 28px; max-width: 480px; width: 90%; box-shadow: 0 24px 60px rgba(0,0,0,0.6); }
+    .modal-box h3 { font-family: var(--font-title); font-size: 1.15rem; font-weight: 700; margin-bottom: 6px; }
+    .modal-desc { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 20px; }
+    .modal-field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+    .modal-field label { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .modal-field-hint { font-size: 0.73rem; color: #4b5563; }
+    .modal-remember { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 20px; cursor: pointer; }
+    .modal-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .modal-settings-link { font-size: 0.78rem; color: #6b7280; text-decoration: none; margin-left: auto; transition: color 0.2s; }
+    .modal-settings-link:hover { color: var(--text-main); }
   </style>
   <script src="../../../../shared/nav.js"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -873,6 +886,36 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
       document.cookie = `${name}=${encodeURIComponent(val)};max-age=${days * 86400};path=/;SameSite=Lax`;
     }
 
+    // ── Save Audio modal state ─────────────────────────────────────────────────
+    let _pendingSaveAudio = null;
+
+    window.openSaveAudioModal = function(videoId, moduleIdx, videoIdx) {
+      _pendingSaveAudio = { videoId, moduleIdx, videoIdx };
+      const savedFolder = getCookie('prod_drive_folder_id') || '';
+      document.getElementById('modal-folder-id').value = savedFolder;
+      document.getElementById('save-audio-modal').style.display = 'flex';
+      document.getElementById('modal-folder-id').focus();
+    };
+
+    window.closeSaveAudioModal = function() {
+      document.getElementById('save-audio-modal').style.display = 'none';
+      _pendingSaveAudio = null;
+    };
+
+    window.confirmSaveAudio = function() {
+      const folderId = document.getElementById('modal-folder-id').value.trim();
+      if (!folderId) { alert('Please enter a Google Drive folder ID.'); return; }
+      if (document.getElementById('modal-remember').checked) {
+        setCookie('prod_drive_folder_id', folderId, 365);
+      }
+      document.getElementById('save-audio-modal').style.display = 'none';
+      if (_pendingSaveAudio) {
+        const { videoId, moduleIdx, videoIdx } = _pendingSaveAudio;
+        _pendingSaveAudio = null;
+        executeAudioUpload(videoId, moduleIdx, videoIdx, folderId);
+      }
+    };
+
     // GOOGLE_CLIENT_ID — read from localStorage first, cookie as fallback
     let GOOGLE_CLIENT_ID = localStorage.getItem('google_client_id') || getCookie('google_client_id') || '';
 
@@ -978,8 +1021,8 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
       return folder.id;
     }
 
-    async function uploadToDrive(token, mp3Blob, filename) {
-      const folderId = await findOrCreateDriveFolder(token, 'Claude Architect Audio');
+    async function uploadToDrive(token, mp3Blob, filename, folderId) {
+      if (!folderId) folderId = await findOrCreateDriveFolder(token, 'Claude Architect Audio');
       const metadata = JSON.stringify({ name: filename, parents: [folderId], mimeType: 'audio/mpeg' });
       const form = new FormData();
       form.append('metadata', new Blob([metadata], { type: 'application/json' }));
@@ -1044,17 +1087,24 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
       window.open(url, '_blank');
     };
 
-    window.saveAudio = async function(videoId, moduleIdx, videoIdx) {
+    window.saveAudio = function(videoId, moduleIdx, videoIdx) {
       const elementId = videoId || `local-${moduleIdx}-${videoIdx}`;
       const textArea = document.getElementById(`script-textarea-${elementId}`);
       const vTarget = window.loadedData && window.loadedData.modules[moduleIdx]
         ? window.loadedData.modules[moduleIdx].videos.find(v => v.id === videoIdx)
         : null;
       const scriptText = (textArea && textArea.value.trim()) || (vTarget ? vTarget.script : '');
-      if (!scriptText.trim()) {
-        alert('No script text found for this video.');
-        return;
-      }
+      if (!scriptText.trim()) { alert('No script text found for this video.'); return; }
+      openSaveAudioModal(videoId, moduleIdx, videoIdx);
+    };
+
+    async function executeAudioUpload(videoId, moduleIdx, videoIdx, folderId) {
+      const elementId = videoId || `local-${moduleIdx}-${videoIdx}`;
+      const textArea = document.getElementById(`script-textarea-${elementId}`);
+      const vTarget = window.loadedData && window.loadedData.modules[moduleIdx]
+        ? window.loadedData.modules[moduleIdx].videos.find(v => v.id === videoIdx)
+        : null;
+      const scriptText = (textArea && textArea.value.trim()) || (vTarget ? vTarget.script : '');
 
       const statusEl = document.getElementById(`audio-status-${elementId}`);
       const btnEl = document.getElementById(`btn-save-audio-${elementId}`);
@@ -1081,7 +1131,7 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
           try {
             const token = await getGisToken();
             const filename = `module${moduleIdx + 1}-video${videoIdx}-script.mp3`;
-            const driveLink = await uploadToDrive(token, mp3Blob, filename);
+            const driveLink = await uploadToDrive(token, mp3Blob, filename, folderId);
             await saveAudioUrl(videoId, driveLink);
             if (listenEl) {
               listenEl.href = driveLink;
@@ -1103,7 +1153,7 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
         btnEl.disabled = false;
         setTimeout(() => setAudioStatus(statusEl, '', ''), 6000);
       }
-    };
+    }
 
     async function loadFromSupabase() {
       if (!SUPABASE_URL.includes('supabase.co')) return null;
@@ -1307,5 +1357,27 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
       }
     })();
   </script>
+
+  <!-- Save Audio Modal -->
+  <div class="modal-overlay" id="save-audio-modal" style="display:none;" onclick="if(event.target===this)closeSaveAudioModal()">
+    <div class="modal-box">
+      <h3>💾 Save Audio to Google Drive</h3>
+      <p class="modal-desc">Upload generated audio to your production Drive folder.</p>
+      <div class="modal-field">
+        <label>Drive Folder ID</label>
+        <input type="text" class="gdrive-input" id="modal-folder-id" placeholder="Paste Google Drive folder ID…" style="flex:none;width:100%;" />
+        <span class="modal-field-hint">Open the folder in Drive → copy the ID from the URL after /folders/</span>
+      </div>
+      <label class="modal-remember">
+        <input type="checkbox" id="modal-remember" checked />
+        Remember as default production folder
+      </label>
+      <div class="modal-actions">
+        <button class="btn-save" onclick="confirmSaveAudio()">☁️ Upload to Drive</button>
+        <button class="btn-cancel" onclick="closeSaveAudioModal()">Cancel</button>
+        <a href="../settings.html" class="modal-settings-link" target="_blank">⚙️ Production Settings</a>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
