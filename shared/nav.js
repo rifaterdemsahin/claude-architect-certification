@@ -27,7 +27,7 @@
       { label: '3. ✅ Sanity Checklist', url: '5_Symbols/sanity_checklist.html', hideAfterDays: 90 },
       { label: '4. 📋 Outline', url: 'course_outline.html' },
       { label: '5. 🎬 Script', url: '5_Symbols/production/preprod/scripts/index.html' },
-      { label: '6. 📋 Producer Checklist', url: '5_Symbols/production/preprod/sanity_check.html' },
+      { label: '6. 📋 Producer Checklist', url: '5_Symbols/production/preprod/producer_checklist.html' },
       {
         label: '🛠️ Tools',
         children: [

@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📋 Producer Checklist</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #030712; --card: rgba(17,24,39,0.9); --border: rgba(139,92,246,0.2);
+      --text: #f3f4f6; --muted: #9ca3af; --primary: #8b5cf6; --green: #10b981;
+      --red: #ef4444; --yellow: #f59e0b; --font-h: 'Outfit', sans-serif;
+      --font-b: 'Plus Jakarta Sans', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: var(--font-b); line-height: 1.6; padding: 32px 24px 100px; }
+    .container { max-width: 860px; margin: 0 auto; }
+    h1 { font-family: var(--font-h); font-size: 2.4rem; font-weight: 800; margin-bottom: 6px; }
+    .subtitle { color: var(--muted); font-size: 1rem; margin-bottom: 28px; }
+
+    /* Config panel */
+    .config-panel {
+      background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+      padding: 20px 24px; margin-bottom: 28px;
+    }
+    .config-panel summary { cursor: pointer; font-weight: 700; font-size: 0.95rem; color: var(--muted); user-select: none; }
+    .config-panel summary:hover { color: var(--text); }
+    .config-row { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+    .config-row input {
+      flex: 1; min-width: 180px; padding: 9px 14px; border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3);
+      color: var(--text); font-size: 0.88rem;
+    }
+    .config-row input:focus { outline: none; border-color: var(--primary); }
+    .btn { padding: 9px 18px; border-radius: 10px; font-weight: 700; border: none; cursor: pointer; font-size: 0.88rem; transition: all 0.2s; font-family: var(--font-b); }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: #7c3aed; }
+    .btn-seed { background: rgba(16,185,129,0.15); color: var(--green); border: 1px solid rgba(16,185,129,0.3); }
+    .btn-seed:hover { background: rgba(16,185,129,0.25); }
+    .btn-sm { padding: 4px 12px; font-size: 0.78rem; border-radius: 7px; }
+    .btn-ghost { background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid rgba(255,255,255,0.08); }
+    .btn-ghost:hover { background: rgba(255,255,255,0.1); color: var(--text); }
+    .btn-danger { background: rgba(239,68,68,0.12); color: var(--red); border: 1px solid rgba(239,68,68,0.2); }
+    .btn-danger:hover { background: rgba(239,68,68,0.22); }
+    #conn-status { font-size: 0.82rem; margin-left: 6px; }
+
+    /* Section cards */
+    .section-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+      margin-bottom: 18px; overflow: hidden;
+    }
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 22px; cursor: pointer; user-select: none;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .section-header h2 { font-family: var(--font-h); font-size: 1.15rem; font-weight: 700; }
+    .section-meta { font-size: 0.8rem; color: var(--muted); }
+    .section-body { padding: 12px 22px 18px; }
+    .section-body.hidden { display: none; }
+
+    /* Task rows */
+    .task-row {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .task-row:last-child { border-bottom: none; }
+    .task-check { margin-top: 4px; width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer; flex-shrink: 0; }
+    .task-label { flex: 1; min-width: 0; }
+    .task-name { font-size: 0.9rem; font-weight: 500; word-break: break-word; }
+    .task-name.checked { text-decoration: line-through; color: var(--muted); }
+    .task-desc { font-size: 0.78rem; color: var(--muted); margin-top: 2px; word-break: break-word; }
+    .task-actions { display: flex; gap: 5px; flex-shrink: 0; }
+
+    /* Inline edit */
+    .edit-form { display: none; margin-top: 8px; }
+    .edit-form.open { display: block; }
+    .edit-form input, .edit-form textarea {
+      width: 100%; padding: 7px 11px; border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3);
+      color: var(--text); font-size: 0.85rem; margin-bottom: 6px; font-family: var(--font-b);
+    }
+    .edit-form textarea { resize: vertical; min-height: 50px; }
+    .edit-form input:focus, .edit-form textarea:focus { outline: none; border-color: var(--primary); }
+    .edit-actions { display: flex; gap: 6px; }
+
+    /* Add task row */
+    .add-row { margin-top: 12px; }
+    .add-row input {
+      width: 100%; padding: 9px 14px; border-radius: 10px;
+      border: 1px dashed rgba(139,92,246,0.3); background: rgba(139,92,246,0.04);
+      color: var(--text); font-size: 0.88rem; transition: border-color 0.2s;
+    }
+    .add-row input:focus { outline: none; border-color: var(--primary); background: rgba(139,92,246,0.08); }
+    .add-row input::placeholder { color: rgba(139,92,246,0.5); }
+
+    /* Progress bar */
+    .progress-bar-wrap { height: 4px; background: rgba(255,255,255,0.06); border-radius: 2px; margin-top: 12px; }
+    .progress-bar-fill { height: 100%; border-radius: 2px; background: var(--primary); transition: width 0.4s; }
+
+    /* SQL card */
+    .sql-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+      padding: 20px 24px; margin-top: 12px;
+    }
+    .sql-card h3 { font-family: var(--font-h); font-size: 1rem; margin-bottom: 12px; color: var(--muted); }
+    .sql-card pre {
+      background: rgba(0,0,0,0.4); border-radius: 10px; padding: 14px; font-size: 0.76rem;
+      color: #94a3b8; overflow-x: auto; white-space: pre-wrap; max-height: 260px; overflow-y: auto;
+    }
+    .toast {
+      position: fixed; bottom: 24px; right: 24px; background: rgba(17,24,39,0.98);
+      border: 1px solid var(--border); border-radius: 12px; padding: 12px 18px;
+      font-size: 0.85rem; z-index: 9999; transform: translateY(80px); transition: transform 0.3s;
+      pointer-events: none;
+    }
+    .toast.show { transform: translateY(0); }
+  </style>
+  <script src="../../../shared/nav.js" defer></script>
+</head>
+<body>
+<div class="container">
+  <h1>📋 Producer Checklist</h1>
+  <p class="subtitle">Supabase-backed subtasks for each pre-production stage — check off, edit, or add tasks in real time.</p>
+
+  <!-- Config -->
+  <details class="config-panel" id="configDetails">
+    <summary>⚙️ Supabase Connection</summary>
+    <div class="config-row">
+      <input id="sb-url" placeholder="https://your-project.supabase.co" autocomplete="off">
+      <input id="sb-key" type="password" placeholder="Anon key" autocomplete="off">
+      <button class="btn btn-primary" onclick="connectAndLoad()">🔌 Connect</button>
+      <button class="btn btn-seed" onclick="seedData()">🌱 Seed Data</button>
+      <span id="conn-status"></span>
+    </div>
+  </details>
+
+  <!-- 5 stage sections — rendered by JS -->
+  <div id="sections"></div>
+
+  <!-- SQL reference -->
+  <details class="sql-card">
+    <summary style="cursor:pointer;font-family:var(--font-h);font-size:1rem;color:var(--muted);">📝 SQL Setup (run once in Supabase SQL Editor)</summary>
+    <pre id="sql-block" style="margin-top:12px;"></pre>
+    <button class="btn btn-ghost btn-sm" style="margin-top:10px;" onclick="copySQL()">📋 Copy SQL</button>
+  </details>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Config ──────────────────────────────────────────────────────────────────
+const STAGES = [
+  { key: 'problem',          icon: '❓', label: '1. Problem' },
+  { key: 'product_solution', icon: '🏠', label: '2. Product (Solution)' },
+  { key: 'sanity_check',     icon: '✅', label: '3. Sanity Checklist' },
+  { key: 'outline',          icon: '📋', label: '4. Outline' },
+  { key: 'script',           icon: '🎬', label: '5. Script' }
+];
+
+const SEED = {
+  problem: [
+    { item_name: 'Define the target audience',            item_desc: 'Who specifically will benefit from this course?' },
+    { item_name: 'Write a clear problem statement',       item_desc: 'One or two sentences describing the core pain point.' },
+    { item_name: 'Validate the problem with 3+ users',    item_desc: 'Interview or survey real potential learners.' },
+    { item_name: 'Set OKRs for the project',              item_desc: 'Objective + 2-3 measurable Key Results.' },
+    { item_name: 'Document competing solutions & gaps',   item_desc: 'What exists already? What gap do you fill?' }
+  ],
+  product_solution: [
+    { item_name: 'Design the landing page copy',                 item_desc: 'Headline, subheadline, and key benefits.' },
+    { item_name: 'Create the full course outline',               item_desc: 'All modules and videos with titles and objectives.' },
+    { item_name: 'Define pricing and business model',            item_desc: 'One-time, subscription, or cohort-based?' },
+    { item_name: 'Write the 30-second elevator pitch',           item_desc: 'Clear, compelling, no jargon.' },
+    { item_name: 'Identify unique selling points vs competitors', item_desc: 'What makes this course uniquely valuable?' }
+  ],
+  sanity_check: [
+    { item_name: 'All internal links verified working',          item_desc: 'Run link checker; fix any 404s.' },
+    { item_name: 'Mobile responsiveness tested on 2+ devices',   item_desc: 'iPhone and Android at minimum.' },
+    { item_name: 'No exposed secrets or API keys in codebase',   item_desc: 'grep for .env patterns; check git history.' },
+    { item_name: 'navigation_config.json synced with all HTML',  item_desc: 'Every page accessible from the nav.' },
+    { item_name: 'GitHub Actions CI/CD passing green',           item_desc: 'All workflows passing before go-live.' }
+  ],
+  outline: [
+    { item_name: 'Module 1 objectives and videos defined', item_desc: 'Title, learning outcomes, and video list.' },
+    { item_name: 'Module 2 objectives and videos defined', item_desc: 'Title, learning outcomes, and video list.' },
+    { item_name: 'Module 3 objectives and videos defined', item_desc: 'Title, learning outcomes, and video list.' },
+    { item_name: 'Module 4 objectives and videos defined', item_desc: 'Title, learning outcomes, and video list.' },
+    { item_name: 'Module 5 objectives and videos defined', item_desc: 'Title, learning outcomes, and video list.' }
+  ],
+  script: [
+    { item_name: 'Module 1 script written and peer-reviewed',  item_desc: 'Full narration text with visual cues.' },
+    { item_name: 'Module 2 script written and peer-reviewed',  item_desc: 'Full narration text with visual cues.' },
+    { item_name: 'Module 3 script written and peer-reviewed',  item_desc: 'Full narration text with visual cues.' },
+    { item_name: 'Shot list created for all modules',          item_desc: 'Screen recordings, diagrams, and demo sequences.' },
+    { item_name: 'Audio test and voiceover baseline done',     item_desc: 'Mic check, room acoustics, sample recording reviewed.' }
+  ]
+};
+
+const SEED_SQL = `-- Run in Supabase SQL Editor: https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/sql/new
+-- Safe to re-run (uses INSERT … ON CONFLICT DO NOTHING if unique constraint exists)
+
+INSERT INTO checklist_items (phase, item_name, item_desc, sort_order) VALUES
+-- 1. Problem
+('problem','Define the target audience','Who specifically will benefit from this course?',1),
+('problem','Write a clear problem statement','One or two sentences describing the core pain point.',2),
+('problem','Validate the problem with 3+ users','Interview or survey real potential learners.',3),
+('problem','Set OKRs for the project','Objective + 2-3 measurable Key Results.',4),
+('problem','Document competing solutions & gaps','What exists already? What gap do you fill?',5),
+-- 2. Product (Solution)
+('product_solution','Design the landing page copy','Headline, subheadline, and key benefits.',1),
+('product_solution','Create the full course outline','All modules and videos with titles and objectives.',2),
+('product_solution','Define pricing and business model','One-time, subscription, or cohort-based?',3),
+('product_solution','Write the 30-second elevator pitch','Clear, compelling, no jargon.',4),
+('product_solution','Identify unique selling points vs competitors','What makes this course uniquely valuable?',5),
+-- 3. Sanity Checklist
+('sanity_check','All internal links verified working','Run link checker; fix any 404s.',1),
+('sanity_check','Mobile responsiveness tested on 2+ devices','iPhone and Android at minimum.',2),
+('sanity_check','No exposed secrets or API keys in codebase','grep for .env patterns; check git history.',3),
+('sanity_check','navigation_config.json synced with all HTML','Every page accessible from the nav.',4),
+('sanity_check','GitHub Actions CI/CD passing green','All workflows passing before go-live.',5),
+-- 4. Outline
+('outline','Module 1 objectives and videos defined','Title, learning outcomes, and video list.',1),
+('outline','Module 2 objectives and videos defined','Title, learning outcomes, and video list.',2),
+('outline','Module 3 objectives and videos defined','Title, learning outcomes, and video list.',3),
+('outline','Module 4 objectives and videos defined','Title, learning outcomes, and video list.',4),
+('outline','Module 5 objectives and videos defined','Title, learning outcomes, and video list.',5),
+-- 5. Script
+('script','Module 1 script written and peer-reviewed','Full narration text with visual cues.',1),
+('script','Module 2 script written and peer-reviewed','Full narration text with visual cues.',2),
+('script','Module 3 script written and peer-reviewed','Full narration text with visual cues.',3),
+('script','Shot list created for all modules','Screen recordings, diagrams, and demo sequences.',4),
+('script','Audio test and voiceover baseline done','Mic check, room acoustics, sample recording reviewed.',5);`;
+
+document.getElementById('sql-block').textContent = SEED_SQL;
+
+// ── Supabase helpers ─────────────────────────────────────────────────────────
+let SB_URL = '', SB_KEY = '', USER_ID = '';
+
+function api(path, opts = {}) {
+  return fetch(SB_URL + '/rest/v1/' + path, {
+    ...opts,
+    headers: {
+      'apikey': SB_KEY,
+      'Authorization': 'Bearer ' + SB_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': opts.prefer || 'return=representation',
+      ...(opts.headers || {})
+    }
+  });
+}
+
+async function loadItems(phase) {
+  const r = await api(`checklist_items?phase=eq.${phase}&order=sort_order.asc`);
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+
+async function loadProgress() {
+  const r = await api(`checklist_progress?user_id=eq.${encodeURIComponent(USER_ID)}`);
+  if (!r.ok) return {};
+  const rows = await r.json();
+  return Object.fromEntries(rows.map(p => [p.item_id, p]));
+}
+
+async function upsertProgress(item_id, checked) {
+  await api('checklist_progress', {
+    method: 'POST',
+    prefer: 'resolution=merge-duplicates,return=representation',
+    headers: { 'Prefer': 'resolution=merge-duplicates' },
+    body: JSON.stringify({ item_id, user_id: USER_ID, checked, updated_at: new Date().toISOString() })
+  });
+}
+
+async function insertItem(phase, item_name, item_desc, sort_order) {
+  const r = await api('checklist_items', {
+    method: 'POST',
+    body: JSON.stringify({ phase, item_name, item_desc: item_desc || '', sort_order })
+  });
+  if (!r.ok) throw new Error(await r.text());
+  const rows = await r.json();
+  return rows[0];
+}
+
+async function updateItem(id, item_name, item_desc) {
+  const r = await api(`checklist_items?id=eq.${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ item_name, item_desc })
+  });
+  if (!r.ok) throw new Error(await r.text());
+}
+
+async function deleteItem(id) {
+  const r = await api(`checklist_items?id=eq.${id}`, { method: 'DELETE', prefer: 'return=minimal' });
+  if (!r.ok) throw new Error(await r.text());
+}
+
+// ── Render ───────────────────────────────────────────────────────────────────
+let progressCache = {};
+
+function renderSection(stage, items) {
+  const total = items.length;
+  const done = items.filter(i => progressCache[i.id]?.checked).length;
+  const pct = total ? Math.round(done / total * 100) : 0;
+
+  const taskRows = items.map(item => {
+    const checked = progressCache[item.id]?.checked || false;
+    return `<div class="task-row" id="row-${item.id}">
+      <input type="checkbox" class="task-check" ${checked ? 'checked' : ''}
+        onchange="toggleTask(${item.id}, this.checked, '${stage.key}')">
+      <div class="task-label">
+        <div class="task-name${checked ? ' checked' : ''}" id="name-${item.id}">${esc(item.item_name)}</div>
+        ${item.item_desc ? `<div class="task-desc" id="desc-${item.id}">${esc(item.item_desc)}</div>` : ''}
+        <div class="edit-form" id="edit-${item.id}">
+          <input id="edit-name-${item.id}" value="${esc(item.item_name)}" placeholder="Task name">
+          <textarea id="edit-desc-${item.id}" placeholder="Description (optional)">${esc(item.item_desc || '')}</textarea>
+          <div class="edit-actions">
+            <button class="btn btn-primary btn-sm" onclick="saveEdit(${item.id})">💾 Save</button>
+            <button class="btn btn-ghost btn-sm" onclick="cancelEdit(${item.id})">Cancel</button>
+          </div>
+        </div>
+      </div>
+      <div class="task-actions">
+        <button class="btn btn-ghost btn-sm" title="Edit" onclick="openEdit(${item.id})">✏️</button>
+        <button class="btn btn-danger btn-sm" title="Delete" onclick="removeTask(${item.id}, '${stage.key}')">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  return `<div class="section-card">
+    <div class="section-header" onclick="toggleSection('body-${stage.key}')">
+      <h2>${stage.icon} ${stage.label}</h2>
+      <span class="section-meta">${done}/${total} done &nbsp;${pct}%</span>
+    </div>
+    <div class="section-body" id="body-${stage.key}">
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" id="bar-${stage.key}" style="width:${pct}%"></div></div>
+      <div id="tasks-${stage.key}" style="margin-top:10px;">${taskRows}</div>
+      <div class="add-row">
+        <input id="new-${stage.key}" placeholder="+ Add a task…" onkeydown="if(event.key==='Enter')addTask('${stage.key}')">
+      </div>
+    </div>
+  </div>`;
+}
+
+function esc(str) {
+  return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function toggleSection(id) {
+  const el = document.getElementById(id);
+  el.classList.toggle('hidden');
+}
+
+// ── Actions ──────────────────────────────────────────────────────────────────
+async function toggleTask(id, checked, stageKey) {
+  try {
+    await upsertProgress(id, checked);
+    progressCache[id] = { ...(progressCache[id] || {}), checked };
+    const nameEl = document.getElementById('name-' + id);
+    if (nameEl) nameEl.classList.toggle('checked', checked);
+    refreshStats(stageKey);
+  } catch(e) { showToast('❌ ' + e.message); }
+}
+
+function openEdit(id) {
+  document.getElementById('edit-' + id).classList.add('open');
+}
+function cancelEdit(id) {
+  document.getElementById('edit-' + id).classList.remove('open');
+}
+async function saveEdit(id) {
+  const name = document.getElementById('edit-name-' + id).value.trim();
+  const desc = document.getElementById('edit-desc-' + id).value.trim();
+  if (!name) return;
+  try {
+    await updateItem(id, name, desc);
+    document.getElementById('name-' + id).textContent = name;
+    const descEl = document.getElementById('desc-' + id);
+    if (descEl) descEl.textContent = desc;
+    cancelEdit(id);
+    showToast('✅ Saved');
+  } catch(e) { showToast('❌ ' + e.message); }
+}
+
+async function addTask(stageKey) {
+  const input = document.getElementById('new-' + stageKey);
+  const name = input.value.trim();
+  if (!name) return;
+  const container = document.getElementById('tasks-' + stageKey);
+  const existing = container.querySelectorAll('.task-row').length;
+  try {
+    const item = await insertItem(stageKey, name, '', existing + 1);
+    input.value = '';
+    const stage = STAGES.find(s => s.key === stageKey);
+    const tmp = document.createElement('div');
+    tmp.innerHTML = renderTaskRow(item, stage);
+    container.appendChild(tmp.firstElementChild);
+    refreshStats(stageKey);
+    showToast('✅ Task added');
+  } catch(e) { showToast('❌ ' + e.message); }
+}
+
+function renderTaskRow(item, stage) {
+  const checked = progressCache[item.id]?.checked || false;
+  return `<div class="task-row" id="row-${item.id}">
+    <input type="checkbox" class="task-check" ${checked ? 'checked' : ''}
+      onchange="toggleTask(${item.id}, this.checked, '${stage.key}')">
+    <div class="task-label">
+      <div class="task-name${checked ? ' checked' : ''}" id="name-${item.id}">${esc(item.item_name)}</div>
+      ${item.item_desc ? `<div class="task-desc" id="desc-${item.id}">${esc(item.item_desc)}</div>` : ''}
+      <div class="edit-form" id="edit-${item.id}">
+        <input id="edit-name-${item.id}" value="${esc(item.item_name)}" placeholder="Task name">
+        <textarea id="edit-desc-${item.id}" placeholder="Description (optional)">${esc(item.item_desc || '')}</textarea>
+        <div class="edit-actions">
+          <button class="btn btn-primary btn-sm" onclick="saveEdit(${item.id})">💾 Save</button>
+          <button class="btn btn-ghost btn-sm" onclick="cancelEdit(${item.id})">Cancel</button>
+        </div>
+      </div>
+    </div>
+    <div class="task-actions">
+      <button class="btn btn-ghost btn-sm" title="Edit" onclick="openEdit(${item.id})">✏️</button>
+      <button class="btn btn-danger btn-sm" title="Delete" onclick="removeTask(${item.id}, '${stage.key}')">🗑</button>
+    </div>
+  </div>`;
+}
+
+async function removeTask(id, stageKey) {
+  if (!confirm('Delete this task?')) return;
+  try {
+    await deleteItem(id);
+    const row = document.getElementById('row-' + id);
+    if (row) row.remove();
+    refreshStats(stageKey);
+    showToast('🗑 Deleted');
+  } catch(e) { showToast('❌ ' + e.message); }
+}
+
+function refreshStats(stageKey) {
+  const container = document.getElementById('tasks-' + stageKey);
+  if (!container) return;
+  const rows = container.querySelectorAll('.task-row');
+  const checks = container.querySelectorAll('.task-check');
+  const total = rows.length;
+  const done = Array.from(checks).filter(c => c.checked).length;
+  const pct = total ? Math.round(done / total * 100) : 0;
+  const stage = STAGES.find(s => s.key === stageKey);
+  const card = container.closest('.section-card');
+  if (card) {
+    const meta = card.querySelector('.section-meta');
+    if (meta) meta.textContent = `${done}/${total} done   ${pct}%`;
+  }
+  const bar = document.getElementById('bar-' + stageKey);
+  if (bar) bar.style.width = pct + '%';
+}
+
+// ── Connect & Load ───────────────────────────────────────────────────────────
+async function connectAndLoad() {
+  SB_URL = document.getElementById('sb-url').value.trim().replace(/\/$/, '');
+  SB_KEY = document.getElementById('sb-key').value.trim();
+  if (!SB_URL || !SB_KEY) { showToast('Enter URL and key first'); return; }
+  localStorage.setItem('sb_url', SB_URL);
+  localStorage.setItem('sb_key', SB_KEY);
+
+  const status = document.getElementById('conn-status');
+  status.textContent = '⏳ Connecting…';
+
+  try {
+    const r = await api('checklist_items?limit=1');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    status.textContent = '✅ Connected';
+    status.style.color = 'var(--green)';
+    document.getElementById('configDetails').removeAttribute('open');
+    await loadAll();
+  } catch(e) {
+    status.textContent = '❌ ' + e.message;
+    status.style.color = 'var(--red)';
+  }
+}
+
+async function loadAll() {
+  progressCache = await loadProgress();
+  const sectionsEl = document.getElementById('sections');
+  let html = '';
+  for (const stage of STAGES) {
+    const items = await loadItems(stage.key);
+    html += renderSection(stage, items);
+  }
+  sectionsEl.innerHTML = html;
+}
+
+// ── Seed data ────────────────────────────────────────────────────────────────
+async function seedData() {
+  if (!SB_URL || !SB_KEY) { showToast('Connect first'); return; }
+  showToast('🌱 Seeding…');
+  let count = 0;
+  for (const [phase, items] of Object.entries(SEED)) {
+    for (let i = 0; i < items.length; i++) {
+      try {
+        await insertItem(phase, items[i].item_name, items[i].item_desc, i + 1);
+        count++;
+      } catch(e) { /* skip duplicates */ }
+    }
+  }
+  showToast(`✅ Seeded ${count} tasks`);
+  await loadAll();
+}
+
+// ── SQL copy ─────────────────────────────────────────────────────────────────
+function copySQL() {
+  navigator.clipboard.writeText(SEED_SQL).then(() => showToast('📋 Copied!'));
+}
+
+// ── Toast ────────────────────────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  const savedUrl = localStorage.getItem('sb_url') || 'https://rmekfsdhglyiralxvkwc.supabase.co';
+  const savedKey = localStorage.getItem('sb_key') || '';
+  document.getElementById('sb-url').value = savedUrl;
+  document.getElementById('sb-key').value = savedKey;
+
+  USER_ID = localStorage.getItem('producer_user_id') || ('user-' + Math.random().toString(36).slice(2, 9));
+  localStorage.setItem('producer_user_id', USER_ID);
+
+  if (savedUrl && savedKey) {
+    SB_URL = savedUrl.replace(/\/$/, '');
+    SB_KEY = savedKey;
+    loadAll().catch(() => {
+      document.getElementById('configDetails').setAttribute('open', '');
+    });
+  } else {
+    document.getElementById('configDetails').setAttribute('open', '');
+  }
+});
+</script>
+</body>
+</html>
