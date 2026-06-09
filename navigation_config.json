@@ -62,6 +62,7 @@
     { "label": "   ├─ README", "url": "markdown_renderer.html?file=4_Formula/README.md" },
     { "label": "   ├─ API Reference", "url": "markdown_renderer.html?file=4_Formula/api_reference.md" },
     { "label": "   ├─ Axiom Logging Ingestion", "url": "markdown_renderer.html?file=4_Formula/axiom_logging_setup.md" },
+    { "label": "   ├─ Axiom Query Guide", "url": "markdown_renderer.html?file=4_Formula/axiom_query_guide.md" },
     { "label": "   ├─ Decisions (ADRs)", "url": "markdown_renderer.html?file=4_Formula/decisions.md" },
     { "label": "   ├─ DSL Glossary", "url": "markdown_renderer.html?file=4_Formula/dsl.md" },
     { "label": "   ├─ Implementation Guide", "url": "markdown_renderer.html?file=4_Formula/implementation_guide.md" },
