@@ -16,7 +16,7 @@ INSERT INTO checklist_items (phase, item_name, item_desc, sort_order, item_url) 
 ('Pre-Production', 'Storyboard / scene breakdown',  'Scene list with timing and overlays defined',                                   30, '../markdown_renderer.html?file=4_Formula/certification/production_plan.md'),
 ('Pre-Production', 'Asset generation prompts ready','All BG, text overlay, and icon prompts written',                                40, '../markdown_renderer.html?file=4_Formula/production/prompter.md'),
 ('Pre-Production', 'Audio recording schedule',      'Dates and environment booked',                                                  50, '../markdown_renderer.html?file=1_Real_Unknown/6_kanban.md'),
-('Pre-Production', 'Lower third designs approved',  'Per-module L3 variants signed off',                                             60, 'production/postprod/module-1/section-1/production_shotlist.html'),
+('Pre-Production', 'Lower third designs approved',  'Per-module L3 variants signed off',                                             60, 'production/postprod/production_shotlist.html'),
 ('Pre-Production', 'Production plan reviewed',      'Master plan read by all stakeholders',                                          70, '../markdown_renderer.html?file=4_Formula/certification/production_plan.md');
 
 -- Production (7 items)
@@ -34,8 +34,8 @@ INSERT INTO checklist_items (phase, item_name, item_desc, sort_order, item_url) 
 ('Post-Production', 'Background images generated',  'All scene backgrounds created and named correctly',                             10, 'production/postprod/index.html'),
 ('Post-Production', 'Text overlays generated',      'Typography overlays match script emphasis',                                     20, 'production/postprod/index.html'),
 ('Post-Production', 'Icons generated',              'All cue icons created in correct style',                                        30, 'production/postprod/index.html'),
-('Post-Production', 'Lower thirds rendered',        'All L3 assets exported with transparency',                                      40, 'production/postprod/module-1/section-1/production_shotlist.html'),
-('Post-Production', 'EDL reviewed for each scene',  'Edit design lists match audio waveform',                                        50, 'production/postprod/module-1/section-1/production_shotlist.html'),
+('Post-Production', 'Lower thirds rendered',        'All L3 assets exported with transparency',                                      40, 'production/postprod/production_shotlist.html'),
+('Post-Production', 'EDL reviewed for each scene',  'Edit design lists match audio waveform',                                        50, 'production/postprod/production_shotlist.html'),
 ('Post-Production', 'Composite previews checked',   'Hover previews match intended final look',                                      60, 'production/postprod/module-1/section-1/asset_checklist.html'),
 ('Post-Production', 'Asset bundles zipped',         'Per-scene ZIP files ready for editor handoff',                                  70, 'production/postprod/index.html'),
 ('Post-Production', 'Final render approved',        'Master video exported and reviewed',                                            80, 'production/postprod/index.html'),

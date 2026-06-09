@@ -191,7 +191,7 @@ The root directory is `/Users/rifaterdemsahin/Projects/claude-architect-certific
 We calculate the depth of each file relative to root:
 - Depth of `5_Symbols/production/prod/index.html` = 3. Relative path to root = `../../../`
 - Depth of `5_Symbols/production/preprod/scripts/index.html` = 4. Relative path to root = `../../../../`
-- Depth of `5_Symbols/production/postprod/module-1/section-1/production_shotlist.html` = 5. Relative path to root = `../../../../../`
+- Depth of `5_Symbols/production/postprod/production_shotlist.html` = 5. Relative path to root = `../../../../../`
 
 Using the depth `D` of the file:
 1. Root `index.html` -> `../` * D + `index.html`
@@ -264,7 +264,7 @@ The user requested a restructure of the main Project Menu to follow a strict seq
 1. "1. Sanity Checklist" (url: `5_Symbols/sanity_checklist.html`)
 2. "2. Outline" (url: `course_outline.html`)
 3. "3. Script" (url: `5_Symbols/production/preprod/scripts/index.html`)
-4. "4. Production Shot List" (url: `5_Symbols/production/postprod/module-1/section-1/production_shotlist.html`)
+4. "4. Production Shot List" (url: `5_Symbols/production/postprod/production_shotlist.html`)
 5. "5. Guide" (url: `markdown_renderer.html?file=4_Formula/certification/exam_and_case_study.md`)
 
 ### Approach & Strategy
