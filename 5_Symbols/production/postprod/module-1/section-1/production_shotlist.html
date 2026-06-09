@@ -1277,9 +1277,13 @@
       if (audioTitleEl) audioTitleEl.textContent = title;
       document.title = 'Production Shot List: ' + title;
 
-      // Load voiceover URL from localStorage (video-level)
+      // Load voiceover URL from localStorage (video-level) — strip localhost URLs (dev-only, not needed)
       const voiceoverKey = `voiceover_m${moduleKey}_s${sectionKey}`;
-      const savedVoiceover = localStorage.getItem(voiceoverKey) || '';
+      let savedVoiceover = localStorage.getItem(voiceoverKey) || '';
+      if (savedVoiceover.startsWith('http://localhost') || savedVoiceover.startsWith('http://127.0.0.1')) {
+        savedVoiceover = '';
+        localStorage.removeItem(voiceoverKey);
+      }
       const voInput = document.getElementById('fVoiceoverUrl');
       if (voInput) voInput.value = savedVoiceover;
       const audioPlayer = document.getElementById('master-audio');
@@ -1393,6 +1397,18 @@
     }
 
 
+    // Strip localhost URLs from a string value — localhost URLs are dev-only and not needed in production
+    function stripLocalhostUrl(val) {
+      if (!val) return val;
+      if (val.startsWith('http://localhost') || val.startsWith('http://127.0.0.1')) {
+        try {
+          const u = new URL(val);
+          return u.pathname + u.search;
+        } catch (_) { return ''; }
+      }
+      return val;
+    }
+
     // 🎬 Scene CRUD — Form open/close
     function openSceneForm(sceneDbId) {
       const overlay = document.getElementById('sceneFormOverlay');
@@ -1427,15 +1443,16 @@
           document.getElementById('fTiming').value = scene.timing || '';
           document.getElementById('fScript').value = scene.script || '';
           autoEstimateTiming(scene.script || '');
-          document.getElementById('fBg').value = scene.bg || '';
-          document.getElementById('fMusicUrl').value = scene.musicUrl || '';
-          document.getElementById('fSfxUrl').value = scene.sfxUrl || '';
-          document.getElementById('fLtImg').value = scene.ltImg || '';
+          // Strip localhost URLs — dev-only URLs are not needed in production
+          document.getElementById('fBg').value = stripLocalhostUrl(scene.bg || '');
+          document.getElementById('fMusicUrl').value = stripLocalhostUrl(scene.musicUrl || '');
+          document.getElementById('fSfxUrl').value = stripLocalhostUrl(scene.sfxUrl || '');
+          document.getElementById('fLtImg').value = stripLocalhostUrl(scene.ltImg || '');
           document.getElementById('fLtMain').value = scene.ltMain || '';
           document.getElementById('fLtSub').value = scene.ltSub || '';
-          document.getElementById('fOverlayLt').value = scene.overlayLt || '';
-          document.getElementById('fOverlayText').value = scene.overlayText || '';
-          document.getElementById('fRefDocUrl').value = scene.refDocUrl || '';
+          document.getElementById('fOverlayLt').value = stripLocalhostUrl(scene.overlayLt || '');
+          document.getElementById('fOverlayText').value = stripLocalhostUrl(scene.overlayText || '');
+          document.getElementById('fRefDocUrl').value = stripLocalhostUrl(scene.refDocUrl || '');
         }
       }
 
@@ -1616,10 +1633,11 @@
         const preview = raw.length > 90 ? raw.substring(0, 90) + '…' : (raw || '—');
         const hasBg = s.bg ? '✅' : '❌';
         const hasMusic = s.musicUrl ? '✅' : '❌';
+        const editAction = s.dbId ? `openSceneForm(${s.dbId})` : `scrollToScene(${s.id})`;
         return `<tr onclick="scrollToScene(${s.id})">
           <td class="cell-num">S${s.id}</td>
           <td class="cell-timing">${s.timing || '—'}</td>
-          <td class="cell-script" title="${raw.replace(/"/g, '&quot;')}">${preview}</td>
+          <td class="cell-script" title="Click to load script into editor" onclick="event.stopPropagation();${editAction}" style="cursor:pointer;">${preview}</td>
           <td class="cell-status">${hasBg} BG</td>
           <td class="cell-status">${hasMusic} 🎵</td>
           <td>${s.dbId ? `<button onclick="event.stopPropagation();openSceneForm(${s.dbId})" style="background:rgba(139,92,246,0.15);color:#a78bfa;border:1px solid rgba(139,92,246,0.35);padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.72rem;font-weight:800;">✏️ Edit</button>` : '<span style="opacity:0.35;font-size:0.7rem;">📋 local</span>'}</td>
