@@ -1,5 +1,22 @@
 # LLM Thinking & Planning Log
 
+## 📅 Date: 2026-06-09
+## 🧠 Stage: Stage 4 (Formula) — Membership FAQ Expansion
+
+### ❓ Problem Statement
+The user requested adding two key FAQ points to `5_Symbols/production/publish/membership.html`:
+1. Explain that scaling the audience allows continuous addition of new courses, which increases the value of membership as more modules/resources get added.
+2. Highlight that joining members can ask questions and receive answers within a 48-hour response window.
+
+### 📐 Approach & Strategy
+1. **📚 Content Updates:**
+   - Update the existing "Will more courses be added?" FAQ answer to state: "Yes! If we are able to generate a large enough audience, we will keep adding new courses. Members can access all courses while they are active, meaning the value of your membership continuously increases as more modules and blueprints are added."
+   - Create a new FAQ item: "Can I ask questions and get support?" with the answer: "Yes! Joining members can ask questions directly and get detailed architectural answers within a 48-hour timeline."
+2. **🌿 Git Workflow:**
+   - Commit the thinking log updates.
+   - Commit the code changes in `membership.html`.
+   - Push and verify link integrity using `test_links.py`.
+
 ---
 
 ## 📅 Date: 2026-06-09
