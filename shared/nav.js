@@ -23,41 +23,43 @@
   var FALLBACK = [
     { label: '🎬 Preprod', children: [
       { label: '1. ❓ Problem', url: 'problem.html' },
-      { label: '2. 📋 Producer Checklist', url: '5_Symbols/production/preprod/sanity_check.html' },
+      { label: '2. 🏠 Product (Solution)', url: 'index.html' },
       { label: '3. ✅ Sanity Checklist', url: '5_Symbols/sanity_checklist.html', hideAfterDays: 90 },
       { label: '4. 📋 Outline', url: 'course_outline.html' },
       { label: '5. 🎬 Script', url: '5_Symbols/production/preprod/scripts/index.html' },
-      { label: '6. 🧪 Pre-Prod → Post-Prod Gate', url: '5_Symbols/production/preprod/sanity_check.html' },
+      { label: '6. 📋 Producer Checklist', url: '5_Symbols/production/preprod/sanity_check.html' },
       {
         label: '🛠️ Tools',
         children: [
-          { label: 'GitHub Repo', url: 'https://github.com/rifaterdemsahin/claude-architect-certification' },
-          { label: 'Supabase', url: 'https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/' },
-          { label: 'Google Cloud API', url: 'https://console.cloud.google.com/' },
-          { label: 'Claude Guide', url: 'claude.md' }
+          { label: '🐙 GitHub Repo', url: 'https://github.com/rifaterdemsahin/claude-architect-certification' },
+          { label: '🔥 Supabase', url: 'https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/' },
+          { label: '☁️ Google Cloud API', url: 'https://console.cloud.google.com/' },
+          { label: '🤖 Claude Guide', url: 'claude.md' }
         ]
       }
     ]},
     { label: '🎥 Production', children: [
       { label: '7. 📸 Shot List & Assets', url: '5_Symbols/production_shotlist.html' },
+      { label: '8. ✅ Production Checklist', url: '5_Symbols/production/prod/checklist.html' },
+      { label: '9. 📊 Readiness Plan', url: 'markdown_renderer.html?file=5_Symbols/production/prod/readiness_plan.md' },
       {
         label: '🛠️ Tools',
         children: [
-          { label: 'Audio Generator', url: 'https://secondbrain-kokoro.fly.dev/' },
-          { label: 'Google Drive', url: 'https://drive.google.com/' }
+          { label: '🔊 Audio Generator', url: 'https://secondbrain-kokoro.fly.dev/' },
+          { label: '📁 Google Drive', url: 'https://drive.google.com/' }
         ]
       }
     ]},
     { label: '📦 Post Prod', children: [
-      { label: '9. 🧭 Certification Guide & Exam', url: 'markdown_renderer.html?file=4_Formula/certification/exam_and_case_study.md' },
-      { label: '10. 🔥 Join $10/mo', url: '5_Symbols/production/publish/membership.html' },
-      { label: '11. 💰 Business Plan', url: 'markdown_renderer.html?file=5_Symbols/production/postprod/business_plan.md' },
+      { label: '10. 🧭 Certification Guide & Exam', url: 'markdown_renderer.html?file=4_Formula/certification/exam_and_case_study.md' },
+      { label: '11. 🔥 Join $10/mo', url: '5_Symbols/production/publish/membership.html' },
+      { label: '12. 💰 Business Plan', url: 'markdown_renderer.html?file=5_Symbols/production/postprod/business_plan.md' },
       {
         label: '🛠️ Tools',
         children: [
-          { label: 'Canva', url: 'https://canva.com' },
-          { label: 'YouTube Studio', url: 'https://studio.youtube.com/' },
-          { label: 'Gemini Guide', url: 'gemini.md' }
+          { label: '🎨 Canva', url: 'https://canva.com' },
+          { label: '📺 YouTube Studio', url: 'https://studio.youtube.com/' },
+          { label: '✨ Gemini Guide', url: 'gemini.md' }
         ]
       }
     ]}

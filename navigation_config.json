@@ -4,7 +4,7 @@
       "label": "🎬 Preprod",
       "children": [
         { "label": "1. ❓ Problem", "url": "problem.html" },
-        { "label": "2. 📋 Producer Checklist", "url": "5_Symbols/production/preprod/sanity_check.html" },
+        { "label": "2. 🏠 Product (Solution)", "url": "index.html" },
         {
           "label": "3. ✅ Sanity Checklist",
           "url": "5_Symbols/sanity_checklist.html",
@@ -16,7 +16,7 @@
           "url": "5_Symbols/production/preprod/scripts/index.html"
         },
         {
-          "label": "6. 🧪 Pre-Prod → Post-Prod Gate",
+          "label": "6. 📋 Producer Checklist",
           "url": "5_Symbols/production/preprod/sanity_check.html"
         },
         {
