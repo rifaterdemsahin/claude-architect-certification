@@ -13,6 +13,7 @@ This document defines how AI agents interact with the **Claude AI Certification 
     - Generated a premium visual contrast illustration `self_learning_value.png` and saved to `3_Simulation/generated/`.
     - Integrated a glassmorphic hero container (`.value-proposition-hero`) at the top of `5_Symbols/production/publish/membership.html` highlighting the self-learning recorded model over certificates.
     - Expanded the FAQ section detailing continuous value scaling from audience growth and 48-hour response support for questions.
+    - Added details to the hero description and comparison cards stating Rifat will post his exam scores and remain fully transparent about his self-learning process.
     - Verified all path and reference links using `test_links.py`.
 - **Status:** IMPLEMENTED, COMMITTED, PUSHED.
 
