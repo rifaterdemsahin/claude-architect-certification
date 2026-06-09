@@ -135,6 +135,29 @@
     let currentPhase = 'Production Roll';
     let itemsCache = [];
 
+    // ── Seed data: auto-inserted when DB is empty ──
+    const SEED_DATA = [
+      { phase: 'Production Roll', item_name: '💡 Lighting check', item_desc: 'Key light, fill light, and backlight positioned correctly. No harsh shadows on face or screen.', sort_order: 1 },
+      { phase: 'Production Roll', item_name: '🎤 Audio levels verified', item_desc: 'Microphone input level between -12dB and -6dB. No peaking or clipping.', sort_order: 2 },
+      { phase: 'Production Roll', item_name: '🔇 Ambient noise check', item_desc: 'Listen for background hum, fan noise, traffic, or echo. Record 10s room tone.', sort_order: 3 },
+      { phase: 'Production Roll', item_name: '📹 Screen recording software open', item_desc: 'OBS / Screen Studio / QuickTime configured at 1920x1080 30fps. Preview window positioned.', sort_order: 4 },
+      { phase: 'Production Roll', item_name: '📄 Script / teleprompter ready', item_desc: 'Script visible on second monitor or teleprompter app open and scrolling.', sort_order: 5 },
+      { phase: 'Production Roll', item_name: '🖥️ VS Code / IDE prepared', item_desc: 'Correct project folder open, font size 16-18px, terminal clean, relevant files open.', sort_order: 6 },
+      { phase: 'Production Roll', item_name: '🌐 Browser tabs closed', item_desc: 'Close personal tabs, messaging apps, notifications. Only production tabs remain.', sort_order: 7 },
+      { phase: 'Production Roll', item_name: '🎧 Headphones on', item_desc: 'Monitor live audio with closed-back headphones to prevent echo bleed.', sort_order: 8 },
+      { phase: 'Production Roll', item_name: '📋 Recording checklist reviewed', item_desc: 'Run through all roll items one more time before pressing record.', sort_order: 9 },
+
+      { phase: 'Production Voiceover', item_name: '🎙️ Microphone test recorded', item_desc: 'Record 15s test clip. Play back and verify clarity, plosives, sibilance.', sort_order: 1 },
+      { phase: 'Production Voiceover', item_name: '🔊 Gain staging set', item_desc: 'Pre-amp gain set so loudest passages hit -3dB max. No distortion.', sort_order: 2 },
+      { phase: 'Production Voiceover', item_name: '🔇 Noise floor acceptable', item_desc: 'Room tone below -50dB. No electrical hum, HVAC rumble, or fan noise.', sort_order: 3 },
+      { phase: 'Production Voiceover', item_name: '📝 Script printed / on screen', item_desc: 'Full script visible with cue marks for emphasis, pauses, and section breaks.', sort_order: 4 },
+      { phase: 'Production Voiceover', item_name: '💧 Water / hydration ready', item_desc: 'Room-temperature water within reach to prevent mouth clicks.', sort_order: 5 },
+      { phase: 'Production Voiceover', item_name: '📏 Mouth-to-mic distance consistent', item_desc: '6-8 inches from mic with pop filter. Consistent throughout recording.', sort_order: 6 },
+      { phase: 'Production Voiceover', item_name: '🔁 Warm-up vocal exercises done', item_desc: '2 minutes of humming, lip trills, and tongue twisters before recording.', sort_order: 7 },
+      { phase: 'Production Voiceover', item_name: '📂 Recording folder set', item_desc: 'Output folder created per module/section. File naming convention ready.', sort_order: 8 },
+      { phase: 'Production Voiceover', item_name: '🎧 Monitor mix confirmed', item_desc: 'Headphone mix has clean microphone feed. No latency or reverb in cans.', sort_order: 9 },
+    ];
+
     // ── Toast ──
     function showToast(msg, isError) {
       const el = document.getElementById('toast');
@@ -157,6 +180,21 @@
         .in('phase', ['Production Roll', 'Production Voiceover'])
         .order('sort_order');
       if (error) { showToast('❌ Load failed: ' + error.message, true); return []; }
+
+      // Auto-seed if database is empty
+      if (!items || items.length === 0) {
+        setBadge('saving');
+        try {
+          const { error: seedErr } = await db.from('checklist_items').insert(SEED_DATA);
+          if (seedErr) throw seedErr;
+          showToast('🌱 Seeded default checklist items');
+          return loadItems(); // recurse to load freshly inserted data
+        } catch (err) {
+          showToast('❌ Seed failed: ' + err.message, true);
+          return SEED_DATA.map(s => ({ ...s, id: 0, prog: { checked: false, notes: '' } }));
+        }
+      }
+
       const { data: progress } = await db
         .from('checklist_progress')
         .select('*')
