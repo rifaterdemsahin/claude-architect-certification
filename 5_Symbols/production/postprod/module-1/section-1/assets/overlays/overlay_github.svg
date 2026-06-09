@@ -1,9 +1,0 @@
-<svg width="1920" height="1080" viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
-  <rect x="0" y="0" width="1920" height="1080" fill="none" />
-  <rect x="360" y="480" width="1200" height="120" rx="60" fill="rgba(255,255,255,0.1)" stroke="white" stroke-width="2" />
-  <text x="960" y="555" font-family="Arial, sans-serif" font-size="42" font-weight="700" fill="white" text-anchor="middle">github.com/rifaterdemsahin/claude-architect-certification</text>
-  
-  <g transform="translate(930, 650)">
-    <text x="30" y="45" font-family="Arial, sans-serif" font-size="60" text-anchor="middle" fill="white">🐙</text>
-  </g>
-</svg>

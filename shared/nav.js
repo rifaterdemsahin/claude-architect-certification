@@ -97,6 +97,7 @@
         children: [
           { label: '🐙 GitHub Repo', url: 'https://github.com/rifaterdemsahin/claude-architect-certification' },
           { label: '🔥 Supabase', url: 'https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/' },
+          { label: '🗄 Supabase Admin (Local)', url: 'http://127.0.0.1:5500/5_Symbols/src/supabase/admin.html' },
           { label: '☁️ Google Cloud API', url: 'https://console.cloud.google.com/' },
           { label: '🤖 Claude Guide', url: 'claude.md' }
         ]

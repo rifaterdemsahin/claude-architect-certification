@@ -718,17 +718,15 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
     });
 
     function getModuleUrl(id) {
-      if (id === 1) return '../../postprod/module-1/section-1/post_production_master.html';
-      return `../../postprod/module-${id}/section-1/demo_script_show.html`;
+      return `../../postprod/post_production_master.html`;
     }
 
     function getSceneUrl(id) {
-      if (id === 1) return '../../postprod/module-1/section-1/demo_script.html';
-      return `../../postprod/module-${id}/section-1/demo_script_show.html`;
+      return `../../postprod/production_shotlist.html?module=${id}&section=1`;
     }
 
     function getShotlistUrl(moduleId) {
-      return `../../postprod/module-1/section-1/production_shotlist.html?module=${moduleId}&section=1`;
+      return `../../postprod/production_shotlist.html?module=${moduleId}&section=1`;
     }
 
     function getOutlineUrl(moduleId, videoId) {
