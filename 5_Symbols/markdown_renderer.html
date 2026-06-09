@@ -398,12 +398,38 @@
     // Config JSON fallback
     let navigationData = {
       projectMenu: [
-        { label: "Home", url: "../index.html" },
-        { label: "1. Sanity Checklist", url: "sanity_checklist.html" },
-        { label: "2. Outline", url: "../course_outline.html" },
-        { label: "3. Script", url: "production/preprod/scripts/index.html" },
-        { label: "4. Production Shot List", url: "production/postprod/module-1/section-1/production_shotlist.html" },
-        { label: "5. Guide", url: "markdown_renderer.html?file=4_Formula/certification/exam_and_case_study.md" }
+        {
+          label: "🎬 Preprod",
+          children: [
+            { label: "1. ❓ Problem", url: "problem.html" },
+            { label: "2. 🏠 Home", url: "index.html" },
+            { label: "3. ✅ Sanity Checklist", url: "5_Symbols/sanity_checklist.html" },
+            { label: "4. 📋 Course Outline", url: "course_outline.html" },
+            { label: "5. 🎬 Script", url: "5_Symbols/production/preprod/scripts/index.html" },
+            { label: "6. 🧪 Pre-Prod → Post-Prod Gate", url: "5_Symbols/production/preprod/sanity_check.html" }
+          ]
+        },
+        {
+          label: "🎥 Production",
+          children: [
+            { label: "7. 📸 Shot List & Assets", url: "5_Symbols/production_shotlist.html" },
+            { label: "8. 📊 Readiness Plan", url: "markdown_renderer.html?file=5_Symbols/production/prod/readiness_plan.md" }
+          ]
+        },
+        {
+          label: "🛠️ Tools",
+          children: [
+            { label: "9. 🎙️ Audio Generator", url: "https://secondbrain-kokoro.fly.dev/" }
+          ]
+        },
+        {
+          label: "📦 Post Prod",
+          children: [
+            { label: "10. 🧭 Certification Guide & Exam", url: "markdown_renderer.html?file=4_Formula/certification/exam_and_case_study.md" },
+            { label: "11. 🔥 Join $10/mo", url: "5_Symbols/production/publish/membership.html" },
+            { label: "12. 💰 Business Plan", url: "markdown_renderer.html?file=5_Symbols/production/postprod/business_plan.md" }
+          ]
+        }
       ],
       debugMenu: [
         { label: "1. Real Unknown", url: "1_Real_Unknown/" },

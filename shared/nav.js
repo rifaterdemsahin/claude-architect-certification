@@ -27,17 +27,19 @@
       { label: '3. ✅ Sanity Checklist', url: '5_Symbols/sanity_checklist.html', hideAfterDays: 90 },
       { label: '4. 📋 Outline', url: 'course_outline.html' },
       { label: '5. 🎬 Script', url: '5_Symbols/production/preprod/scripts/index.html' },
-      { label: '6. 🧪 Sanity Gate', url: '5_Symbols/production/preprod/sanity_check.html' }
+      { label: '6. 🧪 Pre-Prod → Post-Prod Gate', url: '5_Symbols/production/preprod/sanity_check.html' }
     ]},
     { label: '🎥 Production', children: [
-      { label: 'Shot List & Assets', url: '5_Symbols/production_shotlist.html' },
-      { label: '📊 Readiness Plan', url: 'markdown_renderer.html?file=5_Symbols/production/prod/readiness_plan.md' }
+      { label: '7. 📸 Shot List & Assets', url: '5_Symbols/production_shotlist.html' },
+      { label: '8. 📊 Readiness Plan', url: 'markdown_renderer.html?file=5_Symbols/production/prod/readiness_plan.md' }
+    ]},
+    { label: '🛠️ Tools', children: [
+      { label: '9. 🎙️ Audio Generator', url: 'https://secondbrain-kokoro.fly.dev/' }
     ]},
     { label: '📦 Post Prod', children: [
-      { label: '7. 🧪 Guide', url: 'markdown_renderer.html?file=4_Formula/certification/exam_and_case_study.md' },
-      { label: '🧪 Exam', url: 'markdown_renderer.html?file=4_Formula/certification/exam_and_case_study.md' },
-      { label: '📋 Course Outline', url: 'course_outline.html' },
-      { label: '🔥 Join $10/mo', url: '5_Symbols/production/publish/membership.html' }
+      { label: '10. 🧭 Certification Guide & Exam', url: 'markdown_renderer.html?file=4_Formula/certification/exam_and_case_study.md' },
+      { label: '11. 🔥 Join $10/mo', url: '5_Symbols/production/publish/membership.html' },
+      { label: '12. 💰 Business Plan', url: 'markdown_renderer.html?file=5_Symbols/production/postprod/business_plan.md' }
     ]}
   ];
 

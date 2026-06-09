@@ -202,3 +202,11 @@ Record every prompt given to AI agents below. Include the date, agent, and purpo
 **Purpose:** Estimate the manual versus AI-leveraged weekly operational hours Erdem needs to commit to achieve the masterclass business plan goals.  
 **Output:** Updated `5_Symbols/production/postprod/business_plan.md` with a breakdown comparison table and delegation strategies.
 
+---
+
+## 2026-06-09 — Create Tools Menu & Audio Generator Link
+
+**Agent:** Antigravity AI (Gemini 1.5 Pro)  
+**Purpose:** Create a new dropdown group "Tools" under the main Production navigation menu and add a link to the self-hosted Kokoro Audio Generator.  
+**Output:** Updated `navigation_config.json`, `index.html`, `5_Symbols/markdown_renderer.html`, and `shared/nav.js`.
+

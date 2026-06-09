@@ -7,6 +7,14 @@ This document defines how AI agents interact with the **Claude AI Certification 
 ## 📅 Agent Activity Log
 
 ### 2026-06-09
+- **Task:** 🛠️ Add Tools dropdown menu containing Audio Generator link under Production.
+- **Action:**
+    - Modified `navigation_config.json` to insert a new `🛠️ Tools` dropdown with a link to Kokoro Audio Generator (`https://secondbrain-kokoro.fly.dev/`).
+    - Synced fallback configurations in `index.html`, `5_Symbols/markdown_renderer.html`, and `shared/nav.js`.
+    - Renumbered subsequent navigation entries to match.
+    - Verified all links using `test_links.py` to ensure complete integrity.
+- **Status:** IMPLEMENTED, COMMITTED, PUSHED.
+
 - **Task:** 💰 Expand Business Plan with weekly audience acquisition tasks and future certification pipeline.
 - **Action:**
     - Modified `5_Symbols/production/postprod/business_plan.md` to append the `Weekly Audience Acquisition Plan` and `Future Masterclass & Certification Pipeline`.
