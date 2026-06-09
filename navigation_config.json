@@ -20,20 +20,25 @@
           "url": "5_Symbols/production/preprod/sanity_check.html"
         },
         {
-          "label": "🛠️ Tools: GitHub Repo",
-          "url": "https://github.com/rifaterdemsahin/claude-architect-certification"
-        },
-        {
-          "label": "🛠️ Tools: Supabase",
-          "url": "https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/"
-        },
-        {
-          "label": "🛠️ Tools: Google Cloud API",
-          "url": "https://console.cloud.google.com/"
-        },
-        {
-          "label": "🛠️ Tools: Claude Guide",
-          "url": "claude.md"
+          "label": "🛠️ Tools",
+          "children": [
+            {
+              "label": "GitHub Repo",
+              "url": "https://github.com/rifaterdemsahin/claude-architect-certification"
+            },
+            {
+              "label": "Supabase",
+              "url": "https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/"
+            },
+            {
+              "label": "Google Cloud API",
+              "url": "https://console.cloud.google.com/"
+            },
+            {
+              "label": "Claude Guide",
+              "url": "claude.md"
+            }
+          ]
         }
       ]
     },
@@ -49,12 +54,17 @@
           "url": "markdown_renderer.html?file=5_Symbols/production/prod/readiness_plan.md"
         },
         {
-          "label": "🛠️ Tools: Audio Generator",
-          "url": "https://secondbrain-kokoro.fly.dev/"
-        },
-        {
-          "label": "🛠️ Tools: Google Drive",
-          "url": "https://drive.google.com/"
+          "label": "🛠️ Tools",
+          "children": [
+            {
+              "label": "Audio Generator",
+              "url": "https://secondbrain-kokoro.fly.dev/"
+            },
+            {
+              "label": "Google Drive",
+              "url": "https://drive.google.com/"
+            }
+          ]
         }
       ]
     },
@@ -74,16 +84,21 @@
           "url": "markdown_renderer.html?file=5_Symbols/production/postprod/business_plan.md"
         },
         {
-          "label": "🛠️ Tools: Canva",
-          "url": "https://canva.com"
-        },
-        {
-          "label": "🛠️ Tools: YouTube Studio",
-          "url": "https://studio.youtube.com/"
-        },
-        {
-          "label": "🛠️ Tools: Gemini Guide",
-          "url": "gemini.md"
+          "label": "🛠️ Tools",
+          "children": [
+            {
+              "label": "Canva",
+              "url": "https://canva.com"
+            },
+            {
+              "label": "YouTube Studio",
+              "url": "https://studio.youtube.com/"
+            },
+            {
+              "label": "Gemini Guide",
+              "url": "gemini.md"
+            }
+          ]
         }
       ]
     }

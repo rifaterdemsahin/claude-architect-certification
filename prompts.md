@@ -218,3 +218,11 @@ Record every prompt given to AI agents below. Include the date, agent, and purpo
 **Purpose:** Restructure the main navigation bar to nest Tools links as child items inside the existing Preprod, Production, and Post Prod phase dropdowns (attaching GitHub Repo, Supabase, Google Cloud API, Audio Generator, Google Drive, Canva, and YouTube Studio).  
 **Output:** Updated `navigation_config.json`, `index.html`, `5_Symbols/markdown_renderer.html`, and `shared/nav.js`.
 
+---
+
+## 2026-06-09 — Second-Level Tools Menus & Sub-Level Dropdown Links
+
+**Agent:** Antigravity AI (Gemini 1.5 Pro)  
+**Purpose:** Structure the Tools options as a nested second-level menu trigger inside the main phase dropdowns, implementing flyout sub-dropdown menus with pure CSS and updating JS menu generation.  
+**Output:** Updated `navigation_config.json`, `index.html`, `5_Symbols/markdown_renderer.html`, `shared/nav.js`, and `shared/nav.css`.
+

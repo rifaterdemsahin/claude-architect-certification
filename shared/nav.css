@@ -121,6 +121,65 @@
   color: white !important;
 }
 
+/* Sub-dropdown (second level) */
+.site-nav-subdropdown {
+  position: relative;
+}
+
+.site-nav-subdropdown .site-subdrop-trigger {
+  display: block;
+  padding: 10px 16px;
+  border-radius: 8px;
+  color: #9ca3af;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.site-nav-subdropdown:hover .site-subdrop-trigger {
+  background: rgba(139, 92, 246, 0.15);
+  color: #f3f4f6;
+}
+
+.site-subdrop-menu {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 100%;
+  margin-left: 2px;
+  background: rgba(15, 23, 42, 0.98);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 8px;
+  min-width: 190px;
+  z-index: 300;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+}
+
+.site-nav-subdropdown:hover .site-subdrop-menu {
+  display: block;
+}
+
+.site-subdrop-menu a {
+  display: block;
+  padding: 10px 16px;
+  border-radius: 8px;
+  color: #9ca3af;
+  text-decoration: none;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.site-subdrop-menu a:hover {
+  background: rgba(139, 92, 246, 0.15);
+  color: #f3f4f6;
+}
+
 @media (max-width: 768px) {
   .site-nav-links { gap: 10px; }
   .site-nav-links a { font-size: 0.78rem; }

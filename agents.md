@@ -7,6 +7,14 @@ This document defines how AI agents interact with the **Claude AI Certification 
 ## 📅 Agent Activity Log
 
 ### 2026-06-09
+- **Task:** 🛠️ Refactor Tools to be second-level dropdowns with sub-level links.
+- **Action:**
+    - Structured Tools as nested second-level menu triggers inside `🎬 Preprod`, `🎥 Production`, and `📦 Post Prod` dropdowns.
+    - Updated `navigation_config.json` and fallback configurations in `index.html`, `5_Symbols/markdown_renderer.html`, and `shared/nav.js` to support nested `children` lists.
+    - Added pure CSS-based sub-dropdown flyout rules to `shared/nav.css` and `index.html` style sections.
+    - Verified all links using `test_links.py` to ensure complete integrity.
+- **Status:** IMPLEMENTED, COMMITTED, PUSHED.
+
 - **Task:** 🛠️ Refactor navigation to nest phase-specific tools.
 - **Action:**
     - Modified `navigation_config.json` to insert Tools as nested child items under Preprod (GitHub, Supabase, Google Cloud API), Production (Audio Generator, Google Drive), and Postprod (Canva, YouTube Studio) instead of separate dropdown menus.

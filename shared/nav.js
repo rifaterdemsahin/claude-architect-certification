@@ -28,24 +28,39 @@
       { label: '4. 📋 Outline', url: 'course_outline.html' },
       { label: '5. 🎬 Script', url: '5_Symbols/production/preprod/scripts/index.html' },
       { label: '6. 🧪 Pre-Prod → Post-Prod Gate', url: '5_Symbols/production/preprod/sanity_check.html' },
-      { label: '🛠️ Tools: GitHub Repo', url: 'https://github.com/rifaterdemsahin/claude-architect-certification' },
-      { label: '🛠️ Tools: Supabase', url: 'https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/' },
-      { label: '🛠️ Tools: Google Cloud API', url: 'https://console.cloud.google.com/' },
-      { label: '🛠️ Tools: Claude Guide', url: 'claude.md' }
+      {
+        label: '🛠️ Tools',
+        children: [
+          { label: 'GitHub Repo', url: 'https://github.com/rifaterdemsahin/claude-architect-certification' },
+          { label: 'Supabase', url: 'https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/' },
+          { label: 'Google Cloud API', url: 'https://console.cloud.google.com/' },
+          { label: 'Claude Guide', url: 'claude.md' }
+        ]
+      }
     ]},
     { label: '🎥 Production', children: [
       { label: '7. 📸 Shot List & Assets', url: '5_Symbols/production_shotlist.html' },
       { label: '8. 📊 Readiness Plan', url: 'markdown_renderer.html?file=5_Symbols/production/prod/readiness_plan.md' },
-      { label: '🛠️ Tools: Audio Generator', url: 'https://secondbrain-kokoro.fly.dev/' },
-      { label: '🛠️ Tools: Google Drive', url: 'https://drive.google.com/' }
+      {
+        label: '🛠️ Tools',
+        children: [
+          { label: 'Audio Generator', url: 'https://secondbrain-kokoro.fly.dev/' },
+          { label: 'Google Drive', url: 'https://drive.google.com/' }
+        ]
+      }
     ]},
     { label: '📦 Post Prod', children: [
       { label: '9. 🧭 Certification Guide & Exam', url: 'markdown_renderer.html?file=4_Formula/certification/exam_and_case_study.md' },
       { label: '10. 🔥 Join $10/mo', url: '5_Symbols/production/publish/membership.html' },
       { label: '11. 💰 Business Plan', url: 'markdown_renderer.html?file=5_Symbols/production/postprod/business_plan.md' },
-      { label: '🛠️ Tools: Canva', url: 'https://canva.com' },
-      { label: '🛠️ Tools: YouTube Studio', url: 'https://studio.youtube.com/' },
-      { label: '🛠️ Tools: Gemini Guide', url: 'gemini.md' }
+      {
+        label: '🛠️ Tools',
+        children: [
+          { label: 'Canva', url: 'https://canva.com' },
+          { label: 'YouTube Studio', url: 'https://studio.youtube.com/' },
+          { label: 'Gemini Guide', url: 'gemini.md' }
+        ]
+      }
     ]}
   ];
 
@@ -75,7 +90,21 @@
           '<span class="site-drop-trigger">' + item.label + ' &#9662;</span>' +
           '<div class="site-drop-menu">';
         visible.forEach(function (child) {
-          html += '<a href="' + resolveUrl(child.url) + '">' + child.label + '</a>';
+          if (child.children) {
+            var subVisible = child.children.filter(function (sc) {
+              return !(sc.hideAfterDays && daysSinceLaunch >= sc.hideAfterDays);
+            });
+            if (!subVisible.length) return;
+            html += '<div class="site-nav-subdropdown">' +
+              '<span class="site-subdrop-trigger">' + child.label + ' &raquo;</span>' +
+              '<div class="site-subdrop-menu">';
+            subVisible.forEach(function (subChild) {
+              html += '<a href="' + resolveUrl(subChild.url) + '">' + subChild.label + '</a>';
+            });
+            html += '</div></div>';
+          } else {
+            html += '<a href="' + resolveUrl(child.url) + '">' + child.label + '</a>';
+          }
         });
         html += '</div></div>';
       } else {

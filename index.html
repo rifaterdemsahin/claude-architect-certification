@@ -218,6 +218,71 @@
       color: var(--text-primary);
     }
 
+    /* Sub-dropdown menu styling inside homepage menu */
+    .menu-subgroup {
+      position: relative;
+    }
+
+    .menu-subgroup-btn {
+      width: 100%;
+      background: none;
+      border: none;
+      text-align: left;
+      padding: 0.45rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: var(--transition);
+      font-family: inherit;
+    }
+
+    .menu-subgroup-btn:hover {
+      background: rgba(139, 92, 246, 0.15);
+      color: var(--text-primary);
+    }
+
+    .menu-subdropdown {
+      position: absolute;
+      top: 0;
+      left: 100%;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 0.5rem;
+      min-width: 200px;
+      display: none;
+      flex-direction: column;
+      gap: 0.15rem;
+      z-index: 310;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      margin-left: 2px;
+    }
+
+    .menu-subgroup:hover .menu-subdropdown {
+      display: flex;
+    }
+
+    .subdropdown-link {
+      padding: 0.45rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      transition: var(--transition);
+      text-decoration: none;
+    }
+
+    .subdropdown-link:hover {
+      background: rgba(139, 92, 246, 0.15);
+      color: var(--text-primary);
+    }
+
     .nav-btn {
       background: linear-gradient(135deg, var(--accent-violet), #7c3aed);
       color: white !important;
@@ -1445,12 +1510,39 @@
             const dropdown = document.createElement("div");
             dropdown.className = "menu-dropdown";
 
-            visibleChildren.forEach(child => {
-              const a = document.createElement("a");
-              a.href = resolveUrl(child.url);
-              a.className = "dropdown-link";
-              a.textContent = child.label;
-              dropdown.appendChild(a);
+             visibleChildren.forEach(child => {
+              if (child.children) {
+                const subVisible = child.children.filter(sc => !(sc.hideAfterDays && daysSinceLaunch >= sc.hideAfterDays));
+                if (!subVisible.length) return;
+
+                const subGroup = document.createElement("div");
+                subGroup.className = "menu-subgroup";
+
+                const subBtn = document.createElement("button");
+                subBtn.className = "menu-subgroup-btn";
+                subBtn.innerHTML = `${child.label} <span class="chevron-right">▸</span>`;
+                subGroup.appendChild(subBtn);
+
+                const subDropdown = document.createElement("div");
+                subDropdown.className = "menu-subdropdown";
+
+                subVisible.forEach(subChild => {
+                  const subA = document.createElement("a");
+                  subA.href = resolveUrl(subChild.url);
+                  subA.className = "subdropdown-link";
+                  subA.textContent = subChild.label;
+                  subDropdown.appendChild(subA);
+                });
+
+                subGroup.appendChild(subDropdown);
+                dropdown.appendChild(subGroup);
+              } else {
+                const a = document.createElement("a");
+                a.href = resolveUrl(child.url);
+                a.className = "dropdown-link";
+                a.textContent = child.label;
+                dropdown.appendChild(a);
+              }
             });
 
             group.appendChild(dropdown);
