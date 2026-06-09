@@ -4,6 +4,17 @@ Every prompt used in this project is recorded here. This serves as an audit trai
 
 ---
 
+## 2026-06-09 | Claude Code | GitHub Pages + Supabase Stateful Formula
+
+**Purpose:** Document the formula for building a stateful N-tier application using GitHub Pages as the static frontend and Supabase as the data/logic tier, minimising hosting cost.
+
+**Prompt:** "create a formula document how do i manage to use a github pages and be able to write data to supabase and have a statefull system and which lowers the cost of the ntier applicaiton"
+
+**Files created:**
+- `4_Formula/github_pages_supabase_stateful.md` — Architecture pattern, RLS security, write/read/auth code snippets, cost breakdown, Cloudflare Workers decision guide, deploy checklist
+
+---
+
 ## 2026-06-07 | Claude Code | 3_Simulation UX Documentation
 
 **Purpose:** Scan the full project structure and generate `userexperience.md` and `instructor_experience.md` in `3_Simulation/` with embedded image generation prompts, Mermaid diagrams, and system flow visualizations.
