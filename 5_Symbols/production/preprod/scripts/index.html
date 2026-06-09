@@ -689,7 +689,8 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
           html += `</div>`;
           html += `<div class="edit-trigger-row">`;
           html += `<button class="btn-edit" id="btn-edit-${elementId}" onclick="toggleEdit('${elementId}', true)">✏️ Edit Script</button>`;
-          html += `<button class="btn-template" onclick="loadTemplate('${elementId}', ${v.id}, ${m.videos.length})">📋 Template</button>`;
+          const templateLabel = v.id === 1 ? '🚀 Template Intro' : v.id === m.videos.length ? '🎯 Template Outro' : '📋 Template Video';
+          html += `<button class="btn-template" onclick="loadTemplate('${elementId}', ${v.id}, ${m.videos.length})">${templateLabel}</button>`;
           html += `<span class="save-status" id="save-status-${elementId}"></span>`;
           html += `</div>`;
           html += `</div>`; // end script container
