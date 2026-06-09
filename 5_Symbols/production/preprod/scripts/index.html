@@ -668,7 +668,7 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
         }
 
         html += `<div class="video-list">`;
-        m.videos.forEach(v => {
+        m.videos.forEach((v, vi) => {
           const elementId = v.videoId || `local-${mi}-${v.id}`;
           html += `<div class="video-card">`;
           html += `<div class="video-header"><span class="video-title">🎬 <a class="scene-title-link" href="${getSceneUrl(m.id)}">Video ${v.id}: ${v.title}</a></span><span class="video-duration">${v.duration}</span></div>`;
@@ -689,8 +689,11 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
           html += `</div>`;
           html += `<div class="edit-trigger-row">`;
           html += `<button class="btn-edit" id="btn-edit-${elementId}" onclick="toggleEdit('${elementId}', true)">✏️ Edit Script</button>`;
-          const templateLabel = v.id === 1 ? '🚀 Template Intro' : v.id === m.videos.length ? '🎯 Template Outro' : '📋 Template Video';
-          html += `<button class="btn-template" onclick="loadTemplate('${elementId}', ${v.id}, ${m.videos.length})">${templateLabel}</button>`;
+          const isIntro = vi === 0;
+          const isOutro = vi === m.videos.length - 1;
+          const templateLabel = isIntro ? '🚀 Template Intro' : isOutro ? '🎯 Template Outro' : '📋 Template Video';
+          const templatePos = isIntro ? 1 : isOutro ? m.videos.length : 2;
+          html += `<button class="btn-template" onclick="loadTemplate('${elementId}', ${templatePos}, ${m.videos.length})">${templateLabel}</button>`;
           html += `<span class="save-status" id="save-status-${elementId}"></span>`;
           html += `</div>`;
           html += `</div>`; // end script container
