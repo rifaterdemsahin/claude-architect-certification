@@ -380,7 +380,48 @@
       }
     };
 
-    const SCRIPT_TEMPLATE = `Format: Talking Head + Screen Share | Duration: [DURATION]
+    const INTRO_TEMPLATE = `Format: Talking Head | Duration: [DURATION]
+
+🔥 HOOK (on camera, high energy):
+"[BOLD CLAIM or CHALLENGE — something that stops the viewer cold]"
+
+If you've ever [PAIN POINT they know too well], this module changes everything.
+
+By the end of this [DURATION] you will be able to:
+✅ [SKILL 1 — concrete, measurable]
+✅ [SKILL 2 — concrete, measurable]
+✅ [SKILL 3 — concrete, measurable]
+
+This is the knowledge that separates engineers who build toys from engineers who build [HIGH-STAKES OUTCOME].
+
+Here's what we're going to cover:
+- [TOPIC 1] — because [WHY IT MATTERS]
+- [TOPIC 2] — because [WHY IT MATTERS]
+- [TOPIC 3] — because [WHY IT MATTERS]
+
+Let's get into it. First up: [FIRST TOPIC].`;
+
+    const OUTRO_TEMPLATE = `Format: Talking Head | Duration: [DURATION]
+
+RECAP (calm, confident):
+You now know how to [SKILL 1], [SKILL 2], and [SKILL 3].
+
+That's not trivial. Most teams [COMMON MISTAKE they used to make] — you won't.
+
+But here's what I haven't told you yet.
+
+[TEASER — one sentence that hints at a bigger problem or mystery]:
+"[CLIFFHANGER STATEMENT — something that raises a question they now desperately want answered]"
+
+In the next module, we go deeper: [NEXT MODULE TOPIC].
+And the approach? It's nothing like what you'd expect.
+
+[Call to action]:
+If this clicked for you — share it with [TARGET AUDIENCE]. They'll thank you.
+
+See you in Module [NEXT MODULE NUMBER].`;
+
+    const BODY_TEMPLATE = `Format: Talking Head + Screen Share | Duration: [DURATION]
 
 "[HOOK SENTENCE — one punchy line that frames the core problem]" That's the topic we're unpacking today.
 
@@ -404,10 +445,15 @@ Here's the key takeaway: [MAIN TAKEAWAY — the single most important idea]
 
 Now, before we move to [NEXT SECTION], let's check your understanding.`;
 
-    window.loadTemplate = function(elementId) {
+    window.loadTemplate = function(elementId, videoPos, totalVideos) {
       const textArea = document.getElementById(`script-textarea-${elementId}`);
-      textArea.value = SCRIPT_TEMPLATE;
-      // Open edit mode if not already open
+      if (videoPos === 1) {
+        textArea.value = INTRO_TEMPLATE;
+      } else if (videoPos === totalVideos) {
+        textArea.value = OUTRO_TEMPLATE;
+      } else {
+        textArea.value = BODY_TEMPLATE;
+      }
       const form = document.getElementById(`script-edit-form-${elementId}`);
       if (form.style.display === 'none' || !form.style.display) {
         toggleEdit(elementId, true);
@@ -614,7 +660,7 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
           html += `</div>`;
           html += `<div class="edit-trigger-row">`;
           html += `<button class="btn-edit" id="btn-edit-${elementId}" onclick="toggleEdit('${elementId}', true)">✏️ Edit Script</button>`;
-          html += `<button class="btn-template" onclick="loadTemplate('${elementId}')">📋 Template</button>`;
+          html += `<button class="btn-template" onclick="loadTemplate('${elementId}', ${v.id}, ${m.videos.length})">📋 Template</button>`;
           html += `<span class="save-status" id="save-status-${elementId}"></span>`;
           html += `</div>`;
           html += `</div>`; // end script container
