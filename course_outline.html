@@ -782,11 +782,12 @@
     }
 
     function renderModule(mod, idx) {
-      const videos  = (mod.course_videos || []).map(v => renderVideo(v)).join('');
+      const videos  = (mod.course_videos || []).map(v => renderVideo(v, mod.module_number)).join('');
       const links   = (mod.links || []).map(l =>
         `<a href="${l.url}" class="module-link-tag" target="_blank"><i class="fa-solid fa-link fa-xs"></i>${l.label}</a>`
       ).join('');
       const scriptUrl = `5_Symbols/production/preprod/scripts/index.html?module=${mod.module_number}`;
+      const shotlistUrl = `5_Symbols/production/postprod/module-1/section-1/production_shotlist.html?module=${mod.module_number}&section=1`;
       const okr = mod.okr;
 
       const okrHtml = okr ? `
@@ -816,13 +817,16 @@
             <a href="${scriptUrl}" class="script-link-btn">
               <i class="fa-solid fa-file-lines"></i> View &amp; Edit Script
             </a>
+            <a href="${shotlistUrl}" class="script-link-btn" style="background:linear-gradient(135deg,#10b981,#059669);">
+              <i class="fa-solid fa-list"></i> Production Shot List
+            </a>
             <div class="videos-grid">${videos}</div>
             ${links ? `<div class="module-links">${links}</div>` : ''}
           </div>
         </div>`;
     }
 
-    function renderVideo(v) {
+    function renderVideo(v, moduleNumber) {
       const bullets = (v.bullets || []).map(b => `<li>${b}</li>`).join('');
       const topics  = (v.topics  || []).map(t => `<li>${t}</li>`).join('');
       const status  = v.status || null;
@@ -844,10 +848,19 @@
           onclick="toggleSubStatus(${v.id},'${key}',this)">${active ? '✓ ' : ''}${m.icon} ${m.label}</button>`;
       }).join('');
 
+      const scriptLink = `5_Symbols/production/preprod/scripts/index.html?module=${moduleNumber}`;
+      const demoScriptLink = `5_Symbols/production/postprod/module-${moduleNumber}/section-1/demo_script_show.html`;
+      const shotlistLink = `5_Symbols/production/postprod/module-1/section-1/production_shotlist.html?module=${moduleNumber}&section=1`;
+
       return `
         <div class="video-card${status ? ' status-' + status : ''}" id="vc-${v.id}" data-video-id="${v.id}">
           <div class="video-label">Video ${v.video_number}</div>
           <div class="video-title">${v.title}</div>
+          <div class="video-actions" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
+            <a href="${scriptLink}" class="module-link-tag" style="font-size:0.7rem;"><i class="fa-solid fa-file-lines"></i> Script</a>
+            <a href="${demoScriptLink}" class="module-link-tag" style="font-size:0.7rem;"><i class="fa-solid fa-video"></i> Demo Script</a>
+            <a href="${shotlistLink}" class="module-link-tag" style="font-size:0.7rem;"><i class="fa-solid fa-list"></i> Shot List</a>
+          </div>
           <ul class="video-bullets">${bullets}</ul>
           ${topicsHtml}
           <div class="video-status">
