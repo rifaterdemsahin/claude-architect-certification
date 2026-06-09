@@ -299,8 +299,25 @@
     .action-chip:hover { transform: translateY(-2px); }
     .action-chip.shotlist:hover { background: rgba(16,185,129,0.15); border-color: rgba(16,185,129,0.4); }
     .action-chip.outline:hover { background: rgba(139,92,246,0.15); border-color: rgba(139,92,246,0.4); }
+
+    /* Audio generation */
+    .audio-action-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 8px 0 10px; }
+    .btn-gen-audio { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); color: #fbbf24; padding: 6px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-body); }
+    .btn-gen-audio:hover:not(:disabled) { background: rgba(245,158,11,0.2); color: #fde68a; }
+    .btn-gen-audio:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-listen { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); color: #34d399; padding: 6px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; text-decoration: none; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-listen:hover { background: rgba(16,185,129,0.2); color: #6ee7b7; }
+    .audio-status { font-size: 0.78rem; font-weight: 600; padding: 4px 10px; border-radius: 6px; transition: all 0.25s; }
+    .audio-status.generating { color: #fbbf24; background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.2); }
+    .audio-status.uploading { color: #93c5fd; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); }
+    .audio-status.success { color: #34d399; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2); }
+    .audio-status.warn { color: #fbbf24; background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.2); }
+    .audio-status.error-audio { color: #f87171; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); }
+    .audio-player-container { margin: 0 0 10px; }
+    .audio-player-container audio { width: 100%; border-radius: 8px; }
   </style>
   <script src="../../../../shared/nav.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
 
@@ -602,6 +619,15 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
           html += `</div>`;
           html += `</div>`; // end script container
 
+          // Audio generation row
+          const hasAudio = !!v.audioUrl;
+          html += `<div class="audio-action-row">`;
+          html += `<button class="btn-gen-audio" id="btn-audio-${elementId}" onclick="generateAudio('${v.videoId || ''}', ${mi}, ${v.id})">🎙 Generate Audio</button>`;
+          html += `<span class="audio-status" id="audio-status-${elementId}"></span>`;
+          html += `<a class="btn-listen" id="listen-link-${elementId}" href="${v.audioUrl || '#'}" target="_blank"${hasAudio ? '' : ' style="display:none;"'}>🎧 Listen</a>`;
+          html += `</div>`;
+          html += `<div class="audio-player-container" id="audio-player-${elementId}"></div>`;
+
           html += `<div class="cue-list">${v.cues.map(c => `<span class="cue-tag">${c}</span>`).join('')}</div>`;
           html += `</div>`;
         });
@@ -638,6 +664,169 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
 
     const SUPABASE_URL = localStorage.getItem('supabase_url') || 'https://rmekfsdhglyiralxvkwc.supabase.co';
     const SUPABASE_ANON_KEY = localStorage.getItem('supabase_anon_key') || '';
+    const GOOGLE_CLIENT_ID = localStorage.getItem('google_client_id') || '';
+    const KOKORO_BASE = 'https://secondbrain-kokoro.fly.dev';
+
+    // ── Google Identity Services (GIS) token flow ──────────────────────────────
+    let _gisClient = null;
+    let _gisToken = null;
+
+    function initGisClient() {
+      if (!GOOGLE_CLIENT_ID || !window.google?.accounts?.oauth2) return;
+      _gisClient = google.accounts.oauth2.initTokenClient({
+        client_id: GOOGLE_CLIENT_ID,
+        scope: 'https://www.googleapis.com/auth/drive.file',
+        callback: () => {}
+      });
+    }
+
+    async function getGisToken() {
+      if (!_gisClient) initGisClient();
+      if (!_gisClient) throw new Error('Google auth not ready — set google_client_id in localStorage');
+      return new Promise((resolve, reject) => {
+        _gisClient.callback = (resp) => {
+          if (resp.error) reject(new Error(resp.error));
+          else { _gisToken = resp.access_token; resolve(resp.access_token); }
+        };
+        _gisClient.requestAccessToken({ prompt: _gisToken ? '' : 'consent' });
+      });
+    }
+
+    // ── Google Drive helpers ────────────────────────────────────────────────────
+    async function findOrCreateDriveFolder(token, name) {
+      const q = encodeURIComponent(`name='${name}' and mimeType='application/vnd.google-apps.folder' and trashed=false`);
+      const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id)`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.files && data.files.length > 0) return data.files[0].id;
+      const createRes = await fetch('https://www.googleapis.com/drive/v3/files', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, mimeType: 'application/vnd.google-apps.folder' })
+      });
+      const folder = await createRes.json();
+      return folder.id;
+    }
+
+    async function uploadToDrive(token, mp3Blob, filename) {
+      const folderId = await findOrCreateDriveFolder(token, 'Claude Architect Audio');
+      const metadata = JSON.stringify({ name: filename, parents: [folderId], mimeType: 'audio/mpeg' });
+      const form = new FormData();
+      form.append('metadata', new Blob([metadata], { type: 'application/json' }));
+      form.append('file', mp3Blob, filename);
+      const uploadRes = await fetch(
+        'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id',
+        { method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, body: form }
+      );
+      const file = await uploadRes.json();
+      if (!file.id) throw new Error('Drive upload returned no file id');
+      await fetch(`https://www.googleapis.com/drive/v3/files/${file.id}/permissions`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: 'reader', type: 'anyone' })
+      });
+      return `https://drive.google.com/file/d/${file.id}/view`;
+    }
+
+    // ── Supabase audio_url persistence ─────────────────────────────────────────
+    async function saveAudioUrl(videoId, audioUrl) {
+      if (!SUPABASE_URL.includes('supabase.co') || !videoId || !SUPABASE_ANON_KEY) return false;
+      const authHeaders = {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      };
+      const checkRes = await fetch(`${SUPABASE_URL}/rest/v1/scripts?video_id=eq.${videoId}`, {
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+      });
+      const existing = await checkRes.json();
+      const hasRecord = existing && existing.length > 0;
+      const url = hasRecord
+        ? `${SUPABASE_URL}/rest/v1/scripts?video_id=eq.${videoId}`
+        : `${SUPABASE_URL}/rest/v1/scripts`;
+      const body = hasRecord
+        ? { audio_url: audioUrl, audio_generated_at: new Date().toISOString(), updated_at: new Date().toISOString() }
+        : { video_id: parseInt(videoId), script_text: '', audio_url: audioUrl, audio_generated_at: new Date().toISOString(), updated_at: new Date().toISOString() };
+      const res = await fetch(url, { method: hasRecord ? 'PATCH' : 'POST', headers: authHeaders, body: JSON.stringify(body) });
+      return res.ok;
+    }
+
+    // ── Audio status helper ─────────────────────────────────────────────────────
+    function setAudioStatus(el, type, text) {
+      el.textContent = text;
+      el.className = `audio-status${type ? ' ' + type : ''}`;
+    }
+
+    // ── Main generate audio function ────────────────────────────────────────────
+    window.generateAudio = async function(videoId, moduleIdx, videoIdx) {
+      const elementId = videoId || `local-${moduleIdx}-${videoIdx}`;
+      const vTarget = window.loadedData && window.loadedData.modules[moduleIdx]
+        ? window.loadedData.modules[moduleIdx].videos.find(v => v.id === videoIdx)
+        : null;
+      const scriptText = vTarget ? vTarget.script : '';
+      if (!scriptText.trim()) {
+        alert('No script text found for this video.');
+        return;
+      }
+
+      const statusEl = document.getElementById(`audio-status-${elementId}`);
+      const btnEl = document.getElementById(`btn-audio-${elementId}`);
+      const playerEl = document.getElementById(`audio-player-${elementId}`);
+      const listenEl = document.getElementById(`listen-link-${elementId}`);
+
+      btnEl.disabled = true;
+      setAudioStatus(statusEl, 'generating', '🎙 Generating audio…');
+
+      try {
+        // 1. Call Kokoro TTS
+        const ttsRes = await fetch(`${KOKORO_BASE}/api/speak`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: scriptText.slice(0, 5000), voice: 'af_heart', speed: 1.0 })
+        });
+        if (!ttsRes.ok) throw new Error(`TTS error ${ttsRes.status}: ${await ttsRes.text()}`);
+        const mp3Blob = await ttsRes.blob();
+
+        // 2. Play inline immediately
+        const blobUrl = URL.createObjectURL(mp3Blob);
+        playerEl.innerHTML = `<audio controls src="${blobUrl}"></audio>`;
+
+        // 3. Upload to Google Drive (requires google_client_id in localStorage)
+        if (GOOGLE_CLIENT_ID) {
+          setAudioStatus(statusEl, 'uploading', '☁️ Uploading to Drive…');
+          try {
+            const token = await getGisToken();
+            const filename = `module${moduleIdx + 1}-video${videoIdx}-script.mp3`;
+            const driveLink = await uploadToDrive(token, mp3Blob, filename);
+
+            // 4. Save to Supabase
+            await saveAudioUrl(videoId, driveLink);
+
+            // 5. Update listen button
+            if (listenEl) {
+              listenEl.href = driveLink;
+              listenEl.style.display = 'inline-flex';
+            }
+            if (vTarget) vTarget.audioUrl = driveLink;
+
+            setAudioStatus(statusEl, 'success', '✅ Saved to Drive');
+          } catch (driveErr) {
+            console.warn('Drive upload failed:', driveErr);
+            setAudioStatus(statusEl, 'warn', '⚠️ Playing locally — Drive upload failed');
+          }
+        } else {
+          setAudioStatus(statusEl, 'warn', '⚠️ Playing locally — set google_client_id to save');
+        }
+      } catch (err) {
+        console.error('Audio generation failed:', err);
+        setAudioStatus(statusEl, 'error-audio', `❌ ${err.message}`);
+      } finally {
+        btnEl.disabled = false;
+        setTimeout(() => setAudioStatus(statusEl, '', ''), 6000);
+      }
+    };
 
     async function loadFromSupabase() {
       if (!SUPABASE_URL.includes('supabase.co')) return null;
@@ -653,8 +842,8 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
         const videos = await sq('videos?order=video_number.asc&select=*,video_cues(*)');
         const links = await sq('resource_links?select=*,module_id(*)');
         const outlines = await sq('outline?order=sort_order.asc');
-        const scripts = await sq('scripts');
-        
+        const scripts = await sq('scripts?select=video_id,script_text,audio_url');
+
         if (!modules) return null;
 
         return {
@@ -671,6 +860,7 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
                 title: v.title,
                 duration: v.duration,
                 script: matchedScript ? matchedScript.script_text : v.script,
+                audioUrl: matchedScript ? (matchedScript.audio_url || null) : null,
                 cues: (v.video_cues || []).sort((a,b) => a.sort_order - b.sort_order).map(c => c.cue_text)
               };
             }),

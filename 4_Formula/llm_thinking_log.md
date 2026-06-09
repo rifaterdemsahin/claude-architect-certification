@@ -1,6 +1,35 @@
 # LLM Thinking & Planning Log
 
 ## 📅 Date: 2026-06-09
+## 🧠 Stage: Stage 4 (Formula) — Voice Generation for Scripts
+
+### ❓ Problem Statement
+Add TTS voice generation to the master scripts page. Each script should have a "Generate Audio" button that:
+1. Calls the Kokoro TTS API (`https://secondbrain-kokoro.fly.dev/api/speak`)
+2. Plays audio inline immediately via a blob URL `<audio>` element
+3. Uploads the MP3 to Google Drive and gets a shareable link
+4. Saves the Google Drive link to Supabase `scripts.audio_url`
+5. Persists a "Listen" button that loads from Supabase on future visits
+
+### 📐 Approach & Strategy
+- **TTS API**: Kokoro at `https://secondbrain-kokoro.fly.dev` — no auth required, POST /api/speak with `{text, voice, speed}` → raw MP3 binary
+- **Google Drive**: Use Google Identity Services (GIS) token flow with `drive.file` scope; upload via multipart to Drive API; set public reader permission; store `webViewLink`
+- **Supabase**: Add `audio_url` + `audio_generated_at` columns to `scripts` table via migration; PATCH existing records
+- **UX flow**: Generate → play immediately from blob URL → upload to Drive → save link → show persistent Listen button
+- **Google Client ID**: Loaded from `localStorage.getItem('google_client_id')` — user must set this once (stored in Azure Key Vault `claude-architect-GOOGLE-CLIENT-ID`)
+- **GIS token client**: Initialized lazily on first generate click; re-uses token while valid
+
+### 🛠 Files Changed
+- `5_Symbols/production/preprod/scripts/index.html` — added audio generation UI and JS
+- `5_Symbols/src/supabase/migration_audio_url.sql` — adds `audio_url` and `audio_generated_at` columns
+
+### ✅ Decision: Two-phase listen UX
+- Phase 1 (immediate): blob URL → inline `<audio>` player right on the page
+- Phase 2 (persistent): Google Drive link → "🎧 Listen" button that survives page reloads
+
+---
+
+## 📅 Date: 2026-06-09
 ## 🧠 Stage: Stage 4 (Formula) — Exam Score & Process Transparency
 
 ### ❓ Problem Statement
