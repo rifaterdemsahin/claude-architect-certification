@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎯 IVQ Manager — In-Video Questions</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../shared/nav.css">
+  <style>
+    :root {
+      --bg: #030712; --card: rgba(17,24,39,0.9); --border: rgba(139,92,246,0.2);
+      --text: #f3f4f6; --muted: #9ca3af; --primary: #8b5cf6; --green: #10b981;
+      --red: #ef4444; --yellow: #f59e0b; --blue: #3b82f6;
+      --font-h: 'Outfit', sans-serif; --font-b: 'Plus Jakarta Sans', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: var(--font-b); line-height: 1.6; padding: 32px 24px 120px; }
+    .container { max-width: 900px; margin: 0 auto; }
+    h1 { font-family: var(--font-h); font-size: 2.4rem; font-weight: 800; margin-bottom: 6px; }
+    .subtitle { color: var(--muted); font-size: 1rem; margin-bottom: 28px; }
+
+    /* Config panel */
+    .config-panel { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px 24px; margin-bottom: 28px; }
+    .config-panel summary { cursor: pointer; font-weight: 700; font-size: 0.95rem; color: var(--muted); user-select: none; }
+    .config-panel summary:hover { color: var(--text); }
+    .config-row { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+    .config-row input { flex: 1; min-width: 180px; padding: 9px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); color: var(--text); font-size: 0.88rem; }
+    .config-row input:focus { outline: none; border-color: var(--primary); }
+    #conn-status { font-size: 0.82rem; margin-left: 6px; }
+
+    /* Buttons */
+    .btn { padding: 9px 18px; border-radius: 10px; font-weight: 700; border: none; cursor: pointer; font-size: 0.88rem; transition: all 0.2s; font-family: var(--font-b); }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: #7c3aed; }
+    .btn-green { background: rgba(16,185,129,0.15); color: var(--green); border: 1px solid rgba(16,185,129,0.3); }
+    .btn-green:hover { background: rgba(16,185,129,0.25); }
+    .btn-blue { background: rgba(59,130,246,0.15); color: var(--blue); border: 1px solid rgba(59,130,246,0.3); }
+    .btn-blue:hover { background: rgba(59,130,246,0.25); }
+    .btn-sm { padding: 4px 12px; font-size: 0.78rem; border-radius: 7px; }
+    .btn-ghost { background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid rgba(255,255,255,0.08); }
+    .btn-ghost:hover { background: rgba(255,255,255,0.1); color: var(--text); }
+    .btn-danger { background: rgba(239,68,68,0.12); color: var(--red); border: 1px solid rgba(239,68,68,0.2); }
+    .btn-danger:hover { background: rgba(239,68,68,0.22); }
+    .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 22px; }
+
+    /* SQL block */
+    .sql-block { background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 14px; font-family: monospace; font-size: 0.75rem; color: #a5f3fc; white-space: pre-wrap; max-height: 200px; overflow-y: auto; margin-top: 14px; }
+
+    /* Video cards */
+    .video-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; margin-bottom: 18px; overflow: hidden; }
+    .video-header { display: flex; align-items: center; gap: 12px; padding: 16px 22px; cursor: pointer; user-select: none; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .video-header:hover { background: rgba(255,255,255,0.02); }
+    .video-title { font-family: var(--font-h); font-size: 1.1rem; font-weight: 700; flex: 1; }
+    .ivq-badge { background: rgba(139,92,246,0.2); color: var(--primary); border: 1px solid rgba(139,92,246,0.3); border-radius: 20px; padding: 2px 10px; font-size: 0.75rem; font-weight: 700; white-space: nowrap; }
+    .video-actions { display: flex; gap: 6px; }
+    .video-body { padding: 16px 22px 20px; }
+    .video-body.hidden { display: none; }
+    .video-meta { font-size: 0.82rem; color: var(--muted); margin-bottom: 14px; }
+    .video-meta a { color: var(--blue); text-decoration: none; }
+    .video-meta a:hover { text-decoration: underline; }
+
+    /* IVQ question rows */
+    .ivq-row { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; }
+    .ivq-question { font-size: 0.95rem; font-weight: 600; margin-bottom: 10px; }
+    .ivq-options { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px; }
+    @media (max-width: 600px) { .ivq-options { grid-template-columns: 1fr; } }
+    .ivq-option { padding: 7px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); font-size: 0.83rem; display: flex; align-items: flex-start; gap: 8px; }
+    .ivq-option.correct { border-color: rgba(16,185,129,0.4); background: rgba(16,185,129,0.08); }
+    .opt-key { font-weight: 700; color: var(--muted); min-width: 16px; }
+    .ivq-option.correct .opt-key { color: var(--green); }
+    .ivq-explanation { font-size: 0.8rem; color: var(--muted); border-top: 1px solid rgba(255,255,255,0.06); padding-top: 8px; margin-top: 2px; }
+    .ivq-explanation span { color: var(--green); font-weight: 600; }
+    .ivq-row-actions { display: flex; gap: 6px; justify-content: flex-end; margin-top: 10px; }
+    .ts-badge { font-size: 0.72rem; color: var(--muted); background: rgba(255,255,255,0.05); border-radius: 5px; padding: 1px 7px; margin-left: 8px; }
+
+    /* Add IVQ form */
+    .add-ivq-form { background: rgba(139,92,246,0.05); border: 1px dashed rgba(139,92,246,0.3); border-radius: 12px; padding: 16px; margin-top: 12px; display: none; }
+    .add-ivq-form.open { display: block; }
+    .form-label { font-size: 0.8rem; color: var(--muted); font-weight: 600; margin-bottom: 5px; display: block; }
+    .form-input { width: 100%; padding: 8px 12px; border-radius: 9px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); color: var(--text); font-size: 0.88rem; font-family: var(--font-b); margin-bottom: 12px; }
+    .form-input:focus { outline: none; border-color: var(--primary); }
+    textarea.form-input { min-height: 60px; resize: vertical; }
+    .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+    @media (max-width: 600px) { .options-grid { grid-template-columns: 1fr; } }
+    .option-field { display: flex; align-items: center; gap: 8px; }
+    .opt-label { font-weight: 700; color: var(--muted); font-size: 0.9rem; min-width: 18px; }
+    .form-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .form-row .form-input { flex: 1; min-width: 120px; }
+    .form-actions { display: flex; gap: 8px; margin-top: 4px; }
+
+    /* Add video form */
+    .add-video-panel { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px 24px; margin-bottom: 22px; display: none; }
+    .add-video-panel.open { display: block; }
+    .add-video-panel h3 { font-family: var(--font-h); font-size: 1.1rem; margin-bottom: 14px; }
+
+    /* Modal overlay */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 999; align-items: center; justify-content: center; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: #111827; border: 1px solid var(--border); border-radius: 20px; padding: 28px; max-width: 540px; width: 90%; max-height: 90vh; overflow-y: auto; }
+    .modal h2 { font-family: var(--font-h); font-size: 1.4rem; margin-bottom: 18px; }
+    .modal-question { font-size: 1rem; font-weight: 600; margin-bottom: 18px; line-height: 1.5; }
+    .modal-option { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; margin-bottom: 8px; transition: all 0.15s; }
+    .modal-option:hover { border-color: var(--primary); background: rgba(139,92,246,0.08); }
+    .modal-option.selected-correct { border-color: var(--green); background: rgba(16,185,129,0.12); }
+    .modal-option.selected-wrong { border-color: var(--red); background: rgba(239,68,68,0.1); }
+    .modal-option.show-correct { border-color: var(--green); background: rgba(16,185,129,0.08); }
+    .modal-opt-key { font-weight: 800; min-width: 22px; font-size: 1rem; }
+    .modal-opt-text { font-size: 0.9rem; }
+    .modal-feedback { margin-top: 14px; padding: 12px 16px; border-radius: 10px; font-size: 0.88rem; line-height: 1.5; display: none; }
+    .modal-feedback.correct { background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3); color: #6ee7b7; display: block; }
+    .modal-feedback.wrong { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25); color: #fca5a5; display: block; }
+    .modal-close-row { display: flex; justify-content: flex-end; margin-top: 18px; }
+
+    /* Toast */
+    .toast { position: fixed; bottom: 24px; right: 24px; background: #1f2937; border: 1px solid rgba(255,255,255,0.1); padding: 12px 20px; border-radius: 12px; font-size: 0.88rem; z-index: 9999; opacity: 0; transform: translateY(10px); transition: all 0.3s; pointer-events: none; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.success { border-color: rgba(16,185,129,0.4); color: var(--green); }
+    .toast.error { border-color: rgba(239,68,68,0.4); color: var(--red); }
+
+    /* Empty state */
+    .empty { text-align: center; color: var(--muted); padding: 32px; font-size: 0.9rem; }
+    .divider { border: none; border-top: 1px solid rgba(255,255,255,0.06); margin: 14px 0; }
+  </style>
+</head>
+<body>
+  <div id="nav-placeholder"></div>
+  <div class="container">
+    <h1>🎯 IVQ Manager</h1>
+    <p class="subtitle">In-Video Questions — link quiz questions to video timestamps with explanations</p>
+
+    <!-- Config panel -->
+    <details class="config-panel" id="config-details">
+      <summary>⚙️ Supabase Connection <span id="conn-status">🔴 disconnected</span></summary>
+      <div class="config-row">
+        <input id="sb-url" type="text" placeholder="Supabase URL (https://xxx.supabase.co)">
+        <input id="sb-key" type="password" placeholder="Anon / service role key">
+        <button class="btn btn-primary" onclick="connect()">Connect</button>
+      </div>
+    </details>
+
+    <!-- SQL Schema block -->
+    <details class="config-panel" style="margin-bottom:18px;">
+      <summary>🗄️ SQL Setup — run once in Supabase SQL Editor</summary>
+      <pre class="sql-block" id="sql-block"></pre>
+    </details>
+
+    <!-- Action buttons -->
+    <div class="btn-row">
+      <button class="btn btn-green" onclick="toggleAddVideo()">➕ Add Video</button>
+      <button class="btn btn-blue" onclick="seedData()">🌱 Seed Sample IVQ</button>
+      <button class="btn btn-ghost" onclick="loadAll()">🔄 Refresh</button>
+    </div>
+
+    <!-- Add video form -->
+    <div class="add-video-panel" id="add-video-panel">
+      <h3>➕ New Video</h3>
+      <label class="form-label">Title *</label>
+      <input class="form-input" id="v-title" placeholder="Video title">
+      <label class="form-label">YouTube URL</label>
+      <input class="form-input" id="v-url" placeholder="https://www.youtube.com/watch?v=...">
+      <label class="form-label">Description</label>
+      <textarea class="form-input" id="v-desc" placeholder="Brief description…"></textarea>
+      <div class="form-actions">
+        <button class="btn btn-primary" onclick="addVideo()">💾 Save Video</button>
+        <button class="btn btn-ghost" onclick="toggleAddVideo()">Cancel</button>
+      </div>
+    </div>
+
+    <!-- Video list -->
+    <div id="video-list"></div>
+  </div>
+
+  <!-- Quiz preview modal -->
+  <div class="modal-overlay" id="quiz-modal">
+    <div class="modal">
+      <h2>🧪 Quiz Preview</h2>
+      <div class="modal-question" id="modal-q"></div>
+      <div id="modal-options"></div>
+      <div class="modal-feedback" id="modal-feedback"></div>
+      <div class="modal-close-row">
+        <button class="btn btn-ghost" onclick="closeModal()">✕ Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <div id="debug-panel-placeholder"></div>
+  <script src="../shared/nav.js"></script>
+  <script src="../shared/debug-panel.js"></script>
+  <script>
+    // ── SQL Schema display ────────────────────────────────────────────────────
+    document.getElementById('sql-block').textContent = `-- Run in Supabase SQL Editor
+CREATE TABLE IF NOT EXISTS videos (
+  id BIGSERIAL PRIMARY KEY, title TEXT NOT NULL,
+  youtube_url TEXT, description TEXT, created_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE TABLE IF NOT EXISTS ivq_questions (
+  id BIGSERIAL PRIMARY KEY,
+  video_id BIGINT REFERENCES videos(id) ON DELETE CASCADE,
+  question_text TEXT NOT NULL, options JSONB NOT NULL DEFAULT '[]',
+  correct_option TEXT NOT NULL, explanation TEXT,
+  incorrect_explanations JSONB DEFAULT '{}',
+  timestamp_seconds INT DEFAULT 0, sort_order INT DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+ALTER TABLE videos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ivq_questions ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "allow_all_videos" ON videos FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "allow_all_ivq" ON ivq_questions FOR ALL USING (true) WITH CHECK (true);`;
+
+    // ── Supabase ──────────────────────────────────────────────────────────────
+    let SB_URL = localStorage.getItem('ivq_sb_url') || '';
+    let SB_KEY  = localStorage.getItem('ivq_sb_key') || '';
+
+    if (SB_URL) document.getElementById('sb-url').value = SB_URL;
+    if (SB_KEY)  document.getElementById('sb-key').value  = SB_KEY;
+    if (SB_URL && SB_KEY) { updateStatus(true); loadAll(); }
+
+    function api(path, opts = {}) {
+      return fetch(SB_URL + '/rest/v1/' + path, {
+        ...opts,
+        headers: {
+          'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY,
+          'Content-Type': 'application/json',
+          'Prefer': opts.prefer || 'return=representation',
+          ...(opts.headers || {})
+        }
+      });
+    }
+
+    async function connect() {
+      SB_URL = document.getElementById('sb-url').value.trim().replace(/\/$/, '');
+      SB_KEY  = document.getElementById('sb-key').value.trim();
+      if (!SB_URL || !SB_KEY) { toast('Enter URL and key', 'error'); return; }
+      try {
+        const r = await api('videos?limit=1');
+        if (r.ok) {
+          localStorage.setItem('ivq_sb_url', SB_URL);
+          localStorage.setItem('ivq_sb_key',  SB_KEY);
+          updateStatus(true);
+          document.getElementById('config-details').removeAttribute('open');
+          toast('Connected!', 'success');
+          loadAll();
+        } else { throw new Error(await r.text()); }
+      } catch(e) { updateStatus(false); toast('Connection failed: ' + e.message, 'error'); }
+    }
+
+    function updateStatus(ok) {
+      document.getElementById('conn-status').textContent = ok ? '🟢 connected' : '🔴 disconnected';
+    }
+
+    // ── State ─────────────────────────────────────────────────────────────────
+    let videos = [], ivqMap = {}; // ivqMap[video_id] = [questions]
+
+    async function loadAll() {
+      if (!SB_URL || !SB_KEY) { renderVideoList(); return; }
+      try {
+        const [vr, qr] = await Promise.all([
+          api('videos?order=created_at.asc'),
+          api('ivq_questions?order=sort_order.asc,created_at.asc')
+        ]);
+        if (!vr.ok) throw new Error(await vr.text());
+        if (!qr.ok) throw new Error(await qr.text());
+        videos = await vr.json();
+        const questions = await qr.json();
+        ivqMap = {};
+        for (const q of questions) {
+          if (!ivqMap[q.video_id]) ivqMap[q.video_id] = [];
+          ivqMap[q.video_id].push(q);
+        }
+        renderVideoList();
+      } catch(e) { toast('Load error: ' + e.message, 'error'); renderVideoList(); }
+    }
+
+    // ── Render ────────────────────────────────────────────────────────────────
+    function renderVideoList() {
+      const el = document.getElementById('video-list');
+      if (!videos.length) {
+        el.innerHTML = '<div class="empty">📭 No videos yet — add one above or seed sample data.</div>';
+        return;
+      }
+      el.innerHTML = videos.map(v => renderVideoCard(v)).join('');
+    }
+
+    function renderVideoCard(v) {
+      const questions = ivqMap[v.id] || [];
+      const qCount = questions.length;
+      const urlLink = v.youtube_url
+        ? `<a href="${esc(v.youtube_url)}" target="_blank" rel="noopener">▶ Watch on YouTube</a> &nbsp;·&nbsp; `
+        : '';
+      const qRows = questions.map(q => renderIvqRow(q, v.id)).join('');
+      return `<div class="video-card" id="vc-${v.id}">
+        <div class="video-header" onclick="toggleBody('vb-${v.id}')">
+          <div class="video-title">🎬 ${esc(v.title)}</div>
+          <span class="ivq-badge">${qCount} IVQ${qCount !== 1 ? 's' : ''}</span>
+          <div class="video-actions" onclick="event.stopPropagation()">
+            <button class="btn btn-ghost btn-sm" title="Edit video" onclick="openEditVideo(${v.id})">✏️</button>
+            <button class="btn btn-danger btn-sm" title="Delete video" onclick="deleteVideo(${v.id})">🗑</button>
+          </div>
+        </div>
+        <div class="video-body" id="vb-${v.id}">
+          <div class="video-meta">${urlLink}${esc(v.description || '')}</div>
+          ${qRows}
+          <hr class="divider">
+          <button class="btn btn-primary btn-sm" onclick="toggleAddIvq(${v.id})">➕ Add Question</button>
+          <div class="add-ivq-form" id="ivq-form-${v.id}">${buildIvqForm(v.id)}</div>
+        </div>
+      </div>`;
+    }
+
+    function renderIvqRow(q, videoId) {
+      const opts = (q.options || []).map(o => {
+        const isCorrect = o.key === q.correct_option;
+        return `<div class="ivq-option${isCorrect ? ' correct' : ''}">
+          <span class="opt-key">${esc(o.key)})</span>
+          <span>${esc(o.text)}</span>
+        </div>`;
+      }).join('');
+      const ts = q.timestamp_seconds > 0 ? `<span class="ts-badge">⏱ ${fmtTime(q.timestamp_seconds)}</span>` : '';
+      return `<div class="ivq-row" id="ivq-${q.id}">
+        <div class="ivq-question">${esc(q.question_text)}${ts}</div>
+        <div class="ivq-options">${opts}</div>
+        ${q.explanation ? `<div class="ivq-explanation"><span>✅ Correct:</span> ${esc(q.explanation)}</div>` : ''}
+        <div class="ivq-row-actions">
+          <button class="btn btn-blue btn-sm" onclick="previewQuiz(${q.id})">🧪 Preview</button>
+          <button class="btn btn-ghost btn-sm" onclick="openEditIvq(${q.id}, ${videoId})">✏️</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteIvq(${q.id}, ${videoId})">🗑</button>
+        </div>
+      </div>`;
+    }
+
+    function buildIvqForm(videoId, q) {
+      const isEdit = !!q;
+      const optKeys = ['a','b','c','d'];
+      const optInputs = optKeys.map(k => {
+        const val = isEdit ? (q.options.find(o=>o.key===k)?.text||'') : '';
+        return `<div class="option-field">
+          <span class="opt-label">${k})</span>
+          <input class="form-input" style="margin-bottom:0" id="${videoId}-opt-${k}" placeholder="Option ${k.toUpperCase()}…" value="${esc(val)}">
+        </div>`;
+      }).join('');
+      const incorr = isEdit ? (q.incorrect_explanations || {}) : {};
+      const incorrectFields = ['a','b','c','d'].map(k => `
+        <div class="option-field" style="margin-bottom:8px">
+          <span class="opt-label">${k})</span>
+          <input class="form-input" style="margin-bottom:0" id="${videoId}-inc-${k}" placeholder="Why ${k} is wrong (optional)…" value="${esc(incorr[k]||'')}">
+        </div>`).join('');
+      return `<label class="form-label">Question *</label>
+        <textarea class="form-input" id="${videoId}-q-text" placeholder="Type your question here…">${isEdit ? esc(q.question_text) : ''}</textarea>
+        <label class="form-label">Options (fill all 4)</label>
+        <div class="options-grid">${optInputs}</div>
+        <label class="form-label">Correct answer key *</label>
+        <select class="form-input" id="${videoId}-correct" style="margin-bottom:12px">
+          ${['a','b','c','d'].map(k => `<option value="${k}"${isEdit && q.correct_option===k?' selected':''}>${k.toUpperCase()}</option>`).join('')}
+        </select>
+        <label class="form-label">Explanation for correct answer</label>
+        <textarea class="form-input" id="${videoId}-expl" placeholder="Why the correct answer is right…">${isEdit ? esc(q.explanation||'') : ''}</textarea>
+        <details style="margin-bottom:12px">
+          <summary style="cursor:pointer;font-size:0.8rem;color:var(--muted);font-weight:600">⚠️ Per-option incorrect explanations (optional)</summary>
+          <div style="margin-top:8px">${incorrectFields}</div>
+        </details>
+        <label class="form-label">Video timestamp (seconds)</label>
+        <input class="form-input" type="number" id="${videoId}-ts" min="0" placeholder="0" value="${isEdit ? (q.timestamp_seconds||0) : 0}">
+        <div class="form-actions" style="margin-top:12px">
+          <button class="btn btn-primary" onclick="${isEdit ? `saveEditIvq(${q.id},${videoId})` : `saveNewIvq(${videoId})`}">${isEdit ? '💾 Update' : '💾 Save Question'}</button>
+          <button class="btn btn-ghost" onclick="toggleAddIvq(${videoId})">${isEdit ? 'Cancel' : 'Cancel'}</button>
+        </div>`;
+    }
+
+    function toggleBody(id) {
+      document.getElementById(id)?.classList.toggle('hidden');
+    }
+
+    function toggleAddIvq(videoId) {
+      const el = document.getElementById('ivq-form-' + videoId);
+      if (!el) return;
+      el.classList.toggle('open');
+      if (el.classList.contains('open')) el.innerHTML = buildIvqForm(videoId);
+    }
+
+    function toggleAddVideo() {
+      document.getElementById('add-video-panel').classList.toggle('open');
+    }
+
+    // ── Video CRUD ────────────────────────────────────────────────────────────
+    async function addVideo() {
+      const title = document.getElementById('v-title').value.trim();
+      const url   = document.getElementById('v-url').value.trim();
+      const desc  = document.getElementById('v-desc').value.trim();
+      if (!title) { toast('Title is required', 'error'); return; }
+      try {
+        const r = await api('videos', { method: 'POST', body: JSON.stringify({ title, youtube_url: url || null, description: desc || null }) });
+        if (!r.ok) throw new Error(await r.text());
+        toast('Video added!', 'success');
+        document.getElementById('v-title').value = '';
+        document.getElementById('v-url').value   = '';
+        document.getElementById('v-desc').value  = '';
+        toggleAddVideo();
+        await loadAll();
+      } catch(e) { toast('Error: ' + e.message, 'error'); }
+    }
+
+    async function deleteVideo(id) {
+      if (!confirm('Delete this video and ALL its questions?')) return;
+      try {
+        const r = await api('videos?id=eq.' + id, { method: 'DELETE', headers: { 'Prefer': 'return=minimal' } });
+        if (!r.ok) throw new Error(await r.text());
+        toast('Video deleted', 'success');
+        await loadAll();
+      } catch(e) { toast('Error: ' + e.message, 'error'); }
+    }
+
+    function openEditVideo(id) {
+      const v = videos.find(x => x.id === id);
+      if (!v) return;
+      const title = prompt('Video title:', v.title);
+      if (title === null) return;
+      const url  = prompt('YouTube URL:', v.youtube_url || '');
+      const desc = prompt('Description:', v.description || '');
+      api('videos?id=eq.' + id, {
+        method: 'PATCH',
+        body: JSON.stringify({ title: title.trim(), youtube_url: url || null, description: desc || null })
+      }).then(r => { if (!r.ok) return r.text().then(t => { throw new Error(t); }); })
+        .then(() => { toast('Video updated', 'success'); return loadAll(); })
+        .catch(e => toast('Error: ' + e.message, 'error'));
+    }
+
+    // ── IVQ CRUD ──────────────────────────────────────────────────────────────
+    function collectIvqFormData(videoId) {
+      const questionText = document.getElementById(videoId + '-q-text')?.value.trim();
+      const correct = document.getElementById(videoId + '-correct')?.value;
+      const explanation = document.getElementById(videoId + '-expl')?.value.trim();
+      const ts = parseInt(document.getElementById(videoId + '-ts')?.value) || 0;
+      const options = ['a','b','c','d'].map(k => ({
+        key: k, text: document.getElementById(videoId + '-opt-' + k)?.value.trim() || ''
+      })).filter(o => o.text);
+      const incorrect_explanations = {};
+      ['a','b','c','d'].forEach(k => {
+        const v = document.getElementById(videoId + '-inc-' + k)?.value.trim();
+        if (v) incorrect_explanations[k] = v;
+      });
+      return { questionText, correct, explanation, ts, options, incorrect_explanations };
+    }
+
+    async function saveNewIvq(videoId) {
+      const { questionText, correct, explanation, ts, options, incorrect_explanations } = collectIvqFormData(videoId);
+      if (!questionText) { toast('Question text required', 'error'); return; }
+      if (options.length < 2) { toast('Add at least 2 options', 'error'); return; }
+      const body = {
+        video_id: videoId, question_text: questionText, options,
+        correct_option: correct, explanation: explanation || null,
+        incorrect_explanations, timestamp_seconds: ts,
+        sort_order: (ivqMap[videoId]?.length || 0)
+      };
+      try {
+        const r = await api('ivq_questions', { method: 'POST', body: JSON.stringify(body) });
+        if (!r.ok) throw new Error(await r.text());
+        toast('Question saved!', 'success');
+        toggleAddIvq(videoId);
+        await loadAll();
+      } catch(e) { toast('Error: ' + e.message, 'error'); }
+    }
+
+    function openEditIvq(qId, videoId) {
+      const q = (ivqMap[videoId] || []).find(x => x.id === qId);
+      if (!q) return;
+      const formEl = document.getElementById('ivq-form-' + videoId);
+      if (!formEl) return;
+      formEl.innerHTML = buildIvqForm(videoId, q);
+      formEl.classList.add('open');
+      formEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    async function saveEditIvq(qId, videoId) {
+      const { questionText, correct, explanation, ts, options, incorrect_explanations } = collectIvqFormData(videoId);
+      if (!questionText) { toast('Question text required', 'error'); return; }
+      const body = {
+        question_text: questionText, options, correct_option: correct,
+        explanation: explanation || null, incorrect_explanations, timestamp_seconds: ts
+      };
+      try {
+        const r = await api('ivq_questions?id=eq.' + qId, { method: 'PATCH', body: JSON.stringify(body) });
+        if (!r.ok) throw new Error(await r.text());
+        toast('Question updated!', 'success');
+        toggleAddIvq(videoId);
+        await loadAll();
+      } catch(e) { toast('Error: ' + e.message, 'error'); }
+    }
+
+    async function deleteIvq(qId, videoId) {
+      if (!confirm('Delete this question?')) return;
+      try {
+        const r = await api('ivq_questions?id=eq.' + qId, { method: 'DELETE', headers: { 'Prefer': 'return=minimal' } });
+        if (!r.ok) throw new Error(await r.text());
+        toast('Question deleted', 'success');
+        await loadAll();
+      } catch(e) { toast('Error: ' + e.message, 'error'); }
+    }
+
+    // ── Quiz Preview Modal ────────────────────────────────────────────────────
+    let previewQ = null;
+
+    function previewQuiz(qId) {
+      for (const qs of Object.values(ivqMap)) {
+        const q = qs.find(x => x.id === qId);
+        if (q) { previewQ = q; break; }
+      }
+      if (!previewQ) return;
+      document.getElementById('modal-q').textContent = previewQ.question_text;
+      document.getElementById('modal-feedback').className = 'modal-feedback';
+      document.getElementById('modal-feedback').textContent = '';
+      const optEl = document.getElementById('modal-options');
+      optEl.innerHTML = (previewQ.options || []).map(o =>
+        `<div class="modal-option" id="mopt-${o.key}" onclick="selectAnswer('${o.key}')">
+          <span class="modal-opt-key">${esc(o.key)})</span>
+          <span class="modal-opt-text">${esc(o.text)}</span>
+        </div>`
+      ).join('');
+      document.getElementById('quiz-modal').classList.add('open');
+    }
+
+    function selectAnswer(key) {
+      if (!previewQ) return;
+      const isCorrect = key === previewQ.correct_option;
+      document.querySelectorAll('.modal-option').forEach(el => {
+        el.style.pointerEvents = 'none';
+      });
+      document.getElementById('mopt-' + key)?.classList.add(isCorrect ? 'selected-correct' : 'selected-wrong');
+      if (!isCorrect) {
+        document.getElementById('mopt-' + previewQ.correct_option)?.classList.add('show-correct');
+      }
+      const fb = document.getElementById('modal-feedback');
+      if (isCorrect) {
+        fb.className = 'modal-feedback correct';
+        fb.textContent = '✅ Correct! ' + (previewQ.explanation || '');
+      } else {
+        const incExp = previewQ.incorrect_explanations?.[key];
+        fb.className = 'modal-feedback wrong';
+        fb.textContent = '❌ Incorrect. ' + (incExp || (previewQ.explanation ? 'Correct answer: ' + previewQ.correct_option.toUpperCase() + '. ' + previewQ.explanation : ''));
+      }
+    }
+
+    function closeModal() {
+      document.getElementById('quiz-modal').classList.remove('open');
+      previewQ = null;
+    }
+
+    // ── Seed ──────────────────────────────────────────────────────────────────
+    async function seedData() {
+      if (!SB_URL || !SB_KEY) { toast('Connect to Supabase first', 'error'); return; }
+      try {
+        // Upsert video
+        const vr = await api('videos', {
+          method: 'POST',
+          prefer: 'return=representation',
+          body: JSON.stringify({
+            title: 'Claude Messages API — Streaming & Transport',
+            youtube_url: null,
+            description: 'Deep-dive into how the Anthropic Messages API delivers real-time partial responses via SSE.'
+          })
+        });
+        if (!vr.ok) throw new Error(await vr.text());
+        const [newVid] = await vr.json();
+        // Insert IVQ
+        const qr = await api('ivq_questions', {
+          method: 'POST',
+          body: JSON.stringify({
+            video_id: newVid.id,
+            question_text: 'Which transport mechanism does the Messages API use for real-time partial responses?',
+            options: [
+              { key: 'a', text: 'WebSocket persistent connection' },
+              { key: 'b', text: 'Server-Sent Events (SSE) streaming' },
+              { key: 'c', text: 'Long polling with HTTP keep-alive' },
+              { key: 'd', text: 'gRPC bidirectional stream' }
+            ],
+            correct_option: 'b',
+            explanation: 'The Messages API uses SSE streaming via Accept: text/event-stream header, sending each token as a separate event as Claude generates it.',
+            incorrect_explanations: {
+              a: 'WebSocket is not the primary transport — it requires a persistent bidirectional socket which Anthropic does not expose.',
+              c: 'Long polling is a legacy pattern with higher latency; SSE is more efficient for server push.',
+              d: 'gRPC is not exposed by the Anthropic API — the REST endpoint uses HTTP/1.1 + SSE.'
+            },
+            timestamp_seconds: 0,
+            sort_order: 1
+          })
+        });
+        if (!qr.ok) throw new Error(await qr.text());
+        toast('Sample IVQ seeded!', 'success');
+        await loadAll();
+      } catch(e) { toast('Seed error: ' + e.message, 'error'); }
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+    function fmtTime(s) {
+      const m = Math.floor(s / 60), sec = s % 60;
+      return m + ':' + String(sec).padStart(2, '0');
+    }
+
+    function esc(str) {
+      return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    let toastTimer;
+    function toast(msg, type = '') {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.className = 'toast show ' + type;
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.className = 'toast', 3000);
+    }
+
+    // Close modal on overlay click
+    document.getElementById('quiz-modal').addEventListener('click', function(e) {
+      if (e.target === this) closeModal();
+    });
+
+    // Initial render (offline-safe empty state)
+    renderVideoList();
+  </script>
+</body>
+</html>

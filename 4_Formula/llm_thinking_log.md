@@ -1,5 +1,27 @@
 # LLM Thinking & Planning Log
 
+---
+
+## 📅 Date: 2026-06-09
+## 🧠 Stage: Stage 4 (Formula) — IVQ (In-Video Question) Data Structure & UI
+
+### 🎯 Task
+Create the IVQ (In-Video Question) data structure, Supabase backend, and a full CRUD UI page linked to videos.
+
+### 📐 Approach & Strategy
+1. **🗄️ Supabase Schema**: Two tables — `videos` (id, title, youtube_url, description) and `ivq_questions` (id, video_id FK, question_text, options JSONB, correct_option, explanation, incorrect_explanations JSONB, timestamp_seconds, sort_order). Open RLS policies to allow all operations.
+2. **🎨 UI Page** (`5_Symbols/ivq.html`): Dark-themed page matching existing project style. Sections: config panel (Supabase creds), video list with IVQ count badges, expandable per-video IVQ sections, quiz preview modal with answer feedback.
+3. **🌱 Seed Data**: The sample IVQ about SSE streaming in the Messages API pre-loaded as seed data for rapid testing.
+4. **🧭 Navigation**: Add "IVQ Manager" entry to the projectMenu in navigation_config.json under the Preprod dropdown.
+
+### ✅ Decisions Made
+- Store options as JSONB array `[{key:"a", text:"..."}, ...]` for flexible rendering.
+- Store incorrect_explanations as JSONB map `{a:"...", c:"...", d:"..."}` so per-option feedback is optional.
+- timestamp_seconds allows future video player integration (show question at given time).
+- Quiz preview mode in the same page — no separate file needed.
+
+
+
 ## 📅 Date: 2026-06-09
 ## 🧠 Stage: Stage 4 (Formula) — Membership Value Proposition Visualization
 

@@ -20,6 +20,10 @@
           "url": "5_Symbols/production/preprod/producer_checklist.html"
         },
         {
+          "label": "7. 🎯 IVQ Manager",
+          "url": "5_Symbols/ivq.html"
+        },
+        {
           "label": "🛠️ Tools",
           "children": [
             {
