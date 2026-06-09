@@ -1008,9 +1008,40 @@
       padding: 1rem;
     }
   </style>
-  <script src="shared/nav.js" defer></script>
 </head>
 <body>
+
+  <!-- Two-Menu Architecture: Menu 1 - Project Menu (Always Visible) -->
+  <header class="app-header">
+    <div class="header-container">
+      <a href="index.html" class="app-logo">
+        <i class="fa-solid fa-hotel"></i>
+        <span>🏛️ Claude Architect</span>
+      </a>
+
+      <nav class="project-menu-nav" id="projectMenu">
+        <!-- Loaded dynamically via navigation_config.json -->
+        <a href="index.html" class="menu-link active">Home</a>
+        <a href="problem.html" class="menu-link">Problem</a>
+        <a href="5_Symbols/production/preprod/scripts/index.html" class="menu-link">Script</a>
+        <a href="production_shotlist.html" class="menu-link">Production</a>
+        <a href="markdown_renderer.html?file=4_Formula/certification/exam_and_case_study.md" class="menu-link">Exam</a>
+      </nav>
+
+      <div class="social-links">
+        <a href="https://www.youtube.com/playlist?list=PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy" target="_blank" class="nav-btn" title="Course Playlist">
+          <i class="fa-solid fa-play"></i> <span>Course</span>
+        </a>
+        <a href="https://www.linkedin.com/in/rifaterdemsahin/" target="_blank" class="nav-btn" title="LinkedIn">
+          <i class="fa-brands fa-linkedin"></i>
+        </a>
+        <a href="https://www.youtube.com/@RifatErdemSahin" target="_blank" class="nav-btn" title="YouTube">
+          <i class="fa-brands fa-youtube"></i>
+        </a>
+        <a href="5_Symbols/production/publish/membership.html" class="join-btn">🔥 Join $10</a>
+      </div>
+    </div>
+  </header>
 
   <!-- Hero Section -->
   <section class="hero-section">
