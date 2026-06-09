@@ -180,6 +180,31 @@
   color: #f3f4f6;
 }
 
+/* Active top navigation highlight styles */
+.site-nav-dropdown.active .site-drop-trigger {
+  color: #8b5cf6 !important;
+  border-bottom: 2px solid #8b5cf6;
+  border-radius: 0;
+  padding-bottom: 4px;
+}
+
+.site-drop-menu a.active {
+  background: rgba(139, 92, 246, 0.15) !important;
+  color: #06b6d4 !important;
+  font-weight: 600;
+}
+
+.site-nav-subdropdown.active .site-subdrop-trigger {
+  color: #06b6d4 !important;
+  font-weight: 600;
+}
+
+.site-subdrop-menu a.active {
+  background: rgba(139, 92, 246, 0.15) !important;
+  color: #06b6d4 !important;
+  font-weight: 600;
+}
+
 @media (max-width: 768px) {
   .site-nav-links { gap: 10px; }
   .site-nav-links a { font-size: 0.78rem; }

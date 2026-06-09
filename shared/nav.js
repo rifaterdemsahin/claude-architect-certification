@@ -71,6 +71,43 @@
     return ROOT + 'markdown_renderer.html?file=' + url;
   }
 
+  function getAbsoluteUrl(url) {
+    var a = document.createElement('a');
+    a.href = url;
+    return a.href;
+  }
+
+  function isUrlActive(childUrl) {
+    if (!childUrl || childUrl === '#') return false;
+    var resolved = resolveUrl(childUrl);
+    var absResolved = getAbsoluteUrl(resolved);
+    var absCurrent = window.location.href;
+    
+    // Remove trailing slash or hash to avoid mismatch
+    absResolved = absResolved.replace(/\/$/, '').split('#')[0];
+    absCurrent = absCurrent.replace(/\/$/, '').split('#')[0];
+    
+    // For markdown_renderer, compare the file parameter if present
+    if (absCurrent.includes('markdown_renderer.html')) {
+      var currentParams = new URLSearchParams(window.location.search);
+      var currentFile = currentParams.get('file');
+      if (currentFile) {
+        if (resolved.includes('file=' + currentFile)) {
+          return true;
+        }
+      }
+    }
+    
+    return absResolved === absCurrent;
+  }
+
+  function isItemActive(item) {
+    if (item.children) {
+      return item.children.some(isItemActive);
+    }
+    return isUrlActive(item.url);
+  }
+
   function buildNav(menu) {
     if (document.getElementById('site-nav')) return;
 
@@ -81,29 +118,35 @@
 
     items.forEach(function (item) {
       if (item.hideAfterDays && daysSinceLaunch >= item.hideAfterDays) return;
+      var isActive = isItemActive(item);
+      var activeClass = isActive ? ' active' : '';
       if (item.children) {
         var visible = item.children.filter(function (c) {
           return !(c.hideAfterDays && daysSinceLaunch >= c.hideAfterDays);
         });
         if (!visible.length) return;
-        html += '<div class="site-nav-dropdown">' +
+        html += '<div class="site-nav-dropdown' + activeClass + '">' +
           '<span class="site-drop-trigger">' + item.label + ' &#9662;</span>' +
           '<div class="site-drop-menu">';
         visible.forEach(function (child) {
+          var isChildActive = isItemActive(child);
+          var childActiveClass = isChildActive ? ' active' : '';
           if (child.children) {
             var subVisible = child.children.filter(function (sc) {
               return !(sc.hideAfterDays && daysSinceLaunch >= sc.hideAfterDays);
             });
             if (!subVisible.length) return;
-            html += '<div class="site-nav-subdropdown">' +
+            html += '<div class="site-nav-subdropdown' + childActiveClass + '">' +
               '<span class="site-subdrop-trigger">' + child.label + ' &raquo;</span>' +
               '<div class="site-subdrop-menu">';
             subVisible.forEach(function (subChild) {
-              html += '<a href="' + resolveUrl(subChild.url) + '">' + subChild.label + '</a>';
+              var isSubChildActive = isItemActive(subChild);
+              var subChildActiveClass = isSubChildActive ? ' active' : '';
+              html += '<a href="' + resolveUrl(subChild.url) + '" class="' + subChildActiveClass + '">' + subChild.label + '</a>';
             });
             html += '</div></div>';
           } else {
-            html += '<a href="' + resolveUrl(child.url) + '">' + child.label + '</a>';
+            html += '<a href="' + resolveUrl(child.url) + '" class="' + childActiveClass + '">' + child.label + '</a>';
           }
         });
         html += '</div></div>';

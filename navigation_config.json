@@ -23,19 +23,19 @@
           "label": "🛠️ Tools",
           "children": [
             {
-              "label": "GitHub Repo",
+              "label": "🐙 GitHub Repo",
               "url": "https://github.com/rifaterdemsahin/claude-architect-certification"
             },
             {
-              "label": "Supabase",
+              "label": "🔥 Supabase",
               "url": "https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/"
             },
             {
-              "label": "Google Cloud API",
+              "label": "☁️ Google Cloud API",
               "url": "https://console.cloud.google.com/"
             },
             {
-              "label": "Claude Guide",
+              "label": "🤖 Claude Guide",
               "url": "claude.md"
             }
           ]
@@ -57,11 +57,11 @@
           "label": "🛠️ Tools",
           "children": [
             {
-              "label": "Audio Generator",
+              "label": "🔊 Audio Generator",
               "url": "https://secondbrain-kokoro.fly.dev/"
             },
             {
-              "label": "Google Drive",
+              "label": "📁 Google Drive",
               "url": "https://drive.google.com/"
             }
           ]
@@ -87,15 +87,15 @@
           "label": "🛠️ Tools",
           "children": [
             {
-              "label": "Canva",
+              "label": "🎨 Canva",
               "url": "https://canva.com"
             },
             {
-              "label": "YouTube Studio",
+              "label": "📺 YouTube Studio",
               "url": "https://studio.youtube.com/"
             },
             {
-              "label": "Gemini Guide",
+              "label": "✨ Gemini Guide",
               "url": "gemini.md"
             }
           ]
@@ -106,227 +106,227 @@
   "debugMenu": [
     { "label": "📁 1. Real Unknown", "url": "1_Real_Unknown/" },
     {
-      "label": "   ├─ README",
+      "label": "   ├─ 📖 README",
       "url": "markdown_renderer.html?file=1_Real_Unknown/README.md"
     },
     {
-      "label": "   ├─ OKRs",
+      "label": "   ├─ 🎯 OKRs",
       "url": "markdown_renderer.html?file=1_Real_Unknown/1_okr.md"
     },
     {
-      "label": "   ├─ Problem Statement",
+      "label": "   ├─ ❓ Problem Statement",
       "url": "markdown_renderer.html?file=1_Real_Unknown/2_problem_statement.md"
     },
     {
-      "label": "   ├─ Hypotheses",
+      "label": "   ├─ 🧪 Hypotheses",
       "url": "markdown_renderer.html?file=1_Real_Unknown/3_hypotheses.md"
     },
     {
-      "label": "   ├─ Questions",
+      "label": "   ├─ ❔ Questions",
       "url": "markdown_renderer.html?file=1_Real_Unknown/4_questions.md"
     },
     {
-      "label": "   ├─ Cost Tracker",
+      "label": "   ├─ 💰 Cost Tracker",
       "url": "markdown_renderer.html?file=1_Real_Unknown/5_costs.md"
     },
     {
-      "label": "   ├─ Kanban Board",
+      "label": "   ├─ 📋 Kanban Board",
       "url": "markdown_renderer.html?file=1_Real_Unknown/6_kanban.md"
     },
     {
-      "label": "   └─ Sanity Check",
+      "label": "   └─ ✅ Sanity Check",
       "url": "markdown_renderer.html?file=1_Real_Unknown/7_sanity_check.md"
     },
 
     { "label": "📁 2. Environment", "url": "2_Environment/" },
     {
-      "label": "   ├─ README",
+      "label": "   ├─ 📖 README",
       "url": "markdown_renderer.html?file=2_Environment/README.md"
     },
     {
-      "label": "   ├─ Architecture",
+      "label": "   ├─ 🏛 Architecture",
       "url": "markdown_renderer.html?file=2_Environment/1_architecture.md"
     },
     {
-      "label": "   ├─ GitHub Pages",
+      "label": "   ├─ 🌐 GitHub Pages",
       "url": "markdown_renderer.html?file=2_Environment/2_github_pages.md"
     },
     {
-      "label": "   ├─ Cloudflare Workers",
+      "label": "   ├─ ⚡ Cloudflare Workers",
       "url": "markdown_renderer.html?file=2_Environment/3_cloudflare_workers.md"
     },
     {
-      "label": "   ├─ Fly.io",
+      "label": "   ├─ 🚀 Fly.io",
       "url": "markdown_renderer.html?file=2_Environment/4_fly_io.md"
     },
     {
-      "label": "   ├─ Setup Azure Key Vault",
+      "label": "   ├─ 🔐 Setup Azure Key Vault",
       "url": "markdown_renderer.html?file=2_Environment/5_setup_azure.md"
     },
     {
-      "label": "   ├─ Setup Mac",
+      "label": "   ├─ 💻 Setup Mac",
       "url": "markdown_renderer.html?file=2_Environment/6_setup_mac.md"
     },
     {
-      "label": "   ├─ Setup Windows",
+      "label": "   ├─ 🪟 Setup Windows",
       "url": "markdown_renderer.html?file=2_Environment/7_setup_windows.md"
     },
     {
-      "label": "   ├─ Setup AI Tools",
+      "label": "   ├─ 🤖 Setup AI Tools",
       "url": "markdown_renderer.html?file=2_Environment/8_setup_ai.md"
     },
     {
-      "label": "   ├─ Navigation Config",
+      "label": "   ├─ 🗺 Navigation Config",
       "url": "markdown_renderer.html?file=2_Environment/9_navigation.md"
     },
     {
-      "label": "   ├─ Production Setup",
+      "label": "   ├─ 🏗 Production Setup",
       "url": "markdown_renderer.html?file=2_Environment/10_production_setup.md"
     },
     {
-      "label": "   ├─ Database (Supabase)",
+      "label": "   ├─ 🗄 Database (Supabase)",
       "url": "markdown_renderer.html?file=2_Environment/11_database.md"
     },
     {
-      "label": "   └─ Supabase Backup",
+      "label": "   └─ 💾 Supabase Backup",
       "url": "markdown_renderer.html?file=2_Environment/12_supabase_backup.md"
     },
 
     { "label": "📁 3. Simulation", "url": "3_Simulation/" },
     {
-      "label": "   ├─ README",
+      "label": "   ├─ 📖 README",
       "url": "markdown_renderer.html?file=3_Simulation/README.md"
     },
     {
-      "label": "   ├─ Image Prompts",
+      "label": "   ├─ 🎨 Image Prompts",
       "url": "markdown_renderer.html?file=3_Simulation/image_prompts.md"
     },
     {
-      "label": "   ├─ Instructor Experience",
+      "label": "   ├─ 👨‍🏫 Instructor Experience",
       "url": "markdown_renderer.html?file=3_Simulation/instructor_experience.md"
     },
     {
-      "label": "   └─ User Experience",
+      "label": "   └─ 👤 User Experience",
       "url": "markdown_renderer.html?file=3_Simulation/userexperience.md"
     },
 
     { "label": "📁 4. Formula", "url": "4_Formula/" },
     {
-      "label": "   ├─ README",
+      "label": "   ├─ 📖 README",
       "url": "markdown_renderer.html?file=4_Formula/README.md"
     },
     {
-      "label": "   ├─ API Reference",
+      "label": "   ├─ 📚 API Reference",
       "url": "markdown_renderer.html?file=4_Formula/api_reference.md"
     },
     {
-      "label": "   ├─ Axiom Logging Ingestion",
+      "label": "   ├─ 📡 Axiom Logging Ingestion",
       "url": "markdown_renderer.html?file=4_Formula/axiom_logging_setup.md"
     },
     {
-      "label": "   ├─ Axiom Query Guide",
+      "label": "   ├─ 🔍 Axiom Query Guide",
       "url": "markdown_renderer.html?file=4_Formula/axiom_query_guide.md"
     },
     {
-      "label": "   ├─ Decisions (ADRs)",
+      "label": "   ├─ 📐 Decisions (ADRs)",
       "url": "markdown_renderer.html?file=4_Formula/decisions.md"
     },
     {
-      "label": "   ├─ DSL Glossary",
+      "label": "   ├─ 📖 DSL Glossary",
       "url": "markdown_renderer.html?file=4_Formula/dsl.md"
     },
     {
-      "label": "   ├─ Implementation Guide",
+      "label": "   ├─ 🛠 Implementation Guide",
       "url": "markdown_renderer.html?file=4_Formula/implementation_guide.md"
     },
     {
-      "label": "   ├─ LLM Thinking Log",
+      "label": "   ├─ 🧠 LLM Thinking Log",
       "url": "markdown_renderer.html?file=4_Formula/llm_thinking_log.md"
     },
     {
-      "label": "   ├─ Research Notes",
+      "label": "   ├─ 📝 Research Notes",
       "url": "markdown_renderer.html?file=4_Formula/research_notes.md"
     },
     {
-      "label": "   ├─ Certification: Course Outline",
+      "label": "   ├─ 📋 Certification: Course Outline",
       "url": "markdown_renderer.html?file=4_Formula/certification/course_outline.md"
     },
     {
-      "label": "   ├─ Certification: Exam & Case Study",
+      "label": "   ├─ 🎓 Certification: Exam & Case Study",
       "url": "markdown_renderer.html?file=4_Formula/certification/exam_and_case_study.md"
     },
     {
-      "label": "   ├─ Certification: Post-Prod Template",
+      "label": "   ├─ 📄 Certification: Post-Prod Template",
       "url": "markdown_renderer.html?file=4_Formula/certification/post_prod_template.md"
     },
     {
-      "label": "   ├─ Certification: Production Plan",
+      "label": "   ├─ 🎬 Certification: Production Plan",
       "url": "markdown_renderer.html?file=4_Formula/certification/production_plan.md"
     },
     {
-      "label": "   ├─ Delivery Pilot Log",
+      "label": "   ├─ ✈️ Delivery Pilot Log",
       "url": "markdown_renderer.html?file=4_Formula/delivery_pilot/llm_thinking_log.md"
     },
     {
-      "label": "   ├─ Production: Google Drive Structure",
+      "label": "   ├─ 📁 Production: Google Drive Structure",
       "url": "markdown_renderer.html?file=4_Formula/production/google_drive_folder_Structure.md"
     },
     {
-      "label": "   ├─ Production: MCP Google Drive",
+      "label": "   ├─ 🔌 Production: MCP Google Drive",
       "url": "markdown_renderer.html?file=4_Formula/production/mcp_google_drive.md"
     },
     {
-      "label": "   ├─ Production: Outline Template",
+      "label": "   ├─ 📄 Production: Outline Template",
       "url": "markdown_renderer.html?file=4_Formula/production/outline_template.md"
     },
     {
-      "label": "   ├─ Production: Prompter",
+      "label": "   ├─ 💬 Production: Prompter",
       "url": "markdown_renderer.html?file=4_Formula/production/prompter.md"
     },
     {
-      "label": "   ├─ Production: Script",
+      "label": "   ├─ 🎬 Production: Script",
       "url": "markdown_renderer.html?file=4_Formula/production/script.md"
     },
     {
-      "label": "   ├─ Security: ZDR Checklist",
+      "label": "   ├─ 🛡 Security: ZDR Checklist",
       "url": "markdown_renderer.html?file=4_Formula/security/zdr_checklist.md"
     },
     {
-      "label": "   ├─ Tools: Markdown Preview Auto",
+      "label": "   ├─ 👁 Tools: Markdown Preview Auto",
       "url": "markdown_renderer.html?file=4_Formula/tools/markdown_preview_auto.md"
     },
     {
-      "label": "   └─ Tools: VS Code Extensions",
+      "label": "   └─ 🔧 Tools: VS Code Extensions",
       "url": "markdown_renderer.html?file=4_Formula/tools/vscode_extensions.md"
     },
 
     { "label": "📁 5. Symbols (Code)", "url": "5_Symbols/" },
     {
-      "label": "   ├─ README",
+      "label": "   ├─ 📖 README",
       "url": "markdown_renderer.html?file=5_Symbols/README.md"
     },
     {
-      "label": "   ├─ MCP Server README",
+      "label": "   ├─ 🔌 MCP Server README",
       "url": "markdown_renderer.html?file=5_Symbols/src/mcp-server/README.md"
     },
     {
-      "label": "   ├─ ZDR Compliance",
+      "label": "   ├─ 🛡 ZDR Compliance",
       "url": "markdown_renderer.html?file=5_Symbols/src/security/ZDR_COMPLIANCE.md"
     },
     {
-      "label": "   ├─ Plan: Post-Prod Module 1",
+      "label": "   ├─ 📋 Plan: Post-Prod Module 1",
       "url": "markdown_renderer.html?file=5_Symbols/production/postprod/module_1_plan.md"
     },
     {
-      "label": "   ├─ Plan: Business Model",
+      "label": "   ├─ 💰 Plan: Business Model",
       "url": "markdown_renderer.html?file=5_Symbols/production/postprod/business_plan.md"
     },
     {
-      "label": "   ├─ Plan: Pre-Prod Module 1",
+      "label": "   ├─ 📋 Plan: Pre-Prod Module 1",
       "url": "markdown_renderer.html?file=5_Symbols/production/preprod/module_1_plan.md"
     },
     {
-      "label": "   ├─ Plan: Prod Module 1",
+      "label": "   ├─ 📋 Plan: Prod Module 1",
       "url": "markdown_renderer.html?file=5_Symbols/production/prod/module_1_plan.md"
     },
     {
@@ -338,75 +338,75 @@
       "url": "markdown_renderer.html?file=5_Symbols/production/prod/readiness_plan.md"
     },
     {
-      "label": "   ├─ Assets README (Module 2)",
+      "label": "   ├─ 📦 Assets README (Module 2)",
       "url": "markdown_renderer.html?file=5_Symbols/production/postprod/module-2/section-1/assets/README.md"
     },
     {
-      "label": "   ├─ Assets README (Module 3)",
+      "label": "   ├─ 📦 Assets README (Module 3)",
       "url": "markdown_renderer.html?file=5_Symbols/production/postprod/module-3/section-1/assets/README.md"
     },
     {
-      "label": "   ├─ Assets README (Module 4)",
+      "label": "   ├─ 📦 Assets README (Module 4)",
       "url": "markdown_renderer.html?file=5_Symbols/production/postprod/module-4/section-1/assets/README.md"
     },
     {
-      "label": "   └─ Assets README (Module 5)",
+      "label": "   └─ 📦 Assets README (Module 5)",
       "url": "markdown_renderer.html?file=5_Symbols/production/postprod/module-5/section-1/assets/README.md"
     },
 
     { "label": "📁 6. Semblance", "url": "6_Semblance/" },
     {
-      "label": "   ├─ README",
+      "label": "   ├─ 📖 README",
       "url": "markdown_renderer.html?file=6_Semblance/README.md"
     },
     {
-      "label": "   ├─ Workarounds",
+      "label": "   ├─ 🩹 Workarounds",
       "url": "markdown_renderer.html?file=6_Semblance/workarounds.md"
     },
     {
-      "label": "   ├─ Error Log",
+      "label": "   ├─ 🐛 Error Log",
       "url": "markdown_renderer.html?file=6_Semblance/error_log.md"
     },
     {
-      "label": "   ├─ Error: Insert Policy",
+      "label": "   ├─ ⚠️ Error: Insert Policy",
       "url": "markdown_renderer.html?file=6_Semblance/error_insertpolicy.md"
     },
     {
-      "label": "   ├─ CI Broken Links",
+      "label": "   ├─ 🔗 CI Broken Links",
       "url": "markdown_renderer.html?file=6_Semblance/ci_broken_links_label_failure.md"
     },
     {
-      "label": "   ├─ Gap Analysis",
+      "label": "   ├─ 🔍 Gap Analysis",
       "url": "markdown_renderer.html?file=6_Semblance/gap_analysis.md"
     },
     {
-      "label": "   ├─ Lessons Learned",
+      "label": "   ├─ 📝 Lessons Learned",
       "url": "markdown_renderer.html?file=6_Semblance/lessons_learned.md"
     },
     {
-      "label": "   ├─ Missing Menu Remediation",
+      "label": "   ├─ 🛠 Missing Menu Remediation",
       "url": "markdown_renderer.html?file=6_Semblance/missing_menu_items_remediation.md"
     },
     {
-      "label": "   ├─ RLS Checklist Insert",
+      "label": "   ├─ 🔒 RLS Checklist Insert",
       "url": "markdown_renderer.html?file=6_Semblance/rls_checklist_insert.md"
     },
     {
-      "label": "   └─ Archive: 2026-06-06 (and more)",
+      "label": "   └─ 🗄 Archive: 2026-06-06 (and more)",
       "url": "6_Semblance/archive/daily/"
     },
 
     { "label": "📁 7. Testing Known", "url": "7_Testing_Known/" },
     {
-      "label": "   ├─ README",
+      "label": "   ├─ 📖 README",
       "url": "markdown_renderer.html?file=7_Testing_Known/README.md"
     },
     {
-      "label": "   ├─ Sanity Check Report",
+      "label": "   ├─ ✅ Sanity Check Report",
       "url": "markdown_renderer.html?file=7_Testing_Known/sanity_check_report.md"
     },
     {
-      "label": "   └─ Validation Report",
+      "label": "   └─ 🧪 Validation Report",
       "url": "markdown_renderer.html?file=7_Testing_Known/validation_report.md"
     },
 
@@ -414,37 +414,37 @@
 
     { "label": "📁 Root Documents", "url": "" },
     {
-      "label": "   ├─ README (repo root)",
+      "label": "   ├─ 📖 README (repo root)",
       "url": "markdown_renderer.html?file=README.md"
     },
     {
-      "label": "   ├─ agents.md",
+      "label": "   ├─ 🤖 agents.md",
       "url": "markdown_renderer.html?file=agents.md"
     },
     {
-      "label": "   ├─ antigravity.md",
+      "label": "   ├─ 🌀 antigravity.md",
       "url": "markdown_renderer.html?file=antigravity.md"
     },
     {
-      "label": "   ├─ claude.md",
+      "label": "   ├─ 🤖 claude.md",
       "url": "markdown_renderer.html?file=claude.md"
     },
     {
-      "label": "   ├─ copilot.md",
+      "label": "   ├─ 👨‍💻 copilot.md",
       "url": "markdown_renderer.html?file=copilot.md"
     },
     {
-      "label": "   ├─ gemini.md",
+      "label": "   ├─ ✨ gemini.md",
       "url": "markdown_renderer.html?file=gemini.md"
     },
     {
-      "label": "   ├─ kilocode.md",
+      "label": "   ├─ ⚡ kilocode.md",
       "url": "markdown_renderer.html?file=kilocode.md"
     },
     {
-      "label": "   ├─ prompts.md",
+      "label": "   ├─ 💬 prompts.md",
       "url": "markdown_renderer.html?file=prompts.md"
     },
-    { "label": "   └─ todos.md", "url": "markdown_renderer.html?file=todos.md" }
+    { "label": "   └─ ✅ todos.md", "url": "markdown_renderer.html?file=todos.md" }
   ]
 }
