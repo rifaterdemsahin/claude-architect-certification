@@ -103,6 +103,29 @@ To achieve these metrics, Erdem must execute a tight, repeatable weekly rhythm:
 
 ---
 
+## 🤖 AI-Agent Leveraged Weekly Effort Estimation
+
+To make this business model sustainable as a solo operator, Erdem must maximize the leverage of AI agents (Claude, Gemini, Copilot, Kilo Code). Running this operation manually requires a full-time 60+ hour work week. By delegating key activities to specialized AI agents, the weekly commitment is compressed to **~17 hours of highly focused work**.
+
+### 1. 📋 Effort Breakdown Comparison
+
+| Operational Phase | 🛑 Manual Hours (No AI) | 🤖 Leveraged Hours (With AI) | Primary Agent & Delegation Strategy |
+| :--- | :---: | :---: | :--- |
+| **Pre-Production** | 10 Hours | 3 Hours | **Claude** (Generates master blueprints, scripts outlines, and problem statements from raw ideas). |
+| **Production** | 15 Hours | 5 Hours | **Kilo Code & Copilot** (Pre-validates setups, writes SQL schema/seeds, and instantly debugs environment issues). |
+| **Post-Production** | 15 Hours | 4 Hours | **Gemini** (Extracts video transcripts, drafts description copies, writes markdown files, and formats chapters). |
+| **Audience Acquisition** | 12 Hours | 3 Hours | **Gemini & Claude** (Converts transcripts to LinkedIn carousels, drafts newsletter broadcasts, and generates visual assets). |
+| **Community Support** | 8 Hours | 2 Hours | **Claude Workspace** (Diagnoses subscriber-submitted error logs and generates ready-to-paste code fixes). |
+| **Total Weekly Effort** | **60 Hours** | **17 Hours** | **Solo Operator Sustainability (Part-Time Commitment)** |
+
+### 2. ⚙️ Agent-Delegation Rules & Strategies
+*   **Use Claude for Structural Architecture Planning:** Do not write implementation plans, design patterns, or scripts from scratch. Let Claude draft the initial structure (Stage 4) and refine.
+*   **Use Gemini for Multimodal Content Extraction:** Record videos without stopping to write chapters or manual docs. Feed the raw video transcript or screenshot artifacts to Gemini to write the markdown renderer content, video chapters, and promotional summaries.
+*   **Use Kilo Code for Strict Syntax Matching:** Prevent coding bottlenecks. Delegate database table updates, RLS policy adjustments, and test runner configurations to Kilo Code to avoid manual syntax debugging.
+*   **Use Automated Telemetry for Verification:** Let test scripts (like `test_links.py`) and Axiom log telemetry auto-check work in less than 10 seconds, removing the need for manual end-to-end link testing.
+
+---
+
 ## 📢 Weekly Audience Acquisition Plan
 
 To achieve the top-of-funnel conversion target of 50,000 free newsletter subscribers, Erdem must run a consistent, daily-to-weekly marketing operation. Attracting the audience requires treating content and open-source distribution with the same engineering rigor as the masterclass codebase itself.
