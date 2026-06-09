@@ -30,7 +30,7 @@
       { label: '6. 🧪 Sanity Gate', url: '5_Symbols/production/preprod/sanity_check.html' }
     ]},
     { label: '🎥 Production', children: [
-      { label: 'Shot List & Assets', url: 'production_shotlist.html' },
+      { label: 'Shot List & Assets', url: '5_Symbols/production_shotlist.html' },
       { label: '📊 Readiness Plan', url: 'markdown_renderer.html?file=5_Symbols/production/prod/readiness_plan.md' }
     ]},
     { label: '📦 Post Prod', children: [
