@@ -104,7 +104,7 @@
       }
     ]},
     { label: '🎥 Production', children: [
-      { label: '7. 📸 Shot List & Assets', url: '5_Symbols/production_shotlist.html' },
+      { label: '7. 📸 Shot List & Assets', url: '5_Symbols/production/postprod/production_shotlist.html?module=1&section=1' },
       { label: '8. ✅ Production Checklist', url: '5_Symbols/production/prod/checklist.html' },
       {
         label: '🛠️ Tools',
