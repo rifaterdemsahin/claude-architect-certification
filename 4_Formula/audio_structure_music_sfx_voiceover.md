@@ -1,7 +1,7 @@
 # 🧠 Formula: Audio Structure — Voiceover / Music / SFX
 
 > **Stage:** `4_Formula` — Thinking & Planning
-> **Implemented in:** `5_Symbols/production/postprod/module-1/section-1/production_shotlist.html`
+> **Implemented in:** `5_Symbols/production/postprod/production_shotlist.html`
 > **Related errors:** `6_Semblance/error_ref_doc_url_column_missing.md`
 
 ---

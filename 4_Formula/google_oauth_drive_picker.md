@@ -1,7 +1,7 @@
 # 🔐 Formula: Google OAuth 2.0 + Drive Picker + Drive Upload Integration
 
 > **Stage:** `4_Formula` — Thinking & Planning  
-> **Applies to:** `5_Symbols/production/postprod/module-1/section-1/production_shotlist.html`  
+> **Applies to:** `5_Symbols/production/postprod/production_shotlist.html`  
 > **Related errors:** [`6_Semblance/error_google_oauth_no_origin.md`](../6_Semblance/error_google_oauth_no_origin.md) · [`6_Semblance/error_google_drive_api_disabled.md`](../6_Semblance/error_google_drive_api_disabled.md)
 
 ---

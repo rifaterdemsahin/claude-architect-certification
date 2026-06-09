@@ -127,7 +127,7 @@ This document defines how AI agents interact with the **Claude AI Certification 
     - Further enlarged the sticky audio player for maximum visibility.
 - **Status:** All changes IMPLEMENTED and COMMITTED locally.
 - **Push Action:** FAILED (Authentication Required). User must run `git push` manually.
-- **Verification:** Use the local `production/postprod/module-1/section-1/production_shotlist.html` in Chrome for instant preview.
+- **Verification:** Use the local `production/postprod/production_shotlist.html` in Chrome for instant preview.
 
 ---
 

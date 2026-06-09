@@ -797,7 +797,7 @@
         `<a href="${l.url}" class="module-link-tag" target="_blank"><i class="fa-solid fa-link fa-xs"></i>${l.label}</a>`
       ).join('');
       const scriptUrl = `5_Symbols/production/preprod/scripts/index.html?module=${mod.module_number}`;
-      const shotlistUrl = `5_Symbols/production/postprod/module-1/section-1/production_shotlist.html?module=${mod.module_number}&section=1`;
+      const shotlistUrl = `5_Symbols/production/postprod/production_shotlist.html?module=${mod.module_number}&section=1`;
       const okr = mod.okr;
 
       const okrHtml = okr ? `
@@ -860,7 +860,7 @@
 
       const scriptLink = `5_Symbols/production/preprod/scripts/index.html?module=${moduleNumber}`;
       const demoScriptLink = `5_Symbols/production/postprod/module-${moduleNumber}/section-1/demo_script_show.html`;
-      const shotlistLink = `5_Symbols/production/postprod/module-1/section-1/production_shotlist.html?module=${moduleNumber}&section=1`;
+      const shotlistLink = `5_Symbols/production/postprod/production_shotlist.html?module=${moduleNumber}&section=1`;
 
       return `
         <div class="video-card${status ? ' status-' + status : ''}" id="vc-${v.id}" data-video-id="${v.id}" data-video-number="${v.video_number}">

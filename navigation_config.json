@@ -93,7 +93,7 @@
         },
         {
           "label": "11. 💰 Business Plan",
-          "url": "markdown_renderer.html?file=5_Symbols/production/postprod/business_plan.md"
+          "url": "markdown_renderer.html?file=4_Formula/business_plan.md"
         },
         {
           "label": "🛠️ Tools",
@@ -338,12 +338,8 @@
       "url": "markdown_renderer.html?file=5_Symbols/src/security/ZDR_COMPLIANCE.md"
     },
     {
-      "label": "   ├─ 📋 Plan: Post-Prod Module 1",
-      "url": "markdown_renderer.html?file=5_Symbols/production/postprod/module_1_plan.md"
-    },
-    {
       "label": "   ├─ 💰 Plan: Business Model",
-      "url": "markdown_renderer.html?file=5_Symbols/production/postprod/business_plan.md"
+      "url": "markdown_renderer.html?file=4_Formula/business_plan.md"
     },
     {
       "label": "   ├─ 📋 Plan: Pre-Prod Module 1",
@@ -355,22 +351,6 @@
     },
     { "label": "   ├─ 🧪 Sanity Gate (Pre-Prod→Post)", "url": "5_Symbols/production/preprod/sanity_check.html" },
     { "label": "   ├─ ✅ Production Checklist", "url": "5_Symbols/production/prod/checklist.html" },
-    {
-      "label": "   ├─ 📦 Assets README (Module 2)",
-      "url": "markdown_renderer.html?file=5_Symbols/production/postprod/module-2/section-1/assets/README.md"
-    },
-    {
-      "label": "   ├─ 📦 Assets README (Module 3)",
-      "url": "markdown_renderer.html?file=5_Symbols/production/postprod/module-3/section-1/assets/README.md"
-    },
-    {
-      "label": "   ├─ 📦 Assets README (Module 4)",
-      "url": "markdown_renderer.html?file=5_Symbols/production/postprod/module-4/section-1/assets/README.md"
-    },
-    {
-      "label": "   └─ 📦 Assets README (Module 5)",
-      "url": "markdown_renderer.html?file=5_Symbols/production/postprod/module-5/section-1/assets/README.md"
-    },
 
     { "label": "📁 6. Semblance", "url": "6_Semblance/" },
     {
