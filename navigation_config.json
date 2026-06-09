@@ -21,10 +21,12 @@
     {
       "label": "📦 Post Prod",
       "children": [
-        { "label": "7. 🧪 Guide", "url": "markdown_renderer.html?file=4_Formula/certification/exam_and_case_study.md" }
+        { "label": "7. 🧪 Guide", "url": "markdown_renderer.html?file=4_Formula/certification/exam_and_case_study.md" },
+        { "label": "🧪 Exam", "url": "markdown_renderer.html?file=4_Formula/certification/exam_and_case_study.md" },
+        { "label": "📋 Course Outline", "url": "course_outline.html" },
+        { "label": "🔥 Join $10/mo", "url": "5_Symbols/production/publish/membership.html" }
       ]
-    },
-    { "label": "🧪 Exam", "url": "markdown_renderer.html?file=4_Formula/certification/exam_and_case_study.md" }
+    }
   ],
   "debugMenu": [
     { "label": "📁 1. Real Unknown", "url": "1_Real_Unknown/" },
