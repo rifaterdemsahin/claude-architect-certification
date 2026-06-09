@@ -130,6 +130,79 @@
     });
   }
 
+  async function sendAllToAxiom() {
+    const btn = document.getElementById('_dbg_axiom_btn');
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = '📡 Sending...';
+    }
+
+    const token = localStorage.getItem('axiom_token') || 'xaat-dcee4b59-5c6e-4ae4-9574-136f5986e84c';
+    const orgId = localStorage.getItem('axiom_org_id') || 'rifaterdemsahin-stks';
+    const dataset = localStorage.getItem('axiom_dataset') || 'videoproduction';
+    const apiUrl = localStorage.getItem('axiom_api_url') || 'https://eu-central-1.aws.edge.axiom.co';
+
+    if (!token || !orgId || !dataset) {
+      if (btn) {
+        btn.textContent = '❌ Credentials Missing';
+        setTimeout(() => { btn.disabled = false; btn.textContent = '📡 Send to Axiom'; }, 2000);
+      }
+      return;
+    }
+
+    if (LOG.length === 0) {
+      if (btn) {
+        btn.textContent = '⚠️ Log Empty';
+        setTimeout(() => { btn.disabled = false; btn.textContent = '📡 Send to Axiom'; }, 2000);
+      }
+      return;
+    }
+
+    try {
+      const payload = LOG.map(l => ({
+        timestamp: new Date().toISOString(),
+        stage: 'UI-DebugPanel-Batch',
+        severity: l.type.toUpperCase() === 'ERROR' ? 'ERROR' : (l.type.toUpperCase() === 'WARN' ? 'WARNING' : 'INFO'),
+        message: `[${l.time}] [${l.type.toUpperCase()}] ${l.msg}`,
+        url: window.location.href,
+        userAgent: navigator.userAgent
+      }));
+
+      const ingestUrl = apiUrl.includes('.edge.axiom.co')
+        ? `${apiUrl}/v1/ingest/${dataset}`
+        : `${apiUrl}/v1/datasets/${dataset}/ingest`;
+
+      const res = await _fetch(ingestUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'X-Axiom-Org-Id': orgId
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (res.ok) {
+        if (btn) {
+          btn.textContent = '✅ Sent!';
+          setTimeout(() => { btn.disabled = false; btn.textContent = '📡 Send to Axiom'; }, 2000);
+        }
+      } else {
+        const body = await res.text();
+        throw new Error(`HTTP ${res.status}: ${body}`);
+      }
+    } catch (e) {
+      console.warn('Axiom log send failed:', e);
+      if (btn) {
+        btn.textContent = '❌ Failed';
+        setTimeout(() => { btn.disabled = false; btn.textContent = '📡 Send to Axiom'; }, 2000);
+      }
+    }
+  }
+
+  // Expose globally
+  window.sendAllToAxiom = sendAllToAxiom;
+
   // Inject panel HTML after DOM ready
   window.addEventListener('DOMContentLoaded', () => {
     const el = document.createElement('div');
@@ -146,6 +219,7 @@
         <span style="font-size:0.75rem;font-weight:800;color:#a78bfa;letter-spacing:0.1em;">🐛 DEBUG LOG</span>
         <span id="_dbg_count" style="font-size:0.7rem;color:#6b7280;">(click to expand)</span>
         <div style="margin-left:auto;display:flex;gap:8px;">
+          <button id="_dbg_axiom_btn" onclick="event.stopPropagation(); window.sendAllToAxiom();" style="background:rgba(6,182,212,0.25);color:#81e6d9;border:1px solid rgba(6,182,212,0.4);padding:3px 10px;border-radius:6px;cursor:pointer;font-size:0.72rem;font-weight:700;">📡 Send to Axiom</button>
           <button id="_dbg_copy_btn" onclick="event.stopPropagation();(function(){const text=window._DBG_LOG_REF.map(l=>'['+l.time+'] ['+l.type.toUpperCase()+'] '+l.msg).join('\\n');navigator.clipboard.writeText(text).then(()=>{const b=document.getElementById('_dbg_copy_btn');b.textContent='✅ Copied!';setTimeout(()=>b.textContent='📋 Copy All',2000)});})()" style="background:rgba(139,92,246,0.3);color:#c4b5fd;border:1px solid rgba(139,92,246,0.4);padding:3px 10px;border-radius:6px;cursor:pointer;font-size:0.72rem;font-weight:700;">📋 Copy All</button>
           <button onclick="event.stopPropagation();document.getElementById('_dbg_panel_body').innerHTML='';window._DBG_LOG_REF.length=0;" style="background:rgba(239,68,68,0.2);color:#fca5a5;border:1px solid rgba(239,68,68,0.3);padding:3px 8px;border-radius:6px;cursor:pointer;font-size:0.72rem;">🗑 Clear</button>
         </div>
