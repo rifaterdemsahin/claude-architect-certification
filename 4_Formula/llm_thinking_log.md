@@ -1,6 +1,21 @@
 # LLM Thinking & Planning Log
 
 ## 📅 Date: 2026-06-09
+## 🧠 Stage: Stage 4 (Formula) — Exam Score & Process Transparency
+
+### ❓ Problem Statement
+The user requested mentioning that Rifat Erdem Sahin will post his scores and be completely transparent about his self-learning process.
+
+### 📐 Approach & Strategy
+1. **📚 Copywriting updates:**
+   - Update `membership.html` Value Proposition Hero paragraph to add: "Rifat will post his official exam scores and be completely transparent about his preparation process, including the successes, failures, and debug logs."
+   - Update the comparison card description to add: "Rifat transparently publishes his actual exam scores and process details."
+2. **🌿 Git Workflow:**
+   - Commit the thinking log updates.
+   - Commit the changes in `membership.html`.
+   - Push and verify link integrity.
+
+---
 ## 🧠 Stage: Stage 4 (Formula) — Membership FAQ Expansion
 
 ### ❓ Problem Statement
