@@ -1628,8 +1628,8 @@
           let absResolved = getAbsoluteUrl(resolved);
           let absCurrent = window.location.href;
           
-          absResolved = absResolved.replace(/\/$/, '').split('#')[0];
-          absCurrent = absCurrent.replace(/\/$/, '').split('#')[0];
+          absResolved = absResolved.replace(/\/$/, '').replace(/\/index\.html$/, '').split('#')[0];
+          absCurrent = absCurrent.replace(/\/$/, '').replace(/\/index\.html$/, '').split('#')[0];
           
           if (absCurrent.includes('markdown_renderer.html')) {
             const currentParams = new URLSearchParams(window.location.search);

@@ -7,6 +7,12 @@ This document defines how AI agents interact with the **Claude AI Certification 
 ## 📅 Agent Activity Log
 
 ### 2026-06-09
+- **Task:** 🎨 Highlight active top-level menu category and children.
+- **Action:**
+    - Refined `isUrlActive` matching function in `index.html` and `shared/nav.js` to normalize URLs and treat root URL `/` and `/index.html` as equivalent.
+    - Ensured that active phase-specific dropdown menus and active items/sub-items have visible active highlights in both top navigation and the homepage Project Menu.
+- **Status:** IMPLEMENTED, COMMITTED, PUSHED.
+
 - **Task:** 🛠️ Refactor Tools to be second-level dropdowns with sub-level links.
 - **Action:**
     - Structured Tools as nested second-level menu triggers inside `🎬 Preprod`, `🎥 Production`, and `📦 Post Prod` dropdowns.

@@ -226,3 +226,12 @@ Record every prompt given to AI agents below. Include the date, agent, and purpo
 **Purpose:** Structure the Tools options as a nested second-level menu trigger inside the main phase dropdowns, implementing flyout sub-dropdown menus with pure CSS and updating JS menu generation.  
 **Output:** Updated `navigation_config.json`, `index.html`, `5_Symbols/markdown_renderer.html`, `shared/nav.js`, and `shared/nav.css`.
 
+---
+
+## 2026-06-09 — Active Menu Category and Child Links Highlighting
+
+**Agent:** Antigravity AI (Gemini 1.5 Pro)  
+**Purpose:** Highlight the active top-level menu category and child links based on URL path/file match, ensuring root URL/index.html equivalence, and highlight active sections on the homepage menu.  
+**Output:** Refined `isUrlActive` matching in `index.html` and `shared/nav.js` to treat the root URL and `index.html` as equivalent, ensuring seamless active highlight states.
+
+

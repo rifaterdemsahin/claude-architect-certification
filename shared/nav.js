@@ -84,8 +84,8 @@
     var absCurrent = window.location.href;
     
     // Remove trailing slash or hash to avoid mismatch
-    absResolved = absResolved.replace(/\/$/, '').split('#')[0];
-    absCurrent = absCurrent.replace(/\/$/, '').split('#')[0];
+    absResolved = absResolved.replace(/\/$/, '').replace(/\/index\.html$/, '').split('#')[0];
+    absCurrent = absCurrent.replace(/\/$/, '').replace(/\/index\.html$/, '').split('#')[0];
     
     // For markdown_renderer, compare the file parameter if present
     if (absCurrent.includes('markdown_renderer.html')) {
