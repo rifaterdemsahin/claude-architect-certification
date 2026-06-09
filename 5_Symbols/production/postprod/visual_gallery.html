@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visual Asset Gallery | Post-Production</title>
+  <meta name="description" content="Gallery of all uploaded visual assets for the Claude AI Architect Certification course.">
+  <link rel="icon" type="image/png" href="../../../favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #030712; --bg-card: rgba(17,24,39,0.8); --text-main: #f3f4f6; --text-muted: #9ca3af;
+      --primary: #8b5cf6; --secondary: #3b82f6; --accent: #10b981;
+      --font-title: 'Outfit', sans-serif; --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-dark);
+      background-image: radial-gradient(circle at 10% 20%, rgba(139,92,246,0.07) 0%, transparent 40%),
+                        radial-gradient(circle at 90% 80%, rgba(59,130,246,0.07) 0%, transparent 40%);
+      color: var(--text-main); font-family: var(--font-body); line-height: 1.6; padding-bottom: 80px;
+    }
+    .container { max-width: 1300px; margin: 0 auto; padding: 0 24px; }
+
+    header { padding: 60px 0 40px; text-align: center; }
+    .badge { display: inline-block; padding: 6px 16px; background: linear-gradient(135deg, rgba(139,92,246,0.2), rgba(59,130,246,0.2)); border: 1px solid rgba(139,92,246,0.3); border-radius: 100px; font-size: 0.8rem; font-weight: 600; color: #c4b5fd; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 14px; }
+    h1 { font-family: var(--font-title); font-size: 2.6rem; font-weight: 800; margin-bottom: 10px; }
+    header p { color: var(--text-muted); max-width: 600px; margin: 0 auto 32px; }
+
+    /* Filter bar */
+    .filter-bar {
+      display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 40px;
+    }
+    .filter-btn {
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      color: var(--text-muted); padding: 8px 18px; border-radius: 100px;
+      font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s;
+    }
+    .filter-btn:hover { border-color: var(--primary); color: var(--text-main); }
+    .filter-btn.active { background: var(--primary); border-color: var(--primary); color: white; }
+
+    /* Stats bar */
+    .stats-bar {
+      display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;
+      margin-bottom: 40px;
+    }
+    .stat-pill {
+      background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px; padding: 12px 20px; text-align: center;
+    }
+    .stat-num { font-family: var(--font-title); font-size: 1.6rem; font-weight: 800; color: var(--primary); }
+    .stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
+
+    /* Gallery grid */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+      margin-bottom: 48px;
+    }
+    .asset-card {
+      background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 20px; overflow: hidden; transition: all 0.3s;
+    }
+    .asset-card:hover { border-color: var(--primary); transform: translateY(-4px); box-shadow: 0 16px 32px rgba(0,0,0,0.4); }
+    .asset-card.hidden { display: none; }
+
+    .asset-preview {
+      width: 100%; height: 180px; position: relative; overflow: hidden;
+      background: linear-gradient(135deg, rgba(139,92,246,0.1), rgba(17,24,39,1));
+      display: flex; align-items: center; justify-content: center; cursor: pointer;
+    }
+    .asset-preview img {
+      width: 100%; height: 100%; object-fit: cover;
+      transition: transform 0.3s;
+    }
+    .asset-card:hover .asset-preview img { transform: scale(1.05); }
+    .asset-preview .placeholder {
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      color: var(--text-muted); font-size: 0.85rem;
+    }
+    .placeholder-icon { font-size: 2.5rem; opacity: 0.4; }
+    .placeholder-label { opacity: 0.5; font-size: 0.75rem; }
+
+    .asset-status-badge {
+      position: absolute; top: 10px; right: 10px;
+      padding: 3px 10px; border-radius: 100px; font-size: 0.7rem; font-weight: 700;
+    }
+    .status-uploaded { background: rgba(16,185,129,0.85); color: white; }
+    .status-pending { background: rgba(251,191,36,0.85); color: black; }
+
+    .asset-info { padding: 16px 20px; }
+    .asset-type-tag {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+      padding: 3px 10px; border-radius: 6px; margin-bottom: 10px;
+    }
+    .tag-bg   { background: rgba(139,92,246,0.15); color: #c4b5fd; }
+    .tag-text { background: rgba(59,130,246,0.15);  color: #93c5fd; }
+    .tag-icon { background: rgba(251,191,36,0.15);  color: #fde68a; }
+    .tag-lt   { background: rgba(16,185,129,0.15);  color: #6ee7b7; }
+    .tag-comp { background: rgba(236,72,153,0.15);  color: #f9a8d4; }
+    .tag-other{ background: rgba(255,255,255,0.08); color: var(--text-muted); }
+
+    .asset-name { font-weight: 700; font-size: 0.95rem; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .asset-filename { font-family: monospace; font-size: 0.78rem; color: var(--secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 12px; }
+    .asset-scene { font-size: 0.8rem; color: var(--text-muted); }
+
+    .asset-actions { display: flex; gap: 8px; margin-top: 14px; }
+    .btn-sm {
+      flex: 1; padding: 7px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: 700;
+      cursor: pointer; border: none; transition: all 0.2s; text-align: center; text-decoration: none;
+      display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+    }
+    .btn-view   { background: rgba(139,92,246,0.2); color: #c4b5fd; }
+    .btn-view:hover { background: var(--primary); color: white; }
+    .btn-dl     { background: rgba(255,255,255,0.06); color: var(--text-muted); }
+    .btn-dl:hover { background: rgba(255,255,255,0.12); color: var(--text-main); }
+
+    /* Lightbox */
+    .lightbox {
+      display: none; position: fixed; inset: 0; z-index: 9999;
+      background: rgba(0,0,0,0.92); backdrop-filter: blur(8px);
+      align-items: center; justify-content: center; padding: 40px;
+    }
+    .lightbox.open { display: flex; }
+    .lightbox-inner { position: relative; max-width: 1000px; width: 100%; }
+    .lightbox-img { width: 100%; max-height: 75vh; object-fit: contain; border-radius: 16px; }
+    .lightbox-placeholder {
+      width: 100%; height: 400px; border-radius: 16px;
+      background: var(--bg-card); border: 2px dashed rgba(255,255,255,0.1);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 16px; color: var(--text-muted);
+    }
+    .lightbox-placeholder .big-icon { font-size: 4rem; opacity: 0.3; }
+    .lightbox-info { margin-top: 20px; }
+    .lightbox-title { font-family: var(--font-title); font-size: 1.4rem; font-weight: 800; margin-bottom: 4px; }
+    .lightbox-file  { font-family: monospace; color: var(--secondary); font-size: 0.9rem; }
+    .lightbox-close {
+      position: absolute; top: -16px; right: -16px;
+      width: 40px; height: 40px; border-radius: 50%;
+      background: rgba(255,255,255,0.1); border: none; color: white;
+      font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s;
+    }
+    .lightbox-close:hover { background: rgba(255,255,255,0.25); }
+    .lightbox-nav {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      width: 40px; height: 40px; border-radius: 50%;
+      background: rgba(255,255,255,0.1); border: none; color: white;
+      font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s;
+    }
+    .lightbox-nav:hover { background: rgba(255,255,255,0.25); }
+    .lb-prev { left: -56px; }
+    .lb-next { right: -56px; }
+
+    /* Section heading */
+    .section-heading {
+      font-family: var(--font-title); font-size: 1.1rem; font-weight: 700;
+      color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em;
+      margin: 48px 0 20px; padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center; padding: 80px 20px; color: var(--text-muted);
+    }
+    .empty-state .icon { font-size: 3rem; margin-bottom: 16px; opacity: 0.3; }
+    .empty-state p { font-size: 0.9rem; }
+
+    footer { text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
+  </style>
+  <script src="../../../shared/nav.js"></script>
+  <script src="../../../shared/debug-panel.js"></script>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div class="badge">🎨 Post-Production</div>
+    <h1>Visual Asset Gallery</h1>
+    <p>All generated backgrounds, overlays, icons, and lower thirds — organised by module and scene.</p>
+  </header>
+
+  <!-- Stats -->
+  <div class="stats-bar" id="statsBar">
+    <div class="stat-pill"><div class="stat-num" id="statTotal">0</div><div class="stat-label">Total Assets</div></div>
+    <div class="stat-pill"><div class="stat-num" id="statUploaded">0</div><div class="stat-label">Uploaded</div></div>
+    <div class="stat-pill"><div class="stat-num" id="statPending">0</div><div class="stat-label">Pending</div></div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filter-bar">
+    <button class="filter-btn active" data-filter="all">All Types</button>
+    <button class="filter-btn" data-filter="bg">🖼️ Backgrounds</button>
+    <button class="filter-btn" data-filter="text">🔤 Text Overlays</button>
+    <button class="filter-btn" data-filter="icon">🛡️ Icons</button>
+    <button class="filter-btn" data-filter="lt">📺 Lower Thirds</button>
+    <button class="filter-btn" data-filter="comp">🎨 Composites</button>
+    <button class="filter-btn" data-filter="uploaded">✅ Uploaded Only</button>
+  </div>
+
+  <!-- Gallery will be rendered here by JS -->
+  <div id="galleryRoot"></div>
+
+  <footer>
+    <p style="margin-bottom: 8px;"><a href="index.html" style="color: var(--secondary); text-decoration: none;">← Back to Post-Production</a></p>
+    <p style="margin-bottom: 12px; font-size: 0.85rem; opacity: 0.8;">
+      Instructor: <a href="https://www.linkedin.com/in/rifaterdemsahin" target="_blank" style="color: #93c5fd; text-decoration: underline; margin-right: 16px;">Rifat Erdem Sahin LinkedIn</a>
+      GitHub Project: <a href="https://github.com/rifaterdemsahin/claude-architect-certification" target="_blank" style="color: #93c5fd; text-decoration: underline;">Project Repository</a>
+    </p>
+    <div style="margin-top: 12px; display: flex; justify-content: center; gap: 16px; align-items: center;">
+      <a href="https://github.com/rifaterdemsahin/claude-architect-certification/actions/workflows/static.yml" target="_blank">
+        <img src="https://github.com/rifaterdemsahin/claude-architect-certification/actions/workflows/static.yml/badge.svg" alt="Deploy Status" style="vertical-align: middle;">
+      </a>
+    </div>
+  </footer>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+  <div class="lightbox-inner">
+    <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+    <button class="lightbox-nav lb-prev" onclick="lbNav(-1)">‹</button>
+    <button class="lightbox-nav lb-next" onclick="lbNav(1)">›</button>
+    <div id="lbContent"></div>
+    <div class="lightbox-info" id="lbInfo"></div>
+  </div>
+</div>
+
+<script>
+// ─── Asset catalogue ───────────────────────────────────────────────────────
+// Each entry mirrors what is tracked in asset_checklist.html.
+// `path` is relative to this file (postprod/).
+// To mark an asset as uploaded just ensure the image file exists at `path`.
+const ASSETS = [
+  // Module 1 › Section 1 › Scene 1
+  { id:1,  module:1, section:1, scene:1, type:'bg',   label:'Neural Network Background',      filename:'module1_section1_scene1_bg.png',  path:'assets/module1_section1_scene1_bg.png' },
+  { id:2,  module:1, section:1, scene:1, type:'text', label:'Systems Engineering Overlay',    filename:'text_systems.png',               path:'assets/overlays/text_systems.png' },
+  { id:3,  module:1, section:1, scene:1, type:'icon', label:'Security Shield Icon Set',       filename:'icon_shield.png',                path:'assets/overlays/icon_shield.png' },
+  { id:4,  module:1, section:1, scene:1, type:'lt',   label:'Intro Lower Third',              filename:'lt_intro.png',                   path:'assets/overlays/lt_intro.png' },
+  { id:5,  module:1, section:1, scene:1, type:'comp', label:'Systems Composite Preview',      filename:'overlay_systems.png',            path:'assets/overlays/overlay_systems.png' },
+  // Module 1 › Section 1 › Scene 2
+  { id:6,  module:1, section:1, scene:2, type:'bg',   label:'Server Room Background',         filename:'module1_section1_scene2_bg.png',  path:'assets/module1_section1_scene2_bg.png' },
+  { id:7,  module:1, section:1, scene:2, type:'text', label:'MCP Text Overlay',               filename:'text_mcp.png',                   path:'assets/overlays/text_mcp.png' },
+  { id:8,  module:1, section:1, scene:2, type:'icon', label:'MCP Node Icon Set',              filename:'icon_mcp.png',                   path:'assets/overlays/icon_mcp.png' },
+  { id:9,  module:1, section:1, scene:2, type:'lt',   label:'MCP Lower Third',                filename:'lt_mcp.png',                     path:'assets/overlays/lt_mcp.png' },
+  { id:10, module:1, section:1, scene:2, type:'comp', label:'MCP Composite Preview',          filename:'overlay_mcp.png',                path:'assets/overlays/overlay_mcp.png' },
+  // Module 1 › Section 1 › Scene 3
+  { id:11, module:1, section:1, scene:3, type:'bg',   label:'GitHub Ecosystem Background',    filename:'module1_section1_scene3_bg.png',  path:'assets/module1_section1_scene3_bg.png' },
+  { id:12, module:1, section:1, scene:3, type:'text', label:'GitHub Text Overlay',            filename:'text_github.png',                path:'assets/overlays/text_github.png' },
+  { id:13, module:1, section:1, scene:3, type:'icon', label:'GitHub Icon Set',                filename:'icon_github.png',                path:'assets/overlays/icon_github.png' },
+  { id:14, module:1, section:1, scene:3, type:'lt',   label:'Resources Lower Third',          filename:'lt_resources.png',               path:'assets/overlays/lt_resources.png' },
+  { id:15, module:1, section:1, scene:3, type:'comp', label:'GitHub Composite Preview',       filename:'overlay_github.png',             path:'assets/overlays/overlay_github.png' },
+];
+
+// Type metadata
+const TYPE_META = {
+  bg:   { label:'Background',   cls:'tag-bg',   icon:'🖼️' },
+  text: { label:'Text Overlay', cls:'tag-text',  icon:'🔤' },
+  icon: { label:'Icon Set',     cls:'tag-icon',  icon:'🛡️' },
+  lt:   { label:'Lower Third',  cls:'tag-lt',    icon:'📺' },
+  comp: { label:'Composite',    cls:'tag-comp',  icon:'🎨' },
+};
+
+// ─── State ──────────────────────────────────────────────────────────────────
+let activeFilter = 'all';
+let uploadedSet  = new Set(); // ids of assets whose image loaded successfully
+let lbIndex      = 0;        // current lightbox index into filteredAssets()
+
+// ─── Check which images actually exist ──────────────────────────────────────
+async function probeImages() {
+  const checks = ASSETS.map(a => {
+    return new Promise(resolve => {
+      const img = new Image();
+      img.onload  = () => { uploadedSet.add(a.id); resolve(); };
+      img.onerror = () => resolve();
+      img.src = a.path + '?t=' + Date.now(); // bust cache
+    });
+  });
+  await Promise.all(checks);
+}
+
+// ─── Rendering ──────────────────────────────────────────────────────────────
+function filteredAssets() {
+  if (activeFilter === 'all')      return ASSETS;
+  if (activeFilter === 'uploaded') return ASSETS.filter(a => uploadedSet.has(a.id));
+  return ASSETS.filter(a => a.type === activeFilter);
+}
+
+function groupByScene(assets) {
+  const map = {};
+  for (const a of assets) {
+    const key = `M${a.module} · Section ${a.section} · Scene ${a.scene}`;
+    if (!map[key]) map[key] = [];
+    map[key].push(a);
+  }
+  return map;
+}
+
+function renderCard(asset, listIndex) {
+  const uploaded = uploadedSet.has(asset.id);
+  const meta = TYPE_META[asset.type] || TYPE_META.bg;
+  const preview = uploaded
+    ? `<img src="${asset.path}" alt="${asset.label}" loading="lazy" onerror="this.parentElement.innerHTML=pendingPlaceholder()">`
+    : `<div class="placeholder"><span class="placeholder-icon">${meta.icon}</span><span class="placeholder-label">Not uploaded yet</span></div>`;
+
+  return `
+    <div class="asset-card" data-type="${asset.type}" data-id="${asset.id}" data-idx="${listIndex}">
+      <div class="asset-preview" onclick="openLightbox(${listIndex})">
+        ${preview}
+        <span class="asset-status-badge ${uploaded ? 'status-uploaded' : 'status-pending'}">${uploaded ? '✅ Uploaded' : '⏳ Pending'}</span>
+      </div>
+      <div class="asset-info">
+        <span class="asset-type-tag ${meta.cls}">${meta.icon} ${meta.label}</span>
+        <div class="asset-name">${asset.label}</div>
+        <div class="asset-filename">${asset.filename}</div>
+        <div class="asset-scene">Module ${asset.module} · Section ${asset.section} · Scene ${asset.scene}</div>
+        <div class="asset-actions">
+          <button class="btn-sm btn-view" onclick="openLightbox(${listIndex})">🔍 Preview</button>
+          ${uploaded ? `<a class="btn-sm btn-dl" href="${asset.path}" download="${asset.filename}">⬇️ Download</a>` : ''}
+        </div>
+      </div>
+    </div>`;
+}
+
+function pendingPlaceholder() {
+  return `<div class="placeholder"><span class="placeholder-icon">🖼️</span><span class="placeholder-label">Not uploaded yet</span></div>`;
+}
+
+function render() {
+  const visible = filteredAssets();
+  const groups  = groupByScene(visible);
+  const root    = document.getElementById('galleryRoot');
+
+  if (visible.length === 0) {
+    root.innerHTML = `<div class="empty-state"><div class="icon">🖼️</div><p>No assets match this filter.</p></div>`;
+    updateStats();
+    return;
+  }
+
+  let html = '';
+  let globalIdx = 0;
+  for (const [groupLabel, assets] of Object.entries(groups)) {
+    html += `<div class="section-heading">📁 ${groupLabel}</div><div class="gallery-grid">`;
+    for (const a of assets) {
+      html += renderCard(a, globalIdx++);
+    }
+    html += `</div>`;
+  }
+  root.innerHTML = html;
+  updateStats();
+}
+
+function updateStats() {
+  document.getElementById('statTotal').textContent    = ASSETS.length;
+  document.getElementById('statUploaded').textContent = uploadedSet.size;
+  document.getElementById('statPending').textContent  = ASSETS.length - uploadedSet.size;
+}
+
+// ─── Filter buttons ──────────────────────────────────────────────────────────
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilter = btn.dataset.filter;
+    render();
+  });
+});
+
+// ─── Lightbox ────────────────────────────────────────────────────────────────
+function openLightbox(idx) {
+  lbIndex = idx;
+  showLb();
+  document.getElementById('lightbox').classList.add('open');
+  document.addEventListener('keydown', lbKeyHandler);
+}
+
+function showLb() {
+  const assets = filteredAssets();
+  if (!assets[lbIndex]) return;
+  const a        = assets[lbIndex];
+  const uploaded = uploadedSet.has(a.id);
+  const meta     = TYPE_META[a.type] || TYPE_META.bg;
+
+  document.getElementById('lbContent').innerHTML = uploaded
+    ? `<img class="lightbox-img" src="${a.path}" alt="${a.label}">`
+    : `<div class="lightbox-placeholder"><div class="big-icon">${meta.icon}</div><p>Asset not yet uploaded</p><p style="font-size:0.8rem;margin-top:8px;opacity:0.5">${a.filename}</p></div>`;
+
+  document.getElementById('lbInfo').innerHTML = `
+    <div class="lightbox-title">${a.label}</div>
+    <div class="lightbox-file">${a.filename} &nbsp;·&nbsp; Module ${a.module} / Section ${a.section} / Scene ${a.scene}</div>`;
+}
+
+function closeLightbox(e) {
+  if (e && e.target !== document.getElementById('lightbox') && !e.target.classList.contains('lightbox-close')) return;
+  document.getElementById('lightbox').classList.remove('open');
+  document.removeEventListener('keydown', lbKeyHandler);
+}
+
+function lbNav(dir) {
+  const len = filteredAssets().length;
+  lbIndex   = (lbIndex + dir + len) % len;
+  showLb();
+}
+
+function lbKeyHandler(e) {
+  if (e.key === 'ArrowLeft')  lbNav(-1);
+  if (e.key === 'ArrowRight') lbNav(1);
+  if (e.key === 'Escape')     { document.getElementById('lightbox').classList.remove('open'); document.removeEventListener('keydown', lbKeyHandler); }
+}
+
+// ─── Init ────────────────────────────────────────────────────────────────────
+(async function init() {
+  await probeImages();
+  render();
+})();
+</script>
+</body>
+</html>
