@@ -67,6 +67,14 @@ To collaborate on production-ready AI workflows, ensuring:
 
 ## 🪵 Activity Log
 
+### 2026-06-07 (VS Code Extension Audit & Update)
+- **Action:** Scanned project tech stack (HTML/CSS/JS, Python, Mermaid, YAML, Markdown, Supabase, Azure, Fly.io) and installed/updated all 26 required extensions from `4_Formula/tools/vscode_extensions.md`.
+- **Newly installed:** `ecmel.vscode-html-css`, `esbenp.prettier-vscode`, `formulahendry.auto-rename-tag`, `christian-kohler.path-intellisense`, `charliermarsh.ruff`, `yzhang.markdown-all-in-one`, `hnw.vscode-auto-open-markdown-preview`, `mikestead.dotenv`, `eriklynd.json-tools`, `usernamehw.errorlens`, `oderwat.indent-rainbow`, `wayou.vscode-todo-highlight`, `supabase.vscode-supabase-extension`, `tamasfe.even-better-toml`, `flyio.sprites-for-vscode`.
+- **Updated to latest:** `bierner.markdown-mermaid`, `mermaidchart.vscode-mermaid-chart`, `ms-python.python`, `ms-python.vscode-pylance`, `davidanson.vscode-markdownlint`, `github.vscode-github-actions`, `redhat.vscode-yaml`.
+- **Already current / pre-installed:** `ritwickdey.liveserver`, `eamodio.gitlens`, `ms-azuretools.vscode-azureresourcegroups`.
+- **Not available in marketplace:** `bertt.key-vault-secrets-viewer`, `ms-azuretools.vscode-azurekeyvault` — Key Vault management is handled via the existing `ms-azuretools.vscode-azureresourcegroups` extension.
+- **Status:** All reachable extensions installed and up to date.
+
 ### 2026-06-07 (Project Initialization, Script Integration & Editor Page)
 - **Action:** Created `antigravity.md` to initialize project context and mapping for Antigravity.
 - **Action:** Added `scripts` table to database layer (`schema.sql` & `admin.html`) and developed inline script editing UI in pre-production script dashboard with localStorage support.
