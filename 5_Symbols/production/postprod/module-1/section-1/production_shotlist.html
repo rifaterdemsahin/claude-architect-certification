@@ -319,37 +319,64 @@
     .modal {
       display: none; position: fixed; z-index: 2000;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.92);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      background: rgba(0,0,0,0.92);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
       align-items: center; justify-content: center;
-      flex-direction: column; gap: 16px;
-      cursor: zoom-out;
+      flex-direction: column; gap: 12px;
+      overflow: hidden;
     }
-    .modal[style*="display: block"] { display: flex !important; }
-    .modal-content {
-      max-width: 90vw; max-height: 80vh;
-      object-fit: contain;
+    .modal[style*="display: flex"] { display: flex !important; }
+    .modal-img-wrapper {
+      position: relative; overflow: hidden;
+      max-width: 90vw; max-height: 78vh;
+      display: flex; align-items: center; justify-content: center;
       border-radius: 12px;
-      box-shadow: 0 0 60px rgba(99, 102, 241, 0.4);
-      animation: modalZoomIn 0.2s ease;
     }
-    @keyframes modalZoomIn {
+    .modal-content {
+      max-width: 90vw; max-height: 78vh;
+      object-fit: contain; border-radius: 12px;
+      box-shadow: 0 0 60px rgba(99,102,241,0.4);
+      transform-origin: center center;
+      transition: transform 0.15s ease;
+      user-select: none; -webkit-user-drag: none;
+      animation: modalAppear 0.18s ease;
+      will-change: transform;
+    }
+    @keyframes modalAppear {
       from { transform: scale(0.92); opacity: 0; }
       to   { transform: scale(1);    opacity: 1; }
     }
     .modal-close {
-      position: absolute; top: 24px; right: 40px;
-      color: white; font-size: 3rem; font-weight: 300;
-      cursor: pointer; line-height: 1; opacity: 0.7;
-      transition: opacity 0.15s;
-      user-select: none;
+      position: absolute; top: 20px; right: 36px;
+      color: white; font-size: 2.8rem; font-weight: 300;
+      cursor: pointer; line-height: 1; opacity: 0.65;
+      transition: opacity 0.15s; user-select: none; z-index: 10;
     }
     .modal-close:hover { opacity: 1; }
+    .modal-zoom-bar {
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 32px; padding: 6px 16px;
+      user-select: none; z-index: 10;
+    }
+    .modal-zoom-btn {
+      background: rgba(255,255,255,0.1); color: white;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 50%; width: 32px; height: 32px;
+      font-size: 1.3rem; line-height: 1; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s;
+    }
+    .modal-zoom-btn:hover { background: rgba(255,255,255,0.22); }
+    #modalZoomLabel {
+      color: rgba(255,255,255,0.75); font-size: 0.82rem;
+      font-family: monospace; min-width: 44px; text-align: center;
+    }
     #modal-caption {
-      color: rgba(255,255,255,0.6);
-      font-size: 0.85rem; letter-spacing: 0.1em;
+      color: rgba(255,255,255,0.55);
+      font-size: 0.82rem; letter-spacing: 0.1em;
       text-transform: uppercase; font-weight: 700;
+      z-index: 10; pointer-events: none;
     }
     .clickable { cursor: zoom-in; }
 
@@ -617,10 +644,18 @@
   </div>
 
   <!-- Modal Review System -->
-  <div id="assetModal" class="modal">
+  <div id="assetModal" class="modal" onclick="onModalBackdropClick(event)">
     <span class="modal-close" onclick="closeModal()">&times;</span>
-    <img class="modal-content" id="modalImg">
-    <div id="modal-text" class="modal-content" style="color: white; font-size: 2rem; font-style: italic; text-align: center; display: none;"></div>
+    <div class="modal-zoom-bar">
+      <button class="modal-zoom-btn" onclick="modalZoom(-0.25)" title="Zoom out">−</button>
+      <span id="modalZoomLabel">100%</span>
+      <button class="modal-zoom-btn" onclick="modalZoom(+0.25)" title="Zoom in">+</button>
+      <button class="modal-zoom-btn" onclick="modalZoomReset()" title="Reset zoom" style="font-size:1rem;">⊙</button>
+    </div>
+    <div class="modal-img-wrapper" id="modalImgWrapper">
+      <img class="modal-content" id="modalImg" ondblclick="modalToggleZoom()">
+    </div>
+    <div id="modal-text" class="modal-content" style="color:white;font-size:2rem;font-style:italic;text-align:center;display:none;"></div>
     <div id="modal-caption"></div>
   </div>
 
@@ -756,32 +791,110 @@
   </div>
 
   <script>
+    // ===== Modal zoom / pan state =====
+    let _mZoom = 1, _mTx = 0, _mTy = 0;
+    let _mDragging = false, _mDragX = 0, _mDragY = 0;
+
+    function _applyModalTransform(animated) {
+      const img = document.getElementById('modalImg');
+      if (!img) return;
+      img.style.transition = animated ? 'transform 0.18s ease' : 'none';
+      img.style.transform = `scale(${_mZoom}) translate(${_mTx/_mZoom}px,${_mTy/_mZoom}px)`;
+      const lbl = document.getElementById('modalZoomLabel');
+      if (lbl) lbl.textContent = Math.round(_mZoom * 100) + '%';
+      const wrapper = document.getElementById('modalImgWrapper');
+      if (wrapper) wrapper.style.cursor = _mZoom > 1 ? (_mDragging ? 'grabbing' : 'grab') : 'default';
+    }
+
+    function modalZoom(delta) {
+      _mZoom = Math.min(Math.max(_mZoom + delta, 0.25), 8);
+      if (_mZoom <= 1) { _mZoom = 1; _mTx = 0; _mTy = 0; }
+      _applyModalTransform(true);
+    }
+
+    function modalZoomReset() {
+      _mZoom = 1; _mTx = 0; _mTy = 0;
+      _applyModalTransform(true);
+    }
+
+    function modalToggleZoom() {
+      _mZoom = _mZoom > 1 ? 1 : 2.5;
+      if (_mZoom === 1) { _mTx = 0; _mTy = 0; }
+      _applyModalTransform(true);
+    }
+
     function openModal(content, caption, isText = false) {
+      _mZoom = 1; _mTx = 0; _mTy = 0;
       const modal = document.getElementById("assetModal");
       const modalImg = document.getElementById("modalImg");
       const modalText = document.getElementById("modal-text");
-      const captionText = document.getElementById("modal-caption");
-      
+      const wrapper = document.getElementById("modalImgWrapper");
       modal.style.display = "flex";
-      captionText.textContent = caption || '';
-
+      document.getElementById("modal-caption").textContent = caption || '';
       if (isText) {
-        modalImg.style.display = "none";
+        wrapper.style.display = "none";
         modalText.style.display = "block";
         modalText.innerHTML = content;
       } else {
-        modalImg.style.display = "block";
+        wrapper.style.display = "flex";
+        modalImg.style.transform = '';
         modalImg.src = content;
         modalText.style.display = "none";
       }
-      
-      captionText.innerHTML = caption;
+      _applyModalTransform(false);
     }
 
     function closeModal() {
-      const modal = document.getElementById("assetModal");
-      modal.style.display = "none";
+      document.getElementById("assetModal").style.display = "none";
+      _mZoom = 1; _mTx = 0; _mTy = 0;
     }
+
+    function onModalBackdropClick(e) {
+      if (e.target === document.getElementById('assetModal')) closeModal();
+    }
+
+    // Wire wheel + drag after DOM ready
+    document.addEventListener('DOMContentLoaded', () => {
+      const modal = document.getElementById('assetModal');
+
+      // Mouse wheel zoom (centred)
+      modal.addEventListener('wheel', e => {
+        if (modal.style.display !== 'flex') return;
+        e.preventDefault();
+        const delta = e.deltaY < 0 ? 0.15 : -0.15;
+        _mZoom = Math.min(Math.max(_mZoom + delta, 0.25), 8);
+        if (_mZoom <= 1) { _mZoom = 1; _mTx = 0; _mTy = 0; }
+        _applyModalTransform(false);
+      }, { passive: false });
+
+      // Drag to pan when zoomed in
+      const wrapper = document.getElementById('modalImgWrapper');
+      wrapper.addEventListener('mousedown', e => {
+        if (_mZoom <= 1) return;
+        _mDragging = true; _mDragX = e.clientX; _mDragY = e.clientY;
+        _applyModalTransform(false);
+        e.preventDefault();
+      });
+      window.addEventListener('mousemove', e => {
+        if (!_mDragging) return;
+        _mTx += e.clientX - _mDragX; _mTy += e.clientY - _mDragY;
+        _mDragX = e.clientX; _mDragY = e.clientY;
+        _applyModalTransform(false);
+      });
+      window.addEventListener('mouseup', () => {
+        if (!_mDragging) return;
+        _mDragging = false; _applyModalTransform(false);
+      });
+
+      // Keyboard shortcuts
+      document.addEventListener('keydown', e => {
+        if (modal.style.display !== 'flex') return;
+        if (e.key === 'Escape') closeModal();
+        if (e.key === '+' || e.key === '=') modalZoom(0.25);
+        if (e.key === '-' || e.key === '_') modalZoom(-0.25);
+        if (e.key === '0') modalZoomReset();
+      });
+    });
 
     function copyPrompt(btn) {
       const promptText = btn.parentElement.getAttribute('data-prompt');
@@ -794,14 +907,6 @@
           btn.classList.remove('copied');
         }, 2000);
       });
-    }
-
-    // Close on click outside
-    window.onclick = function(event) {
-      const modal = document.getElementById("assetModal");
-      if (event.target == modal) {
-        modal.style.display = "none";
-      }
     }
 
     // 📁 Static Fallback Data for Dropdowns and Local Dev
