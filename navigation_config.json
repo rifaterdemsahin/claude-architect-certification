@@ -25,11 +25,11 @@
       "label": "🎥 Production",
       "children": [
         {
-          "label": "7. Production Shot List and Assets",
+          "label": "7. 📸 Shot List & Assets",
           "url": "production_shotlist.html"
         },
         {
-          "label": "8.📊 Readiness Plan",
+          "label": "8. 📊 Readiness Plan",
           "url": "markdown_renderer.html?file=5_Symbols/production/prod/readiness_plan.md"
         }
       ]
@@ -38,20 +38,15 @@
       "label": "📦 Post Prod",
       "children": [
         {
-          "label": "9. 🧪 Guide",
+          "label": "9. 🧭 Certification Guide & Exam",
           "url": "markdown_renderer.html?file=4_Formula/certification/exam_and_case_study.md"
         },
         {
-          "label": "10. 🧪 Exam",
-          "url": "markdown_renderer.html?file=4_Formula/certification/exam_and_case_study.md"
-        },
-        { "label": "11. 📋 Course Outline", "url": "course_outline.html" },
-        {
-          "label": "12. 🔥 Join $10/mo",
+          "label": "10. 🔥 Join $10/mo",
           "url": "5_Symbols/production/publish/membership.html"
         },
         {
-          "label": "13. 💰 Business Plan",
+          "label": "11. 💰 Business Plan",
           "url": "markdown_renderer.html?file=5_Symbols/production/postprod/business_plan.md"
         }
       ]

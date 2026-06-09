@@ -395,35 +395,22 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.2.4/mermaid.min.js"></script>
 
   <script>
-    // Config JSON fallback
+    // 🗃️ Minimal offline fallback — single source of truth is navigation_config.json
+    // DO NOT add entries here; edit navigation_config.json instead.
     let navigationData = {
       projectMenu: [
-        { label: "Home", url: "index.html" },
-        { label: "Docs", url: "markdown_renderer.html?file=2_Environment/README.md" },
-        { label: "API", url: "markdown_renderer.html?file=4_Formula/README.md" },
-        { label: "Production", url: "5_Symbols/production_hub.html" },
-        { label: "Sanity Check", url: "5_Symbols/sanity_checklist.html" },
-        { label: "Exam", url: "markdown_renderer.html?file=4_Formula/certification/exam_and_case_study.md" }
+        { label: "🏠 Home", url: "index.html" },
+        { label: "📋 Course Outline", url: "course_outline.html" },
+        { label: "🧭 Certification Guide & Exam", url: "markdown_renderer.html?file=4_Formula/certification/exam_and_case_study.md" }
       ],
       debugMenu: [
-        { label: "1. Real Unknown", url: "1_Real_Unknown/" },
-        { label: "   ├─ Kanban Board", url: "1_Real_Unknown/6_kanban.md" },
-        { label: "   ├─ Cost Tracker", url: "1_Real_Unknown/5_costs.md" },
-        { label: "2. Environment", url: "2_Environment/" },
-        { label: "   ├─ Architecture", url: "2_Environment/1_architecture.md" },
-        { label: "   └─ Database (Supabase)", url: "markdown_renderer.html?file=2_Environment/database.md" },
-        { label: "3. Simulation", url: "3_Simulation/" },
-        { label: "4. Formula", url: "4_Formula/" },
-        { label: "5. Symbols", url: "5_Symbols/" },
-        { label: "6. Semblance", url: "6_Semblance/" },
-        { label: "7. Testing Known", url: "7_Testing_Known/" },
-        { label: "---", url: "divider" },
-        { label: "agents.md", url: "agents.md" },
-        { label: "prompts.md", url: "prompts.md" },
-        { label: "claude.md", url: "claude.md" },
-        { label: "gemini.md", url: "gemini.md" },
-        { label: "copilot.md", url: "copilot.md" },
-        { label: "kilocode.md", url: "kilocode.md" }
+        { label: "📁 1. Real Unknown", url: "1_Real_Unknown/" },
+        { label: "📁 2. Environment", url: "2_Environment/" },
+        { label: "📁 3. Simulation", url: "3_Simulation/" },
+        { label: "📁 4. Formula", url: "4_Formula/" },
+        { label: "📁 5. Symbols (Code)", url: "5_Symbols/" },
+        { label: "📁 6. Semblance", url: "6_Semblance/" },
+        { label: "📁 7. Testing Known", url: "7_Testing_Known/" }
       ]
     };
 
@@ -493,10 +480,13 @@
             li.className = "debug-item";
             
             const a = document.createElement("a");
-            
-            // Route relative URLs dynamically through the renderer
+
+            // URLs in navigation_config.json are already fully resolved.
+            // Only auto-prefix bare .md paths from the minimal offline fallback.
             let finalUrl = item.url;
-            if (finalUrl !== "index.html" && finalUrl !== "divider" && !finalUrl.startsWith("http")) {
+            if (finalUrl && finalUrl !== "divider" && !finalUrl.startsWith("http") &&
+                !finalUrl.includes("markdown_renderer.html") && !finalUrl.endsWith(".html") &&
+                !finalUrl.endsWith("/")) {
               finalUrl = `markdown_renderer.html?file=${finalUrl}`;
             }
             
