@@ -754,13 +754,23 @@
         container.innerHTML = modules.map((mod, idx) => renderModule(mod, idx)).join('');
         document.getElementById('examCta').style.display = 'block';
 
-        // Auto-expand module from URL param ?module=N
-        const urlModule = parseInt(new URLSearchParams(location.search).get('module'), 10);
+        // Auto-expand module and optionally scroll to a specific video from URL params ?module=N&video=V
+        const _qp = new URLSearchParams(location.search);
+        const urlModule = parseInt(_qp.get('module'), 10);
+        const urlVideo  = parseInt(_qp.get('video'),  10);
         const cards = container.querySelectorAll('.module-card');
         const targetIdx = urlModule >= 1 && urlModule <= cards.length ? urlModule - 1 : 0;
         if (cards[targetIdx]) {
           cards[targetIdx].classList.add('expanded');
-          setTimeout(() => cards[targetIdx].scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+          const scrollTarget = !isNaN(urlVideo)
+            ? cards[targetIdx].querySelector(`[data-video-number="${urlVideo}"]`)
+            : cards[targetIdx];
+          setTimeout(() => (scrollTarget || cards[targetIdx]).scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+          if (scrollTarget) {
+            scrollTarget.style.transition = 'box-shadow 0.4s';
+            scrollTarget.style.boxShadow = '0 0 0 2px rgba(139,92,246,0.6)';
+            setTimeout(() => { scrollTarget.style.boxShadow = ''; }, 2000);
+          }
         }
 
         container.querySelectorAll('.module-header').forEach(header => {
@@ -853,7 +863,7 @@
       const shotlistLink = `5_Symbols/production/postprod/module-1/section-1/production_shotlist.html?module=${moduleNumber}&section=1`;
 
       return `
-        <div class="video-card${status ? ' status-' + status : ''}" id="vc-${v.id}" data-video-id="${v.id}">
+        <div class="video-card${status ? ' status-' + status : ''}" id="vc-${v.id}" data-video-id="${v.id}" data-video-number="${v.video_number}">
           <div class="video-label">Video ${v.video_number}</div>
           <div class="video-title">${v.title}</div>
           <div class="video-actions" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">

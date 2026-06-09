@@ -278,6 +278,12 @@
     .module-title-arrow:hover { opacity: 1; color: #c084fc; }
     .scene-title-link { color: inherit; text-decoration: none; transition: color 0.2s; }
     .scene-title-link:hover { color: #93c5fd; }
+
+    .video-action-bar { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0 12px; }
+    .action-chip { display: inline-flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); width: 32px; height: 32px; border-radius: 8px; text-decoration: none; font-size: 1rem; line-height: 1; transition: all 0.2s; }
+    .action-chip:hover { transform: translateY(-2px); }
+    .action-chip.shotlist:hover { background: rgba(16,185,129,0.15); border-color: rgba(16,185,129,0.4); }
+    .action-chip.outline:hover { background: rgba(139,92,246,0.15); border-color: rgba(139,92,246,0.4); }
   </style>
   <script src="../../../../shared/nav.js"></script>
 </head>
@@ -475,6 +481,14 @@
       return `../../postprod/module-${id}/section-1/demo_script_show.html`;
     }
 
+    function getShotlistUrl(moduleId) {
+      return `../../postprod/module-1/section-1/production_shotlist.html?module=${moduleId}&section=1`;
+    }
+
+    function getOutlineUrl(moduleId, videoId) {
+      return `../../../../course_outline.html?module=${moduleId}&video=${videoId}`;
+    }
+
     function render(data) {
       const nav = document.getElementById('module-nav');
       const area = document.getElementById('content-area');
@@ -517,6 +531,10 @@
           const elementId = v.videoId || `local-${mi}-${v.id}`;
           html += `<div class="video-card">`;
           html += `<div class="video-header"><span class="video-title">🎬 <a class="scene-title-link" href="${getSceneUrl(m.id)}">Video ${v.id}: ${v.title}</a></span><span class="video-duration">${v.duration}</span></div>`;
+          html += `<div class="video-action-bar">`;
+          html += `<a class="action-chip shotlist" href="${getShotlistUrl(m.id)}" title="Shot List — Module ${m.id}, Video ${v.id}">🎬</a>`;
+          html += `<a class="action-chip outline" href="${getOutlineUrl(m.id, v.id)}" title="Jump to Module ${m.id} in Course Outline">🗺</a>`;
+          html += `</div>`;
           
           // Editable Script Block
           html += `<div class="video-script-container" id="script-container-${elementId}">`;
