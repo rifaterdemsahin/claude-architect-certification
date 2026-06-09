@@ -480,10 +480,10 @@
       ]
     };
 
-    const CODE_REFS_SQL = `-- Run once in Supabase SQL Editor to enable custom code references
+    const CODE_REFS_SQL = `-- Run once in Supabase SQL Editor to enable per-video code references
 CREATE TABLE IF NOT EXISTS code_references (
   id          SERIAL PRIMARY KEY,
-  module_id   INTEGER NOT NULL,
+  video_id    TEXT NOT NULL,        -- matches video elementId (Supabase video DB id or "local-{mi}-{vi}")
   label       TEXT NOT NULL,
   url         TEXT NOT NULL,
   note        TEXT DEFAULT '',
@@ -491,6 +491,7 @@ CREATE TABLE IF NOT EXISTS code_references (
   created_at  TIMESTAMPTZ DEFAULT NOW(),
   updated_at  TIMESTAMPTZ DEFAULT NOW()
 );
+CREATE INDEX IF NOT EXISTS idx_code_refs_video_id ON code_references (video_id);
 -- Enable Row Level Security (adjust policies to your auth setup)
 ALTER TABLE code_references ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "allow_all" ON code_references FOR ALL USING (true) WITH CHECK (true);`;
@@ -800,7 +801,32 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
           html += `<div class="audio-player-container" id="audio-player-${elementId}"></div>`;
 
           html += `<div class="cue-list">${v.cues.map(c => `<span class="cue-tag">${c}</span>`).join('')}</div>`;
-          html += `</div>`;
+
+          // Per-video Code References panel
+          const moduleStaticRefs = STATIC_CODE_REFS[m.id] || [];
+          const staticRef = moduleStaticRefs[vi] || null;
+          html += `<div class="code-refs-section">`;
+          html += `<h3>💻 Code Refs <a class="code-ref-badge browse" href="${TREE_BASE}" target="_blank" rel="noopener">src/ ↗</a></h3>`;
+          if (staticRef) {
+            html += `<div class="code-refs-grid">
+              <div class="code-ref-row github-ref">
+                <span class="code-ref-icon">📄</span>
+                <div class="code-ref-body">
+                  <div class="code-ref-label"><a href="${staticRef.url}" target="_blank" rel="noopener">${staticRef.label}</a><span class="code-ref-badge gh">GitHub</span></div>
+                  ${staticRef.note ? `<div class="code-ref-note">${staticRef.note}</div>` : ''}
+                </div>
+              </div>
+            </div>`;
+          }
+          html += `<div class="code-refs-grid" id="cref-dynamic-${elementId}"></div>`;
+          html += `<div class="code-ref-add">
+            <input id="cref-new-label-${elementId}" placeholder="Label (e.g. src/my_file.py)">
+            <input id="cref-new-url-${elementId}" placeholder="GitHub URL" onkeydown="if(event.key==='Enter')addCodeRefUI('${elementId}')">
+            <button class="btn btn-sm btn-primary" onclick="addCodeRefUI('${elementId}')">+ Add Ref</button>
+          </div>`;
+          html += `</div>`; // end code-refs-section
+
+          html += `</div>`; // end video-card
         });
         html += `</div>`;
         if (m.links && m.links.length) {
@@ -810,31 +836,6 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
           });
           html += `</div></div>`;
         }
-
-        // Code References panel
-        const staticRefs = STATIC_CODE_REFS[m.id] || [];
-        html += `<div class="code-refs-section">`;
-        html += `<h3>💻 Code References <a class="code-ref-badge browse" href="${TREE_BASE}" target="_blank" rel="noopener">Browse src/ ↗</a></h3>`;
-        if (staticRefs.length) {
-          html += `<div class="code-refs-grid">`;
-          staticRefs.forEach(ref => {
-            html += `<div class="code-ref-row github-ref">
-              <span class="code-ref-icon">📄</span>
-              <div class="code-ref-body">
-                <div class="code-ref-label"><a href="${ref.url}" target="_blank" rel="noopener">${ref.label}</a><span class="code-ref-badge gh">GitHub</span></div>
-                ${ref.note ? `<div class="code-ref-note">${ref.note}</div>` : ''}
-              </div>
-            </div>`;
-          });
-          html += `</div>`;
-        }
-        html += `<div class="code-refs-grid" id="cref-dynamic-${m.id}"></div>`;
-        html += `<div class="code-ref-add">
-          <input id="cref-new-label-${m.id}" placeholder="Label (e.g. src/my_file.py)">
-          <input id="cref-new-url-${m.id}" placeholder="GitHub URL" onkeydown="if(event.key==='Enter')addCodeRefUI(${m.id})">
-          <button class="btn btn-sm btn-primary" onclick="addCodeRefUI(${m.id})">+ Add Ref</button>
-        </div>`;
-        html += `</div>`; // end code-refs-section
 
         html += `</div>`;
       });
@@ -1155,21 +1156,21 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
       return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
 
-    async function fetchCodeRefs(moduleId) {
+    async function fetchCodeRefs(videoId) {
       if (!SUPABASE_URL.includes('supabase.co') || !SUPABASE_ANON_KEY) return [];
       try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/code_references?module_id=eq.${moduleId}&order=sort_order.asc,id.asc`, {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/code_references?video_id=eq.${encodeURIComponent(videoId)}&order=sort_order.asc,id.asc`, {
           headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
         });
         return res.ok ? res.json() : [];
       } catch { return []; }
     }
 
-    async function insertCodeRef(moduleId, label, url, note) {
+    async function insertCodeRef(videoId, label, url, note) {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/code_references`, {
         method: 'POST',
         headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
-        body: JSON.stringify({ module_id: moduleId, label, url, note: note || '', sort_order: 99 })
+        body: JSON.stringify({ video_id: String(videoId), label, url, note: note || '', sort_order: 99 })
       });
       if (!res.ok) throw new Error(await res.text());
       return (await res.json())[0];
@@ -1244,26 +1245,26 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
         if (row) row.remove();
       } catch(e) { alert('❌ ' + e.message); }
     };
-    window.addCodeRefUI = async function(moduleId) {
-      const label = document.getElementById('cref-new-label-' + moduleId).value.trim();
-      const url   = document.getElementById('cref-new-url-'   + moduleId).value.trim();
+    window.addCodeRefUI = async function(elementId) {
+      const label = document.getElementById('cref-new-label-' + elementId).value.trim();
+      const url   = document.getElementById('cref-new-url-'   + elementId).value.trim();
       if (!label || !url) { alert('Enter a label and a GitHub URL first'); return; }
       try {
-        const ref = await insertCodeRef(moduleId, label, url, '');
-        const grid = document.getElementById('cref-dynamic-' + moduleId);
+        const ref = await insertCodeRef(elementId, label, url, '');
+        const grid = document.getElementById('cref-dynamic-' + elementId);
         if (grid) {
           const tmp = document.createElement('div');
           tmp.innerHTML = buildCodeRefRow(ref);
           grid.appendChild(tmp.firstElementChild);
         }
-        document.getElementById('cref-new-label-' + moduleId).value = '';
-        document.getElementById('cref-new-url-'   + moduleId).value = '';
+        document.getElementById('cref-new-label-' + elementId).value = '';
+        document.getElementById('cref-new-url-'   + elementId).value = '';
       } catch(e) { alert('❌ ' + e.message); }
     };
 
-    async function hydrateModuleCodeRefs(moduleId) {
-      const refs = await fetchCodeRefs(moduleId);
-      const grid = document.getElementById('cref-dynamic-' + moduleId);
+    async function hydrateVideoCodeRefs(elementId) {
+      const refs = await fetchCodeRefs(elementId);
+      const grid = document.getElementById('cref-dynamic-' + elementId);
       if (!grid) return;
       if (refs.length) grid.innerHTML = refs.map(buildCodeRefRow).join('');
     }
@@ -1294,7 +1295,12 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
         window.loadedData = data;
         render(data);
         updateGoogleConfigUI();
-        data.modules.forEach(m => hydrateModuleCodeRefs(m.id));
+        data.modules.forEach((m, mi) => {
+          m.videos.forEach(v => {
+            const elementId = v.videoId || `local-${mi}-${v.id}`;
+            hydrateVideoCodeRefs(elementId);
+          });
+        });
       } else {
         document.getElementById('content-area').innerHTML =
           '<div class="error"><h2>❌ Failed to Load</h2><p>Could not load from Supabase or local JSON.</p></div>';
