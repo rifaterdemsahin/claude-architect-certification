@@ -339,6 +339,9 @@
     .btn-gen-audio { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); color: #fbbf24; padding: 6px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-body); }
     .btn-gen-audio:hover:not(:disabled) { background: rgba(245,158,11,0.2); color: #fde68a; }
     .btn-gen-audio:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-save-audio { background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.3); color: #93c5fd; padding: 6px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-body); }
+    .btn-save-audio:hover:not(:disabled) { background: rgba(59,130,246,0.2); color: #bfdbfe; }
+    .btn-save-audio:disabled { opacity: 0.5; cursor: not-allowed; }
     .btn-listen { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); color: #34d399; padding: 6px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; text-decoration: none; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
     .btn-listen:hover { background: rgba(16,185,129,0.2); color: #6ee7b7; }
     .audio-status { font-size: 0.78rem; font-weight: 600; padding: 4px 10px; border-radius: 6px; transition: all 0.25s; }
@@ -790,6 +793,7 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
           const hasAudio = !!v.audioUrl;
           html += `<div class="audio-action-row">`;
           html += `<button class="btn-gen-audio" id="btn-audio-${elementId}" onclick="generateAudio('${v.videoId || ''}', ${mi}, ${v.id})">🎙 Generate Audio</button>`;
+          html += `<button class="btn-save-audio" id="btn-save-audio-${elementId}" onclick="saveAudio('${v.videoId || ''}', ${mi}, ${v.id})">💾 Save Audio</button>`;
           html += `<span class="audio-status" id="audio-status-${elementId}"></span>`;
           html += `<a class="btn-listen" id="listen-link-${elementId}" href="${v.audioUrl || '#'}" target="_blank"${hasAudio ? '' : ' style="display:none;"'}>🎧 Listen</a>`;
           html += `</div>`;
@@ -1024,19 +1028,35 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
     }
 
     // ── Main generate audio function ────────────────────────────────────────────
-    window.generateAudio = async function(videoId, moduleIdx, videoIdx) {
+    window.generateAudio = function(videoId, moduleIdx, videoIdx) {
       const elementId = videoId || `local-${moduleIdx}-${videoIdx}`;
+      const textArea = document.getElementById(`script-textarea-${elementId}`);
       const vTarget = window.loadedData && window.loadedData.modules[moduleIdx]
         ? window.loadedData.modules[moduleIdx].videos.find(v => v.id === videoIdx)
         : null;
-      const scriptText = vTarget ? vTarget.script : '';
+      const scriptText = (textArea && textArea.value.trim()) || (vTarget ? vTarget.script : '');
+      if (!scriptText.trim()) {
+        alert('No script text found for this video.');
+        return;
+      }
+      const url = `${KOKORO_BASE}/?lang=en&voice=en-US-AriaNeural&text=${encodeURIComponent(scriptText)}`;
+      window.open(url, '_blank');
+    };
+
+    window.saveAudio = async function(videoId, moduleIdx, videoIdx) {
+      const elementId = videoId || `local-${moduleIdx}-${videoIdx}`;
+      const textArea = document.getElementById(`script-textarea-${elementId}`);
+      const vTarget = window.loadedData && window.loadedData.modules[moduleIdx]
+        ? window.loadedData.modules[moduleIdx].videos.find(v => v.id === videoIdx)
+        : null;
+      const scriptText = (textArea && textArea.value.trim()) || (vTarget ? vTarget.script : '');
       if (!scriptText.trim()) {
         alert('No script text found for this video.');
         return;
       }
 
       const statusEl = document.getElementById(`audio-status-${elementId}`);
-      const btnEl = document.getElementById(`btn-audio-${elementId}`);
+      const btnEl = document.getElementById(`btn-save-audio-${elementId}`);
       const playerEl = document.getElementById(`audio-player-${elementId}`);
       const listenEl = document.getElementById(`listen-link-${elementId}`);
 
@@ -1044,7 +1064,6 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
       setAudioStatus(statusEl, 'generating', '🎙 Generating audio…');
 
       try {
-        // 1. Call Kokoro TTS
         const ttsRes = await fetch(`${KOKORO_BASE}/api/speak`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -1053,28 +1072,21 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
         if (!ttsRes.ok) throw new Error(`TTS error ${ttsRes.status}: ${await ttsRes.text()}`);
         const mp3Blob = await ttsRes.blob();
 
-        // 2. Play inline immediately
         const blobUrl = URL.createObjectURL(mp3Blob);
         playerEl.innerHTML = `<audio controls src="${blobUrl}"></audio>`;
 
-        // 3. Upload to Google Drive (requires google_client_id in localStorage)
         if (GOOGLE_CLIENT_ID) {
           setAudioStatus(statusEl, 'uploading', '☁️ Uploading to Drive…');
           try {
             const token = await getGisToken();
             const filename = `module${moduleIdx + 1}-video${videoIdx}-script.mp3`;
             const driveLink = await uploadToDrive(token, mp3Blob, filename);
-
-            // 4. Save to Supabase
             await saveAudioUrl(videoId, driveLink);
-
-            // 5. Update listen button
             if (listenEl) {
               listenEl.href = driveLink;
               listenEl.style.display = 'inline-flex';
             }
             if (vTarget) vTarget.audioUrl = driveLink;
-
             setAudioStatus(statusEl, 'success', '✅ Saved to Drive');
           } catch (driveErr) {
             console.warn('Drive upload failed:', driveErr);
