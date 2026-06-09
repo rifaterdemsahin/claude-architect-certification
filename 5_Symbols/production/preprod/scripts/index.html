@@ -202,6 +202,21 @@
       background: rgba(139, 92, 246, 0.2);
       color: white;
     }
+    .btn-template {
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.2);
+      color: #fbbf24;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-template:hover {
+      background: rgba(245, 158, 11, 0.2);
+      color: white;
+    }
     /* Success / Save animation styling */
     @keyframes statusEntry {
       0% {
@@ -345,6 +360,40 @@
           "Implement prefix-matching cache points achieving 90% hit rate.",
           "Deploy cache_layer.py with LRU and TTL strategies."
         ]
+      }
+    };
+
+    const SCRIPT_TEMPLATE = `Format: Talking Head + Screen Share | Duration: [DURATION]
+
+"[HOOK SENTENCE — one punchy line that frames the core problem]" That's the topic we're unpacking today.
+
+Overview & Objectives:
+- [OBJECTIVE 1]
+- [OBJECTIVE 2]
+- [OBJECTIVE 3]
+
+Let's start with [FIRST TOPIC] — from [STARTING POINT] through [END POINT].
+
+[Screenshare Starts]
+Diagram: [DIAGRAM TITLE]
+- Step 1: [STEP 1]
+- Step 2: [STEP 2]
+- Step 3: [STEP 3]
+- Step 4: [STEP 4]
+Key insight: [KEY INSIGHT — one sentence distilling the diagram]
+[Screenshare Ends]
+
+Here's the key takeaway: [MAIN TAKEAWAY — the single most important idea]
+
+Now, before we move to [NEXT SECTION], let's check your understanding.`;
+
+    window.loadTemplate = function(elementId) {
+      const textArea = document.getElementById(`script-textarea-${elementId}`);
+      textArea.value = SCRIPT_TEMPLATE;
+      // Open edit mode if not already open
+      const form = document.getElementById(`script-edit-form-${elementId}`);
+      if (form.style.display === 'none' || !form.style.display) {
+        toggleEdit(elementId, true);
       }
     };
 
@@ -548,6 +597,7 @@
           html += `</div>`;
           html += `<div class="edit-trigger-row">`;
           html += `<button class="btn-edit" id="btn-edit-${elementId}" onclick="toggleEdit('${elementId}', true)">✏️ Edit Script</button>`;
+          html += `<button class="btn-template" onclick="loadTemplate('${elementId}')">📋 Template</button>`;
           html += `<span class="save-status" id="save-status-${elementId}"></span>`;
           html += `</div>`;
           html += `</div>`; // end script container
