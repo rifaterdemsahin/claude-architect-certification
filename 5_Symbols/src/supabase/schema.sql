@@ -261,6 +261,8 @@ CREATE POLICY anon_select_edl_entries ON edl_entries FOR SELECT USING (true);
 CREATE POLICY anon_select_checklist_items ON checklist_items FOR SELECT USING (true);
 CREATE POLICY anon_insert_checklist_items ON checklist_items FOR INSERT WITH CHECK (true);
 CREATE POLICY anon_update_checklist_items ON checklist_items FOR UPDATE USING (true);
+DROP POLICY IF EXISTS anon_delete_checklist_items ON checklist_items;
+CREATE POLICY anon_delete_checklist_items ON checklist_items FOR DELETE USING (true);
 CREATE POLICY anon_select_checklist_progress ON checklist_progress FOR SELECT USING (true);
 CREATE POLICY anon_select_course_content ON course_content FOR SELECT USING (true);
 CREATE POLICY anon_select_scripts ON scripts FOR SELECT USING (true);

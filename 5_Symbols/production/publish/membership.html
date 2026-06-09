@@ -65,6 +65,159 @@
     .faq-a { color: var(--text-muted); font-size: 0.9rem; }
 
     footer { text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
+
+    /* Value Proposition Section */
+    .value-proposition-hero {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.05), rgba(59, 130, 246, 0.05));
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: 24px;
+      padding: 40px;
+      margin-top: 30px;
+      margin-bottom: 48px;
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 32px;
+      align-items: center;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .value-proposition-hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.03) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .value-info {
+      z-index: 1;
+    }
+
+    .value-badge {
+      display: inline-block;
+      padding: 6px 12px;
+      background: rgba(139, 92, 246, 0.1);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      border-radius: 100px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #a78bfa;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 16px;
+    }
+
+    .value-title {
+      font-family: var(--font-title);
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, #ffffff 30%, #a78bfa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1.2;
+    }
+
+    .value-text {
+      color: var(--text-muted);
+      font-size: 1rem;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .value-text strong {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    .value-comparison {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .comparison-card {
+      background: rgba(3, 7, 18, 0.4);
+      border-radius: 16px;
+      padding: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      transition: all 0.3s ease;
+    }
+
+    .comparison-card:hover {
+      border-color: rgba(255, 255, 255, 0.08);
+      transform: translateY(-2px);
+    }
+
+    .comparison-card.no-cert {
+      border-left: 3px solid #ef4444;
+    }
+
+    .comparison-card.self-learn {
+      border-left: 3px solid #10b981;
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.02), rgba(3, 7, 18, 0.4));
+    }
+
+    .comparison-header {
+      font-weight: 700;
+      font-size: 0.95rem;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .comparison-desc {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .value-visual {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .visual-image {
+      max-width: 100%;
+      height: auto;
+      border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+      transition: all 0.5s ease;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      animation: float 6s ease-in-out infinite;
+    }
+
+    .visual-image:hover {
+      transform: scale(1.02);
+      box-shadow: 0 25px 50px rgba(139, 92, 246, 0.15);
+      border-color: rgba(139, 92, 246, 0.3);
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0px); }
+    }
+
+    @media (max-width: 768px) {
+      .value-proposition-hero {
+        grid-template-columns: 1fr;
+        padding: 24px;
+        gap: 24px;
+      }
+      .value-visual {
+        order: -1;
+      }
+    }
   </style>
   <script src="../../../shared/nav.js"></script>
 </head>
@@ -76,6 +229,30 @@
       <h1>Master Claude AI</h1>
       <p>Module 1 is free for everyone. Unlock all 5 modules + future courses for just $10/month.</p>
     </header>
+
+    <!-- Value Proposition Hero Section -->
+    <div class="value-proposition-hero">
+      <div class="value-info">
+        <div class="value-badge">⚡ Core Philosophy</div>
+        <h2 class="value-title">Accelerated Skill-Mapping vs Paper Credentials</h2>
+        <p class="value-text">
+          We are <strong>not awarding certifications</strong>. Instead, we record and stream the raw self-learning process of how <strong>Rifat Erdem Sahin</strong> target-studies and earns official AI certifications. By tracing real-world setups, actual error debugging, and architectural decisions, you bypass theoretical fluff. This blueprint-first approach is engineered to <strong>speed up your process to close your skills gaps</strong> and thrive in the new agentic world.
+        </p>
+        <div class="value-comparison">
+          <div class="comparison-card no-cert">
+            <div class="comparison-header">❌ No Certificate Given</div>
+            <div class="comparison-desc">Traditional certificates often measure passive attendance rather than real-world engineering readiness. We skip the empty paper.</div>
+          </div>
+          <div class="comparison-card self-learn">
+            <div class="comparison-header">✅ Recorded Self-Learning</div>
+            <div class="comparison-desc">You clone the exact code repositories, custom MCP servers, error logs, and fixes accumulated during Rifat's preparation.</div>
+          </div>
+        </div>
+      </div>
+      <div class="value-visual">
+        <img src="../../../3_Simulation/generated/self_learning_value.png" alt="Self-learning process value proposition" class="visual-image">
+      </div>
+    </div>
 
     <div class="pricing-grid">
       <div class="pricing-card">
