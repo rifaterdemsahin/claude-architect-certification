@@ -211,13 +211,48 @@ ALTER TABLE ivq_questions ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "allow_all_videos" ON videos FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "allow_all_ivq" ON ivq_questions FOR ALL USING (true) WITH CHECK (true);`;
 
-    // ── Supabase ──────────────────────────────────────────────────────────────
-    let SB_URL = localStorage.getItem('ivq_sb_url') || '';
-    let SB_KEY  = localStorage.getItem('ivq_sb_key') || '';
+    // ── Cookie helpers ──────────────────────────────────────────────────────────
+    function setCookie(name, value, days) {
+      const d = new Date();
+      d.setTime(d.getTime() + (days || 365) * 24 * 60 * 60 * 1000);
+      document.cookie = name + '=' + encodeURIComponent(value) + ';path=/;expires=' + d.toUTCString() + ';SameSite=Lax';
+    }
+    function getCookie(name) {
+      const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+      return match ? decodeURIComponent(match[2]) : '';
+    }
 
-    if (SB_URL) document.getElementById('sb-url').value = SB_URL;
-    if (SB_KEY)  document.getElementById('sb-key').value  = SB_KEY;
-    if (SB_URL && SB_KEY) { updateStatus(true); loadAll(); }
+    // ── Supabase ──────────────────────────────────────────────────────────────
+    function loadCreds() {
+      const cookieUrl = getCookie('sb_url');
+      const cookieKey  = getCookie('sb_key');
+      const localUrl  = localStorage.getItem('ivq_sb_url');
+      const localKey   = localStorage.getItem('ivq_sb_key');
+      const sharedUrl = localStorage.getItem('sb_url');
+      const sharedKey  = localStorage.getItem('sb_key');
+      return {
+        url: cookieUrl || localUrl || sharedUrl || '',
+        key: cookieKey  || localKey  || sharedKey  || ''
+      };
+    }
+    function saveCreds(url, key) {
+      setCookie('sb_url', url);
+      setCookie('sb_key', key);
+      localStorage.setItem('ivq_sb_url', url);
+      localStorage.setItem('ivq_sb_key', key);
+      localStorage.setItem('sb_url', url);
+      localStorage.setItem('sb_key', key);
+    }
+    let SB_URL = '', SB_KEY  = '';
+    function initCreds() {
+      const creds = loadCreds();
+      SB_URL = creds.url;
+      SB_KEY  = creds.key;
+      if (SB_URL) document.getElementById('sb-url').value = SB_URL;
+      if (SB_KEY)  document.getElementById('sb-key').value  = SB_KEY;
+      if (SB_URL && SB_KEY) { updateStatus(true); loadAll(); }
+    }
+    initCreds();
 
     function api(path, opts = {}) {
       return fetch(SB_URL + '/rest/v1/' + path, {
@@ -238,8 +273,7 @@ CREATE POLICY "allow_all_ivq" ON ivq_questions FOR ALL USING (true) WITH CHECK (
       try {
         const r = await api('videos?limit=1');
         if (r.ok) {
-          localStorage.setItem('ivq_sb_url', SB_URL);
-          localStorage.setItem('ivq_sb_key',  SB_KEY);
+          saveCreds(SB_URL, SB_KEY);
           updateStatus(true);
           document.getElementById('config-details').removeAttribute('open');
           toast('Connected!', 'success');

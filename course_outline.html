@@ -658,10 +658,10 @@
 
     // ── Tell / Show / Do / Apply toggle ───────────────────
     const SUB_META = {
-      tell:  { col: 'tell_done',  icon: '📝', label: 'Tell'  },
-      show:  { col: 'show_done',  icon: '🎬', label: 'Show'  },
-      do:    { col: 'do_done',    icon: '💻', label: 'Do'    },
-      apply: { col: 'apply_done', icon: '📋', label: 'Apply' }
+      tell:  { col: 'tell_done',  icon: '📝', label: 'Tell',  tooltip: 'The script is ready' },
+      show:  { col: 'show_done',  icon: '🎬', label: 'Show',  tooltip: 'The shot list is ready for this video' },
+      do:    { col: 'do_done',    icon: '💻', label: 'Do',    tooltip: 'Hands-on screencapture is completed' },
+      apply: { col: 'apply_done', icon: '📋', label: 'Apply', tooltip: 'The IVQ part is ready' }
     };
 
     async function toggleSubStatus(videoId, field, btn) {
@@ -854,7 +854,7 @@
       // Tell / Show / Do / Apply sub-buttons
       const subHtml = Object.entries(SUB_META).map(([key, m]) => {
         const active = !!v[key];
-        return `<button class="sub-btn${active ? ' sub-active-' + key : ''}" data-sub="${key}"
+        return `<button class="sub-btn${active ? ' sub-active-' + key : ''}" data-sub="${key}" title="${m.tooltip}"
           onclick="toggleSubStatus(${v.id},'${key}',this)">${active ? '✓ ' : ''}${m.icon} ${m.label}</button>`;
       }).join('');
 
