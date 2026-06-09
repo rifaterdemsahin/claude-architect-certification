@@ -78,6 +78,7 @@
 | `implementation_guide.md` | Main step-by-step build sequence |
 | `research_notes.md` | Technology evaluations that informed decisions |
 | `api_reference.md` | Key API endpoints (Qdrant, Claude, Azure Key Vault, GitHub Actions) |
+| `mcp_deployment_formula.md` | 🧠 Where `temp_mcp.yml` should live — GitHub vs Fly.io pros/cons + split model |
 
 ---
 
