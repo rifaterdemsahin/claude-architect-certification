@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Controversial Post Playbook | Claude AI Certification</title>
+  <meta name="description" content="Step-by-step playbook for writing controversial image-based LinkedIn posts that attract AI transformation audiences.">
+  <link rel="icon" type="image/png" href="../../../favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #030712; --card: rgba(17,24,39,0.85); --border: rgba(255,255,255,0.07);
+      --text: #f3f4f6; --muted: #9ca3af; --primary: #8b5cf6; --green: #10b981;
+      --blue: #3b82f6; --red: #ef4444; --orange: #f97316; --yellow: #f59e0b;
+      --font-h: 'Outfit', sans-serif; --font-b: 'Plus Jakarta Sans', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      background-image: radial-gradient(circle at 15% 25%, rgba(139,92,246,0.07) 0%, transparent 50%),
+                        radial-gradient(circle at 85% 75%, rgba(249,115,22,0.05) 0%, transparent 50%);
+      color: var(--text); font-family: var(--font-b); line-height: 1.65; padding-bottom: 100px;
+    }
+    .container { max-width: 860px; margin: 0 auto; padding: 0 24px; }
+    .badge { display: inline-block; padding: 5px 14px; background: linear-gradient(135deg, rgba(249,115,22,0.2), rgba(139,92,246,0.2)); border: 1px solid rgba(249,115,22,0.35); border-radius: 100px; font-size: 0.75rem; font-weight: 700; color: #fb923c; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 14px; }
+    h1 { font-family: var(--font-h); font-size: 2.3rem; font-weight: 800; margin-bottom: 8px; }
+    .subtitle { color: var(--muted); font-size: 0.95rem; margin-bottom: 36px; max-width: 680px; }
+    .back-link { display: inline-block; margin-bottom: 24px; color: var(--blue); text-decoration: none; font-size: 0.88rem; }
+    .back-link:hover { text-decoration: underline; }
+
+    /* Section headings */
+    .section-label {
+      font-family: var(--font-h); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--orange); margin-bottom: 10px; margin-top: 40px;
+    }
+    h2 { font-family: var(--font-h); font-size: 1.35rem; font-weight: 800; margin-bottom: 18px; }
+
+    /* Cards */
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 24px 26px; margin-bottom: 18px; }
+    .card h3 { font-family: var(--font-h); font-size: 1.05rem; font-weight: 700; margin-bottom: 10px; }
+    .card p { font-size: 0.9rem; color: var(--muted); line-height: 1.65; }
+    .card p + p { margin-top: 8px; }
+    .card ul, .card ol { padding-left: 20px; margin-top: 8px; }
+    .card li { font-size: 0.88rem; color: var(--muted); margin-bottom: 6px; line-height: 1.55; }
+    .card li strong { color: var(--text); }
+
+    /* Why it works grid */
+    .why-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; margin-bottom: 18px; }
+    .why-tile { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; }
+    .why-tile .icon { font-size: 1.6rem; margin-bottom: 8px; }
+    .why-tile h4 { font-family: var(--font-h); font-size: 0.88rem; font-weight: 700; margin-bottom: 5px; }
+    .why-tile p { font-size: 0.8rem; color: var(--muted); }
+
+    /* Anatomy diagram */
+    .anatomy { border: 1.5px solid rgba(249,115,22,0.3); border-radius: 18px; overflow: hidden; margin-bottom: 18px; }
+    .anatomy-header { background: rgba(249,115,22,0.1); padding: 14px 22px; font-family: var(--font-h); font-weight: 700; font-size: 0.9rem; color: #fb923c; border-bottom: 1px solid rgba(249,115,22,0.2); }
+    .anatomy-row { display: flex; gap: 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .anatomy-row:last-child { border-bottom: none; }
+    .anatomy-num { width: 44px; min-width: 44px; display: flex; align-items: center; justify-content: center; font-family: var(--font-h); font-weight: 800; font-size: 1.1rem; color: #fb923c; background: rgba(249,115,22,0.06); border-right: 1px solid rgba(249,115,22,0.12); }
+    .anatomy-body { padding: 14px 18px; flex: 1; }
+    .anatomy-body strong { font-size: 0.88rem; color: var(--text); display: block; margin-bottom: 3px; }
+    .anatomy-body span { font-size: 0.8rem; color: var(--muted); }
+
+    /* Image mockup */
+    .image-mockup {
+      background: #0f172a; border: 1px solid rgba(249,115,22,0.25); border-radius: 16px;
+      padding: 0; overflow: hidden; margin-bottom: 18px;
+    }
+    .mockup-label { font-size: 0.72rem; font-weight: 700; color: var(--orange); text-transform: uppercase; letter-spacing: 0.1em; padding: 10px 18px; border-bottom: 1px solid rgba(255,255,255,0.05); background: rgba(249,115,22,0.06); }
+    .mockup-post {
+      aspect-ratio: 1/1; max-width: 400px; margin: 20px auto;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      border-radius: 12px; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; padding: 32px; text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .mockup-post::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(circle at 50% 30%, rgba(249,115,22,0.12) 0%, transparent 60%);
+    }
+    .mockup-post .claim { font-family: var(--font-h); font-size: 1.55rem; font-weight: 800; line-height: 1.25; color: #fff; margin-bottom: 14px; position: relative; z-index: 1; }
+    .mockup-post .claim em { color: #fb923c; font-style: normal; }
+    .mockup-post .sub { font-size: 0.82rem; color: rgba(255,255,255,0.55); position: relative; z-index: 1; }
+    .mockup-post .watermark { position: absolute; bottom: 14px; right: 16px; font-size: 0.65rem; color: rgba(255,255,255,0.25); z-index: 1; }
+
+    /* Template cards */
+    .template-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; margin-bottom: 18px; overflow: hidden; }
+    .template-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid var(--border); }
+    .template-header h3 { font-family: var(--font-h); font-size: 0.95rem; font-weight: 700; }
+    .template-header .tag { font-size: 0.72rem; font-weight: 700; padding: 3px 10px; border-radius: 6px; }
+    .tag-hot { background: rgba(239,68,68,0.15); color: #fca5a5; border: 1px solid rgba(239,68,68,0.25); }
+    .tag-medium { background: rgba(245,158,11,0.15); color: #fcd34d; border: 1px solid rgba(245,158,11,0.25); }
+    .tag-safe { background: rgba(16,185,129,0.15); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.25); }
+    .template-image-line { background: rgba(249,115,22,0.06); border-bottom: 1px solid var(--border); padding: 10px 20px; font-size: 0.8rem; color: #fb923c; font-weight: 600; }
+    .template-body { padding: 16px 20px; font-size: 0.88rem; line-height: 1.7; white-space: pre-wrap; color: var(--text); background: rgba(0,0,0,0.25); }
+    .template-actions { display: flex; gap: 10px; padding: 14px 20px; border-top: 1px solid var(--border); }
+    .copy-btn { background: var(--green); color: #000; border: none; padding: 8px 18px; border-radius: 9px; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: all 0.2s; font-family: var(--font-b); }
+    .copy-btn:hover { background: #34d399; transform: translateY(-1px); }
+    .copy-btn.copied { background: var(--blue); color: #fff; }
+    .copy-img-btn { background: rgba(249,115,22,0.15); color: #fb923c; border: 1px solid rgba(249,115,22,0.3); padding: 8px 18px; border-radius: 9px; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: all 0.2s; font-family: var(--font-b); }
+    .copy-img-btn:hover { background: rgba(249,115,22,0.25); }
+    .copy-img-btn.copied { background: rgba(16,185,129,0.2); color: #6ee7b7; border-color: rgba(16,185,129,0.4); }
+
+    /* Checklist */
+    .checklist { list-style: none; padding: 0; }
+    .checklist li { display: flex; gap: 10px; align-items: flex-start; padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.88rem; }
+    .checklist li:last-child { border-bottom: none; }
+    .checklist li::before { content: '☐'; color: var(--orange); font-size: 1rem; margin-top: 1px; flex-shrink: 0; }
+
+    /* Sample reference */
+    .sample-box { background: rgba(59,130,246,0.07); border: 1px solid rgba(59,130,246,0.25); border-radius: 14px; padding: 18px 22px; margin-top: 32px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .sample-box .sample-icon { font-size: 1.8rem; flex-shrink: 0; }
+    .sample-box .sample-text { flex: 1; min-width: 200px; }
+    .sample-box .sample-text p { font-size: 0.85rem; color: var(--muted); margin-top: 3px; }
+    .sample-box .sample-text strong { font-size: 0.92rem; }
+    .sample-link { display: inline-block; background: var(--blue); color: #fff; padding: 8px 18px; border-radius: 9px; text-decoration: none; font-size: 0.82rem; font-weight: 700; transition: all 0.2s; flex-shrink: 0; }
+    .sample-link:hover { background: #2563eb; transform: translateY(-1px); }
+
+    footer { text-align: center; color: var(--muted); font-size: 0.8rem; margin-top: 48px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
+  </style>
+  <script src="../../../shared/nav.js"></script>
+  <script src="../../../shared/debug-panel.js"></script>
+</head>
+<body>
+<div class="container">
+
+  <header style="padding-top: 36px; margin-bottom: 8px;">
+    <a class="back-link" href="index.html">← Back to Post-Production</a>
+    <div class="badge">🔥 Audience Growth Playbook</div>
+    <h1>Controversial Post Playbook</h1>
+    <p class="subtitle">How to create image-based LinkedIn posts that spark debate, attract the AI transformation audience, and turn passive scrollers into followers.</p>
+  </header>
+
+  <!-- WHY IT WORKS -->
+  <div class="section-label">Why controversy works</div>
+  <div class="why-grid">
+    <div class="why-tile">
+      <div class="icon">🔥</div>
+      <h4>Comment bait</h4>
+      <p>LinkedIn's algorithm rewards comments 4× more than likes. A bold claim forces people to agree or defend themselves.</p>
+    </div>
+    <div class="why-tile">
+      <div class="icon">🧠</div>
+      <h4>Cognitive friction</h4>
+      <p>The brain stops scrolling when a statement contradicts a held belief. That pause is your window.</p>
+    </div>
+    <div class="why-tile">
+      <div class="icon">📢</div>
+      <h4>Signal amplification</h4>
+      <p>Disagreement spreads posts to the commenter's network — your audience grows via people who argue with you.</p>
+    </div>
+    <div class="why-tile">
+      <div class="icon">🎯</div>
+      <h4>Audience filtering</h4>
+      <p>Only people who care about AI transformation will engage. Low-quality followers self-select out.</p>
+    </div>
+  </div>
+
+  <!-- ANATOMY OF THE POST -->
+  <div class="section-label">Anatomy of an image-based controversial post</div>
+  <h2>5-layer structure</h2>
+  <div class="anatomy">
+    <div class="anatomy-header">📐 Post Structure — top to bottom</div>
+    <div class="anatomy-row">
+      <div class="anatomy-num">1</div>
+      <div class="anatomy-body">
+        <strong>🖼️ Hook image — the scroll-stopper</strong>
+        <span>Bold white text on dark gradient. One provocative claim, max 10 words. No logo spam, no stock photos. The image must work without a caption. Use Canva or Figma: 1080×1080px, high contrast, large type (&gt;60pt).</span>
+      </div>
+    </div>
+    <div class="anatomy-row">
+      <div class="anatomy-num">2</div>
+      <div class="anatomy-body">
+        <strong>🪝 Opening line — the first 2 sentences (shown before "see more")</strong>
+        <span>Restate the claim as a direct statement. Add one surprising stat or personal stake. Never start with "I". Example: "Most AI pilots fail before month 3. Not because of the model — because of the org."</span>
+      </div>
+    </div>
+    <div class="anatomy-row">
+      <div class="anatomy-num">3</div>
+      <div class="anatomy-body">
+        <strong>📖 Body — 3-5 short punchy paragraphs</strong>
+        <span>Each paragraph = 1-2 sentences max. Use line breaks aggressively. No walls of text. List the reasons, the evidence, or the story that backs the claim. Alternate between facts and opinion to keep both sides engaged.</span>
+      </div>
+    </div>
+    <div class="anatomy-row">
+      <div class="anatomy-num">4</div>
+      <div class="anatomy-body">
+        <strong>💬 Engagement trigger — the question or dare</strong>
+        <span>End with a direct question that forces a side: "Agree or disagree?" / "What's your org's failure point?" / "Drop your take below." Never ask open-ended vague questions — binary or specific only.</span>
+      </div>
+    </div>
+    <div class="anatomy-row">
+      <div class="anatomy-num">5</div>
+      <div class="anatomy-body">
+        <strong>#️⃣ Hashtags — 3-5 max, targeted</strong>
+        <span>#AITransformation #EnterpriseAI #Claude #LLM #ArchitectLife — always include at least one niche tag (low volume, high intent) alongside 1-2 broad tags. Never more than 5 or it looks spammy.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- IMAGE MOCKUP -->
+  <div class="section-label">What the image looks like</div>
+  <div class="image-mockup">
+    <div class="mockup-label">📱 Sample 1080×1080 hook image layout</div>
+    <div style="padding: 20px 20px 24px;">
+      <div class="mockup-post">
+        <div class="claim">Your AI pilot<br>will <em>fail.</em><br>Here's why.</div>
+        <div class="sub">And how to be the one who fixes it →</div>
+        <div class="watermark">rifaterdemsahin.com</div>
+      </div>
+      <p style="text-align:center;font-size:0.75rem;color:var(--muted);margin-top:12px;">Dark gradient · White bold text · Single claim · No clutter · Small domain watermark</p>
+    </div>
+  </div>
+
+  <!-- TEMPLATES -->
+  <div class="section-label">Ready-to-use post templates</div>
+  <h2>Copy, adapt, post</h2>
+
+  <!-- Template A -->
+  <div class="template-card">
+    <div class="template-header">
+      <h3>🔥 A — "Your AI pilot will fail" (highest controversy)</h3>
+      <span class="tag tag-hot">🌶 Hot</span>
+    </div>
+    <div class="template-image-line">🖼️ Image text: "Your AI pilot will fail. Here's why." — white on dark purple gradient</div>
+    <div class="template-body" id="tpl-a">Your AI pilot will fail before month 3.
+
+Not because the model is wrong.
+Not because the prompt isn't clever enough.
+
+Because no one in your org owns it.
+
+I've seen this pattern across 15+ enterprise teams:
+→ Excited stakeholder kicks off a ChatGPT/Claude pilot
+→ IT hasn't approved the data access
+→ Legal hasn't reviewed the outputs
+→ The team using it hasn't changed a single workflow
+
+Six weeks later: "We tried AI. It didn't work for us."
+
+The technology isn't the bottleneck.
+The transformation is.
+
+If your team is serious about moving AI past the pilot stage, start by answering one question:
+
+Who gets fired if this doesn't work?
+
+If the answer is "nobody" — you're not running a pilot. You're running a demo.
+
+Agree or disagree? 👇
+
+#AITransformation #EnterpriseAI #Claude #LLM #DigitalTransformation</div>
+    <div class="template-actions">
+      <button type="button" class="copy-btn" onclick="copyTemplate('tpl-a', this)">📋 Copy post text</button>
+      <button type="button" class="copy-img-btn" onclick="copyImagePrompt('Your AI pilot will fail. Here\'s why.', this)">🖼️ Copy image prompt</button>
+    </div>
+  </div>
+
+  <!-- Template B -->
+  <div class="template-card">
+    <div class="template-header">
+      <h3>🧠 B — "Senior engineers are next" (career fear angle)</h3>
+      <span class="tag tag-hot">🌶 Hot</span>
+    </div>
+    <div class="template-image-line">🖼️ Image text: "Junior devs replaced. Senior devs: you're next." — white on dark red-to-black gradient</div>
+    <div class="template-body" id="tpl-b">Junior developers are already being replaced by AI.
+
+I know that's uncomfortable to read.
+
+But senior engineers think they're safe.
+They're not.
+
+Here's the difference:
+
+Junior work = code generation, CRUD, boilerplate → Claude does this now.
+Senior work = architecture decisions, trade-off analysis, system design → Claude is catching up.
+
+The engineers who will survive aren't the ones who write the best code.
+They're the ones who know how to direct Claude to write production-grade code and verify it doesn't fail at 3am.
+
+That's a different skill set.
+
+I'm building that skill set in public — every architectural decision documented, every Claude API integration tested under real enterprise constraints.
+
+The question isn't whether AI replaces engineers.
+It's whether you'll be directing it or replaced by someone who can.
+
+Which side are you on? 👇
+
+#AITransformation #SoftwareEngineering #Claude #CareerDevelopment #FutureOfWork</div>
+    <div class="template-actions">
+      <button type="button" class="copy-btn" onclick="copyTemplate('tpl-b', this)">📋 Copy post text</button>
+      <button type="button" class="copy-img-btn" onclick="copyImagePrompt('Junior devs replaced. Senior devs: you\'re next.', this)">🖼️ Copy image prompt</button>
+    </div>
+  </div>
+
+  <!-- Template C -->
+  <div class="template-card">
+    <div class="template-header">
+      <h3>⚡ C — "AI certifications are useless" (self-referential hook)</h3>
+      <span class="tag tag-medium">⚡ Medium</span>
+    </div>
+    <div class="template-image-line">🖼️ Image text: "Most AI certifications are useless. I'm getting one anyway." — white on dark slate gradient</div>
+    <div class="template-body" id="tpl-c">Most AI certifications are useless. I'm getting one anyway.
+
+Here's my honest take:
+
+90% of "AI certifications" are prompt engineering courses dressed up with a badge.
+They test how well you read documentation — not whether you can deploy anything.
+
+Anthropic's Claude Certified Architect exam is different.
+It tests production architecture: MCP servers, ZDR compliance, multi-agent circuit breakers, private networking.
+
+I know because I've been building every single component from scratch to prepare.
+
+Not to pass a test.
+To prove — to myself and publicly — that I can wire Claude into an enterprise stack that a CISO would actually approve.
+
+If you want to watch what production-grade Claude architecture actually looks like, every step is on my channel.
+
+If you want the badge without the builds — there are easier courses.
+
+Worth it or waste of time? Let me know your take 👇
+
+#CertificationTrap #Claude #AIArchitecture #EnterpriseAI #BuildInPublic</div>
+    <div class="template-actions">
+      <button type="button" class="copy-btn" onclick="copyTemplate('tpl-c', this)">📋 Copy post text</button>
+      <button type="button" class="copy-img-btn" onclick="copyImagePrompt('Most AI certifications are useless. I\'m getting one anyway.', this)">🖼️ Copy image prompt</button>
+    </div>
+  </div>
+
+  <!-- Template D -->
+  <div class="template-card">
+    <div class="template-header">
+      <h3>✅ D — "What your CTO won't tell you" (insider frame)</h3>
+      <span class="tag tag-safe">✅ Safe-ish</span>
+    </div>
+    <div class="template-image-line">🖼️ Image text: "What your CTO won't say about AI in 2025" — white on dark navy-to-teal gradient</div>
+    <div class="template-body" id="tpl-d">What your CTO won't say out loud about AI in 2025:
+
+"We're behind. And we don't know how to catch up without breaking things."
+
+I talk to engineering leaders constantly.
+The honest ones say the same thing:
+
+→ The board wants AI everywhere, yesterday
+→ Legal and security have a list of 40 blockers
+→ The team is half-excited, half-terrified
+→ The vendor demos look nothing like the production reality
+
+The transformation gap is real.
+And it's not closed by buying more API credits.
+
+It's closed by architects who understand both sides:
+the model capabilities AND the enterprise constraints.
+
+That's the exact gap this certification is designed to fill.
+I'm sitting it this month and documenting every decision openly.
+
+Which constraint is slowing down your org's AI adoption? Drop it below 👇
+
+#AITransformation #CTOPerspective #EnterpriseAI #Claude #DigitalLeadership</div>
+    <div class="template-actions">
+      <button type="button" class="copy-btn" onclick="copyTemplate('tpl-d', this)">📋 Copy post text</button>
+      <button type="button" class="copy-img-btn" onclick="copyImagePrompt('What your CTO won\'t say about AI in 2025', this)">🖼️ Copy image prompt</button>
+    </div>
+  </div>
+
+  <!-- IMAGE CREATION GUIDE -->
+  <div class="section-label" style="margin-top: 36px;">Creating the hook image</div>
+  <div class="card">
+    <h3>🎨 Step-by-step: build the image in Canva (5 min)</h3>
+    <ol style="margin-top: 10px;">
+      <li><strong>Open Canva → New Design → Custom size: 1080 × 1080 px</strong></li>
+      <li><strong>Background:</strong> Use a dark gradient — deep purple (#0f0c29 → #24243e) or dark navy (#0a0e27 → #1a1a2e). Avoid white or light backgrounds; they blend into the feed.</li>
+      <li><strong>Text:</strong> Add your claim in large sans-serif bold (Outfit, Montserrat, or Inter). Font size 80–100pt. White (#FFFFFF) or bright orange (#fb923c) for the trigger word. Left-aligned or centred — never justified.</li>
+      <li><strong>One accent element only:</strong> A thin horizontal line, a small arrow, or an emoji. Nothing more — clutter kills the message.</li>
+      <li><strong>Watermark:</strong> Your name or domain in 12pt grey (#6b7280) bottom-right. Small enough to not distract.</li>
+      <li><strong>Export:</strong> PNG, 1080×1080. No JPEG compression artefacts on text.</li>
+    </ol>
+    <p style="margin-top: 14px; font-size:0.82rem; color: var(--green);">💡 <strong>Speed tip:</strong> Copy the image text prompt below into Midjourney or fal.ai with the style "minimalist dark corporate LinkedIn post, bold white typography, no people, gradient background" for an AI-generated version.</p>
+  </div>
+
+  <!-- PRE-POST CHECKLIST -->
+  <div class="section-label">Before you hit publish</div>
+  <div class="card">
+    <h3>✅ Pre-post checklist</h3>
+    <ul class="checklist" style="margin-top: 10px;">
+      <li>Image makes a clear, debatable claim in under 10 words</li>
+      <li>First 2 lines of text work without the image context</li>
+      <li>Post has exactly one question at the end (not two or three)</li>
+      <li>No more than 5 hashtags</li>
+      <li>You can defend the claim in the comments — you'll need to</li>
+      <li>Post goes live on Tuesday–Thursday, 7–9am or 12–1pm (audience timezone)</li>
+      <li>Reply to every comment within the first 60 minutes to feed the algorithm</li>
+      <li>Do NOT delete or edit after posting — edits reset distribution</li>
+    </ul>
+  </div>
+
+  <!-- SAMPLE REFERENCE -->
+  <div class="sample-box">
+    <div class="sample-icon">👀</div>
+    <div class="sample-text">
+      <strong>Live sample — see this in the wild</strong>
+      <p>Real controversial post using the AI transformation audience-building approach. Study the hook image, opening line, and comment engagement pattern.</p>
+    </div>
+    <a class="sample-link" href="https://www.linkedin.com/feed/update/urn:li:activity:7335556327500378113/" target="_blank" rel="noopener">View sample post →</a>
+  </div>
+
+  <footer>
+    <p style="margin-bottom: 8px;"><a href="index.html" style="color: var(--blue); text-decoration: none;">← Back to Post-Production</a></p>
+    <p style="margin-bottom: 12px; font-size: 0.85rem; opacity: 0.8;">
+      <a href="https://www.linkedin.com/in/rifaterdemsahin" target="_blank" style="color: #93c5fd; text-decoration: underline; margin-right: 16px;">Rifat Erdem Sahin</a>
+      <a href="https://github.com/rifaterdemsahin/claude-architect-certification" target="_blank" style="color: #93c5fd; text-decoration: underline;">GitHub</a>
+    </p>
+  </footer>
+
+</div>
+
+<script>
+function copyTemplate(id, btn) {
+  const text = document.getElementById(id).textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✅ Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '📋 Copy post text'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+function copyImagePrompt(claim, btn) {
+  const prompt = `Minimalist dark LinkedIn post image, 1080x1080px. Dark gradient background (deep purple to near-black). Large bold white sans-serif text centred: "${claim}". Clean, no people, no icons, small subtle watermark "rifaterdemsahin.com" bottom right in grey. Corporate, high contrast, scroll-stopping.`;
+  navigator.clipboard.writeText(prompt).then(() => {
+    btn.textContent = '✅ Prompt copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '🖼️ Copy image prompt'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+</script>
+</body>
+</html>
