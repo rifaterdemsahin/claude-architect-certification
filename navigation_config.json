@@ -96,6 +96,23 @@
           "url": "markdown_renderer.html?file=4_Formula/business_plan.md"
         },
         {
+          "label": "12. 💼 LinkedIn",
+          "children": [
+            {
+              "label": "Journey Post (pre-exam)",
+              "url": "5_Symbols/production/postprod/linkedin_messaging.html#msg-a"
+            },
+            {
+              "label": "Announcement Post (after pass)",
+              "url": "5_Symbols/production/postprod/linkedin_messaging.html#msg-b"
+            },
+            {
+              "label": "Reply to Recruiter",
+              "url": "5_Symbols/production/postprod/linkedin_messaging.html#msg-c"
+            }
+          ]
+        },
+        {
           "label": "🛠️ Tools",
           "children": [
             {

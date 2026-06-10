@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LinkedIn Messaging | Claude AI Certification</title>
+  <meta name="description" content="LinkedIn message templates for Journey Post, Announcement Post, and Recruiter Reply.">
+  <link rel="icon" type="image/png" href="../../../favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg-dark: #030712; --bg-card: rgba(17,24,39,0.8); --text-main: #f3f4f6; --text-muted: #9ca3af; --primary: #8b5cf6; --secondary: #3b82f6; --accent: #10b981; --font-title: 'Outfit', sans-serif; --font-body: 'Plus Jakarta Sans', sans-serif; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background-color: var(--bg-dark); background-image: radial-gradient(circle at 10% 20%, rgba(16,185,129,0.06) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(139,92,246,0.06) 0%, transparent 40%); color: var(--text-main); font-family: var(--font-body); line-height: 1.6; padding-bottom: 80px; }
+    .container { max-width: 860px; margin: 0 auto; padding: 0 24px; }
+    .badge { display: inline-block; padding: 6px 16px; background: linear-gradient(135deg, rgba(16,185,129,0.2), rgba(139,92,246,0.2)); border: 1px solid rgba(16,185,129,0.3); border-radius: 100px; font-size: 0.8rem; font-weight: 600; color: #6ee7b7; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 14px; }
+    h1 { font-family: var(--font-title); font-size: 2.4rem; font-weight: 800; margin-bottom: 6px; }
+    header p { color: var(--text-muted); max-width: 700px; margin-bottom: 32px; }
+    .msg-card { background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px; padding: 28px; margin-bottom: 24px; }
+    .msg-card h2 { font-family: var(--font-title); font-size: 1.2rem; font-weight: 700; margin-bottom: 4px; }
+    .msg-card .subtitle { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px; }
+    .msg-body { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 20px; font-size: 0.95rem; line-height: 1.7; white-space: pre-wrap; margin-bottom: 16px; }
+    .copy-btn { background: var(--accent); color: black; border: none; padding: 10px 24px; border-radius: 10px; font-size: 0.85rem; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+    .copy-btn:hover { background: #34d399; transform: translateY(-1px); }
+    .copy-btn.copied { background: var(--secondary); color: white; }
+    .sample-link { display: inline-block; margin-top: 20px; color: var(--secondary); text-decoration: none; font-size: 0.9rem; }
+    .sample-link:hover { text-decoration: underline; }
+    .back-link { display: inline-block; margin-bottom: 24px; color: var(--secondary); text-decoration: none; font-size: 0.9rem; }
+    .back-link:hover { text-decoration: underline; }
+    footer { text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
+  </style>
+  <script src="../../../shared/nav.js"></script>
+  <script src="../../../shared/debug-panel.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <a class="back-link" href="index.html">← Back to Post-Production</a>
+      <div class="badge">LinkedIn Outreach</div>
+      <h1>LinkedIn Recruiter Messages — CCA-F Positioning</h1>
+      <p>Pre-crafted templates for your Claude Certified Architect journey. Click to copy and paste with ease.</p>
+    </header>
+
+    <!-- A — Journey Post -->
+    <div class="msg-card">
+      <h2>A — Journey Post <span style="font-size:0.8rem;color:var(--accent);font-weight:400;">(use now, pre-exam)</span></h2>
+      <div class="subtitle">Pre-exam LinkedIn post — build in public positioning</div>
+      <div class="msg-body" id="msg-a">Anthropic launched its first official certification in March — Claude Certified Architect. I'm sitting it this month, and I'm preparing the way I'd build any production system: by actually building one.
+
+So far: an MCP server in TypeScript deployed to Fly.io, a deterministic multi-agent router with circuit breakers, secrets via Key Vault, and Terraform for private LLM networking. Every step recorded and published free on my channel.
+
+15 years of SRE and platform work taught me that the hard part of AI isn't the model — it's making it survive contact with enterprise security, compliance, and ops. That's the gap this certification actually tests.
+
+Follow along if you want to see what production-grade Claude architecture looks like — or if your team is trying to move AI past the pilot stage, my DMs are open.</div>
+      <button class="copy-btn" onclick="copyMessage('msg-a', this)">📋 Copy Journey Post</button>
+    </div>
+
+    <!-- B — Announcement Post -->
+    <div class="msg-card">
+      <h2>B — Announcement Post <span style="font-size:0.8rem;color:#fbbf24;font-weight:400;">(after passing — do not post before the badge is real)</span></h2>
+      <div class="subtitle">Post-exam announcement — certification achieved</div>
+      <div class="msg-body" id="msg-b">I just passed Anthropic's Claude Certified Architect – Foundations exam — their first official technical certification, launched in March.
+
+It's not a prompting badge. It's a proctored, scenario-based exam on designing production AI systems: agentic architecture, orchestration, MCP integration, tool design, and context management.
+
+I didn't just study for it — I built the whole thing in public. A working MCP server, multi-agent routing with circuit breakers, secure secrets handling, deployed infrastructure. The full repo and a free video course documenting every step are on my channel (link in comments).
+
+Why it matters: enterprises are moving AI from pilots to production right now, and the gap isn't prompts — it's engineers who can wire AI into regulated, secure platforms. That's been my day job for years (SC-cleared SRE, OpenShift, Vault, Keycloak, national infrastructure). This certification just makes it legible.
+
+If you're hiring for platform or AI infrastructure roles — or your clients are asking how to get Claude into production safely — happy to talk.</div>
+      <button class="copy-btn" onclick="copyMessage('msg-b', this)">📋 Copy Announcement Post</button>
+    </div>
+
+    <!-- C — Reply to Recruiter -->
+    <div class="msg-card">
+      <h2>C — Reply to Recruiter InMail <span style="font-size:0.8rem;color:var(--text-muted);font-weight:400;">(standing template)</span></h2>
+      <div class="subtitle">Standard reply template for recruiter outreach</div>
+      <div class="msg-body" id="msg-c">Thanks for reaching out. Quick summary of where I am and what I'm looking for:
+
+Senior SRE / Platform Engineer, SC-cleared, currently delivering on UK critical national infrastructure (OpenShift, ArgoCD, Vault, Keycloak). Alongside that, I've specialised in production AI architecture — I'm certified as a Claude Certified Architect (Anthropic's foundations-level credential) and build enterprise AI integrations: MCP servers, multi-agent orchestration, secure LLM deployment patterns.
+
+I'm interested in roles where that combination matters: platform engineering with an AI adoption mandate, or AI infrastructure roles needing someone who's run regulated production systems.
+
+Day rate reflects the dual specialism — happy to share expectations if the role is in that space. What's the engagement?</div>
+      <button class="copy-btn" onclick="copyMessage('msg-c', this)">📋 Copy Recruiter Reply</button>
+    </div>
+
+    <a class="sample-link" href="https://www.linkedin.com/messaging/thread/2-MjQ1ZWUwYTAtZjQ1YS00MGRmLWEwMWMtMzE0MGRmZGE4YTk5XzEwMA==/?searchTerm=london" target="_blank">🔗 Sample LinkedIn Message Thread →</a>
+
+    <footer>
+      <p style="margin-bottom: 12px; font-size: 0.85rem; opacity: 0.8;">
+        Instructor: <a href="https://www.linkedin.com/in/rifaterdemsahin" target="_blank" style="color: #93c5fd; text-decoration: underline; margin-right: 16px;">Rifat Erdem Sahin LinkedIn</a>
+        GitHub Project: <a href="https://github.com/rifaterdemsahin/claude-architect-certification" target="_blank" style="color: #93c5fd; text-decoration: underline;">Project Repository</a>
+      </p>
+    </footer>
+  </div>
+
+  <script>
+    function copyMessage(id, btn) {
+      const text = document.getElementById(id).textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const original = btn.textContent;
+        btn.textContent = '✅ Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = original;
+          btn.classList.remove('copied');
+        }, 2000);
+      }).catch(() => {
+        btn.textContent = '❌ Failed';
+        setTimeout(() => {
+          btn.textContent = original;
+        }, 2000);
+      });
+    }
+  </script>
+</body>
+</html>
