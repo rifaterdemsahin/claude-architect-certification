@@ -66,4 +66,5 @@ Lesson captured in lessons_learned.md
 [2026-06-08] [6_Semblance] [WORKAROUND] — Added regional Axiom API URL support (`AXIOM_API_URL`) to allow targeting the EU central primary region of the `videoproduction` dataset. Ingestion requires user to update Axiom API token permissions.
 [2026-06-09] [CI] [APPLIED] — Corrected setup-node cache-dependency-path and step paths to '5_Symbols/src/mcp-server/' in test_mcp.yml and deploy_fly.yml. Details: 6_Semblance/error_ci_setup_node_cache_missing_path.md
 [2026-06-09] [CI] [APPLIED] — Fly.io deploy failing with "no access token available": changed `secrets.FLY_API_TOKEN` → `secrets.FLYIO_TOKEN` in deploy_fly.yml to match actual repo secret name. Details: 6_Semblance/error_fly_token_secret_name_mismatch.md
+[2026-06-10] [4_Formula] [VERIFIED] — Replaced unsupported xychart-beta Mermaid diagrams in userexperience.md and YouTubeCourseStructureFeedback.md with markdown tables and bar/trend indicators. Verified clean compile and render.
 

@@ -4,6 +4,24 @@
 
 ---
 
+## 📅 2026-06-10: Replacing xychart-beta Mermaid Diagrams with Tables
+
+### 🎯 What Was Built
+Replaced `xychart-beta` Mermaid blocks in `YouTubeCourseStructureFeedback.md` and `userexperience.md` with visual markdown tables including bar/trend indicators.
+
+### ✅ What Went Well
+- Replacing experimental and unsupported Mermaid diagram types (like `xychart-beta`) with structured markdown tables ensures 100% rendering compatibility across all markdown view tools (VS Code extensions, GitHub Pages, browser plugins).
+- Custom visual bars using unicode characters (e.g. `█` and `▬`) maintain high visual aesthetic density without relying on heavy rendering libraries.
+
+### 🐛 Gaps & Gotchas
+- Mermaid's experimental diagram formats (`xychart-beta`) have limited support across different engines and versions, frequently triggering parse errors: `No diagram type detected matching given configuration`.
+
+### 🔑 Takeaways for Future Agents
+- Avoid using experimental Mermaid graph types like `xychart-beta` or `xychart` in markdown files meant for cross-platform/multi-tool compatibility.
+- Prefer visual markdown tables or traditional flowchart structures (`graph TD`/`flowchart LR`) for simple numeric charts.
+
+---
+
 ## 📅 2026-06-09: Audio Restructure + Drive Image Display
 
 ### 🎯 What Was Built
