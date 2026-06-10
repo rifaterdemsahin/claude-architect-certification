@@ -4,6 +4,26 @@ This document defines how AI agents interact with the **Claude AI Certification 
 
 ---
 
+## 🤖 AI Daily Plan Log
+
+> ⚠️ **This section is AI-generated only.** Updated daily by Claude to prevent scaffolding deadlock. Do not edit manually — re-run Claude with the daily plan prompt to refresh.
+
+### 📅 2026-06-10 — `claude-sonnet-4-6`
+
+**Status snapshot:**
+- ✅ Module 1 Pre-Prod 100% complete (script, assets, shotlist)
+- ⬜ Module 1 Recording: 0% — only gate remaining
+- ❌ Modules 2–5: Pre-production not started
+- ⚠️ Scaffolding deadlock risk: 4 tooling/docs commits today (LinkedIn, markdown, diagrams)
+
+**Today's ONE thing:** Record Module 1 Video 1 — Architecture Overview (15 min). Everything is ready. Press record.
+
+**Unlock path:** M1 recording → M1 post-prod → write M2 pre-prod plan in parallel.
+
+**AI plan injected into:** `5_Symbols/production/preprod/producer_checklist.html` (top banner)
+
+---
+
 ## 📅 Agent Activity Log
 
 ### 2026-06-09
