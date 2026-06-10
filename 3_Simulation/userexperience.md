@@ -143,15 +143,17 @@ flowchart TD
 
 ---
 
-## 🧠 Emotional Arc of the User Experience
-
-```mermaid
-xychart-beta
-    title "Learner Confidence vs Stage"
-    x-axis ["Start", "Stage 1", "Stage 2", "Stage 3", "Stage 4", "Stage 5", "Stage 6", "Stage 7", "Exam"]
-    y-axis "Confidence (0-10)" 0 --> 10
-    line [2, 3, 4, 5, 6, 8, 7, 9, 10]
-```
+| 📅 Stage | 📈 Learner Confidence (0-10) | 📊 Visual Trend |
+|---|---|---|
+| **Start** | 2/10 | ▬▬ (20%) |
+| **Stage 1** | 3/10 | ▬▬▬ (30%) |
+| **Stage 2** | 4/10 | ▬▬▬▬ (40%) |
+| **Stage 3** | 5/10 | ▬▬▬▬▬ (50%) |
+| **Stage 4** | 6/10 | ▬▬▬▬▬▬ (60%) |
+| **Stage 5** | 8/10 | ▬▬▬▬▬▬▬▬ (80%) |
+| **Stage 6** | 7/10 | ▬▬▬▬▬▬▬ (70%) |
+| **Stage 7** | 9/10 | ▬▬▬▬▬▬▬▬▬ (90%) |
+| **Exam** | 10/10 | ▬▬▬▬▬▬▬▬▬▬ (100%) |
 
 - **Start:** Anxious — exam costs £50, 6-month lockout on failure
 - **Stage 1–2:** Grounded — problem is defined, environment is mapped

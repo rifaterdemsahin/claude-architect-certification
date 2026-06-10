@@ -150,13 +150,11 @@ stateDiagram-v2
 
 ### 💰 Module 5 — Financial Engineering
 
-```mermaid
-xychart-beta
-    title "💸 Token Cost: Cached vs Uncached (per 1M tokens)"
-    x-axis ["No Cache", "50% Cache Hit", "90% Cache Hit"]
-    y-axis "Cost ($)" 0 --> 20
-    bar [15, 7.5, 1.5]
-```
+| 🏷 Cache State | 💰 Cost per 1M Tokens ($) | 📊 Visual Comparison |
+|---|---|---|
+| **No Cache** | $15.00 | █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ (100%) |
+| **50% Cache Hit** | $7.50 | █ █ █ █ █ █ █ (50%) |
+| **90% Cache Hit** | $1.50 | █ (10%) |
 
 | 🏷 Item | 💬 Feedback |
 |---|---|

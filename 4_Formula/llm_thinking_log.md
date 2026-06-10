@@ -367,3 +367,22 @@ This was caused by `setup-node` trying to resolve `./src/mcp-server/package-lock
 3. **🌿 Git Workflow**:
    - Commit and push all changes.
 
+---
+
+## 📅 Date: 2026-06-10
+## 🧠 Stage: Stage 4 (Formula - Thinking & Planning) - Replacing xychart-beta Mermaid Diagrams with Compatible Tables
+
+### ❓ Problem Statement
+Mermaid's `xychart-beta` diagram type is not supported in the markdown preview engines of many editors (such as standard VS Code extensions) and standard Mermaid renderers. This causes rendering errors: `No diagram type detected matching given configuration for text: xychart-beta...` when previewing `4_Formula/YouTubeCourseStructureFeedback.md` and `3_Simulation/userexperience.md`.
+
+### 📐 Approach & Strategy
+1. **Remove xychart-beta blocks**: Remove the `xychart-beta` mermaid blocks from both files.
+2. **Implement styled markdown table fallback**:
+   - For `4_Formula/YouTubeCourseStructureFeedback.md` (Cache token cost), replace the chart with a rich markdown table representing cost differences with custom visual indicator bars:
+     `█ █ █ █ █ █ █ █ █ █ █ █ █ █ █ (100%)`
+   - For `3_Simulation/userexperience.md` (Learner confidence curve), replace the line chart with a formatted table showing the stage, confidence rating (0-10), and a block indicator visual trend.
+3. **Validate**:
+   - Verify that markdown files compile cleanly and no longer contain invalid mermaid syntax.
+
+### ✅ Decisions Made
+- Use table-based bar charts as they are natively rendered by all markdown engines, load instantly, and are highly readable on mobile screens, unlike Mermaid's experimental features which often fail outside of specific environments.
