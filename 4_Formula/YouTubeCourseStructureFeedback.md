@@ -40,7 +40,7 @@ flowchart TD
 ## 📊 Structure Scorecard
 
 | 🏷 Dimension | ⭐ Score | 💬 Comment |
-|---|---|---|
+| --- | --- | --- |
 | 📐 Logical progression | ✅ 5/5 | Ecosystem → MCP → Security → Control → Cost is a natural build-up |
 | 🎯 Exam alignment | ✅ 5/5 | 1-to-1 mapping between modules and exam topics |
 | ⚖️ Video balance | ✅ 5/5 | Consistent 3-video-per-module rhythm — predictable for learners |
@@ -62,7 +62,7 @@ graph LR
 ```
 
 | 🏷 Item | 💬 Feedback |
-|---|---|
+| --- | --- |
 | ✅ Strength | Token mechanics + architecture diagram = strong mental model anchor |
 | ✅ Strength | Multi-agent routing patterns set up Modules 2–4 perfectly |
 | ⚠️ Gap | No "What is Claude?" 60-second teaser — assumes too much prior knowledge |
@@ -88,7 +88,7 @@ sequenceDiagram
 ```
 
 | 🏷 Item | 💬 Feedback |
-|---|---|
+| --- | --- |
 | ✅ Strength | stdio vs SSE transport comparison is exactly what architects need |
 | ✅ Strength | Fly.io deployment makes it immediately production-replicable |
 | ⚠️ Gap | "Enterprise MCP" video covers auth broadly — needs a concrete OAuth/mTLS example |
@@ -112,7 +112,7 @@ graph TD
 ```
 
 | 🏷 Item | 💬 Feedback |
-|---|---|
+| --- | --- |
 | ✅ Strength | Terraform blueprint is the killer differentiator — no other course has this |
 | ✅ Strength | Compliance logging adds real enterprise credibility |
 | ⚠️ Gap | "Why ZDR matters" could be opened with a data-breach cost headline to create urgency |
@@ -140,7 +140,7 @@ stateDiagram-v2
 ```
 
 | 🏷 Item | 💬 Feedback |
-|---|---|
+| --- | --- |
 | ✅ Strength | Circuit breaker pattern is under-taught — this is a genuine gap-fill |
 | ✅ Strength | Loop detection is exam-critical and well positioned |
 | ⚠️ Gap | No mention of timeout budgets — architects need latency SLA examples |
@@ -151,13 +151,13 @@ stateDiagram-v2
 ### 💰 Module 5 — Financial Engineering
 
 | 🏷 Cache State | 💰 Cost per 1M Tokens ($) | 📊 Visual Comparison |
-|---|---|---|
+| --- | --- | --- |
 | **No Cache** | $15.00 | █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ (100%) |
 | **50% Cache Hit** | $7.50 | █ █ █ █ █ █ █ (50%) |
 | **90% Cache Hit** | $1.50 | █ (10%) |
 
 | 🏷 Item | 💬 Feedback |
-|---|---|
+| --- | --- |
 | ✅ Strength | "90% savings" headline is a compelling hook — leads with business value |
 | ✅ Strength | Prefix-matching mechanics are technical enough to satisfy architects |
 | ⚠️ Gap | No mention of cache TTL expiry edge cases (5-min window) — exam gotcha |
@@ -195,7 +195,7 @@ flowchart LR
 ```
 
 | 🏷 Phase | ⭐ Rating | 💬 Note |
-|---|---|---|
+| --- | --- | --- |
 | 🎯 Pre-Production | ✅ Excellent | Script + outline + AI prompts pipeline is solid |
 | 🎬 Production | ⚠️ Good | Needs explicit B-roll checklist for architecture diagrams |
 | ✂️ Post-Production | ⚠️ Needs work | EDL template exists but composite preview step undefined |
@@ -238,7 +238,7 @@ journey
 ## 💡 Top 5 Improvement Suggestions
 
 | 🏷 Priority | 💡 Suggestion | 🎯 Impact |
-|---|---|---|
+| --- | --- | --- |
 | 🔴 P1 | Add a 2-min "zero-to-Claude" intro video before Module 1 | Lowers barrier for new viewers |
 | 🔴 P1 | Show cache TTL expiry edge case in Module 5 V1 | Covers likely exam trap question |
 | 🟡 P2 | Add latency SLA / timeout budget discussion to Module 4 | Rounds out router architecture |
@@ -304,7 +304,7 @@ flowchart TD
 ### 🏗 Recommended Business Model
 
 | 🏷 Layer | 💡 Approach | 💰 Timeline |
-|---|---|---|
+| --- | --- | --- |
 | 🆓 Free tier | Module 1 of every course + Shorts for discovery | Now |
 | 💳 One-time purchase | $30–40 per course on Gumroad (no YPP needed) | Phase 2 |
 | 🔑 Membership | Full library access at £9.99/month after YPP | Phase 3 |
@@ -345,4 +345,4 @@ flowchart TD
 
 ---
 
-_📅 Last updated: 2026-06-10 | 🤖 Stage: 4_Formula | 🏷 Type: Course Review_
+> 📅 Last updated: 2026-06-10 | 🤖 Stage: 4_Formula | 🏷 Type: Course Review
