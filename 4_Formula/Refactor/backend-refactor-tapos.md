@@ -174,3 +174,51 @@
 - ⬜ Add `SIGTERM` handler to `index.ts` for graceful Fly.io shutdown
 - ⬜ Shared model-constants config consumed by both TypeScript and Python (single source of truth across language boundary)
 - ⬜ Integration smoke-test: `router.py` → real MCP server → `query_inventory` → assert structured JSON response
+
+---
+
+## 🚀 Execution Plan — What To Do Next
+
+> Work top-to-bottom. Each step is either **🤖 Claude does it** (tell Claude to run it) or **🧑 You do it** (manual action needed from you).
+
+### Step 1 — 🤖 Fix R-06: Wire tools into INVENTORY_AGENT
+**Tell Claude:** `"Fix R-06 in backend-refactor-tapos.md — wire the query_inventory tool definition into router.py execute_workflow so INVENTORY_AGENT can actually call the MCP data bridge"`
+- Claude edits `router.py`: adds `QUERY_INVENTORY_TOOL_DEF`, passes `tools=` to `messages.create`, loops on `stop_reason == "tool_use"`
+- Marks R-06 ✅ TAPOS, commits, pushes
+
+### Step 2 — 🤖 Fix R-01: SSE concurrent session safety
+**Tell Claude:** `"Fix R-01 in backend-refactor-tapos.md — replace activeTransport single slot with a Map keyed by session UUID in index.ts"`
+- Claude edits `index.ts`: `Map<string, SSEServerTransport>`, UUID per `/sse`, session routing on `/messages`
+- Marks R-01 ✅ TAPOS, commits, pushes
+
+### Step 3 — 🤖 Fix R-08 + R-02 together (small, same files)
+**Tell Claude:** `"Fix R-08 and R-02 from backend-refactor-tapos.md"`
+- R-08: conversation history list built across cycles in `router.py`
+- R-02: region allowlist in `index.ts`
+- Both marked ✅ TAPOS, committed, pushed
+
+### Step 4 — 🧑 Build & smoke-test locally
+```bash
+cd 5_Symbols/src/mcp-server
+npm run build
+npm start
+# In another terminal — ask Claude Desktop: "What stock levels exist in eu-west-1?"
+# Expected: JSON response with CLD-35-SONNET stock data
+```
+
+### Step 5 — 🧑 Deploy to Fly.io
+```bash
+cd 5_Symbols/src/mcp-server
+fly deploy
+# Verify: curl https://<your-app>.fly.dev/health
+```
+
+### Step 6 — 🤖 Fix backlog (optional, cosmetic)
+**Tell Claude:** `"Fix R-03 from backend-refactor-tapos.md — add DbRow type to index.ts"`
+
+### Step 7 — 🤖 Run integration smoke-test
+**Tell Claude:** `"Write an integration smoke-test script that calls router.py execute_workflow with a real inventory query and asserts the response contains stock data from the MCP server"`
+
+---
+
+**👉 Start here:** Tell Claude — *"Fix R-06 in backend-refactor-tapos.md"*
