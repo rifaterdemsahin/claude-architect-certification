@@ -21,7 +21,7 @@ Add TTS voice generation to the master scripts page. Each script should have a "
 
 ### 🛠 Files Changed
 - `5_Symbols/production/preprod/scripts/index.html` — added audio generation UI and JS
-- `5_Symbols/src/supabase/migration_audio_url.sql` — adds `audio_url` and `audio_generated_at` columns
+- `5_Symbols/supabase/migration_audio_url.sql` — adds `audio_url` and `audio_generated_at` columns
 
 ### ✅ Decision: Two-phase listen UX
 - Phase 1 (immediate): blob URL → inline `<audio>` player right on the page
@@ -286,12 +286,12 @@ The user requested a restructure of the main Project Menu to follow a strict seq
 ## Stage: Stage 4 (Formula - Thinking & Planning) - Supabase SQL Consolidation
 
 ### Problem Statement
-The user requested to remove the `5_Symbols/sql/` directory and consolidate all SQL schemas and seeds into `5_Symbols/src/supabase/`, merging needed tables and seeds and removing the redundant/unused files.
+The user requested to remove the `5_Symbols/sql/` directory and consolidate all SQL schemas and seeds into `5_Symbols/supabase/`, merging needed tables and seeds and removing the redundant/unused files.
 
 ### Approach & Strategy
-1. **Consolidate Schemas:** Refactor `5_Symbols/src/supabase/schema.sql` to include definitions and policies for all 18 tables: `modules`, `videos`, `video_cues`, `resource_links`, `scenes`, `scene_cues`, `edl_entries`, `checklist_items`, `checklist_progress`, `course_content`, `scripts`, `outline`, `course_modules`, `course_videos`, `milestones`, `milestone_progress`, `pricing`, `courses`. Remove duplications.
-2. **Consolidate Seeds:** Create a new `5_Symbols/src/supabase/seed.sql` containing seed data from all separate seed SQL files in their correct insert order.
-3. **Delete Obsolete Files:** Remove `5_Symbols/sql/` directory entirely and the individual seed files inside `5_Symbols/src/supabase/`.
+1. **Consolidate Schemas:** Refactor `5_Symbols/supabase/schema.sql` to include definitions and policies for all 18 tables: `modules`, `videos`, `video_cues`, `resource_links`, `scenes`, `scene_cues`, `edl_entries`, `checklist_items`, `checklist_progress`, `course_content`, `scripts`, `outline`, `course_modules`, `course_videos`, `milestones`, `milestone_progress`, `pricing`, `courses`. Remove duplications.
+2. **Consolidate Seeds:** Create a new `5_Symbols/supabase/seed.sql` containing seed data from all separate seed SQL files in their correct insert order.
+3. **Delete Obsolete Files:** Remove `5_Symbols/sql/` directory entirely and the individual seed files inside `5_Symbols/supabase/`.
 4. **Update References:** Update all occurrences of references to old SQL paths in HTML dashboards, shell scripts, and documentation files.
 5. **Execution & Verification:** Verify snapshot generation and database consistency.
 

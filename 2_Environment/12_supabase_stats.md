@@ -66,7 +66,7 @@ Runs anytime — no arguments needed. Detects credentials automatically and pick
 Run the schema SQL in the Supabase dashboard:
 
 1. Open [SQL Editor](https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/sql/new)
-2. Paste contents of `5_Symbols/src/supabase/schema.sql`
+2. Paste contents of `5_Symbols/supabase/schema.sql`
 3. Execute — all `CREATE TABLE IF NOT EXISTS` statements are idempotent (safe to re-run)
 4. Re-run `bash supabase_stats.sh` to confirm
 

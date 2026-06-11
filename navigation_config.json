@@ -3,14 +3,14 @@
     {
       "label": "🎬 Preprod",
       "children": [
-        { "label": "1. ❓ Problem", "url": "problem.html" },
+        { "label": "1. ❓ Problem", "url": "5_Symbols/problem.html" },
         { "label": "2. 🏠 Product (Solution)", "url": "index.html" },
         {
           "label": "3. ✅ Sanity Checklist",
           "url": "5_Symbols/sanity_checklist.html",
           "hideAfterDays": 90
         },
-        { "label": "4. 📋 Outline", "url": "course_outline.html" },
+        { "label": "4. 📋 Outline", "url": "5_Symbols/course_outline.html" },
         {
           "label": "5. 🎬 Script",
           "url": "5_Symbols/production/preprod/scripts/index.html"
@@ -36,7 +36,7 @@
             },
             {
               "label": "🗄 Supabase Admin (Local)",
-              "url": "http://127.0.0.1:5500/5_Symbols/src/supabase/admin.html"
+              "url": "http://127.0.0.1:5500/5_Symbols/supabase/admin.html"
             },
             {
               "label": "☁️ Google Cloud API",

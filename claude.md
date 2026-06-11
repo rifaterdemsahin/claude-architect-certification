@@ -299,7 +299,7 @@ Every file in this repo belongs to one of three labels. Always apply the correct
 - `4_Formula/certification/` — course_outline.md, exam_and_case_study.md, post_prod_template.md, production_plan.md
 - `4_Formula/production/` — outline_template.md, prompter.md, script.md, google_drive_folder_Structure.md, mcp_google_drive.md
 - `4_Formula/audio_structure_music_sfx_voiceover.md`
-- `course_outline.html` (root)
+- `5_Symbols/course_outline.html`
 - `3_Simulation/userexperience.md`, `3_Simulation/instructor_experience.md`
 - `5_Symbols/ivq.html`, `5_Symbols/production_hub.html`, `5_Symbols/production_shotlist.html`
 - `5_Symbols/production/` — all preprod / prod / postprod / publish sub-folders
@@ -319,7 +319,7 @@ Every file in this repo belongs to one of three labels. Always apply the correct
 ### 🔬 POC files
 - `5_Symbols/src/multi-agent/` — multi-agent system implementation
 - `5_Symbols/src/mcp-server/` — MCP server implementation
-- `5_Symbols/src/supabase/admin.html` — Supabase admin UI
+- `5_Symbols/supabase/admin.html` — Supabase admin UI
 - `5_Symbols/src/security/ZDR_COMPLIANCE.md`, `5_Symbols/src/optimization/`, `5_Symbols/src/utils/`
 - `5_Symbols/markdown_renderer.html`, `5_Symbols/markdown_viewer.html`
 - `5_Symbols/sanity_checklist.html`, `5_Symbols/production/settings.html`

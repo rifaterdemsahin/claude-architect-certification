@@ -59,10 +59,10 @@ When neither of the above is available, the script concatenates all local `.sql`
 
 | File | Purpose |
 |------|---------|
-| `5_Symbols/src/supabase/schema.sql` | Table definitions |
-| `5_Symbols/src/supabase/milestones_seed.sql` | Milestones seed data |
-| `5_Symbols/src/supabase/outline_seed.sql` | Outline seed data |
-| `5_Symbols/src/supabase/pricing_seed.sql` | Pricing seed data |
+| `5_Symbols/supabase/schema.sql` | Table definitions |
+| `5_Symbols/supabase/milestones_seed.sql` | Milestones seed data |
+| `5_Symbols/supabase/outline_seed.sql` | Outline seed data |
+| `5_Symbols/supabase/pricing_seed.sql` | Pricing seed data |
 | `5_Symbols/sql/supabase_seed.sql` | General seed data |
 
 This does **not** capture live data — it only reflects what is in the repository.

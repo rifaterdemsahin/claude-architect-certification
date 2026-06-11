@@ -158,7 +158,7 @@ Expected result:
 
 ## 🔗 Related
 
-- [Supabase migration SQL](../5_Symbols/src/supabase/migration_scenes_crud.sql)
+- [Supabase migration SQL](../5_Symbols/supabase/migration_scenes_crud.sql)
 - [Google OAuth error](error_google_oauth_no_origin.md)
 
 ---

@@ -182,7 +182,7 @@ This document defines how AI agents interact with the **Claude AI Certification 
 - **Error & Fix Logging:** Log all runtime errors to `6_Semblance/error.log` and fixes to `6_Semblance/fix.log`. Additionally, automatically send all error logs to Axiom using the ingestion helper script: `./6_Semblance/send_error.sh "<stage>" "<severity>" "<description>"`.
 - **Active Reflection:** Write a retrospective journal in `6_Semblance/lessons_learned.md` after every milestone.
 - **Menu Sync:** Keep `navigation_config.json` synchronized when adding/removing documents.
-- **SQL Canonical Location:** All Supabase SQL files (schema, seeds) live in `5_Symbols/src/supabase/`. When creating or modifying SQL, always place the file there. Current files:
+- **SQL Canonical Location:** All Supabase SQL files (schema, seeds) live in `5_Symbols/supabase/`. When creating or modifying SQL, always place the file there. Current files:
   - `schema.sql` — full consolidated table definitions and RLS policies
   - `seed.sql` — consolidated seed data (modules, videos, outline, milestones, pricing)
   Run either of these in the Supabase SQL Editor: https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/sql
@@ -240,7 +240,7 @@ Files that contain or support the actual certification course material:
 - `4_Formula/certification/` — `course_outline.md`, `exam_and_case_study.md`, `post_prod_template.md`, `production_plan.md`
 - `4_Formula/production/` — `outline_template.md`, `prompter.md`, `script.md`, `google_drive_folder_Structure.md`, `mcp_google_drive.md`
 - `4_Formula/audio_structure_music_sfx_voiceover.md`
-- `course_outline.html` (root)
+- `5_Symbols/course_outline.html`
 - `3_Simulation/userexperience.md`, `3_Simulation/instructor_experience.md`
 - `5_Symbols/ivq.html` — Interactive Video Quiz
 - `5_Symbols/production_hub.html`, `5_Symbols/production_shotlist.html`
@@ -265,7 +265,7 @@ Files that define the delivery pilot reusable framework:
 Files that are the actual proof-of-concept product implementation:
 - `5_Symbols/src/multi-agent/` — multi-agent system implementation
 - `5_Symbols/src/mcp-server/` — MCP server implementation
-- `5_Symbols/src/supabase/admin.html` — Supabase admin UI
+- `5_Symbols/supabase/admin.html` — Supabase admin UI
 - `5_Symbols/src/security/ZDR_COMPLIANCE.md`
 - `5_Symbols/src/optimization/`, `5_Symbols/src/utils/`
 - `5_Symbols/markdown_renderer.html`, `5_Symbols/markdown_viewer.html`

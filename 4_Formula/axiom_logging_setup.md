@@ -75,7 +75,7 @@ Run the script manually in the terminal:
 ```
 
 ### UI Verification:
-1. Open the Database Seed page at `5_Symbols/src/supabase/admin.html`.
+1. Open the Database Seed page at `5_Symbols/supabase/admin.html`.
 2. Configure your Axiom parameters in the **Axiom Log Ingestion** card and click **Save Axiom Config**.
 3. Click the **💥 Send Test Error** button.
 4. Verify that the exception is caught, listed in the debug console overlay at the bottom, and transmitted to Axiom.

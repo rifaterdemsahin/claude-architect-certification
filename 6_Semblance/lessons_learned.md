@@ -113,7 +113,7 @@ Split audio into two levels matching real post-production workflow: 🎤 voiceov
 - Added `SUPABASE_CONFIGURED` flag to both HTML files for cleaner early-exit when Supabase is not configured.
 
 ### Gaps & Challenges
-- The `edit_scripts.html` and `scripts/index.html` share near-identical Supabase query and save logic — future refactoring could extract this to a shared `supabase-client.js` module (the existing `client.js` in `5_Symbols/src/supabase/` is a candidate).
+- The `edit_scripts.html` and `scripts/index.html` share near-identical Supabase query and save logic — future refactoring could extract this to a shared `supabase-client.js` module (the existing `client.js` in `5_Symbols/supabase/` is a candidate).
 - localStorage override key format must stay synchronized between both HTML files. Currently both use `script_override_{moduleId}_{videoId}` — any divergence would cause save/view mismatch.
 - The `moduleIdx + 1` vs `m.id` key pattern is fragile — both represent the same value (1-5) but derived differently (0-based index + 1 vs data property). Future refactoring should normalize to use only the data property.
 

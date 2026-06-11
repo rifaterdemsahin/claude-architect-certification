@@ -186,7 +186,7 @@ erDiagram
 
 | File | Purpose |
 |------|---------|
-| [`5_Symbols/src/supabase/schema.sql`](../5_Symbols/src/supabase/schema.sql) | Full consolidated schema defining all 18 tables and RLS policies |
-| [`5_Symbols/src/supabase/seed.sql`](../5_Symbols/src/supabase/seed.sql) | Consolidated seed data (checklist, modules, videos, outline, milestones, pricing) |
+| [`5_Symbols/supabase/schema.sql`](../5_Symbols/supabase/schema.sql) | Full consolidated schema defining all 18 tables and RLS policies |
+| [`5_Symbols/supabase/seed.sql`](../5_Symbols/supabase/seed.sql) | Consolidated seed data (checklist, modules, videos, outline, milestones, pricing) |
 
 > **To reset:** Paste the schema or seed file content into the [SQL Editor](https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/sql/new) and run it. All statements are safe to re-run.
