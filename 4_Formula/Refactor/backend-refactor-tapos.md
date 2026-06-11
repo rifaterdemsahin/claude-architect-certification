@@ -128,3 +128,49 @@
 | R-09 | Circuit breaker HALF-OPEN recovery with `_opened_at` timestamp | 2026-06-11 |
 | R-10 | Model ID updated in `cache_layer.py` | 2026-06-11 |
 | R-11 | Token calculation fixed; warm-run print uses correct metrics dict | 2026-06-11 |
+
+---
+
+## 🗺 Progress Summary
+
+### ✅ Done — 2026-06-11
+
+> 5 of 11 issues resolved in commit `184a035`. All safe, self-contained fixes applied first.
+
+**🔩 `keyvault.ts`**
+- ✅ **R-05** — Added `console.warn` when a secret is missing from both Azure Key Vault and the env fallback. Previously `app.listen(undefined)` would silently bind to a random OS port.
+
+**🔩 `router.py`**
+- ✅ **R-07** — Replaced three hardcoded `claude-3-5-*` model strings with two module-level constants (`MODEL_CLASSIFIER = "claude-haiku-4-5-20251001"`, `MODEL_ANALYTICS = "claude-sonnet-4-6"`). One place to update on next model release.
+
+**🔩 `fallbacks.py`**
+- ✅ **R-09** — `cooldown_seconds` was stored but never read. Added `self._opened_at = time.time()` when tripping to OPEN. `execute()` now checks elapsed time and transitions to HALF-OPEN — the circuit can recover automatically instead of staying broken forever.
+
+**🔩 `cache_layer.py`**
+- ✅ **R-10** — Model updated from `claude-3-5-sonnet-20241022` to `claude-sonnet-4-6`.
+- ✅ **R-11** — `usage.input_tokens` already excludes cached tokens in the SDK; the subtraction of `cache_read_input_tokens` was double-counting and could produce a negative value. Removed. Also fixed the warm-run smoke-test print that was reading from `cold_metrics` instead of `warm_metrics`.
+
+---
+
+### ⏳ In Progress — next session
+
+> 4 open items remain. Ordered by blast radius — tackle R-06 first as it makes INVENTORY_AGENT actually functional.
+
+**🔩 `router.py`**
+- ⬜ **R-06** *(🔴 High)* — `INVENTORY_AGENT` declares `"allowed_tools": ["query_inventory"]` but `execute_workflow` never passes `tools=` to `messages.create`. The agent can only hallucinate what it would do, never actually call the data bridge. Fix: add `tools=[QUERY_INVENTORY_TOOL_DEF]` when `allowed_tools` is non-empty; detect `stop_reason == "tool_use"` and loop with the tool result appended.
+- ⬜ **R-08** *(🟡 Medium)* — Each loop cycle sends a single `[{"role":"user","content": current_prompt}]`. Previous assistant turns and tool results are thrown away. Fix: accumulate a `conversation_history` list and pass the full array each iteration.
+
+**🔩 `index.ts`**
+- ⬜ **R-01** *(🔴 High)* — `let activeTransport: SSEServerTransport | null` is a single slot. A second client overwrites it and the first client's messages go nowhere. Fix: `Map<sessionId, SSEServerTransport>`; generate a UUID per `/sse` connection; route `/messages` posts by `?sessionId=` query param.
+- ⬜ **R-02** *(🟡 Medium)* — `region` arrives unvalidated. An empty string returns all rows. Fix: allowlist check against `['eu-west-1','eu-west-2','us-east-1']` before the query.
+
+---
+
+### 📋 Planned — backlog
+
+> Lower effort, lower risk. Do after the high-severity items are tapos.
+
+- ⬜ **R-03** — Type `DbRow` for DB helpers in `index.ts` (removes `any[]`, IDE-safe)
+- ⬜ Add `SIGTERM` handler to `index.ts` for graceful Fly.io shutdown
+- ⬜ Shared model-constants config consumed by both TypeScript and Python (single source of truth across language boundary)
+- ⬜ Integration smoke-test: `router.py` → real MCP server → `query_inventory` → assert structured JSON response
