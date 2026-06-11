@@ -75,6 +75,41 @@ To collaborate on production-ready AI workflows, ensuring:
 - **Not available in marketplace:** `bertt.key-vault-secrets-viewer`, `ms-azuretools.vscode-azurekeyvault` — Key Vault management is handled via the existing `ms-azuretools.vscode-azureresourcegroups` extension.
 - **Status:** All reachable extensions installed and up to date.
 
+### 2026-06-11 (Go Migration Constraints Added)
+- **Action:** Saved Go migration invariants to `SESSION.md`, `PLAN.md`, `agents.md`, and this file.
+- **Status:** Constraints active for all subsequent sessions.
+
+---
+
+## 🚀 Go Migration — Active Constraints
+
+> Anchored here so Antigravity picks up the same rules as Claude.
+
+### 🎯 Target
+
+| Property | Value |
+|----------|-------|
+| 🔧 From | Static HTML + Supabase (browser-side) |
+| 🔧 To | Go server-render (`html/template`), single binary |
+| 📦 Artifact | Static binary in scratch Docker image |
+| ☁️ Deploy | Fly.io auto-stop machine |
+
+### 🔒 Non-Negotiable Invariants
+
+1. **No secret reaches the browser** — Supabase service key is server-side only.
+2. **Every handler wrapped by `observe`** — all errors funnel to Axiom.
+3. **After every change:** `go build ./... && go vet ./... && go test ./...` must pass before continuing.
+4. **Parity, not redesign** — behaviour identical to the current site.
+5. **Port one route at a time** — do not touch scope outside what was asked; ask before adding a dependency.
+6. **Work in slices** — update `PLAN.md` after each slice (done / next).
+
+### 📋 Working Rules
+- Go stdlib only unless the user explicitly approves a dependency.
+- One slice = one commit; follow Conventional Commits.
+- After each slice: mark ✅ in `PLAN.md`, set the next slice.
+
+---
+
 ### 2026-06-07 (Project Initialization, Script Integration & Editor Page)
 - **Action:** Created `antigravity.md` to initialize project context and mapping for Antigravity.
 - **Action:** Added `scripts` table to database layer (`schema.sql` & `admin.html`) and developed inline script editing UI in pre-production script dashboard with localStorage support.

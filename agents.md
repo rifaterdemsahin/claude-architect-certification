@@ -173,6 +173,20 @@ This document defines how AI agents interact with the **Claude AI Certification 
 
 ---
 
+## 🚀 Go Migration — Persistent Constraints
+
+> These constraints apply for the duration of the static → Go migration. See `SESSION.md` for session state and `PLAN.md` for slice tracking.
+
+- **Stack:** Go stdlib only (no external deps without explicit approval), `html/template` server-render, single binary, scratch Docker image, Fly.io auto-stop machine.
+- **Secret hygiene:** Supabase service key is server-side only — never reaches the browser.
+- **Observability:** Every HTTP handler must be wrapped by `observe`; all errors funnel to Axiom.
+- **Gate:** After every change run `go build ./... && go vet ./... && go test ./...` before committing.
+- **Parity:** Behaviour must be identical to the current static site — no redesign.
+- **Scope:** Port one route per slice. Do not touch out-of-scope files. Ask before adding a dependency.
+- **Slice discipline:** Update `PLAN.md` (done / next) after every slice commit.
+
+---
+
 ## ⚙️ Agent Guidelines & Rules
 
 - **7-Stage Structure:** Always align files and updates with the 7-stage folder structure (`1_Real_Unknown` through `7_Testing_Known`).
