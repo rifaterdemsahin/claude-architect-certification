@@ -86,10 +86,10 @@
 
   var FALLBACK = [
     { label: '🎬 Preprod', children: [
-      { label: '1. ❓ Problem', url: '5_Symbols/problem.html' },
+      { label: '1. ❓ Problem', url: '5_Symbols/production/preprod/problem.html' },
       { label: '2. 🏠 Product (Solution)', url: 'index.html' },
-      { label: '3. ✅ Sanity Checklist', url: '5_Symbols/sanity_checklist.html', hideAfterDays: 90 },
-      { label: '4. 📋 Outline', url: '5_Symbols/course_outline.html' },
+      { label: '3. ✅ Sanity Checklist', url: '5_Symbols/production/preprod/sanity_checklist.html', hideAfterDays: 90 },
+      { label: '4. 📋 Outline', url: '5_Symbols/production/preprod/course_outline.html' },
       { label: '5. 🎬 Script', url: '5_Symbols/production/preprod/scripts/index.html' },
       { label: '6. 📋 Producer Checklist', url: '5_Symbols/production/preprod/producer_checklist.html' },
       {

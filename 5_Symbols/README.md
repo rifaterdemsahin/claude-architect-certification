@@ -2,55 +2,66 @@
 
 > **Stage 5 of 7:** The actual code — where vision becomes working software.
 
-## Purpose
+## 📂 Folder Structure
 
-This folder contains the **core source code and implementation files**. Everything that runs, executes, or is deployed lives here. Code is rendered with PrismJS syntax highlighting for readable documentation.
-
-## What belongs here
-
-- **Source code** — All scripts, modules, and application code
-- **Configuration files** — App config (non-secret)
-- **Docker definitions** — `Dockerfile` and `docker-compose.yml`
-- **GitHub Actions workflows** — CI/CD pipeline definitions
-- **Static assets** — JS, CSS bundles used by the app
-
-## Files
-
-| File | Description |
-|------|-------------|
-| `main.py` | Primary application entry point |
-| `Dockerfile` | Container build definition |
-| `docker-compose.yml` | Multi-service orchestration |
-| `requirements.txt` | Python dependencies |
-| `.github/workflows/` | CI/CD pipeline definitions |
+```
+5_Symbols/
+├── README.md                  ← This document
+│
+├── production/                ← Video & content production dashboards
+│   ├── production_hub.html    ← Main production hub page
+│   ├── settings.html          ← Configuration panel for Supabase
+│   │
+│   ├── preprod/               ← Pre-Production phase dashboards
+│   │   ├── index.html         ← Pre-Production hub
+│   │   ├── course_outline.html ← Dynamic Course Outline
+│   │   ├── edit_scripts.html  ← Interactive Script Editor
+│   │   ├── ivq.html           ← Interactive Video Quiz (IVQ) Manager
+│   │   ├── problem.html       ← "0. Problem" page definition
+│   │   ├── sanity_checklist.html ← Collapsible Master Sanity Checklist
+│   │   ├── scripts/ (scripts viewer, master script json)
+│   │   └── module_1_plan.md
+│   │
+│   ├── prod/                  ← Production phase dashboards & checklists
+│   │   ├── index.html         ← Production hub
+│   │   ├── checklist.html     ← Audio/video capture checklists
+│   │   ├── module_1_plan.md
+│   │   └── readiness_plan.md
+│   │
+│   └── postprod/              ← Post-Production phase dashboards
+│       ├── index.html         ← Post-Production hub
+│       ├── production_shotlist.html ← Composite scene review (EDL)
+│       └── asset_checklist.html     ← Asset generation trackers
+│
+├── course_src/                ← Backend, server and multi-agent implementation
+│   ├── mcp-server/            ← Node.js MCP Google Drive server
+│   ├── multi-agent/           ← Multi-agent orchestration engine
+│   ├── templates/             ← HTML templates (duplicate markdown renderer)
+│   └── utils/                 ← Utilities (markdown_viewer.html)
+│
+└── supabase/                  ← Database schemas, seeds, backup scripts and admin UI
+    ├── admin.html             ← Supabase database dashboard UI
+    ├── schema.sql             ← Consolidated table schemas
+    └── seed.sql               ← Consolidated database seed data
+```
 
 ## Code Standards
 
 - **Syntax highlighting:** PrismJS (included via CDN in all HTML pages)
-- **Style:** Modern CSS — Flexbox/Grid, no legacy floats
-- **Diagrams:** Mermaid for all architecture and flow diagrams
-- **Backend:** Python on Fly.io
-- **Frontend:** Static HTML/CSS/JS on GitHub Pages
+- **Style:** Modern CSS — Flexbox/Grid, tailored dark mode colors
+- **Backend:** Node.js MCP server, Supabase dynamic data loading
+- **Frontend:** Responsive HTML dashboards with interactive components
 
 ## Secrets
 
 - **Never** store secrets in this folder
 - Use `.env.example` in root to document required variables
-- Load secrets at runtime via Azure Key Vault
-
-## Rules
-
-- Keep `main.py` minimal — delegate to modules
-- Every function that isn't self-evident gets a comment
-- Move deprecated code to `_obsolete/` 🚮
+- Load secrets at runtime via Azure Key Vault or retrieve them from localStorage configurations in dashboards
 
 ## 🧪 Testing Checklist
 
-[![CI/CD with GitHub Actions](https://img.youtube.com/vi/R8_veQiYur0/0.jpg)](https://www.youtube.com/watch?v=R8_veQiYur0)
-
-- [ ] `main.py` runs without errors locally
-- [ ] `Dockerfile` builds successfully
-- [ ] `docker-compose.yml` starts all services
-- [ ] GitHub Actions workflow passes on push to `main`
+- [ ] All production dashboards load dynamically with zero JS errors
+- [ ] Relative paths resolve correctly between nested subfolders
+- [ ] Database credentials config and settings persist in localStorage
 - [ ] No secrets committed to this folder
-- [ ] PrismJS renders code blocks correctly on all HTML pages
+- [ ] `test_links.py` reports zero broken links inside the `5_Symbols/production` folders
