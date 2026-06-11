@@ -41,7 +41,7 @@ A navigation design split that separates audience visibility:
 The requirement for both humans and AI agents to compile retrospective logs inside `6_Semblance/lessons_learned.md` immediately following the completion of any project milestone.
 
 ### LLM Thinking / Reasoning Log
-An explicit documentation process (`4_Formula/llm_thinking_log.md`) capturing the internal thinking phase, evaluation steps, and decision drivers of the Large Language Model during task execution.
+An explicit documentation process (`4_Formula/delivery_pilot/llm_thinking_log.md`) capturing the internal thinking phase, evaluation steps, and decision drivers of the Large Language Model during task execution.
 
 ### Azure Key Vault
 The designated cloud credentials vault used to store, manage, and dynamically retrieve development credentials at runtime, enforcing zero secret leakage in version control.

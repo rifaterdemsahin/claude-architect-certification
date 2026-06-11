@@ -182,5 +182,5 @@ Fly.io (fly.toml + fly secrets)           →  Run the MCP server image in produ
 - 📁 `5_Symbols/course_src/mcp-server/README.md` — MCP server implementation details
 - 📁 `.github/workflows/test_mcp.yml` — current CI workflow
 - 📁 `5_Symbols/course_src/mcp-server/fly.toml` — current Fly.io topology
-- 📁 `4_Formula/mcp_google_drive.md` — Google Drive MCP server options
+- 📁 `../production/mcp_google_drive.md` — Google Drive MCP server options
 - 📁 `6_Semblance/archive/daily/2026-06-06_fly_toml_mcp.md` — past Fly.io/MCP issues

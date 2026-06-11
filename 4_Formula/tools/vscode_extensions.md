@@ -173,5 +173,5 @@ After installing, confirm each area works:
 ## 🔗 Related Documents
 
 - `2_Environment/1_architecture.md` — full stack diagram
-- `4_Formula/llm_thinking_log.md` — reasoning log
-- `CLAUDE.md` → Code Standards section
+- `../delivery_pilot/llm_thinking_log.md` — reasoning log
+- `../../claude.md` → Code Standards section

@@ -53,7 +53,7 @@ A split-screen developer workspace. Left panel: a dark terminal showing git add,
 
 ## 📸 Screen 2 — 4_Formula Thinking-Before-Coding Gate
 
-> **Mandatory gate:** Before writing any code in `5_Symbols`, the instructor documents approach and reasoning in `4_Formula/llm_thinking_log.md`. Claude Code assists with planning.
+> **Mandatory gate:** Before writing any code in `5_Symbols`, the instructor documents approach and reasoning in `4_Formula/delivery_pilot/llm_thinking_log.md`. Claude Code assists with planning.
 
 **Image Generation Prompt (Midjourney / DALL-E 3):**
 ```text

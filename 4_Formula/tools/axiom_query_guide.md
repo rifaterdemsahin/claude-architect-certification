@@ -180,7 +180,7 @@ In the web UI, use the **Relative** time picker instead of typing these manually
 | Saved Error Query | https://app.axiom.co/rifaterdemsahin-stks/query?qid=VmhIX12pi7S-tgc7x0&relative=1 |
 | Axiom Settings | https://app.axiom.co/rifaterdemsahin-stks/settings |
 | Ingest Script | `./6_Semblance/send_error.sh` |
-| Setup Guide | `4_Formula/axiom_logging_setup.md` |
+| Setup Guide | `./axiom_logging_setup.md` |
 
 ---
 

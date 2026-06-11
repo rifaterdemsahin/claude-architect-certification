@@ -11,6 +11,7 @@
 | `prompter.md` | Teleprompter notes |
 | `google_drive_folder_Structure.md` | Google Drive folder organization |
 | `mcp_google_drive.md` | MCP integration with Google Drive |
+| `audio_structure_music_sfx_voiceover.md` | Audio, music, sound effects, and voiceover mapping |
 
 ## Rules
 - Keep scripts aligned with `5_Symbols/production/` assets

@@ -117,7 +117,7 @@
     { label: '📦 Post Prod', children: [
       { label: '9. 🧭 Certification Guide & Exam', url: 'markdown_renderer.html?file=4_Formula/certification/exam_and_case_study.md' },
       { label: '10. 🔥 Join $10/mo', url: '5_Symbols/production/publish/membership.html' },
-      { label: '11. 💰 Business Plan', url: 'markdown_renderer.html?file=4_Formula/business_plan.md' },
+      { label: '11. 💰 Business Plan', url: 'markdown_renderer.html?file=4_Formula/certification/business_plan.md' },
       {
         label: '🛠️ Tools',
         children: [

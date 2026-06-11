@@ -209,7 +209,7 @@ Azure KV      ──→  service_role_key          (secrets, never in git)
 | 📄 File | 🏷 Role |
 |---------|---------|
 | `5_Symbols/production/postprod/production_shotlist.html` | The single-page engine |
-| `5_Symbols/sql/` | Supabase schema and seed SQL |
+| `5_Symbols/supabase/` | Supabase schema and seed SQL |
 | `2_Environment/11_database.md` | Supabase setup guide |
-| `4_Formula/github_pages_supabase_stateful.md` | Cost formula for this stack |
-| `4_Formula/decisions.md` | Why Supabase was chosen over alternatives |
+| `4_Formula/delivery_pilot/github_pages_supabase_stateful.md` | Cost formula for this stack |
+| `4_Formula/delivery_pilot/decisions.md` | Why Supabase was chosen over alternatives |

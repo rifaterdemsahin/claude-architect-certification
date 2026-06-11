@@ -1,7 +1,7 @@
 # 🌍 Environment: Google Drive Integration Setup
 
 > **Stage:** `2_Environment` — Context & Constraints  
-> **Formula doc:** [`4_Formula/google_oauth_drive_picker.md`](../4_Formula/google_oauth_drive_picker.md)  
+> **Formula doc:** [`4_Formula/tools/google_oauth_drive_picker.md`](../4_Formula/tools/google_oauth_drive_picker.md)  
 > **Errors:** [`6_Semblance/error_google_oauth_no_origin.md`](../6_Semblance/error_google_oauth_no_origin.md) · [`6_Semblance/error_google_drive_api_disabled.md`](../6_Semblance/error_google_drive_api_disabled.md)
 
 ---

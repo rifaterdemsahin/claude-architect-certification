@@ -93,7 +93,7 @@
         },
         {
           "label": "11. 💰 Business Plan",
-          "url": "markdown_renderer.html?file=4_Formula/business_plan.md"
+          "url": "markdown_renderer.html?file=4_Formula/certification/business_plan.md"
         },
         {
           "label": "12. 💼 LinkedIn",
@@ -258,35 +258,35 @@
     },
     {
       "label": "   ├─ 📚 API Reference",
-      "url": "markdown_renderer.html?file=4_Formula/api_reference.md"
+      "url": "markdown_renderer.html?file=4_Formula/delivery_pilot/api_reference.md"
     },
     {
       "label": "   ├─ 📡 Axiom Logging Ingestion",
-      "url": "markdown_renderer.html?file=4_Formula/axiom_logging_setup.md"
+      "url": "markdown_renderer.html?file=4_Formula/tools/axiom_logging_setup.md"
     },
     {
       "label": "   ├─ 🔍 Axiom Query Guide",
-      "url": "markdown_renderer.html?file=4_Formula/axiom_query_guide.md"
+      "url": "markdown_renderer.html?file=4_Formula/tools/axiom_query_guide.md"
     },
     {
       "label": "   ├─ 📐 Decisions (ADRs)",
-      "url": "markdown_renderer.html?file=4_Formula/decisions.md"
+      "url": "markdown_renderer.html?file=4_Formula/delivery_pilot/decisions.md"
     },
     {
       "label": "   ├─ 📖 DSL Glossary",
-      "url": "markdown_renderer.html?file=4_Formula/dsl.md"
+      "url": "markdown_renderer.html?file=4_Formula/delivery_pilot/dsl.md"
     },
     {
       "label": "   ├─ 🛠 Implementation Guide",
-      "url": "markdown_renderer.html?file=4_Formula/implementation_guide.md"
+      "url": "markdown_renderer.html?file=4_Formula/delivery_pilot/implementation_guide.md"
     },
     {
       "label": "   ├─ 🧠 LLM Thinking Log",
-      "url": "markdown_renderer.html?file=4_Formula/llm_thinking_log.md"
+      "url": "markdown_renderer.html?file=4_Formula/delivery_pilot/llm_thinking_log.md"
     },
     {
       "label": "   ├─ 📝 Research Notes",
-      "url": "markdown_renderer.html?file=4_Formula/research_notes.md"
+      "url": "markdown_renderer.html?file=4_Formula/delivery_pilot/research_notes.md"
     },
     {
       "label": "   ├─ 📋 Certification: Course Outline",
@@ -356,7 +356,7 @@
     },
     {
       "label": "   ├─ 💰 Plan: Business Model",
-      "url": "markdown_renderer.html?file=4_Formula/business_plan.md"
+      "url": "markdown_renderer.html?file=4_Formula/certification/business_plan.md"
     },
     {
       "label": "   ├─ 📋 Plan: Pre-Prod Module 1",

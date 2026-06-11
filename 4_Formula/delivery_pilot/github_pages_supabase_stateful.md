@@ -261,6 +261,6 @@ const supabase = createClient('http://localhost:54321', 'YOUR_LOCAL_ANON_KEY')
 ## 🔗 Related Documents
 
 - 📐 [`2_Environment/1_architecture.md`](../2_Environment/1_architecture.md) — full system architecture with Mermaid diagrams
-- 🔐 [`4_Formula/security/`](./security/) — ZDR compliance, secret rotation
-- 🤖 [`4_Formula/mcp_deployment_formula.md`](./mcp_deployment_formula.md) — GitHub vs Fly.io decision guide
+- 🔐 [`4_Formula/security/`](../security/) — ZDR compliance, secret rotation
+- 🤖 [`4_Formula/delivery_pilot/mcp_deployment_formula.md`](./mcp_deployment_formula.md) — GitHub vs Fly.io decision guide
 - 🧪 [`7_Testing_Known/`](../7_Testing_Known/) — validation checklist

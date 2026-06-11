@@ -110,4 +110,4 @@ flowchart LR
 
 - ⚙️ `.vscode/settings.json` — workspace settings updated
 - 🏛 `2_Environment/1_architecture.md` — uses Mermaid diagrams
-- 📝 `4_Formula/llm_thinking_log.md` — general planning log
+- 📝 `../delivery_pilot/llm_thinking_log.md` — general planning log
