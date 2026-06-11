@@ -2,7 +2,7 @@
 
 > **"Tapos"** = Filipino for "done/finished". Each item is marked ✅ TAPOS when resolved.
 > Scope: **production HTML pages + shared delivery pilot components only.**
-> ⛔ `5_Symbols/src/` is course demo code — do not touch.
+> ⛔ `5_Symbols/course_src/` is course demo code — do not touch.
 > Updated by `claude-sonnet-4-6` on 2026-06-11.
 
 ---
@@ -128,7 +128,7 @@
 
 ### ⏳ Not started — scope reset 2026-06-11
 
-Previous entries (R-01 to R-11) covered `5_Symbols/src/` — course demo code.
+Previous entries (R-01 to R-11) covered `5_Symbols/course_src/` — course demo code.
 **That scope was incorrect.** `src/` is not touched by this refactor.
 All items above (P-01 to P-10) are the correct targets: production planning pages and the shared delivery pilot framework.
 

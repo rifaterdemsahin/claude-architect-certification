@@ -30,7 +30,7 @@ This document defines how AI agents interact with the **Claude AI Certification 
 - **Task:** 🛠️ Fix GitHub Actions npm dependency caching and workspace path reference failures.
 - **Action:**
     - Documented approach in `4_Formula/llm_thinking_log.md`.
-    - Modified `.github/workflows/test_mcp.yml` and `.github/workflows/deploy_fly.yml` to update the cache dependency path to `5_Symbols/src/mcp-server/package-lock.json` and working directory directories to point to the stage folder `5_Symbols/src/mcp-server/`.
+    - Modified `.github/workflows/test_mcp.yml` and `.github/workflows/deploy_fly.yml` to update the cache dependency path to `5_Symbols/course_src/mcp-server/package-lock.json` and working directory directories to point to the stage folder `5_Symbols/course_src/mcp-server/`.
     - Appended error details to `6_Semblance/error.log` and `6_Semblance/fix.log`.
     - Created a detailed Semblance error page at `6_Semblance/error_ci_setup_node_cache_missing_path.md`.
     - Ingested error telemetry to Axiom using the ingestion helper script `./6_Semblance/send_error.sh`.
@@ -263,11 +263,11 @@ Files that define the delivery pilot reusable framework:
 
 ### 🔬 POC files
 Files that are the actual proof-of-concept product implementation:
-- `5_Symbols/src/multi-agent/` — multi-agent system implementation
-- `5_Symbols/src/mcp-server/` — MCP server implementation
+- `5_Symbols/course_src/multi-agent/` — multi-agent system implementation
+- `5_Symbols/course_src/mcp-server/` — MCP server implementation
 - `5_Symbols/supabase/admin.html` — Supabase admin UI
-- `5_Symbols/src/security/ZDR_COMPLIANCE.md`
-- `5_Symbols/src/optimization/`, `5_Symbols/src/utils/`
+- `5_Symbols/course_src/security/ZDR_COMPLIANCE.md`
+- `5_Symbols/course_src/optimization/`, `5_Symbols/course_src/utils/`
 - `5_Symbols/markdown_renderer.html`, `5_Symbols/markdown_viewer.html`
 - `5_Symbols/sanity_checklist.html`, `5_Symbols/production/settings.html`
 - `5_Symbols/sql/` — all database schema and seed SQL files

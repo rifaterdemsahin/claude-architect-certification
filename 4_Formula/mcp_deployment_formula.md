@@ -3,7 +3,7 @@
 > **Stage:** 📁 4_Formula — Thinking & Planning
 > **Date:** 2026-06-09
 > **Author:** Claude Sonnet 4.6 (via auto memory)
-> **Related files:** `.github/workflows/test_mcp.yml`, `5_Symbols/src/mcp-server/fly.toml`, `5_Symbols/src/mcp-server/mcp.config.json`
+> **Related files:** `.github/workflows/test_mcp.yml`, `5_Symbols/course_src/mcp-server/fly.toml`, `5_Symbols/course_src/mcp-server/mcp.config.json`
 
 ---
 
@@ -55,7 +55,7 @@ This means storing `temp_mcp.yml` as a **GitHub Actions workflow** or **repo con
 
 This means the MCP server config lives **on the Fly.io machine** — either baked into `fly.toml`, passed as Fly secrets, or mounted as a file volume.
 
-**Current equivalent:** `5_Symbols/src/mcp-server/fly.toml`
+**Current equivalent:** `5_Symbols/course_src/mcp-server/fly.toml`
 
 #### ✅ Pros
 
@@ -148,9 +148,9 @@ Fly.io (fly.toml + fly secrets)           →  Run the MCP server image in produ
 | 📄 File | 🏠 Home | 🎯 Purpose |
 |---------|---------|-----------|
 | `temp_mcp.yml` | `.github/workflows/` | CI — build, test, Docker verify |
-| `fly.toml` | `5_Symbols/src/mcp-server/` | Runtime topology — VM, region, ports |
-| `mcp.config.json` | `5_Symbols/src/mcp-server/` | Tool definitions for Claude client |
-| `deploy.sh` | `5_Symbols/src/mcp-server/` | One-command `fly deploy` wrapper |
+| `fly.toml` | `5_Symbols/course_src/mcp-server/` | Runtime topology — VM, region, ports |
+| `mcp.config.json` | `5_Symbols/course_src/mcp-server/` | Tool definitions for Claude client |
+| `deploy.sh` | `5_Symbols/course_src/mcp-server/` | One-command `fly deploy` wrapper |
 | Secrets | Fly.io secret store + Azure Key Vault | Never in git |
 
 ---
@@ -162,7 +162,7 @@ Fly.io (fly.toml + fly secrets)           →  Run the MCP server image in produ
 | Where do I put the build steps? | GitHub Actions (`.github/workflows/`) |
 | Where do I put runtime config (ports, memory)? | `fly.toml` checked into the repo |
 | Where do I put secrets? | `fly secrets set` + Azure Key Vault (never git) |
-| How do I test locally? | `npm start` or `npm run build` in `5_Symbols/src/mcp-server/` |
+| How do I test locally? | `npm start` or `npm run build` in `5_Symbols/course_src/mcp-server/` |
 | When does temp become permanent? | After the promotion checklist above is complete |
 | What triggers auto-deploy? | `test_mcp.yml` success → runs `deploy.sh` → `fly deploy` |
 
@@ -179,8 +179,8 @@ Fly.io (fly.toml + fly secrets)           →  Run the MCP server image in produ
 
 ## 🔗 Related Documents
 
-- 📁 `5_Symbols/src/mcp-server/README.md` — MCP server implementation details
+- 📁 `5_Symbols/course_src/mcp-server/README.md` — MCP server implementation details
 - 📁 `.github/workflows/test_mcp.yml` — current CI workflow
-- 📁 `5_Symbols/src/mcp-server/fly.toml` — current Fly.io topology
+- 📁 `5_Symbols/course_src/mcp-server/fly.toml` — current Fly.io topology
 - 📁 `4_Formula/mcp_google_drive.md` — Google Drive MCP server options
 - 📁 `6_Semblance/archive/daily/2026-06-06_fly_toml_mcp.md` — past Fly.io/MCP issues

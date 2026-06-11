@@ -6,7 +6,7 @@ from anthropic import Anthropic
 
 # Ensure workspace root is in python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-from src.utils.keyvault import get_secret
+from course_src.utils.keyvault import get_secret
 
 class EnterpriseOptimizationEngine:
     def __init__(self):

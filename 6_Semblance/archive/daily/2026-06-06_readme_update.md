@@ -3,7 +3,7 @@
 We are updating the `src/mcp-server/README.md` to add both native Stdio/Proxy and SSE deployment options for Fly.io.
 
 ## Source Files Modified
-- [/src/mcp-server/README.md](file:///C:/projects/claude-architect-certification/5_Symbols/src/mcp-server/README.md)
+- [/src/mcp-server/README.md](file:///C:/projects/claude-architect-certification/5_Symbols/course_src/mcp-server/README.md)
 
 ## Removed Content
 ```markdown
@@ -61,7 +61,7 @@ Add this block to your `claude_desktop_config.json` (located at `%APPDATA%\Claud
   "mcpServers": {
     "enterprise-data-bridge-local": {
       "command": "node",
-      "args": ["C:/projects/claude-architect-certification/5_Symbols/src/mcp-server/dist/index.js"]
+      "args": ["C:/projects/claude-architect-certification/5_Symbols/course_src/mcp-server/dist/index.js"]
     }
   }
 }

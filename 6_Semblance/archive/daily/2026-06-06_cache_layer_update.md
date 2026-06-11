@@ -3,7 +3,7 @@
 We are updating `src/optimization/cache_layer.py` to implement a real prompt caching optimization engine using the `anthropic` Python client to demonstrate explicit block caching and token usage tracking.
 
 ## Source Files Modified
-- [/src/optimization/cache_layer.py](file:///C:/projects/claude-architect-certification/5_Symbols/src/optimization/cache_layer.py)
+- [/src/optimization/cache_layer.py](file:///C:/projects/claude-architect-certification/5_Symbols/course_src/optimization/cache_layer.py)
 
 ## Removed Content
 ```python

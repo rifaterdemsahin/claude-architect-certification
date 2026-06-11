@@ -184,7 +184,7 @@ Add this block to your `claude_desktop_config.json` (located at `%APPDATA%\Claud
   "mcpServers": {
     "enterprise-data-bridge-local": {
       "command": "node",
-      "args": ["C:/projects/claude-architect-certification/5_Symbols/src/mcp-server/dist/index.js"]
+      "args": ["C:/projects/claude-architect-certification/5_Symbols/course_src/mcp-server/dist/index.js"]
     }
   }
 }

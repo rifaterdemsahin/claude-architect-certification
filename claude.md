@@ -317,10 +317,10 @@ Every file in this repo belongs to one of three labels. Always apply the correct
 - `robots.txt`, `sitemap.xml`, `.github/`, `.vscode/`, `prompts.md`, `todos.md`
 
 ### 🔬 POC files
-- `5_Symbols/src/multi-agent/` — multi-agent system implementation
-- `5_Symbols/src/mcp-server/` — MCP server implementation
+- `5_Symbols/course_src/multi-agent/` — multi-agent system implementation
+- `5_Symbols/course_src/mcp-server/` — MCP server implementation
 - `5_Symbols/supabase/admin.html` — Supabase admin UI
-- `5_Symbols/src/security/ZDR_COMPLIANCE.md`, `5_Symbols/src/optimization/`, `5_Symbols/src/utils/`
+- `5_Symbols/course_src/security/ZDR_COMPLIANCE.md`, `5_Symbols/course_src/optimization/`, `5_Symbols/course_src/utils/`
 - `5_Symbols/markdown_renderer.html`, `5_Symbols/markdown_viewer.html`
 - `5_Symbols/sanity_checklist.html`, `5_Symbols/production/settings.html`
 - `5_Symbols/sql/` — all database schema and seed SQL files

@@ -99,7 +99,7 @@
 | `1_okr.md` → `7_Testing_Known/README.md` | Stage 7 folder | ✅ |
 | `3_hypotheses.md` → `7_Testing_Known/validation_report.md` | Needs creation | ⚠️ |
 | `4_questions.md` → `4_Formula/revenue_model.md` | Needs creation | ⚠️ |
-| `2_problem_statement.md` → `5_Symbols/src/mcp-server/` | Needs implementation | ⚠️ (Stage 5, expected later) |
+| `2_problem_statement.md` → `5_Symbols/course_src/mcp-server/` | Needs implementation | ⚠️ (Stage 5, expected later) |
 
 **Result:** ⚠️ Two files (`validation_report.md`, `revenue_model.md`) are referenced but not yet created. These are downstream artifacts — expected gaps at this stage.
 

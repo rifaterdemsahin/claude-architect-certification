@@ -93,9 +93,9 @@
         }
       ],
       "links": [
-        { "label": "MCP Codebase", "url": "../../src/mcp-server/" },
-        { "label": "Setup & Deploy Guide", "url": "../../src/mcp-server/README.md" },
-        { "label": "fly.toml", "url": "../../src/mcp-server/fly.toml" }
+        { "label": "MCP Codebase", "url": "../../course_src/mcp-server/" },
+        { "label": "Setup & Deploy Guide", "url": "../../course_src/mcp-server/README.md" },
+        { "label": "fly.toml", "url": "../../course_src/mcp-server/fly.toml" }
       ]
     },
     {
@@ -141,7 +141,7 @@
         }
       ],
       "links": [
-        { "label": "ZDR Protocol", "url": "../../src/security/ZDR_COMPLIANCE.md" },
+        { "label": "ZDR Protocol", "url": "../../course_src/security/ZDR_COMPLIANCE.md" },
         { "label": "Terraform Blueprint", "url": "../../templates/aws-bedrock-private-link.tf" }
       ]
     },
@@ -188,7 +188,7 @@
         }
       ],
       "links": [
-        { "label": "router.py", "url": "../../src/multi-agent/router.py" }
+        { "label": "router.py", "url": "../../course_src/multi-agent/router.py" }
       ]
     },
     {
@@ -234,7 +234,7 @@
         }
       ],
       "links": [
-        { "label": "cache_layer.py", "url": "../../src/optimization/cache_layer.py" }
+        { "label": "cache_layer.py", "url": "../../course_src/optimization/cache_layer.py" }
       ]
     }
   ],

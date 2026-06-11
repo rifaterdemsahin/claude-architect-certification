@@ -43,13 +43,13 @@ The reference architectures built across this course's modules resolve and preve
 ```
 
 1. **Mitigation 1 (Module 4 - Deterministic Routing & Hops Limit):**
-   The implementation of our [EnterpriseAgentRouter](file:///C:/projects/claude-architect-certification/5_Symbols/src/multi-agent/router.py) with an embedded **Circuit Breaker** (`max_loop_depth=5`) ensures that if an agent gets caught in a recursive validation rut, the system gracefully trips an exception, isolates the failing process, and alerts an on-call engineer before wasting budget.
+   The implementation of our [EnterpriseAgentRouter](file:///C:/projects/claude-architect-certification/5_Symbols/course_src/multi-agent/router.py) with an embedded **Circuit Breaker** (`max_loop_depth=5`) ensures that if an agent gets caught in a recursive validation rut, the system gracefully trips an exception, isolates the failing process, and alerts an on-call engineer before wasting budget.
    
 2. **Mitigation 2 (Module 5 - Prompt Caching):**
-   By utilizing **Explicit Block Caching** (`cache_control: {"type": "ephemeral"}` in [cache_layer.py](file:///C:/projects/claude-architect-certification/5_Symbols/src/optimization/cache_layer.py)), even if the agent is forced into 2 or 3 retries, the large 50,000-token system schemas are read directly from the edge cache, defusing a financial spike by 90%.
+   By utilizing **Explicit Block Caching** (`cache_control: {"type": "ephemeral"}` in [cache_layer.py](file:///C:/projects/claude-architect-certification/5_Symbols/course_src/optimization/cache_layer.py)), even if the agent is forced into 2 or 3 retries, the large 50,000-token system schemas are read directly from the edge cache, defusing a financial spike by 90%.
 
 3. **Mitigation 3 (Module 2 - Network & Database Isolation):**
-   Deploying the data bridge into an isolated **Fly.io microVM** via an authenticated `fly mcp proxy` (as documented in our [MCP README](file:///C:/projects/claude-architect-certification/5_Symbols/src/mcp-server/README.md)) ensures that database connection load-shedding is handled within an isolated container network, shielding the core system from service degradation.
+   Deploying the data bridge into an isolated **Fly.io microVM** via an authenticated `fly mcp proxy` (as documented in our [MCP README](file:///C:/projects/claude-architect-certification/5_Symbols/course_src/mcp-server/README.md)) ensures that database connection load-shedding is handled within an isolated container network, shielding the core system from service degradation.
 
 ---
 

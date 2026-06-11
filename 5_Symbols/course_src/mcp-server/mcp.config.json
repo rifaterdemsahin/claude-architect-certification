@@ -2,7 +2,7 @@
   "mcpServers": {
     "enterprise-secure-gateway": {
       "command": "node",
-      "args": ["C:/projects/claude-architect-certification/5_Symbols/src/mcp-server/build/index.js"],
+      "args": ["C:/projects/claude-architect-certification/5_Symbols/course_src/mcp-server/build/index.js"],
       "env": {
         "NODE_ENV": "production",
         "MCP_LOG_LEVEL": "info"

@@ -43,8 +43,8 @@ fi
 echo "Neither SUPABASE_DB_URL nor supabase CLI found — snapshotting local SQL files..."
 SNAPSHOT="${BACKUP_DIR}/supabase_snapshot_${TIMESTAMP}.sql"
 cat \
-  5_Symbols/src/supabase/schema.sql \
-  5_Symbols/src/supabase/seed.sql 2>/dev/null \
+  5_Symbols/supabase/schema.sql \
+  5_Symbols/supabase/seed.sql 2>/dev/null \
   > "$SNAPSHOT" || true
 echo "Snapshot saved: $SNAPSHOT"
 echo ""

@@ -353,11 +353,11 @@ The user requested:
 
 ### ❓ Problem Statement
 The GitHub Actions workflow runs failed with the error: "Some specified paths were not resolved, unable to cache dependencies" (e.g., in run https://github.com/rifaterdemsahin/claude-architect-certification/actions/runs/27233036485/job/80417859563).
-This was caused by `setup-node` trying to resolve `./src/mcp-server/package-lock.json` and build tasks attempting to `cd src/mcp-server` at the root level. However, the MCP server codebase is actually located in the stage folder `5_Symbols/src/mcp-server`.
+This was caused by `setup-node` trying to resolve `./src/mcp-server/package-lock.json` and build tasks attempting to `cd src/mcp-server` at the root level. However, the MCP server codebase is actually located in the stage folder `5_Symbols/course_src/mcp-server`.
 
 ### 📐 Approach & Strategy
 1. **🛠 Fix CI/CD configurations**:
-   - Update `.github/workflows/test_mcp.yml` to point `cache-dependency-path` to `5_Symbols/src/mcp-server/package-lock.json` and change all `cd src/mcp-server` to `cd 5_Symbols/src/mcp-server`.
+   - Update `.github/workflows/test_mcp.yml` to point `cache-dependency-path` to `5_Symbols/course_src/mcp-server/package-lock.json` and change all `cd src/mcp-server` to `cd 5_Symbols/course_src/mcp-server`.
    - Update `.github/workflows/deploy_fly.yml` to match the correct paths for `paths` triggers, `cache-dependency-path`, build steps (`cd`), and `working-directory`.
 2. **📝 Log error & fix**:
    - Append log entry to `6_Semblance/error.log`.

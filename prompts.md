@@ -170,8 +170,8 @@ Record every prompt given to AI agents below. Include the date, agent, and purpo
 ## 2026-06-08 — Supabase SQL Consolidation
 
 **Agent:** Gemini 3.5 Flash (Medium)  
-**Purpose:** Move all SQL schemas and seeds from `5_Symbols/sql/` to `5_Symbols/src/supabase/`, merging them into single consolidated files (`schema.sql` and `seed.sql`), deleting obsolete files, and updating all workspace references.  
-**Output:** Updated `5_Symbols/src/supabase/schema.sql`, created `5_Symbols/src/supabase/seed.sql`, deleted old files/directories, and updated references in HTML dashboard pages, scripts, and docs.
+**Purpose:** Move all SQL schemas and seeds from `5_Symbols/sql/` to `5_Symbols/course_src/supabase/`, merging them into single consolidated files (`schema.sql` and `seed.sql`), deleting obsolete files, and updating all workspace references.  
+**Output:** Updated `5_Symbols/course_src/supabase/schema.sql`, created `5_Symbols/course_src/supabase/seed.sql`, deleted old files/directories, and updated references in HTML dashboard pages, scripts, and docs.
 
 ---
 

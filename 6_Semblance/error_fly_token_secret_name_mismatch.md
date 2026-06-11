@@ -65,7 +65,7 @@ This maps the workflow's `FLY_API_TOKEN` environment variable to the actual secr
 ## 🧪 How to Verify
 
 1. Push the fix to `main`.
-2. Trigger the workflow by pushing a change under `5_Symbols/src/mcp-server/` or manually dispatch.
+2. Trigger the workflow by pushing a change under `5_Symbols/course_src/mcp-server/` or manually dispatch.
 3. Monitor: https://github.com/rifaterdemsahin/claude-architect-certification/actions
 4. Confirm `flyctl deploy --remote-only` runs without authentication errors.
 

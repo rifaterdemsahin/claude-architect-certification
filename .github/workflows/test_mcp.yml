@@ -23,19 +23,19 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-        cache-dependency-path: '5_Symbols/src/mcp-server/package-lock.json'
+        cache-dependency-path: '5_Symbols/course_src/mcp-server/package-lock.json'
 
     - name: Install MCP Server Dependencies
       run: |
-        cd 5_Symbols/src/mcp-server
+        cd 5_Symbols/course_src/mcp-server
         npm ci
 
     - name: Compile TypeScript
       run: |
-        cd 5_Symbols/src/mcp-server
+        cd 5_Symbols/course_src/mcp-server
         npm run build
 
     - name: Verify Docker Container Build
       run: |
-        cd 5_Symbols/src/mcp-server
+        cd 5_Symbols/course_src/mcp-server
         docker build -t enterprise-mcp-server:latest .

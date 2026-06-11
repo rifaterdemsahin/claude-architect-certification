@@ -45,7 +45,7 @@ To maintain momentum, every remaining video follows a 3-step cycle: **Learn & Te
 
 * **Step 1: Learn & Test (Local):**
   * Review the Zero-Data Retention (ZDR) requirements for Anthropic API commercial contracts.
-  * Audit your [ZDR_COMPLIANCE.md](file:///C:/projects/claude-architect-certification/5_Symbols/src/security/ZDR_COMPLIANCE.md) layout.
+  * Audit your [ZDR_COMPLIANCE.md](file:///C:/projects/claude-architect-certification/5_Symbols/course_src/security/ZDR_COMPLIANCE.md) layout.
 
 * **Step 2: Capture Record (The Content):**
   * **The Visuals:** Walk through the official Anthropic data privacy terms.

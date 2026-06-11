@@ -14,7 +14,7 @@ fi
 
 SUPABASE_URL="${SUPABASE_URL:-https://rmekfsdhglyiralxvkwc.supabase.co}"
 SUPABASE_KEY="${SUPABASE_SERVICE_KEY:-${SUPABASE_ANON_KEY:-}}"
-SCHEMA_FILE="$SCRIPT_DIR/5_Symbols/src/supabase/schema.sql"
+SCHEMA_FILE="$SCRIPT_DIR/5_Symbols/supabase/schema.sql"
 BACKUP_DIR="$SCRIPT_DIR/backup"
 TIMESTAMP="$(date +%Y%m%d_%H%M%S)"
 REPORT_FILE="$BACKUP_DIR/stats_${TIMESTAMP}.txt"
@@ -75,7 +75,7 @@ get_row_count_api() {
 # ──────────────────────────────────────────────
 get_row_count_local() {
   local table="$1"
-  local seed_dir="$SCRIPT_DIR/5_Symbols/src/supabase"
+  local seed_dir="$SCRIPT_DIR/5_Symbols/course_src/supabase"
   # Count INSERT INTO <table> lines across all seed files
   grep -rhi "INSERT INTO ${table}" "$seed_dir"/*.sql 2>/dev/null | wc -l | tr -d ' '
 }
