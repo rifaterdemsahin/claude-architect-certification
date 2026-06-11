@@ -8,6 +8,10 @@ from anthropic import Anthropic
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from src.utils.keyvault import get_secret
 
+# R-07: Model constants — update here only when upgrading
+MODEL_CLASSIFIER = "claude-haiku-4-5-20251001"   # Fast, cost-optimised: routing + transactional lookups
+MODEL_ANALYTICS  = "claude-sonnet-4-6"            # High-reasoning: pattern analysis + architectural decisions
+
 class EnterpriseAgentRouter:
     def __init__(self, max_loop_depth: int = 5):
         """
@@ -15,16 +19,16 @@ class EnterpriseAgentRouter:
         """
         self.client = Anthropic(api_key=get_secret("ANTHROPIC_API_KEY"))
         self.max_loop_depth = max_loop_depth
-        
+
         # Define agent registry with strict boundaries
         self.agent_registry = {
             "INVENTORY_AGENT": {
-                "model": "claude-3-5-haiku-20241022", # Cost-optimized, low-latency model for transactional lookups
+                "model": MODEL_CLASSIFIER,
                 "system": "You are a read-only inventory lookup service. Extract the region parameter and invoke the data bridge tool.",
                 "allowed_tools": ["query_inventory"]
             },
             "ANALYTICS_AGENT": {
-                "model": "claude-3-5-sonnet-20241022", # High-reasoning model for complex business strategy and pattern evaluation
+                "model": MODEL_ANALYTICS,
                 "system": "You are a systems performance analyst. Evaluate data patterns across regions to output architectural optimizations.",
                 "allowed_tools": []
             }
@@ -42,7 +46,7 @@ class EnterpriseAgentRouter:
         Routing Key:"""
 
         response = self.client.messages.create(
-            model="claude-3-5-haiku-20241022",
+            model=MODEL_CLASSIFIER,
             max_tokens=15,
             temperature=0.0, # Enforcing near-deterministic output profiles
             messages=[{"role": "user", "content": classification_prompt}]

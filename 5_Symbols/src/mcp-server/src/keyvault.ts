@@ -43,7 +43,11 @@ export async function getSecret(secretName: string, fallbackEnvName?: string): P
     }
   }
 
-  // Fallback to local environment variable
+  // R-05: Fallback to local environment variable; warn if also missing
   const envName = fallbackEnvName || secretName;
-  return process.env[envName];
+  const value = process.env[envName];
+  if (value === undefined) {
+    console.warn(`[KeyVault] Secret '${secretName}' not found in Key Vault or env. Callers receiving undefined may fail silently.`);
+  }
+  return value;
 }

@@ -14,8 +14,7 @@ class EnterpriseOptimizationEngine:
         Initializes the performance engineering engine using Anthropic's block caching protocol.
         """
         self.client = Anthropic(api_key=get_secret("ANTHROPIC_API_KEY"))
-        # Using current stable high-throughput model
-        self.model_target = "claude-3-5-sonnet-20241022" 
+        self.model_target = "claude-sonnet-4-6"  # R-10: updated to current model
 
     def execute_cached_transaction(self, system_instruction: str, large_context: str, user_query: str) -> Dict[str, Any]:
         """
@@ -58,9 +57,10 @@ class EnterpriseOptimizationEngine:
         usage = response.usage
 
         # Extract precise prompt tracking details (Eligible under Zero-Data Retention metrics)
+        # R-11: usage.input_tokens already excludes cached tokens; do not subtract again
         write_tokens = getattr(usage, 'cache_creation_input_tokens', 0)
         read_tokens = getattr(usage, 'cache_read_input_tokens', 0)
-        standard_input_tokens = usage.input_tokens - read_tokens
+        standard_input_tokens = usage.input_tokens
 
         return {
             "latency_seconds": round(elapsed_latency, 3),
@@ -95,4 +95,4 @@ if __name__ == "__main__":
         large_context=mock_large_spec,
         user_query="Summarize the compliance posture of our hosts based on the documents."
     )
-    print(f"Warm Run Latency: {warm_metrics['latency_seconds']}s | Cache Reads: {cold_metrics['total_input_tokens']} tokens (90% cost drop applied)")
+    print(f"Warm Run Latency: {warm_metrics['latency_seconds']}s | Cache Reads: {warm_metrics['cache_read_tokens']} tokens (90% cost drop applied)")

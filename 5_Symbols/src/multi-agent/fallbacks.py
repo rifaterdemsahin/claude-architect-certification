@@ -5,6 +5,7 @@ Provides recovery mechanisms for agent orchestration failure states.
 """
 
 import logging
+import time
 from typing import Dict, Any, Callable
 
 # Setup ZDR-compliant logging (never logs prompt/response contents)
@@ -20,6 +21,7 @@ class ExecutionCircuitBreaker:
         self.cooldown_seconds = cooldown_seconds
         self.failure_count = 0
         self.state = "CLOSED"  # CLOSED, OPEN, HALF-OPEN
+        self._opened_at: float = 0.0
 
     def record_success(self):
         self.failure_count = 0
@@ -29,12 +31,18 @@ class ExecutionCircuitBreaker:
         self.failure_count += 1
         if self.failure_count >= self.failure_threshold:
             self.state = "OPEN"
+            self._opened_at = time.time()
             logging.error(f"Circuit Breaker tripped to OPEN state. Threshold: {self.failure_threshold}")
 
     def execute(self, fallback_func: Callable[[], Any], primary_func: Callable[[], Any]) -> Any:
+        # R-09: transition OPEN → HALF-OPEN after cooldown elapses
         if self.state == "OPEN":
-            logging.warning("Circuit is OPEN. Executing static fallback function immediately.")
-            return fallback_func()
+            if time.time() - self._opened_at >= self.cooldown_seconds:
+                self.state = "HALF-OPEN"
+                logging.info("Circuit transitioning to HALF-OPEN. Allowing one probe request.")
+            else:
+                logging.warning("Circuit is OPEN. Executing static fallback function immediately.")
+                return fallback_func()
         
         try:
             result = primary_func()
