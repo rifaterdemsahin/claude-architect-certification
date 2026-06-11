@@ -688,3 +688,33 @@ Mermaid's `xychart-beta` diagram type is not supported in the markdown preview e
 
 ### ✅ Decisions Made
 - Use table-based bar charts as they are natively rendered by all markdown engines, load instantly, and are highly readable on mobile screens, unlike Mermaid's experimental features which often fail outside of specific environments.
+
+---
+
+## 📅 Date: 2026-06-11
+## 🧠 Stage: Stage 4 (Formula - Thinking & Planning) - Regrouping 6_Semblance Files & Reference Update
+
+### ❓ Problem Statement
+The user requested to rename and regroup all files under `6_Semblance/` into logical subfolders and to update all references to keep the application fully intact.
+Specifically:
+- Move general log files (`error.log`, `fix.log`, `error_log.md`, `gap_analysis.md`, `workarounds.md`, `lessons_learned.md`) to `6_Semblance/logs/`.
+- Move specific error markdown files (`error_*.md`, `ci_broken_links_label_failure.md`, `rls_checklist_insert.md`, `missing_menu_items_remediation.md`) to `6_Semblance/errors/`.
+- Move script tools (`send_error.sh`, `get_logs.sh`) to `6_Semblance/tools/` and update their path handling for finding `.env`.
+- Rename and move `feedback-llm.md` to `6_Semblance/consulting/architecture_consulting.md`.
+- Keep the root of `6_Semblance` clean of loose files except `README.md`.
+- Update all references across navigation configuration files, codebase scripts, markdown documents, templates, and agent guidelines.
+
+### 📐 Approach & Strategy
+1. **📂 Physical Relocation & Directory Audit**: Move all loose files from the root of `6_Semblance` (including moving `lessons_learned.md` to `logs/`) and verify that directories are cleanly structured.
+2. **🛠️ Script Environment Fix**: Adjust path computation in `tools/send_error.sh` and `tools/get_logs.sh` to correctly look two levels up (`../..`) for `.env`.
+3. **⚙️ Navigation Updates**:
+   - Update `navigation_config.json` Debug Menu paths to point to the new files (e.g. `6_Semblance/logs/error_log.md` instead of `6_Semblance/error_log.md`).
+   - Update fallback lists inside `index.html`, `markdown_renderer.html` (root), and `5_Symbols/course_src/templates/markdown_renderer.html`.
+4. **📝 Documentation & Agents Reference Updates**:
+   - Update pathing inside agent files `agents.md`, `claude.md`, `gemini.md`, `copilot.md`, `kilocode.md`, and `antigravity.md`.
+   - Update internal link references in stage documentations (`1_Real_Unknown/6_kanban.md`, `1_Real_Unknown/7_sanity_check.md`, etc.).
+   - Re-run the local test link script to ensure complete routing health.
+
+### ✅ Decisions Made
+- Consolidate all lessons learned, workarounds, gap analysis, and error list logs under the `6_Semblance/logs/` sub-folder to keep logging structures clean.
+- Update agent rules to reflect the new paths so future agents can accurately find logs and run diagnostic scripts without pathing errors.

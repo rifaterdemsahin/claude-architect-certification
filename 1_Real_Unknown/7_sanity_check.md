@@ -83,7 +83,7 @@
 | TSK-004: Navigation & menus | 2_Environment/9_navigation.md | ✅ |
 | TSK-005: CI/CD pipeline | 2_Environment/8_setup_ai.md | ⚠️ Should link to `.github/workflows/` |
 | TSK-006: Azure Key Vault | 2_Environment/5_setup_azure.md | ✅ |
-| TSK-007: Reflection routine | 6_Semblance/lessons_learned.md | ✅ |
+| TSK-007: Reflection routine | 6_Semblance/logs/lessons_learned.md | ✅ |
 | TSK-008: Folder structure validation | 7_Testing_Known/README.md | ✅ |
 | TSK-009: Production setup | No link | ⚠️ Missing stage reference |
 | TSK-010: Multimodal test | 3_Simulation/ | ✅ |

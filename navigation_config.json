@@ -376,39 +376,39 @@
     },
     {
       "label": "   ├─ 🩹 Workarounds",
-      "url": "markdown_renderer.html?file=6_Semblance/workarounds.md"
+      "url": "markdown_renderer.html?file=6_Semblance/logs/workarounds.md"
     },
     {
       "label": "   ├─ 🐛 Error Log",
-      "url": "markdown_renderer.html?file=6_Semblance/error_log.md"
+      "url": "markdown_renderer.html?file=6_Semblance/logs/error_log.md"
     },
     {
       "label": "   ├─ ⚠️ Error: Insert Policy",
-      "url": "markdown_renderer.html?file=6_Semblance/error_insertpolicy.md"
+      "url": "markdown_renderer.html?file=6_Semblance/errors/error_insertpolicy.md"
     },
     {
       "label": "   ├─ 🔗 CI Broken Links",
-      "url": "markdown_renderer.html?file=6_Semblance/ci_broken_links_label_failure.md"
+      "url": "markdown_renderer.html?file=6_Semblance/errors/error_ci_broken_links_label_failure.md"
     },
     {
       "label": "   ├─ 🔗 CI Setup-Node Caching Error",
-      "url": "markdown_renderer.html?file=6_Semblance/error_ci_setup_node_cache_missing_path.md"
+      "url": "markdown_renderer.html?file=6_Semblance/errors/error_ci_setup_node_cache_missing_path.md"
     },
     {
       "label": "   ├─ 🔍 Gap Analysis",
-      "url": "markdown_renderer.html?file=6_Semblance/gap_analysis.md"
+      "url": "markdown_renderer.html?file=6_Semblance/logs/gap_analysis.md"
     },
     {
       "label": "   ├─ 📝 Lessons Learned",
-      "url": "markdown_renderer.html?file=6_Semblance/lessons_learned.md"
+      "url": "markdown_renderer.html?file=6_Semblance/logs/lessons_learned.md"
     },
     {
       "label": "   ├─ 🛠 Missing Menu Remediation",
-      "url": "markdown_renderer.html?file=6_Semblance/missing_menu_items_remediation.md"
+      "url": "markdown_renderer.html?file=6_Semblance/errors/error_missing_menu_items_remediation.md"
     },
     {
       "label": "   ├─ 🔒 RLS Checklist Insert",
-      "url": "markdown_renderer.html?file=6_Semblance/rls_checklist_insert.md"
+      "url": "markdown_renderer.html?file=6_Semblance/errors/error_rls_checklist_insert.md"
     },
     {
       "label": "   └─ 🗄 Archive: 2026-06-06 (and more)",

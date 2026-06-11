@@ -57,8 +57,8 @@ Running the `CREATE POLICY` statement twice without dropping it first raises an 
 ## Steps Taken
 
 1. **Error surfaced** in browser — red toast: `❌ new row violates row-level security policy`
-2. **Logged** in `6_Semblance/error.log` with severity ERROR
-3. **Root cause documented** in `6_Semblance/rls_checklist_insert.md`
+2. **Logged** in `6_Semblance/logs/error.log` with severity ERROR
+3. **Root cause documented** in `6_Semblance/errors/error_rls_checklist_insert.md`
 4. **Fix SQL prepared** in `5_Symbols/sql/checklist_insert_policy.sql`
 5. **Fix SQL executed** in Supabase SQL Editor → INSERT policy created
 6. **Retested** — "+ Add item" successfully inserted a row → `✅ Item added to Supabase`
@@ -84,4 +84,4 @@ And a matching UPDATE/DELETE policy scoped per user.
 
 > **Always add INSERT/UPDATE policies explicitly when enabling RLS**, even on tables that seem write-only from the UI. RLS blocks all verbs independently — SELECT access does not imply write access.
 
-See also: `6_Semblance/lessons_learned.md`
+See also: `6_Semblance/logs/lessons_learned.md`

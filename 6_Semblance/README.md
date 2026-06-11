@@ -14,14 +14,18 @@ This folder is the **honest record** of what went wrong, what was harder than ex
 - **Gap analysis** — Planned vs. actual outcomes
 - **Lessons learned** — What to do differently next time
 
-## Files
+## Files & Subdirectories
 
-| File | Description |
-|------|-------------|
-| [`error_log.md`](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/6_Semblance/error_log.md) | Chronological log of significant errors |
-| [`workarounds.md`](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/6_Semblance/workarounds.md) | Active workarounds and their technical debt |
-| [`gap_analysis.md`](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/6_Semblance/gap_analysis.md) | Plan vs. reality comparison |
-| [`lessons_learned.md`](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/6_Semblance/lessons_learned.md) | Retrospective insights |
+| Folder/File | Description |
+|-------------|-------------|
+| [`logs/error_log.md`](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/6_Semblance/logs/error_log.md) | Chronological log of significant errors |
+| [`logs/workarounds.md`](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/6_Semblance/logs/workarounds.md) | Active workarounds and their technical debt |
+| [`logs/gap_analysis.md`](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/6_Semblance/logs/gap_analysis.md) | Plan vs. reality comparison |
+| [`logs/lessons_learned.md`](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/6_Semblance/logs/lessons_learned.md) | Retrospective insights |
+| [`errors/`](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/6_Semblance/errors) | Specific detailed incident report files (e.g. `error_*.md`) |
+| [`tools/`](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/6_Semblance/tools) | Log fetcher and error dispatcher CLI scripts |
+| [`consulting/`](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/6_Semblance/consulting) | Expert review logs and architecture consultancy transcripts |
+
 
 ## Error Log Format
 

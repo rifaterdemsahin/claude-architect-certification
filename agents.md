@@ -167,7 +167,7 @@ This document defines how AI agents interact with the **Claude AI Certification 
 | Skill | Command / Tool | Purpose |
 |-------|----------------|---------|
 | `gdrive-search` | `/gdrive-search` | Search Google Drive for reference documents |
-| `axiom-logs` | `./6_Semblance/get_logs.sh [limit]` | Pull latest error logs from Axiom dataset to diagnose issues |
+| `axiom-logs` | `./6_Semblance/tools/get_logs.sh [limit]` | Pull latest error logs from Axiom dataset to diagnose issues |
 | `video-transcribe` | `/video-transcribe` | Transcribe YouTube demos into markdown |
 | `image-generation` | `/image-generation` | Generate visual mockups in `3_Simulation/` |
 
@@ -179,8 +179,8 @@ This document defines how AI agents interact with the **Claude AI Certification 
 - **Secrets Management:** Never commit secrets. Load them at runtime via Azure Key Vault (e.g., Supabase credentials, Axiom tokens like `AXIOM-TOKEN` and `AXIOM-ORG-ID`).
 - **Micro-commits:** Commit and push after every incremental task.
 - **Thinking & Planning Gate:** Before writing any code (`5_Symbols`), document the approach and reasoning in `4_Formula/llm_thinking_log.md`.
-- **Error & Fix Logging:** Log all runtime errors to `6_Semblance/error.log` and fixes to `6_Semblance/fix.log`. Additionally, automatically send all error logs to Axiom using the ingestion helper script: `./6_Semblance/send_error.sh "<stage>" "<severity>" "<description>"`.
-- **Active Reflection:** Write a retrospective journal in `6_Semblance/lessons_learned.md` after every milestone.
+- **Error & Fix Logging:** Log all runtime errors to `6_Semblance/logs/error.log` and fixes to `6_Semblance/logs/fix.log`. Additionally, automatically send all error logs to Axiom using the ingestion helper script: `./6_Semblance/tools/send_error.sh "<stage>" "<severity>" "<description>"`.
+- **Active Reflection:** Write a retrospective journal in `6_Semblance/logs/lessons_learned.md` after every milestone.
 - **Menu Sync:** Keep `navigation_config.json` synchronized when adding/removing documents.
 - **SQL Canonical Location:** All Supabase SQL files (schema, seeds) live in `5_Symbols/supabase/`. When creating or modifying SQL, always place the file there. Current files:
   - `schema.sql` — full consolidated table definitions and RLS policies

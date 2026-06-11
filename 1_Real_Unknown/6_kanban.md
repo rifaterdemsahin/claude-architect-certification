@@ -109,8 +109,8 @@
 
 - [x] **TSK-007: Implement Active Reflection Routine**
   - **Assignee:** All Agents
-  - **Details:** `6_Semblance/lessons_learned.md` established for post-milestone retrospectives.
-  - **Stage Reference:** `6_Semblance/lessons_learned.md`
+  - **Details:** `6_Semblance/logs/lessons_learned.md` established for post-milestone retrospectives.
+  - **Stage Reference:** `6_Semblance/logs/lessons_learned.md`
 
 - [x] **TSK-008: Basic Stage Folders Structure Validation**
   - **Assignee:** Claude
@@ -197,5 +197,5 @@
 - [ ] Add new features incoming as visuals folder > `3_Simulation`
 - [x] Add new ways of doing the implementation to formula folder > `4_Formula` — LLM thinking log + VS Code extensions
 - [x] Update the Symbols and pay technical debt > `5_Symbols` — nav modularized, paths standardized
-- [x] Add new errors in semblance > `6_Semblance` — lessons_learned.md active
+- [x] Add new errors in semblance > `6_Semblance` — `logs/lessons_learned.md` active
 - [ ] Update the tests folder > `7_Testing_Known` — full checklist pass pending
