@@ -43,8 +43,16 @@
               "url": "http://127.0.0.1:5500/5_Symbols/supabase/ui/admin.html"
             },
             {
-              "label": "📡 Axiom Errors",
+              "label": "📡 Axiom Errors Admin",
               "url": "/admin/errors"
+            },
+            {
+              "label": "🏠 Home Template",
+              "url": "5_Symbols/templates/index.html"
+            },
+            {
+              "label": "📋 Error Log Template",
+              "url": "5_Symbols/templates/axiom_errors.html"
             },
             {
               "label": "☁️ Google Cloud API",

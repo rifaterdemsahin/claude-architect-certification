@@ -97,8 +97,12 @@
         label: '🛠️ Tools',
         children: [
           { label: '🐙 GitHub Repo', url: 'https://github.com/rifaterdemsahin/claude-architect-certification' },
+          { label: '💳 GitHub Billing Usage', url: 'https://github.com/settings/billing/usage?period=3&group=0&customer=592572' },
           { label: '🔥 Supabase', url: 'https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/' },
-          { label: '🗄 Supabase Admin (Local)', url: 'http://127.0.0.1:5500/5_Symbols/supabase/admin.html' },
+          { label: '🗄 Supabase Admin (Local)', url: 'http://127.0.0.1:5500/5_Symbols/supabase/ui/admin.html' },
+          { label: '📡 Axiom Errors Admin', url: '/admin/errors' },
+          { label: '🏠 Home Template', url: '5_Symbols/templates/index.html' },
+          { label: '📋 Error Log Template', url: '5_Symbols/templates/axiom_errors.html' },
           { label: '☁️ Google Cloud API', url: 'https://console.cloud.google.com/' },
           { label: '🤖 Claude Guide', url: 'claude.md' }
         ]
@@ -242,8 +246,42 @@
     });
   }
 
+  /* ---- Client-side error reporter → POST /api/errors → Axiom ----------- */
+  function reportError(msg, src, line, col, errObj) {
+    try {
+      fetch('/api/errors', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: String(msg),
+          source: src || window.location.pathname,
+          line: line,
+          col: col,
+          stack: errObj && errObj.stack ? errObj.stack : '',
+          page: window.location.href
+        })
+      }).catch(function () {});
+    } catch (_) {}
+  }
+
+  var _prevOnError = window.onerror;
+  window.onerror = function (msg, src, line, col, err) {
+    reportError(msg, src, line, col, err);
+    return _prevOnError ? _prevOnError(msg, src, line, col, err) : false;
+  };
+
+  window.addEventListener('unhandledrejection', function (e) {
+    reportError('Unhandled promise rejection: ' + (e.reason ? String(e.reason) : 'unknown'),
+      window.location.pathname, 0, 0, e.reason instanceof Error ? e.reason : null);
+  });
+
   function init() {
     if (document.getElementById('site-nav')) return;
+    var preloaded = window.__NAV_CONFIG__;
+    if (preloaded && preloaded.projectMenu) {
+      buildNav(preloaded.projectMenu);
+      return;
+    }
     fetch(ROOT + 'navigation_config.json', { cache: 'no-store' })
       .then(function (r) { return r.json(); })
       .then(function (data) { buildNav(data.projectMenu); })

@@ -15,7 +15,6 @@ COPY --from=build /app/server .
 
 # Copy assets the server reads at runtime from its working directory
 COPY navigation_config.json .
-COPY templates/ templates/
 COPY shared/ shared/
 COPY 5_Symbols/ 5_Symbols/
 COPY markdown_renderer.html .

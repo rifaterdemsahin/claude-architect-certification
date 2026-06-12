@@ -364,6 +364,27 @@ func axiomErrorsHandler(tmpl *template.Template, cfg config, navConfigJS templat
 	}
 }
 
+// ── Client-side error ingestion ───────────────────────────────────────────────
+
+func clientErrorsHandler(cfg config) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+		var payload map[string]any
+		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+			http.Error(w, "bad request", http.StatusBadRequest)
+			return
+		}
+		payload["_time"] = time.Now().UTC().Format(time.RFC3339)
+		payload["level"] = "error"
+		payload["source"] = "client"
+		go shipToAxiom(cfg, []map[string]any{payload})
+		w.WriteHeader(http.StatusNoContent)
+	}
+}
+
 // ── Nav favourites toggle ─────────────────────────────────────────────────────
 
 func navFavsHandler(cfg config) http.HandlerFunc {
@@ -414,8 +435,8 @@ func main() {
 	}
 	tmpl := template.Must(
 		template.New("").Funcs(funcs).ParseFiles(
-			"templates/index.html",
-			"templates/axiom_errors.html",
+			"5_Symbols/templates/index.html",
+			"5_Symbols/templates/axiom_errors.html",
 		),
 	)
 
@@ -424,6 +445,7 @@ func main() {
 	mux.Handle("/shared/", observe(cfg, fs))
 	mux.Handle("/navigation_config.json", observe(cfg, fs))
 	mux.Handle("/api/nav/favs", observe(cfg, navFavsHandler(cfg)))
+	mux.Handle("/api/errors", observe(cfg, clientErrorsHandler(cfg)))
 	mux.Handle("/admin/errors", observe(cfg, axiomErrorsHandler(tmpl, cfg, navConfigJS)))
 	mux.Handle("/", observe(cfg, homeHandler(tmpl, cfg, navConfigJS)))
 
