@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Database Stats | Claude AI Certification</title>
+  <link rel="icon" type="image/png" href="../../../favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #030712; --bg-card: rgba(17,24,39,0.8); --text-main: #f3f4f6; --text-muted: #9ca3af;
+      --primary: #8b5cf6; --secondary: #3b82f6; --accent: #f59e0b; --success: #10b981;
+      --font-title: 'Outfit', sans-serif; --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-dark);
+      background-image: radial-gradient(circle at 10% 20%, rgba(139,92,246,0.08) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(59,130,246,0.08) 0%, transparent 40%);
+      color: var(--text-main); font-family: var(--font-body); line-height: 1.6; min-height: 100vh; padding: 40px 20px;
+    }
+    .container { max-width: 900px; margin: 0 auto; }
+    header { text-align: center; margin-bottom: 40px; }
+    h1 { font-family: var(--font-title); font-size: 2.5rem; font-weight: 800; margin-bottom: 8px; }
+    .subtitle { color: var(--text-muted); font-size: 1rem; }
+
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 40px; }
+    .stat-card {
+      background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px;
+      padding: 24px; text-align: center; transition: transform 0.3s;
+    }
+    .stat-card:hover { transform: translateY(-5px); border-color: var(--primary); }
+    .stat-value { font-family: var(--font-title); font-size: 2.5rem; font-weight: 800; color: white; line-height: 1.2; }
+    .stat-label { color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 4px; }
+
+    .table-container {
+      background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px;
+      overflow: hidden; margin-bottom: 40px;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    th { background: rgba(255,255,255,0.03); color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; padding: 16px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    td { padding: 16px; font-size: 0.9rem; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    tr:last-child td { border-bottom: none; }
+    .row-name { font-weight: 600; color: #e5e7eb; }
+    .row-count { font-family: monospace; color: var(--secondary); font-weight: 700; }
+    .row-words { font-family: monospace; color: var(--accent); font-weight: 700; }
+
+    .loading-overlay { position: fixed; inset: 0; background: var(--bg-dark); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; transition: opacity 0.5s; }
+    .spinner { width: 40px; height: 40px; border: 3px solid rgba(139,92,246,0.1); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 16px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .error-msg { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); color: #f87171; padding: 20px; border-radius: 12px; margin-bottom: 20px; display: none; }
+    
+    footer { text-align: center; margin-top: 40px; }
+    .back-link { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+    .back-link:hover { color: white; }
+  </style>
+  <script src="../../../shared/nav.js"></script>
+</head>
+<body>
+  <div id="loading" class="loading-overlay">
+    <div class="spinner"></div>
+    <p>Calculating database metrics...</p>
+  </div>
+
+  <div class="container">
+    <header>
+      <h1>Database Stats</h1>
+      <p class="subtitle">Real-time content metrics from Supabase Production DB</p>
+    </header>
+
+    <div id="error" class="error-msg"></div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div id="total-rows" class="stat-value">0</div>
+        <div class="stat-label">Total Rows</div>
+      </div>
+      <div class="stat-card">
+        <div id="total-words" class="stat-value">0</div>
+        <div class="stat-label">Total Words</div>
+      </div>
+      <div class="stat-card">
+        <div id="table-count" class="stat-value">0</div>
+        <div class="stat-label">Active Tables</div>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Table Name</th>
+            <th style="text-align: right;">Rows</th>
+            <th style="text-align: right;">Words</th>
+          </tr>
+        </thead>
+        <tbody id="stats-body">
+          <!-- Rows injected here -->
+        </tbody>
+      </table>
+    </div>
+
+    <footer>
+      <a href="index.html" class="back-link">← Back to Pre-Production</a>
+    </footer>
+  </div>
+
+  <script>
+    const SUPABASE_URL = localStorage.getItem('supabase_url') || 'https://rmekfsdhglyiralxvkwc.supabase.co';
+    const SUPABASE_ANON_KEY = localStorage.getItem('supabase_anon_key') || '';
+
+    const TABLES = [
+      { name: 'modules', column: null },
+      { name: 'videos', column: null },
+      { name: 'scripts', column: 'script_text' },
+      { name: 'sentences', column: 'sentence_text' },
+      { name: 'outline', column: 'content' },
+      { name: 'checklist_items', column: null },
+      { name: 'scenes', column: 'script' }
+    ];
+
+    async function fetchStats() {
+      if (!SUPABASE_ANON_KEY) {
+        showError("Supabase configuration missing. Please set URL and Anon Key in Settings.");
+        return;
+      }
+
+      const statsBody = document.getElementById('stats-body');
+      const totalRowsEl = document.getElementById('total-rows');
+      const totalWordsEl = document.getElementById('total-words');
+      const tableCountEl = document.getElementById('table-count');
+      
+      let totalRows = 0;
+      let totalWords = 0;
+      let activeTables = 0;
+
+      try {
+        for (const table of TABLES) {
+          // Fetch row count
+          const countRes = await fetch(`${SUPABASE_URL}/rest/v1/${table.name}?select=count`, {
+            headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Prefer': 'count=exact' }
+          });
+          
+          if (!countRes.ok) continue;
+          
+          const countRange = countRes.headers.get('Content-Range');
+          const rowCount = parseInt(countRange ? countRange.split('/')[1] : 0);
+          
+          // Fetch word count if column specified
+          let wordCount = 0;
+          if (table.column) {
+            const dataRes = await fetch(`${SUPABASE_URL}/rest/v1/${table.name}?select=${table.column}`, {
+              headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+            });
+            if (dataRes.ok) {
+              const data = await dataRes.json();
+              data.forEach(row => {
+                const text = row[table.column] || '';
+                wordCount += text.split(/\s+/).filter(w => w.length > 0).length;
+              });
+            }
+          }
+
+          // Update UI
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td class="row-name">${table.name}</td>
+            <td class="row-count" style="text-align: right;">${rowCount.toLocaleString()}</td>
+            <td class="row-words" style="text-align: right;">${wordCount > 0 ? wordCount.toLocaleString() : '-'}</td>
+          `;
+          statsBody.appendChild(row);
+
+          totalRows += rowCount;
+          totalWords += wordCount;
+          activeTables++;
+        }
+
+        totalRowsEl.textContent = totalRows.toLocaleString();
+        totalWordsEl.textContent = totalWords.toLocaleString();
+        tableCountEl.textContent = activeTables;
+
+      } catch (err) {
+        showError("Failed to fetch statistics: " + err.message);
+      } finally {
+        document.getElementById('loading').style.opacity = '0';
+        setTimeout(() => document.getElementById('loading').style.display = 'none', 500);
+      }
+    }
+
+    function showError(msg) {
+      const errEl = document.getElementById('error');
+      errEl.textContent = msg;
+      errEl.style.display = 'block';
+      document.getElementById('loading').style.display = 'none';
+    }
+
+    document.addEventListener('DOMContentLoaded', fetchStats);
+  </script>
+<script src="../../../shared/debug-panel.js"></script>
+</body>
+</html>
