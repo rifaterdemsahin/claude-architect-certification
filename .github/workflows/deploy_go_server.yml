@@ -9,7 +9,7 @@ on:
       - 'go.sum'
       - 'Dockerfile'
       - 'fly.toml'
-      - 'templates/**'
+      - '5_Symbols/templates/**'
       - 'navigation_config.json'
       - 'shared/**'
       - '.github/workflows/deploy_go_server.yml'
