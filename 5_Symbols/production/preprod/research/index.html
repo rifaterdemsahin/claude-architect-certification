@@ -747,6 +747,7 @@ async function linkAssetToSentence(container, itemName, select) {
   const { data, error } = await client.from('research_relationships').insert({
     container,
     item_name: itemName,
+    video_id: null,
     sentence_id: sentenceId
   }).select();
 

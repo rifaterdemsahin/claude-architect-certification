@@ -430,6 +430,29 @@
     .sent-add-label  { font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
     .btn-sent-add    { background: rgba(16,185,129,0.1); color: #34d399; border: 1px solid rgba(16,185,129,0.2); padding: 6px 14px; border-radius: 7px; font-size: 0.78rem; font-weight: 700; cursor: pointer; width: 100%; margin-top: 8px; font-family: var(--font-body); }
     .btn-sent-add:hover { background: rgba(16,185,129,0.18); }
+    .sent-view { position: relative; }
+    .sent-view::after {
+      content: attr(data-text);
+      position: absolute;
+      left: 50%; top: calc(100% + 6px);
+      transform: translateX(-50%);
+      background: rgba(15,15,20,0.97);
+      border: 1px solid rgba(139,92,246,0.35);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 0.92rem;
+      line-height: 1.6;
+      color: #e2e8f0;
+      max-width: 480px;
+      min-width: 200px;
+      white-space: normal;
+      word-break: break-word;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.55);
+      z-index: 999;
+      pointer-events: none;
+      display: none;
+    }
+    .sent-view:hover::after { display: block; }
 
     /* Glassmorphic hover tooltips */
     .research-hover-container {
@@ -1326,7 +1349,7 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
             const rid = `${elementId}-${s.id}`;
             return `
             <div class="sent-row" id="sent-row-${rid}">
-              <div class="sent-view" id="sent-view-${rid}">
+              <div class="sent-view" id="sent-view-${rid}" data-text="${esc2(s.sentence_text)}">
                 <div class="sent-badges">
                   <span class="sent-badge ${esc2(s.sentence_type)}">${esc2(s.sentence_type)}</span>
                   <span class="sent-badge ${esc2(s.visual_mode)}">${esc2(s.visual_mode).replace(/_/g,' ')}</span>
