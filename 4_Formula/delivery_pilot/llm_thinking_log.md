@@ -718,3 +718,31 @@ Specifically:
 ### ✅ Decisions Made
 - Consolidate all lessons learned, workarounds, gap analysis, and error list logs under the `6_Semblance/logs/` sub-folder to keep logging structures clean.
 - Update agent rules to reflect the new paths so future agents can accurately find logs and run diagnostic scripts without pathing errors.
+
+---
+
+## 📅 Date: 2026-06-12
+## 🧠 Stage: Stage 4 (Formula - Thinking & Planning) - Create Production Footage & Research Mapping Page
+
+### ❓ Problem Statement
+The user requested creating a mapping page in the Production menu of the project menu, mapping pre-production research elements (images, audio, videos, notes stored in Azure Blob Storage) to actual shot footage / scenes.
+
+### 📐 Approach & Strategy
+1. **📂 File Location**: Create the HTML page at `5_Symbols/production/prod/footage_mapping.html` to respect the HTML containment rule.
+2. **🎨 Design System & Visuals**:
+   - Modern dark mode with outfit/plus jakarta sans fonts.
+   - Glassmorphic panels, gradient badges, and interactive animations.
+   - Layout:
+     - Header & Status indicator (Azure storage integration status).
+     - Selection bar: Fetch modules/videos from Supabase or fallback, select a scene to map.
+     - Split screen: Left column shows Azure Blob Storage research files (by category: Images, Audio, Videos, Notes). Right column displays the selected scene, details, and current mapping.
+     - "Add Mapping" interaction to bind an Azure asset name to a specific Scene ID, saved to `localStorage` for high-performance client-side persistence and portability.
+3. **⚙️ Navigation**:
+   - Add the mapping page to `"projectMenu"` under `"🎥 Production"` in `navigation_config.json`.
+   - Update fallback projectMenu lists inside `index.html` and `5_Symbols/markdown_renderer.html`.
+4. **🌿 Git Workflow**:
+   - Commit `antigravity.md` changes.
+   - Commit `llm_thinking_log.md` planning.
+   - Commit mapping page implementation.
+   - Commit navigation updates.
+   - Push to repository.

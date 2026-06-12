@@ -111,6 +111,18 @@ To collaborate on production-ready AI workflows, ensuring:
 
 ---
 
+### 2026-06-12 (Go server, research manager APIs, and footage mapping)
+- **Action:** Analyzed Go migration progress, reviewed `cmd/server/main.go` and verified the active route server implementation.
+- **Action:** Scaffolded Go API handlers for managing Azure Blob Storage containers (`research-images`, `research-audio`, `research-videos`, `research-notes`) using safe server-side SAS queries.
+- **Action:** Created `5_Symbols/production/prod/footage_mapping.html` to map pre-production research elements to actual shot footage.
+- **Status:** Commits analyzed, mapping page implemented, and navigation updated.
+
+### 2026-06-11 (Go Migration Scaffolding & CI Caching Fix)
+- **Action:** Scaffolded Go server (`cmd/server/main.go`) to render dynamic routes and proxy database assets.
+- **Action:** Set up `observe` handler middleware forwarding latency and recovery data to Axiom.
+- **Action:** Fixed the GitHub Actions path caching failures by updating package-lock and build routes pointing to the nested folder `5_Symbols/course_src/mcp-server/`.
+- **Status:** Implemented and tested in CI/CD pipeline.
+
 ### 2026-06-07 (Project Initialization, Script Integration & Editor Page)
 - **Action:** Created `antigravity.md` to initialize project context and mapping for Antigravity.
 - **Action:** Added `scripts` table to database layer (`schema.sql` & `admin.html`) and developed inline script editing UI in pre-production script dashboard with localStorage support.
