@@ -866,3 +866,28 @@ The user requested mapping research assets (images, audio, videos, notes stored 
 4. **🌿 Git Workflow**:
    - Commit files individually or incrementally.
    - Perform build and test validation.
+
+---
+
+## 📅 Date: 2026-06-12
+## 🧠 Stage: Stage 4 (Formula - Thinking & Planning) - Explanations Datastructure & Gemini Key Vault Integration
+### ❓ Problem Statement
+The user wants to add an `explanations` datastructure that links explanations to entities like script outlines, sentences, research assets, and problems. We need to create a dedicated page to view/add these explanations via a Gemini API call, using a key retrieved from Azure Key Vault.
+
+### 📐 Approach & Strategy
+1. **💾 Database Schema**:
+   - Create `5_Symbols/supabase/schema/07_explanations.sql` containing the definitions for the `explanations` table.
+   - Fields: `id` (serial primary key), `entity_type` (TEXT), `entity_id` (TEXT), `explanation_text` (TEXT), `generated_by` (TEXT), `created_at` (TIMESTAMPTZ).
+   - Enable RLS policies for read/write access (public read/write anon permissions, or standard public access).
+2. **🔑 Key Vault REST Integration**:
+   - Enhance Go server configuration (`cmd/server/main.go`) to load Key Vault settings from environment variables.
+   - Implement standard Go library-based client credentials flow to get a token and fetch `GEMINI_API_KEY` from Azure Key Vault, fallback to local environment variable.
+3. **🤖 Gemini & Explanations API Endpoints**:
+   - Create `POST /api/explanations/generate` to send a prompt to Gemini's API (`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent`) to generate an explanation.
+   - Create `GET /api/explanations` to fetch explanations for specific entities.
+   - Create `POST /api/explanations` to persist generated or custom explanations to Supabase.
+4. **🖥️ Frontend UI**:
+   - Create `5_Symbols/explanations.html` with a glassmorphic dashboard interface to choose an entity type (outline, sentence, research, problem), enter/select the ID, query existing explanations, call Gemini to generate explanations, edit them, and save them back to the database.
+5. **🌿 Menu & Navigation**:
+   - Update `navigation_config.json` to include the new explanations page under a suitable phase/menu.
+
