@@ -21,18 +21,14 @@
   var LAUNCH_DATE = new Date('2026-06-07');
   var daysSinceLaunch = Math.floor((Date.now() - LAUNCH_DATE.getTime()) / (1000 * 60 * 60 * 24));
 
-  /* ---- Favorites helpers ---- */
-  var FAVS_KEY = 'site-nav-favorites';
+  /* ---- Favorites helpers (backed by Supabase via /api/nav/favs) ---- */
 
   function getFavs() {
-    try { return JSON.parse(localStorage.getItem(FAVS_KEY) || '[]'); }
-    catch (e) { return []; }
+    return window.__NAV_FAVS__ || [];
   }
 
-  function saveFavs(f) { localStorage.setItem(FAVS_KEY, JSON.stringify(f)); }
-
   function toggleFav(resolvedUrl, label) {
-    var favs = getFavs();
+    var favs = getFavs().slice();
     var idx = -1;
     for (var k = 0; k < favs.length; k++) {
       if (favs[k].url === resolvedUrl) { idx = k; break; }
@@ -40,9 +36,14 @@
     var nowFav;
     if (idx > -1) { favs.splice(idx, 1); nowFav = false; }
     else { favs.push({ url: resolvedUrl, label: label }); nowFav = true; }
-    saveFavs(favs);
+    window.__NAV_FAVS__ = favs; // optimistic update
 
-    // Update all star buttons that match this URL
+    fetch('/api/nav/favs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: resolvedUrl, label: label })
+    }).catch(function (e) { console.warn('nav favs sync failed', e); });
+
     var btns = document.querySelectorAll('.nav-star[data-fav-url]');
     for (var b = 0; b < btns.length; b++) {
       if (btns[b].getAttribute('data-fav-url') === resolvedUrl) {

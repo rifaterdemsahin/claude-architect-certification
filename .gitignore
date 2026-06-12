@@ -7,6 +7,9 @@ build/
 dist/
 *.tsbuildinfo
 
+# Go binary (built by Dockerfile, not committed)
+/server
+
 # Local configuration files
 .env
 .env.local

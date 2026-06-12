@@ -4,11 +4,12 @@
 
 ## ✅ Done
 
-_(empty — migration not yet started)_
+- [x] **Slice 0 — Scaffold** — `go.mod`, `cmd/server/main.go` with `observe` middleware + `shipToAxiom`; `templates/index.html` with `{{define}}`; build gate passes.
+- [x] **Slice 1 — `GET /`** — server-side fetch of `course_metadata` + `course_tools` from Supabase; secrets loaded from Azure Key Vault `dp-kv-deliverypilot`; curl returns full rendered HTML with course data; anon key never in browser.
 
 ## ⏳ Next
 
-- [ ] **Slice 0 — Scaffold** — `cmd/server/main.go`, `Dockerfile` (scratch), `fly.toml`, `go.mod`; serve one static response; CI green.
+- [ ] **Slice 2 — Static assets** — serve `/static/` via `http.FileServer` with `embed.FS` so shared CSS/JS loads from the Go binary.
 
 ## 🔮 Backlog
 

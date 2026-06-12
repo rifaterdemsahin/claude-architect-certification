@@ -68,3 +68,5 @@ Lesson captured in lessons_learned.md
 [2026-06-09] [CI] [APPLIED] — Fly.io deploy failing with "no access token available": changed `secrets.FLY_API_TOKEN` → `secrets.FLYIO_TOKEN` in deploy_fly.yml to match actual repo secret name. Details: 6_Semblance/error_fly_token_secret_name_mismatch.md
 [2026-06-10] [4_Formula] [VERIFIED] — Replaced unsupported xychart-beta Mermaid diagrams in userexperience.md and YouTubeCourseStructureFeedback.md with markdown tables and bar/trend indicators. Verified clean compile and render.
 
+
+[2026-06-12] 💻 [5_Symbols/Go] [APPLIED] — Add go.goroot + go.alternateTools to .vscode/settings.json pointing at /opt/homebrew, OR symlink /usr/local/bin/go → /opt/homebrew/bin/go, OR set GUI PATH via launchctl. See 6_Semblance/error_go_vscode_path.md

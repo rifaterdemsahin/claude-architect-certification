@@ -43,3 +43,5 @@ Severity levels: `CRITICAL` | `ERROR` | `WARNING` | `INFO`
 [2026-06-09] 🔴 [CI] [HIGH] — setup-node: "Some specified paths were not resolved, unable to cache dependencies" due to incorrect path './src/mcp-server/package-lock.json' (correct path is '5_Symbols/src/mcp-server/package-lock.json'). Fix: 6_Semblance/error_ci_setup_node_cache_missing_path.md
 [2026-06-10] ⚠️ [4_Formula] [MEDIUM] — xychart-beta Mermaid diagrams crash preview renderers with error "No diagram type detected matching given configuration for text: xychart-beta" in userexperience.md and YouTubeCourseStructureFeedback.md. Fix: 6_Semblance/fix.log
 
+
+[2026-06-12] 💻 [5_Symbols/Go] [MEDIUM] — VS Code Go extension cannot find `go` binary. GUI app PATH does not include /opt/homebrew/bin even though Homebrew Go is installed and works in terminal. See 6_Semblance/error_go_vscode_path.md

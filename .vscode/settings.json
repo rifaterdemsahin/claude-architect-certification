@@ -35,5 +35,13 @@
   ],
   "DockerRun.DisableDockerrc": true,
   "markdown.mermaid.enabled": true,
-  "security.workspace.trust.untrustedFiles": "open"
+  "security.workspace.trust.untrustedFiles": "open",
+  "go.goroot": "/opt/homebrew/opt/go/libexec",
+  "go.alternateTools": {
+    "go": "/opt/homebrew/bin/go"
+  },
+  "[go]": {
+    "editor.defaultFormatter": "golang.go",
+    "editor.formatOnSave": true
+  }
 }

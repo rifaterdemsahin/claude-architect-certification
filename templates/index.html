@@ -1,0 +1,1851 @@
+{{define "index.html"}}<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Claude AI Certification for Architects - Enterprise Systems & Integration Masterclass Companion Workspace. Learn custom MCP, VPC PrivateLink, multi-agent topologies, and cost-reduction prompt caching.">
+  <title>🏛️ Claude AI Certification for Architects</title>
+  
+  <!-- Modern Typography (Inter & Outfit) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- PrismJS for Syntax Highlighting -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+
+  <style>
+    /* Design Tokens / Variables */
+    :root {
+      --bg-dark: #0b0f19;
+      --bg-card: rgba(22, 28, 45, 0.7);
+      --bg-glass: rgba(15, 23, 42, 0.6);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-glow: rgba(139, 92, 246, 0.2);
+      
+      --text-primary: #f8fafc;
+      --text-muted: #94a3b8;
+      
+      /* Vibrant Accent Colors */
+      --accent-violet: #8b5cf6;
+      --accent-violet-glow: rgba(139, 92, 246, 0.4);
+      --accent-cyan: #06b6d4;
+      --accent-cyan-glow: rgba(6, 182, 212, 0.4);
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      
+      --font-display: 'Outfit', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Core Styles */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.15) 0px, transparent 50%);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      line-height: 1.6;
+      overflow-x: hidden;
+      padding-bottom: 100px;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+      transition: var(--transition);
+    }
+
+    /* Header & Project Menu (Always Visible) */
+    .app-header {
+      backdrop-filter: blur(12px);
+      background-color: var(--bg-glass);
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .app-logo {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent-violet), var(--accent-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* Project Menu Navigation */
+    .project-menu-nav {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+    }
+
+    .menu-link {
+      font-weight: 500;
+      color: var(--text-muted);
+      position: relative;
+      padding: 0.25rem 0;
+    }
+
+    .menu-link:hover, .menu-link.active {
+      color: var(--text-primary);
+    }
+
+    .menu-link::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent-violet), var(--accent-cyan));
+      transition: var(--transition);
+    }
+
+    .menu-link:hover::after, .menu-link.active::after {
+      width: 100%;
+    }
+
+    /* Dropdown Menu Group */
+    .menu-group {
+      position: relative;
+    }
+
+    .menu-group-btn {
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 0.25rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      background: none;
+      border: none;
+      font-family: var(--font-body);
+      font-size: 1rem;
+      position: relative;
+      transition: var(--transition);
+    }
+
+    .menu-group-btn::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent-violet), var(--accent-cyan));
+      transition: var(--transition);
+    }
+
+    .menu-group:hover .menu-group-btn,
+    .menu-group-btn:hover {
+      color: var(--text-primary);
+    }
+
+    .menu-group:hover .menu-group-btn::after {
+      width: 100%;
+    }
+
+    .menu-group-btn .chevron {
+      font-size: 0.6rem;
+      transition: transform 0.2s ease;
+    }
+
+    .menu-group:hover .chevron {
+      transform: rotate(180deg);
+    }
+
+    .menu-dropdown {
+      position: absolute;
+      top: calc(100% + 10px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 0.5rem;
+      min-width: 200px;
+      display: none;
+      flex-direction: column;
+      gap: 0.15rem;
+      z-index: 300;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+
+    .menu-group:hover .menu-dropdown {
+      display: flex;
+    }
+
+    .dropdown-link {
+      padding: 0.45rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      transition: var(--transition);
+    }
+
+    .dropdown-link:hover {
+      background: rgba(139, 92, 246, 0.15);
+      color: var(--text-primary);
+    }
+
+    /* Sub-dropdown menu styling inside homepage menu */
+    .menu-subgroup {
+      position: relative;
+    }
+
+    .menu-subgroup-btn {
+      width: 100%;
+      background: none;
+      border: none;
+      text-align: left;
+      padding: 0.45rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: var(--transition);
+      font-family: inherit;
+    }
+
+    .menu-subgroup-btn:hover {
+      background: rgba(139, 92, 246, 0.15);
+      color: var(--text-primary);
+    }
+
+    .menu-subdropdown {
+      position: absolute;
+      top: 0;
+      left: 100%;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 0.5rem;
+      min-width: 200px;
+      display: none;
+      flex-direction: column;
+      gap: 0.15rem;
+      z-index: 310;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      margin-left: 2px;
+    }
+
+    .menu-subgroup:hover .menu-subdropdown {
+      display: flex;
+    }
+
+    .subdropdown-link {
+      padding: 0.45rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      transition: var(--transition);
+      text-decoration: none;
+    }
+
+    .subdropdown-link:hover {
+      background: rgba(139, 92, 246, 0.15);
+      color: var(--text-primary);
+    }
+
+    /* Active top navigation highlight styles */
+    .menu-group.active .menu-group-btn {
+      color: var(--accent-violet) !important;
+      border-bottom: 2px solid var(--accent-violet);
+      border-radius: 0;
+    }
+
+    .dropdown-link.active {
+      background: rgba(139, 92, 246, 0.15) !important;
+      color: var(--accent-cyan) !important;
+      font-weight: 600;
+    }
+
+    .menu-subgroup.active .menu-subgroup-btn {
+      color: var(--accent-cyan) !important;
+      font-weight: 600;
+    }
+
+    .subdropdown-link.active {
+      background: rgba(139, 92, 246, 0.15) !important;
+      color: var(--accent-cyan) !important;
+      font-weight: 600;
+    }
+
+    .nav-btn {
+      background: linear-gradient(135deg, var(--accent-violet), #7c3aed);
+      color: white !important;
+      padding: 6px 16px;
+      border-radius: 100px;
+      font-size: 0.85rem !important;
+      font-weight: 600 !important;
+      box-shadow: 0 4px 15px var(--accent-violet-glow);
+    }
+
+    .nav-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6);
+    }
+
+    .join-btn {
+      background: linear-gradient(135deg, #f59e0b, var(--accent-violet));
+      color: white !important;
+      padding: 6px 16px;
+      border-radius: 100px;
+      font-weight: 700;
+      box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+    }
+
+    .join-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5) !important;
+    }
+
+    .social-links {
+      display: flex;
+      gap: 1.25rem;
+      align-items: center;
+    }
+
+    .social-icon {
+      color: var(--text-muted);
+      font-size: 1.2rem;
+    }
+
+    .social-icon:hover {
+      color: var(--text-primary);
+      transform: translateY(-2px);
+    }
+
+    /* Hero Section */
+    .hero-section {
+      max-width: 1200px;
+      margin: 4rem auto 2rem auto;
+      padding: 0 2rem;
+      text-align: center;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(139, 92, 246, 0.1);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      padding: 0.35rem 1rem;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--accent-violet);
+      margin-bottom: 1.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: 3.5rem;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 1rem;
+      background: linear-gradient(to right, #ffffff, #c084fc, #6366f1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.02em;
+    }
+
+    .hero-subtitle {
+      font-size: 1.25rem;
+      color: var(--text-muted);
+      max-width: 750px;
+      margin: 0 auto 2.5rem auto;
+      font-weight: 300;
+    }
+
+    /* Interactive Simulator */
+    .simulator-container {
+      max-width: 1200px;
+      margin: 0 auto 3rem auto;
+      padding: 0 2rem;
+    }
+
+    .glass-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      padding: 2.5rem;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
+      position: relative;
+      overflow: hidden;
+      transition: var(--transition);
+    }
+
+    .glass-card:hover {
+      border-color: var(--border-glow);
+    }
+
+    .glass-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(to right, var(--accent-violet), var(--accent-cyan));
+    }
+
+    .card-title {
+      font-family: var(--font-display);
+      font-size: 1.75rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .simulation-controls {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      border: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-violet), #7c3aed);
+      color: white;
+      box-shadow: 0 4px 15px var(--accent-violet-glow);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-primary);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateY(-2px);
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, var(--accent-red), #dc2626);
+      color: white;
+      box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+    }
+
+    .btn-danger:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(239, 68, 68, 0.6);
+    }
+
+    /* Flow Chart */
+    .flow-chart {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      margin: 40px 0;
+      flex-wrap: wrap;
+      gap: 24px;
+    }
+
+    @media (max-width: 768px) {
+      .flow-chart {
+        flex-direction: column;
+      }
+    }
+
+    .node {
+      background: rgba(31, 41, 55, 0.6);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 16px 24px;
+      width: 200px;
+      text-align: center;
+      transition: all 0.5s ease;
+      z-index: 2;
+      position: relative;
+    }
+
+    .node-active {
+      border-color: var(--accent-violet);
+      box-shadow: 0 0 20px var(--accent-violet-glow);
+      background: rgba(139, 92, 246, 0.1);
+    }
+
+    .node-cached {
+      border-color: var(--accent-green);
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+      background: rgba(16, 185, 129, 0.1);
+    }
+
+    .node-fault {
+      border-color: var(--accent-red);
+      box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+      background: rgba(239, 68, 68, 0.1);
+      animation: shake 0.5s infinite alternate;
+    }
+
+    .node h4 {
+      font-family: var(--font-display);
+      margin-bottom: 6px;
+      font-size: 1rem;
+    }
+
+    .node p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .node-icon {
+      font-size: 1.5rem;
+      margin-bottom: 8px;
+    }
+
+    .flow-line {
+      flex: 1;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      position: relative;
+      min-width: 40px;
+      transition: all 0.5s ease;
+    }
+
+    @media (max-width: 768px) {
+      .flow-line {
+        width: 4px;
+        height: 40px;
+        min-height: 40px;
+      }
+    }
+
+    .flow-line::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(to right, var(--accent-violet), var(--accent-cyan));
+      transition: width 0.5s ease;
+    }
+
+    .flow-line-active::after {
+      width: 100%;
+      animation: flow-pulse 1.5s infinite linear;
+    }
+
+    .flow-line-cached::after {
+      width: 100%;
+      background: var(--accent-green);
+    }
+
+    .flow-line-fault::after {
+      width: 100%;
+      background: var(--accent-red);
+    }
+
+    /* Terminal Console */
+    .status-terminal {
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 16px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.85rem;
+      height: 150px;
+      overflow-y: auto;
+      color: #38bdf8;
+      box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+    }
+
+    .status-terminal p {
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Columns Grid Layout */
+    .dashboard-grid {
+      max-width: 1200px;
+      margin: 0 auto 4rem auto;
+      padding: 0 2rem;
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 2.5rem;
+      align-items: start;
+    }
+
+    @media (max-width: 968px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Timeline step indicator */
+    .timeline-steps {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .step-item {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+
+    .step-number {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background-color: rgba(139, 92, 246, 0.1);
+      border: 1px solid var(--accent-violet);
+      color: var(--accent-violet);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: 600;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+
+    .step-content {
+      flex-grow: 1;
+    }
+
+    .step-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+      margin-bottom: 0.15rem;
+    }
+
+    .step-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    /* Course Blueprint Cards */
+    .modules-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .module-card {
+      background: rgba(30, 41, 59, 0.4);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 1.5rem;
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .module-card:hover {
+      border-color: rgba(6, 182, 212, 0.3);
+      background: rgba(30, 41, 59, 0.6);
+      transform: translateX(4px);
+    }
+
+    .module-badge {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+      letter-spacing: 0.05em;
+    }
+
+    .module-card h3 {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+
+    .module-card p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+
+    .module-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .link-tag {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 0.75rem;
+      color: #93c5fd;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .link-tag:hover {
+      background: rgba(147, 197, 253, 0.1);
+      border-color: rgba(147, 197, 253, 0.3);
+      color: #ffffff;
+    }
+
+    /* Certification banner */
+    .cert-container {
+      max-width: 1200px;
+      margin: 0 auto 4rem auto;
+      padding: 0 2rem;
+    }
+
+    .cert-banner {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(59, 130, 246, 0.15) 100%);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      border-radius: 24px;
+      padding: 40px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .cert-banner::after {
+      content: '🎓';
+      position: absolute;
+      right: -20px;
+      bottom: -20px;
+      font-size: 8rem;
+      opacity: 0.08;
+      pointer-events: none;
+    }
+
+    .cert-banner h2 {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      margin-bottom: 12px;
+      font-weight: 700;
+    }
+
+    .cert-banner p {
+      max-width: 600px;
+      margin: 0 auto 24px auto;
+      color: var(--text-muted);
+    }
+
+    .cert-banner .btn {
+      display: inline-flex;
+      margin: 0 auto;
+    }
+
+    /* Floating Debug Toggle Button */
+    .debug-toggle-btn {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent-violet), var(--accent-cyan));
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 4px 20px var(--accent-violet-glow);
+      z-index: 999;
+      transition: var(--transition);
+    }
+
+    .debug-toggle-btn:hover {
+      transform: scale(1.1) rotate(15deg);
+      box-shadow: 0 6px 24px rgba(6, 182, 212, 0.6);
+    }
+
+    /* Debug Side Overlay Menu */
+    .debug-menu-overlay {
+      position: fixed;
+      top: 0;
+      right: -420px;
+      width: 400px;
+      height: 100vh;
+      background-color: rgba(11, 15, 25, 0.95);
+      backdrop-filter: blur(20px);
+      border-left: 1px solid var(--border-color);
+      box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+      z-index: 998;
+      transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      padding: 2.5rem 2rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .debug-menu-overlay.open {
+      right: 0;
+    }
+
+    .debug-menu-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 1rem;
+    }
+
+    .debug-menu-title {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .search-wrapper {
+      position: relative;
+      margin-bottom: 1.5rem;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 0.75rem 1rem 0.75rem 2.5rem;
+      background-color: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: white;
+      font-family: var(--font-body);
+      outline: none;
+      transition: var(--transition);
+    }
+
+    .search-input:focus {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 10px rgba(6, 182, 212, 0.2);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 0.85rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+    }
+
+    .debug-links-list {
+      list-style: none;
+      overflow-y: auto;
+      flex-grow: 1;
+      padding-right: 0.5rem;
+    }
+
+    .debug-links-list::-webkit-scrollbar {
+      width: 6px;
+    }
+    .debug-links-list::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .debug-links-list::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+    }
+
+    .debug-item {
+      margin-bottom: 0.5rem;
+    }
+
+    .debug-divider {
+      height: 1px;
+      background-color: var(--border-color);
+      margin: 1rem 0;
+    }
+
+    .debug-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      background-color: rgba(255, 255, 255, 0.02);
+      border: 1px solid transparent;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      transition: var(--transition);
+      color: var(--text-primary);
+    }
+
+    .debug-link:hover {
+      background-color: rgba(6, 182, 212, 0.08);
+      border-color: rgba(6, 182, 212, 0.2);
+      color: var(--accent-cyan);
+      transform: translateX(4px);
+    }
+
+    .debug-link-icon {
+      font-size: 0.85rem;
+      opacity: 0.5;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-top: 40px;
+      border-top: 1px solid var(--border-color);
+      padding-top: 30px;
+    }
+
+    footer a {
+      color: #93c5fd;
+      text-decoration: none;
+    }
+
+    /* Animations */
+    @keyframes pulse {
+      0% { box-shadow: 0 0 10px rgba(139, 92, 246, 0.1); }
+      100% { box-shadow: 0 0 20px rgba(139, 92, 246, 0.3); }
+    }
+
+    @keyframes shake {
+      0% { transform: translate(1px, 1px) rotate(0deg); }
+      10% { transform: translate(-1px, -2px) rotate(-1deg); }
+      20% { transform: translate(-3px, 0px) rotate(1deg); }
+      35% { transform: translate(0px, 2px) rotate(0deg); }
+      50% { transform: translate(1px, -1px) rotate(1deg); }
+      70% { transform: translate(-1px, 2px) rotate(-1deg); }
+      90% { transform: translate(2px, 1px) rotate(0deg); }
+    }
+
+    @keyframes flow-pulse {
+      0% { opacity: 0.6; }
+      50% { opacity: 1; }
+      100% { opacity: 0.6; }
+    }
+
+    @media (max-width: 480px) {
+      .header-container {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1rem;
+      }
+      .debug-menu-overlay {
+        width: 100vw;
+        right: -100vw;
+      }
+      .hero-section {
+        margin-top: 2rem;
+      }
+      .hero-title {
+        font-size: 2.25rem;
+      }
+    }
+
+    /* ── Course Metadata Section ── */
+    .metadata-section {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 2rem;
+    }
+    .metadata-section .section-header {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+    }
+    .meta-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      background: var(--bg-card);
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+    }
+    .meta-table th {
+      background: rgba(139, 92, 246, 0.12);
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 0.55rem 1rem;
+      text-align: left;
+    }
+    .meta-table td {
+      padding: 0.65rem 1rem;
+      border-bottom: 1px solid var(--border-color);
+      vertical-align: top;
+    }
+    .meta-table tr:last-child td { border-bottom: none; }
+    .meta-table td:first-child {
+      color: var(--text-muted);
+      font-weight: 500;
+      width: 220px;
+      white-space: nowrap;
+    }
+    .skill-tag {
+      display: inline-block;
+      background: rgba(139, 92, 246, 0.15);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      color: #c4b5fd;
+      border-radius: 100px;
+      padding: 2px 10px;
+      font-size: 0.8rem;
+      margin: 2px 3px 2px 0;
+    }
+    .tools-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      margin-top: 1.25rem;
+      background: var(--bg-card);
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+    }
+    .tools-table th {
+      background: rgba(6, 182, 212, 0.1);
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 0.55rem 0.85rem;
+      text-align: left;
+    }
+    .tools-table td {
+      padding: 0.6rem 0.85rem;
+      border-bottom: 1px solid var(--border-color);
+      vertical-align: top;
+    }
+    .tools-table tr:last-child td { border-bottom: none; }
+    .valid-badge {
+      color: var(--accent-green);
+      font-size: 0.85rem;
+    }
+    #metaLoadState {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      text-align: center;
+      padding: 1rem;
+    }
+  </style>
+  <script>
+    window.__NAV_FAVS__   = {{.NavFavsJSON}};
+    window.__NAV_CONFIG__ = {{.NavConfigJSON}};
+  </script>
+  <script src="shared/nav.js" defer></script>
+</head>
+<body>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-badge">
+      <i class="fa-solid fa-award"></i> Enterprise Systems & Integration
+    </div>
+    <h1 class="hero-title">Claude AI Certification for Architects</h1>
+    <p class="hero-subtitle">
+      A hands-on, production-grade guide to building secure, optimized, and sovereign AI workflows at enterprise scale. Learn system topologies, custom MCP servers, and prompt optimization.
+    </p>
+  </section>
+
+  <!-- Interactive Simulator Card -->
+  <section class="simulator-container">
+    <div class="glass-card">
+      <h2 class="card-title">
+        <i class="fa-solid fa-laptop-code" style="color: var(--accent-violet);"></i>
+        <span>🕹️ Interactive Architecture Simulator</span>
+      </h2>
+      <div class="simulation-controls">
+        <button id="btn-standard" class="btn btn-primary">⚡ Standard Request</button>
+        <button id="btn-caching" class="btn btn-secondary">🔋 Run Cached Request</button>
+        <button id="btn-outage" class="btn btn-danger">🚨 Trigger Outage Simulation</button>
+      </div>
+
+      <div class="flow-chart">
+        <!-- User / Trigger Node -->
+        <div id="node-user" class="node">
+          <div class="node-icon">👤</div>
+          <h4>User Prompt</h4>
+          <p id="label-user">Awaiting click</p>
+        </div>
+
+        <div id="line-1" class="flow-line"></div>
+
+        <!-- Router / Loop Breaker Node -->
+        <div id="node-router" class="node">
+          <div class="node-icon">🚦</div>
+          <h4>Router / Guards</h4>
+          <p id="label-router">Security & loops checks</p>
+        </div>
+
+        <div id="line-2" class="flow-line"></div>
+
+        <!-- Prompt Caching Node -->
+        <div id="node-cache" class="node">
+          <div class="node-icon">💾</div>
+          <h4>Prompt Cache</h4>
+          <p id="label-cache">Checkpoints</p>
+        </div>
+
+        <div id="line-3" class="flow-line"></div>
+
+        <!-- MCP Server Node -->
+        <div id="node-mcp" class="node">
+          <div class="node-icon">🔒</div>
+          <h4>Fly.io MCP Server</h4>
+          <p id="label-mcp">Data bridge</p>
+        </div>
+      </div>
+
+      <div class="status-terminal" id="terminal">
+        <p>> System ready. Select an execution scenario above to trace payload flow...</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Course Metadata Section (server-rendered by Go) ── -->
+  <section class="metadata-section">
+    <div class="glass-card">
+      <h2 class="section-header">
+        <i class="fa-solid fa-table-list" style="color:var(--accent-violet);"></i>
+        📋 Course Overview &amp; Metadata
+        <span style="margin-left:auto;font-size:0.75rem;font-weight:400;color:var(--text-muted);">Source: Supabase · course_metadata</span>
+      </h2>
+
+      {{if .FetchErr}}
+        <div id="metaLoadState">❌ Failed to load course data: {{.FetchErr}}</div>
+      {{else if .Course}}
+        <table class="meta-table" id="metaTable">
+          <thead><tr><th>Field</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td>📚 Course Title</td><td>{{.Course.CourseTitle}}</td></tr>
+            <tr><td>👤 Instructor</td><td>{{.Course.Instructor}}</td></tr>
+            <tr><td>🎯 Target Audience</td><td>{{.Course.TargetAudience}}</td></tr>
+            <tr><td>⏱️ Total Duration</td><td>{{.Course.TotalDuration}}</td></tr>
+            <tr><td>📊 Difficulty Level</td><td>{{.Course.DifficultyLevel}}</td></tr>
+            <tr><td>🎓 Learning Objectives</td><td>{{range $i, $o := .Course.LearningObjectives}}<div style="margin-bottom:4px;">{{inc $i}}. {{$o}}</div>{{end}}</td></tr>
+            <tr><td>💡 Key Takeaways</td><td>{{.Course.KeyTakeaways}}</td></tr>
+            <tr><td>🌍 Real World Connections</td><td>{{.Course.RealWorldConnections}}</td></tr>
+            <tr><td>📋 Recommended Background</td><td>{{.Course.RecommendedBackground}}</td></tr>
+            <tr><td>🧪 Proof of Learning</td><td>{{.Course.ProofOfLearning}}</td></tr>
+            <tr><td>📝 Course Description</td><td>{{.Course.CourseDescription}}</td></tr>
+            <tr><td>🏷️ Skills</td><td>{{range .Course.Skills}}<span class="skill-tag">{{.}}</span> {{end}}</td></tr>
+          </tbody>
+        </table>
+
+        {{if .Tools}}
+        <div id="toolsWrap" style="margin-top:1.5rem;">
+          <h3 style="font-family:var(--font-display);font-size:1.1rem;font-weight:700;margin-bottom:0.75rem;display:flex;align-items:center;gap:0.5rem;">
+            <i class="fa-solid fa-screwdriver-wrench" style="color:var(--accent-cyan);"></i>
+            🛠️ Tools Used in This Course
+            <span style="font-size:0.75rem;font-weight:400;color:var(--text-muted);margin-left:auto;">Source: Supabase · course_tools</span>
+          </h3>
+          <table class="tools-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Tool</th>
+                <th>Purpose / Use in Course</th>
+                <th>Free or Paid</th>
+                <th>Trial Available</th>
+                <th>Trial Duration &amp; Limits</th>
+                <th>Validity</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{range $i, $t := .Tools}}
+              <tr>
+                <td style="color:var(--text-muted);text-align:center;">{{inc $i}}</td>
+                <td><strong>{{$t.ToolName}}</strong></td>
+                <td>{{or $t.Purpose "—"}}</td>
+                <td>{{or $t.FreeOrPaid "—"}}</td>
+                <td>{{if $t.TrialAvailable}}✅ Yes{{else}}❌ No{{end}}</td>
+                <td>{{or $t.TrialDuration "—"}}</td>
+                <td class="valid-badge">{{or $t.ToolValidity "—"}}</td>
+              </tr>
+              {{end}}
+            </tbody>
+          </table>
+        </div>
+        {{end}}
+      {{else}}
+        <div id="metaLoadState">⚠️ No course data found — run 5_Symbols/sql/course_metadata.sql in Supabase.</div>
+      {{end}}
+    </div>
+  </section>
+
+  <!-- Two-Column Layout: Framework Timeline & Curriculum Blueprint -->
+  <main class="dashboard-grid">
+    
+    <!-- Left column: The 7-Stage Framework -->
+    <section class="glass-card" id="framework-section">
+      <h2 class="card-title">
+        <i class="fa-solid fa-list-ol" style="color: var(--accent-violet);"></i>
+        <span>The 7-Stage Framework</span>
+      </h2>
+      <ul class="timeline-steps">
+        <li class="step-item">
+          <span class="step-number">1</span>
+          <div class="step-content">
+            <h3 class="step-title">Real Unknown</h3>
+            <p class="step-desc">Identifying core problem statements, OKRs, and hypotheses in <a href="markdown_renderer.html?file=1_Real_Unknown/README.md" style="color: var(--accent-cyan); text-decoration: underline;">1_Real_Unknown</a>.</p>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-number">2</span>
+          <div class="step-content">
+            <h3 class="step-title">Environment Setup</h3>
+            <p class="step-desc">Setting up Azure Key Vault secrets, local credentials, and AI tools in <a href="markdown_renderer.html?file=2_Environment/README.md" style="color: var(--accent-cyan); text-decoration: underline;">2_Environment</a>.</p>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-number">3</span>
+          <div class="step-content">
+            <h3 class="step-title">Simulation</h3>
+            <p class="step-desc">Building user journeys, layout simulations, and carousel configs in <a href="markdown_renderer.html?file=3_Simulation/README.md" style="color: var(--accent-cyan); text-decoration: underline;">3_Simulation</a>.</p>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-number">4</span>
+          <div class="step-content">
+            <h3 class="step-title">Formula</h3>
+            <p class="step-desc">Documenting decisions (ADRs) and recipe guides in <a href="markdown_renderer.html?file=4_Formula/README.md" style="color: var(--accent-cyan); text-decoration: underline;">4_Formula</a>.</p>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-number">5</span>
+          <div class="step-content">
+            <h3 class="step-title">Symbols (Code)</h3>
+            <p class="step-desc">Writing the core source code, Docker configs, and workflows in <a href="markdown_renderer.html?file=5_Symbols/README.md" style="color: var(--accent-cyan); text-decoration: underline;">5_Symbols</a>.</p>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-number">6</span>
+          <div class="step-content">
+            <h3 class="step-title">Semblance</h3>
+            <p class="step-desc">Tracking active workarounds, error logs, and learnings in <a href="markdown_renderer.html?file=6_Semblance/README.md" style="color: var(--accent-cyan); text-decoration: underline;">6_Semblance</a>.</p>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-number">7</span>
+          <div class="step-content">
+            <h3 class="step-title">Testing Known</h3>
+            <p class="step-desc">Validating everything against hypotheses and OKRs in <a href="markdown_renderer.html?file=7_Testing_Known/README.md" style="color: var(--accent-cyan); text-decoration: underline;">7_Testing_Known</a>.</p>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <!-- Right column: Course Curriculum modules -->
+    <section class="glass-card">
+      <h2 class="card-title">
+        <i class="fa-solid fa-graduation-cap" style="color: var(--accent-cyan);"></i>
+        <span>Curriculum & Code Blueprints</span>
+      </h2>
+      <div class="modules-list">
+        
+        <!-- Module 1 -->
+        <div class="module-card">
+          <div class="module-badge">Module 1</div>
+          <h3>Claude Ecosystem & Flows</h3>
+          <p>Anatomy of Claude, token mechanics, stateful orchestration loops, and message routing topologies.</p>
+          <div class="module-links">
+            <a href="markdown_renderer.html?file=4_Formula/topologies/multi_agent_flow.md" class="link-tag"><i class="fa-solid fa-file-invoice"></i> Topology Guide</a>
+          </div>
+        </div>
+
+        <!-- Module 2 -->
+        <div class="module-card">
+          <div class="module-badge">Module 2</div>
+          <h3>Model Context Protocol (MCP)</h3>
+          <p>Connecting Claude to secure private databridges (SQLite/PostgreSQL) with read-only boundaries and stdio/SSE transports on Fly.io.</p>
+          <div class="module-links">
+            <a href="markdown_renderer.html?file=5_Symbols/course_src/mcp-server/README.md" class="link-tag"><i class="fa-solid fa-file-invoice"></i> Deploy Guide</a>
+            <a href="markdown_renderer.html?file=5_Symbols/course_src/mcp-server/fly.toml" class="link-tag"><i class="fa-solid fa-code"></i> fly.toml</a>
+          </div>
+        </div>
+
+        <!-- Module 3 -->
+        <div class="module-card">
+          <div class="module-badge">Module 3</div>
+          <h3>Zero-Data Retention (ZDR)</h3>
+          <p>Restricting API endpoints using AWS Bedrock VPC Interface Endpoints (PrivateLink) and implementing strict compliance logs.</p>
+          <div class="module-links">
+            <a href="markdown_renderer.html?file=5_Symbols/course_src/security/ZDR_COMPLIANCE.md" class="link-tag"><i class="fa-solid fa-shield-halved"></i> ZDR Protocol</a>
+            <a href="markdown_renderer.html?file=5_Symbols/templates/aws-bedrock-private-link.tf" class="link-tag"><i class="fa-solid fa-file-code"></i> Terraform Blueprint</a>
+          </div>
+        </div>
+
+        <!-- Module 4 -->
+        <div class="module-card">
+          <div class="module-badge">Module 4</div>
+          <h3>Deterministic Routers</h3>
+          <p>Building specialized agent classifiers and execution circuit-breakers in Python to shut down rogue loops cleanly.</p>
+          <div class="module-links">
+            <a href="markdown_renderer.html?file=5_Symbols/course_src/multi-agent/router.py" class="link-tag"><i class="fa-brands fa-python"></i> router.py</a>
+          </div>
+        </div>
+
+        <!-- Module 5 -->
+        <div class="module-card">
+          <div class="module-badge">Module 5</div>
+          <h3>Financial Engineering</h3>
+          <p>Minimizing enterprise operational overhead by up to 90% using explicit, prefix-matching prompt cache points.</p>
+          <div class="module-links">
+            <a href="markdown_renderer.html?file=5_Symbols/course_src/optimization/cache_layer.py" class="link-tag"><i class="fa-brands fa-python"></i> cache_layer.py</a>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- Certification Banner -->
+  <section class="cert-container">
+    <div class="cert-banner">
+      <h2>🎓 Certification Exam & Case Study</h2>
+      <p>Audit system failures under pressure and test your knowledge on real-world enterprise outage remediation scenarios.</p>
+      <a href="markdown_renderer.html?file=4_Formula/certification/exam_and_case_study.md" class="btn btn-primary">
+        <i class="fa-solid fa-file-signature"></i> Start Exam Walkthrough
+      </a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p style="margin-bottom: 8px;">Built for the <strong><a href="https://www.youtube.com/playlist?list=PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy" target="_blank" style="color: #c084fc;">Claude AI Certification for Architects</a></strong> Masterclass.</p>
+    <p style="margin-bottom: 12px; font-size: 0.85rem; opacity: 0.8;">
+      Instructor: <a href="https://www.linkedin.com/in/rifaterdemsahin" target="_blank" style="color: #93c5fd; text-decoration: underline; margin-right: 16px;">Rifat Erdem Sahin LinkedIn</a>
+      GitHub Project: <a href="https://github.com/rifaterdemsahin/claude-architect-certification" target="_blank" style="color: #93c5fd; text-decoration: underline;">Project Repository</a>
+    </p>
+    <div style="margin-top: 12px; display: flex; justify-content: center; gap: 16px; align-items: center;">
+      <a href="https://github.com/rifaterdemsahin/claude-architect-certification/actions/workflows/static.yml" target="_blank">
+        <img src="https://github.com/rifaterdemsahin/claude-architect-certification/actions/workflows/static.yml/badge.svg" alt="Deploy Status" style="vertical-align: middle;">
+      </a>
+    </div>
+  </footer>
+
+  <!-- Two-Menu Architecture: Menu 2 - Debug Toggle Button -->
+  <button class="debug-toggle-btn" id="debugToggle" title="Toggle Developer Debug Menu">
+    <i class="fa-solid fa-bug"></i>
+  </button>
+
+  <!-- Debug Side Overlay Menu (Hidden by Default) -->
+  <div class="debug-menu-overlay" id="debugMenuOverlay">
+    <div class="debug-menu-header">
+      <h2 class="debug-menu-title">
+        <i class="fa-solid fa-terminal"></i>
+        <span>Debug Menu</span>
+      </h2>
+      <button id="debugClose" style="background:none; border:none; color:white; cursor:pointer; font-size:1.1rem;">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <!-- Search Box with Autocomplete -->
+    <div class="search-wrapper">
+      <i class="fa-solid fa-magnifying-glass search-icon"></i>
+      <input type="text" class="search-input" id="debugSearch" placeholder="Search stages, files, or agents... (Ctrl+K)">
+      <span id="searchMatchCount" style="position:absolute; right:0.85rem; top:50%; transform:translateY(-50%); font-size:0.75rem; color:var(--text-muted);"></span>
+    </div>
+
+    <!-- Debug Menu Links -->
+    <ul class="debug-links-list" id="debugLinksList">
+      <!-- Loaded dynamically via config -->
+    </ul>
+  </div>
+
+  <script>
+    // 📅 Project launch date — dev-phase items are hidden 90 days after this
+    const LAUNCH_DATE = new Date('2026-06-07');
+    const DAY_MS = 1000 * 60 * 60 * 24;
+    const daysSinceLaunch = Math.floor((Date.now() - LAUNCH_DATE.getTime()) / DAY_MS);
+    const showDevPhaseItems = daysSinceLaunch < 90;
+
+    // Nav config is server-rendered into window.__NAV_CONFIG__ — no client-side fallback needed.
+    let navigationData = window.__NAV_CONFIG__ || { projectMenu: [], debugMenu: [] };
+
+    // 🍪 Helper Functions for Cookie Management
+    function setCookie(name, value, days = 7) {
+      const d = new Date();
+      d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
+      document.cookie = `${name}=${value};path=/;expires=${d.toUTCString()};SameSite=Strict`;
+    }
+
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+      return null;
+    }
+
+    function debugLog(message, data = '') {
+      if (getCookie("debug") === "true") {
+        console.log(`%c[Debug Mode] ${message}`, 'color: #06b6d4; font-weight: bold;', data);
+      }
+    }
+
+    // 🖥️ UI Handlers
+    document.addEventListener("DOMContentLoaded", () => {
+      debugLog("DOM content fully loaded. Initializing debug logs...");
+
+      const debugToggle = document.getElementById("debugToggle");
+      const debugClose = document.getElementById("debugClose");
+      const debugMenuOverlay = document.getElementById("debugMenuOverlay");
+      const debugSearch = document.getElementById("debugSearch");
+      const debugLinksList = document.getElementById("debugLinksList");
+      const projectMenuContainer = document.getElementById("projectMenu");
+
+      // Nav config is injected server-side; build menus immediately.
+      initMenus();
+
+      function initMenus() {
+        debugLog("Initializing Project and Debug Menus.", navigationData);
+
+        // Hide dev-phase sections after 90 days from launch
+        if (!showDevPhaseItems) {
+          const frameworkSection = document.getElementById("framework-section");
+          if (frameworkSection) frameworkSection.style.display = "none";
+        }
+
+        // 1. Build Project Menu (legacy fallback — nav is now rendered by shared/nav.js)
+        if (!projectMenuContainer) return;
+
+        function resolveUrl(url) {
+          if (!url) return "#";
+          if (url === "index.html" || url.startsWith("http") || url.includes("markdown_renderer.html") || url.endsWith(".html")) return url;
+          return `markdown_renderer.html?file=${url}`;
+        }
+
+        function getAbsoluteUrl(url) {
+          const a = document.createElement('a');
+          a.href = url;
+          return a.href;
+        }
+
+        function isUrlActive(childUrl) {
+          if (!childUrl || childUrl === '#') return false;
+          const resolved = resolveUrl(childUrl);
+          let absResolved = getAbsoluteUrl(resolved);
+          let absCurrent = window.location.href;
+          
+          absResolved = absResolved.replace(/\/$/, '').replace(/\/index\.html$/, '').split('#')[0];
+          absCurrent = absCurrent.replace(/\/$/, '').replace(/\/index\.html$/, '').split('#')[0];
+          
+          if (absCurrent.includes('markdown_renderer.html')) {
+            const currentParams = new URLSearchParams(window.location.search);
+            const currentFile = currentParams.get('file');
+            if (currentFile) {
+              if (resolved.includes('file=' + currentFile)) {
+                return true;
+              }
+            }
+          }
+          
+          return absResolved === absCurrent;
+        }
+
+        function isItemActive(item) {
+          if (item.children) {
+            return item.children.some(isItemActive);
+          }
+          return isUrlActive(item.url);
+        }
+
+        navigationData.projectMenu.forEach((item) => {
+          if (item.children) {
+            // Dropdown group
+            const visibleChildren = item.children.filter(c => !(c.hideAfterDays && daysSinceLaunch >= c.hideAfterDays));
+            if (!visibleChildren.length) return;
+
+            const isActive = isItemActive(item);
+            const activeClass = isActive ? " active" : "";
+
+            const group = document.createElement("div");
+            group.className = "menu-group" + activeClass;
+
+            const btn = document.createElement("button");
+            btn.className = "menu-group-btn";
+            btn.innerHTML = `${item.label} <span class="chevron">▾</span>`;
+            group.appendChild(btn);
+
+            const dropdown = document.createElement("div");
+            dropdown.className = "menu-dropdown";
+
+             visibleChildren.forEach(child => {
+              const isChildActive = isItemActive(child);
+              const childActiveClass = isChildActive ? " active" : "";
+              if (child.children) {
+                const subVisible = child.children.filter(sc => !(sc.hideAfterDays && daysSinceLaunch >= sc.hideAfterDays));
+                if (!subVisible.length) return;
+
+                const subGroup = document.createElement("div");
+                subGroup.className = "menu-subgroup" + childActiveClass;
+
+                const subBtn = document.createElement("button");
+                subBtn.className = "menu-subgroup-btn";
+                subBtn.innerHTML = `${child.label} <span class="chevron-right">▸</span>`;
+                subGroup.appendChild(subBtn);
+
+                const subDropdown = document.createElement("div");
+                subDropdown.className = "menu-subdropdown";
+
+                subVisible.forEach(subChild => {
+                  const isSubChildActive = isItemActive(subChild);
+                  const subChildActiveClass = isSubChildActive ? " active" : "";
+                  const subA = document.createElement("a");
+                  subA.href = resolveUrl(subChild.url);
+                  subA.className = "subdropdown-link" + subChildActiveClass;
+                  subA.textContent = subChild.label;
+                  subDropdown.appendChild(subA);
+                });
+
+                subGroup.appendChild(subDropdown);
+                dropdown.appendChild(subGroup);
+              } else {
+                const a = document.createElement("a");
+                a.href = resolveUrl(child.url);
+                a.className = "dropdown-link" + childActiveClass;
+                a.textContent = child.label;
+                dropdown.appendChild(a);
+              }
+            });
+
+            group.appendChild(dropdown);
+            projectMenuContainer.appendChild(group);
+          } else {
+            // Flat link
+            if (item.hideAfterDays && daysSinceLaunch >= item.hideAfterDays) return;
+            const isActive = isItemActive(item);
+            const activeClass = isActive ? " active" : "";
+            const link = document.createElement("a");
+            link.href = resolveUrl(item.url);
+            link.className = "menu-link" + activeClass;
+            link.textContent = item.label;
+            projectMenuContainer.appendChild(link);
+          }
+        });
+
+        // 2. Build Debug Menu
+        buildDebugMenu();
+      }
+
+      function buildDebugMenu(filterText = "") {
+        debugLog(`Building Debug Menu with filter: "${filterText}"`);
+        debugLinksList.innerHTML = "";
+        const query = filterText.toLowerCase();
+        const matchCount = document.getElementById("searchMatchCount");
+        let visibleCount = 0;
+
+        navigationData.debugMenu.forEach(item => {
+          const labelLower = item.label.toLowerCase();
+          const urlLower = item.url.toLowerCase();
+          const matchesQuery = !query ||
+            labelLower.includes(query) ||
+            urlLower.includes(query) ||
+            urlLower.replace(/^markdown_renderer\.html\?file=/, "").includes(query);
+
+          if (query && item.label === "---") return;
+          if (query && !matchesQuery) return;
+
+          if (item.label === "---") {
+            const divider = document.createElement("li");
+            divider.className = "debug-divider";
+            debugLinksList.appendChild(divider);
+          } else {
+            visibleCount++;
+            const li = document.createElement("li");
+            li.className = "debug-item";
+            
+            const a = document.createElement("a");
+            // URLs in navigation_config.json are already fully resolved.
+            // Only auto-prefix bare .md paths from the minimal offline fallback.
+            let finalUrl = item.url;
+            if (finalUrl && finalUrl !== "divider" && !finalUrl.startsWith("http") &&
+                !finalUrl.includes("markdown_renderer.html") && !finalUrl.endsWith(".html") &&
+                !finalUrl.endsWith("/")) {
+              finalUrl = `markdown_renderer.html?file=${finalUrl}`;
+            }
+
+            // Heading entries (no URL) render as non-clickable labels
+            if (!item.url || item.url === "divider") {
+              a.className = "debug-link";
+              a.style.cursor = "default";
+              a.style.opacity = "0.7";
+              a.href = "#";
+              a.addEventListener("click", (e) => e.preventDefault());
+              a.innerHTML = `<span>${item.label}</span>`;
+            } else {
+              a.href = finalUrl;
+              a.className = "debug-link";
+              a.innerHTML = `<span>${item.label}</span><i class="fa-solid fa-chevron-right debug-link-icon"></i>`;
+            }
+            li.appendChild(a);
+            debugLinksList.appendChild(li);
+          }
+        });
+
+        if (matchCount) {
+          const total = navigationData.debugMenu.filter(i => i.label !== "---").length;
+          matchCount.textContent = query ? `${visibleCount}/${total}` : `${total}`;
+        }
+
+        if (visibleCount === 0 && query) {
+          const noResult = document.createElement("li");
+          noResult.className = "debug-item";
+          noResult.innerHTML = `<div class="debug-link" style="justify-content:center; opacity:0.5;">No results for "${filterText}"</div>`;
+          debugLinksList.appendChild(noResult);
+        }
+      }
+
+      // Search Autocomplete Listener
+      debugSearch.addEventListener("input", (e) => {
+        buildDebugMenu(e.target.value);
+      });
+
+      // Keyboard shortcuts: Ctrl+K / Cmd+K to focus search, Esc to close
+      document.addEventListener("keydown", (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+          e.preventDefault();
+          if (!debugMenuOverlay.classList.contains("open")) {
+            debugMenuOverlay.classList.add("open");
+            setCookie("debug", "true");
+          }
+          debugSearch.focus();
+        }
+        if (e.key === "Escape" && debugMenuOverlay.classList.contains("open")) {
+          debugMenuOverlay.classList.remove("open");
+          setCookie("debug", "false");
+          debugSearch.blur();
+        }
+      });
+
+      // Cookie state
+      const debugState = getCookie("debug");
+      if (debugState === "true") {
+        debugMenuOverlay.classList.add("open");
+      }
+
+      debugToggle.addEventListener("click", () => {
+        const isOpen = debugMenuOverlay.classList.toggle("open");
+        setCookie("debug", isOpen ? "true" : "false");
+      });
+
+      debugClose.addEventListener("click", () => {
+        debugMenuOverlay.classList.remove("open");
+        setCookie("debug", "false");
+      });
+    });
+
+    // ==========================================
+    // 🕹️ Simulator Script Logic
+    // ==========================================
+    const term = document.getElementById('terminal');
+    const nodes = {
+      user: document.getElementById('node-user'),
+      router: document.getElementById('node-router'),
+      cache: document.getElementById('node-cache'),
+      mcp: document.getElementById('node-mcp')
+    };
+    const lines = {
+      l1: document.getElementById('line-1'),
+      l2: document.getElementById('line-2'),
+      l3: document.getElementById('line-3')
+    };
+    const labels = {
+      user: document.getElementById('label-user'),
+      router: document.getElementById('label-router'),
+      cache: document.getElementById('label-cache'),
+      mcp: document.getElementById('label-mcp')
+    };
+
+    function resetNodes() {
+      Object.values(nodes).forEach(n => n.className = 'node');
+      Object.values(lines).forEach(l => l.className = 'flow-line');
+      labels.user.textContent = 'Awaiting click';
+      labels.router.textContent = 'Security & loops checks';
+      labels.cache.textContent = 'Checkpoints';
+      labels.mcp.textContent = 'Data bridge';
+    }
+
+    function termLog(text, color = '#38bdf8') {
+      const p = document.createElement('p');
+      p.style.color = color;
+      p.textContent = `> ${text}`;
+      term.appendChild(p);
+      term.scrollTop = term.scrollHeight;
+    }
+
+    document.getElementById('btn-standard').addEventListener('click', () => {
+      resetNodes();
+      term.innerHTML = '';
+      termLog('Initiating Standard User Request...');
+      
+      setTimeout(() => {
+        nodes.user.classList.add('node-active');
+        labels.user.textContent = 'User: "Query stock in eu-west-1"';
+        lines.l1.classList.add('flow-line-active');
+        termLog('Dispatching prompt payload to Router classifier...', '#818cf8');
+      }, 300);
+
+      setTimeout(() => {
+        nodes.router.classList.add('node-active');
+        labels.router.textContent = 'Router: INVENTORY_AGENT routed';
+        lines.l2.classList.add('flow-line-active');
+        termLog('No cache token found. Evaluating full context prompt (Cache Write)...', '#818cf8');
+      }, 1000);
+
+      setTimeout(() => {
+        nodes.cache.classList.add('node-active');
+        labels.cache.textContent = 'Cache: Ephemeral Write';
+        lines.l3.classList.add('flow-line-active');
+        termLog('Writing context block to edge cache (100% cost)...', '#f43f5e');
+      }, 1800);
+
+      setTimeout(() => {
+        nodes.mcp.classList.add('node-active');
+        labels.mcp.textContent = 'MCP Server: SQLite query run';
+        termLog('SUCCESS: SQL parameters bound. Returning SKU stock data.', '#10b981');
+      }, 2600);
+    });
+
+    document.getElementById('btn-caching').addEventListener('click', () => {
+      resetNodes();
+      term.innerHTML = '';
+      termLog('Initiating Warm User Request (Identical context payload)...');
+      
+      setTimeout(() => {
+        nodes.user.classList.add('node-cached');
+        labels.user.textContent = 'User: "Optimize stock ratios"';
+        lines.l1.className = 'flow-line flow-line-cached';
+        termLog('Dispatching payload to Router...', '#10b981');
+      }, 300);
+
+      setTimeout(() => {
+        nodes.router.classList.add('node-cached');
+        labels.router.textContent = 'Router: Dispatched';
+        lines.l2.className = 'flow-line flow-line-cached';
+        termLog('Matching prefix... Ephemeral cache hit detected!', '#10b981');
+      }, 900);
+
+      setTimeout(() => {
+        nodes.cache.classList.add('node-cached');
+        labels.cache.textContent = 'Cache: 100% Hit (90% cost cut)';
+        lines.l3.className = 'flow-line flow-line-cached';
+        termLog('Cache read hit. Zero latency overhead introduced.', '#10b981');
+      }, 1500);
+
+      setTimeout(() => {
+        nodes.mcp.classList.add('node-cached');
+        labels.mcp.textContent = 'MCP Server: Response completed';
+        termLog('SUCCESS: Optimization advice dispatched to client.', '#10b981');
+      }, 2100);
+    });
+
+    document.getElementById('btn-outage').addEventListener('click', () => {
+      resetNodes();
+      term.innerHTML = '';
+      termLog('CRITICAL OUTAGE SCENARIO INITIATED: Malformed input recursion loop', '#ef4444');
+      
+      setTimeout(() => {
+        nodes.user.className = 'node node-fault';
+        labels.user.textContent = 'User: Malformed circular receipt';
+        lines.l1.className = 'flow-line flow-line-fault';
+        termLog('Agent loop depth counter triggered. Depth: 1', '#ef4444');
+      }, 400);
+
+      setTimeout(() => {
+        nodes.router.className = 'node node-fault';
+        labels.router.textContent = 'Router: Recursive cycles detected';
+        lines.l2.className = 'flow-line flow-line-fault';
+        termLog('Warning: Agent attempting recursive call. Depth: 2', '#f59e0b');
+      }, 1000);
+
+      setTimeout(() => {
+        nodes.cache.className = 'node node-fault';
+        labels.cache.textContent = 'Loop Breaker Tripped!';
+        lines.l3.className = 'flow-line flow-line-fault';
+        termLog('SHUTDOWN: max_loop_depth (3) exceeded. Circuit breaker tripped!', '#ef4444');
+      }, 1600);
+
+      setTimeout(() => {
+        nodes.mcp.className = 'node node-fault';
+        labels.mcp.textContent = 'Database Isolated';
+        termLog('ALERT: Execution halted to protect downstream DB connection pool and API tokens.', '#ef4444');
+      }, 2200);
+    });
+  </script>
+
+  <!-- Supabase client-side fetch removed: data is now server-rendered by Go -->
+
+</body>
+</html>
+{{end}}
