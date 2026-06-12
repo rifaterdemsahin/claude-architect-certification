@@ -60,6 +60,7 @@
 │
 ├── tools/                     ← Developer tooling configuration
 │   ├── vscode_extensions.md
+│   ├── supabase_setup_formula.md
 │   ├── markdown_preview_auto.md
 │   ├── axiom_logging_setup.md
 │   ├── axiom_query_guide.md

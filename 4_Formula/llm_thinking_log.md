@@ -18,3 +18,20 @@ Remove the Supabase connection dependency from the Producer Checklist page ([pro
    - Keep the clean design, Outfit/Jakarta typography, glassmorphism UI rules, and active top navigation links.
 3. **Validation**:
    - Ensure the app builds, renders default steps, and supports CRUD operations in the browser without attempting any database calls.
+
+## 2026-06-12 — Install Supabase VS Code Extensions and Create Setup Formula
+
+### 🎯 Objective
+Install PostgreSQL, Supabase, and Deno VS Code extensions to optimize developer workflow, and create a comprehensive setup and formula guide at [supabase_setup_formula.md](file:///Users/rifaterdemsahin/projects/claude-architect-certification/4_Formula/tools/supabase_setup_formula.md).
+
+### 📐 Design & Implementation Plan
+1. **Extension Installation**:
+   - Install/verify `Supabase.vscode-supabase-extension` (Official Supabase Extension).
+   - Install/verify `ckolkman.vscode-postgres` (PostgreSQL Client).
+   - Install/verify `denoland.vscode-deno` (Deno for Supabase Edge Functions).
+2. **Create Formula Document**:
+   - Create a comprehensive formula guide `4_Formula/tools/supabase_setup_formula.md` documenting the installed extensions, configuration settings, CLI requirements, local database setup, edge function configurations, and verification steps.
+3. **Sync Configuration**:
+   - Register the new document in the navigation files (`navigation_config.json` and index/markdown fallbacks).
+4. **Validation**:
+   - Run link checker or verify relative links.

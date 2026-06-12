@@ -367,8 +367,12 @@
       "url": "markdown_renderer.html?file=4_Formula/tools/markdown_preview_auto.md"
     },
     {
-      "label": "   └─ 🔧 Tools: VS Code Extensions",
+      "label": "   ├─ 🔧 Tools: VS Code Extensions",
       "url": "markdown_renderer.html?file=4_Formula/tools/vscode_extensions.md"
+    },
+    {
+      "label": "   └─ 🛢️ Tools: Supabase Setup Formula",
+      "url": "markdown_renderer.html?file=4_Formula/tools/supabase_setup_formula.md"
     },
 
     { "label": "📁 5. Symbols (Code)", "url": "5_Symbols/" },
