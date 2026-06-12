@@ -55,21 +55,23 @@ Add functionality to relate research assets (images, audio, videos, notes) direc
 4. **Validation**:
    - Ensure the scripts interface handles listing, linking, and unlinking successfully.
 
-## 2026-06-12 — Create Edit List Page with Canva Embed
+## 2026-06-12 — Dynamic Video Edit List with CRUD Operations
 
 ### 🎯 Objective
-Create a new "Edit List" page in the post-production section (`5_Symbols/production/postprod/edit_list.html`) to track editing tasks and embed the Module 1 Video 1 Canva presentation.
+Transform the static "Edit List" page (`5_Symbols/production/postprod/edit_list.html`) into a dynamic CRUD application that allows managing video embeds (Add, Edit, Delete) using `localStorage`.
 
 ### 📐 Design & Implementation Plan
-1. **File Creation**: Create `5_Symbols/production/postprod/edit_list.html`.
-2. **Content Integration**:
-   - Embed the Canva video using the provided iframe code.
-   - Include a direct link to the Canva design.
-   - Follow the project's visual style (Flexbox/Grid, Glassmorphism, Emojis).
-3. **Navigation Update**:
-   - Add the new page to `navigation_config.json`.
-   - Update fallback arrays in `index.html` and `markdown_renderer.html`.
-4. **Documentation**: Update `5_Symbols/production/postprod/README.md` if necessary.
-5. **Validation**: Verify the page renders correctly and links are functional.
+1. **Data Model**: Define a video object structure: `{ id, title, description, canvaUrl, embedUrl }`.
+2. **UI Components**:
+   - **Video Table**: A glassmorphic table displaying video titles, descriptions, and action buttons (View, Edit, Delete).
+   - **Management Form**: A hidden or modal form for adding and editing video details.
+   - **Embed Preview**: A dynamic preview area that loads the selected video's Canva iframe.
+3. **JavaScript Logic**:
+   - `loadVideos()`: Fetch from `localStorage` or seed with defaults (Video 1 & 2).
+   - `renderTable()`: Update the DOM with the current video list.
+   - `saveVideo()`: Handle both create and update operations.
+   - `deleteVideo()`: Remove an entry and refresh.
+   - `previewVideo()`: Update the iframe source.
+4. **Validation**: Ensure data persistence across sessions and clean UI transitions.
 
 

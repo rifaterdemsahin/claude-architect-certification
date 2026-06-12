@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Edit List | Module 1 Videos</title>
+  <title>Edit List | Dynamic Manager</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -18,6 +18,7 @@
       --primary-glow: rgba(139, 92, 246, 0.6);
       --secondary: #3b82f6;
       --success: #10b981;
+      --danger: #ef4444;
       --font-title: 'Outfit', sans-serif;
       --font-body: 'Plus Jakarta Sans', sans-serif;
     }
@@ -41,52 +42,97 @@
     header h1 { font-family: var(--font-title); font-size: 3rem; font-weight: 900; letter-spacing: -0.02em; margin-bottom: 10px; }
     header p { font-size: 1.2rem; color: var(--text-muted); }
 
-    .video-container {
+    .glass-card {
       background: var(--bg-card);
       border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 24px;
       padding: 32px;
       margin-bottom: 40px;
       box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(12px);
     }
 
+    /* Table Styles */
+    .video-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    .video-table th {
+      text-align: left;
+      padding: 16px;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+    }
+    .video-table td {
+      padding: 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .video-table tr:hover { background: rgba(255, 255, 255, 0.02); }
+
+    /* Form Styles */
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-muted); }
+    .form-group input, .form-group textarea {
+      width: 100%;
+      padding: 12px 16px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      color: white;
+      font-family: inherit;
+    }
+    .form-group input:focus { border-color: var(--primary); outline: none; }
+
+    /* Buttons */
+    .btn {
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-secondary { background: rgba(255, 255, 255, 0.1); color: white; }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-success { background: var(--success); color: white; }
+    .btn:hover { transform: translateY(-2px); opacity: 0.9; }
+
+    /* Modal Overlay */
+    #modal-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      backdrop-filter: blur(4px);
+    }
+    .modal-content { width: 100%; max-width: 600px; }
+
+    /* Embed Preview */
+    .preview-container { margin-top: 40px; display: none; }
     .canva-embed-wrapper {
       position: relative;
       width: 100%;
       height: 0;
-      padding-top: 56.2500%;
-      padding-bottom: 0;
-      box-shadow: 0 2px 8px 0 rgba(63,69,81,0.16);
-      margin-top: 1.6em;
-      margin-bottom: 0.9em;
+      padding-top: 56.25%;
+      border-radius: 16px;
       overflow: hidden;
-      border-radius: 8px;
-      will-change: transform;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
     }
-
     .canva-embed-wrapper iframe {
       position: absolute;
-      width: 100%;
-      height: 100%;
-      top: 0;
-      left: 0;
+      top: 0; left: 0; width: 100%; height: 100%;
       border: none;
-      padding: 0;
-      margin: 0;
-    }
-
-    .canva-link {
-      display: inline-block;
-      margin-top: 20px;
-      color: var(--secondary);
-      text-decoration: none;
-      font-weight: 700;
-      font-size: 1.1rem;
-      transition: color 0.2s;
-    }
-
-    .canva-link:hover {
-      color: var(--primary);
     }
 
     footer {
@@ -95,47 +141,50 @@
       padding-top: 40px;
       border-top: 1px solid rgba(255, 255, 255, 0.1);
     }
-
-    .nav-links {
-      display: flex;
-      justify-content: center;
-      gap: 30px;
-      flex-wrap: wrap;
-    }
-
-    .nav-links a {
-      color: var(--text-muted);
-      text-decoration: none;
-      font-weight: 600;
-      transition: color 0.2s;
-    }
-
-    .nav-links a:hover {
-      color: var(--primary);
-    }
+    .nav-links { display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; }
+    .nav-links a { color: var(--text-muted); text-decoration: none; font-weight: 600; }
+    .nav-links a:hover { color: var(--primary); }
   </style>
 </head>
 <body>
   <div class="container">
     <header>
-      <h1>🎬 Edit List</h1>
-      <p>Module 1 — Certification Course Videos</p>
+      <h1>🎬 Edit List Manager</h1>
+      <p>Dynamic Content Management for Certification Videos</p>
     </header>
 
-    <div class="video-container">
-      <h2 style="font-family: var(--font-title); margin-bottom: 16px;">📹 Video 1: Architecture Overview</h2>
-      <div class="canva-embed-wrapper">
-        <iframe loading="lazy" src="https://www.canva.com/design/DAHMZNdrN90/y4fhG1KiyiKQiv9HzbGMKA/watch?embed" allowfullscreen="allowfullscreen" allow="fullscreen"></iframe>
+    <div class="glass-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <h2 style="font-family: var(--font-title);">📁 Video Registry</h2>
+        <button class="btn btn-primary" onclick="openModal()">➕ Add Video</button>
       </div>
-      <a href="https://www.canva.com/design/DAHMZNdrN90/y4fhG1KiyiKQiv9HzbGMKA/watch?utm_content=DAHMZNdrN90&amp;utm_campaign=designshare&amp;utm_medium=embeds&amp;utm_source=link" target="_blank" rel="noopener" class="canva-link">🔗 View Module 1 Video 1 on Canva</a>
+
+      <table class="video-table">
+        <thead>
+          <tr>
+            <th>Video Title</th>
+            <th>Description</th>
+            <th style="width: 250px;">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="video-list-body">
+          <!-- Dynamically populated -->
+        </tbody>
+      </table>
     </div>
 
-    <div class="video-container">
-      <h2 style="font-family: var(--font-title); margin-bottom: 16px;">📹 Video 2: Stage 1 - Real Unknown</h2>
-      <div class="canva-embed-wrapper">
-        <iframe loading="lazy" src="https://www.canva.com/design/DAHMZOwYX0s/kZJZiDd29p-risELh91t7A/watch?embed" allowfullscreen="allowfullscreen" allow="fullscreen"></iframe>
+    <!-- Preview Section -->
+    <div id="preview-section" class="preview-container">
+      <div class="glass-card">
+        <h2 id="preview-title" style="font-family: var(--font-title); margin-bottom: 16px;">📹 Preview</h2>
+        <div class="canva-embed-wrapper">
+          <iframe id="preview-iframe" loading="lazy" allowfullscreen="allowfullscreen" allow="fullscreen"></iframe>
+        </div>
+        <div style="margin-top: 16px; display: flex; justify-content: space-between;">
+          <a id="preview-link" href="#" target="_blank" class="btn btn-secondary" style="text-decoration: none;">🔗 Open in Canva</a>
+          <button class="btn btn-danger" onclick="closePreview()">❌ Close Preview</button>
+        </div>
       </div>
-      <a href="https://www.canva.com/design/DAHMZOwYX0s/kZJZiDd29p-risELh91t7A/watch?utm_content=DAHMZOwYX0s&amp;utm_campaign=designshare&amp;utm_medium=embeds&amp;utm_source=link" target="_blank" rel="noopener" class="canva-link">🔗 View Module 1 Video 2 on Canva</a>
     </div>
 
     <footer>
@@ -149,9 +198,178 @@
     </footer>
   </div>
 
+  <!-- Modal Form -->
+  <div id="modal-overlay">
+    <div class="modal-content glass-card">
+      <h2 id="modal-title" style="font-family: var(--font-title); margin-bottom: 24px;">Add New Video</h2>
+      <form id="video-form" onsubmit="handleFormSubmit(event)">
+        <input type="hidden" id="edit-id">
+        <div class="form-group">
+          <label>Video Title</label>
+          <input type="text" id="video-title" required placeholder="e.g., Video 1: Architecture Overview">
+        </div>
+        <div class="form-group">
+          <label>Short Description</label>
+          <textarea id="video-desc" rows="2" placeholder="What is this video about?"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Canva Embed URL</label>
+          <input type="url" id="embed-url" required placeholder="https://www.canva.com/design/.../watch?embed">
+        </div>
+        <div class="form-group">
+          <label>Canva Share URL</label>
+          <input type="url" id="share-url" required placeholder="https://www.canva.com/design/.../watch">
+        </div>
+        <div style="display: flex; gap: 12px; margin-top: 30px;">
+          <button type="submit" class="btn btn-primary" style="flex: 1;">💾 Save Video</button>
+          <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <button id="debug-btn" style="position: fixed; bottom: 20px; right: 20px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 10px; border-radius: 50%; cursor: pointer; z-index: 1000;">🐞</button>
 
   <script src="../../../shared/debug-panel.js"></script>
   <script src="../../../shared/nav.js"></script>
+
+  <script>
+    let videos = [];
+    const STORAGE_KEY = 'certification_videos';
+
+    // Initial Seeds
+    const SEED_VIDEOS = [
+      {
+        id: Date.now(),
+        title: 'Video 1: Architecture Overview',
+        desc: 'Core architecture overview and high-level project goals.',
+        embedUrl: 'https://www.canva.com/design/DAHMZNdrN90/y4fhG1KiyiKQiv9HzbGMKA/watch?embed',
+        shareUrl: 'https://www.canva.com/design/DAHMZNdrN90/y4fhG1KiyiKQiv9HzbGMKA/watch'
+      },
+      {
+        id: Date.now() + 1,
+        title: 'Video 2: Stage 1 - Real Unknown',
+        desc: 'Deep dive into Stage 1 problem definitions and OKRs.',
+        embedUrl: 'https://www.canva.com/design/DAHMZOwYX0s/kZJZiDd29p-risELh91t7A/watch?embed',
+        shareUrl: 'https://www.canva.com/design/DAHMZOwYX0s/kZJZiDd29p-risELh91t7A/watch'
+      }
+    ];
+
+    function init() {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        videos = JSON.parse(stored);
+      } else {
+        videos = [...SEED_VIDEOS];
+        saveToStorage();
+      }
+      renderTable();
+    }
+
+    function saveToStorage() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(videos));
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('video-list-body');
+      tbody.innerHTML = '';
+      
+      videos.forEach(v => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${v.title}</strong></td>
+          <td style="color: var(--text-muted); font-size: 0.9rem;">${v.desc}</td>
+          <td>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-success" onclick="previewVideo(${v.id})" style="padding: 6px 12px; font-size: 0.8rem;">👁️ View</button>
+              <button class="btn btn-secondary" onclick="editVideo(${v.id})" style="padding: 6px 12px; font-size: 0.8rem;">✏️ Edit</button>
+              <button class="btn btn-danger" onclick="deleteVideo(${v.id})" style="padding: 6px 12px; font-size: 0.8rem;">🗑️</button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function openModal(id = null) {
+      const overlay = document.getElementById('modal-overlay');
+      const form = document.getElementById('video-form');
+      const title = document.getElementById('modal-title');
+      
+      form.reset();
+      document.getElementById('edit-id').value = '';
+      
+      if (id) {
+        const v = videos.find(x => x.id === id);
+        title.innerText = 'Edit Video Entry';
+        document.getElementById('edit-id').value = v.id;
+        document.getElementById('video-title').value = v.title;
+        document.getElementById('video-desc').value = v.desc;
+        document.getElementById('embed-url').value = v.embedUrl;
+        document.getElementById('share-url').value = v.shareUrl;
+      } else {
+        title.innerText = 'Add New Video';
+      }
+      
+      overlay.style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('modal-overlay').style.display = 'none';
+    }
+
+    function handleFormSubmit(e) {
+      e.preventDefault();
+      const id = document.getElementById('edit-id').value;
+      const data = {
+        id: id ? parseInt(id) : Date.now(),
+        title: document.getElementById('video-title').value,
+        desc: document.getElementById('video-desc').value,
+        embedUrl: document.getElementById('embed-url').value,
+        shareUrl: document.getElementById('share-url').value
+      };
+
+      if (id) {
+        videos = videos.map(v => v.id === parseInt(id) ? data : v);
+      } else {
+        videos.push(data);
+      }
+
+      saveToStorage();
+      renderTable();
+      closeModal();
+    }
+
+    function deleteVideo(id) {
+      if (confirm('Are you sure you want to delete this video entry?')) {
+        videos = videos.filter(v => v.id !== id);
+        saveToStorage();
+        renderTable();
+        closePreview();
+      }
+    }
+
+    function editVideo(id) {
+      openModal(id);
+    }
+
+    function previewVideo(id) {
+      const v = videos.find(x => x.id === id);
+      document.getElementById('preview-section').style.display = 'block';
+      document.getElementById('preview-title').innerText = '📹 ' + v.title;
+      document.getElementById('preview-iframe').src = v.embedUrl;
+      document.getElementById('preview-link').href = v.shareUrl;
+      
+      // Scroll to preview
+      window.scrollTo({ top: document.getElementById('preview-section').offsetTop - 100, behavior: 'smooth' });
+    }
+
+    function closePreview() {
+      document.getElementById('preview-section').style.display = 'none';
+      document.getElementById('preview-iframe').src = '';
+    }
+
+    init();
+  </script>
 </body>
 </html>
