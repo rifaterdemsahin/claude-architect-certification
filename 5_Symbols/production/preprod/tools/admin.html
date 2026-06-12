@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🔧 Data Admin | Pre-Production</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&family=Fira+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --bg: #030712; --card: rgba(17,24,39,0.92); --card2: rgba(10,16,28,0.95);
+      --border: rgba(255,255,255,0.07); --border-accent: rgba(139,92,246,0.25);
+      --text: #f3f4f6; --muted: #6b7280; --muted2: #9ca3af;
+      --primary: #8b5cf6; --secondary: #3b82f6; --green: #10b981;
+      --yellow: #f59e0b; --red: #ef4444; --teal: #06b6d4;
+      --font-h: 'Outfit', sans-serif; --font-b: 'Plus Jakarta Sans', sans-serif;
+      --font-mono: 'Fira Mono', 'Consolas', monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      background-image: radial-gradient(circle at 8% 15%, rgba(139,92,246,0.07) 0%, transparent 45%),
+                        radial-gradient(circle at 92% 85%, rgba(59,130,246,0.06) 0%, transparent 45%);
+      color: var(--text); font-family: var(--font-b); line-height: 1.6;
+      padding: 32px 24px 100px;
+    }
+    .container { max-width: 1200px; margin: 0 auto; }
+
+    /* ── Header ── */
+    .page-badge { display: inline-block; padding: 5px 14px; background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(139,92,246,0.2)); border: 1px solid rgba(245,158,11,0.3); border-radius: 100px; font-size: 0.75rem; font-weight: 700; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; }
+    h1 { font-family: var(--font-h); font-size: 2.2rem; font-weight: 800; margin-bottom: 6px; }
+    .subtitle { color: var(--muted2); margin-bottom: 28px; font-size: 0.95rem; }
+
+    /* ── Status bar ── */
+    .status-bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 28px; padding: 12px 18px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; }
+    .status-pill { display: inline-flex; align-items: center; gap: 6px; font-size: 0.78rem; font-weight: 700; padding: 4px 12px; border-radius: 100px; }
+    .status-pill.ok    { background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3); color: #34d399; }
+    .status-pill.warn  { background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.3); color: #fbbf24; }
+    .status-pill.err   { background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3); color: #f87171; }
+    .status-pill.info  { background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.3); color: #93c5fd; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+
+    /* ── Tabs ── */
+    .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 28px; border-bottom: 1px solid var(--border); padding-bottom: 14px; }
+    .tab { padding: 9px 20px; border-radius: 10px; border: 1px solid transparent; background: transparent; color: var(--muted2); cursor: pointer; font-size: 0.88rem; font-weight: 600; font-family: var(--font-b); transition: all 0.2s; }
+    .tab:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+    .tab.active { background: rgba(139,92,246,0.15); border-color: var(--border-accent); color: var(--text); }
+    .pane { display: none; }
+    .pane.active { display: block; }
+
+    /* ── Section heading ── */
+    .section-title { font-family: var(--font-h); font-size: 1.1rem; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+    .section-title span { font-size: 0.72rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 5px; padding: 2px 8px; }
+
+    /* ── Schema cards ── */
+    .schema-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    .schema-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+    .schema-card-header { padding: 14px 16px 10px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+    .schema-table-name { font-family: var(--font-mono); font-size: 0.9rem; font-weight: 600; color: #c084fc; }
+    .schema-group-badge { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 2px 7px; border-radius: 4px; }
+    .badge-core   { background: rgba(16,185,129,0.15);  color: #34d399; border: 1px solid rgba(16,185,129,0.25); }
+    .badge-prod   { background: rgba(139,92,246,0.15); color: #c084fc; border: 1px solid rgba(139,92,246,0.25); }
+    .badge-learner{ background: rgba(59,130,246,0.15);  color: #93c5fd; border: 1px solid rgba(59,130,246,0.25); }
+    .badge-research{ background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.25); }
+    .schema-fields { padding: 10px 16px 14px; display: flex; flex-direction: column; gap: 4px; }
+    .field-row { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; }
+    .field-name { font-family: var(--font-mono); color: var(--text); min-width: 120px; }
+    .field-type { color: var(--muted); font-size: 0.72rem; font-family: var(--font-mono); }
+    .field-fk { font-size: 0.68rem; color: #fbbf24; background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.2); border-radius: 4px; padding: 1px 5px; font-family: var(--font-mono); }
+    .field-pk { font-size: 0.65rem; color: #34d399; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2); border-radius: 3px; padding: 1px 5px; font-family: var(--font-mono); flex-shrink: 0; }
+    .schema-row-count { font-size: 0.72rem; color: var(--muted); padding: 0 16px 10px; font-family: var(--font-mono); }
+
+    /* ── Relationship map ── */
+    .rel-flow { display: flex; flex-direction: column; gap: 20px; }
+    .rel-group { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; }
+    .rel-group-title { font-family: var(--font-h); font-size: 0.95rem; font-weight: 700; margin-bottom: 14px; color: var(--muted2); text-transform: uppercase; letter-spacing: 0.07em; font-size: 0.78rem; }
+    .rel-chain { display: flex; align-items: center; flex-wrap: wrap; gap: 0; }
+    .rel-node { background: rgba(139,92,246,0.1); border: 1px solid rgba(139,92,246,0.25); border-radius: 8px; padding: 7px 14px; font-family: var(--font-mono); font-size: 0.82rem; color: #c084fc; white-space: nowrap; }
+    .rel-node.green  { background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.25); color: #34d399; }
+    .rel-node.blue   { background: rgba(59,130,246,0.1); border-color: rgba(59,130,246,0.25); color: #93c5fd; }
+    .rel-node.yellow { background: rgba(245,158,11,0.1); border-color: rgba(245,158,11,0.25); color: #fbbf24; }
+    .rel-node.teal   { background: rgba(6,182,212,0.1);  border-color: rgba(6,182,212,0.25);  color: #67e8f9; }
+    .rel-arrow { padding: 0 10px; color: var(--muted); font-size: 1rem; display: flex; align-items: center; }
+    .rel-label { font-size: 0.65rem; color: var(--muted); text-align: center; padding: 0 4px; }
+
+    /* ── Data browser ── */
+    .browser-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 18px; }
+    .table-select { background: var(--card2); border: 1px solid var(--border-accent); border-radius: 9px; padding: 8px 14px; color: var(--text); font-size: 0.88rem; font-family: var(--font-b); outline: none; cursor: pointer; min-width: 200px; }
+    .table-select:focus { border-color: var(--primary); }
+    .btn { padding: 8px 16px; border-radius: 9px; border: none; cursor: pointer; font-size: 0.82rem; font-weight: 700; font-family: var(--font-b); transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: #7c3aed; }
+    .btn-ghost { background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--muted2); }
+    .btn-ghost:hover { background: rgba(255,255,255,0.1); color: var(--text); }
+    .row-count-badge { font-size: 0.75rem; color: var(--muted2); background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 6px; padding: 4px 10px; font-family: var(--font-mono); }
+    .data-table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); }
+    table.data-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    table.data-table th { background: rgba(255,255,255,0.04); color: var(--muted2); font-weight: 700; font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.07em; padding: 10px 14px; border-bottom: 1px solid var(--border); text-align: left; white-space: nowrap; }
+    table.data-table td { padding: 9px 14px; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: top; max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--font-mono); font-size: 0.78rem; color: var(--muted2); }
+    table.data-table td.id-col { color: #c084fc; }
+    table.data-table td.fk-col { color: #fbbf24; }
+    table.data-table td.text-col { color: var(--text); }
+    table.data-table tr:hover td { background: rgba(255,255,255,0.02); }
+    .loading-row { text-align: center; padding: 40px; color: var(--muted); font-size: 0.95rem; }
+    .empty-row   { text-align: center; padding: 32px; color: var(--muted); font-size: 0.85rem; }
+    .error-row   { text-align: center; padding: 32px; color: var(--red);  font-size: 0.85rem; }
+
+    /* ── Relationship viewer ── */
+    .rel-matrix { display: flex; flex-direction: column; gap: 10px; }
+    .rel-row-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; display: flex; gap: 14px; align-items: flex-start; flex-wrap: wrap; }
+    .rel-asset { font-family: var(--font-mono); font-size: 0.82rem; color: #fbbf24; flex: 1; min-width: 160px; }
+    .rel-asset-type { font-size: 0.68rem; color: var(--muted); background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.15); border-radius: 4px; padding: 1px 6px; margin-left: 6px; }
+    .rel-arrow-mid { color: var(--muted); font-size: 1.1rem; padding-top: 1px; }
+    .rel-video-badge { background: rgba(139,92,246,0.12); border: 1px solid rgba(139,92,246,0.25); border-radius: 7px; padding: 4px 10px; font-size: 0.78rem; color: #c084fc; font-family: var(--font-mono); text-decoration: none; transition: all 0.2s; }
+    .rel-video-badge:hover { background: rgba(139,92,246,0.25); color: white; }
+
+    /* ── Storage section ── */
+    .storage-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+    .storage-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; }
+    .storage-icon { font-size: 2rem; margin-bottom: 10px; }
+    .storage-name { font-family: var(--font-mono); font-size: 0.88rem; font-weight: 600; color: #fbbf24; margin-bottom: 6px; }
+    .storage-count { font-size: 1.6rem; font-family: var(--font-h); font-weight: 800; color: var(--text); }
+    .storage-sub { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
+
+    /* ── Misc ── */
+    a { color: var(--secondary); text-decoration: none; }
+    a:hover { color: white; }
+    .back-link { display: inline-flex; align-items: center; gap: 6px; color: var(--muted2); font-size: 0.85rem; margin-bottom: 20px; text-decoration: none; transition: color 0.2s; }
+    .back-link:hover { color: var(--text); }
+    .refresh-btn { background: none; border: 1px solid var(--border); color: var(--muted2); border-radius: 8px; padding: 5px 12px; font-size: 0.78rem; cursor: pointer; font-family: var(--font-b); transition: all 0.2s; }
+    .refresh-btn:hover { border-color: var(--primary); color: var(--text); }
+    .truncate { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block; vertical-align: bottom; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinning { display: inline-block; animation: spin 0.8s linear infinite; }
+  </style>
+</head>
+<body>
+<script src="../../../../shared/nav.js"></script>
+<div class="container">
+
+  <a class="back-link" href="../index.html">← Pre-Production</a>
+
+  <div class="page-badge">Tools</div>
+  <h1>🔧 Data Admin</h1>
+  <p class="subtitle">Live view of all Supabase tables, relationships, and Azure Blob Storage containers used in this project.</p>
+
+  <!-- Connection status bar -->
+  <div class="status-bar" id="status-bar">
+    <span id="pill-supabase" class="status-pill warn"><span class="dot"></span> Supabase: connecting…</span>
+    <span id="pill-storage"  class="status-pill info"><span class="dot"></span> Storage: checking…</span>
+    <span id="pill-tables"   class="status-pill info"><span class="dot"></span> Tables: –</span>
+    <button class="refresh-btn" onclick="bootstrap()">↺ Refresh all</button>
+  </div>
+
+  <!-- Main tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('schema')">📐 Schema</button>
+    <button class="tab" onclick="showTab('browser')">🗃 Data Browser</button>
+    <button class="tab" onclick="showTab('relations')">🔗 Relationships</button>
+    <button class="tab" onclick="showTab('storage')">📦 Storage</button>
+  </div>
+
+  <!-- ── TAB: Schema ── -->
+  <div class="pane active" id="pane-schema">
+    <div class="section-title">📐 Table Schema <span>static · derived from codebase</span></div>
+
+    <div style="margin-bottom:24px;">
+      <div class="section-title" style="font-size:0.88rem; color:var(--muted2); margin-bottom:10px;">🔗 Relationship Chains</div>
+      <div class="rel-flow">
+
+        <div class="rel-group">
+          <div class="rel-group-title">Core Course Structure</div>
+          <div class="rel-chain">
+            <div class="rel-node green">modules</div>
+            <div class="rel-arrow">→<div class="rel-label">1:N<br>module_id</div></div>
+            <div class="rel-node green">videos</div>
+            <div class="rel-arrow">→<div class="rel-label">1:N<br>video_id</div></div>
+            <div class="rel-node">video_cues</div>
+          </div>
+          <div style="margin-top:10px;" class="rel-chain">
+            <div class="rel-node green">modules</div>
+            <div class="rel-arrow">→<div class="rel-label">1:N<br>module_number</div></div>
+            <div class="rel-node">outline</div>
+            <span style="font-size:0.72rem;color:var(--muted);margin-left:12px;">(objectives &amp; key results)</span>
+          </div>
+          <div style="margin-top:10px;" class="rel-chain">
+            <div class="rel-node green">modules</div>
+            <div class="rel-arrow">→<div class="rel-label">1:N<br>module_id</div></div>
+            <div class="rel-node">resource_links</div>
+          </div>
+        </div>
+
+        <div class="rel-group">
+          <div class="rel-group-title">Production Assets</div>
+          <div class="rel-chain">
+            <div class="rel-node green">videos</div>
+            <div class="rel-arrow">→<div class="rel-label">1:1<br>video_id</div></div>
+            <div class="rel-node blue">scripts</div>
+            <span style="font-size:0.72rem;color:var(--muted);margin-left:12px;">(script_text, audio_url)</span>
+          </div>
+          <div style="margin-top:10px;" class="rel-chain">
+            <div class="rel-node green">videos</div>
+            <div class="rel-arrow">→<div class="rel-label">1:N<br>video_id</div></div>
+            <div class="rel-node blue">code_references</div>
+          </div>
+          <div style="margin-top:10px;" class="rel-chain">
+            <div class="rel-node green">videos</div>
+            <div class="rel-arrow">→<div class="rel-label">1:N<br>video_id</div></div>
+            <div class="rel-node blue">scenes</div>
+            <div class="rel-arrow">→<div class="rel-label">1:N<br>scene_id</div></div>
+            <div class="rel-node blue">scene_cues</div>
+          </div>
+          <div style="margin-top:10px;" class="rel-chain">
+            <div class="rel-node blue">scenes</div>
+            <div class="rel-arrow">→<div class="rel-label">1:N<br>scene_id</div></div>
+            <div class="rel-node blue">edl_entries</div>
+            <span style="font-size:0.72rem;color:var(--muted);margin-left:12px;">(edit decision list)</span>
+          </div>
+        </div>
+
+        <div class="rel-group">
+          <div class="rel-group-title">Learner Experience</div>
+          <div class="rel-chain">
+            <div class="rel-node teal">course_modules</div>
+            <div class="rel-arrow">→<div class="rel-label">1:N</div></div>
+            <div class="rel-node teal">course_videos</div>
+            <div class="rel-arrow">→<div class="rel-label">1:N<br>video_id</div></div>
+            <div class="rel-node teal">course_video_progress</div>
+          </div>
+          <div style="margin-top:10px;" class="rel-chain">
+            <div class="rel-node teal">checklist_items</div>
+            <div class="rel-arrow">→<div class="rel-label">1:N<br>item_id</div></div>
+            <div class="rel-node teal">checklist_progress</div>
+          </div>
+        </div>
+
+        <div class="rel-group">
+          <div class="rel-group-title">Research ↔ Production Bridge</div>
+          <div class="rel-chain">
+            <div class="rel-node yellow">Azure Blob<br><small style="font-size:0.7rem">(images/audio/videos/notes)</small></div>
+            <div class="rel-arrow">→<div class="rel-label">N:M via<br>research_relationships</div></div>
+            <div class="rel-node teal">course_videos</div>
+            <div class="rel-arrow">→</div>
+            <div class="rel-node blue">scripts</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="section-title">🗂 All Tables <span id="schema-count-badge">loading…</span></div>
+    <div class="schema-grid" id="schema-grid">
+      <!-- Populated by JS with live row counts -->
+    </div>
+  </div>
+
+  <!-- ── TAB: Data Browser ── -->
+  <div class="pane" id="pane-browser">
+    <div class="section-title">🗃 Live Data Browser <span>Supabase REST · max 50 rows</span></div>
+    <div class="browser-controls">
+      <select class="table-select" id="table-select" onchange="loadTable()">
+        <option value="">— choose a table —</option>
+        <optgroup label="Core Course">
+          <option value="modules">modules</option>
+          <option value="videos">videos</option>
+          <option value="video_cues">video_cues</option>
+          <option value="outline">outline</option>
+          <option value="resource_links">resource_links</option>
+        </optgroup>
+        <optgroup label="Production">
+          <option value="scripts">scripts</option>
+          <option value="code_references">code_references</option>
+          <option value="scenes">scenes</option>
+          <option value="scene_cues">scene_cues</option>
+          <option value="edl_entries">edl_entries</option>
+        </optgroup>
+        <optgroup label="Learner Experience">
+          <option value="course_modules">course_modules</option>
+          <option value="course_videos">course_videos</option>
+          <option value="course_video_progress">course_video_progress</option>
+          <option value="checklist_items">checklist_items</option>
+          <option value="checklist_progress">checklist_progress</option>
+        </optgroup>
+        <optgroup label="Research">
+          <option value="research_relationships">research_relationships</option>
+        </optgroup>
+      </select>
+      <span class="row-count-badge" id="row-count-badge">– rows</span>
+      <button class="btn btn-ghost" onclick="loadTable()">↺ Reload</button>
+    </div>
+    <div class="data-table-wrap">
+      <table class="data-table" id="data-table">
+        <thead id="data-thead"></thead>
+        <tbody id="data-tbody"><tr><td class="loading-row" colspan="99">Choose a table above to browse its data.</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── TAB: Relationships ── -->
+  <div class="pane" id="pane-relations">
+    <div class="section-title">🔗 Research → Script Relationships <span>research_relationships × course_videos</span></div>
+    <div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;">
+      <button class="btn btn-primary" onclick="loadRelationships()">↺ Load Relationships</button>
+      <span id="rel-count-badge" class="row-count-badge">–</span>
+    </div>
+    <div id="rel-matrix-container">
+      <div class="loading-row">Click "Load Relationships" to fetch live data.</div>
+    </div>
+
+    <div class="section-title" style="margin-top:32px;">📋 All Table Row Counts <span>live from Supabase</span></div>
+    <div id="counts-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;">
+      <div class="loading-row" style="grid-column:1/-1;">Click "Load Relationships" to refresh counts.</div>
+    </div>
+  </div>
+
+  <!-- ── TAB: Storage ── -->
+  <div class="pane" id="pane-storage">
+    <div class="section-title">📦 Azure Blob Storage <span>research containers</span></div>
+    <div class="storage-grid" id="storage-grid">
+      <div class="loading-row" style="grid-column:1/-1;">Loading storage containers…</div>
+    </div>
+
+    <div class="section-title" style="margin-top:32px;">🗺 Storage ↔ Database Mapping</div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;">
+      <table class="data-table" style="border:none;">
+        <thead>
+          <tr>
+            <th>Container</th>
+            <th>Azure Blob Path</th>
+            <th>Linked via</th>
+            <th>Supabase Table</th>
+            <th>File count</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="text-col">🖼 Images</td>
+            <td><span class="truncate">research-images</span></td>
+            <td class="fk-col">container + item_name</td>
+            <td class="id-col">research_relationships</td>
+            <td id="sc-images" class="text-col">…</td>
+          </tr>
+          <tr>
+            <td class="text-col">🎵 Audio</td>
+            <td><span class="truncate">research-audio</span></td>
+            <td class="fk-col">container + item_name</td>
+            <td class="id-col">research_relationships</td>
+            <td id="sc-audio" class="text-col">…</td>
+          </tr>
+          <tr>
+            <td class="text-col">🎬 Videos</td>
+            <td><span class="truncate">research-videos</span></td>
+            <td class="fk-col">container + item_name</td>
+            <td class="id-col">research_relationships</td>
+            <td id="sc-videos" class="text-col">…</td>
+          </tr>
+          <tr>
+            <td class="text-col">📝 Notes</td>
+            <td><span class="truncate">research-notes</span></td>
+            <td class="fk-col">container + item_name</td>
+            <td class="id-col">research_relationships</td>
+            <td id="sc-notes" class="text-col">…</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── Config ──────────────────────────────────────────────────────────────────
+const SUPABASE_URL  = localStorage.getItem('supabase_url')      || 'https://rmekfsdhglyiralxvkwc.supabase.co';
+const SUPABASE_ANON = localStorage.getItem('supabase_anon_key') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZWtmc2RoZ2x5aXJhbHh2a3djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NzYzODgsImV4cCI6MjA5NjM1MjM4OH0.ay6HsmO_CbMGDXL_Dv4DT-paAIAOqlQPfmqqx_mexSU';
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+// ── All known tables with metadata ──────────────────────────────────────────
+const TABLES = [
+  // group, name, fields[]
+  { group: 'core',    badge: 'badge-core',    name: 'modules',               icon: '📦', fields: [
+    { name:'id', type:'int8', pk:true }, { name:'module_number', type:'int4' },
+    { name:'title', type:'text' }, { name:'description', type:'text' }
+  ]},
+  { group: 'core',    badge: 'badge-core',    name: 'videos',                icon: '🎬', fields: [
+    { name:'id', type:'int8', pk:true }, { name:'module_id', type:'int8', fk:'modules' },
+    { name:'video_number', type:'int4' }, { name:'title', type:'text' },
+    { name:'duration', type:'text' }, { name:'script', type:'text' }
+  ]},
+  { group: 'core',    badge: 'badge-core',    name: 'video_cues',            icon: '🎙', fields: [
+    { name:'id', type:'int8', pk:true }, { name:'video_id', type:'int8', fk:'videos' },
+    { name:'cue_text', type:'text' }, { name:'sort_order', type:'int4' }
+  ]},
+  { group: 'core',    badge: 'badge-core',    name: 'outline',               icon: '📋', fields: [
+    { name:'id', type:'int8', pk:true }, { name:'module_number', type:'int4', fk:'modules' },
+    { name:'content_type', type:'text' }, { name:'content', type:'text' }, { name:'sort_order', type:'int4' }
+  ]},
+  { group: 'core',    badge: 'badge-core',    name: 'resource_links',        icon: '🔗', fields: [
+    { name:'id', type:'int8', pk:true }, { name:'module_id', type:'int8', fk:'modules' },
+    { name:'label', type:'text' }, { name:'url', type:'text' }
+  ]},
+  { group: 'prod',    badge: 'badge-prod',    name: 'scripts',               icon: '📝', fields: [
+    { name:'id', type:'int8', pk:true }, { name:'video_id', type:'int8', fk:'videos' },
+    { name:'script_text', type:'text' }, { name:'audio_url', type:'text' },
+    { name:'audio_generated_at', type:'timestamptz' }, { name:'updated_at', type:'timestamptz' }
+  ]},
+  { group: 'prod',    badge: 'badge-prod',    name: 'code_references',       icon: '💻', fields: [
+    { name:'id', type:'int8', pk:true }, { name:'video_id', type:'text', fk:'videos' },
+    { name:'label', type:'text' }, { name:'url', type:'text' },
+    { name:'note', type:'text' }, { name:'sort_order', type:'int4' }
+  ]},
+  { group: 'prod',    badge: 'badge-prod',    name: 'scenes',                icon: '🎥', fields: [
+    { name:'id', type:'int8', pk:true }, { name:'video_id', type:'int8', fk:'videos' },
+    { name:'title', type:'text' }, { name:'sort_order', type:'int4' }
+  ]},
+  { group: 'prod',    badge: 'badge-prod',    name: 'scene_cues',            icon: '🎯', fields: [
+    { name:'id', type:'int8', pk:true }, { name:'scene_id', type:'int8', fk:'scenes' },
+    { name:'cue_text', type:'text' }, { name:'sort_order', type:'int4' }
+  ]},
+  { group: 'prod',    badge: 'badge-prod',    name: 'edl_entries',           icon: '✂️', fields: [
+    { name:'id', type:'int8', pk:true }, { name:'scene_id', type:'int8', fk:'scenes' },
+    { name:'in_point', type:'text' }, { name:'out_point', type:'text' }, { name:'clip_name', type:'text' }
+  ]},
+  { group: 'learner', badge: 'badge-learner', name: 'course_modules',        icon: '🎓', fields: [
+    { name:'id', type:'int8', pk:true }, { name:'module_number', type:'int4' },
+    { name:'title', type:'text' }, { name:'description', type:'text' }
+  ]},
+  { group: 'learner', badge: 'badge-learner', name: 'course_videos',         icon: '▶️', fields: [
+    { name:'id', type:'int8', pk:true }, { name:'module_id', type:'int8', fk:'course_modules' },
+    { name:'video_number', type:'int4' }, { name:'title', type:'text' }
+  ]},
+  { group: 'learner', badge: 'badge-learner', name: 'course_video_progress', icon: '📊', fields: [
+    { name:'id', type:'int8', pk:true }, { name:'video_id', type:'int8', fk:'course_videos' },
+    { name:'user_id', type:'uuid' }, { name:'completed', type:'bool' }, { name:'watched_at', type:'timestamptz' }
+  ]},
+  { group: 'learner', badge: 'badge-learner', name: 'checklist_items',       icon: '☑️', fields: [
+    { name:'id', type:'int8', pk:true }, { name:'title', type:'text' },
+    { name:'description', type:'text' }, { name:'sort_order', type:'int4' }
+  ]},
+  { group: 'learner', badge: 'badge-learner', name: 'checklist_progress',    icon: '✅', fields: [
+    { name:'id', type:'int8', pk:true }, { name:'item_id', type:'int8', fk:'checklist_items' },
+    { name:'user_id', type:'uuid' }, { name:'checked', type:'bool' }, { name:'updated_at', type:'timestamptz' }
+  ]},
+  { group: 'research',badge: 'badge-research',name: 'research_relationships', icon: '🔬', fields: [
+    { name:'id', type:'int8', pk:true }, { name:'container', type:'text' },
+    { name:'item_name', type:'text' }, { name:'video_id', type:'int8', fk:'course_videos' }
+  ]},
+];
+
+const GROUP_LABELS = { core:'Core Course', prod:'Production', learner:'Learner Experience', research:'Research' };
+
+// ── Tab switching ────────────────────────────────────────────────────────────
+function showTab(id) {
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ['schema','browser','relations','storage'][i] === id));
+  document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
+  document.getElementById('pane-' + id).classList.add('active');
+  if (id === 'storage' && !storageLoaded) loadStorage();
+  if (id === 'relations' && !relLoaded) {}
+}
+
+// ── Supabase fetch helper ────────────────────────────────────────────────────
+async function sq(table, params) {
+  const url = `${SUPABASE_URL}/rest/v1/${table}${params ? '?' + params : ''}`;
+  const res = await fetch(url, {
+    headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` }
+  });
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+  return res.json();
+}
+
+async function sqCount(table) {
+  const url = `${SUPABASE_URL}/rest/v1/${table}?select=id&limit=1`;
+  const res = await fetch(url, {
+    headers: {
+      'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}`,
+      'Prefer': 'count=exact', 'Range': '0-0'
+    }
+  });
+  if (!res.ok) return null;
+  const range = res.headers.get('Content-Range') || '';
+  const m = range.match(/\/(\d+)/);
+  return m ? parseInt(m[1]) : null;
+}
+
+// ── Bootstrap / status ───────────────────────────────────────────────────────
+async function bootstrap() {
+  const pillSB = document.getElementById('pill-supabase');
+  const pillT  = document.getElementById('pill-tables');
+  pillSB.className = 'status-pill warn'; pillSB.innerHTML = '<span class="dot"></span> Supabase: connecting…';
+
+  try {
+    const testData = await sq('modules', 'limit=1');
+    pillSB.className = 'status-pill ok';
+    pillSB.innerHTML = `<span class="dot"></span> Supabase: connected — ${SUPABASE_URL.replace('https://','').split('.')[0]}`;
+    renderSchemaGrid();
+    loadRowCounts(pillT);
+  } catch(e) {
+    pillSB.className = 'status-pill err';
+    pillSB.innerHTML = `<span class="dot"></span> Supabase: ${e.message}`;
+    pillT.className = 'status-pill err';
+    pillT.innerHTML = `<span class="dot"></span> Tables: unavailable`;
+    renderSchemaGrid(); // still render static schema
+  }
+  loadStorage();
+}
+
+// ── Schema grid (static + live counts) ──────────────────────────────────────
+function renderSchemaGrid() {
+  const grid = document.getElementById('schema-grid');
+  const badge = document.getElementById('schema-count-badge');
+  badge.textContent = `${TABLES.length} tables`;
+
+  grid.innerHTML = TABLES.map(t => `
+    <div class="schema-card" id="sc-${t.name}">
+      <div class="schema-card-header">
+        <span style="font-size:1.3rem;">${t.icon}</span>
+        <div>
+          <div class="schema-table-name">${t.name}</div>
+          <span class="schema-group-badge ${t.badge}">${GROUP_LABELS[t.group]}</span>
+        </div>
+      </div>
+      <div class="schema-fields">
+        ${t.fields.map(f => `
+          <div class="field-row">
+            ${f.pk ? `<span class="field-pk">PK</span>` : `<span style="width:22px;flex-shrink:0;"></span>`}
+            <span class="field-name">${f.name}</span>
+            <span class="field-type">${f.type}</span>
+            ${f.fk ? `<span class="field-fk">→ ${f.fk}</span>` : ''}
+          </div>`).join('')}
+      </div>
+      <div class="schema-row-count" id="src-${t.name}">rows: loading…</div>
+    </div>
+  `).join('');
+}
+
+async function loadRowCounts(pillT) {
+  let loaded = 0;
+  await Promise.all(TABLES.map(async t => {
+    try {
+      const c = await sqCount(t.name);
+      const el = document.getElementById('src-' + t.name);
+      if (el) el.textContent = c !== null ? `rows: ${c}` : 'rows: table not found';
+      loaded++;
+    } catch {
+      const el = document.getElementById('src-' + t.name);
+      if (el) el.textContent = 'rows: –';
+    }
+  }));
+  pillT.className = 'status-pill ok';
+  pillT.innerHTML = `<span class="dot"></span> Tables: ${loaded}/${TABLES.length} reachable`;
+}
+
+// ── Data browser ─────────────────────────────────────────────────────────────
+async function loadTable() {
+  const name = document.getElementById('table-select').value;
+  if (!name) return;
+  const thead = document.getElementById('data-thead');
+  const tbody = document.getElementById('data-tbody');
+  const badge = document.getElementById('row-count-badge');
+
+  tbody.innerHTML = `<tr><td class="loading-row" colspan="99"><span class="spinning">⟳</span> Loading ${name}…</td></tr>`;
+  badge.textContent = '…';
+
+  try {
+    const rows = await sq(name, 'limit=50&order=id.asc');
+    if (!rows.length) {
+      thead.innerHTML = '';
+      tbody.innerHTML = `<tr><td class="empty-row" colspan="99">No rows in <code>${name}</code>.</td></tr>`;
+      badge.textContent = '0 rows';
+      return;
+    }
+    const cols = Object.keys(rows[0]);
+    thead.innerHTML = `<tr>${cols.map(c => `<th>${c}</th>`).join('')}</tr>`;
+    tbody.innerHTML = rows.map(r => `<tr>${cols.map(c => {
+      const v = r[c];
+      const str = v === null ? '<span style="color:var(--muted);font-style:italic">null</span>'
+                             : String(v).length > 80 ? `<span title="${esc(String(v))}">${esc(String(v).slice(0,80))}…</span>`
+                             : esc(String(v));
+      const cls = c === 'id' ? 'id-col' : c.endsWith('_id') ? 'fk-col' : 'text-col';
+      return `<td class="${cls}">${str}</td>`;
+    }).join('')}</tr>`).join('');
+    badge.textContent = `${rows.length} rows${rows.length===50?' (max 50)':''}`;
+  } catch(e) {
+    thead.innerHTML = '';
+    tbody.innerHTML = `<tr><td class="error-row" colspan="99">❌ ${esc(e.message)}</td></tr>`;
+    badge.textContent = 'error';
+  }
+}
+
+// ── Relationships view ────────────────────────────────────────────────────────
+let relLoaded = false;
+async function loadRelationships() {
+  const container = document.getElementById('rel-matrix-container');
+  const badge = document.getElementById('rel-count-badge');
+  container.innerHTML = `<div class="loading-row"><span class="spinning">⟳</span> Fetching relationships…</div>`;
+
+  try {
+    const [rels, vids] = await Promise.all([
+      sq('research_relationships', 'order=video_id.asc'),
+      sq('course_videos', 'select=id,title,video_number,course_modules(module_number)')
+    ]);
+
+    badge.textContent = `${rels.length} linked`;
+
+    if (!rels.length) {
+      container.innerHTML = `<div class="empty-row">No research relationships yet. Go to <a href="../research/index.html">Research Hub</a> to link assets to videos.</div>`;
+    } else {
+      container.innerHTML = `<div class="rel-matrix">` + rels.map(r => {
+        const vid = vids.find(v => v.id === r.video_id);
+        const modNum = vid?.course_modules?.module_number ?? '?';
+        const vidNum = vid?.video_number ?? '?';
+        const vidTitle = vid?.title ?? `Video ID ${r.video_id}`;
+        const containerEmoji = { 'research-images':'🖼', 'research-audio':'🎵', 'research-videos':'🎬', 'research-notes':'📝' }[r.container] || '📎';
+        return `<div class="rel-row-card">
+          <div class="rel-asset">${containerEmoji} ${esc(r.item_name)}<span class="rel-asset-type">${esc(r.container)}</span></div>
+          <div class="rel-arrow-mid">→</div>
+          <a class="rel-video-badge" href="../scripts/index.html?module=${modNum}" title="Open script">📝 M${modNum} V${vidNum}: ${esc(vidTitle)}</a>
+          <a class="rel-video-badge" href="../research/index.html?video=${encodeURIComponent(r.video_id)}" style="background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.25);color:#fbbf24;" title="View in Research Hub">🔬 Research</a>
+        </div>`;
+      }).join('') + `</div>`;
+    }
+    relLoaded = true;
+    loadCountsGrid();
+  } catch(e) {
+    container.innerHTML = `<div class="error-row">❌ ${esc(e.message)}</div>`;
+  }
+}
+
+async function loadCountsGrid() {
+  const grid = document.getElementById('counts-grid');
+  grid.innerHTML = TABLES.map(t => `
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 16px;">
+      <div style="font-family:var(--font-mono);font-size:0.75rem;color:var(--muted2);margin-bottom:6px;">${t.icon} ${t.name}</div>
+      <div style="font-family:var(--font-h);font-size:1.4rem;font-weight:800;" id="cg-${t.name}">…</div>
+    </div>`).join('');
+
+  await Promise.all(TABLES.map(async t => {
+    try {
+      const c = await sqCount(t.name);
+      const el = document.getElementById('cg-' + t.name);
+      if (el) { el.textContent = c !== null ? c : '—'; el.style.color = c > 0 ? '#34d399' : 'var(--muted)'; }
+    } catch {
+      const el = document.getElementById('cg-' + t.name);
+      if (el) { el.textContent = '–'; el.style.color = 'var(--muted)'; }
+    }
+  }));
+}
+
+// ── Storage ──────────────────────────────────────────────────────────────────
+let storageLoaded = false;
+const CONTAINERS = [
+  { id:'images',  name:'research-images',  icon:'🖼',  label:'Research Images' },
+  { id:'audio',   name:'research-audio',   icon:'🎵',  label:'Research Audio'  },
+  { id:'videos',  name:'research-videos',  icon:'🎬',  label:'Research Videos' },
+  { id:'notes',   name:'research-notes',   icon:'📝',  label:'Research Notes'  },
+];
+
+async function loadStorage() {
+  if (storageLoaded) return;
+  const pill = document.getElementById('pill-storage');
+  const grid = document.getElementById('storage-grid');
+
+  const results = await Promise.all(CONTAINERS.map(async c => {
+    try {
+      const res = await fetch(`/api/research/files?container=${c.name}`);
+      const files = res.ok ? await res.json() : [];
+      return { ...c, count: files.length, error: false };
+    } catch {
+      return { ...c, count: 0, error: true };
+    }
+  }));
+
+  const totalFiles = results.reduce((s,r) => s + r.count, 0);
+  const anyError   = results.some(r => r.error);
+
+  pill.className = anyError ? 'status-pill warn' : 'status-pill ok';
+  pill.innerHTML = `<span class="dot"></span> Storage: ${totalFiles} files across ${CONTAINERS.length} containers`;
+
+  grid.innerHTML = results.map(r => `
+    <div class="storage-card">
+      <div class="storage-icon">${r.icon}</div>
+      <div class="storage-name">${r.name}</div>
+      <div class="storage-count">${r.error ? '–' : r.count}</div>
+      <div class="storage-sub">${r.error ? 'API unavailable' : `${r.label}`}</div>
+    </div>`).join('');
+
+  // update mapping table counts
+  results.forEach(r => {
+    const el = document.getElementById('sc-' + r.id);
+    if (el) el.textContent = r.error ? '–' : r.count;
+  });
+
+  storageLoaded = true;
+}
+
+// ── Utility ──────────────────────────────────────────────────────────────────
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+bootstrap();
+</script>
+</body>
+</html>
