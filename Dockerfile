@@ -19,6 +19,7 @@ COPY --from=build /app/server .
 
 # Copy assets the server reads at runtime from its working directory
 COPY navigation_config.json .
+COPY favicon.png .
 COPY shared/ shared/
 COPY 1_Real_Unknown/ 1_Real_Unknown/
 COPY 2_Environment/ 2_Environment/
