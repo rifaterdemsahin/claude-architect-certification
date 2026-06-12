@@ -746,3 +746,18 @@ The user requested creating a mapping page in the Production menu of the project
    - Commit mapping page implementation.
    - Commit navigation updates.
    - Push to repository.
+
+---
+
+## 📅 Date: 2026-06-12
+## 🧠 Stage: Stage 4 (Formula - Thinking & Planning) - Reorder Preprod Menu Items
+
+### ❓ Problem Statement
+The user requested reordering the Preprod menu so that "Sanity Checklist" becomes item "8. ✅ Sanity Checklist" and "Research" becomes item "3. 🔬 Research".
+
+### 📐 Approach & Strategy
+1. **⚙️ Navigation Update**:
+   - Update `navigation_config.json` to move the "3. 🔬 Research" menu item up as the 3rd child, and move "8. ✅ Sanity Checklist" to the 8th child.
+   - Synchronize fallback `projectMenu` objects in `index.html` and `markdown_renderer.html`.
+2. **🌿 Git Workflow**:
+   - Commit updates, verify, open the mapping page locally to confirm correctness.

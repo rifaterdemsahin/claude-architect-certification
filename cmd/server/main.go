@@ -349,6 +349,8 @@ func axiomErrorsHandler(tmpl *template.Template, cfg config, navConfigJS templat
 			data.FetchErr = "AXIOM_TOKEN not set — configure it via Fly.io secrets"
 		} else {
 			apl := fmt.Sprintf(`['%s'] | sort by _time desc | limit 100`, cfg.axiomDataset)
+			data.APL = apl
+			data.QueryURL = fmt.Sprintf("%s/v1/datasets/%s/query", cfg.axiomQueryURL, cfg.axiomDataset)
 			body, _ := json.Marshal(map[string]string{"apl": apl})
 			queryURL := fmt.Sprintf("%s/v1/datasets/%s/query", cfg.axiomQueryURL, cfg.axiomDataset)
 			log.Printf("axiom query -> %s (apl: %s)", queryURL, apl)
@@ -493,15 +495,18 @@ func parseStorageConnStr(connStr string) (accountName, accountKey string) {
 }
 
 // generateContainerSAS creates a service SAS query string for a blob container.
-// Uses the 2018-11-09 string-to-sign format (15 fields, no trailing newline).
+// Uses 16-field string-to-sign (sv=2026-04-06, includes signedEncryptionScope as field 11).
+// Format verified against az storage container generate-sas output.
 func generateContainerSAS(accountName, accountKey, container, permissions string, expiry time.Time) (string, error) {
-	const version = "2018-11-09"
+	const version = "2026-04-06"
 	expiryStr := expiry.UTC().Format("2006-01-02T15:04:05Z")
 	canonResource := "/blob/" + accountName + "/" + container
+	// 16 fields: perm, start, expiry, canon, id, ip, proto, ver, resource(c),
+	//            snapshotTime, encryptionScope, rscc, rscd, rsce, rscl, rsct
 	stringToSign := strings.Join([]string{
 		permissions, "", expiryStr, canonResource,
 		"", "", "https", version, "c",
-		"", "", "", "", "", "",
+		"", "", "", "", "", "", "",
 	}, "\n")
 	keyBytes, err := base64.StdEncoding.DecodeString(accountKey)
 	if err != nil {

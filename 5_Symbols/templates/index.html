@@ -1102,6 +1102,56 @@
     window.__NAV_CONFIG__ = {{.NavConfigJSON}};
   </script>
   <script src="shared/nav.js" defer></script>
+  <script src="shared/debug-panel.js" defer></script>
+  <script>
+  (function() {
+    window.addEventListener('DOMContentLoaded', function() {
+      fetch('/api/errors', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          _time: new Date().toISOString(),
+          level: 'info',
+          stage: 'homepage',
+          message: 'Page loaded: ' + window.location.pathname + window.location.search,
+          url: window.location.href,
+          userAgent: navigator.userAgent
+        })
+      }).catch(function(e) { console.warn('page-load report failed', e); });
+    });
+
+    window.addEventListener('error', function(e) {
+      fetch('/api/errors', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          _time: new Date().toISOString(),
+          level: 'error',
+          stage: 'homepage',
+          message: e.message + ' at ' + (e.filename || 'unknown') + ':' + e.lineno + ':' + e.colno,
+          url: window.location.href
+        })
+      }).catch(function() {});
+    });
+
+    window.addEventListener('unhandledrejection', function(e) {
+      var msg = e.reason instanceof Error ? (e.reason.stack || e.reason.message) : String(e.reason);
+      fetch('/api/errors', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          _time: new Date().toISOString(),
+          level: 'error',
+          stage: 'homepage',
+          message: 'Unhandled promise rejection: ' + msg,
+          url: window.location.href
+        })
+      }).catch(function() {});
+    });
+
+    console.log('[Homepage] Verbose logging active — errors will be reported to /api/errors');
+  })();
+  </script>
 </head>
 <body>
 

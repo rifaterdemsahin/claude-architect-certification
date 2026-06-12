@@ -6,9 +6,13 @@
         { "label": "1. ❓ Problem", "url": "5_Symbols/production/preprod/problem.html" },
         { "label": "2. 🏠 Product (Solution)", "url": "index.html" },
         {
-          "label": "3. ✅ Sanity Checklist",
-          "url": "5_Symbols/production/preprod/sanity_checklist.html",
-          "hideAfterDays": 90
+          "label": "3. 🔬 Research",
+          "children": [
+            { "label": "🖼 Images", "url": "5_Symbols/production/preprod/research/images.html" },
+            { "label": "🎵 Audio", "url": "5_Symbols/production/preprod/research/audio.html" },
+            { "label": "🎬 Videos", "url": "5_Symbols/production/preprod/research/videos.html" },
+            { "label": "📝 Notes", "url": "5_Symbols/production/preprod/research/notes.html" }
+          ]
         },
         { "label": "4. 📋 Outline", "url": "5_Symbols/production/preprod/course_outline.html" },
         {
@@ -24,13 +28,9 @@
           "url": "5_Symbols/production/preprod/ivq.html"
         },
         {
-          "label": "🔬 Research",
-          "children": [
-            { "label": "🖼 Images", "url": "5_Symbols/production/preprod/research/images.html" },
-            { "label": "🎵 Audio", "url": "5_Symbols/production/preprod/research/audio.html" },
-            { "label": "🎬 Videos", "url": "5_Symbols/production/preprod/research/videos.html" },
-            { "label": "📝 Notes", "url": "5_Symbols/production/preprod/research/notes.html" }
-          ]
+          "label": "8. ✅ Sanity Checklist",
+          "url": "5_Symbols/production/preprod/sanity_checklist.html",
+          "hideAfterDays": 90
         },
         {
           "label": "🛠️ Tools",

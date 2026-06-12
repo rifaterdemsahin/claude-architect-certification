@@ -8,6 +8,7 @@ primary_region = "lhr"
   PORT = "8080"
   AXIOM_DATASET = "videoproduction"
   AXIOM_API_URL = "https://eu-central-1.aws.edge.axiom.co"
+  AXIOM_QUERY_URL = "https://api.axiom.co"
 
 [http_service]
   internal_port = 8080
