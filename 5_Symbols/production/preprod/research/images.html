@@ -239,5 +239,6 @@ fetch('/api/research/files?container=' + CONTAINER)
   .then(() => loadGallery())
   .catch(() => { setStatus(false); document.getElementById('gallery').innerHTML = '<div class="empty-state">Azure Storage not available.</div>'; });
 </script>
+<script src="../../../../shared/debug-panel.js"></script>
 </body>
 </html>

@@ -68,7 +68,7 @@
   }
 
   /* ---- builds a dropdown row: link + star button ---- */
-  function buildDropItemHtml(rawUrl, label, activeClass, alreadyResolved) {
+  function buildDropItemHtml(rawUrl, label, activeClass, alreadyResolved, description) {
     var resolved = alreadyResolved ? rawUrl : resolveUrl(rawUrl);
     var favs = getFavs();
     var isFav = false;
@@ -76,11 +76,12 @@
       if (favs[i].url === resolved) { isFav = true; break; }
     }
     var aClass = activeClass ? ' class="' + activeClass + '"' : '';
+    var titleAttr = description ? ' title="' + description.replace(/"/g, '&quot;') + '"' : '';
     var starClass = 'nav-star' + (isFav ? ' nav-star--on' : '');
     var starChar = isFav ? '★' : '☆';
     var safeLabel = label.replace(/"/g, '&quot;');
     return '<div class="site-drop-item">' +
-      '<a href="' + resolved + '"' + aClass + '>' + label + '</a>' +
+      '<a href="' + resolved + '"' + aClass + titleAttr + '>' + label + '</a>' +
       '<button class="' + starClass + '" data-fav-url="' + resolved + '" data-fav-label="' + safeLabel + '" title="' + (isFav ? 'Remove from favorites' : 'Add to favorites') + '">' + starChar + '</button>' +
       '</div>';
   }
@@ -214,11 +215,11 @@
               '<div class="site-subdrop-menu">';
             subVisible.forEach(function (subChild) {
               var isSubChildActive = isItemActive(subChild);
-              html += buildDropItemHtml(subChild.url, subChild.label, isSubChildActive ? 'active' : '');
+              html += buildDropItemHtml(subChild.url, subChild.label, isSubChildActive ? 'active' : '', false, subChild.description);
             });
             html += '</div></div>';
           } else {
-            html += buildDropItemHtml(child.url, child.label, childActiveClass);
+            html += buildDropItemHtml(child.url, child.label, childActiveClass, false, child.description);
           }
         });
         html += '</div></div>';

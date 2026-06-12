@@ -28,8 +28,9 @@
     .section-card:hover { border-color: rgba(139,92,246,0.6); }
     .section-icon { font-size: 2.4rem; margin-bottom: 10px; }
     .section-title { font-family: var(--font-h); font-size: 1.25rem; font-weight: 800; margin-bottom: 4px; }
-    .section-count { font-size: 0.88rem; color: var(--muted); margin-bottom: 12px; }
-    .section-link { font-size: 0.82rem; color: var(--primary); }
+    .section-desc { font-size: 0.82rem; color: var(--muted); margin-bottom: 12px; line-height: 1.4; }
+    .section-count { font-size: 0.88rem; color: var(--primary); font-weight: 700; margin-bottom: 12px; }
+    .section-link { font-size: 0.82rem; color: var(--muted); }
 
     /* Tab system */
     .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 24px; }
@@ -141,24 +142,28 @@
     <div class="section-card" onclick="switchTab('images')">
       <div class="section-icon">🖼</div>
       <div class="section-title">Images</div>
+      <div class="section-desc">Visual assets, mockups, and diagrams used for course production.</div>
       <div class="section-count" id="cnt-images">Loading…</div>
       <div class="section-link">Browse gallery →</div>
     </div>
     <div class="section-card" onclick="switchTab('audio')">
       <div class="section-icon">🎵</div>
       <div class="section-title">Audio</div>
+      <div class="section-desc">Voiceovers, background music, and sound effects for video modules.</div>
       <div class="section-count" id="cnt-audio">Loading…</div>
       <div class="section-link">Play clips →</div>
     </div>
     <div class="section-card" onclick="switchTab('videos')">
       <div class="section-icon">🎬</div>
       <div class="section-title">Videos</div>
+      <div class="section-desc">Raw footage, B-roll, and screen recordings for final assembly.</div>
       <div class="section-count" id="cnt-videos">Loading…</div>
       <div class="section-link">Watch clips →</div>
     </div>
     <div class="section-card" onclick="switchTab('notes')">
       <div class="section-icon">📝</div>
       <div class="section-title">Notes</div>
+      <div class="section-desc">Research findings, technical references, and production scripts.</div>
       <div class="section-count" id="cnt-notes">Loading…</div>
       <div class="section-link">Read notes →</div>
     </div>
@@ -824,5 +829,6 @@ function applyVideoFilter(videoId, countEl) {
   if (countEl) countEl.textContent = matched ? `${matched} linked item${matched !== 1 ? 's' : ''}` : 'No items linked yet';
 }
 </script>
+<script src="../../../../shared/debug-panel.js"></script>
 </body>
 </html>

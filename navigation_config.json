@@ -8,11 +8,31 @@
         {
           "label": "3. 🔬 Research",
           "children": [
-            { "label": "🗂 Research Hub", "url": "5_Symbols/production/preprod/research/index.html" },
-            { "label": "🖼 Images", "url": "5_Symbols/production/preprod/research/images.html" },
-            { "label": "🎵 Audio", "url": "5_Symbols/production/preprod/research/audio.html" },
-            { "label": "🎬 Videos", "url": "5_Symbols/production/preprod/research/videos.html" },
-            { "label": "📝 Notes", "url": "5_Symbols/production/preprod/research/notes.html" }
+            { 
+              "label": "🗂 Research Hub", 
+              "url": "5_Symbols/production/preprod/research/index.html",
+              "description": "Central dashboard for all pre-production assets including images, audio, and notes."
+            },
+            { 
+              "label": "🖼 Images", 
+              "url": "5_Symbols/production/preprod/research/images.html",
+              "description": "Visual assets, mockups, and diagrams used for course production."
+            },
+            { 
+              "label": "🎵 Audio", 
+              "url": "5_Symbols/production/preprod/research/audio.html",
+              "description": "Voiceovers, background music, and sound effects for video modules."
+            },
+            { 
+              "label": "🎬 Videos", 
+              "url": "5_Symbols/production/preprod/research/videos.html",
+              "description": "Raw footage, B-roll, and screen recordings for final assembly."
+            },
+            { 
+              "label": "📝 Notes", 
+              "url": "5_Symbols/production/preprod/research/notes.html",
+              "description": "Research findings, technical references, and production scripts."
+            }
           ]
         },
         { "label": "4. 📋 Outline", "url": "5_Symbols/production/preprod/course_outline.html" },
