@@ -27,6 +27,7 @@ type config struct {
 	axiomToken       string
 	axiomDataset     string
 	axiomAPIURL      string
+	axiomQueryURL    string
 	port             string
 	azureAccountName string
 	azureAccountKey  string
@@ -34,12 +35,13 @@ type config struct {
 
 func loadConfig() config {
 	cfg := config{
-		supabaseURL:  mustEnv("SUPABASE_URL"),
-		supabaseAnon: mustEnv("SUPABASE_ANON_KEY"),
-		axiomToken:   os.Getenv("AXIOM_TOKEN"),
-		axiomDataset: mustEnv("AXIOM_DATASET"),
-		axiomAPIURL:  envOr("AXIOM_API_URL", "https://api.axiom.co"),
-		port:         envOr("PORT", "8080"),
+		supabaseURL:    mustEnv("SUPABASE_URL"),
+		supabaseAnon:   mustEnv("SUPABASE_ANON_KEY"),
+		axiomToken:     os.Getenv("AXIOM_TOKEN"),
+		axiomDataset:   mustEnv("AXIOM_DATASET"),
+		axiomAPIURL:    envOr("AXIOM_API_URL", "https://api.axiom.co"),
+		axiomQueryURL:  envOr("AXIOM_QUERY_URL", "https://api.axiom.co"),
+		port:           envOr("PORT", "8080"),
 	}
 	if connStr := os.Getenv("AZURE_STORAGE_CONN_STR"); connStr != "" {
 		cfg.azureAccountName, cfg.azureAccountKey = parseStorageConnStr(connStr)
@@ -73,7 +75,13 @@ func shipToAxiom(cfg config, events []map[string]any) {
 		log.Printf("axiom marshal: %v", err)
 		return
 	}
-	url := fmt.Sprintf("%s/v1/datasets/%s/ingest", cfg.axiomAPIURL, cfg.axiomDataset)
+	var url string
+	if strings.Contains(cfg.axiomAPIURL, ".edge.axiom.co") {
+		url = fmt.Sprintf("%s/v1/ingest/%s", cfg.axiomAPIURL, cfg.axiomDataset)
+	} else {
+		url = fmt.Sprintf("%s/v1/datasets/%s/ingest", cfg.axiomAPIURL, cfg.axiomDataset)
+	}
+	log.Printf("axiom ingest -> %s (%d events)", url, len(events))
 	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(body))
 	if err != nil {
 		log.Printf("axiom request build: %v", err)
@@ -86,7 +94,11 @@ func shipToAxiom(cfg config, events []map[string]any) {
 		log.Printf("axiom send: %v", err)
 		return
 	}
-	resp.Body.Close()
+	defer resp.Body.Close()
+	if resp.StatusCode >= 300 {
+		b, _ := io.ReadAll(resp.Body)
+		log.Printf("axiom ingest %d: %s", resp.StatusCode, b)
+	}
 }
 
 // ── observe middleware ────────────────────────────────────────────────────────
@@ -312,8 +324,10 @@ type axiomQueryResp struct {
 }
 
 type axiomErrorsData struct {
-	Events  []axiomEvent
-	FetchErr string
+	Events        []axiomEvent
+	FetchErr      string
+	QueryURL      string
+	APL           string
 	NavFavsJSON   template.JS
 	NavConfigJSON template.JS
 }
@@ -323,7 +337,7 @@ func axiomErrorsHandler(tmpl *template.Template, cfg config, navConfigJS templat
 		data := axiomErrorsData{NavConfigJSON: navConfigJS}
 
 		var favs []NavFav
-		ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+		ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
 		defer cancel()
 		if err := supabaseGet(ctx, cfg, "nav_favorites", "select=url,label&order=created_at.asc", &favs); err != nil {
 			log.Printf("nav_favorites fetch: %v", err)
@@ -336,8 +350,10 @@ func axiomErrorsHandler(tmpl *template.Template, cfg config, navConfigJS templat
 		} else {
 			apl := fmt.Sprintf(`['%s'] | sort by _time desc | limit 100`, cfg.axiomDataset)
 			body, _ := json.Marshal(map[string]string{"apl": apl})
-			url := fmt.Sprintf("%s/v1/datasets/%s/query", cfg.axiomAPIURL, cfg.axiomDataset)
-			req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(body))
+			queryURL := fmt.Sprintf("%s/v1/datasets/%s/query", cfg.axiomQueryURL, cfg.axiomDataset)
+			log.Printf("axiom query -> %s (apl: %s)", queryURL, apl)
+
+			req, err := http.NewRequestWithContext(ctx, http.MethodPost, queryURL, bytes.NewReader(body))
 			if err != nil {
 				data.FetchErr = err.Error()
 			} else {
@@ -348,20 +364,28 @@ func axiomErrorsHandler(tmpl *template.Template, cfg config, navConfigJS templat
 					data.FetchErr = err.Error()
 				} else {
 					defer resp.Body.Close()
-					var qr axiomQueryResp
-					if err := json.NewDecoder(resp.Body).Decode(&qr); err != nil {
-						data.FetchErr = "decode: " + err.Error()
+					respBody, _ := io.ReadAll(resp.Body)
+					log.Printf("axiom query response %d: %s", resp.StatusCode, string(respBody[:min(len(respBody), 1000)]))
+
+					if resp.StatusCode >= 300 {
+						data.FetchErr = fmt.Sprintf("Axiom API %d: %s", resp.StatusCode, string(respBody))
 					} else {
-						for _, m := range qr.Matches {
-							ev := axiomEvent{Time: m.Time}
-							if v, ok := m.Data["level"].(string); ok { ev.Level = v }
-							if v, ok := m.Data["method"].(string); ok { ev.Method = v }
-							if v, ok := m.Data["path"].(string); ok { ev.Path = v }
-							if v, ok := m.Data["status"].(float64); ok { ev.Status = int(v) }
-							if v, ok := m.Data["duration_ms"].(float64); ok { ev.Duration = int64(v) }
-							if v, ok := m.Data["err"].(string); ok { ev.Err = v }
-							if v, ok := m.Data["panic"].(string); ok { ev.Panic = v }
-							data.Events = append(data.Events, ev)
+						var qr axiomQueryResp
+						if err := json.Unmarshal(respBody, &qr); err != nil {
+							data.FetchErr = "decode: " + err.Error()
+						} else {
+							for _, m := range qr.Matches {
+								ev := axiomEvent{Time: m.Time}
+								if v, ok := m.Data["level"].(string); ok { ev.Level = v }
+								if v, ok := m.Data["method"].(string); ok { ev.Method = v }
+								if v, ok := m.Data["path"].(string); ok { ev.Path = v }
+								if v, ok := m.Data["status"].(float64); ok { ev.Status = int(v) }
+								if v, ok := m.Data["duration_ms"].(float64); ok { ev.Duration = int64(v) }
+								if v, ok := m.Data["err"].(string); ok { ev.Err = v }
+								if v, ok := m.Data["panic"].(string); ok { ev.Panic = v }
+								data.Events = append(data.Events, ev)
+							}
+							log.Printf("axiom query returned %d events", len(data.Events))
 						}
 					}
 				}

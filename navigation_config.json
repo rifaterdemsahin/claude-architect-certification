@@ -91,6 +91,10 @@
           "url": "5_Symbols/production/prod/checklist.html"
         },
         {
+          "label": "9. 🎥 Footage Mapping",
+          "url": "5_Symbols/production/prod/footage_mapping.html"
+        },
+        {
           "label": "🛠️ Tools",
           "children": [
             {
@@ -109,19 +113,19 @@
       "label": "📦 Post Prod",
       "children": [
         {
-          "label": "9. 🧭 Certification Guide & Exam",
+          "label": "10. 🧭 Certification Guide & Exam",
           "url": "markdown_renderer.html?file=4_Formula/certification/exam_and_case_study.md"
         },
         {
-          "label": "10. 🔥 Join $10/mo",
+          "label": "11. 🔥 Join $10/mo",
           "url": "5_Symbols/production/publish/membership.html"
         },
         {
-          "label": "11. 💰 Business Plan",
+          "label": "12. 💰 Business Plan",
           "url": "markdown_renderer.html?file=4_Formula/certification/business_plan.md"
         },
         {
-          "label": "12. 💼 LinkedIn",
+          "label": "13. 💼 LinkedIn",
           "children": [
             {
               "label": "Journey Post (pre-exam)",

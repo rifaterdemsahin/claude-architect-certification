@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎥 Footage & Research Mapping — Claude AI Certification</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #030712;
+      --bg-card: rgba(17, 24, 39, 0.9);
+      --border-glow: rgba(139, 92, 246, 0.3);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --primary: #8b5cf6;
+      --primary-glow: rgba(139, 92, 246, 0.6);
+      --secondary: #3b82f6;
+      --success: #10b981;
+      --font-title: 'Outfit', sans-serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.12) 0%, transparent 40%);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      line-height: 1.6;
+      padding-top: 80px;
+      padding-bottom: 100px;
+    }
+
+    .container { max-width: 1400px; margin: 0 auto; padding: 0 24px; }
+
+    header { margin-bottom: 40px; }
+
+    /* Control Panel */
+    .control-panel {
+      background: rgba(17, 24, 39, 0.6);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(139, 92, 246, 0.25);
+      border-radius: 24px;
+      padding: 24px 32px;
+      margin-bottom: 24px;
+      display: flex;
+      gap: 24px;
+      align-items: center;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .selector-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .selector-group label {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+    }
+
+    .selector-group select {
+      background: rgba(3, 7, 18, 0.8);
+      color: var(--text-main);
+      border: 2px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 14px 20px;
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      font-weight: 600;
+      outline: none;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%238b5cf6'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 20px center;
+      background-size: 16px;
+      padding-right: 48px;
+    }
+
+    .selector-group select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 15px var(--primary-glow);
+    }
+
+    .status-badge {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--success);
+      padding: 8px 16px;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      white-space: nowrap;
+    }
+
+    /* Layout Split */
+    .mapping-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      margin-bottom: 80px;
+    }
+
+    @media (max-width: 1024px) {
+      .mapping-grid { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 24px;
+      padding: 32px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+    }
+
+    .panel h2 {
+      font-family: var(--font-title);
+      font-size: 1.6rem;
+      font-weight: 800;
+      margin-bottom: 24px;
+      border-bottom: 2px solid rgba(139, 92, 246, 0.2);
+      padding-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Tabs for Research elements */
+    .tab-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 10px;
+    }
+
+    .tab-btn {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-muted);
+      padding: 10px 18px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 0.9rem;
+    }
+
+    .tab-btn.active, .tab-btn:hover {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    /* Assets List */
+    .assets-list {
+      max-height: 480px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding-right: 8px;
+    }
+
+    .asset-item {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      transition: all 0.2s;
+    }
+
+    .asset-item:hover {
+      border-color: var(--primary);
+      background: rgba(139, 92, 246, 0.08);
+    }
+
+    .asset-details {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .asset-name {
+      font-weight: 600;
+      font-size: 0.95rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: white;
+    }
+
+    .asset-meta {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .btn-action {
+      background: rgba(59, 130, 246, 0.15);
+      color: var(--secondary);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .btn-action:hover {
+      background: var(--secondary);
+      color: white;
+    }
+
+    /* Mapped Outputs */
+    .mappings-container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .mapping-card {
+      background: rgba(139, 92, 246, 0.05);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      border-radius: 20px;
+      padding: 20px;
+      position: relative;
+      transition: all 0.3s;
+    }
+
+    .mapping-card:hover {
+      box-shadow: 0 10px 30px rgba(139, 92, 246, 0.15);
+      border-color: var(--primary);
+    }
+
+    .mapping-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .scene-badge {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      padding: 4px 12px;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+    }
+
+    .mapping-body {
+      display: grid;
+      gap: 10px;
+    }
+
+    .mapped-element {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.88rem;
+    }
+
+    .element-icon { font-size: 1.1rem; }
+
+    .btn-delete {
+      background: rgba(239, 68, 68, 0.15);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-weight: 700;
+      transition: all 0.2s;
+    }
+
+    .btn-delete:hover {
+      background: #ef4444;
+      color: white;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-muted);
+      border: 2px dashed rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      font-style: italic;
+    }
+
+    footer {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      margin-top: 60px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    footer a {
+      color: var(--secondary);
+      text-decoration: none;
+      font-weight: 700;
+    }
+  </style>
+  <script src="../../../shared/nav.js"></script>
+  <script src="../../../shared/debug-panel.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1 style="font-size: 3.5rem; font-weight: 900; letter-spacing: -0.02em; margin-bottom: 10px;">Footage &amp; Research Mapping</h1>
+      <p style="font-size: 1.2rem; color: var(--text-muted);">
+        Map pre-production research elements to actual footage and production scenes.
+      </p>
+    </header>
+
+    <!-- Selection Bar -->
+    <div class="control-panel">
+      <div class="selector-group">
+        <label for="module-select">Module</label>
+        <select id="module-select" onchange="onModuleChange()">
+          <option value="1">Module 1: Claude Ecosystem &amp; Flows</option>
+          <option value="2">Module 2: Model Context Protocol (MCP)</option>
+          <option value="3">Module 3: Zero-Data Retention (ZDR)</option>
+          <option value="4">Module 4: Deterministic Routers</option>
+          <option value="5">Module 5: Financial Engineering</option>
+        </select>
+      </div>
+
+      <div class="selector-group">
+        <label for="video-select">Target Scene</label>
+        <select id="video-select">
+          <option value="scene_1">Scene 1: Introduction Overview</option>
+          <option value="scene_2">Scene 2: Core Concept Walkthrough</option>
+          <option value="scene_3">Scene 3: Deep Dive Demo</option>
+          <option value="scene_4">Scene 4: Key Insights &amp; Wrap-Up</option>
+        </select>
+      </div>
+
+      <div class="status-badge" id="storage-status">
+        🟢 Connected
+      </div>
+    </div>
+
+    <!-- Mapping Dashboard -->
+    <div class="mapping-grid">
+      <!-- Left Panel: Research Elements -->
+      <div class="panel">
+        <h2>
+          <span>🔬 Research Elements</span>
+          <span style="font-size:0.8rem; color:var(--text-muted);">From Azure Storage</span>
+        </h2>
+
+        <div class="tab-bar">
+          <button class="tab-btn active" onclick="switchTab('images')">🖼 Images</button>
+          <button class="tab-btn" onclick="switchTab('audio')">🎵 Audio</button>
+          <button class="tab-btn" onclick="switchTab('videos')">🎬 Videos</button>
+          <button class="tab-btn" onclick="switchTab('notes')">📝 Notes</button>
+        </div>
+
+        <div class="assets-list" id="assets-container">
+          <div class="empty-state">Loading elements...</div>
+        </div>
+      </div>
+
+      <!-- Right Panel: Mapped Relations -->
+      <div class="panel">
+        <h2>
+          <span>📋 Active Mappings</span>
+          <span style="font-size:0.8rem; color:var(--text-muted);">LocalStorage Sync</span>
+        </h2>
+
+        <div class="mappings-container" id="mappings-container">
+          <div class="empty-state">No active mappings created yet. Select elements on the left to map.</div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <p style="font-weight: 800; font-size: 1.1rem; color: white; margin-bottom: 20px;">Claude AI Certification | Production Coordinator</p>
+      <div style="display: flex; justify-content: center; gap: 40px; flex-wrap: wrap;">
+        <a href="../../../index.html">🏠 Home</a>
+        <a href="../production_hub.html">🏭 Production Hub</a>
+        <a href="../postprod/production_shotlist.html?module=1&section=1">🎬 Shot List</a>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    let activeTab = 'images';
+    let loadedAssets = [];
+    const containerMap = {
+      'images': 'research-images',
+      'audio': 'research-audio',
+      'videos': 'research-videos',
+      'notes': 'research-notes'
+    };
+    const iconMap = {
+      'images': '🖼',
+      'audio': '🎵',
+      'videos': '🎬',
+      'notes': '📝'
+    };
+
+    function onModuleChange() {
+      // Refresh scenes options based on selected module
+      const mod = document.getElementById('module-select').value;
+      const select = document.getElementById('video-select');
+      select.innerHTML = '';
+      for (let i = 1; i <= 5; i++) {
+        const opt = document.createElement('option');
+        opt.value = `m${mod}_scene_${i}`;
+        opt.textContent = `Scene ${i}: Module ${mod} Focus Topic ${i}`;
+        select.appendChild(opt);
+      }
+      renderMappings();
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.textContent.toLowerCase().includes(tab));
+      });
+      activeTab = tab;
+      loadResearchElements();
+    }
+
+    async function loadResearchElements() {
+      const container = document.getElementById('assets-container');
+      container.innerHTML = '<div class="empty-state">Fetching elements from Go Storage proxy...</div>';
+      
+      const azureContainer = containerMap[activeTab];
+      try {
+        const res = await fetch(`/api/research/files?container=${azureContainer}`);
+        if (!res.ok) throw new Error('API unavailable');
+        const files = await res.json();
+        loadedAssets = files;
+
+        if (files.length === 0) {
+          container.innerHTML = `<div class="empty-state">No elements in ${azureContainer}. Upload via the Preprod manager.</div>`;
+          return;
+        }
+
+        container.innerHTML = '';
+        files.forEach(file => {
+          const item = document.createElement('div');
+          item.className = 'asset-item';
+          
+          let sizeStr = (file.size / 1024).toFixed(1) + ' KB';
+          if (file.size > 1024 * 1024) sizeStr = (file.size / (1024 * 1024)).toFixed(1) + ' MB';
+
+          item.innerHTML = `
+            <div class="asset-details">
+              <span class="asset-name" title="${file.name}">${file.name}</span>
+              <span class="asset-meta">${iconMap[activeTab]} ${activeTab.toUpperCase()} • ${sizeStr}</span>
+            </div>
+            <button class="btn-action" onclick="mapAsset('${file.name.replace(/'/g, "\\'")}')">Map to Scene</button>
+          `;
+          container.appendChild(item);
+        });
+      } catch (err) {
+        document.getElementById('storage-status').textContent = '⚠️ Storage Proxy Offline';
+        document.getElementById('storage-status').style.background = 'rgba(239, 68, 68, 0.15)';
+        document.getElementById('storage-status').style.color = '#ef4444';
+        
+        // Mock fallback for presentation
+        container.innerHTML = '';
+        const mockElements = {
+          'images': ['architecture_diagram_v1.png', 'ui_mockup_v2.png', 'zdr_topology.png'],
+          'audio': ['intro_voiceover_mod1.mp3', 'sfx_impact.wav'],
+          'videos': ['ide_walkthrough_m1.mp4', 'mcp_console_capture.mov'],
+          'notes': ['preprod_research_notes.md', 'script_outline.txt']
+        };
+
+        const mockList = mockElements[activeTab] || [];
+        if (mockList.length === 0) {
+          container.innerHTML = '<div class="empty-state">No fallback elements.</div>';
+          return;
+        }
+
+        mockList.forEach(name => {
+          const item = document.createElement('div');
+          item.className = 'asset-item';
+          item.innerHTML = `
+            <div class="asset-details">
+              <span class="asset-name">${name}</span>
+              <span class="asset-meta">${iconMap[activeTab]} ${activeTab.toUpperCase()} • Fallback Asset</span>
+            </div>
+            <button class="btn-action" onclick="mapAsset('${name}')">Map to Scene</button>
+          `;
+          container.appendChild(item);
+        });
+      }
+    }
+
+    function mapAsset(assetName) {
+      const sceneId = document.getElementById('video-select').value;
+      const key = 'footage_mappings';
+      let mappings = JSON.parse(localStorage.getItem(key)) || {};
+      
+      if (!mappings[sceneId]) {
+        mappings[sceneId] = [];
+      }
+
+      // Check duplicate
+      const exists = mappings[sceneId].some(m => m.name === assetName && m.type === activeTab);
+      if (!exists) {
+        mappings[sceneId].push({
+          name: assetName,
+          type: activeTab,
+          icon: iconMap[activeTab],
+          timestamp: new Date().toISOString()
+        });
+        localStorage.setItem(key, JSON.stringify(mappings));
+        renderMappings();
+      }
+    }
+
+    function removeMapping(sceneId, index) {
+      const key = 'footage_mappings';
+      let mappings = JSON.parse(localStorage.getItem(key)) || {};
+      if (mappings[sceneId]) {
+        mappings[sceneId].splice(index, 1);
+        if (mappings[sceneId].length === 0) {
+          delete mappings[sceneId];
+        }
+        localStorage.setItem(key, JSON.stringify(mappings));
+        renderMappings();
+      }
+    }
+
+    function renderMappings() {
+      const container = document.getElementById('mappings-container');
+      const mappings = JSON.parse(localStorage.getItem('footage_mappings')) || {};
+      
+      const keys = Object.keys(mappings);
+      if (keys.length === 0) {
+        container.innerHTML = '<div class="empty-state">No active mappings created yet. Select elements on the left to map.</div>';
+        return;
+      }
+
+      container.innerHTML = '';
+      keys.forEach(sceneId => {
+        const card = document.createElement('div');
+        card.className = 'mapping-card';
+        
+        let elementsHtml = '';
+        mappings[sceneId].forEach((item, index) => {
+          elementsHtml += `
+            <div class="mapped-element">
+              <span class="element-icon">${item.icon}</span>
+              <span style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.name}</span>
+              <button class="btn-delete" onclick="removeMapping('${sceneId}', ${index})">✕</button>
+            </div>
+          `;
+        });
+
+        card.innerHTML = `
+          <div class="mapping-header">
+            <span class="scene-badge">${sceneId.replace(/_/g, ' ')}</span>
+          </div>
+          <div class="mapping-body">
+            ${elementsHtml}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // Init
+    onModuleChange();
+    switchTab('images');
+  </script>
+</body>
+</html>
