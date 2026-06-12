@@ -55,3 +55,17 @@ Add functionality to relate research assets (images, audio, videos, notes) direc
 4. **Validation**:
    - Ensure the scripts interface handles listing, linking, and unlinking successfully.
 
+## 2026-06-12 — Hover Details for Linked Research Items
+
+### 🎯 Objective
+Enable detailed metadata display (size, content type, last modified date) when hovering over related research items inside the master script page [scripts/index.html](file:///Users/rifaterdemsahin/projects/claude-architect-certification/5_Symbols/production/preprod/scripts/index.html).
+
+### 📐 Design & Implementation Plan
+1. **Metadata Retention**:
+   - Update the `/api/research/files` data mapping in scripts page to preserve properties like `size`, `contentType`, and `lastModified`.
+2. **Premium Tooltip Styling**:
+   - Add a sleek CSS-based glassmorphic tooltip style for displaying metadata.
+3. **Hover Event & Element hydration**:
+   - Wrap the related research link in a hover container and render details such as file size, type, and modification date inside the tooltip element.
+
+

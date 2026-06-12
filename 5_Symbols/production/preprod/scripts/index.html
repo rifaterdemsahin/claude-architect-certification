@@ -430,6 +430,65 @@
     .sent-add-label  { font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
     .btn-sent-add    { background: rgba(16,185,129,0.1); color: #34d399; border: 1px solid rgba(16,185,129,0.2); padding: 6px 14px; border-radius: 7px; font-size: 0.78rem; font-weight: 700; cursor: pointer; width: 100%; margin-top: 8px; font-family: var(--font-body); }
     .btn-sent-add:hover { background: rgba(16,185,129,0.18); }
+
+    /* Glassmorphic hover tooltips */
+    .research-hover-container {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .research-tooltip {
+      visibility: hidden;
+      width: 260px;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(139, 92, 246, 0.4);
+      color: #fff;
+      text-align: left;
+      border-radius: 10px;
+      padding: 12px;
+      position: absolute;
+      z-index: 100;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%);
+      opacity: 0;
+      transition: opacity 0.2s, visibility 0.2s;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      backdrop-filter: blur(10px);
+      font-size: 0.75rem;
+      pointer-events: none;
+      font-family: var(--font-body);
+      line-height: 1.4;
+    }
+    .research-hover-container:hover .research-tooltip {
+      visibility: visible;
+      opacity: 1;
+    }
+    .tooltip-header {
+      font-weight: 700;
+      color: #c084fc;
+      margin-bottom: 6px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      padding-bottom: 4px;
+      font-size: 0.8rem;
+    }
+    .tooltip-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+      gap: 10px;
+    }
+    .tooltip-label {
+      color: #9ca3af;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    .tooltip-value {
+      color: #f3f4f6;
+      word-break: break-all;
+      text-align: right;
+    }
   </style>
   <script src="../../../../shared/nav.js"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -1621,6 +1680,13 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
     let allResearchItems = [];
     let allRelationships = [];
 
+    function fmtBytes(b) {
+      if (!b) return '0 B';
+      if (b < 1024) return b + ' B';
+      if (b < 1024*1024) return (b/1024).toFixed(1) + ' KB';
+      return (b/1024/1024).toFixed(1) + ' MB';
+    }
+
     async function loadResearchData() {
       const containers = {
         'research-images': '🖼 Image',
@@ -1634,7 +1700,14 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
           try {
             const res = await fetch(`/api/research/files?container=${c}`);
             const files = res.ok ? await res.json() : [];
-            return files.map(f => ({ container: c, name: f.name, typeLabel: containers[c] }));
+            return files.map(f => ({ 
+              container: c, 
+              name: f.name, 
+              typeLabel: containers[c],
+              size: f.size,
+              contentType: f.contentType,
+              lastModified: f.lastModified
+            }));
           } catch (e) {
             console.error('Failed to load research container ' + c, e);
             return [];
@@ -1697,12 +1770,30 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
             previewAction = `openResearchNoteModal('${r.container}', '${r.item_name.replace(/'/g, "\\'")}')`;
           }
 
+          const fileMeta = allResearchItems.find(item => item.container === r.container && item.name === r.item_name);
+          let tooltipHtml = '';
+          if (fileMeta) {
+            const sizeStr = fileMeta.size ? fmtBytes(fileMeta.size) : 'Unknown size';
+            const typeStr = fileMeta.contentType || 'unknown type';
+            const dateStr = fileMeta.lastModified ? new Date(fileMeta.lastModified).toLocaleString() : 'N/A';
+            tooltipHtml = `
+              <div class="research-tooltip">
+                <div class="tooltip-header">${esc2(fileMeta.typeLabel)} Info</div>
+                <div class="tooltip-row"><span class="tooltip-label">File:</span><span class="tooltip-value">${esc2(r.item_name)}</span></div>
+                <div class="tooltip-row"><span class="tooltip-label">Size:</span><span class="tooltip-value">${sizeStr}</span></div>
+                <div class="tooltip-row"><span class="tooltip-label">Type:</span><span class="tooltip-value">${esc2(typeStr)}</span></div>
+                <div class="tooltip-row"><span class="tooltip-label">Modified:</span><span class="tooltip-value">${esc2(dateStr)}</span></div>
+              </div>
+            `;
+          }
+
           return `<div class="code-ref-row custom-ref" id="research-rel-${r.id}" style="border: 1px solid rgba(139,92,246,0.14); background: rgba(139,92,246,0.04); margin-bottom: 4px;">
             <span class="code-ref-icon">${icon}</span>
             <div class="code-ref-body">
-              <div class="code-ref-label">
-                <a href="javascript:void(0)" onclick="${previewAction}">${esc2(r.item_name)}</a>
-                <span class="code-ref-badge db" style="background: rgba(139,92,246,0.18); color: #c084fc;">Research</span>
+              <div class="code-ref-label research-hover-container">
+                <a href="javascript:void(0)" onclick="${previewAction}" style="border-bottom: 1px dotted rgba(255,255,255,0.3); padding-bottom: 1px; color: #93c5fd; text-decoration: none;">${esc2(r.item_name)}</a>
+                <span class="code-ref-badge db" style="background: rgba(139,92,246,0.18); color: #c084fc; vertical-align: middle; margin-left: 6px;">Research</span>
+                ${tooltipHtml}
               </div>
             </div>
             <div class="code-ref-actions-col">
