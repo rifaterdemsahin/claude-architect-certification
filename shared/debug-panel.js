@@ -12,34 +12,19 @@
   }
 
   async function reportToAxiom(msg, stage = 'UI-Client') {
-    const token = localStorage.getItem('axiom_token') || 'xaat-dcee4b59-5c6e-4ae4-9574-136f5986e84c';
-    const orgId = localStorage.getItem('axiom_org_id') || 'rifaterdemsahin-stks';
-    const dataset = localStorage.getItem('axiom_dataset') || 'videoproduction';
-    const apiUrl = localStorage.getItem('axiom_api_url') || 'https://eu-central-1.aws.edge.axiom.co';
-
-    if (!token || !orgId || !dataset) return;
-
     try {
-      const payload = [{
-        timestamp: new Date().toISOString(),
+      const payload = {
+        _time: new Date().toISOString(),
         stage: stage,
-        severity: 'ERROR',
+        level: 'error',
         message: msg,
         url: window.location.href,
         userAgent: navigator.userAgent
-      }];
+      };
 
-      const ingestUrl = apiUrl.includes('.edge.axiom.co')
-        ? `${apiUrl}/v1/ingest/${dataset}`
-        : `${apiUrl}/v1/datasets/${dataset}/ingest`;
-
-      _fetch(ingestUrl, {
+      _fetch('/api/errors', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-          'X-Axiom-Org-Id': orgId
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       }).catch(err => {
         console.warn('Axiom background reporting failed:', err);
@@ -90,8 +75,31 @@
   };
 
   // ── Log page metadata ────────────────────────────────────────────────────
-  window.addEventListener('DOMContentLoaded', () => {
+  window.addEventListener('DOMContentLoaded', async () => {
     push('info', `Page: ${location.pathname}${location.search}`);
+
+    // Try to auto-populate from Go server config if localStorage is empty
+    try {
+      const cfgRes = await _fetch('/api/config');
+      if (cfgRes.ok) {
+        const cfg = await cfgRes.json();
+        if (cfg.supabaseUrl && !localStorage.getItem('supabase_url')) {
+          localStorage.setItem('supabase_url', cfg.supabaseUrl);
+          push('info', `⚙️ Auto-set supabase_url from /api/config`);
+        }
+        if (cfg.supabaseAnon && !localStorage.getItem('supabase_anon_key')) {
+          localStorage.setItem('supabase_anon_key', cfg.supabaseAnon);
+          push('info', `⚙️ Auto-set supabase_anon_key from /api/config`);
+        }
+        if (cfg.googleClientId && !localStorage.getItem('google_client_id')) {
+          localStorage.setItem('google_client_id', cfg.googleClientId);
+          push('info', `⚙️ Auto-set google_client_id from /api/config`);
+        }
+      }
+    } catch (e) {
+      push('warn', `Failed to fetch /api/config for auto-setup: ${e.message}`);
+    }
+
     push('info', `supabase_url: ${localStorage.getItem('supabase_url') || '(not set)'}`);
     push('info', `supabase_anon_key: ${localStorage.getItem('supabase_anon_key') ? '✅ set (' + localStorage.getItem('supabase_anon_key').slice(0,20) + '…)' : '❌ missing'}`);
     push('info', `google_client_id: ${localStorage.getItem('google_client_id') ? '✅ set' : '❌ missing'}`);
@@ -137,19 +145,6 @@
       btn.textContent = '📡 Sending...';
     }
 
-    const token = localStorage.getItem('axiom_token') || 'xaat-dcee4b59-5c6e-4ae4-9574-136f5986e84c';
-    const orgId = localStorage.getItem('axiom_org_id') || 'rifaterdemsahin-stks';
-    const dataset = localStorage.getItem('axiom_dataset') || 'videoproduction';
-    const apiUrl = localStorage.getItem('axiom_api_url') || 'https://eu-central-1.aws.edge.axiom.co';
-
-    if (!token || !orgId || !dataset) {
-      if (btn) {
-        btn.textContent = '❌ Credentials Missing';
-        setTimeout(() => { btn.disabled = false; btn.textContent = '📡 Send to Axiom'; }, 2000);
-      }
-      return;
-    }
-
     if (LOG.length === 0) {
       if (btn) {
         btn.textContent = '⚠️ Log Empty';
@@ -159,26 +154,21 @@
     }
 
     try {
-      const payload = LOG.map(l => ({
-        timestamp: new Date().toISOString(),
+      // Send the entire log as one big message or multiple?
+      // For simplicity and to match the current /api/errors proxy, 
+      // we'll send a single summary event.
+      const payload = {
+        _time: new Date().toISOString(),
         stage: 'UI-DebugPanel-Batch',
-        severity: l.type.toUpperCase() === 'ERROR' ? 'ERROR' : (l.type.toUpperCase() === 'WARN' ? 'WARNING' : 'INFO'),
-        message: `[${l.time}] [${l.type.toUpperCase()}] ${l.msg}`,
+        level: LOG.some(l => l.type === 'error') ? 'error' : 'info',
+        message: LOG.map(l => `[${l.time}] [${l.type.toUpperCase()}] ${l.msg}`).join('\n'),
         url: window.location.href,
         userAgent: navigator.userAgent
-      }));
+      };
 
-      const ingestUrl = apiUrl.includes('.edge.axiom.co')
-        ? `${apiUrl}/v1/ingest/${dataset}`
-        : `${apiUrl}/v1/datasets/${dataset}/ingest`;
-
-      const res = await _fetch(ingestUrl, {
+      const res = await _fetch('/api/errors', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-          'X-Axiom-Org-Id': orgId
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
 

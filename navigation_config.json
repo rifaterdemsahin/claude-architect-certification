@@ -77,6 +77,10 @@
               "url": "/admin/errors"
             },
             {
+              "label": "🗺 Project Sitemap",
+              "url": "5_Symbols/tools/sitemap.html"
+            },
+            {
               "label": "🏠 Home Template",
               "url": "5_Symbols/templates/index.html"
             },

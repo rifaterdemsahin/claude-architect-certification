@@ -1325,7 +1325,21 @@
 
     // Page Entry point
     window.addEventListener('DOMContentLoaded', async () => {
-      // Bootstrap: cookie → localStorage → hardcoded default, then persist to both
+      // 1. Try to fetch config from Go server (Fly.io/local)
+      try {
+        const cfgRes = await fetch('/api/config');
+        if (cfgRes.ok) {
+          const cfg = await cfgRes.json();
+          if (cfg.supabaseUrl) localStorage.setItem('supabase_url', cfg.supabaseUrl);
+          if (cfg.supabaseAnon) localStorage.setItem('supabase_anon_key', cfg.supabaseAnon);
+          if (cfg.googleClientId) localStorage.setItem('google_client_id', cfg.googleClientId);
+          if (window.dbg) window.dbg('⚙️ Loaded configuration from /api/config');
+        }
+      } catch (e) {
+        console.warn('Config fetch failed, using local storage / defaults:', e);
+      }
+
+      // 2. Bootstrap: cookie → localStorage → hardcoded default, then persist to both
       for (const [key, def] of Object.entries(CRED_DEFAULTS)) {
         const resolved = getCookie(key) || localStorage.getItem(key) || def;
         if (resolved) { localStorage.setItem(key, resolved); setCookie(key, resolved, 365); }

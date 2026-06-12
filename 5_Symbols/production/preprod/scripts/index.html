@@ -414,6 +414,7 @@
     .sent-badge.screenshare { background: rgba(59,130,246,0.08);  color: #3b82f6; }
     .sent-badge.b_roll      { background: rgba(16,185,129,0.08);  color: #10b981; }
     .sent-text { font-size: 0.84rem; color: var(--text-main); line-height: 1.55; flex: 1; }
+    .sent-para-num { font-size: 0.6rem; font-weight: 800; color: rgba(139,92,246,0.5); min-width: 18px; text-align: center; flex-shrink: 0; padding-top: 3px; letter-spacing: 0.02em; }
     .sent-row-btns { display: flex; flex-direction: column; gap: 3px; flex-shrink: 0; }
     .btn-sent-edit   { background: rgba(139,92,246,0.08); color: #c084fc; border: 1px solid rgba(139,92,246,0.18); padding: 3px 7px; border-radius: 5px; font-size: 0.68rem; cursor: pointer; font-family: var(--font-body); line-height: 1.4; }
     .btn-sent-delete { background: rgba(239,68,68,0.08); color: #f87171; border: 1px solid rgba(239,68,68,0.15); padding: 3px 7px; border-radius: 5px; font-size: 0.68rem; cursor: pointer; font-family: var(--font-body); line-height: 1.4; }
@@ -912,28 +913,7 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
           html += `<a class="action-chip research" href="../research/index.html?video=${encodeURIComponent(elementId)}" title="Research items linked to this video">🔬</a>`;
           html += `</div>`;
           
-          // Editable Script Block
-          html += `<div class="video-script-container" id="script-container-${elementId}">`;
-          html += `<div class="script-display" id="script-display-${elementId}">${v.script}</div>`;
-          html += `<div class="script-edit-form" id="script-edit-form-${elementId}" style="display: none;">`;
-          html += `<textarea class="script-textarea" id="script-textarea-${elementId}">${v.script}</textarea>`;
-          html += `<div class="edit-actions">`;
-          html += `<button class="btn-save" onclick="saveScript('${v.videoId || ''}', ${mi}, ${v.id})">Save Changes</button>`;
-          html += `<button class="btn-cancel" onclick="toggleEdit('${elementId}', false)">Cancel</button>`;
-          html += `</div>`;
-          html += `</div>`;
-          html += `<div class="edit-trigger-row">`;
-          html += `<button class="btn-edit" id="btn-edit-${elementId}" onclick="toggleEdit('${elementId}', true)">✏️ Edit Script</button>`;
-          const isIntro = vi === 0;
-          const isOutro = vi === m.videos.length - 1;
-          const templateLabel = isIntro ? '🚀 Template Intro' : isOutro ? '🎯 Template Outro' : '📋 Template Video';
-          const templatePos = isIntro ? 1 : isOutro ? m.videos.length : 2;
-          html += `<button class="btn-template" onclick="loadTemplate('${elementId}', ${templatePos}, ${m.videos.length})">${templateLabel}</button>`;
-          html += `<span class="save-status" id="save-status-${elementId}"></span>`;
-          html += `</div>`;
-          html += `</div>`; // end script container
-
-          // Format + duration badges + sentences panel (hydrated async)
+          // Script Paragraphs — sentences table is canonical source; loaded async via hydrateSentences
           html += `<div id="sentences-${elementId}"></div>`;
 
           // Audio generation row
@@ -1219,15 +1199,18 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
     }
 
     // ── Main generate audio function ────────────────────────────────────────────
+    function getScriptFromSentences(elementId) {
+      const c = document.getElementById('sentences-' + elementId);
+      if (!c) return '';
+      return Array.from(c.querySelectorAll('.sent-text'))
+        .map(el => el.textContent.trim()).filter(Boolean).join('\n\n');
+    }
+
     window.generateAudio = function(videoId, moduleIdx, videoIdx) {
       const elementId = videoId || `local-${moduleIdx}-${videoIdx}`;
-      const textArea = document.getElementById(`script-textarea-${elementId}`);
-      const vTarget = window.loadedData && window.loadedData.modules[moduleIdx]
-        ? window.loadedData.modules[moduleIdx].videos.find(v => v.id === videoIdx)
-        : null;
-      const scriptText = (textArea && textArea.value.trim()) || (vTarget ? vTarget.script : '');
+      const scriptText = getScriptFromSentences(elementId);
       if (!scriptText.trim()) {
-        alert('No script text found for this video.');
+        alert('No script paragraphs found. Add sentences first.');
         return;
       }
       const url = `${KOKORO_BASE}/?lang=en&voice=en-US-AriaNeural&text=${encodeURIComponent(scriptText)}`;
@@ -1236,22 +1219,14 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
 
     window.saveAudio = function(videoId, moduleIdx, videoIdx) {
       const elementId = videoId || `local-${moduleIdx}-${videoIdx}`;
-      const textArea = document.getElementById(`script-textarea-${elementId}`);
-      const vTarget = window.loadedData && window.loadedData.modules[moduleIdx]
-        ? window.loadedData.modules[moduleIdx].videos.find(v => v.id === videoIdx)
-        : null;
-      const scriptText = (textArea && textArea.value.trim()) || (vTarget ? vTarget.script : '');
-      if (!scriptText.trim()) { alert('No script text found for this video.'); return; }
+      const scriptText = getScriptFromSentences(elementId);
+      if (!scriptText.trim()) { alert('No script paragraphs found. Add sentences first.'); return; }
       openSaveAudioModal(videoId, moduleIdx, videoIdx);
     };
 
     async function executeAudioUpload(videoId, moduleIdx, videoIdx, folderId) {
       const elementId = videoId || `local-${moduleIdx}-${videoIdx}`;
-      const textArea = document.getElementById(`script-textarea-${elementId}`);
-      const vTarget = window.loadedData && window.loadedData.modules[moduleIdx]
-        ? window.loadedData.modules[moduleIdx].videos.find(v => v.id === videoIdx)
-        : null;
-      const scriptText = (textArea && textArea.value.trim()) || (vTarget ? vTarget.script : '');
+      const scriptText = getScriptFromSentences(elementId);
 
       const statusEl = document.getElementById(`audio-status-${elementId}`);
       const btnEl = document.getElementById(`btn-save-audio-${elementId}`);
@@ -1342,14 +1317,17 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
         grouped[s.section].push(s);
       });
 
+      let paraNum = 0;
       const groupHtml = SECTION_ORDER
         .filter(sec => grouped[sec] && grouped[sec].length)
         .map(sec => {
           const rows = grouped[sec].map(s => {
+            paraNum++;
             const rid = `${elementId}-${s.id}`;
             return `
             <div class="sent-row" id="sent-row-${rid}">
               <div class="sent-view" id="sent-view-${rid}" data-text="${esc2(s.sentence_text)}">
+                <span class="sent-para-num">${paraNum}</span>
                 <div class="sent-badges">
                   <span class="sent-badge ${esc2(s.sentence_type)}">${esc2(s.sentence_type)}</span>
                   <span class="sent-badge ${esc2(s.visual_mode)}">${esc2(s.visual_mode).replace(/_/g,' ')}</span>
@@ -1392,8 +1370,8 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
         </div>` : '';
 
       return `${metaBadges ? `<div class="script-meta-badges">${metaBadges}</div>` : ''}
-        <details class="sentences-panel">
-          <summary>📋 Sentences <span style="font-weight:400;opacity:0.6;">(${sentences.length})</span></summary>
+        <details class="sentences-panel" open>
+          <summary>📋 Script Paragraphs <span style="font-weight:400;opacity:0.6;">(${sentences.length})</span></summary>
           ${groupHtml}
           ${addForm}
         </details>`;
@@ -1505,7 +1483,7 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
         const videos = await sq('videos?order=video_number.asc&select=*,video_cues(*)');
         const links = await sq('resource_links?select=*,module_id(*)');
         const outlines = await sq('outline?order=sort_order.asc');
-        const scripts = await sq('scripts?select=id,video_id,script_text,audio_url,format,target_duration');
+        const scripts = await sq('scripts?select=id,video_id,audio_url,format,target_duration');
 
         if (!modules) return null;
 
@@ -1522,7 +1500,6 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
                 videoId: v.id,
                 title: v.title,
                 duration: v.duration,
-                script: matchedScript ? matchedScript.script_text : v.script,
                 audioUrl: matchedScript ? (matchedScript.audio_url || null) : null,
                 scriptId: matchedScript ? matchedScript.id : null,
                 format: matchedScript ? (matchedScript.format || '') : '',
@@ -1672,15 +1649,6 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
       }
       
       if (data) {
-        // Hydrate overrides
-        data.modules.forEach(m => {
-          m.videos.forEach(v => {
-            const override = localStorage.getItem(`script_override_${m.id}_${v.id}`);
-            if (override) {
-              v.script = override;
-            }
-          });
-        });
         window.loadedData = data;
         render(data);
         updateGoogleConfigUI();

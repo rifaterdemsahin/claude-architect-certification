@@ -35,6 +35,7 @@ type config struct {
 	azureTenantID      string
 	azureClientID      string
 	azureClientSecret  string
+	googleClientID     string
 }
 
 func loadConfig() config {
@@ -50,6 +51,7 @@ func loadConfig() config {
 		azureTenantID:     os.Getenv("AZURE_TENANT_ID"),
 		azureClientID:     os.Getenv("AZURE_CLIENT_ID"),
 		azureClientSecret: os.Getenv("AZURE_CLIENT_SECRET"),
+		googleClientID:    os.Getenv("GOOGLE_CLIENT_ID"),
 	}
 	if connStr := os.Getenv("AZURE_STORAGE_CONN_STR"); connStr != "" {
 		cfg.azureAccountName, cfg.azureAccountKey = parseStorageConnStr(connStr)
@@ -492,12 +494,19 @@ func axiomErrorsHandler(tmpl *template.Template, cfg config, navConfigJS templat
 
 func configHandler(cfg config) http.HandlerFunc {
 	type configResp struct {
-		SupabaseURL  string `json:"supabaseUrl"`
-		SupabaseAnon string `json:"supabaseAnon"`
+		SupabaseURL    string `json:"supabaseUrl"`
+		SupabaseAnon   string `json:"supabaseAnon"`
+		GoogleClientID string `json:"googleClientId"`
+	}
+	// Use getSecret for anything that might be in Key Vault
+	gID := cfg.googleClientID
+	if gID == "" {
+		gID = cfg.getSecret("GOOGLE_CLIENT_ID")
 	}
 	payload, _ := json.Marshal(configResp{
-		SupabaseURL:  cfg.supabaseURL,
-		SupabaseAnon: cfg.supabaseAnon,
+		SupabaseURL:    cfg.supabaseURL,
+		SupabaseAnon:   cfg.supabaseAnon,
+		GoogleClientID: gID,
 	})
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
