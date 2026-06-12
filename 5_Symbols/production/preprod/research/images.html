@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🖼 Research Images</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../../../shared/nav.css">
+  <style>
+    :root {
+      --bg: #030712; --card: rgba(17,24,39,0.9); --border: rgba(139,92,246,0.2);
+      --text: #f3f4f6; --muted: #9ca3af; --primary: #8b5cf6; --green: #10b981;
+      --red: #ef4444; --yellow: #f59e0b; --blue: #3b82f6;
+      --font-h: 'Outfit', sans-serif; --font-b: 'Plus Jakarta Sans', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: var(--font-b); line-height: 1.6; padding: 32px 24px 120px; }
+    .container { max-width: 960px; margin: 0 auto; }
+    h1 { font-family: var(--font-h); font-size: 2.2rem; font-weight: 800; margin-bottom: 6px; }
+    .subtitle { color: var(--muted); margin-bottom: 28px; }
+    .status-bar { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 20px; margin-bottom: 24px; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; }
+    /* Drop zone */
+    .dropzone { border: 2px dashed rgba(139,92,246,0.4); border-radius: 16px; padding: 48px 24px; text-align: center; cursor: pointer; transition: all 0.2s; margin-bottom: 28px; }
+    .dropzone:hover, .dropzone.drag-over { border-color: var(--primary); background: rgba(139,92,246,0.06); }
+    .dropzone-icon { font-size: 3rem; margin-bottom: 10px; }
+    .dropzone-text { color: var(--muted); font-size: 0.95rem; }
+    .dropzone-text strong { color: var(--text); }
+    #file-input { display: none; }
+    /* Progress */
+    .progress-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; margin-bottom: 24px; display: none; }
+    .progress-label { font-size: 0.85rem; color: var(--muted); margin-bottom: 8px; }
+    .progress-bar-track { background: rgba(255,255,255,0.08); border-radius: 8px; height: 8px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; background: var(--primary); border-radius: 8px; width: 0%; transition: width 0.2s; }
+    /* Gallery */
+    .section-title { font-family: var(--font-h); font-size: 1.1rem; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+    .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; }
+    .img-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; position: relative; }
+    .img-thumb { width: 100%; aspect-ratio: 1; object-fit: cover; background: rgba(255,255,255,0.04); display: block; }
+    .img-thumb-placeholder { width: 100%; aspect-ratio: 1; background: rgba(139,92,246,0.08); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; }
+    .img-info { padding: 10px 12px; }
+    .img-name { font-size: 0.78rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; }
+    .img-size { font-size: 0.72rem; color: var(--muted); }
+    .img-actions { display: flex; gap: 6px; padding: 0 12px 10px; }
+    .btn-sm { padding: 4px 12px; border-radius: 7px; border: none; cursor: pointer; font-size: 0.75rem; font-weight: 600; font-family: var(--font-b); transition: all 0.2s; }
+    .btn-ghost { background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid rgba(255,255,255,0.08); }
+    .btn-ghost:hover { background: rgba(255,255,255,0.1); color: var(--text); }
+    .btn-danger { background: rgba(239,68,68,0.12); color: var(--red); border: 1px solid rgba(239,68,68,0.2); }
+    .btn-danger:hover { background: rgba(239,68,68,0.22); }
+    .empty-state { text-align: center; color: var(--muted); padding: 48px; font-size: 0.95rem; }
+    /* Toast */
+    .toast { position: fixed; bottom: 24px; right: 24px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 18px; font-size: 0.88rem; z-index: 1000; max-width: 340px; transition: opacity 0.3s; }
+    .toast.error { border-color: rgba(239,68,68,0.4); }
+    .toast.success { border-color: rgba(16,185,129,0.4); }
+  </style>
+</head>
+<body>
+<script src="../../../../shared/nav.js"></script>
+<div class="container">
+  <h1>🖼 Research Images</h1>
+  <p class="subtitle">Upload and manage reference images for research — stored in Azure Blob Storage.</p>
+
+  <div class="status-bar" id="status-bar">⏳ Connecting…</div>
+
+  <div class="dropzone" id="dropzone">
+    <div class="dropzone-icon">📷</div>
+    <div class="dropzone-text"><strong>Click to browse</strong> or drag &amp; drop images here</div>
+    <div class="dropzone-text" style="margin-top:6px;font-size:0.82rem">PNG, JPG, GIF, WebP, SVG</div>
+  </div>
+  <input type="file" id="file-input" accept="image/*" multiple>
+
+  <div class="progress-wrap" id="progress-wrap">
+    <div class="progress-label" id="progress-label">Uploading…</div>
+    <div class="progress-bar-track"><div class="progress-bar-fill" id="progress-fill"></div></div>
+  </div>
+
+  <div class="section-title">🗂 Uploaded Images <span id="count" style="color:var(--muted);font-size:0.85rem;font-weight:400"></span></div>
+  <div class="gallery" id="gallery"><div class="empty-state">Loading…</div></div>
+</div>
+
+<div class="toast" id="toast" style="opacity:0;pointer-events:none"></div>
+
+<script>
+const CONTAINER = 'research-images';
+let _toastTimer;
+
+function toast(msg, type) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast ' + (type || '');
+  el.style.opacity = '1';
+  el.style.pointerEvents = 'auto';
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => { el.style.opacity = '0'; el.style.pointerEvents = 'none'; }, 3500);
+}
+
+function fmtBytes(b) {
+  if (b < 1024) return b + ' B';
+  if (b < 1024*1024) return (b/1024).toFixed(1) + ' KB';
+  return (b/1024/1024).toFixed(1) + ' MB';
+}
+
+function setStatus(ok) {
+  const el = document.getElementById('status-bar');
+  el.textContent = ok ? '🟢 Connected to Azure Storage — research-images' : '🔴 Azure Storage unavailable';
+}
+
+function loadGallery() {
+  fetch('/api/research/files?container=' + CONTAINER)
+    .then(r => r.json())
+    .then(files => {
+      const gallery = document.getElementById('gallery');
+      document.getElementById('count').textContent = '(' + files.length + ')';
+      if (!files || files.length === 0) {
+        gallery.innerHTML = '<div class="empty-state">No images yet — upload one above.</div>';
+        return;
+      }
+      gallery.innerHTML = '';
+      files.forEach(f => {
+        const card = document.createElement('div');
+        card.className = 'img-card';
+        const isImg = /^image\//i.test(f.contentType);
+        card.innerHTML = `
+          ${isImg
+            ? `<img class="img-thumb" src="/api/research/file?container=${CONTAINER}&name=${encodeURIComponent(f.name)}" alt="${f.name}" loading="lazy">`
+            : `<div class="img-thumb-placeholder">🖼</div>`}
+          <div class="img-info">
+            <div class="img-name" title="${f.name}">${f.name}</div>
+            <div class="img-size">${fmtBytes(f.size)}</div>
+          </div>
+          <div class="img-actions">
+            <a class="btn-sm btn-ghost" href="/api/research/file?container=${CONTAINER}&name=${encodeURIComponent(f.name)}" download="${f.name}">⬇ Save</a>
+            <button class="btn-sm btn-danger" onclick="deleteFile('${f.name.replace(/'/g,"\\'")}')">🗑</button>
+          </div>`;
+        gallery.appendChild(card);
+      });
+    })
+    .catch(e => {
+      document.getElementById('gallery').innerHTML = '<div class="empty-state">Failed to load: ' + e.message + '</div>';
+    });
+}
+
+function uploadFiles(files) {
+  const progressWrap = document.getElementById('progress-wrap');
+  const progressFill = document.getElementById('progress-fill');
+  const progressLabel = document.getElementById('progress-label');
+  let done = 0, total = files.length;
+  progressWrap.style.display = 'block';
+  progressFill.style.width = '0%';
+
+  Array.from(files).reduce((chain, file) => chain.then(() => {
+    progressLabel.textContent = `Uploading ${file.name} (${done+1}/${total})…`;
+    const fd = new FormData();
+    fd.append('file', file);
+    return fetch('/api/research/upload?container=' + CONTAINER, { method: 'POST', body: fd })
+      .then(r => r.ok ? r.json() : r.text().then(t => Promise.reject(t)))
+      .then(() => {
+        done++;
+        progressFill.style.width = Math.round(done/total*100) + '%';
+        toast('Uploaded: ' + file.name, 'success');
+      })
+      .catch(e => toast('Upload failed: ' + e, 'error'));
+  }), Promise.resolve())
+  .then(() => {
+    setTimeout(() => { progressWrap.style.display = 'none'; }, 1200);
+    loadGallery();
+  });
+}
+
+function deleteFile(name) {
+  if (!confirm('Delete ' + name + '?')) return;
+  fetch('/api/research/file?container=' + CONTAINER + '&name=' + encodeURIComponent(name), { method: 'DELETE' })
+    .then(r => { if (r.ok || r.status === 204) { toast('Deleted: ' + name, 'success'); loadGallery(); } else toast('Delete failed', 'error'); })
+    .catch(e => toast('Delete error: ' + e.message, 'error'));
+}
+
+// Dropzone events
+const dz = document.getElementById('dropzone');
+const fi = document.getElementById('file-input');
+dz.addEventListener('click', () => fi.click());
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('drag-over'); uploadFiles(e.dataTransfer.files); });
+fi.addEventListener('change', () => { if (fi.files.length) uploadFiles(fi.files); fi.value = ''; });
+
+// Init
+fetch('/api/research/files?container=' + CONTAINER)
+  .then(r => { setStatus(r.ok); return r.json(); })
+  .then(() => loadGallery())
+  .catch(() => { setStatus(false); document.getElementById('gallery').innerHTML = '<div class="empty-state">Azure Storage not available.</div>'; });
+</script>
+</body>
+</html>

@@ -3,7 +3,11 @@ package main
 import (
 	"bytes"
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/base64"
 	"encoding/json"
+	"encoding/xml"
 	"fmt"
 	"html/template"
 	"io"
@@ -11,29 +15,36 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 	"time"
 )
 
 // ── Config ────────────────────────────────────────────────────────────────────
 
 type config struct {
-	supabaseURL  string
-	supabaseAnon string
-	axiomToken   string
-	axiomDataset string
-	axiomAPIURL  string
-	port         string
+	supabaseURL      string
+	supabaseAnon     string
+	axiomToken       string
+	axiomDataset     string
+	axiomAPIURL      string
+	port             string
+	azureAccountName string
+	azureAccountKey  string
 }
 
 func loadConfig() config {
-	return config{
+	cfg := config{
 		supabaseURL:  mustEnv("SUPABASE_URL"),
 		supabaseAnon: mustEnv("SUPABASE_ANON_KEY"),
-		axiomToken:   os.Getenv("AXIOM_TOKEN"), // optional — skips Axiom if unset
+		axiomToken:   os.Getenv("AXIOM_TOKEN"),
 		axiomDataset: mustEnv("AXIOM_DATASET"),
 		axiomAPIURL:  envOr("AXIOM_API_URL", "https://api.axiom.co"),
 		port:         envOr("PORT", "8080"),
 	}
+	if connStr := os.Getenv("AZURE_STORAGE_CONN_STR"); connStr != "" {
+		cfg.azureAccountName, cfg.azureAccountKey = parseStorageConnStr(connStr)
+	}
+	return cfg
 }
 
 func mustEnv(key string) string {
@@ -438,6 +449,281 @@ func navFavsHandler(cfg config) http.HandlerFunc {
 	}
 }
 
+// ── Azure Blob Storage ────────────────────────────────────────────────────────
+
+func parseStorageConnStr(connStr string) (accountName, accountKey string) {
+	for _, part := range strings.Split(connStr, ";") {
+		k, v, ok := strings.Cut(part, "=")
+		if !ok {
+			continue
+		}
+		switch k {
+		case "AccountName":
+			accountName = v
+		case "AccountKey":
+			// strings.Cut splits on the first "=" so base64 padding in the key is preserved
+			accountKey = v
+		}
+	}
+	return
+}
+
+// generateContainerSAS creates a service SAS query string for a blob container.
+// Uses the 2018-11-09 string-to-sign format (15 fields, no trailing newline).
+func generateContainerSAS(accountName, accountKey, container, permissions string, expiry time.Time) (string, error) {
+	const version = "2018-11-09"
+	expiryStr := expiry.UTC().Format("2006-01-02T15:04:05Z")
+	canonResource := "/blob/" + accountName + "/" + container
+	stringToSign := strings.Join([]string{
+		permissions, "", expiryStr, canonResource,
+		"", "", "https", version, "c",
+		"", "", "", "", "", "",
+	}, "\n")
+	keyBytes, err := base64.StdEncoding.DecodeString(accountKey)
+	if err != nil {
+		return "", fmt.Errorf("decode account key: %w", err)
+	}
+	mac := hmac.New(sha256.New, keyBytes)
+	mac.Write([]byte(stringToSign))
+	sig := base64.StdEncoding.EncodeToString(mac.Sum(nil))
+	params := url.Values{
+		"sv": {version}, "se": {expiryStr}, "sr": {"c"},
+		"sp": {permissions}, "spr": {"https"}, "sig": {sig},
+	}
+	return params.Encode(), nil
+}
+
+var allowedResearchContainers = map[string]bool{
+	"research-images": true,
+	"research-audio":  true,
+	"research-videos": true,
+	"research-notes":  true,
+}
+
+type blobInfo struct {
+	Name         string `json:"name"`
+	Size         int64  `json:"size"`
+	ContentType  string `json:"contentType"`
+	LastModified string `json:"lastModified"`
+}
+
+type blobListXML struct {
+	XMLName xml.Name `xml:"EnumerationResults"`
+	Blobs   []struct {
+		Name  string `xml:"Name"`
+		Props struct {
+			LastModified  string `xml:"Last-Modified"`
+			ContentLength int64  `xml:"Content-Length"`
+			ContentType   string `xml:"Content-Type"`
+		} `xml:"Properties"`
+	} `xml:"Blobs>Blob"`
+}
+
+func blobURL(accountName, container, name, sasQuery string) string {
+	base := fmt.Sprintf("https://%s.blob.core.windows.net/%s", accountName, container)
+	if name != "" {
+		base += "/" + url.PathEscape(name)
+	}
+	return base + "?" + sasQuery
+}
+
+func researchUploadHandler(cfg config) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+		container := r.URL.Query().Get("container")
+		if !allowedResearchContainers[container] {
+			http.Error(w, "invalid container", http.StatusBadRequest)
+			return
+		}
+		if cfg.azureAccountName == "" {
+			http.Error(w, "Azure Storage not configured", http.StatusServiceUnavailable)
+			return
+		}
+		if err := r.ParseMultipartForm(100 << 20); err != nil {
+			http.Error(w, "parse form: "+err.Error(), http.StatusBadRequest)
+			return
+		}
+		file, header, err := r.FormFile("file")
+		if err != nil {
+			http.Error(w, "missing file field", http.StatusBadRequest)
+			return
+		}
+		defer file.Close()
+
+		blobName := strings.ReplaceAll(header.Filename, "/", "_")
+		blobName = strings.ReplaceAll(blobName, "\\", "_")
+		if blobName == "" || blobName == "." {
+			blobName = fmt.Sprintf("file-%d", time.Now().UnixMilli())
+		}
+		contentType := header.Header.Get("Content-Type")
+		if contentType == "" {
+			contentType = "application/octet-stream"
+		}
+
+		expiry := time.Now().UTC().Add(5 * time.Minute)
+		sasQuery, err := generateContainerSAS(cfg.azureAccountName, cfg.azureAccountKey, container, "cwlr", expiry)
+		if err != nil {
+			http.Error(w, "sas error", http.StatusInternalServerError)
+			return
+		}
+		putURL := blobURL(cfg.azureAccountName, container, blobName, sasQuery)
+		req, err := http.NewRequestWithContext(r.Context(), http.MethodPut, putURL, file)
+		if err != nil {
+			http.Error(w, "request build", http.StatusInternalServerError)
+			return
+		}
+		req.Header.Set("x-ms-blob-type", "BlockBlob")
+		req.Header.Set("Content-Type", contentType)
+		req.ContentLength = header.Size
+
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			http.Error(w, "azure upload: "+err.Error(), http.StatusBadGateway)
+			return
+		}
+		defer resp.Body.Close()
+		if resp.StatusCode >= 400 {
+			b, _ := io.ReadAll(resp.Body)
+			http.Error(w, fmt.Sprintf("azure %d: %s", resp.StatusCode, b), http.StatusBadGateway)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{"ok": "true", "name": blobName})
+	}
+}
+
+func researchFilesHandler(cfg config) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		container := r.URL.Query().Get("container")
+		if !allowedResearchContainers[container] {
+			http.Error(w, "invalid container", http.StatusBadRequest)
+			return
+		}
+		if cfg.azureAccountName == "" {
+			http.Error(w, "Azure Storage not configured", http.StatusServiceUnavailable)
+			return
+		}
+		expiry := time.Now().UTC().Add(5 * time.Minute)
+		sasQuery, err := generateContainerSAS(cfg.azureAccountName, cfg.azureAccountKey, container, "rl", expiry)
+		if err != nil {
+			http.Error(w, "sas error", http.StatusInternalServerError)
+			return
+		}
+		listURL := fmt.Sprintf("https://%s.blob.core.windows.net/%s?restype=container&comp=list&%s",
+			cfg.azureAccountName, container, sasQuery)
+		req, err := http.NewRequestWithContext(r.Context(), http.MethodGet, listURL, nil)
+		if err != nil {
+			http.Error(w, "request build", http.StatusInternalServerError)
+			return
+		}
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			http.Error(w, "azure list: "+err.Error(), http.StatusBadGateway)
+			return
+		}
+		defer resp.Body.Close()
+		if resp.StatusCode >= 400 {
+			b, _ := io.ReadAll(resp.Body)
+			http.Error(w, fmt.Sprintf("azure %d: %s", resp.StatusCode, b), http.StatusBadGateway)
+			return
+		}
+		var listResult blobListXML
+		if err := xml.NewDecoder(resp.Body).Decode(&listResult); err != nil {
+			http.Error(w, "decode: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+		blobs := make([]blobInfo, 0, len(listResult.Blobs))
+		for _, b := range listResult.Blobs {
+			blobs = append(blobs, blobInfo{
+				Name:         b.Name,
+				Size:         b.Props.ContentLength,
+				ContentType:  b.Props.ContentType,
+				LastModified: b.Props.LastModified,
+			})
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(blobs)
+	}
+}
+
+func researchFileHandler(cfg config) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		container := r.URL.Query().Get("container")
+		name := r.URL.Query().Get("name")
+		if !allowedResearchContainers[container] || name == "" {
+			http.Error(w, "invalid params", http.StatusBadRequest)
+			return
+		}
+		if cfg.azureAccountName == "" {
+			http.Error(w, "Azure Storage not configured", http.StatusServiceUnavailable)
+			return
+		}
+		expiry := time.Now().UTC().Add(5 * time.Minute)
+		switch r.Method {
+		case http.MethodGet:
+			sasQuery, err := generateContainerSAS(cfg.azureAccountName, cfg.azureAccountKey, container, "rl", expiry)
+			if err != nil {
+				http.Error(w, "sas error", http.StatusInternalServerError)
+				return
+			}
+			getURL := blobURL(cfg.azureAccountName, container, name, sasQuery)
+			req, err := http.NewRequestWithContext(r.Context(), http.MethodGet, getURL, nil)
+			if err != nil {
+				http.Error(w, "request build", http.StatusInternalServerError)
+				return
+			}
+			resp, err := http.DefaultClient.Do(req)
+			if err != nil {
+				http.Error(w, "azure get: "+err.Error(), http.StatusBadGateway)
+				return
+			}
+			defer resp.Body.Close()
+			if resp.StatusCode >= 400 {
+				http.Error(w, "not found", http.StatusNotFound)
+				return
+			}
+			if ct := resp.Header.Get("Content-Type"); ct != "" {
+				w.Header().Set("Content-Type", ct)
+			}
+			if cl := resp.Header.Get("Content-Length"); cl != "" {
+				w.Header().Set("Content-Length", cl)
+			}
+			w.Header().Set("Cache-Control", "public, max-age=300")
+			io.Copy(w, resp.Body)
+
+		case http.MethodDelete:
+			sasQuery, err := generateContainerSAS(cfg.azureAccountName, cfg.azureAccountKey, container, "dlr", expiry)
+			if err != nil {
+				http.Error(w, "sas error", http.StatusInternalServerError)
+				return
+			}
+			delURL := blobURL(cfg.azureAccountName, container, name, sasQuery)
+			req, err := http.NewRequestWithContext(r.Context(), http.MethodDelete, delURL, nil)
+			if err != nil {
+				http.Error(w, "request build", http.StatusInternalServerError)
+				return
+			}
+			resp, err := http.DefaultClient.Do(req)
+			if err != nil {
+				http.Error(w, "azure delete: "+err.Error(), http.StatusBadGateway)
+				return
+			}
+			resp.Body.Close()
+			if resp.StatusCode >= 400 {
+				http.Error(w, "delete failed", http.StatusBadGateway)
+				return
+			}
+			w.WriteHeader(http.StatusNoContent)
+
+		default:
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		}
+	}
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 func main() {
@@ -467,6 +753,9 @@ func main() {
 	mux.Handle("/api/config", observe(cfg, configHandler(cfg)))
 	mux.Handle("/api/nav/favs", observe(cfg, navFavsHandler(cfg)))
 	mux.Handle("/api/errors", observe(cfg, clientErrorsHandler(cfg)))
+	mux.Handle("/api/research/upload", observe(cfg, researchUploadHandler(cfg)))
+	mux.Handle("/api/research/files", observe(cfg, researchFilesHandler(cfg)))
+	mux.Handle("/api/research/file", observe(cfg, researchFileHandler(cfg)))
 	mux.Handle("/admin/errors", observe(cfg, axiomErrorsHandler(tmpl, cfg, navConfigJS)))
 	mux.Handle("/", observe(cfg, homeHandler(tmpl, cfg, navConfigJS)))
 

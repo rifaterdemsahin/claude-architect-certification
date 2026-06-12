@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📝 Research Notes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../../../shared/nav.css">
+  <style>
+    :root {
+      --bg: #030712; --card: rgba(17,24,39,0.9); --border: rgba(139,92,246,0.2);
+      --text: #f3f4f6; --muted: #9ca3af; --primary: #8b5cf6; --green: #10b981;
+      --red: #ef4444; --blue: #3b82f6;
+      --font-h: 'Outfit', sans-serif; --font-b: 'Plus Jakarta Sans', sans-serif;
+      --font-mono: 'Fira Mono', 'Consolas', monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: var(--font-b); line-height: 1.6; padding: 32px 24px 120px; }
+    .container { max-width: 860px; margin: 0 auto; }
+    h1 { font-family: var(--font-h); font-size: 2.2rem; font-weight: 800; margin-bottom: 6px; }
+    .subtitle { color: var(--muted); margin-bottom: 28px; }
+    .status-bar { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 20px; margin-bottom: 24px; font-size: 0.85rem; }
+    /* Editor */
+    .editor-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px 24px; margin-bottom: 28px; }
+    .editor-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+    .editor-header label { font-size: 0.85rem; color: var(--muted); white-space: nowrap; }
+    .filename-input { flex: 1; min-width: 200px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 9px; padding: 7px 12px; color: var(--text); font-size: 0.88rem; font-family: var(--font-mono); outline: none; }
+    .filename-input:focus { border-color: var(--primary); }
+    textarea#note-body { width: 100%; min-height: 240px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px 16px; color: var(--text); font-size: 0.92rem; font-family: var(--font-mono); line-height: 1.7; resize: vertical; outline: none; }
+    textarea#note-body:focus { border-color: var(--primary); }
+    .editor-footer { display: flex; gap: 8px; margin-top: 14px; align-items: center; flex-wrap: wrap; }
+    .btn { padding: 9px 18px; border-radius: 10px; font-weight: 700; border: none; cursor: pointer; font-size: 0.88rem; transition: all 0.2s; font-family: var(--font-b); }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: #7c3aed; }
+    .btn-ghost-lg { background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid rgba(255,255,255,0.08); }
+    .btn-ghost-lg:hover { background: rgba(255,255,255,0.1); color: var(--text); }
+    .save-status { font-size: 0.82rem; color: var(--muted); }
+    /* Note list */
+    .section-title { font-family: var(--font-h); font-size: 1.1rem; font-weight: 700; margin-bottom: 16px; }
+    .note-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px 20px; margin-bottom: 12px; cursor: pointer; transition: border-color 0.15s; }
+    .note-card:hover { border-color: rgba(139,92,246,0.5); }
+    .note-card.active { border-color: var(--primary); background: rgba(139,92,246,0.08); }
+    .note-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+    .note-name { font-weight: 700; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .note-meta { font-size: 0.78rem; color: var(--muted); white-space: nowrap; }
+    .note-preview { font-size: 0.82rem; color: var(--muted); font-family: var(--font-mono); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .note-actions { display: flex; gap: 6px; margin-top: 10px; }
+    .btn-sm { padding: 4px 12px; border-radius: 7px; border: none; cursor: pointer; font-size: 0.75rem; font-weight: 600; font-family: var(--font-b); transition: all 0.2s; }
+    .btn-blue { background: rgba(59,130,246,0.15); color: var(--blue); border: 1px solid rgba(59,130,246,0.3); }
+    .btn-blue:hover { background: rgba(59,130,246,0.25); }
+    .btn-ghost { background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid rgba(255,255,255,0.08); text-decoration: none; display: inline-flex; align-items: center; }
+    .btn-ghost:hover { background: rgba(255,255,255,0.1); color: var(--text); }
+    .btn-danger { background: rgba(239,68,68,0.12); color: var(--red); border: 1px solid rgba(239,68,68,0.2); }
+    .btn-danger:hover { background: rgba(239,68,68,0.22); }
+    .empty-state { text-align: center; color: var(--muted); padding: 48px; }
+    .toast { position: fixed; bottom: 24px; right: 24px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 18px; font-size: 0.88rem; z-index: 1000; max-width: 340px; transition: opacity 0.3s; }
+    .toast.error { border-color: rgba(239,68,68,0.4); }
+    .toast.success { border-color: rgba(16,185,129,0.4); }
+  </style>
+</head>
+<body>
+<script src="../../../../shared/nav.js"></script>
+<div class="container">
+  <h1>📝 Research Notes</h1>
+  <p class="subtitle">Write and save research notes as Markdown files in Azure Blob Storage.</p>
+
+  <div class="status-bar" id="status-bar">⏳ Connecting…</div>
+
+  <div class="editor-card">
+    <div class="editor-header">
+      <label for="filename-input">📄 Filename:</label>
+      <input class="filename-input" id="filename-input" type="text" placeholder="note-2026-06-12.md" spellcheck="false">
+    </div>
+    <textarea id="note-body" placeholder="# Research Note&#10;&#10;Write your notes here in Markdown…&#10;&#10;## Key Points&#10;- "></textarea>
+    <div class="editor-footer">
+      <button class="btn btn-primary" onclick="saveNote()">💾 Save Note</button>
+      <button class="btn btn-ghost-lg" onclick="newNote()">➕ New</button>
+      <span class="save-status" id="save-status"></span>
+    </div>
+  </div>
+
+  <div class="section-title">🗒 Saved Notes <span id="count" style="color:var(--muted);font-size:0.85rem;font-weight:400"></span></div>
+  <div id="list"><div class="empty-state">Loading…</div></div>
+</div>
+
+<div class="toast" id="toast" style="opacity:0;pointer-events:none"></div>
+
+<script>
+const CONTAINER = 'research-notes';
+let _toastTimer;
+
+function toast(msg, type) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast ' + (type || '');
+  el.style.opacity = '1';
+  el.style.pointerEvents = 'auto';
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => { el.style.opacity = '0'; el.style.pointerEvents = 'none'; }, 3500);
+}
+
+function defaultFilename() {
+  const d = new Date();
+  return 'note-' + d.toISOString().slice(0,10) + '-' + d.toTimeString().slice(0,8).replace(/:/g,'-') + '.md';
+}
+
+function newNote() {
+  document.getElementById('filename-input').value = defaultFilename();
+  document.getElementById('note-body').value = '';
+  document.getElementById('save-status').textContent = '';
+  document.querySelectorAll('.note-card.active').forEach(el => el.classList.remove('active'));
+  document.getElementById('note-body').focus();
+}
+
+function saveNote() {
+  let name = document.getElementById('filename-input').value.trim();
+  if (!name) name = defaultFilename();
+  if (!name.endsWith('.md') && !name.endsWith('.txt')) name += '.md';
+  document.getElementById('filename-input').value = name;
+
+  const content = document.getElementById('note-body').value;
+  const blob = new Blob([content], { type: 'text/markdown' });
+  const fd = new FormData();
+  fd.append('file', blob, name);
+
+  document.getElementById('save-status').textContent = '⏳ Saving…';
+  fetch('/api/research/upload?container=' + CONTAINER, { method: 'POST', body: fd })
+    .then(r => r.ok ? r.json() : r.text().then(t => Promise.reject(t)))
+    .then(() => {
+      document.getElementById('save-status').textContent = '✅ Saved';
+      toast('Saved: ' + name, 'success');
+      loadList();
+    })
+    .catch(e => {
+      document.getElementById('save-status').textContent = '❌ Error';
+      toast('Save failed: ' + e, 'error');
+    });
+}
+
+function loadNote(name) {
+  fetch('/api/research/file?container=' + CONTAINER + '&name=' + encodeURIComponent(name))
+    .then(r => r.ok ? r.text() : r.text().then(t => Promise.reject(t)))
+    .then(text => {
+      document.getElementById('filename-input').value = name;
+      document.getElementById('note-body').value = text;
+      document.getElementById('save-status').textContent = '📂 Loaded';
+      document.querySelectorAll('.note-card.active').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.note-card').forEach(el => { if (el.dataset.name === name) el.classList.add('active'); });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    })
+    .catch(e => toast('Load failed: ' + e, 'error'));
+}
+
+function deleteFile(name) {
+  if (!confirm('Delete ' + name + '?')) return;
+  fetch('/api/research/file?container=' + CONTAINER + '&name=' + encodeURIComponent(name), { method: 'DELETE' })
+    .then(r => {
+      if (r.ok || r.status === 204) {
+        toast('Deleted: ' + name, 'success');
+        const active = document.querySelector('.note-card.active');
+        if (active && active.dataset.name === name) newNote();
+        loadList();
+      } else toast('Delete failed', 'error');
+    })
+    .catch(e => toast('Delete error: ' + e.message, 'error'));
+}
+
+function loadList() {
+  fetch('/api/research/files?container=' + CONTAINER)
+    .then(r => r.json())
+    .then(files => {
+      const list = document.getElementById('list');
+      document.getElementById('count').textContent = '(' + files.length + ')';
+      if (!files || files.length === 0) { list.innerHTML = '<div class="empty-state">No notes yet — write one above.</div>'; return; }
+      list.innerHTML = '';
+      files.slice().reverse().forEach(f => {
+        const card = document.createElement('div');
+        card.className = 'note-card';
+        card.dataset.name = f.name;
+        card.innerHTML = `
+          <div class="note-card-header">
+            <div class="note-name">📄 ${f.name}</div>
+            <div class="note-meta">${f.lastModified || ''}</div>
+          </div>
+          <div class="note-preview" id="preview-${CSS.escape(f.name)}">Loading preview…</div>
+          <div class="note-actions">
+            <button class="btn-sm btn-blue" onclick="loadNote('${f.name.replace(/'/g,"\\'")}')">✏️ Edit</button>
+            <a class="btn-sm btn-ghost" href="/api/research/file?container=${CONTAINER}&name=${encodeURIComponent(f.name)}" download="${f.name}">⬇ Download</a>
+            <button class="btn-sm btn-danger" onclick="deleteFile('${f.name.replace(/'/g,"\\'")}')">🗑 Delete</button>
+          </div>`;
+        list.appendChild(card);
+        // Load preview snippet
+        fetch('/api/research/file?container=' + CONTAINER + '&name=' + encodeURIComponent(f.name))
+          .then(r => r.text())
+          .then(text => {
+            const previewEl = document.getElementById('preview-' + CSS.escape(f.name));
+            if (previewEl) previewEl.textContent = text.trim().slice(0, 120) || '(empty)';
+          })
+          .catch(() => {});
+      });
+    })
+    .catch(e => { document.getElementById('list').innerHTML = '<div class="empty-state">Failed to load: ' + e.message + '</div>'; });
+}
+
+// Init
+document.getElementById('filename-input').value = defaultFilename();
+document.getElementById('status-bar').textContent = '🟢 Connected to Azure Storage — research-notes';
+loadList();
+</script>
+</body>
+</html>

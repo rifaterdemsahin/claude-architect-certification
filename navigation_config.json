@@ -24,6 +24,15 @@
           "url": "5_Symbols/production/preprod/ivq.html"
         },
         {
+          "label": "🔬 Research",
+          "children": [
+            { "label": "🖼 Images", "url": "5_Symbols/production/preprod/research/images.html" },
+            { "label": "🎵 Audio", "url": "5_Symbols/production/preprod/research/audio.html" },
+            { "label": "🎬 Videos", "url": "5_Symbols/production/preprod/research/videos.html" },
+            { "label": "📝 Notes", "url": "5_Symbols/production/preprod/research/notes.html" }
+          ]
+        },
+        {
           "label": "🛠️ Tools",
           "children": [
             {
