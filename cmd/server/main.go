@@ -29,7 +29,7 @@ func loadConfig() config {
 	return config{
 		supabaseURL:  mustEnv("SUPABASE_URL"),
 		supabaseAnon: mustEnv("SUPABASE_ANON_KEY"),
-		axiomToken:   mustEnv("AXIOM_TOKEN"),
+		axiomToken:   os.Getenv("AXIOM_TOKEN"), // optional — skips Axiom if unset
 		axiomDataset: mustEnv("AXIOM_DATASET"),
 		axiomAPIURL:  envOr("AXIOM_API_URL", "https://api.axiom.co"),
 		port:         envOr("PORT", "8080"),
@@ -54,6 +54,9 @@ func envOr(key, fallback string) string {
 // ── Axiom ─────────────────────────────────────────────────────────────────────
 
 func shipToAxiom(cfg config, events []map[string]any) {
+	if cfg.axiomToken == "" {
+		return
+	}
 	body, err := json.Marshal(events)
 	if err != nil {
 		log.Printf("axiom marshal: %v", err)
