@@ -396,8 +396,9 @@
     .sentences-panel summary:hover { color: var(--text-main); }
     .sent-section-group { padding: 8px 14px 4px; border-top: 1px solid rgba(255,255,255,0.04); }
     .sent-section-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); font-weight: 700; margin-bottom: 6px; }
-    .sent-row { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
+    .sent-row { display: flex; flex-direction: column; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
     .sent-row:last-child { border-bottom: none; }
+    .sent-view { display: flex; align-items: flex-start; gap: 10px; width: 100%; }
     .sent-badges { display: flex; flex-direction: column; gap: 3px; flex-shrink: 0; width: 88px; }
     .sent-badge { font-size: 0.62rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; text-align: center; letter-spacing: 0.04em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .sent-badge.hook        { background: rgba(239,68,68,0.15);   color: #f87171; }
@@ -413,6 +414,22 @@
     .sent-badge.screenshare { background: rgba(59,130,246,0.08);  color: #3b82f6; }
     .sent-badge.b_roll      { background: rgba(16,185,129,0.08);  color: #10b981; }
     .sent-text { font-size: 0.84rem; color: var(--text-main); line-height: 1.55; flex: 1; }
+    .sent-row-btns { display: flex; flex-direction: column; gap: 3px; flex-shrink: 0; }
+    .btn-sent-edit   { background: rgba(139,92,246,0.08); color: #c084fc; border: 1px solid rgba(139,92,246,0.18); padding: 3px 7px; border-radius: 5px; font-size: 0.68rem; cursor: pointer; font-family: var(--font-body); line-height: 1.4; }
+    .btn-sent-delete { background: rgba(239,68,68,0.08); color: #f87171; border: 1px solid rgba(239,68,68,0.15); padding: 3px 7px; border-radius: 5px; font-size: 0.68rem; cursor: pointer; font-family: var(--font-body); line-height: 1.4; }
+    .sent-edit-form  { background: rgba(0,0,0,0.25); border-radius: 8px; padding: 10px; margin-top: 6px; width: 100%; }
+    .sent-edit-row   { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+    .sent-select     { background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 4px 8px; color: var(--text-main); font-size: 0.74rem; cursor: pointer; font-family: var(--font-body); }
+    .sent-select:focus { outline: none; border-color: var(--secondary); }
+    .sent-textarea   { width: 100%; background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 8px; color: var(--text-main); font-size: 0.84rem; resize: vertical; min-height: 58px; font-family: var(--font-body); line-height: 1.5; margin-bottom: 8px; box-sizing: border-box; }
+    .sent-textarea:focus { outline: none; border-color: var(--primary); }
+    .sent-edit-actions { display: flex; gap: 8px; }
+    .btn-sent-save   { background: var(--primary); color: white; border: none; padding: 5px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer; font-family: var(--font-body); }
+    .btn-sent-cancel { background: rgba(255,255,255,0.06); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.08); padding: 5px 10px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; font-family: var(--font-body); }
+    .sent-add-section { padding: 12px 14px 14px; border-top: 1px solid rgba(255,255,255,0.05); }
+    .sent-add-label  { font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+    .btn-sent-add    { background: rgba(16,185,129,0.1); color: #34d399; border: 1px solid rgba(16,185,129,0.2); padding: 6px 14px; border-radius: 7px; font-size: 0.78rem; font-weight: 700; cursor: pointer; width: 100%; margin-top: 8px; font-family: var(--font-body); }
+    .btn-sent-add:hover { background: rgba(16,185,129,0.18); }
   </style>
   <script src="../../../../shared/nav.js"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -849,6 +866,20 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
 
           html += `<div class="cue-list">${v.cues.map(c => `<span class="cue-tag">${c}</span>`).join('')}</div>`;
 
+          // Related Research section
+          html += `<div class="code-refs-section" style="margin-top: 18px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.06);">`;
+          html += `<h3>🔬 Related Research <a class="code-ref-badge browse" href="../research/index.html?video=${encodeURIComponent(elementId)}" target="_blank" rel="noopener">Research Hub ↗</a></h3>`;
+          html += `<div class="code-refs-grid" id="research-dynamic-${elementId}">`;
+          html += `<div style="font-size:0.8rem; color:var(--text-muted); padding: 4px 0;">Loading related research...</div>`;
+          html += `</div>`;
+          html += `<div class="code-ref-add">`;
+          html += `<select id="research-select-${elementId}" style="flex: 1; min-width: 200px; padding: 7px 11px; border-radius: 8px; border: 1px dashed rgba(139,92,246,0.3); background: rgba(139,92,246,0.03); color: var(--text-main); font-size: 0.82rem; font-family: var(--font-body); outline: none; cursor: pointer;">`;
+          html += `<option value="">-- select research item --</option>`;
+          html += `</select>`;
+          html += `<button class="btn btn-sm btn-primary" onclick="linkResearchUI('${elementId}', ${v.videoId || 'null'})">+ Link</button>`;
+          html += `</div>`;
+          html += `</div>`;
+
           // Per-video Code References panel
           const moduleStaticRefs = STATIC_CODE_REFS[m.id] || [];
           const staticRef = moduleStaticRefs[vi] || null;
@@ -908,7 +939,7 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
     }
 
     const SUPABASE_URL = localStorage.getItem('supabase_url') || 'https://rmekfsdhglyiralxvkwc.supabase.co';
-    const SUPABASE_ANON_KEY = localStorage.getItem('supabase_anon_key') || '';
+    const SUPABASE_ANON_KEY = localStorage.getItem('supabase_anon_key') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZWtmc2RoZ2x5aXJhbHh2a3djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NzYzODgsImV4cCI6MjA5NjM1MjM4OH0.ay6HsmO_CbMGDXL_Dv4DT-paAIAOqlQPfmqqx_mexSU';
     const KOKORO_BASE = 'https://secondbrain-kokoro.fly.dev';
 
     // ── Cookie helpers ─────────────────────────────────────────────────────────
@@ -1442,6 +1473,7 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
         window.loadedData = data;
         render(data);
         updateGoogleConfigUI();
+        loadResearchData();
         data.modules.forEach((m, mi) => {
           m.videos.forEach(v => {
             const elementId = v.videoId || `local-${mi}-${v.id}`;
@@ -1455,6 +1487,180 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
           '<div class="error"><h2>❌ Failed to Load</h2><p>Could not load from Supabase or local JSON.</p></div>';
       }
     })();
+
+    // ── Related Research helpers ──────────────────────────────────────────────
+    let allResearchItems = [];
+    let allRelationships = [];
+
+    async function loadResearchData() {
+      const containers = {
+        'research-images': '🖼 Image',
+        'research-audio': '🎵 Audio',
+        'research-videos': '🎬 Video',
+        'research-notes': '📝 Note'
+      };
+
+      try {
+        const filePromises = Object.keys(containers).map(async (c) => {
+          try {
+            const res = await fetch(`/api/research/files?container=${c}`);
+            const files = res.ok ? await res.json() : [];
+            return files.map(f => ({ container: c, name: f.name, typeLabel: containers[c] }));
+          } catch (e) {
+            console.error('Failed to load research container ' + c, e);
+            return [];
+          }
+        });
+        const results = await Promise.all(filePromises);
+        allResearchItems = results.flat();
+      } catch (err) {
+        console.error('Error loading research files:', err);
+      }
+
+      if (SUPABASE_URL.includes('supabase.co')) {
+        try {
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/research_relationships`, {
+            headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+          });
+          allRelationships = res.ok ? await res.json() : [];
+        } catch (err) {
+          console.error('Error loading research relationships:', err);
+        }
+      }
+
+      hydrateResearchUI();
+    }
+
+    function hydrateResearchUI() {
+      const videoElements = document.querySelectorAll('[id^="research-select-"]');
+      videoElements.forEach(select => {
+        const currentVal = select.value;
+        select.innerHTML = '<option value="">-- select research item --</option>' +
+          allResearchItems.map(item => {
+            return `<option value="${item.container}:${item.name}">${item.typeLabel}: ${item.name}</option>`;
+          }).join('');
+        select.value = currentVal;
+      });
+
+      const targetDivs = document.querySelectorAll('[id^="research-dynamic-"]');
+      targetDivs.forEach(div => {
+        const elementId = div.id.replace('research-dynamic-', '');
+        const matchedRels = allRelationships.filter(r => {
+          return String(r.video_id) === elementId;
+        });
+
+        if (!matchedRels.length) {
+          div.innerHTML = '<div style="font-size:0.8rem; color:var(--text-muted); padding: 4px 0;">None linked</div>';
+          return;
+        }
+
+        div.innerHTML = matchedRels.map(r => {
+          const containerMap = {
+            'research-images': '🖼',
+            'research-audio': '🎵',
+            'research-videos': '🎬',
+            'research-notes': '📝'
+          };
+          const icon = containerMap[r.container] || '🔗';
+          const fileUrl = `/api/research/file?container=${r.container}&name=${encodeURIComponent(r.item_name)}`;
+          let previewAction = `window.open('${fileUrl}', '_blank')`;
+          if (r.container === 'research-notes') {
+            previewAction = `openResearchNoteModal('${r.container}', '${r.item_name.replace(/'/g, "\\'")}')`;
+          }
+
+          return `<div class="code-ref-row custom-ref" id="research-rel-${r.id}" style="border: 1px solid rgba(139,92,246,0.14); background: rgba(139,92,246,0.04); margin-bottom: 4px;">
+            <span class="code-ref-icon">${icon}</span>
+            <div class="code-ref-body">
+              <div class="code-ref-label">
+                <a href="javascript:void(0)" onclick="${previewAction}">${esc2(r.item_name)}</a>
+                <span class="code-ref-badge db" style="background: rgba(139,92,246,0.18); color: #c084fc;">Research</span>
+              </div>
+            </div>
+            <div class="code-ref-actions-col">
+              <button class="btn btn-danger btn-sm" title="Unlink" onclick="unlinkResearchUI(${r.id}, '${elementId}')">✕</button>
+            </div>
+          </div>`;
+        }).join('');
+      });
+    }
+
+    window.linkResearchUI = async function(elementId, dbVideoId) {
+      const select = document.getElementById(`research-select-${elementId}`);
+      const val = select.value;
+      if (!val) { alert('Please select a research item first.'); return; }
+      
+      const parts = val.split(':');
+      const container = parts[0];
+      const itemName = parts.slice(1).join(':');
+      const videoId = dbVideoId || parseInt(elementId, 10);
+      if (isNaN(videoId)) {
+        alert('This video is not saved in Supabase yet. Save the script/video first to generate a Database ID.');
+        return;
+      }
+
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/research_relationships`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation'
+          },
+          body: JSON.stringify({
+            container,
+            item_name: itemName,
+            video_id: videoId
+          })
+        });
+
+        if (!res.ok) throw new Error(await res.text());
+        const resultData = await res.json();
+        allRelationships.push(resultData[0]);
+        hydrateResearchUI();
+        select.value = '';
+      } catch (e) {
+        alert('❌ Link failed: ' + e.message);
+      }
+    };
+
+    window.unlinkResearchUI = async function(relationshipId, elementId) {
+      if (!confirm('Unlink this research item?')) return;
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/research_relationships?id=eq.${relationshipId}`, {
+          method: 'DELETE',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Prefer': 'return=minimal'
+          }
+        });
+
+        if (!res.ok) throw new Error(await res.text());
+        allRelationships = allRelationships.filter(r => r.id !== relationshipId);
+        hydrateResearchUI();
+      } catch (e) {
+        alert('❌ Unlink failed: ' + e.message);
+      }
+    };
+
+    window.openResearchNoteModal = async function(container, name) {
+      document.getElementById('rnote-modal-title').textContent = '📄 ' + name;
+      document.getElementById('rnote-modal-text').value = 'Loading…';
+      document.getElementById('research-note-modal').style.display = 'flex';
+      try {
+        const fileUrl = `/api/research/file?container=${container}&name=${encodeURIComponent(name)}`;
+        const r = await fetch(fileUrl);
+        const text = r.ok ? await r.text() : 'Error loading note contents.';
+        document.getElementById('rnote-modal-text').value = text;
+      } catch (err) {
+        document.getElementById('rnote-modal-text').value = 'Error: ' + err.message;
+      }
+    };
+
+    window.closeResearchNoteModal = function() {
+      document.getElementById('research-note-modal').style.display = 'none';
+    };
   </script>
 
   <!-- Save Audio Modal -->
@@ -1475,6 +1681,20 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
         <button class="btn-save" onclick="confirmSaveAudio()">☁️ Upload to Drive</button>
         <button class="btn-cancel" onclick="closeSaveAudioModal()">Cancel</button>
         <a href="../../settings.html" class="modal-settings-link" target="_blank">⚙️ Production Settings</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Research Note Modal -->
+  <div class="modal-overlay" id="research-note-modal" style="display:none;" onclick="if(event.target===this)closeResearchNoteModal()">
+    <div class="modal-box" style="max-width: 700px;">
+      <h3 id="rnote-modal-title">📄 Research Note</h3>
+      <p class="modal-desc" id="rnote-modal-desc">Note content viewer</p>
+      <div class="modal-field">
+        <textarea id="rnote-modal-text" readonly style="width:100%; height: 350px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; padding: 12px; color: var(--text-main); font-family: var(--font-body); font-size: 0.9rem; line-height: 1.6; resize: none; outline: none;"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeResearchNoteModal()">Close</button>
       </div>
     </div>
   </div>

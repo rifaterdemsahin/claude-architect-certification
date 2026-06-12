@@ -35,3 +35,23 @@ Install PostgreSQL, Supabase, and Deno VS Code extensions to optimize developer 
    - Register the new document in the navigation files (`navigation_config.json` and index/markdown fallbacks).
 4. **Validation**:
    - Run link checker or verify relative links.
+
+## 2026-06-12 — Enable Relating Research to Script
+
+### 🎯 Objective
+Add functionality to relate research assets (images, audio, videos, notes) directly to script videos in [scripts/index.html](file:///Users/rifaterdemsahin/projects/claude-architect-certification/5_Symbols/production/preprod/scripts/index.html).
+
+### 📐 Design & Implementation Plan
+1. **Supabase Key Fallback**:
+   - Update `SUPABASE_ANON_KEY` to fall back to the project's default anon key to guarantee database interactions function without configuration.
+2. **UI Integration**:
+   - Insert a "🔬 Related Research" section under each video card inside the master script page.
+   - Include a select element listing all research items from the 4 storage containers (`research-images`, `research-audio`, `research-videos`, `research-notes`).
+   - Display currently linked research items with category icons (🖼, 🎵, 🎬, 📝) and clean titles.
+   - Add inline modal viewer support for reading related text notes.
+3. **Data Flows**:
+   - Fetch storage files dynamically via `/api/research/files` API.
+   - Query and mutate relationships dynamically from the `research_relationships` table in Supabase.
+4. **Validation**:
+   - Ensure the scripts interface handles listing, linking, and unlinking successfully.
+

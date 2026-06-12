@@ -280,12 +280,49 @@
     var preloaded = window.__NAV_CONFIG__;
     if (preloaded && preloaded.projectMenu) {
       buildNav(preloaded.projectMenu);
+      attachDropdownHandlers();
       return;
     }
     fetch(ROOT + 'navigation_config.json', { cache: 'no-store' })
       .then(function (r) { return r.json(); })
-      .then(function (data) { buildNav(data.projectMenu); })
-      .catch(function () { buildNav(FALLBACK); });
+      .then(function (data) { buildNav(data.projectMenu); attachDropdownHandlers(); })
+      .catch(function () { buildNav(FALLBACK); attachDropdownHandlers(); });
+  }
+
+  function attachDropdownHandlers() {
+    var nav = document.getElementById('site-nav');
+    if (!nav) return;
+
+    // Click trigger to toggle open/close
+    nav.addEventListener('click', function (e) {
+      var trigger = e.target.closest('.site-drop-trigger');
+      if (!trigger) return;
+      e.preventDefault();
+      e.stopPropagation();
+
+      var dropdown = trigger.closest('.site-nav-dropdown');
+      if (!dropdown) return;
+      var isOpen = dropdown.classList.contains('open');
+
+      // Close all sibling/other dropdowns
+      var allOpen = nav.querySelectorAll('.site-nav-dropdown.open');
+      for (var i = 0; i < allOpen.length; i++) {
+        if (allOpen[i] !== dropdown) allOpen[i].classList.remove('open');
+      }
+
+      // Toggle this one
+      if (isOpen) dropdown.classList.remove('open');
+      else dropdown.classList.add('open');
+    });
+
+    // Close all when clicking outside the nav
+    document.addEventListener('click', function (e) {
+      if (nav.contains(e.target)) return;
+      var allOpen = nav.querySelectorAll('.site-nav-dropdown.open');
+      for (var i = 0; i < allOpen.length; i++) {
+        allOpen[i].classList.remove('open');
+      }
+    });
   }
 
   if (document.readyState === 'loading') {
