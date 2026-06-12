@@ -80,6 +80,23 @@
     .loading { text-align: center; color: var(--muted); padding: 32px; }
     .err { color: var(--red); font-size: 0.85rem; padding: 12px 0; }
 
+    /* Lightbox for images & videos */
+    .lightbox-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 200; display: none; align-items: center; justify-content: center; padding: 20px; cursor: zoom-out; }
+    .lightbox-bg.open { display: flex; }
+    .lightbox-inner { position: relative; cursor: default; display: flex; flex-direction: column; align-items: center; }
+    .lightbox-inner img { max-width: 88vw; max-height: 82vh; border-radius: 14px; object-fit: contain; display: block; box-shadow: 0 8px 48px rgba(0,0,0,0.6); }
+    .lightbox-inner video { max-width: 88vw; max-height: 82vh; border-radius: 14px; display: block; background: #000; box-shadow: 0 8px 48px rgba(0,0,0,0.6); }
+    .lightbox-close { position: absolute; top: -18px; right: -18px; background: rgba(139,92,246,0.9); border: none; color: white; font-size: 1.1rem; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 1; }
+    .lightbox-caption { text-align: center; color: var(--muted); font-size: 0.82rem; margin-top: 10px; max-width: 88vw; word-break: break-all; }
+    /* Video card play-overlay */
+    .video-clickable { position: relative; cursor: pointer; }
+    .video-clickable video { pointer-events: none; width: 100%; max-height: 220px; display: block; background: #000; }
+    .video-play-btn { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.25); }
+    .video-play-btn span { width: 54px; height: 54px; border-radius: 50%; background: rgba(139,92,246,0.85); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; transition: transform 0.15s; }
+    .video-clickable:hover .video-play-btn span { transform: scale(1.1); }
+    /* Make images clickable */
+    .img-item img { cursor: zoom-in; }
+
     .btn-sm { padding: 4px 12px; border-radius: 7px; border: none; cursor: pointer; font-size: 0.75rem; font-weight: 600; font-family: var(--font-b); background: rgba(139,92,246,0.15); color: var(--primary); border: 1px solid rgba(139,92,246,0.3); text-decoration: none; }
     .btn-sm:hover { background: rgba(139,92,246,0.25); }
     @keyframes pulse {
@@ -186,6 +203,16 @@
   </div>
 </div>
 
+<!-- Image / Video lightbox -->
+<div class="lightbox-bg" id="lightbox-bg" onclick="closeLightbox(event)">
+  <div class="lightbox-inner">
+    <button class="lightbox-close" id="lightbox-close-btn">✕</button>
+    <img id="lightbox-img" src="" alt="" style="display:none">
+    <video id="lightbox-video" controls src="" style="display:none"></video>
+    <div class="lightbox-caption" id="lightbox-caption"></div>
+  </div>
+</div>
+
 <!-- Note reader modal -->
 <div class="modal-bg" id="modal-bg" onclick="closeModal(event)">
   <div class="modal">
@@ -247,8 +274,8 @@ function renderImages(files) {
     div.className = 'img-item';
     const relMarkup = renderRelationsMarkup(CONTAINERS.images, f.name);
     div.innerHTML = (isImg
-      ? `<img src="${url}" alt="${f.name}" loading="lazy"><div class="name" title="${f.name}">${f.name}</div>`
-      : `<div style="padding:24px;text-align:center;font-size:2rem">🖼</div><div class="name">${f.name}</div>`)
+      ? `<img src="${url}" alt="${f.name}" loading="lazy" onclick="openLightboxImage('${url.replace(/'/g,"\\'")}', '${f.name.replace(/'/g,"\\'")}')"><div class="name" title="${f.name}">${f.name}</div>`
+      : `<div style="padding:24px;text-align:center;font-size:2rem;cursor:pointer;" onclick="openLightboxImage('${url.replace(/'/g,"\\'")}', '${f.name.replace(/'/g,"\\'")}')">🖼</div><div class="name">${f.name}</div>`)
       + `<div style="padding:0 10px 10px 10px;">${relMarkup}</div>`;
     el.appendChild(div);
   });
@@ -283,7 +310,10 @@ function renderVideos(files) {
     const div = document.createElement('div');
     div.className = 'video-item';
     const relMarkup = renderRelationsMarkup(CONTAINERS.videos, f.name);
-    div.innerHTML = `<video controls preload="metadata" src="${url}"></video>
+    div.innerHTML = `<div class="video-clickable" onclick="openLightboxVideo('${url.replace(/'/g,"\\'")}', '${f.name.replace(/'/g,"\\'")}')">
+        <video preload="metadata" src="${url}"></video>
+        <div class="video-play-btn"><span>▶</span></div>
+      </div>
       <div class="name" title="${f.name}">${f.name} · ${fmtBytes(f.size)}</div>
       <div style="padding: 0 14px 14px 14px;">${relMarkup}</div>`;
     el.appendChild(div);
@@ -315,6 +345,51 @@ function renderNotes(files) {
   });
   updateAllRelationsUI();
 }
+
+function openLightboxImage(url, name) {
+  const lb = document.getElementById('lightbox-bg');
+  const img = document.getElementById('lightbox-img');
+  const vid = document.getElementById('lightbox-video');
+  vid.pause(); vid.src = ''; vid.style.display = 'none';
+  img.src = url; img.alt = name; img.style.display = 'block';
+  document.getElementById('lightbox-caption').textContent = name;
+  lb.classList.add('open');
+}
+
+function openLightboxVideo(url, name) {
+  const lb = document.getElementById('lightbox-bg');
+  const img = document.getElementById('lightbox-img');
+  const vid = document.getElementById('lightbox-video');
+  img.src = ''; img.style.display = 'none';
+  vid.src = url; vid.style.display = 'block';
+  document.getElementById('lightbox-caption').textContent = name;
+  lb.classList.add('open');
+}
+
+function closeLightbox(e) {
+  if (e.target === document.getElementById('lightbox-bg')) {
+    const vid = document.getElementById('lightbox-video');
+    vid.pause(); vid.src = '';
+    document.getElementById('lightbox-bg').classList.remove('open');
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('lightbox-close-btn').addEventListener('click', () => {
+    const vid = document.getElementById('lightbox-video');
+    vid.pause(); vid.src = '';
+    document.getElementById('lightbox-bg').classList.remove('open');
+  });
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    const vid = document.getElementById('lightbox-video');
+    if (vid) { vid.pause(); vid.src = ''; }
+    document.getElementById('lightbox-bg').classList.remove('open');
+    document.getElementById('modal-bg').classList.remove('open');
+  }
+});
 
 function openNote(name, url) {
   document.getElementById('modal-title-text').textContent = '📄 ' + name;

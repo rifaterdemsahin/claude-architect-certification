@@ -52,6 +52,14 @@
     .toast { position: fixed; bottom: 24px; right: 24px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 18px; font-size: 0.88rem; z-index: 1000; max-width: 340px; transition: opacity 0.3s; }
     .toast.error { border-color: rgba(239,68,68,0.4); }
     .toast.success { border-color: rgba(16,185,129,0.4); }
+    /* Lightbox */
+    .lightbox-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 200; display: none; align-items: center; justify-content: center; padding: 20px; cursor: zoom-out; }
+    .lightbox-bg.open { display: flex; }
+    .lightbox-inner { position: relative; cursor: default; display: flex; flex-direction: column; align-items: center; }
+    .lightbox-inner img { max-width: 88vw; max-height: 82vh; border-radius: 14px; object-fit: contain; display: block; box-shadow: 0 8px 48px rgba(0,0,0,0.6); }
+    .lightbox-close { position: absolute; top: -18px; right: -18px; background: rgba(139,92,246,0.9); border: none; color: white; font-size: 1.1rem; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .lightbox-caption { text-align: center; color: #9ca3af; font-size: 0.82rem; margin-top: 10px; max-width: 88vw; word-break: break-all; }
+    .img-thumb { cursor: zoom-in; }
   </style>
 </head>
 <body>
@@ -88,6 +96,15 @@
 </div>
 
 <div class="toast" id="toast" style="opacity:0;pointer-events:none"></div>
+
+<!-- Image lightbox -->
+<div class="lightbox-bg" id="lightbox-bg" onclick="closeLightbox(event)">
+  <div class="lightbox-inner">
+    <button class="lightbox-close" id="lightbox-close-btn">✕</button>
+    <img id="lightbox-img" src="" alt="">
+    <div class="lightbox-caption" id="lightbox-caption"></div>
+  </div>
+</div>
 
 <script>
 const CONTAINER = 'research-images';
@@ -129,16 +146,17 @@ function loadGallery() {
         const card = document.createElement('div');
         card.className = 'img-card';
         const isImg = /^image\//i.test(f.contentType);
+        const imgUrl = `/api/research/file?container=${CONTAINER}&name=${encodeURIComponent(f.name)}`;
         card.innerHTML = `
           ${isImg
-            ? `<img class="img-thumb" src="/api/research/file?container=${CONTAINER}&name=${encodeURIComponent(f.name)}" alt="${f.name}" loading="lazy">`
-            : `<div class="img-thumb-placeholder">🖼</div>`}
+            ? `<img class="img-thumb" src="${imgUrl}" alt="${f.name}" loading="lazy" onclick="openLightbox('${imgUrl.replace(/'/g,"\\'")}','${f.name.replace(/'/g,"\\'")}' )">`
+            : `<div class="img-thumb-placeholder" style="cursor:zoom-in;" onclick="openLightbox('${imgUrl.replace(/'/g,"\\'")}','${f.name.replace(/'/g,"\\'")}')">🖼</div>`}
           <div class="img-info">
             <div class="img-name" title="${f.name}">${f.name}</div>
             <div class="img-size">${fmtBytes(f.size)}</div>
           </div>
           <div class="img-actions">
-            <a class="btn-sm btn-ghost" href="/api/research/file?container=${CONTAINER}&name=${encodeURIComponent(f.name)}" download="${f.name}">⬇ Save</a>
+            <a class="btn-sm btn-ghost" href="${imgUrl}" download="${f.name}">⬇ Save</a>
             <button class="btn-sm btn-danger" onclick="deleteFile('${f.name.replace(/'/g,"\\'")}')">🗑</button>
           </div>`;
         gallery.appendChild(card);
@@ -182,6 +200,29 @@ function deleteFile(name) {
     .then(r => { if (r.ok || r.status === 204) { toast('Deleted: ' + name, 'success'); loadGallery(); } else toast('Delete failed', 'error'); })
     .catch(e => toast('Delete error: ' + e.message, 'error'));
 }
+
+function openLightbox(url, name) {
+  document.getElementById('lightbox-img').src = url;
+  document.getElementById('lightbox-img').alt = name;
+  document.getElementById('lightbox-caption').textContent = name;
+  document.getElementById('lightbox-bg').classList.add('open');
+}
+
+function closeLightbox(e) {
+  if (e.target === document.getElementById('lightbox-bg')) {
+    document.getElementById('lightbox-bg').classList.remove('open');
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('lightbox-close-btn').addEventListener('click', () => {
+    document.getElementById('lightbox-bg').classList.remove('open');
+  });
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.getElementById('lightbox-bg').classList.remove('open');
+});
 
 // Dropzone events
 const dz = document.getElementById('dropzone');
