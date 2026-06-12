@@ -1,6 +1,10 @@
 # Claude AI Certification for Architects: Enterprise Systems & Integration
 
-This repository is the official production-grade companion code for the **[Claude AI Certification for Architects](https://www.youtube.com/playlist?list=PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy)** masterclass. Access the interactive workspace dashboard at [rifaterdemsahin.github.io/claude-architect-certification/](https://rifaterdemsahin.github.io/claude-architect-certification/).
+This repository is the official production-grade companion code for the **[Claude AI Certification for Architects](https://www.youtube.com/playlist?list=PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy)** masterclass.
+
+| 🌐 Live App (Fly.io) | 📄 GitHub Pages |
+|---|---|
+| **[claude-architect-certification.fly.dev](https://claude-architect-certification.fly.dev/)** | [rifaterdemsahin.github.io/claude-architect-certification/](https://rifaterdemsahin.github.io/claude-architect-certification/) |
 
 It contains reference architectures, secure Model Context Protocol (MCP) implementations, multi-agent routing topologies, and optimization frameworks designed for enterprise scale.
 
