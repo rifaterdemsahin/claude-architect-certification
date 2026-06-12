@@ -81,6 +81,11 @@
 
     .btn-sm { padding: 4px 12px; border-radius: 7px; border: none; cursor: pointer; font-size: 0.75rem; font-weight: 600; font-family: var(--font-b); background: rgba(139,92,246,0.15); color: var(--primary); border: 1px solid rgba(139,92,246,0.3); text-decoration: none; }
     .btn-sm:hover { background: rgba(139,92,246,0.25); }
+    @keyframes pulse {
+      0% { opacity: 0.6; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.05); }
+      100% { opacity: 0.6; transform: scale(1); }
+    }
   </style>
 </head>
 <body>
@@ -88,6 +93,17 @@
 <div class="container">
   <h1>🔬 Research Hub</h1>
   <p class="subtitle">All pre-production research assets — images, audio, videos, and notes — stored in Azure Blob Storage.</p>
+
+  <!-- Quick Creation Hub Section -->
+  <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 14px; padding: 16px; margin-bottom: 24px; display: flex; flex-direction: column; gap: 10px;">
+    <div style="font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; gap: 6px; font-family: var(--font-h);">⚡ Quick Creator Hub</div>
+    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+      <a href="images.html" class="btn-sm" style="padding: 8px 14px; border-radius: 8px; font-weight: 700;">🖼 Add Image</a>
+      <a href="audio.html" class="btn-sm" style="padding: 8px 14px; border-radius: 8px; font-weight: 700;">🎵 Add / Record Audio</a>
+      <a href="videos.html" class="btn-sm" style="padding: 8px 14px; border-radius: 8px; font-weight: 700;">🎬 Add Video</a>
+      <a href="notes.html" class="btn-sm" style="padding: 8px 14px; border-radius: 8px; font-weight: 700;">📝 Add Note</a>
+    </div>
+  </div>
 
   <!-- Summary cards -->
   <div class="sections" id="summary-cards">
@@ -141,7 +157,18 @@
 
   <!-- Audio pane -->
   <div class="pane" id="pane-audio">
-    <div class="section-header">🎵 Audio <a class="btn-sm" href="audio.html">+ Upload</a></div>
+    <div class="section-header">🎵 Audio <a class="btn-sm" href="audio.html">+ Upload / Record Page</a></div>
+    
+    <!-- Inline voice recorder -->
+    <div class="inline-recorder" style="background: var(--card); border: 1px dashed var(--border); border-radius: 12px; padding: 16px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; width: 100%;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 1.5rem;" id="inline-record-icon">🎤</span>
+        <span style="font-weight: 600; font-size: 0.9rem;" id="inline-record-status">Mobile Voice Recorder</span>
+        <span style="font-family: monospace; font-size: 0.95rem; color: var(--muted); font-weight: bold;" id="inline-record-timer">00:00</span>
+      </div>
+      <button class="btn-sm" id="btn-inline-record" onclick="toggleInlineRecording()" style="background: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; min-width: 120px;">🔴 Record Live</button>
+    </div>
+
     <div class="audio-list" id="list-audio"><div class="loading">Loading…</div></div>
   </div>
 
@@ -351,6 +378,98 @@ function updateUI() {
       document.getElementById('cnt-' + key).textContent = 'unavailable';
     });
 });
+let inlineRecorder;
+let inlineRecordedChunks = [];
+let inlineRecordInterval;
+let inlineStartTime;
+
+function toggleInlineRecording() {
+  const btn = document.getElementById('btn-inline-record');
+  const status = document.getElementById('inline-record-status');
+  const timer = document.getElementById('inline-record-timer');
+  const icon = document.getElementById('inline-record-icon');
+
+  if (inlineRecorder && inlineRecorder.state === "recording") {
+    inlineRecorder.stop();
+    return;
+  }
+
+  navigator.mediaDevices.getUserMedia({ audio: true })
+    .then(stream => {
+      inlineRecordedChunks = [];
+      let mimeType = 'audio/webm';
+      if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'audio/mp4';
+      if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'audio/ogg';
+      if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = '';
+
+      inlineRecorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
+      inlineRecorder.ondataavailable = e => {
+        if (e.data && e.data.size > 0) inlineRecordedChunks.push(e.data);
+      };
+
+      inlineRecorder.onstop = () => {
+        stream.getTracks().forEach(track => track.stop());
+        clearInterval(inlineRecordInterval);
+        
+        btn.textContent = '🔴 Record Live';
+        btn.style.background = 'var(--primary)';
+        status.textContent = 'Saving voice recording…';
+        icon.style.animation = 'none';
+
+        const blob = new Blob(inlineRecordedChunks, { type: mimeType || 'audio/octet-stream' });
+        const d = new Date();
+        const ext = mimeType.includes('mp4') ? 'm4a' : mimeType.includes('ogg') ? 'ogg' : 'webm';
+        const filename = 'voice_' + d.getFullYear() +
+                         String(d.getMonth()+1).padStart(2,'0') +
+                         String(d.getDate()).padStart(2,'0') + '_' +
+                         String(d.getHours()).padStart(2,'0') +
+                         String(d.getMinutes()).padStart(2,'0') +
+                         String(d.getSeconds()).padStart(2,'0') + '.' + ext;
+
+        const fd = new FormData();
+        fd.append('file', blob, filename);
+
+        fetch('/api/research/upload?container=research-audio', { method: 'POST', body: fd })
+          .then(r => r.ok ? r.json() : r.text().then(t => Promise.reject(t)))
+          .then(() => {
+            status.textContent = 'Saved successfully!';
+            timer.textContent = '00:00';
+            setTimeout(() => {
+              status.textContent = 'Mobile Voice Recorder';
+            }, 1500);
+            
+            // Reload audio container list
+            fetch('/api/research/files?container=research-audio')
+              .then(r => r.ok ? r.json() : [])
+              .then(files => {
+                data['audio'] = files;
+                renderAudio(files);
+              });
+          })
+          .catch(e => {
+            alert('Failed to save recording: ' + e);
+            status.textContent = 'Upload failed';
+          });
+      };
+
+      inlineRecorder.start();
+      inlineStartTime = Date.now();
+      icon.style.animation = 'pulse 1.5s infinite';
+      btn.textContent = '⏹ Stop';
+      btn.style.background = 'var(--red)';
+      status.textContent = 'Recording live…';
+
+      inlineRecordInterval = setInterval(() => {
+        const diff = Date.now() - inlineStartTime;
+        const secs = Math.floor(diff / 1000) % 60;
+        const mins = Math.floor(diff / 60000);
+        timer.textContent = String(mins).padStart(2,'0') + ':' + String(secs).padStart(2,'0');
+      }, 1000);
+    })
+    .catch(err => {
+      alert('Microphone error: ' + err.message);
+    });
+}
 </script>
 </body>
 </html>
