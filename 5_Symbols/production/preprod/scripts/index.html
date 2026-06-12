@@ -382,6 +382,37 @@
     .modal-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
     .modal-settings-link { font-size: 0.78rem; color: #6b7280; text-decoration: none; margin-left: auto; transition: color 0.2s; }
     .modal-settings-link:hover { color: var(--text-main); }
+
+    /* Script metadata badges (format + duration) */
+    .script-meta-badges { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0 6px; }
+    .meta-badge { font-size: 0.72rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; letter-spacing: 0.04em; }
+    .meta-badge.format  { background: rgba(139,92,246,0.15); color: #c084fc; border: 1px solid rgba(139,92,246,0.25); }
+    .meta-badge.dur     { background: rgba(245,158,11,0.15);  color: #fbbf24; border: 1px solid rgba(245,158,11,0.25); }
+
+    /* Sentences panel */
+    .sentences-panel { margin-top: 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.06); background: rgba(0,0,0,0.18); overflow: hidden; }
+    .sentences-panel summary { padding: 10px 14px; cursor: pointer; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); user-select: none; display: flex; align-items: center; gap: 8px; list-style: none; }
+    .sentences-panel summary::-webkit-details-marker { display: none; }
+    .sentences-panel summary:hover { color: var(--text-main); }
+    .sent-section-group { padding: 8px 14px 4px; border-top: 1px solid rgba(255,255,255,0.04); }
+    .sent-section-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); font-weight: 700; margin-bottom: 6px; }
+    .sent-row { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
+    .sent-row:last-child { border-bottom: none; }
+    .sent-badges { display: flex; flex-direction: column; gap: 3px; flex-shrink: 0; width: 88px; }
+    .sent-badge { font-size: 0.62rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; text-align: center; letter-spacing: 0.04em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sent-badge.hook        { background: rgba(239,68,68,0.15);   color: #f87171; }
+    .sent-badge.transition  { background: rgba(156,163,175,0.12); color: #9ca3af; }
+    .sent-badge.heading     { background: rgba(139,92,246,0.15);  color: #c084fc; }
+    .sent-badge.objective   { background: rgba(99,102,241,0.15);  color: #a5b4fc; }
+    .sent-badge.step        { background: rgba(59,130,246,0.15);  color: #93c5fd; }
+    .sent-badge.cue         { background: rgba(6,182,212,0.15);   color: #67e8f9; }
+    .sent-badge.insight     { background: rgba(245,158,11,0.15);  color: #fbbf24; }
+    .sent-badge.takeaway    { background: rgba(16,185,129,0.15);  color: #34d399; }
+    .sent-badge.body        { background: rgba(255,255,255,0.05); color: #6b7280; }
+    .sent-badge.talking_head{ background: rgba(139,92,246,0.08);  color: #8b5cf6; }
+    .sent-badge.screenshare { background: rgba(59,130,246,0.08);  color: #3b82f6; }
+    .sent-badge.b_roll      { background: rgba(16,185,129,0.08);  color: #10b981; }
+    .sent-text { font-size: 0.84rem; color: var(--text-main); line-height: 1.55; flex: 1; }
   </style>
   <script src="../../../../shared/nav.js"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -803,6 +834,9 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
           html += `</div>`;
           html += `</div>`; // end script container
 
+          // Format + duration badges + sentences panel (hydrated async)
+          html += `<div id="sentences-${elementId}"></div>`;
+
           // Audio generation row
           const hasAudio = !!v.audioUrl;
           html += `<div class="audio-action-row">`;
@@ -1155,6 +1189,66 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
       }
     }
 
+    // ── Sentences helpers ──────────────────────────────────────────────────────
+    async function fetchSentences(scriptId) {
+      if (!SUPABASE_URL.includes('supabase.co') || !scriptId) return [];
+      try {
+        const res = await fetch(
+          `${SUPABASE_URL}/rest/v1/sentences?script_id=eq.${scriptId}&order=sort_order.asc`,
+          { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
+        );
+        return res.ok ? res.json() : [];
+      } catch { return []; }
+    }
+
+    const SECTION_LABELS = {
+      intro: '🎬 Intro', objectives: '🎯 Objectives',
+      screenshare: '🖥 Screen Share', outro: '🏁 Outro', body: '📝 Body'
+    };
+    const SECTION_ORDER = ['intro', 'objectives', 'screenshare', 'outro', 'body'];
+
+    function renderSentencesPanel(sentences, format, duration) {
+      const metaBadges = [
+        format   ? `<span class="meta-badge format">📽 ${esc2(format)}</span>` : '',
+        duration ? `<span class="meta-badge dur">⏱ ${esc2(duration)}</span>` : ''
+      ].filter(Boolean).join('');
+
+      const grouped = {};
+      sentences.forEach(s => {
+        if (!grouped[s.section]) grouped[s.section] = [];
+        grouped[s.section].push(s);
+      });
+
+      const groupHtml = SECTION_ORDER
+        .filter(sec => grouped[sec] && grouped[sec].length)
+        .map(sec => {
+          const rows = grouped[sec].map(s => `
+            <div class="sent-row">
+              <div class="sent-badges">
+                <span class="sent-badge ${esc2(s.sentence_type)}">${esc2(s.sentence_type)}</span>
+                <span class="sent-badge ${esc2(s.visual_mode)}">${esc2(s.visual_mode).replace('_', ' ')}</span>
+              </div>
+              <div class="sent-text">${esc2(s.sentence_text)}</div>
+            </div>`).join('');
+          return `<div class="sent-section-group">
+            <div class="sent-section-label">${SECTION_LABELS[sec] || sec}</div>${rows}
+          </div>`;
+        }).join('');
+
+      return `${metaBadges ? `<div class="script-meta-badges">${metaBadges}</div>` : ''}
+        ${sentences.length ? `<details class="sentences-panel">
+          <summary>📋 Sentences <span style="font-weight:400;opacity:0.6;">(${sentences.length})</span></summary>
+          ${groupHtml}
+        </details>` : ''}`;
+    }
+
+    async function hydrateSentences(elementId, scriptId, format, duration) {
+      const container = document.getElementById('sentences-' + elementId);
+      if (!container) return;
+      const sentences = await fetchSentences(scriptId);
+      container.innerHTML = renderSentencesPanel(sentences, format, duration);
+    }
+
     async function loadFromSupabase() {
       if (!SUPABASE_URL.includes('supabase.co')) return null;
       try {
@@ -1169,7 +1263,7 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
         const videos = await sq('videos?order=video_number.asc&select=*,video_cues(*)');
         const links = await sq('resource_links?select=*,module_id(*)');
         const outlines = await sq('outline?order=sort_order.asc');
-        const scripts = await sq('scripts?select=video_id,script_text,audio_url');
+        const scripts = await sq('scripts?select=id,video_id,script_text,audio_url,format,target_duration');
 
         if (!modules) return null;
 
@@ -1188,6 +1282,9 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
                 duration: v.duration,
                 script: matchedScript ? matchedScript.script_text : v.script,
                 audioUrl: matchedScript ? (matchedScript.audio_url || null) : null,
+                scriptId: matchedScript ? matchedScript.id : null,
+                format: matchedScript ? (matchedScript.format || '') : '',
+                targetDuration: matchedScript ? (matchedScript.target_duration || '') : '',
                 cues: (v.video_cues || []).sort((a,b) => a.sort_order - b.sort_order).map(c => c.cue_text)
               };
             }),
@@ -1349,6 +1446,8 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
           m.videos.forEach(v => {
             const elementId = v.videoId || `local-${mi}-${v.id}`;
             hydrateVideoCodeRefs(elementId);
+            if (v.scriptId) hydrateSentences(elementId, v.scriptId, v.format, v.targetDuration);
+            else if (v.format || v.targetDuration) hydrateSentences(elementId, null, v.format, v.targetDuration);
           });
         });
       } else {
