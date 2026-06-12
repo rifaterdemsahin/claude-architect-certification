@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Sitemap | Claude AI Certification</title>
+  <meta name="description" content="Complete sitemap of all project pages — open any page with one click from the local dev server.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #030712; --bg-card: rgba(17,24,39,0.8); --text-main: #f3f4f6; --text-muted: #9ca3af;
+      --primary: #8b5cf6; --secondary: #3b82f6; --accent: #f59e0b;
+      --font-title: 'Outfit', sans-serif; --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-dark);
+      background-image: radial-gradient(circle at 10% 20%, rgba(139,92,246,0.08) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(59,130,246,0.08) 0%, transparent 40%);
+      color: var(--text-main); font-family: var(--font-body); line-height: 1.6; padding-bottom: 80px;
+    }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+    .badge { display: inline-block; padding: 6px 16px; background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(139,92,246,0.2)); border: 1px solid rgba(245,158,11,0.3); border-radius: 100px; font-size: 0.8rem; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 14px; }
+    h1 { font-family: var(--font-title); font-size: 2.4rem; font-weight: 800; margin-bottom: 10px; }
+    header p { color: var(--text-muted); max-width: 600px; margin: 0 auto 32px; }
+
+    .phase-section {
+      background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px;
+      padding: 28px; margin-bottom: 24px;
+    }
+    .phase-title {
+      font-family: var(--font-title); font-size: 1.3rem; font-weight: 700; margin-bottom: 20px;
+      display: flex; align-items: center; gap: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 12px;
+    }
+    .page-link {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 14px; border-radius: 12px;
+      text-decoration: none; color: inherit; transition: all 0.2s;
+      border: 1px solid transparent;
+    }
+    .page-link:hover {
+      background: rgba(139,92,246,0.06); border-color: rgba(139,92,246,0.15);
+      transform: translateX(4px);
+    }
+    .page-icon { font-size: 1.2rem; width: 28px; text-align: center; flex-shrink: 0; }
+    .page-info { flex: 1; }
+    .page-name { font-weight: 600; font-size: 0.95rem; }
+    .page-path { font-family: monospace; font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+    .page-open {
+      background: var(--primary); color: white; border: none; padding: 5px 14px;
+      border-radius: 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer; text-decoration: none;
+      transition: opacity 0.2s; flex-shrink: 0;
+    }
+    .page-open:hover { opacity: 0.85; }
+    .page-open.ext { background: var(--secondary); }
+    .server-bar {
+      background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.15);
+      border-radius: 14px; padding: 16px 20px; display: flex; align-items: center; gap: 14px;
+      margin-bottom: 28px; flex-wrap: wrap;
+    }
+    .server-bar .dot {
+      width: 10px; height: 10px; border-radius: 50%; background: #10b981;
+      flex-shrink: 0; animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .server-bar .url { font-family: monospace; font-size: 0.95rem; font-weight: 600; color: #10b981; }
+    .server-bar .hint { color: var(--text-muted); font-size: 0.8rem; }
+
+    .search-box {
+      width: 100%; padding: 12px 16px; border-radius: 12px;
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+      color: var(--text-main); font-size: 0.95rem; font-family: var(--font-body);
+      margin-bottom: 20px; transition: border-color 0.2s;
+    }
+    .search-box:focus { outline: none; border-color: var(--primary); }
+    .search-box::placeholder { color: var(--text-muted); }
+
+    .page-count { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 16px; }
+    .hidden { display: none; }
+    footer { text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header style="text-align: center; padding-top: 40px;">
+      <div class="badge">Page Index</div>
+      <h1>🗺 Project Sitemap</h1>
+      <p>Every page in the project — click to open from the local dev server.</p>
+    </header>
+
+    <div class="server-bar">
+      <span class="dot"></span>
+      <span class="url" id="server-url">http://localhost:8080</span>
+      <span class="hint">— Dev server is running. Click any link below.</span>
+      <a href="/" style="margin-left: auto; color: var(--secondary); font-size: 0.85rem;">← Home</a>
+    </div>
+
+    <input type="text" class="search-box" id="search" placeholder="🔍 Filter pages by name, path, or phase..." oninput="filterPages(this.value)">
+
+    <div class="page-count" id="page-count"></div>
+
+    <div id="sections-container"></div>
+
+    <footer>
+      <p>Claude AI Certification for Architects — Project Sitemap</p>
+    </footer>
+  </div>
+
+  <script src="../../shared/nav.js"></script>
+  <script>
+    const SECTIONS = [
+      {
+        label: "🎬 Pre-Production",
+        icon: "🎬",
+        pages: [
+          { icon: "🏠", name: "Pre-Production Hub",     path: "../production/preprod/index.html" },
+          { icon: "❓", name: "Problem Statement",       path: "../production/preprod/problem.html" },
+          { icon: "✅", name: "Producer Checklist",       path: "../production/preprod/producer_checklist.html" },
+          { icon: "✅", name: "Master Sanity Checklist",  path: "../production/preprod/sanity_checklist.html" },
+          { icon: "📋", name: "Course Outline",           path: "../production/preprod/course_outline.html" },
+          { icon: "🎭", name: "Master Script",            path: "../production/preprod/scripts/index.html" },
+          { icon: "🎯", name: "IVQ Manager",             path: "../production/preprod/ivq.html" },
+          { icon: "✏️", name: "Script Editor",           path: "../production/preprod/edit_scripts.html" },
+          { icon: "📊", name: "Stats",                   path: "../production/preprod/stats.html" },
+          { icon: "💡", name: "Explanations",            path: "../production/preprod/explanations.html" },
+          { icon: "🔬", name: "Research Hub",            path: "../production/preprod/research/index.html" },
+          { icon: "🖼", name: "Research Images",          path: "../production/preprod/research/images.html" },
+          { icon: "🎵", name: "Research Audio",           path: "../production/preprod/research/audio.html" },
+          { icon: "🎬", name: "Research Videos",          path: "../production/preprod/research/videos.html" },
+          { icon: "📝", name: "Research Notes",           path: "../production/preprod/research/notes.html" },
+          { icon: "🔧", name: "Data Admin",              path: "../production/preprod/tools/admin.html" },
+        ]
+      },
+      {
+        label: "🎥 Production",
+        icon: "🎥",
+        pages: [
+          { icon: "🏠", name: "Production Hub",          path: "../production/production_hub.html" },
+          { icon: "⚙️", name: "Production Settings",     path: "../production/settings.html" },
+          { icon: "📸", name: "Shot List & Assets",      path: "../production/postprod/production_shotlist.html" },
+          { icon: "✅", name: "Production Checklist",     path: "../production/prod/checklist.html" },
+          { icon: "🎥", name: "Footage Mapping",         path: "../production/prod/footage_mapping.html" },
+          { icon: "🏆", name: "Production Milestones",   path: "../production/prod/index.html" },
+        ]
+      },
+      {
+        label: "📦 Post-Production",
+        icon: "📦",
+        pages: [
+          { icon: "🏠", name: "Post-Production Hub",     path: "../production/postprod/index.html" },
+          { icon: "📸", name: "Shot List & Review",      path: "../production/postprod/production_shotlist.html" },
+          { icon: "✅", name: "Asset Checklist",          path: "../production/postprod/asset_checklist.html" },
+          { icon: "🖼", name: "Visual Asset Gallery",    path: "../production/postprod/visual_gallery.html" },
+          { icon: "💼", name: "LinkedIn Messaging",      path: "../production/postprod/linkedin_messaging.html" },
+          { icon: "🔥", name: "Controversial Post",      path: "../production/postprod/linkedin_controversial.html" },
+          { icon: "💰", name: "Business Plan",           path: "../production/postprod/business_plan.html" },
+        ]
+      },
+      {
+        label: "📡 Publish & Membership",
+        icon: "🌐",
+        pages: [
+          { icon: "🔥", name: "Membership / Join",       path: "../production/publish/membership.html" },
+        ]
+      },
+      {
+        label: "🗂 Templates",
+        icon: "📄",
+        pages: [
+          { icon: "🏠", name: "Home Template",           path: "../templates/index.html" },
+          { icon: "⚠️", name: "Axiom Errors Template",   path: "../templates/axiom_errors.html" },
+        ]
+      },
+      {
+        label: "🗄 Supabase Admin",
+        icon: "🗄",
+        pages: [
+          { icon: "🛠", name: "DB Seed Admin",           path: "../supabase/ui/admin.html" },
+        ]
+      },
+      {
+        label: "🔧 Utilities",
+        icon: "🔧",
+        pages: [
+          { icon: "📝", name: "Markdown Renderer",       path: "../course_src/templates/markdown_renderer.html" },
+          { icon: "👁", name: "Markdown Viewer",         path: "../course_src/utils/markdown_viewer.html" },
+          { icon: "📁", name: "Sanity Gate (Pre-Prod)",  path: "../production/preprod/sanity_check.html" },
+        ]
+      },
+      {
+        label: "🏠 Root Pages",
+        icon: "🏠",
+        pages: [
+          { icon: "🏠", name: "Home / Landing",          path: "../../index.html" },
+          { icon: "📖", name: "Markdown Renderer (Root)","path": "../../markdown_renderer.html" },
+          { icon: "🗺", name: "Navigation Config",        path: "../../navigation_config.json" },
+        ]
+      },
+      {
+        label: "🌍 External Tools",
+        icon: "🔗",
+        external: true,
+        pages: [
+          { icon: "🐙", name: "GitHub Repo",           url: "https://github.com/rifaterdemsahin/claude-architect-certification" },
+          { icon: "🔥", name: "Supabase Dashboard",     url: "https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/" },
+          { icon: "📡", name: "Axiom Errors Admin",     url: "/admin/errors" },
+          { icon: "🔊", name: "Audio Generator",        url: "https://secondbrain-kokoro.fly.dev/" },
+          { icon: "🎨", name: "Canva",                  url: "https://canva.com" },
+          { icon: "📺", name: "YouTube Studio",         url: "https://studio.youtube.com/" },
+          { icon: "🤖", name: "Claude Guide",           url: "claude.md" },
+          { icon: "✨", name: "Gemini Guide",           url: "gemini.md" },
+        ]
+      }
+    ];
+
+    function escHtml(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function renderSections(filter) {
+      const container = document.getElementById('sections-container');
+      container.innerHTML = '';
+      let total = 0;
+      const lf = filter ? filter.toLowerCase() : '';
+
+      SECTIONS.forEach(section => {
+        const filtered = section.pages.filter(p => {
+          if (!lf) return true;
+          const name = (p.name || '').toLowerCase();
+          const path = (p.path || p.url || '').toLowerCase();
+          const label = section.label.toLowerCase();
+          return name.includes(lf) || path.includes(lf) || label.includes(lf);
+        });
+        if (filtered.length === 0) return;
+
+        total += filtered.length;
+        const div = document.createElement('div');
+        div.className = 'phase-section';
+        div.innerHTML = `
+          <div class="phase-title">${section.icon} ${section.label}</div>
+          ${filtered.map(p => {
+            const isExternal = p.url || section.external;
+            const href = isExternal ? escHtml(p.url) : escHtml(p.path);
+            const cls = isExternal ? 'page-open ext' : 'page-open';
+            const target = isExternal ? ' target="_blank" rel="noopener"' : '';
+            return `
+              <a class="page-link" href="${href}"${target}>
+                <span class="page-icon">${p.icon}</span>
+                <span class="page-info">
+                  <span class="page-name">${escHtml(p.name)}</span>
+                  <div class="page-path">${escHtml(p.path || p.url || '')}</div>
+                </span>
+                <span class="${cls}">${isExternal ? '↗ Open' : '▶ Open'}</span>
+              </a>`;
+          }).join('')}
+        `;
+        container.appendChild(div);
+      });
+
+      document.getElementById('page-count').textContent = `📄 ${total} page${total !== 1 ? 's' : ''}`;
+    }
+
+    function filterPages(value) {
+      renderSections(value);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderSections('');
+      const url = new URL(window.location.href);
+      document.getElementById('server-url').textContent = url.origin;
+    });
+  </script>
+  <script src="../../shared/debug-panel.js"></script>
+</body>
+</html>
