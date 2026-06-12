@@ -31,18 +31,14 @@ Run each file in the Supabase SQL Editor in the order shown. All files are idemp
 |------|---------|
 | `policies/checklist_insert_policy.sql` | Standalone anon-insert policy for checklist_items (already included in schema but safe to re-run) |
 
-### 🔧 Step 4 — Migrations (apply only if upgrading an existing DB)
+### 🛠 Step 5 — Operations (transform and maintain data)
 
-These are incremental changes applied on top of an existing schema. **Skip if running from scratch** — `schema/01_core_schema.sql` already includes all these changes.
-
-| File | What it adds |
-|------|-------------|
-| `migrations/migration_add_item_url.sql` | `item_url` column to `checklist_items` |
-| `migrations/migration_in_progress.sql` | `in_progress` column to `checklist_progress` |
-| `migrations/migration_audio_url.sql` | `audio_url` column to `scripts` |
-| `migrations/migration_scenes_crud.sql` | `audio_url` on `scenes` + INSERT/UPDATE/DELETE RLS |
-| `migrations/migration_course_video_progress.sql` | `course_video_progress` tracking table |
-| `migrations/migration_tell_show_do_apply.sql` | Tell/Show/Do/Apply flags on `course_video_progress` |
+| File | Purpose |
+|------|---------|
+| `scripts/create_sentences_from_scripts.sql` | Splits all `scripts.script_text` into individual `sentences` with automatic categorization. **Idempotent.** |
+| `scripts/supabase_backup.sh` | Export data from Supabase project to local backup. |
+| `scripts/supabase_stats.sh` | Query table row counts and storage sizes. |
+| `scripts/fetch_supabase_secrets.py` | Load `SUPABASE_URL` and `ANON_KEY` from Azure Key Vault. |
 
 ---
 
