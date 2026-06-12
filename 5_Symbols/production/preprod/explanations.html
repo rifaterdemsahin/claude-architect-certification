@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Architect Explanations | Claude AI Certification</title>
+  <meta name="description" content="Generate and manage AI-powered explanations for course script outlines, sentences, research files, and problem statements.">
+  <link rel="icon" type="image/png" href="../../../favicon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../../../shared/nav.css">
+
+  <style>
+    :root {
+      --bg-dark: #030712;
+      --bg-card: rgba(17, 24, 39, 0.85);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --primary: #8b5cf6;
+      --secondary: #3b82f6;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --font-title: 'Outfit', sans-serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-dark);
+      background-image:
+        radial-gradient(circle at 10% 20%, rgba(139,92,246,0.08) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(59,130,246,0.08) 0%, transparent 40%);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      line-height: 1.6;
+      padding-bottom: 80px;
+    }
+    .container { max-width: 1000px; margin: 0 auto; padding: 0 24px; }
+    header { padding: 48px 0 32px; text-align: center; }
+    h1 { font-family: var(--font-title); font-size: 2.6rem; font-weight: 800; margin-bottom: 10px; }
+    header p { color: var(--text-muted); max-width: 600px; margin: 0 auto; }
+
+    /* Glassmorphic control card */
+    .glass-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 32px;
+      margin-bottom: 32px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-row {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .form-row .form-group {
+      flex: 1;
+      margin-bottom: 0;
+    }
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+      color: var(--text-muted);
+    }
+    select, input, textarea {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      padding: 12px;
+      color: var(--text-main);
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      transition: all 0.3s;
+    }
+    select:focus, input:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.25);
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 16px;
+    }
+    .btn {
+      padding: 12px 24px;
+      font-weight: 700;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s;
+      font-family: var(--font-title);
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(139, 92, 246, 0.4);
+    }
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-main);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* History section */
+    .section-title {
+      font-family: var(--font-title);
+      font-size: 1.8rem;
+      font-weight: 800;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .history-card {
+      background: rgba(17, 24, 39, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .history-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    .badge {
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.7rem;
+    }
+    .badge-gemini { background: rgba(139, 92, 246, 0.2); color: #c084fc; }
+    .badge-user { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+    
+    .history-text {
+      white-space: pre-wrap;
+      font-size: 0.95rem;
+    }
+
+    /* Loading Overlay */
+    .loader {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin: 20px 0;
+      color: var(--text-muted);
+    }
+    .spinner {
+      width: 24px;
+      height: 24px;
+      border: 3px solid rgba(255,255,255,0.1);
+      border-radius: 50%;
+      border-top-color: var(--primary);
+      animation: spin 1s ease-in-out infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Toast alert */
+    #toast {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      background: var(--success);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 700;
+      z-index: 10000;
+      opacity: 0;
+      transform: translateY(-20px);
+      transition: all 0.3s;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    #toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    #toast.error {
+      background: var(--danger);
+    }
+  </style>
+  <script src="../../../shared/nav.js" defer></script>
+</head>
+<body>
+  <div id="toast">✅ Explanation saved</div>
+
+  <div class="container">
+    <header>
+      <h1>🧠 Architect AI Explanations</h1>
+      <p>Select outlines, sentences, research material, or problem pages, and request automated, high-quality architectural explanations via Gemini 1.5 Flash.</p>
+    </header>
+
+    <div class="glass-card">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="entity-type">Entity Type</label>
+          <select id="entity-type">
+            <option value="outline">📋 Script Outline</option>
+            <option value="sentence">📝 Script Sentence</option>
+            <option value="research">🔬 Research Notes / Assets</option>
+            <option value="problem">❓ Problem Statements</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="entity-select">Target Entity</label>
+          <select id="entity-select">
+            <option value="">-- Select an Item --</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group" style="display: none;" id="custom-id-group">
+        <label for="entity-id">Entity ID</label>
+        <input type="text" id="entity-id" placeholder="Select or type the target ID">
+      </div>
+
+      <div class="form-group">
+        <label for="prompt-override">Custom Prompt instructions (Optional)</label>
+        <textarea id="prompt-override" rows="3" placeholder="Tell Gemini to focus on specific architectural features, costs, security boundaries, etc."></textarea>
+      </div>
+
+      <div class="btn-group">
+        <button class="btn btn-primary" id="btn-generate">
+          <span>🤖</span> Generate with Gemini
+        </button>
+        <button class="btn btn-secondary" id="btn-load">
+          <span>🔄</span> Load History
+        </button>
+      </div>
+
+      <div class="loader" id="loader">
+        <div class="spinner"></div>
+        <span>Generating explanation with Gemini...</span>
+      </div>
+    </div>
+
+    <!-- Live Workspace / Editor -->
+    <div class="glass-card" id="editor-section" style="display: none;">
+      <h2 class="section-title">✍️ Edit & Save Explanation</h2>
+      <div class="form-group">
+        <textarea id="explanation-editor" rows="12"></textarea>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-primary" id="btn-save">
+          <span>💾</span> Save to Supabase
+        </button>
+      </div>
+    </div>
+
+    <!-- Explanation list -->
+    <div>
+      <h2 class="section-title">📜 Explanations Log</h2>
+      <div id="explanations-list">
+        <p style="color: var(--text-muted); font-style: italic;">No explanations loaded. Select an entity or click Load History.</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = 'https://rmekfsdhglyiralxvkwc.supabase.co';
+    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZWtmc2RoZ2x5aXJhbHh2a3djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NzYzODgsImV4cCI6MjA5NjM1MjM4OH0.ay6HsmO_CbMGDXL_Dv4DT-paAIAOqlQPfmqqx_mexSU';
+    const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+    // DOM Elements
+    const entityType = document.getElementById('entity-type');
+    const entitySelect = document.getElementById('entity-select');
+    const entityId = document.getElementById('entity-id');
+    const promptOverride = document.getElementById('prompt-override');
+    const btnGenerate = document.getElementById('btn-generate');
+    const btnLoad = document.getElementById('btn-load');
+    const btnSave = document.getElementById('btn-save');
+    const loader = document.getElementById('loader');
+    const editorSection = document.getElementById('editor-section');
+    const explanationEditor = document.getElementById('explanation-editor');
+    const explanationsList = document.getElementById('explanations-list');
+    const toast = document.getElementById('toast');
+
+    // UI Toast Feedback
+    function showToast(msg, isError = false) {
+      toast.textContent = msg;
+      if (isError) toast.classList.add('error');
+      else toast.classList.remove('error');
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    // Load Entities Dropdown Based on Selection
+    async function loadEntities() {
+      entitySelect.innerHTML = '<option value="">-- Loading Items --</option>';
+      const type = entityType.value;
+      
+      try {
+        if (type === 'outline') {
+          const { data, error } = await db.from('outline').select('id,content,content_type').order('sort_order', { ascending: true }).limit(100);
+          if (error) throw error;
+          entitySelect.innerHTML = '<option value="">-- Select Outlines --</option>';
+          data.forEach(item => {
+            const label = `[${item.content_type}] ${item.content.substring(0, 50)}${item.content.length > 50 ? '...' : ''}`;
+            entitySelect.innerHTML += `<option value="${item.id}">${label}</option>`;
+          });
+        } 
+        else if (type === 'sentence') {
+          const { data, error } = await db.from('sentences').select('id,sentence_text,sentence_type').order('sort_order', { ascending: true }).limit(100);
+          if (error) throw error;
+          entitySelect.innerHTML = '<option value="">-- Select Sentence --</option>';
+          data.forEach(item => {
+            const label = `[${item.sentence_type}] ${item.sentence_text.substring(0, 50)}${item.sentence_text.length > 50 ? '...' : ''}`;
+            entitySelect.innerHTML += `<option value="${item.id}">${label}</option>`;
+          });
+        }
+        else if (type === 'research') {
+          entitySelect.innerHTML = '<option value="">-- Loading Research files --</option>';
+          const res = await fetch('/api/research/files?container=research-notes');
+          if (!res.ok) throw new Error('Failed to fetch research items');
+          const files = await res.json();
+          entitySelect.innerHTML = '<option value="">-- Select Research file --</option>';
+          files.forEach(file => {
+            entitySelect.innerHTML += `<option value="${file.name}">${file.name}</option>`;
+          });
+        }
+        else if (type === 'problem') {
+          const { data, error } = await db.from('problem_pages').select('id,title,headline').limit(50);
+          if (error) throw error;
+          entitySelect.innerHTML = '<option value="">-- Select Problem Page --</option>';
+          data.forEach(item => {
+            entitySelect.innerHTML += `<option value="${item.id}">${item.title} - ${item.headline.substring(0,30)}...</option>`;
+          });
+        }
+      } catch (err) {
+        entitySelect.innerHTML = `<option value="">⚠️ Error loading entities: ${err.message}</option>`;
+      }
+    }
+
+    entityType.addEventListener('change', () => {
+      loadEntities();
+      explanationEditor.value = '';
+      editorSection.style.display = 'none';
+    });
+
+    entitySelect.addEventListener('change', () => {
+      entityId.value = entitySelect.value;
+      if (entitySelect.value) {
+        loadExplanations(entityType.value, entitySelect.value);
+      }
+    });
+
+    // Load Explanations Log from Database
+    async function loadExplanations(type, id) {
+      let url = '/api/explanations';
+      if (type && id) {
+        url += `?entity_type=${encodeURIComponent(type)}&entity_id=${encodeURIComponent(id)}`;
+      }
+
+      explanationsList.innerHTML = '<p style="color: var(--text-muted);">Loading explanations...</p>';
+      
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('Failed to fetch explanations from API');
+        const data = await res.json();
+        
+        if (!data || data.length === 0) {
+          explanationsList.innerHTML = '<p style="color: var(--text-muted); font-style: italic;">No explanations found for this entity.</p>';
+          return;
+        }
+
+        explanationsList.innerHTML = '';
+        data.forEach(item => {
+          const date = new Date(item.created_at).toLocaleString();
+          const badgeClass = item.generated_by === 'gemini' ? 'badge-gemini' : 'badge-user';
+          explanationsList.innerHTML += `
+            <div class="history-card">
+              <div class="history-meta">
+                <span>Created: ${date}</span>
+                <span class="badge ${badgeClass}">${item.generated_by}</span>
+              </div>
+              <div class="history-text">${item.explanation_text}</div>
+            </div>
+          `;
+        });
+      } catch (err) {
+        explanationsList.innerHTML = `<p style="color: var(--danger);">Error: ${err.message}</p>';
+      }
+    }
+
+    // Call Gemini AI generation proxy
+    btnGenerate.addEventListener('click', async () => {
+      const type = entityType.value;
+      const id = entityId.value || entitySelect.value;
+
+      if (!id) {
+        showToast('Please select or enter an Entity ID first', true);
+        return;
+      }
+
+      loader.style.display = 'flex';
+      btnGenerate.disabled = true;
+
+      try {
+        const res = await fetch('/api/explanations/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            entity_type: type,
+            entity_id: id,
+            prompt: promptOverride.value
+          })
+        });
+
+        if (!res.ok) {
+          const errData = await res.json();
+          throw new Error(errData.error || 'API generation failed');
+        }
+
+        const data = await res.json();
+        explanationEditor.value = data.explanation;
+        editorSection.style.display = 'block';
+        showToast('🤖 Gemini explanation generated successfully');
+      } catch (err) {
+        showToast(err.message, true);
+      } finally {
+        loader.style.display = 'none';
+        btnGenerate.disabled = false;
+      }
+    });
+
+    // Save Explanation to Supabase
+    btnSave.addEventListener('click', async () => {
+      const type = entityType.value;
+      const id = entityId.value || entitySelect.value;
+      const text = explanationEditor.value.trim();
+
+      if (!id || !text) {
+        showToast('Entity ID and explanation text cannot be empty', true);
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/explanations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            entity_type: type,
+            entity_id: id,
+            explanation_text: text,
+            generated_by: 'gemini'
+          })
+        });
+
+        if (!res.ok) {
+          const errData = await res.json();
+          throw new Error(errData.error || 'Failed to save');
+        }
+
+        showToast('💾 Explanation saved to database');
+        loadExplanations(type, id);
+      } catch (err) {
+        showToast(err.message, true);
+      }
+    });
+
+    btnLoad.addEventListener('click', () => {
+      loadExplanations(entityType.value, entityId.value || entitySelect.value);
+    });
+
+    // Init onload
+    loadEntities();
+  </script>
+</body>
+</html>

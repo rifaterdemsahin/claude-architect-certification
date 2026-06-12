@@ -295,6 +295,28 @@
 
     // Click trigger to toggle open/close
     nav.addEventListener('click', function (e) {
+      // Handle subdropdown triggers first
+      var subTrigger = e.target.closest('.site-subdrop-trigger');
+      if (subTrigger) {
+        e.preventDefault();
+        e.stopPropagation();
+        var subdropdown = subTrigger.closest('.site-nav-subdropdown');
+        if (!subdropdown) return;
+        var isOpen = subdropdown.classList.contains('open');
+
+        // Close sibling subdropdowns
+        var parent = subdropdown.parentNode;
+        var siblings = parent.querySelectorAll(':scope > .site-nav-subdropdown.open');
+        for (var si = 0; si < siblings.length; si++) {
+          if (siblings[si] !== subdropdown) siblings[si].classList.remove('open');
+        }
+
+        if (isOpen) subdropdown.classList.remove('open');
+        else subdropdown.classList.add('open');
+        return;
+      }
+
+      // Handle main dropdown triggers
       var trigger = e.target.closest('.site-drop-trigger');
       if (!trigger) return;
       e.preventDefault();
@@ -304,13 +326,12 @@
       if (!dropdown) return;
       var isOpen = dropdown.classList.contains('open');
 
-      // Close all sibling/other dropdowns
-      var allOpen = nav.querySelectorAll('.site-nav-dropdown.open');
+      // Close all other main dropdowns
+      var allOpen = nav.querySelectorAll(':scope > .site-nav-container > .site-nav-links > .site-nav-dropdown.open');
       for (var i = 0; i < allOpen.length; i++) {
         if (allOpen[i] !== dropdown) allOpen[i].classList.remove('open');
       }
 
-      // Toggle this one
       if (isOpen) dropdown.classList.remove('open');
       else dropdown.classList.add('open');
     });
@@ -321,6 +342,10 @@
       var allOpen = nav.querySelectorAll('.site-nav-dropdown.open');
       for (var i = 0; i < allOpen.length; i++) {
         allOpen[i].classList.remove('open');
+      }
+      var allSubOpen = nav.querySelectorAll('.site-nav-subdropdown.open');
+      for (var j = 0; j < allSubOpen.length; j++) {
+        allSubOpen[j].classList.remove('open');
       }
     });
   }
