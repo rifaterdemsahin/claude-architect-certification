@@ -67,6 +67,32 @@
     .server-bar .url { font-family: monospace; font-size: 0.95rem; font-weight: 600; color: #10b981; }
     .server-bar .hint { color: var(--text-muted); font-size: 0.8rem; }
 
+    .toolbar {
+      display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; align-items: center;
+    }
+    .toolbar-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 18px; border-radius: 10px; border: none;
+      font-size: 0.85rem; font-weight: 700; cursor: pointer;
+      font-family: var(--font-body); transition: all 0.2s;
+    }
+    .toolbar-btn:hover { transform: translateY(-1px); }
+    .toolbar-btn.open-all {
+      background: linear-gradient(135deg, #8b5cf6, #3b82f6); color: white;
+    }
+    .toolbar-btn.open-all:hover { box-shadow: 0 4px 14px rgba(139,92,246,0.35); }
+    .toolbar-btn.clear-all { background: rgba(239,68,68,0.1); color: #f87171; border: 1px solid rgba(239,68,68,0.2); }
+    .toolbar-btn.clear-all:hover { background: rgba(239,68,68,0.2); }
+    .toolbar-count { font-size: 0.8rem; color: var(--text-muted); margin-left: auto; }
+
+    .group-open-btn {
+      background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2);
+      color: var(--secondary); padding: 4px 14px; border-radius: 8px;
+      font-size: 0.75rem; font-weight: 600; cursor: pointer;
+      font-family: var(--font-body); transition: all 0.2s; margin-left: auto;
+    }
+    .group-open-btn:hover { background: rgba(59,130,246,0.2); }
+
     .search-box {
       width: 100%; padding: 12px 16px; border-radius: 12px;
       background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
@@ -78,6 +104,14 @@
 
     .page-count { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 16px; }
     .hidden { display: none; }
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.1); border-radius: 12px;
+      padding: 12px 24px; font-size: 0.85rem; z-index: 999;
+      opacity: 0; transition: opacity 0.3s; pointer-events: none;
+    }
+    .toast.show { opacity: 1; }
     footer { text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
   </style>
 </head>
@@ -96,11 +130,19 @@
       <a href="/" style="margin-left: auto; color: var(--secondary); font-size: 0.85rem;">← Home</a>
     </div>
 
+    <div class="toolbar">
+      <button class="toolbar-btn open-all" onclick="openAllPages()">🚀 Open All</button>
+      <button class="toolbar-btn clear-all" onclick="closeAllTabs()">✕ Close All</button>
+      <span class="toolbar-count" id="toolbar-count"></span>
+    </div>
+
     <input type="text" class="search-box" id="search" placeholder="🔍 Filter pages by name, path, or phase..." oninput="filterPages(this.value)">
 
     <div class="page-count" id="page-count"></div>
 
     <div id="sections-container"></div>
+
+    <div class="toast" id="toast"></div>
 
     <footer>
       <p>Claude AI Certification for Architects — Project Sitemap</p>
@@ -238,7 +280,10 @@
         const div = document.createElement('div');
         div.className = 'phase-section';
         div.innerHTML = `
-          <div class="phase-title">${section.icon} ${section.label}</div>
+          <div class="phase-title">
+            ${section.icon} ${section.label}
+            <button class="group-open-btn" onclick="openGroup(event, '${escHtml(section.label)}')">⊕ Open Group</button>
+          </div>
           ${filtered.map(p => {
             const isExternal = p.url || section.external;
             const href = isExternal ? escHtml(p.url) : escHtml(p.path);
@@ -259,6 +304,64 @@
       });
 
       document.getElementById('page-count').textContent = `📄 ${total} page${total !== 1 ? 's' : ''}`;
+      document.getElementById('toolbar-count').textContent = `⬡ ${total} available`;
+    }
+
+    function collectInternalPages(sectionLabel) {
+      const pages = [];
+      SECTIONS.forEach(s => {
+        if (sectionLabel && s.label !== sectionLabel) return;
+        s.pages.forEach(p => {
+          const isExternal = p.url || s.external;
+          if (isExternal) return;
+          const href = p.path;
+          if (href && !href.startsWith('http')) pages.push({ name: p.name, href });
+        });
+      });
+      return pages;
+    }
+
+    function openAllPages() {
+      const pages = collectInternalPages();
+      if (pages.length === 0) return;
+      const reason = `Open all ${pages.length} project pages in new tabs?`;
+      if (!confirm(reason)) return;
+      pages.forEach(p => window.open(p.href, p.name.replace(/[^a-zA-Z0-9]/g, '_')));
+      showToast(`Opened ${pages.length} pages`);
+    }
+
+    function openGroup(event, label) {
+      event.stopPropagation();
+      const section = SECTIONS.find(s => s.label === label);
+      if (!section) return;
+      const pages = [];
+      section.pages.forEach(p => {
+        const isExternal = p.url || section.external;
+        if (isExternal) return;
+        if (p.path && !p.path.startsWith('http')) pages.push({ name: p.name, href: p.path });
+      });
+      if (pages.length === 0) return;
+      pages.forEach(p => window.open(p.href, p.name.replace(/[^a-zA-Z0-9]/g, '_')));
+      showToast(`Opened ${pages.length} pages in ${label}`);
+    }
+
+    function closeAllTabs() {
+      if (!confirm('Close all project tabs opened from this sitemap?')) return;
+      const closed = [];
+      SECTIONS.forEach(s => s.pages.forEach(p => {
+        const name = (p.name || '').replace(/[^a-zA-Z0-9]/g, '_');
+        const w = window.open('', name);
+        if (w && !w.closed) { w.close(); closed.push(p.name); }
+      }));
+      showToast(`Closed ${closed.length} tab${closed.length !== 1 ? 's' : ''}`);
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(t._hide);
+      t._hide = setTimeout(() => t.classList.remove('show'), 3000);
     }
 
     function filterPages(value) {
