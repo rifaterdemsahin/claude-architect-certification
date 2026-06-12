@@ -83,4 +83,53 @@ The listing endpoint (`GET /api/research/files`) was hit while the container was
 
 ---
 
-*Fixed in commit: pending · Status: 🔄 DEPLOYED*
+## ❌ Error 2: Azure Blob SAS — `SAS field 'sp' is not well formed` (403)
+
+> 📅 **Detected:** 2026-06-12 · 🏷 **Stage:** 5_Symbols (Go server) · 🔴 **Severity:** HIGH
+
+### 🔍 Symptoms
+
+Upload via browser pages returned:
+```
+Upload result: azure 403: <Code>AuthenticationFailed</Code>
+<AuthenticationErrorDetail>SAS field 'sp' is not well formed.</AuthenticationErrorDetail>
+HTTP:502
+```
+Listing still worked (read-only path, Azure was more lenient).
+
+### 🧠 Root Cause
+
+Azure requires the permissions string (`sp=`) in strict canonical order: `r a c w d x l t f m e o p i y q`.
+The upload handler was calling `generateContainerSAS(..., "cwlr", ...)` — wrong order.
+
+### 🩹 Fix Applied
+
+Two-part fix:
+1. All call sites corrected to canonical order (`"rcwl"`, `"rdl"`, `"rl"`)
+2. `sasPerms()` canonicalization helper added to `generateContainerSAS` as a safety net — any future caller passing out-of-order chars will be corrected automatically before HMAC signing
+
+```go
+func sasPerms(raw string) string {
+    const order = "racwdxltfmoepiyq"
+    var b strings.Builder
+    for _, c := range order {
+        if strings.ContainsRune(raw, c) {
+            b.WriteRune(c)
+        }
+    }
+    return b.String()
+}
+
+func generateContainerSAS(..., permissions string, ...) (string, error) {
+    permissions = sasPerms(permissions) // enforce canonical order
+    ...
+}
+```
+
+### ✅ Verification
+
+`go build ./... && go vet ./...` — passed
+
+---
+
+*Error 1 fixed in commit: bd492aa · Error 2 fixed: see latest commit · Status: 🔄 DEPLOYING*
