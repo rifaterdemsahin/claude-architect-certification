@@ -840,3 +840,29 @@ The user requested two tasks:
    - When the recording stops, it automatically POSTs the audio blob to `/api/research/upload?container=research-audio` with a default timestamped filename, uploads it automatically, and refreshes the asset list without page reload.
 4. **🎨 Aesthetics & Responsiveness**:
    - Apply premium styles matching the existing dark/glassmorphic look. Ensure responsive grid layouts and touch targets suitable for mobile phones.
+
+---
+
+## 📅 Date: 2026-06-12
+## 🧠 Stage: Stage 4 (Formula - Thinking & Planning) - Research to Video Outline Relationship Mapping
+### ❓ Problem Statement
+The user requested mapping research assets (images, audio, videos, notes stored in Azure Blob Storage) to specific items in the course outline (videos inside `course_videos` table in Supabase). Relationships need to be managed and displayed on both the Course Outline page and the Research Hub page.
+
+### 📐 Approach & Strategy
+1. **💾 Database Schema**:
+   - Create table `research_relationships` linking research container + item name to video ID with cascading delete.
+   - Configure public RLS policies to allow anon read/write.
+   - User executed SQL in Supabase dashboard.
+2. **📝 Outline Page Integration**:
+   - Query `research_relationships` and group by video ID.
+   - Query Azure Storage container items via proxy API.
+   - Display linked items as clickable tags under each video.
+   - Provide an inline toggleable asset picker to link/unlink files dynamically.
+3. **🖼️ Research Hub Integration**:
+   - Import Supabase CDN and configure anonymous client.
+   - Under each image, audio, video, and note card, display currently linked videos as tags.
+   - Provide a quick dropdown select menu to link to any course video.
+   - Add click handlers to unlink relationships instantly.
+4. **🌿 Git Workflow**:
+   - Commit files individually or incrementally.
+   - Perform build and test validation.
