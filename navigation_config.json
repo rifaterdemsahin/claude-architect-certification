@@ -31,12 +31,20 @@
               "url": "https://github.com/rifaterdemsahin/claude-architect-certification"
             },
             {
+              "label": "💳 GitHub Billing Usage",
+              "url": "https://github.com/settings/billing/usage?period=3&group=0&customer=592572"
+            },
+            {
               "label": "🔥 Supabase",
               "url": "https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/"
             },
             {
               "label": "🗄 Supabase Admin (Local)",
-              "url": "http://127.0.0.1:5500/5_Symbols/supabase/admin.html"
+              "url": "http://127.0.0.1:5500/5_Symbols/supabase/ui/admin.html"
+            },
+            {
+              "label": "📡 Axiom Errors",
+              "url": "/admin/errors"
             },
             {
               "label": "☁️ Google Cloud API",
