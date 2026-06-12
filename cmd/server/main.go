@@ -280,6 +280,90 @@ func homeHandler(tmpl *template.Template, cfg config, navConfigJS template.JS) h
 	}
 }
 
+// ── Axiom errors admin ───────────────────────────────────────────────────────
+
+type axiomEvent struct {
+	Time     string `json:"_time"`
+	Level    string `json:"level"`
+	Method   string `json:"method"`
+	Path     string `json:"path"`
+	Status   int    `json:"status"`
+	Duration int64  `json:"duration_ms"`
+	Err      string `json:"err"`
+	Panic    string `json:"panic"`
+}
+
+type axiomQueryResp struct {
+	Matches []struct {
+		Time string         `json:"_time"`
+		Data map[string]any `json:"data"`
+	} `json:"matches"`
+}
+
+type axiomErrorsData struct {
+	Events  []axiomEvent
+	FetchErr string
+	NavFavsJSON   template.JS
+	NavConfigJSON template.JS
+}
+
+func axiomErrorsHandler(tmpl *template.Template, cfg config, navConfigJS template.JS) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		data := axiomErrorsData{NavConfigJSON: navConfigJS}
+
+		var favs []NavFav
+		ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+		defer cancel()
+		if err := supabaseGet(ctx, cfg, "nav_favorites", "select=url,label&order=created_at.asc", &favs); err != nil {
+			log.Printf("nav_favorites fetch: %v", err)
+		}
+		favsJSON, _ := json.Marshal(favs)
+		data.NavFavsJSON = template.JS(favsJSON)
+
+		if cfg.axiomToken == "" {
+			data.FetchErr = "AXIOM_TOKEN not set — configure it via Fly.io secrets"
+		} else {
+			apl := fmt.Sprintf(`['%s'] | sort by _time desc | limit 100`, cfg.axiomDataset)
+			body, _ := json.Marshal(map[string]string{"apl": apl})
+			url := fmt.Sprintf("%s/v1/datasets/%s/query", cfg.axiomAPIURL, cfg.axiomDataset)
+			req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(body))
+			if err != nil {
+				data.FetchErr = err.Error()
+			} else {
+				req.Header.Set("Authorization", "Bearer "+cfg.axiomToken)
+				req.Header.Set("Content-Type", "application/json")
+				resp, err := http.DefaultClient.Do(req)
+				if err != nil {
+					data.FetchErr = err.Error()
+				} else {
+					defer resp.Body.Close()
+					var qr axiomQueryResp
+					if err := json.NewDecoder(resp.Body).Decode(&qr); err != nil {
+						data.FetchErr = "decode: " + err.Error()
+					} else {
+						for _, m := range qr.Matches {
+							ev := axiomEvent{Time: m.Time}
+							if v, ok := m.Data["level"].(string); ok { ev.Level = v }
+							if v, ok := m.Data["method"].(string); ok { ev.Method = v }
+							if v, ok := m.Data["path"].(string); ok { ev.Path = v }
+							if v, ok := m.Data["status"].(float64); ok { ev.Status = int(v) }
+							if v, ok := m.Data["duration_ms"].(float64); ok { ev.Duration = int64(v) }
+							if v, ok := m.Data["err"].(string); ok { ev.Err = v }
+							if v, ok := m.Data["panic"].(string); ok { ev.Panic = v }
+							data.Events = append(data.Events, ev)
+						}
+					}
+				}
+			}
+		}
+
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		if err := tmpl.ExecuteTemplate(w, "axiom_errors.html", data); err != nil {
+			log.Printf("axiom_errors template: %v", err)
+		}
+	}
+}
+
 // ── Nav favourites toggle ─────────────────────────────────────────────────────
 
 func navFavsHandler(cfg config) http.HandlerFunc {
@@ -328,13 +412,19 @@ func main() {
 	funcs := template.FuncMap{
 		"inc": func(i int) int { return i + 1 },
 	}
-	tmpl := template.Must(template.New("index.html").Funcs(funcs).ParseFiles("templates/index.html"))
+	tmpl := template.Must(
+		template.New("").Funcs(funcs).ParseFiles(
+			"templates/index.html",
+			"templates/axiom_errors.html",
+		),
+	)
 
 	fs := http.FileServer(http.Dir("."))
 	mux := http.NewServeMux()
 	mux.Handle("/shared/", observe(cfg, fs))
 	mux.Handle("/navigation_config.json", observe(cfg, fs))
 	mux.Handle("/api/nav/favs", observe(cfg, navFavsHandler(cfg)))
+	mux.Handle("/admin/errors", observe(cfg, axiomErrorsHandler(tmpl, cfg, navConfigJS)))
 	mux.Handle("/", observe(cfg, homeHandler(tmpl, cfg, navConfigJS)))
 
 	addr := ":" + cfg.port

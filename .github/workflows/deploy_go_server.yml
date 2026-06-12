@@ -1,0 +1,52 @@
+name: Deploy Go Server → Smoke Test
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'cmd/**'
+      - 'go.mod'
+      - 'go.sum'
+      - 'Dockerfile'
+      - 'fly.toml'
+      - 'templates/**'
+      - 'navigation_config.json'
+      - 'shared/**'
+      - '.github/workflows/deploy_go_server.yml'
+
+jobs:
+  deploy:
+    name: Deploy & Smoke Test
+    runs-on: ubuntu-latest
+    concurrency: deploy-go-server
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Build gate (must pass before deploy)
+        run: go build ./... && go vet ./...
+
+      - name: Set up Flyctl
+        uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Deploy to Fly.io
+        run: flyctl deploy --ha=false --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLYIO_TOKEN }}
+
+      - name: Smoke test — GET / must return 200
+        run: |
+          URL="https://claude-architect-certification.fly.dev/"
+          echo "Checking $URL"
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$URL")
+          echo "HTTP status: $STATUS"
+          if [ "$STATUS" != "200" ]; then
+            echo "❌ Smoke test FAILED — expected 200, got $STATUS"
+            exit 1
+          fi
+          echo "✅ Smoke test PASSED"
