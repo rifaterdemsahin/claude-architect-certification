@@ -48,284 +48,195 @@
 
     a { color: inherit; text-decoration: none; transition: var(--transition); }
 
-    /* ── Header ── */
-    .app-header {
-      backdrop-filter: blur(12px);
-      background-color: var(--bg-glass);
-      border-bottom: 1px solid var(--border-color);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-    .header-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 1rem 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .app-logo {
-      font-family: var(--font-display);
-      font-size: 1.4rem;
-      font-weight: 700;
-      background: linear-gradient(135deg, var(--accent-violet), var(--accent-cyan));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    .project-menu-nav {
-      display: flex;
-      gap: 2rem;
-      align-items: center;
-    }
-    .menu-link {
-      font-weight: 500;
-      color: var(--text-muted);
-      position: relative;
-      padding: 0.25rem 0;
-    }
-    .menu-link:hover, .menu-link.active { color: var(--text-primary); }
-    .menu-link::after {
-      content: '';
-      position: absolute;
-      bottom: 0; left: 0;
-      width: 0; height: 2px;
-      background: linear-gradient(90deg, var(--accent-violet), var(--accent-cyan));
-      transition: var(--transition);
-    }
-    .menu-link:hover::after, .menu-link.active::after { width: 100%; }
-    .nav-btn {
-      background: linear-gradient(135deg, var(--accent-violet), #7c3aed);
-      color: white !important;
-      padding: 6px 16px;
-      border-radius: 100px;
-      font-size: 0.85rem !important;
-      font-weight: 600 !important;
-      box-shadow: 0 4px 15px var(--accent-violet-glow);
-    }
-    .join-btn {
-      background: linear-gradient(135deg, #f59e0b, var(--accent-violet));
-      color: white !important;
-      padding: 6px 16px;
-      border-radius: 100px;
-      font-weight: 700;
-    }
-
-    /* ── Layout ── */
-    .page-container {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 3rem 2rem;
-    }
+    .page-container { max-width: 900px; margin: 0 auto; padding: 3rem 2rem; }
 
     /* ── Problem Hero ── */
-    .problem-hero {
-      text-align: center;
-      margin-bottom: 3rem;
-    }
+    .problem-hero { text-align: center; margin-bottom: 3rem; }
     .problem-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      background: rgba(239, 68, 68, 0.12);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      color: #fca5a5;
-      padding: 0.35rem 1rem;
-      border-radius: 100px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      letter-spacing: 0.05em;
-      margin-bottom: 1.5rem;
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fca5a5; padding: 0.35rem 1rem; border-radius: 100px;
+      font-size: 0.85rem; font-weight: 600; letter-spacing: 0.05em; margin-bottom: 1.5rem;
     }
     .problem-title {
-      font-family: var(--font-display);
-      font-size: clamp(2rem, 5vw, 3.2rem);
-      font-weight: 800;
-      line-height: 1.1;
-      letter-spacing: -0.02em;
-      margin-bottom: 1.25rem;
+      font-family: var(--font-display); font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 1.25rem;
     }
     .problem-title .highlight-red {
       background: linear-gradient(135deg, #ef4444, #f59e0b);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
-    .problem-subtitle {
-      font-size: 1.15rem;
-      color: var(--text-muted);
-      max-width: 680px;
-      margin: 0 auto;
-    }
+    .problem-subtitle { font-size: 1.15rem; color: var(--text-muted); max-width: 680px; margin: 0 auto; }
 
     /* ── Glass Cards ── */
     .glass-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 16px;
-      padding: 2rem;
-      backdrop-filter: blur(8px);
-      margin-bottom: 1.5rem;
+      background: var(--bg-card); border: 1px solid var(--border-color);
+      border-radius: 16px; padding: 2rem; backdrop-filter: blur(8px); margin-bottom: 1.5rem;
     }
     .card-title {
-      font-family: var(--font-display);
-      font-size: 1.3rem;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      margin-bottom: 1.25rem;
+      font-family: var(--font-display); font-size: 1.3rem; font-weight: 700;
+      display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1.25rem;
     }
 
     /* ── Pain Points Grid ── */
-    .pain-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-    }
+    .pain-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
     .pain-item {
-      background: rgba(239, 68, 68, 0.06);
-      border: 1px solid rgba(239, 68, 68, 0.18);
-      border-radius: 12px;
-      padding: 1.25rem;
+      background: rgba(239, 68, 68, 0.06); border: 1px solid rgba(239, 68, 68, 0.18);
+      border-radius: 12px; padding: 1.25rem; position: relative;
     }
-    .pain-icon {
-      font-size: 1.5rem;
-      margin-bottom: 0.5rem;
-      display: block;
-    }
-    .pain-item h4 {
-      font-weight: 600;
-      margin-bottom: 0.4rem;
-      color: #fca5a5;
-    }
+    .pain-icon { font-size: 1.5rem; margin-bottom: 0.5rem; display: block; }
+    .pain-item h4 { font-weight: 600; margin-bottom: 0.4rem; color: #fca5a5; }
     .pain-item p { font-size: 0.9rem; color: var(--text-muted); }
 
     /* ── Exam Breakdown Table ── */
-    .exam-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.95rem;
-    }
+    .exam-table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
     .exam-table th {
-      text-align: left;
-      padding: 0.6rem 1rem;
-      background: rgba(139, 92, 246, 0.12);
-      color: var(--text-muted);
-      font-weight: 600;
-      font-size: 0.8rem;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
+      text-align: left; padding: 0.6rem 1rem;
+      background: rgba(139, 92, 246, 0.12); color: var(--text-muted);
+      font-weight: 600; font-size: 0.8rem; letter-spacing: 0.06em; text-transform: uppercase;
     }
     .exam-table th:first-child { border-radius: 8px 0 0 8px; }
     .exam-table th:last-child  { border-radius: 0 8px 8px 0; }
-    .exam-table td {
-      padding: 0.75rem 1rem;
-      border-bottom: 1px solid var(--border-color);
-      vertical-align: top;
-    }
+    .exam-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color); vertical-align: top; }
     .exam-table tr:last-child td { border-bottom: none; }
     .pct-badge {
-      background: rgba(139, 92, 246, 0.15);
-      border: 1px solid rgba(139, 92, 246, 0.3);
-      color: #c4b5fd;
-      border-radius: 100px;
-      padding: 2px 10px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      white-space: nowrap;
+      background: rgba(139, 92, 246, 0.15); border: 1px solid rgba(139, 92, 246, 0.3);
+      color: #c4b5fd; border-radius: 100px; padding: 2px 10px; font-size: 0.8rem;
+      font-weight: 600; white-space: nowrap;
     }
 
     /* ── Solution Path ── */
-    .solution-steps {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-    .solution-step {
-      display: flex;
-      gap: 1rem;
-      align-items: flex-start;
-    }
+    .solution-steps { list-style: none; display: flex; flex-direction: column; gap: 1rem; }
+    .solution-step { display: flex; gap: 1rem; align-items: flex-start; }
     .step-num {
-      flex-shrink: 0;
-      width: 2rem; height: 2rem;
-      border-radius: 50%;
+      flex-shrink: 0; width: 2rem; height: 2rem; border-radius: 50%;
       background: linear-gradient(135deg, var(--accent-violet), var(--accent-cyan));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      font-size: 0.85rem;
-      margin-top: 2px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.85rem; margin-top: 2px;
     }
     .solution-step-body h4 { font-weight: 600; margin-bottom: 0.2rem; }
     .solution-step-body p  { font-size: 0.9rem; color: var(--text-muted); }
 
     /* ── CTA ── */
-    .cta-section {
-      text-align: center;
-      margin-top: 2rem;
-    }
+    .cta-section { text-align: center; margin-top: 2rem; }
     .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.6rem;
-      padding: 0.75rem 1.75rem;
-      border-radius: 100px;
-      font-weight: 600;
-      font-size: 1rem;
-      transition: var(--transition);
-      cursor: pointer;
-      border: none;
-      text-decoration: none;
+      display: inline-flex; align-items: center; gap: 0.6rem;
+      padding: 0.75rem 1.75rem; border-radius: 100px; font-weight: 600;
+      font-size: 1rem; transition: var(--transition); cursor: pointer; border: none; text-decoration: none;
     }
     .btn-primary {
       background: linear-gradient(135deg, var(--accent-violet), #7c3aed);
-      color: white;
-      box-shadow: 0 4px 20px var(--accent-violet-glow);
+      color: white; box-shadow: 0 4px 20px var(--accent-violet-glow);
     }
     .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px var(--accent-violet-glow); }
     .btn-secondary {
-      background: rgba(255,255,255,0.06);
-      color: var(--text-primary);
-      border: 1px solid var(--border-color);
-      margin-left: 1rem;
+      background: rgba(255,255,255,0.06); color: var(--text-primary);
+      border: 1px solid var(--border-color); margin-left: 1rem;
     }
     .btn-secondary:hover { background: rgba(255,255,255,0.12); }
 
     /* ── Footer ── */
     footer {
-      text-align: center;
-      padding: 2rem;
-      color: var(--text-muted);
-      font-size: 0.85rem;
-      border-top: 1px solid var(--border-color);
-      margin-top: 3rem;
+      text-align: center; padding: 2rem; color: var(--text-muted);
+      font-size: 0.85rem; border-top: 1px solid var(--border-color); margin-top: 3rem;
     }
+
+    /* ── Loading/Error States ── */
+    .skeleton {
+      background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+      background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 6px;
+      height: 1em; display: inline-block; width: 100%;
+    }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+    .error-banner {
+      background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3);
+      color: #fca5a5; border-radius: 10px; padding: 1rem 1.25rem;
+      margin-bottom: 1.5rem; font-size: 0.9rem; display: none;
+    }
+
+    /* ── Edit Mode ── */
+    .edit-toggle-btn {
+      position: fixed; bottom: 5rem; right: 1.5rem; z-index: 999;
+      width: 44px; height: 44px; border-radius: 50%; border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; font-size: 1rem;
+      background: rgba(139,92,246,0.2); border: 1px solid rgba(139,92,246,0.4);
+      color: #c4b5fd; transition: var(--transition); backdrop-filter: blur(8px);
+    }
+    .edit-toggle-btn:hover { background: rgba(139,92,246,0.4); }
+    .edit-toggle-btn.active { background: var(--accent-violet); color: white; box-shadow: 0 0 20px var(--accent-violet-glow); }
+
+    body.edit-mode [contenteditable] {
+      outline: 1px dashed rgba(139,92,246,0.5); border-radius: 4px;
+      padding: 2px 4px; cursor: text; min-width: 20px;
+    }
+    body.edit-mode [contenteditable]:focus {
+      outline: 2px solid var(--accent-violet); background: rgba(139,92,246,0.08);
+    }
+    body.edit-mode [contenteditable]:empty:before {
+      content: attr(data-placeholder); color: rgba(255,255,255,0.3); font-style: italic;
+    }
+
+    .save-row-btn {
+      display: none; margin-top: 0.5rem;
+      background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.4);
+      color: #6ee7b7; border-radius: 6px; padding: 3px 10px; font-size: 0.78rem;
+      cursor: pointer; font-family: var(--font-body);
+    }
+    body.edit-mode .save-row-btn { display: inline-flex; align-items: center; gap: 0.3rem; }
+
+    .save-toast {
+      position: fixed; bottom: 9rem; right: 1.5rem; z-index: 1001;
+      background: rgba(16,185,129,0.9); color: white; padding: 0.5rem 1rem;
+      border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+      opacity: 0; transition: opacity 0.3s; pointer-events: none;
+    }
+    .save-toast.show { opacity: 1; }
+
+    .admin-bar {
+      display: none; background: rgba(139,92,246,0.1); border-bottom: 1px solid rgba(139,92,246,0.2);
+      padding: 0.5rem 2rem; font-size: 0.8rem; color: #c4b5fd; text-align: center;
+    }
+    body.edit-mode .admin-bar { display: block; }
+
+    .add-row-btn {
+      display: none; margin-top: 0.75rem;
+      background: rgba(6,182,212,0.12); border: 1px dashed rgba(6,182,212,0.4);
+      color: #67e8f9; border-radius: 8px; padding: 0.5rem 1rem; font-size: 0.82rem;
+      cursor: pointer; font-family: var(--font-body); width: 100%; text-align: center;
+    }
+    body.edit-mode .add-row-btn { display: block; }
+
+    .delete-row-btn {
+      display: none; position: absolute; top: 0.5rem; right: 0.5rem;
+      background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3);
+      color: #fca5a5; border-radius: 4px; padding: 2px 7px; font-size: 0.75rem; cursor: pointer;
+    }
+    body.edit-mode .delete-row-btn { display: block; }
   </style>
   <script src="../../../shared/nav.js" defer></script>
 </head>
 <body>
 
+  <!-- Admin edit mode indicator -->
+  <div class="admin-bar">
+    ✏️ Edit mode active — click any text to edit, then save. Changes persist to Supabase.
+  </div>
+
   <div class="page-container">
+    <div class="error-banner" id="error-banner"></div>
 
     <!-- ── Problem Hero ── -->
     <div class="problem-hero">
       <div class="problem-badge">
         <i class="fa-solid fa-triangle-exclamation"></i>
-        Problem Statement — Stage 0
+        <span id="hero-badge">Problem Statement — Stage 0</span>
       </div>
       <h1 class="problem-title">
-        AI is moving fast.<br>
-        <span class="highlight-red">Most architects are left behind.</span>
+        <span id="hero-headline" class="skeleton" style="display:block; height:1.2em; width:80%; margin:0 auto 0.5rem;"></span>
+        <span class="highlight-red" id="hero-subheadline" style="display:block;"></span>
       </h1>
-      <p class="problem-subtitle">
-        Enterprise teams are deploying Claude in production today — without certified architects who understand multi-agent routing, MCP security boundaries, ZDR compliance, or prompt cost optimization. The gap is real, and the stakes are high.
+      <p class="problem-subtitle" id="hero-subtitle">
+        <span class="skeleton" style="width:90%;"></span>
       </p>
     </div>
 
@@ -335,28 +246,14 @@
         <i class="fa-solid fa-users" style="color:#f59e0b;"></i>
         🎯 Who Faces This Problem
       </h2>
-      <div class="pain-grid">
-        <div class="pain-item">
-          <span class="pain-icon">🏛️</span>
-          <h4>Enterprise Architects</h4>
-          <p>Asked to design Claude-based systems but lack a structured framework for multi-agent topologies, routing patterns, and cost governance.</p>
-        </div>
-        <div class="pain-item">
-          <span class="pain-icon">⚙️</span>
-          <h4>DevOps / Platform Engineers</h4>
-          <p>Deploying Claude on cloud infra without understanding ZDR, VPC PrivateLink, or how to keep secrets off the model's context window.</p>
-        </div>
-        <div class="pain-item">
-          <span class="pain-icon">👨‍💻</span>
-          <h4>Senior Developers</h4>
-          <p>Building agent loops that hallucinate, blow cost budgets, or fail silently — because they haven't mastered prompt caching or deterministic routing.</p>
-        </div>
-        <div class="pain-item">
-          <span class="pain-icon">🔐</span>
-          <h4>Compliance / Security Teams</h4>
-          <p>Struggling to approve Claude deployments without a clear audit trail, data residency guarantee, or understanding of Anthropic's trust architecture.</p>
-        </div>
+      <div class="pain-grid" id="personas-grid">
+        <!-- JS populated -->
+        <div class="pain-item"><span class="skeleton" style="height:4em;"></span></div>
+        <div class="pain-item"><span class="skeleton" style="height:4em;"></span></div>
+        <div class="pain-item"><span class="skeleton" style="height:4em;"></span></div>
+        <div class="pain-item"><span class="skeleton" style="height:4em;"></span></div>
       </div>
+      <button class="add-row-btn" onclick="addPersona()">+ Add Persona</button>
     </div>
 
     <!-- ── Core Problem Statement ── -->
@@ -368,20 +265,13 @@
       <p style="font-size:1.05rem; margin-bottom:1rem;">
         There is <strong>no standardised certification path</strong> for architects who need to prove competency in Claude AI at the enterprise level. Professionals face three compounding challenges:
       </p>
-      <ol style="list-style:none; display:flex; flex-direction:column; gap:0.75rem;">
-        <li style="display:flex; gap:0.75rem; align-items:flex-start;">
-          <span style="color:#ef4444; font-weight:700; flex-shrink:0;">1.</span>
-          <span><strong>No clear learning path</strong> — Anthropic's documentation covers APIs but not enterprise architecture patterns, routing topologies, or multi-agent governance.</span>
-        </li>
-        <li style="display:flex; gap:0.75rem; align-items:flex-start;">
-          <span style="color:#ef4444; font-weight:700; flex-shrink:0;">2.</span>
-          <span><strong>No proof of competency</strong> — Teams cannot distinguish between someone who "uses Claude" and someone who can design, audit, and defend a production-grade system.</span>
-        </li>
-        <li style="display:flex; gap:0.75rem; align-items:flex-start;">
-          <span style="color:#ef4444; font-weight:700; flex-shrink:0;">3.</span>
-          <span><strong>No exam preparation resource</strong> — The Claude Certified Architect exam tests deep knowledge of ZDR, MCP security, prompt caching, and multi-agent design — topics with no consolidated study guide.</span>
-        </li>
+      <ol style="list-style:none; display:flex; flex-direction:column; gap:0.75rem;" id="challenges-list">
+        <!-- JS populated -->
+        <li><span class="skeleton" style="height:2em;"></span></li>
+        <li><span class="skeleton" style="height:2em;"></span></li>
+        <li><span class="skeleton" style="height:2em;"></span></li>
       </ol>
+      <button class="add-row-btn" onclick="addChallenge()">+ Add Challenge</button>
     </div>
 
     <!-- ── Exam Breakdown ── -->
@@ -392,40 +282,14 @@
       </h2>
       <table class="exam-table">
         <thead>
-          <tr>
-            <th>Domain</th>
-            <th>Topics Covered</th>
-            <th>Weight</th>
-          </tr>
+          <tr><th>Domain</th><th>Topics Covered</th><th>Weight</th></tr>
         </thead>
-        <tbody>
-          <tr>
-            <td><strong>Multi-Agent Design</strong></td>
-            <td>Routing topologies, loop-breakers, orchestrator patterns, state management</td>
-            <td><span class="pct-badge">~25%</span></td>
-          </tr>
-          <tr>
-            <td><strong>Model Context Protocol (MCP)</strong></td>
-            <td>Server design, stdio/SSE transports, read-only data boundaries, tool schemas</td>
-            <td><span class="pct-badge">~20%</span></td>
-          </tr>
-          <tr>
-            <td><strong>Prompt Engineering & Caching</strong></td>
-            <td>Cache write/read mechanics, cache-breakpoint placement, cost reduction strategies</td>
-            <td><span class="pct-badge">~20%</span></td>
-          </tr>
-          <tr>
-            <td><strong>Enterprise Security & Compliance</strong></td>
-            <td>Zero Data Retention, VPC PrivateLink, secrets management, Azure Key Vault patterns</td>
-            <td><span class="pct-badge">~20%</span></td>
-          </tr>
-          <tr>
-            <td><strong>Deployment & Operations</strong></td>
-            <td>Fly.io, Qdrant, Supabase, GitHub Actions, cost governance, SLA monitoring</td>
-            <td><span class="pct-badge">~15%</span></td>
-          </tr>
+        <tbody id="domains-tbody">
+          <!-- JS populated -->
+          <tr><td colspan="3"><span class="skeleton" style="height:2em;"></span></td></tr>
         </tbody>
       </table>
+      <button class="add-row-btn" onclick="addDomain()">+ Add Domain</button>
     </div>
 
     <!-- ── Solution Path ── -->
@@ -434,36 +298,12 @@
         <i class="fa-solid fa-route" style="color:var(--accent-green);"></i>
         🛠️ How This Course Solves It
       </h2>
-      <ul class="solution-steps">
-        <li class="solution-step">
-          <span class="step-num">1</span>
-          <div class="solution-step-body">
-            <h4>Structured Knowledge Path</h4>
-            <p>5 modules, 15 videos — each targeting an exam domain. No filler, no beginner hand-holding. Built for professionals who already ship software.</p>
-          </div>
-        </li>
-        <li class="solution-step">
-          <span class="step-num">2</span>
-          <div class="solution-step-body">
-            <h4>Hands-On Implementation</h4>
-            <p>Every concept is implemented in code: working MCP servers, prompt-cached agent loops, Supabase RLS policies, and Fly.io deployments.</p>
-          </div>
-        </li>
-        <li class="solution-step">
-          <span class="step-num">3</span>
-          <div class="solution-step-body">
-            <h4>Proof-of-Learning Checkpoints</h4>
-            <p>Architecture diagrams, load tests, and the 30-question exam walkthrough give you tangible evidence of mastery to show your team and Anthropic.</p>
-          </div>
-        </li>
-        <li class="solution-step">
-          <span class="step-num">4</span>
-          <div class="solution-step-body">
-            <h4>Production-Grade Templates</h4>
-            <p>Leave with reusable blueprints for multi-agent routing, MCP server scaffolding, prompt caching config, and ZDR-compliant infra — immediately applicable at work.</p>
-          </div>
-        </li>
+      <ul class="solution-steps" id="solutions-list">
+        <!-- JS populated -->
+        <li class="solution-step"><span class="skeleton" style="height:3em; width:100%;"></span></li>
+        <li class="solution-step"><span class="skeleton" style="height:3em; width:100%;"></span></li>
       </ul>
+      <button class="add-row-btn" onclick="addSolution()">+ Add Step</button>
     </div>
 
     <!-- ── CTA ── -->
@@ -475,8 +315,7 @@
         <i class="fa-solid fa-house"></i> Back to Home
       </a>
     </div>
-
-  </div><!-- /page-container -->
+  </div>
 
   <footer>
     <p>Built for the <strong>Claude AI Certification for Architects</strong> Masterclass.</p>
@@ -489,5 +328,441 @@
     </p>
   </footer>
 
+  <!-- Edit mode toggle -->
+  <button class="edit-toggle-btn" id="edit-toggle-btn" title="Toggle edit mode" onclick="toggleEditMode()">
+    <i class="fa-solid fa-pen-to-square"></i>
+  </button>
+
+  <!-- Save toast -->
+  <div class="save-toast" id="save-toast">✓ Saved</div>
+
+<script>
+  // ── Supabase config ──────────────────────────────────────────
+  const SB_URL  = localStorage.getItem('supabase_url')      || 'https://rmekfsdhglyiralxvkwc.supabase.co';
+  const SB_KEY  = localStorage.getItem('supabase_anon_key') || '';
+  const PAGE_ID = '00000000-0000-0000-0000-000000000001';
+
+  const HEADERS = {
+    'apikey': SB_KEY,
+    'Authorization': `Bearer ${SB_KEY}`,
+    'Content-Type': 'application/json',
+    'Prefer': 'return=representation'
+  };
+
+  async function sbGet(table, query = '') {
+    const r = await fetch(`${SB_URL}/rest/v1/${table}${query ? '?' + query : ''}`, { headers: HEADERS });
+    if (!r.ok) throw new Error(`${table}: ${r.status} ${r.statusText}`);
+    return r.json();
+  }
+
+  async function sbPatch(table, id, body) {
+    const r = await fetch(`${SB_URL}/rest/v1/${table}?id=eq.${id}`, {
+      method: 'PATCH', headers: HEADERS, body: JSON.stringify(body)
+    });
+    if (!r.ok) throw new Error(`PATCH ${table}: ${r.status}`);
+    return r.json();
+  }
+
+  async function sbPost(table, body) {
+    const r = await fetch(`${SB_URL}/rest/v1/${table}`, {
+      method: 'POST', headers: HEADERS, body: JSON.stringify(body)
+    });
+    if (!r.ok) throw new Error(`POST ${table}: ${r.status}`);
+    return r.json();
+  }
+
+  async function sbDelete(table, id) {
+    const r = await fetch(`${SB_URL}/rest/v1/${table}?id=eq.${id}`, {
+      method: 'DELETE', headers: { ...HEADERS, 'Prefer': '' }
+    });
+    if (!r.ok) throw new Error(`DELETE ${table}: ${r.status}`);
+  }
+
+  // ── Edit mode ─────────────────────────────────────────────────
+  let editMode = localStorage.getItem('problem_edit_mode') === 'true';
+
+  function toggleEditMode() {
+    if (!editMode) {
+      const pass = prompt('Admin key:');
+      const adminKey = localStorage.getItem('problem_admin_key') || 'admin';
+      if (pass !== adminKey) { alert('Incorrect key'); return; }
+    }
+    editMode = !editMode;
+    localStorage.setItem('problem_edit_mode', editMode);
+    applyEditMode();
+  }
+
+  function applyEditMode() {
+    document.body.classList.toggle('edit-mode', editMode);
+    const btn = document.getElementById('edit-toggle-btn');
+    btn.classList.toggle('active', editMode);
+    btn.title = editMode ? 'Exit edit mode' : 'Enter edit mode';
+    document.querySelectorAll('[contenteditable]').forEach(el => {
+      el.contentEditable = editMode ? 'true' : 'false';
+    });
+  }
+
+  function showToast(msg = '✓ Saved') {
+    const t = document.getElementById('save-toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2000);
+  }
+
+  function showError(msg) {
+    const b = document.getElementById('error-banner');
+    b.textContent = '⚠️ ' + msg;
+    b.style.display = 'block';
+  }
+
+  // ── Render helpers ────────────────────────────────────────────
+  function editable(text, placeholder = 'Click to edit') {
+    return `<span contenteditable="${editMode}" data-placeholder="${placeholder}">${text}</span>`;
+  }
+
+  // ── Load page data ────────────────────────────────────────────
+  async function loadAll() {
+    try {
+      const [page, personas, challenges, domains, solutions] = await Promise.all([
+        sbGet('problem_pages', `id=eq.${PAGE_ID}&select=*`),
+        sbGet('target_personas', `page_id=eq.${PAGE_ID}&order=display_order.asc`),
+        sbGet('core_challenges', `page_id=eq.${PAGE_ID}&order=challenge_number.asc`),
+        sbGet('exam_domains', `page_id=eq.${PAGE_ID}&order=display_order.asc`),
+        sbGet('course_solutions', `page_id=eq.${PAGE_ID}&order=step_number.asc`)
+      ]);
+
+      renderHero(page[0]);
+      renderPersonas(personas);
+      renderChallenges(challenges);
+      renderDomains(domains);
+      renderSolutions(solutions);
+      applyEditMode();
+    } catch (err) {
+      showError(`Failed to load from Supabase: ${err.message}. Check that supabase_anon_key is set in localStorage.`);
+      renderFallback();
+    }
+  }
+
+  function renderHero(p) {
+    if (!p) return;
+    // Split headline on ". " to highlight second sentence
+    const parts = p.headline.split('. ');
+    document.getElementById('hero-headline').innerHTML = editable(parts[0] + (parts.length > 1 ? '.' : ''), 'Headline');
+    document.getElementById('hero-subheadline').innerHTML = parts.length > 1 ? editable(parts.slice(1).join('. '), 'Sub-headline') : '';
+    document.getElementById('hero-subtitle').innerHTML = editable(p.subheadline || '', 'Subtitle');
+
+    // Wire save on blur
+    wireHeroSave(p.id, 'hero-headline',    'headline',    parts[0] + (parts.length > 1 ? '. ' + parts.slice(1).join('. ') : ''));
+    wireHeroSave(p.id, 'hero-subheadline', 'headline',    null, true);
+    wireHeroSave(p.id, 'hero-subtitle',    'subheadline', p.subheadline);
+  }
+
+  function wireHeroSave(pageId, elemId, field, currentVal, isHighlight = false) {
+    const el = document.getElementById(elemId);
+    if (!el) return;
+    el.addEventListener('blur', async () => {
+      if (!editMode) return;
+      const span = el.querySelector('[contenteditable]') || el;
+      const newVal = span.textContent.trim();
+      try {
+        if (field === 'headline') {
+          const headlineEl = document.getElementById('hero-headline').querySelector('[contenteditable]') || document.getElementById('hero-headline');
+          const highlightEl = document.getElementById('hero-subheadline').querySelector('[contenteditable]') || document.getElementById('hero-subheadline');
+          const combined = headlineEl.textContent.trim() + (highlightEl.textContent.trim() ? ' ' + highlightEl.textContent.trim() : '');
+          await sbPatch('problem_pages', pageId, { headline: combined });
+        } else {
+          await sbPatch('problem_pages', pageId, { [field]: newVal });
+        }
+        showToast();
+      } catch(e) { showError(e.message); }
+    });
+  }
+
+  function renderPersonas(personas) {
+    const grid = document.getElementById('personas-grid');
+    grid.innerHTML = personas.map(p => `
+      <div class="pain-item" data-id="${p.id}">
+        <button class="delete-row-btn" onclick="deletePersona('${p.id}', this)">✕</button>
+        <span class="pain-icon" contenteditable="${editMode}" data-placeholder="emoji">${p.emoji}</span>
+        <h4 contenteditable="${editMode}" data-placeholder="Role title">${p.role_title}</h4>
+        <p contenteditable="${editMode}" data-placeholder="Description">${p.description}</p>
+        <button class="save-row-btn" onclick="savePersona('${p.id}', this)">
+          <i class="fa-solid fa-floppy-disk"></i> Save
+        </button>
+      </div>
+    `).join('');
+  }
+
+  async function savePersona(id, btn) {
+    const card = btn.closest('.pain-item');
+    const emoji       = card.querySelector('.pain-icon').textContent.trim();
+    const role_title  = card.querySelector('h4').textContent.trim();
+    const description = card.querySelector('p').textContent.trim();
+    try {
+      await sbPatch('target_personas', id, { emoji, role_title, description });
+      showToast();
+    } catch(e) { showError(e.message); }
+  }
+
+  async function deletePersona(id, btn) {
+    if (!confirm('Delete this persona?')) return;
+    try {
+      await sbDelete('target_personas', id);
+      btn.closest('.pain-item').remove();
+      showToast('✓ Deleted');
+    } catch(e) { showError(e.message); }
+  }
+
+  async function addPersona() {
+    try {
+      const rows = await sbPost('target_personas', [{
+        page_id: PAGE_ID, display_order: 99,
+        emoji: '🆕', role_title: 'New Persona', description: 'Description here.'
+      }]);
+      const p = rows[0];
+      const grid = document.getElementById('personas-grid');
+      const div = document.createElement('div');
+      div.className = 'pain-item'; div.dataset.id = p.id;
+      div.innerHTML = `
+        <button class="delete-row-btn" onclick="deletePersona('${p.id}', this)">✕</button>
+        <span class="pain-icon" contenteditable="true" data-placeholder="emoji">${p.emoji}</span>
+        <h4 contenteditable="true" data-placeholder="Role title">${p.role_title}</h4>
+        <p contenteditable="true" data-placeholder="Description">${p.description}</p>
+        <button class="save-row-btn" onclick="savePersona('${p.id}', this)">
+          <i class="fa-solid fa-floppy-disk"></i> Save
+        </button>`;
+      grid.appendChild(div);
+    } catch(e) { showError(e.message); }
+  }
+
+  function renderChallenges(challenges) {
+    const list = document.getElementById('challenges-list');
+    list.innerHTML = challenges.map(c => `
+      <li style="display:flex; gap:0.75rem; align-items:flex-start; position:relative;" data-id="${c.id}">
+        <button class="delete-row-btn" style="position:static; margin-left:auto;" onclick="deleteChallenge('${c.id}', this)">✕</button>
+        <span style="color:#ef4444; font-weight:700; flex-shrink:0;">${c.challenge_number}.</span>
+        <span>
+          <strong contenteditable="${editMode}" data-placeholder="Title">${c.title}</strong>
+          — <span contenteditable="${editMode}" data-placeholder="Description">${c.description}</span>
+          <br>
+          <button class="save-row-btn" onclick="saveChallenge('${c.id}', this)">
+            <i class="fa-solid fa-floppy-disk"></i> Save
+          </button>
+        </span>
+      </li>
+    `).join('');
+  }
+
+  async function saveChallenge(id, btn) {
+    const li = btn.closest('li');
+    const title       = li.querySelector('strong').textContent.trim();
+    const description = li.querySelector('strong + span, strong ~ span').textContent.trim().replace(/^—\s*/, '');
+    try {
+      await sbPatch('core_challenges', id, { title, description });
+      showToast();
+    } catch(e) { showError(e.message); }
+  }
+
+  async function deleteChallenge(id, btn) {
+    if (!confirm('Delete this challenge?')) return;
+    try {
+      await sbDelete('core_challenges', id);
+      btn.closest('li').remove();
+      showToast('✓ Deleted');
+    } catch(e) { showError(e.message); }
+  }
+
+  async function addChallenge() {
+    const list = document.getElementById('challenges-list');
+    const num = list.querySelectorAll('li').length + 1;
+    try {
+      const rows = await sbPost('core_challenges', [{
+        page_id: PAGE_ID, challenge_number: num, display_order: num,
+        title: 'New Challenge', description: 'Description here.'
+      }]);
+      const c = rows[0];
+      const li = document.createElement('li');
+      li.style.cssText = 'display:flex; gap:0.75rem; align-items:flex-start; position:relative;';
+      li.dataset.id = c.id;
+      li.innerHTML = `
+        <button class="delete-row-btn" style="position:static; margin-left:auto;" onclick="deleteChallenge('${c.id}', this)">✕</button>
+        <span style="color:#ef4444; font-weight:700; flex-shrink:0;">${c.challenge_number}.</span>
+        <span>
+          <strong contenteditable="true" data-placeholder="Title">${c.title}</strong>
+          — <span contenteditable="true" data-placeholder="Description">${c.description}</span><br>
+          <button class="save-row-btn" onclick="saveChallenge('${c.id}', this)">
+            <i class="fa-solid fa-floppy-disk"></i> Save
+          </button>
+        </span>`;
+      list.appendChild(li);
+    } catch(e) { showError(e.message); }
+  }
+
+  function renderDomains(domains) {
+    const tbody = document.getElementById('domains-tbody');
+    tbody.innerHTML = domains.map(d => `
+      <tr data-id="${d.id}">
+        <td>
+          <strong contenteditable="${editMode}" data-placeholder="Domain name">${d.domain_name}</strong>
+          <br><button class="save-row-btn" onclick="saveDomain('${d.id}', this)"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+        </td>
+        <td contenteditable="${editMode}" data-placeholder="Topics (comma separated)">${d.topics_covered.join(', ')}</td>
+        <td>
+          <span class="pct-badge">
+            ~<span contenteditable="${editMode}" data-placeholder="15">${d.weight_percent}</span>%
+          </span>
+          <button class="delete-row-btn" style="position:static; display:none;" onclick="deleteDomain('${d.id}', this)">✕</button>
+        </td>
+      </tr>
+    `).join('');
+    // show delete btns in edit mode
+    if (editMode) tbody.querySelectorAll('.delete-row-btn').forEach(b => b.style.display = 'inline');
+  }
+
+  async function saveDomain(id, btn) {
+    const row = btn.closest('tr');
+    const domain_name    = row.querySelector('strong').textContent.trim();
+    const topicsRaw      = row.cells[1].textContent.trim();
+    const topics_covered = topicsRaw.split(',').map(t => t.trim()).filter(Boolean);
+    const weight_percent = parseInt(row.querySelector('.pct-badge span[contenteditable]')?.textContent || '0', 10);
+    try {
+      await sbPatch('exam_domains', id, { domain_name, topics_covered, weight_percent });
+      showToast();
+    } catch(e) { showError(e.message); }
+  }
+
+  async function deleteDomain(id, btn) {
+    if (!confirm('Delete this domain?')) return;
+    try {
+      await sbDelete('exam_domains', id);
+      btn.closest('tr').remove();
+      showToast('✓ Deleted');
+    } catch(e) { showError(e.message); }
+  }
+
+  async function addDomain() {
+    try {
+      const rows = await sbPost('exam_domains', [{
+        page_id: PAGE_ID, domain_name: 'New Domain',
+        topics_covered: ['Topic A', 'Topic B'], weight_percent: 10, display_order: 99
+      }]);
+      const d = rows[0];
+      const tbody = document.getElementById('domains-tbody');
+      const tr = document.createElement('tr');
+      tr.dataset.id = d.id;
+      tr.innerHTML = `
+        <td>
+          <strong contenteditable="true" data-placeholder="Domain name">${d.domain_name}</strong>
+          <br><button class="save-row-btn" onclick="saveDomain('${d.id}', this)"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+        </td>
+        <td contenteditable="true" data-placeholder="Topics (comma separated)">${d.topics_covered.join(', ')}</td>
+        <td>
+          <span class="pct-badge">~<span contenteditable="true" data-placeholder="10">${d.weight_percent}</span>%</span>
+          <button class="delete-row-btn" style="position:static;" onclick="deleteDomain('${d.id}', this)">✕</button>
+        </td>`;
+      tbody.appendChild(tr);
+    } catch(e) { showError(e.message); }
+  }
+
+  function renderSolutions(solutions) {
+    const list = document.getElementById('solutions-list');
+    list.innerHTML = solutions.map(s => `
+      <li class="solution-step" data-id="${s.id}" style="position:relative;">
+        <span class="step-num">${s.step_number}</span>
+        <div class="solution-step-body" style="flex:1;">
+          <h4 contenteditable="${editMode}" data-placeholder="Title">${s.title}</h4>
+          <p contenteditable="${editMode}" data-placeholder="Description">${s.description}</p>
+          <button class="save-row-btn" onclick="saveSolution('${s.id}', this)">
+            <i class="fa-solid fa-floppy-disk"></i> Save
+          </button>
+        </div>
+        <button class="delete-row-btn" onclick="deleteSolution('${s.id}', this)">✕</button>
+      </li>
+    `).join('');
+  }
+
+  async function saveSolution(id, btn) {
+    const li = btn.closest('li');
+    const title       = li.querySelector('h4').textContent.trim();
+    const description = li.querySelector('p').textContent.trim();
+    try {
+      await sbPatch('course_solutions', id, { title, description });
+      showToast();
+    } catch(e) { showError(e.message); }
+  }
+
+  async function deleteSolution(id, btn) {
+    if (!confirm('Delete this step?')) return;
+    try {
+      await sbDelete('course_solutions', id);
+      btn.closest('li').remove();
+      showToast('✓ Deleted');
+    } catch(e) { showError(e.message); }
+  }
+
+  async function addSolution() {
+    const list = document.getElementById('solutions-list');
+    const num = list.querySelectorAll('li').length + 1;
+    try {
+      const rows = await sbPost('course_solutions', [{
+        page_id: PAGE_ID, step_number: num, display_order: num,
+        title: 'New Step', description: 'Description here.'
+      }]);
+      const s = rows[0];
+      const li = document.createElement('li');
+      li.className = 'solution-step'; li.dataset.id = s.id; li.style.position = 'relative';
+      li.innerHTML = `
+        <span class="step-num">${s.step_number}</span>
+        <div class="solution-step-body" style="flex:1;">
+          <h4 contenteditable="true" data-placeholder="Title">${s.title}</h4>
+          <p contenteditable="true" data-placeholder="Description">${s.description}</p>
+          <button class="save-row-btn" onclick="saveSolution('${s.id}', this)">
+            <i class="fa-solid fa-floppy-disk"></i> Save
+          </button>
+        </div>
+        <button class="delete-row-btn" onclick="deleteSolution('${s.id}', this)">✕</button>`;
+      list.appendChild(li);
+    } catch(e) { showError(e.message); }
+  }
+
+  // ── Static fallback (no Supabase key) ────────────────────────
+  function renderFallback() {
+    document.getElementById('hero-headline').textContent    = 'AI is moving fast.';
+    document.getElementById('hero-subheadline').textContent = 'Most architects are left behind.';
+    document.getElementById('hero-subtitle').textContent    = 'Enterprise teams are deploying Claude in production today — without certified architects who understand multi-agent routing, MCP security boundaries, ZDR compliance, or prompt cost optimization.';
+    renderPersonas([
+      { id:'f1', emoji:'🏛️', role_title:'Enterprise Architects', description:'Asked to design Claude-based systems but lack a structured framework for multi-agent topologies, routing patterns, and cost governance.' },
+      { id:'f2', emoji:'⚙️', role_title:'DevOps / Platform Engineers', description:'Deploying Claude on cloud infra without understanding ZDR, VPC PrivateLink, or how to keep secrets off the model\'s context window.' },
+      { id:'f3', emoji:'👨‍💻', role_title:'Senior Developers', description:'Building agent loops that hallucinate, blow cost budgets, or fail silently — because they haven\'t mastered prompt caching or deterministic routing.' },
+      { id:'f4', emoji:'🔐', role_title:'Compliance / Security Teams', description:'Struggling to approve Claude deployments without a clear audit trail, data residency guarantee, or understanding of Anthropic\'s trust architecture.' }
+    ]);
+    renderChallenges([
+      { id:'c1', challenge_number:1, title:'No clear learning path', description:'Anthropic\'s documentation covers APIs but not enterprise architecture patterns, routing topologies, or multi-agent governance.' },
+      { id:'c2', challenge_number:2, title:'No proof of competency', description:'Teams cannot distinguish between someone who "uses Claude" and someone who can design, audit, and defend a production-grade system.' },
+      { id:'c3', challenge_number:3, title:'No exam preparation resource', description:'The Claude Certified Architect exam tests deep knowledge of ZDR, MCP security, prompt caching, and multi-agent design — topics with no consolidated study guide.' }
+    ]);
+    renderDomains([
+      { id:'d1', domain_name:'Multi-Agent Design', topics_covered:['Routing topologies','Loop-breakers','Orchestrator patterns','State management'], weight_percent:25 },
+      { id:'d2', domain_name:'Model Context Protocol (MCP)', topics_covered:['Server design','stdio/SSE transports','Read-only data boundaries','Tool schemas'], weight_percent:20 },
+      { id:'d3', domain_name:'Prompt Engineering & Caching', topics_covered:['Cache write/read mechanics','Cache-breakpoint placement','Cost reduction strategies'], weight_percent:20 },
+      { id:'d4', domain_name:'Enterprise Security & Compliance', topics_covered:['Zero Data Retention','VPC PrivateLink','Secrets management','Azure Key Vault patterns'], weight_percent:20 },
+      { id:'d5', domain_name:'Deployment & Operations', topics_covered:['Fly.io','Qdrant','Supabase','GitHub Actions','Cost governance','SLA monitoring'], weight_percent:15 }
+    ]);
+    renderSolutions([
+      { id:'s1', step_number:1, title:'Structured Knowledge Path', description:'5 modules, 15 videos — each targeting an exam domain. No filler, no beginner hand-holding. Built for professionals who already ship software.' },
+      { id:'s2', step_number:2, title:'Hands-On Implementation', description:'Every concept is implemented in code: working MCP servers, prompt-cached agent loops, Supabase RLS policies, and Fly.io deployments.' },
+      { id:'s3', step_number:3, title:'Proof-of-Learning Checkpoints', description:'Architecture diagrams, load tests, and the 30-question exam walkthrough give you tangible evidence of mastery to show your team and Anthropic.' },
+      { id:'s4', step_number:4, title:'Production-Grade Templates', description:'Leave with reusable blueprints for multi-agent routing, MCP server scaffolding, prompt caching config, and ZDR-compliant infra — immediately applicable at work.' }
+    ]);
+  }
+
+  // ── Boot ─────────────────────────────────────────────────────
+  if (!SB_KEY) {
+    showError('supabase_anon_key not set in localStorage — showing static fallback. Run: localStorage.setItem("supabase_anon_key","your-key") then reload.');
+    renderFallback();
+  } else {
+    loadAll();
+  }
+</script>
 </body>
 </html>
