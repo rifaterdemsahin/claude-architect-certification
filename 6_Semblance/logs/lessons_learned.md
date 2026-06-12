@@ -265,3 +265,6 @@ Split audio into two levels matching real post-production workflow: 🎤 voiceov
 - When interacting with Axiom, always verify the target dataset's region and use `https://api.eu.axiom.co` if it's region-locked to EU.
 - Ensure API tokens are verified to have proper Ingest permissions and scoped dataset coverage in the Axiom admin console before deploying automation.
 
+
+## 2026-06-12 — Fix Axiom Query 422 Error
+Axiom's query endpoints (both dataset-specific and general APL) require a `startTime` parameter in the JSON body when performing APL queries. Without it, the API returns a 422 error. Defaulting to `now-24h` is a safe way to ensure recent logs are always available while satisfying the API requirement.

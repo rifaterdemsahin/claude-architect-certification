@@ -246,3 +246,8 @@ Record every prompt given to AI agents below. Include the date, agent, and purpo
 **Output:** Refined `isUrlActive` matching in `index.html` and `shared/nav.js` to treat the root URL and `index.html` as equivalent, ensuring seamless active highlight states.
 
 
+
+### 2026-06-12 — Fix Axiom 422 startTime Error
+- **Agent:** Gemini CLI
+- **Purpose:** Resolve the missing startTime parameter in Axiom query API calls.
+- **Outcome:** Updated cmd/server/main.go and 6_Semblance/tools/get_logs.sh to include startTime: now-24h.

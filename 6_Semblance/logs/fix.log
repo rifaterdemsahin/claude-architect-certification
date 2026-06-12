@@ -72,3 +72,4 @@ Lesson captured in lessons_learned.md
 [2026-06-12] 💻 [5_Symbols/Go] [APPLIED] — Add go.goroot + go.alternateTools to .vscode/settings.json pointing at /opt/homebrew, OR symlink /usr/local/bin/go → /opt/homebrew/bin/go, OR set GUI PATH via launchctl. See 6_Semblance/error_go_vscode_path.md
 [2026-06-12] [5_Symbols] [APPLIED] — Corrected permission strings for generating Azure SAS container tokens in cmd/server/main.go. Reordered "cwlr" (upload) to standard "rcwl", and "dlr" (delete) to standard "rdl" to satisfy Azure's strict racwdxltmeop ordering rules.
 
+[2026-06-12] [5_Symbols] [APPLIED] — Fixed Axiom 422 error by adding startTime to query payload in cmd/server/main.go and get_logs.sh

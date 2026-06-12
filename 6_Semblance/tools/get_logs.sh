@@ -19,14 +19,15 @@ if [ -z "$AXIOM_TOKEN" ] || [ -z "$AXIOM_ORG_ID" ]; then
 fi
 
 DATASET=${AXIOM_DATASET:-videoproduction}
-API_URL=${AXIOM_API_URL:-https://api.axiom.co}
+API_URL=${AXIOM_QUERY_URL:-${AXIOM_API_URL:-https://api.axiom.co}}
 
 # Construct APL query to select latest entries
 APL_QUERY="['$DATASET'] | order by timestamp desc | limit $LIMIT"
 
 JSON_PAYLOAD=$(cat <<EOF
 {
-  "apl": "$APL_QUERY"
+  "apl": "$APL_QUERY",
+  "startTime": "now-24h"
 }
 EOF
 )
