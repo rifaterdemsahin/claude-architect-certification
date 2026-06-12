@@ -1238,7 +1238,17 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
     };
     const SECTION_ORDER = ['intro', 'objectives', 'screenshare', 'outro', 'body'];
 
-    function renderSentencesPanel(sentences, format, duration) {
+    const TYPE_OPTIONS    = ['hook','transition','heading','objective','step','cue','insight','takeaway','body'];
+    const SECTION_OPTIONS = ['intro','objectives','screenshare','outro','body'];
+    const VISUAL_OPTIONS  = ['talking_head','screenshare','b_roll'];
+
+    function sentSelect(id, options, current) {
+      return `<select id="${id}" class="sent-select">${options.map(o =>
+        `<option value="${o}"${o === current ? ' selected' : ''}>${o.replace(/_/g,' ')}</option>`
+      ).join('')}</select>`;
+    }
+
+    function renderSentencesPanel(sentences, format, duration, elementId, scriptId) {
       const metaBadges = [
         format   ? `<span class="meta-badge format">📽 ${esc2(format)}</span>` : '',
         duration ? `<span class="meta-badge dur">⏱ ${esc2(duration)}</span>` : ''
@@ -1253,32 +1263,151 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
       const groupHtml = SECTION_ORDER
         .filter(sec => grouped[sec] && grouped[sec].length)
         .map(sec => {
-          const rows = grouped[sec].map(s => `
-            <div class="sent-row">
-              <div class="sent-badges">
-                <span class="sent-badge ${esc2(s.sentence_type)}">${esc2(s.sentence_type)}</span>
-                <span class="sent-badge ${esc2(s.visual_mode)}">${esc2(s.visual_mode).replace('_', ' ')}</span>
+          const rows = grouped[sec].map(s => {
+            const rid = `${elementId}-${s.id}`;
+            return `
+            <div class="sent-row" id="sent-row-${rid}">
+              <div class="sent-view" id="sent-view-${rid}">
+                <div class="sent-badges">
+                  <span class="sent-badge ${esc2(s.sentence_type)}">${esc2(s.sentence_type)}</span>
+                  <span class="sent-badge ${esc2(s.visual_mode)}">${esc2(s.visual_mode).replace(/_/g,' ')}</span>
+                </div>
+                <div class="sent-text">${esc2(s.sentence_text)}</div>
+                <div class="sent-row-btns">
+                  <button class="btn-sent-edit" onclick="sentEdit('${rid}')">✏️</button>
+                  <button class="btn-sent-delete" onclick="sentDelete('${elementId}',${s.id})">🗑</button>
+                </div>
               </div>
-              <div class="sent-text">${esc2(s.sentence_text)}</div>
-            </div>`).join('');
+              <div class="sent-edit-form" id="sent-edit-${rid}" style="display:none;">
+                <div class="sent-edit-row">
+                  ${sentSelect(`sent-type-${rid}`, TYPE_OPTIONS, s.sentence_type)}
+                  ${sentSelect(`sent-section-${rid}`, SECTION_OPTIONS, s.section)}
+                  ${sentSelect(`sent-visual-${rid}`, VISUAL_OPTIONS, s.visual_mode)}
+                </div>
+                <textarea class="sent-textarea" id="sent-text-${rid}">${esc2(s.sentence_text)}</textarea>
+                <div class="sent-edit-actions">
+                  <button class="btn-sent-save" onclick="sentSave('${elementId}',${s.id},'${rid}')">💾 Save</button>
+                  <button class="btn-sent-cancel" onclick="sentCancel('${rid}')">Cancel</button>
+                </div>
+              </div>
+            </div>`;
+          }).join('');
           return `<div class="sent-section-group">
             <div class="sent-section-label">${SECTION_LABELS[sec] || sec}</div>${rows}
           </div>`;
         }).join('');
 
+      const addForm = scriptId ? `
+        <div class="sent-add-section">
+          <div class="sent-add-label">+ Add sentence</div>
+          <div class="sent-edit-row">
+            ${sentSelect(`sent-add-type-${elementId}`, TYPE_OPTIONS, 'body')}
+            ${sentSelect(`sent-add-section-${elementId}`, SECTION_OPTIONS, 'body')}
+            ${sentSelect(`sent-add-visual-${elementId}`, VISUAL_OPTIONS, 'talking_head')}
+          </div>
+          <textarea class="sent-textarea" id="sent-add-text-${elementId}" placeholder="New sentence text…" style="min-height:50px;"></textarea>
+          <button class="btn-sent-add" onclick="sentAdd('${elementId}',${scriptId})">+ Add Sentence</button>
+        </div>` : '';
+
       return `${metaBadges ? `<div class="script-meta-badges">${metaBadges}</div>` : ''}
-        ${sentences.length ? `<details class="sentences-panel">
+        <details class="sentences-panel">
           <summary>📋 Sentences <span style="font-weight:400;opacity:0.6;">(${sentences.length})</span></summary>
           ${groupHtml}
-        </details>` : ''}`;
+          ${addForm}
+        </details>`;
     }
 
     async function hydrateSentences(elementId, scriptId, format, duration) {
       const container = document.getElementById('sentences-' + elementId);
       if (!container) return;
-      const sentences = await fetchSentences(scriptId);
-      container.innerHTML = renderSentencesPanel(sentences, format, duration);
+      if (scriptId != null) container.dataset.scriptId = String(scriptId);
+      if (format   != null) container.dataset.format   = format   || '';
+      if (duration != null) container.dataset.duration = duration || '';
+      const sid  = container.dataset.scriptId;
+      const fmt  = container.dataset.format;
+      const dur  = container.dataset.duration;
+      const wasOpen = container.querySelector('details.sentences-panel')?.open;
+      const sentences = await fetchSentences(sid);
+      container.innerHTML = renderSentencesPanel(sentences, fmt, dur, elementId, Number(sid) || null);
+      if (wasOpen) { const d = container.querySelector('details.sentences-panel'); if (d) d.open = true; }
     }
+
+    async function rehydrateSentences(elementId) {
+      const c = document.getElementById('sentences-' + elementId);
+      if (c) await hydrateSentences(elementId, null, null, null);
+    }
+
+    // ── Sentence CRUD ──────────────────────────────────────────────────────────
+    function sentAuthHeaders() {
+      return { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' };
+    }
+
+    window.sentEdit = function(rid) {
+      document.getElementById('sent-view-' + rid).style.display = 'none';
+      document.getElementById('sent-edit-' + rid).style.display = 'block';
+    };
+    window.sentCancel = function(rid) {
+      document.getElementById('sent-view-' + rid).style.display = 'flex';
+      document.getElementById('sent-edit-' + rid).style.display = 'none';
+    };
+    window.sentSave = async function(elementId, sentId, rid) {
+      const body = {
+        sentence_type: document.getElementById(`sent-type-${rid}`).value,
+        section:       document.getElementById(`sent-section-${rid}`).value,
+        visual_mode:   document.getElementById(`sent-visual-${rid}`).value,
+        sentence_text: document.getElementById(`sent-text-${rid}`).value.trim()
+      };
+      if (!body.sentence_text) { alert('Sentence text cannot be empty.'); return; }
+      const btn = document.querySelector(`#sent-edit-${rid} .btn-sent-save`);
+      if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/sentences?id=eq.${sentId}`, {
+          method: 'PATCH', headers: sentAuthHeaders(), body: JSON.stringify(body)
+        });
+        if (!res.ok) throw new Error(await res.text());
+        await rehydrateSentences(elementId);
+      } catch (err) {
+        alert('Save failed: ' + err.message);
+        if (btn) { btn.disabled = false; btn.textContent = '💾 Save'; }
+      }
+    };
+    window.sentDelete = async function(elementId, sentId) {
+      if (!confirm('Delete this sentence?')) return;
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/sentences?id=eq.${sentId}`, {
+          method: 'DELETE', headers: sentAuthHeaders()
+        });
+        if (!res.ok) throw new Error(await res.text());
+        await rehydrateSentences(elementId);
+      } catch (err) { alert('Delete failed: ' + err.message); }
+    };
+    window.sentAdd = async function(elementId, scriptId) {
+      const text = document.getElementById(`sent-add-text-${elementId}`).value.trim();
+      if (!text) { alert('Enter sentence text first.'); return; }
+      const container = document.getElementById('sentences-' + elementId);
+      const nextOrder = (container.querySelectorAll('.sent-row').length + 1) * 10;
+      const body = {
+        script_id:     parseInt(scriptId),
+        sentence_text: text,
+        sentence_type: document.getElementById(`sent-add-type-${elementId}`).value,
+        section:       document.getElementById(`sent-add-section-${elementId}`).value,
+        visual_mode:   document.getElementById(`sent-add-visual-${elementId}`).value,
+        sort_order:    nextOrder
+      };
+      const btn = document.querySelector(`#sentences-${elementId} .btn-sent-add`);
+      if (btn) { btn.disabled = true; btn.textContent = 'Adding…'; }
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/sentences`, {
+          method: 'POST', headers: sentAuthHeaders(), body: JSON.stringify(body)
+        });
+        if (!res.ok) throw new Error(await res.text());
+        await rehydrateSentences(elementId);
+      } catch (err) {
+        alert('Add failed: ' + err.message);
+        if (btn) { btn.disabled = false; btn.textContent = '+ Add Sentence'; }
+      }
+    };
+
 
     async function loadFromSupabase() {
       if (!SUPABASE_URL.includes('supabase.co')) return null;
