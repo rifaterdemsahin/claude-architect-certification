@@ -45,3 +45,5 @@ Severity levels: `CRITICAL` | `ERROR` | `WARNING` | `INFO`
 
 
 [2026-06-12] 💻 [5_Symbols/Go] [MEDIUM] — VS Code Go extension cannot find `go` binary. GUI app PATH does not include /opt/homebrew/bin even though Homebrew Go is installed and works in terminal. See 6_Semblance/error_go_vscode_path.md
+[2026-06-12] 🔴 [5_Symbols/Go] [HIGH] — Azure 403 Upload Failure: AuthenticationFailed, SAS field 'sp' is not well formed when uploading files to research-audio container. Fix: 6_Semblance/logs/fix.log
+
