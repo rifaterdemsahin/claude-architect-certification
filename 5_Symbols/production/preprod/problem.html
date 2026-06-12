@@ -378,15 +378,9 @@
     if (!r.ok) throw new Error(`DELETE ${table}: ${r.status}`);
   }
 
-  // ── Edit mode ─────────────────────────────────────────────────
   let editMode = localStorage.getItem('problem_edit_mode') === 'true';
 
   function toggleEditMode() {
-    if (!editMode) {
-      const pass = prompt('Admin key:');
-      const adminKey = localStorage.getItem('problem_admin_key') || 'admin';
-      if (pass !== adminKey) { alert('Incorrect key'); return; }
-    }
     editMode = !editMode;
     localStorage.setItem('problem_edit_mode', editMode);
     applyEditMode();
