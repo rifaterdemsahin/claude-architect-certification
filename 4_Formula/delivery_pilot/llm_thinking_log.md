@@ -813,3 +813,30 @@ The user requested adding an "All" option and "multiselect" capabilities to the 
    - Commit this planning log.
    - Modify the index.html page and verify layout.
    - Commit and push changes.
+
+---
+
+## 📅 Date: 2026-06-12
+## 🧠 Stage: Stage 4 (Formula - Thinking & Planning) - Unified Creator and Mobile Recording
+### ❓ Problem Statement
+The user requested two tasks:
+1. Practical add buttons for creation. The creation modes (Images, Audio, Videos, Notes) should refer to each other or be unified so new modes can be added with ease.
+2. In the audio section, the user should be able to record directly from their mobile phone and have it auto-save to storage.
+
+### 📐 Approach & Strategy
+1. **📂 Target Files**:
+   - `5_Symbols/production/preprod/research/index.html`
+   - `5_Symbols/production/preprod/research/audio.html`
+   - `5_Symbols/production/preprod/research/images.html`
+   - `5_Symbols/production/preprod/research/videos.html`
+   - `5_Symbols/production/preprod/research/notes.html`
+2. **🛠️ Unified Creator Hub (First Task)**:
+   - Provide a persistent, responsive quick-creator component/header at the top of the Research pages.
+   - On the main dashboard (`index.html`), embed this quick-creator directly or make a toggleable "Quick Create / Upload" section with tabs for each mode (Images, Audio, Videos, Notes).
+   - This makes adding new types of modes extremely easy (we can just add another tab/card).
+3. **🎤 Mobile Audio Recording & Auto-Save (Second Task)**:
+   - Implement a browser-based recording system using `MediaRecorder` API on `audio.html` and the main dashboard's audio tab/pane.
+   - Offer a clean, touch-friendly UI for starting, pausing, and stopping recording.
+   - When the recording stops, it automatically POSTs the audio blob to `/api/research/upload?container=research-audio` with a default timestamped filename, uploads it automatically, and refreshes the asset list without page reload.
+4. **🎨 Aesthetics & Responsiveness**:
+   - Apply premium styles matching the existing dark/glassmorphic look. Ensure responsive grid layouts and touch targets suitable for mobile phones.
