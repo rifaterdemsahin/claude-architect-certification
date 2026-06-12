@@ -258,17 +258,30 @@ function fileUrl(container, name) {
 }
 
 function renderRelationsMarkup(container, fileName) {
-  const dropId = `drop-${container}-${CSS.escape(fileName)}`;
-  const listId = `list-${container}-${CSS.escape(fileName)}`;
+  const dropId     = `drop-${container}-${CSS.escape(fileName)}`;
+  const listId     = `list-${container}-${CSS.escape(fileName)}`;
+  const sentDropId = `sent-drop-${container}-${CSS.escape(fileName)}`;
+  const sentListId = `sent-list-${container}-${CSS.escape(fileName)}`;
+  const safeFile   = fileName.replace(/'/g, "\\'");
   return `
     <div style="margin-top:8px; padding-top:6px; border-top:1px solid rgba(255,255,255,0.06); text-align:left;">
       <div style="font-size:0.7rem; font-weight:bold; color:var(--muted); margin-bottom:4px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:4px;">
         <span>📝 Link to Script:</span>
-        <select id="${dropId}" onchange="linkAssetToVideo('${container}', '${fileName.replace(/'/g, "\\'")}', this)" style="background:rgba(255,255,255,0.08); border:1px solid var(--border); border-radius:4px; color:var(--text); font-size:0.65rem; padding:1px 3px; outline:none; max-width: 140px; cursor:pointer;">
+        <select id="${dropId}" onchange="linkAssetToVideo('${container}', '${safeFile}', this)" style="background:rgba(255,255,255,0.08); border:1px solid var(--border); border-radius:4px; color:var(--text); font-size:0.65rem; padding:1px 3px; outline:none; max-width: 140px; cursor:pointer;">
           <option value="">-- choose script --</option>
         </select>
       </div>
       <div id="${listId}" data-container="${container}" data-name="${fileName}" style="display:flex; flex-wrap:wrap; gap:4px; margin-top:4px;">
+        <span style="font-size:0.65rem; color:var(--muted)">None linked</span>
+      </div>
+
+      <div style="margin-top:6px; padding-top:5px; border-top:1px solid rgba(255,255,255,0.04); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:4px;">
+        <span style="font-size:0.7rem; font-weight:bold; color:var(--muted);">📋 Link to Sentence:</span>
+        <select id="${sentDropId}" onchange="linkAssetToSentence('${container}', '${safeFile}', this)" style="background:rgba(255,255,255,0.08); border:1px solid rgba(59,130,246,0.3); border-radius:4px; color:var(--text); font-size:0.65rem; padding:1px 3px; outline:none; max-width: 140px; cursor:pointer;">
+          <option value="">-- choose sentence --</option>
+        </select>
+      </div>
+      <div id="${sentListId}" data-container="${container}" data-name="${fileName}" data-kind="sentence" style="display:flex; flex-wrap:wrap; gap:4px; margin-top:4px;">
         <span style="font-size:0.65rem; color:var(--muted)">None linked</span>
       </div>
     </div>
@@ -598,26 +611,33 @@ const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
 let allVideos = [];
 let allRelationships = [];
+let allSentences = [];
 
 async function loadSupabaseData() {
-  const { data: vids, error: err1 } = await client.from('course_videos').select('id, title, video_number, course_modules(module_number)').order('id');
-  if (err1) {
-    console.error('Error loading course videos:', err1);
-  } else {
-    allVideos = vids || [];
-  }
+  const [
+    { data: vids,  error: err1 },
+    { data: rels,  error: err2 },
+    { data: sents, error: err3 }
+  ] = await Promise.all([
+    client.from('course_videos').select('id, title, video_number, course_modules(module_number)').order('id'),
+    client.from('research_relationships').select('*'),
+    client.from('sentences').select('id, sentence_type, section, sentence_text, script_id').order('sort_order')
+  ]);
 
-  const { data: rels, error: err2 } = await client.from('research_relationships').select('*');
-  if (err2) {
-    console.error('Error loading relationships:', err2);
-  } else {
-    allRelationships = rels || [];
-  }
+  if (err1) console.error('Error loading course videos:', err1);
+  else allVideos = vids || [];
+
+  if (err2) console.error('Error loading relationships:', err2);
+  else allRelationships = rels || [];
+
+  if (err3) console.error('Error loading sentences:', err3);
+  else allSentences = sents || [];
 
   updateAllRelationsUI();
 }
 
 function updateAllRelationsUI() {
+  // ── Video dropdowns ────────────────────────────────────────────────────────
   document.querySelectorAll('select[id^="drop-"]').forEach(select => {
     const currentVal = select.value;
     select.innerHTML = '<option value="">-- link video --</option>' + allVideos.map(v => {
@@ -627,31 +647,61 @@ function updateAllRelationsUI() {
     select.value = currentVal;
   });
 
-  document.querySelectorAll('div[id^="list-"]').forEach(el => {
+  // ── Sentence dropdowns ─────────────────────────────────────────────────────
+  document.querySelectorAll('select[id^="sent-drop-"]').forEach(select => {
+    const currentVal = select.value;
+    select.innerHTML = '<option value="">-- choose sentence --</option>' + allSentences.map(s => {
+      const preview = s.sentence_text.length > 48 ? s.sentence_text.slice(0, 48) + '…' : s.sentence_text;
+      return `<option value="${s.id}">[${s.sentence_type}] ${preview}</option>`;
+    }).join('');
+    select.value = currentVal;
+  });
+
+  // ── Video link badges ──────────────────────────────────────────────────────
+  document.querySelectorAll('div[id^="list-"]:not([data-kind])').forEach(el => {
     const container = el.dataset.container;
     const name = el.dataset.name;
+    if (!container || !name) return;
 
-    const matchedRels = allRelationships.filter(r => r.container === container && r.item_name === name);
-    if (matchedRels.length === 0) {
+    const matchedRels = allRelationships.filter(r => r.container === container && r.item_name === name && r.video_id != null);
+    if (!matchedRels.length) {
       el.innerHTML = '<span style="font-size:0.65rem; color:var(--muted)">None linked</span>';
       return;
     }
-
     el.innerHTML = matchedRels.map(r => {
       const vidInfo = allVideos.find(v => v.id === r.video_id);
-      let label = `Vid ID: ${r.video_id}`;
+      let label = `Vid #${r.video_id}`;
       let scriptUrl = '../scripts/index.html';
       if (vidInfo) {
         const modNum = vidInfo.course_modules ? vidInfo.course_modules.module_number : '?';
         label = `M${modNum} V${vidInfo.video_number}`;
         scriptUrl = `../scripts/index.html?module=${modNum}`;
       }
-      return `
-        <span style="display:inline-flex; align-items:center; gap:3px; background:rgba(139,92,246,0.15); border:1px solid rgba(139,92,246,0.3); border-radius:4px; padding:2px 4px; font-size:0.65rem; color:var(--text);">
-          <a href="${scriptUrl}" title="Open script for ${label}" style="color:inherit; text-decoration:none;" onmouseover="this.style.color='#c084fc'" onmouseout="this.style.color='inherit'">📝 ${label}</a>
-          <span style="cursor:pointer; font-weight:bold; color:var(--muted); font-size: 0.75rem;" onclick="unlinkAssetFromVideo('${container}', '${name.replace(/'/g, "\\'")}', ${r.video_id}, event)">✕</span>
-        </span>
-      `;
+      return `<span style="display:inline-flex;align-items:center;gap:3px;background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.3);border-radius:4px;padding:2px 4px;font-size:0.65rem;color:var(--text);">
+        <a href="${scriptUrl}" style="color:inherit;text-decoration:none;" onmouseover="this.style.color='#c084fc'" onmouseout="this.style.color='inherit'">📝 ${label}</a>
+        <span style="cursor:pointer;font-weight:bold;color:var(--muted);font-size:0.75rem;" onclick="unlinkAssetFromVideo('${container}','${name.replace(/'/g,"\\'")}',${r.video_id},event)">✕</span>
+      </span>`;
+    }).join('');
+  });
+
+  // ── Sentence link badges ───────────────────────────────────────────────────
+  document.querySelectorAll('div[id^="sent-list-"]').forEach(el => {
+    const container = el.dataset.container;
+    const name = el.dataset.name;
+    if (!container || !name) return;
+
+    const matchedRels = allRelationships.filter(r => r.container === container && r.item_name === name && r.sentence_id != null);
+    if (!matchedRels.length) {
+      el.innerHTML = '<span style="font-size:0.65rem; color:var(--muted)">None linked</span>';
+      return;
+    }
+    el.innerHTML = matchedRels.map(r => {
+      const sent = allSentences.find(s => s.id === r.sentence_id);
+      const preview = sent ? `${sent.sentence_type}: ${sent.sentence_text.slice(0, 36)}…` : `#${r.sentence_id}`;
+      return `<span style="display:inline-flex;align-items:center;gap:3px;background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.3);border-radius:4px;padding:2px 4px;font-size:0.65rem;color:var(--text);" title="${sent ? sent.sentence_text.replace(/"/g,'&quot;') : ''}">
+        📋 ${preview}
+        <span style="cursor:pointer;font-weight:bold;color:var(--muted);font-size:0.75rem;" onclick="unlinkAssetFromSentence('${container}','${name.replace(/'/g,"\\'")}',${r.sentence_id},event)">✕</span>
+      </span>`;
     }).join('');
   });
 }
@@ -682,11 +732,44 @@ async function unlinkAssetFromVideo(container, itemName, videoId, e) {
     item_name: itemName,
     video_id: videoId
   });
-
   if (error) {
     alert('Unlink failed: ' + error.message);
   } else {
     allRelationships = allRelationships.filter(r => !(r.container === container && r.item_name === itemName && r.video_id === videoId));
+    updateAllRelationsUI();
+  }
+}
+
+async function linkAssetToSentence(container, itemName, select) {
+  const sentenceId = parseInt(select.value, 10);
+  if (isNaN(sentenceId)) return;
+
+  const { data, error } = await client.from('research_relationships').insert({
+    container,
+    item_name: itemName,
+    sentence_id: sentenceId
+  }).select();
+
+  if (error) {
+    alert('Link failed: ' + error.message);
+  } else {
+    allRelationships.push(...(data || [{ container, item_name: itemName, sentence_id: sentenceId }]));
+    updateAllRelationsUI();
+  }
+  select.value = '';
+}
+
+async function unlinkAssetFromSentence(container, itemName, sentenceId, e) {
+  if (e) e.stopPropagation();
+  const { error } = await client.from('research_relationships').delete()
+    .eq('container', container)
+    .eq('item_name', itemName)
+    .eq('sentence_id', sentenceId);
+
+  if (error) {
+    alert('Unlink failed: ' + error.message);
+  } else {
+    allRelationships = allRelationships.filter(r => !(r.container === container && r.item_name === itemName && r.sentence_id === sentenceId));
     updateAllRelationsUI();
   }
 }
