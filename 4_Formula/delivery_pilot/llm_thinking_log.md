@@ -788,3 +788,28 @@ This occurred on the audio research page at `https://claude-architect-certificat
    - Apply fixes to `cmd/server/main.go`.
    - Commit implementation.
    - Run verification build/test commands.
+
+---
+
+## 📅 Date: 2026-06-12
+## 🧠 Stage: Stage 4 (Formula - Thinking & Planning) - Implement All Option & Multiselect in Research Hub
+
+### ❓ Problem Statement
+The user requested adding an "All" option and "multiselect" capabilities to the Research Hub page located at `https://claude-architect-certification.fly.dev/5_Symbols/production/preprod/research/`.
+
+### 📐 Approach & Strategy
+1. **📂 File Target**: Modify `5_Symbols/production/preprod/research/index.html`.
+2. **💡 Features & UX Plan**:
+   - Add an `All` tab to the tab list (e.g. `✨ All` or `📂 All`).
+   - Add a "Multiselect Mode" switch/checkbox next to the tab container, styled as a premium toggler.
+   - Define custom selection logic:
+     - When Multiselect Mode is OFF: Clicking any tab (including "All") activates that tab exclusively and hides the others.
+     - When Multiselect Mode is ON:
+       - Clicking a category tab (Images, Audio, Videos, Notes) toggles its active state independently.
+       - Multiple categories can be visible simultaneously.
+       - Clicking "All" selects/activates all categories. Deselecting it (or toggling individual tabs) updates the views accordingly.
+       - If all category tabs are manually turned off, fallback to showing nothing or a friendly instruction, and deselect the "All" tab.
+3. **🌿 Git Workflow**:
+   - Commit this planning log.
+   - Modify the index.html page and verify layout.
+   - Commit and push changes.
