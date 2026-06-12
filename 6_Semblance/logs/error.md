@@ -132,4 +132,4 @@ func generateContainerSAS(..., permissions string, ...) (string, error) {
 
 ---
 
-*Error 1 fixed in commit: bd492aa · Error 2 fixed: see latest commit · Status: 🔄 DEPLOYING*
+*Error 1 fixed in commit: bd492aa · Error 2 fixed in commit: d3240ae · Status: ✅ VERIFIED — curl upload 200, file visible in listing 2026-06-12*
