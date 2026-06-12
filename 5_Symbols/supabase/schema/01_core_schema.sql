@@ -109,11 +109,25 @@ CREATE TABLE IF NOT EXISTS course_content (
 
 -- 11. SCRIPTS (Full video scripts)
 CREATE TABLE IF NOT EXISTS scripts (
-  id SERIAL PRIMARY KEY,
-  video_id INTEGER REFERENCES videos(id) ON DELETE CASCADE UNIQUE,
-  script_text TEXT NOT NULL,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
+  id              SERIAL PRIMARY KEY,
+  video_id        INTEGER REFERENCES videos(id) ON DELETE CASCADE UNIQUE,
+  script_text     TEXT NOT NULL,
+  format          TEXT DEFAULT '',           -- e.g. "Talking Head + Screen Share"
+  target_duration TEXT DEFAULT '',           -- e.g. "3-5 Minutes"
+  created_at      TIMESTAMPTZ DEFAULT NOW(),
+  updated_at      TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 11b. SENTENCES (Individual sentences/blocks from a script, with metadata)
+CREATE TABLE IF NOT EXISTS sentences (
+  id            SERIAL PRIMARY KEY,
+  script_id     INTEGER REFERENCES scripts(id) ON DELETE CASCADE,
+  sentence_text TEXT    NOT NULL,
+  sentence_type TEXT    NOT NULL DEFAULT 'body',   -- hook | objective | transition | step | insight | takeaway | cue | heading | body
+  section       TEXT    NOT NULL DEFAULT 'body',   -- intro | objectives | screenshare | outro | body
+  visual_mode   TEXT             DEFAULT 'talking_head', -- talking_head | screenshare | b_roll
+  sort_order    INTEGER          DEFAULT 0,
+  created_at    TIMESTAMPTZ      DEFAULT NOW()
 );
 
 -- 12. OUTLINE (Objectives, key results, video topics per module)
@@ -211,6 +225,7 @@ ALTER TABLE checklist_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE checklist_progress ENABLE ROW LEVEL SECURITY;
 ALTER TABLE course_content ENABLE ROW LEVEL SECURITY;
 ALTER TABLE scripts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE sentences ENABLE ROW LEVEL SECURITY;
 ALTER TABLE outline ENABLE ROW LEVEL SECURITY;
 ALTER TABLE course_modules ENABLE ROW LEVEL SECURITY;
 ALTER TABLE course_videos ENABLE ROW LEVEL SECURITY;
@@ -238,6 +253,10 @@ DROP POLICY IF EXISTS anon_insert_course_content ON course_content;
 DROP POLICY IF EXISTS anon_select_scripts ON scripts;
 DROP POLICY IF EXISTS anon_insert_scripts ON scripts;
 DROP POLICY IF EXISTS anon_update_scripts ON scripts;
+DROP POLICY IF EXISTS anon_select_sentences ON sentences;
+DROP POLICY IF EXISTS anon_insert_sentences ON sentences;
+DROP POLICY IF EXISTS anon_update_sentences ON sentences;
+DROP POLICY IF EXISTS anon_delete_sentences ON sentences;
 DROP POLICY IF EXISTS anon_select_outline ON outline;
 DROP POLICY IF EXISTS anon_insert_outline ON outline;
 DROP POLICY IF EXISTS "Public read course_modules" ON course_modules;
@@ -266,6 +285,7 @@ CREATE POLICY anon_delete_checklist_items ON checklist_items FOR DELETE USING (t
 CREATE POLICY anon_select_checklist_progress ON checklist_progress FOR SELECT USING (true);
 CREATE POLICY anon_select_course_content ON course_content FOR SELECT USING (true);
 CREATE POLICY anon_select_scripts ON scripts FOR SELECT USING (true);
+CREATE POLICY anon_select_sentences ON sentences FOR SELECT USING (true);
 CREATE POLICY anon_select_outline ON outline FOR SELECT USING (true);
 CREATE POLICY "Public read course_modules" ON course_modules FOR SELECT USING (true);
 CREATE POLICY "Public read course_videos" ON course_videos FOR SELECT USING (true);
@@ -280,6 +300,9 @@ CREATE POLICY anon_update_checklist_progress ON checklist_progress FOR UPDATE US
 CREATE POLICY anon_insert_course_content ON course_content FOR INSERT WITH CHECK (true);
 CREATE POLICY anon_insert_scripts ON scripts FOR INSERT WITH CHECK (true);
 CREATE POLICY anon_update_scripts ON scripts FOR UPDATE USING (true);
+CREATE POLICY anon_insert_sentences ON sentences FOR INSERT WITH CHECK (true);
+CREATE POLICY anon_update_sentences ON sentences FOR UPDATE USING (true);
+CREATE POLICY anon_delete_sentences ON sentences FOR DELETE USING (true);
 CREATE POLICY anon_insert_outline ON outline FOR INSERT WITH CHECK (true);
 CREATE POLICY anon_insert_milestones ON milestones FOR INSERT WITH CHECK (true);
 CREATE POLICY anon_insert_milestone_progress ON milestone_progress FOR INSERT WITH CHECK (true);
