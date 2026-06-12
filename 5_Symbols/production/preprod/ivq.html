@@ -22,12 +22,7 @@
 
     /* Config panel */
     .config-panel { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px 24px; margin-bottom: 28px; }
-    .config-panel summary { cursor: pointer; font-weight: 700; font-size: 0.95rem; color: var(--muted); user-select: none; }
-    .config-panel summary:hover { color: var(--text); }
-    .config-row { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
-    .config-row input { flex: 1; min-width: 180px; padding: 9px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); color: var(--text); font-size: 0.88rem; }
-    .config-row input:focus { outline: none; border-color: var(--primary); }
-    #conn-status { font-size: 0.82rem; margin-left: 6px; }
+    #conn-status { font-size: 0.85rem; }
 
     /* Buttons */
     .btn { padding: 9px 18px; border-radius: 10px; font-weight: 700; border: none; cursor: pointer; font-size: 0.88rem; transition: all 0.2s; font-family: var(--font-b); }
@@ -129,16 +124,11 @@
     <h1>🎯 IVQ Manager</h1>
     <p class="subtitle">In-Video Questions — link quiz questions to video timestamps with explanations</p>
 
-    <!-- Config panel -->
-    <details class="config-panel" id="config-details">
-      <summary>⚙️ Supabase Connection <span id="conn-status">🔴 disconnected</span></summary>
-      <div class="config-row">
-        <input id="sb-url" type="text" placeholder="Supabase URL (https://xxx.supabase.co)">
-        <input id="sb-key" type="password" placeholder="Anon / service role key">
-        <button class="btn btn-green" onclick="testConnection()">🔍 Test</button>
-        <button class="btn btn-primary" onclick="connect()">💾 Connect & Save</button>
-      </div>
-    </details>
+    <!-- Connection status (auto-connects via /api/config) -->
+    <div class="config-panel" style="display:flex;align-items:center;gap:12px;padding:12px 18px;">
+      <span style="font-size:0.85rem;color:var(--muted);">⚙️ Supabase</span>
+      <span id="conn-status">🔴 connecting…</span>
+    </div>
 
     <!-- SQL Schema block -->
     <details class="config-panel" style="margin-bottom:18px;">
@@ -212,48 +202,25 @@ ALTER TABLE ivq_questions ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "allow_all_videos" ON videos FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "allow_all_ivq" ON ivq_questions FOR ALL USING (true) WITH CHECK (true);`;
 
-    // ── Cookie helpers ──────────────────────────────────────────────────────────
-    function setCookie(name, value, days) {
-      const d = new Date();
-      d.setTime(d.getTime() + (days || 365) * 24 * 60 * 60 * 1000);
-      document.cookie = name + '=' + encodeURIComponent(value) + ';path=/;expires=' + d.toUTCString() + ';SameSite=Lax';
-    }
-    function getCookie(name) {
-      const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-      return match ? decodeURIComponent(match[2]) : '';
-    }
+    // ── Auto-connect from server config ──────────────────────────────────────
+    let SB_URL = '', SB_KEY = '';
 
-    // ── Supabase ──────────────────────────────────────────────────────────────
-    function loadCreds() {
-      const cookieUrl = getCookie('sb_url');
-      const cookieKey  = getCookie('sb_key');
-      const localUrl  = localStorage.getItem('ivq_sb_url');
-      const localKey   = localStorage.getItem('ivq_sb_key');
-      const sharedUrl = localStorage.getItem('sb_url');
-      const sharedKey  = localStorage.getItem('sb_key');
-      return {
-        url: cookieUrl || localUrl || sharedUrl || '',
-        key: cookieKey  || localKey  || sharedKey  || ''
-      };
+    fetch('/api/config')
+      .then(r => r.json())
+      .then(cfg => {
+        SB_URL = cfg.supabaseUrl;
+        SB_KEY  = cfg.supabaseAnon;
+        updateStatus(true);
+        loadAll();
+      })
+      .catch(e => {
+        updateStatus(false);
+        toast('Config fetch failed: ' + e.message, 'error');
+      });
+
+    function updateStatus(ok) {
+      document.getElementById('conn-status').textContent = ok ? '🟢 connected' : '🔴 disconnected';
     }
-    function saveCreds(url, key) {
-      setCookie('sb_url', url);
-      setCookie('sb_key', key);
-      localStorage.setItem('ivq_sb_url', url);
-      localStorage.setItem('ivq_sb_key', key);
-      localStorage.setItem('sb_url', url);
-      localStorage.setItem('sb_key', key);
-    }
-    let SB_URL = '', SB_KEY  = '';
-    function initCreds() {
-      const creds = loadCreds();
-      SB_URL = creds.url;
-      SB_KEY  = creds.key;
-      if (SB_URL) document.getElementById('sb-url').value = SB_URL;
-      if (SB_KEY)  document.getElementById('sb-key').value  = SB_KEY;
-      if (SB_URL && SB_KEY) { updateStatus(true); loadAll(); }
-    }
-    initCreds();
 
     function api(path, opts = {}) {
       return fetch(SB_URL + '/rest/v1/' + path, {
@@ -265,45 +232,6 @@ CREATE POLICY "allow_all_ivq" ON ivq_questions FOR ALL USING (true) WITH CHECK (
           ...(opts.headers || {})
         }
       });
-    }
-
-    async function testConnection() {
-      const testUrl = document.getElementById('sb-url').value.trim().replace(/\/$/, '');
-      const testKey = document.getElementById('sb-key').value.trim();
-      if (!testUrl || !testKey) { toast('Enter URL and key first', 'error'); return; }
-      const prevUrl = SB_URL, prevKey = SB_KEY;
-      SB_URL = testUrl; SB_KEY = testKey;
-      try {
-        const r = await api('videos?limit=1');
-        if (r.ok) {
-          toast('✅ Connection successful', 'success');
-        } else {
-          throw new Error('HTTP ' + r.status + ': ' + (await r.text()).slice(0, 80));
-        }
-      } catch(e) {
-        toast('❌ Connection failed: ' + e.message, 'error');
-      }
-      SB_URL = prevUrl; SB_KEY = prevKey;
-    }
-
-    async function connect() {
-      SB_URL = document.getElementById('sb-url').value.trim().replace(/\/$/, '');
-      SB_KEY  = document.getElementById('sb-key').value.trim();
-      if (!SB_URL || !SB_KEY) { toast('Enter URL and key', 'error'); return; }
-      try {
-        const r = await api('videos?limit=1');
-        if (r.ok) {
-          saveCreds(SB_URL, SB_KEY);
-          updateStatus(true);
-          document.getElementById('config-details').removeAttribute('open');
-          toast('Connected!', 'success');
-          loadAll();
-        } else { throw new Error(await r.text()); }
-      } catch(e) { updateStatus(false); toast('Connection failed: ' + e.message, 'error'); }
-    }
-
-    function updateStatus(ok) {
-      document.getElementById('conn-status').textContent = ok ? '🟢 connected' : '🔴 disconnected';
     }
 
     // ── State ─────────────────────────────────────────────────────────────────

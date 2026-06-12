@@ -138,7 +138,7 @@
 
   function resolveUrl(url) {
     if (!url || url === '#') return '#';
-    if (url.startsWith('http')) return url;
+    if (url.startsWith('http') || url.startsWith('/')) return url; // absolute path or external URL
     if (url.endsWith('.html') || url.includes('?') || url.endsWith('/')) return ROOT + url;
     return ROOT + 'markdown_renderer.html?file=' + url;
   }

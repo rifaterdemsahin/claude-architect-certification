@@ -364,6 +364,26 @@ func axiomErrorsHandler(tmpl *template.Template, cfg config, navConfigJS templat
 	}
 }
 
+// ── Public config endpoint ────────────────────────────────────────────────────
+// Returns the Supabase anon key (public by design) so static pages can
+// auto-connect without hardcoding it in HTML.
+
+func configHandler(cfg config) http.HandlerFunc {
+	type configResp struct {
+		SupabaseURL  string `json:"supabaseUrl"`
+		SupabaseAnon string `json:"supabaseAnon"`
+	}
+	payload, _ := json.Marshal(configResp{
+		SupabaseURL:  cfg.supabaseURL,
+		SupabaseAnon: cfg.supabaseAnon,
+	})
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Cache-Control", "public, max-age=300")
+		w.Write(payload)
+	}
+}
+
 // ── Client-side error ingestion ───────────────────────────────────────────────
 
 func clientErrorsHandler(cfg config) http.HandlerFunc {
@@ -444,6 +464,7 @@ func main() {
 	mux := http.NewServeMux()
 	mux.Handle("/shared/", observe(cfg, fs))
 	mux.Handle("/navigation_config.json", observe(cfg, fs))
+	mux.Handle("/api/config", observe(cfg, configHandler(cfg)))
 	mux.Handle("/api/nav/favs", observe(cfg, navFavsHandler(cfg)))
 	mux.Handle("/api/errors", observe(cfg, clientErrorsHandler(cfg)))
 	mux.Handle("/admin/errors", observe(cfg, axiomErrorsHandler(tmpl, cfg, navConfigJS)))
