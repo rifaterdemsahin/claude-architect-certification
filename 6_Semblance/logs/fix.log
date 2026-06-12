@@ -9,7 +9,7 @@ Status: `APPLIED` | `VERIFIED` | `WORKAROUND` | `PENDING`
 
 ## Fix Entries
 
-[2026-06-12] [5_Symbols/scripts] [APPLIED] — Created `5_Symbols/supabase/migrations/migration_code_references.sql` to add the missing `code_references` table (SERIAL id, video_id TEXT, label, url, note, sort_order, RLS allow_all). Run in Supabase SQL Editor to resolve HTTP 404 on all `/rest/v1/code_references` calls from the scripts page. Status → VERIFIED once confirmed in browser with no 404s.
+[2026-06-12] [5_Symbols/scripts] [VERIFIED] — Created `5_Symbols/supabase/migrations/migration_code_references.sql` to add the missing `code_references` table (SERIAL id, video_id TEXT, label, url, note, sort_order, RLS allow_all). Run in Supabase SQL Editor to resolve HTTP 404 on all `/rest/v1/code_references` calls from the scripts page. Status → VERIFIED once confirmed in browser with no 404s.
 [2026-06-09] [5_Symbols] [VERIFIED] — Added music_url + sfx_url columns to scenes table: `ALTER TABLE scenes ADD COLUMN IF NOT EXISTS music_url TEXT DEFAULT ''; ALTER TABLE scenes ADD COLUMN IF NOT EXISTS sfx_url TEXT DEFAULT '';` — audio_url column did not exist (never created under that name), ADD COLUMN IF NOT EXISTS used safely instead of RENAME. Scene form now persists scene-level music and SFX to Supabase.
 [2026-06-09] [5_Symbols] [VERIFIED] — Drive image invisible in scene card: toGDriveEmbedUrl was using uc?export=view which returns HTML interstitial for images. Fixed to use /thumbnail?id=&sz=w800 which always returns raw image bytes. Background image now renders correctly after upload.
 
