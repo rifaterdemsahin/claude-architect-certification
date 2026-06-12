@@ -48,6 +48,11 @@
     .toast { position: fixed; bottom: 24px; right: 24px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 18px; font-size: 0.88rem; z-index: 1000; max-width: 340px; transition: opacity 0.3s; }
     .toast.error { border-color: rgba(239,68,68,0.4); }
     .toast.success { border-color: rgba(16,185,129,0.4); }
+    @keyframes pulse {
+      0% { opacity: 0.6; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.1); }
+      100% { opacity: 0.6; transform: scale(1); }
+    }
   </style>
 </head>
 <body>
@@ -56,12 +61,33 @@
   <h1>🎵 Research Audio</h1>
   <p class="subtitle">Upload and play reference audio files — stored in Azure Blob Storage.</p>
 
+  <!-- Navigation Mode Bar -->
+  <div class="creation-modes" style="display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap;">
+    <a href="index.html" class="btn-sm btn-ghost" style="padding: 8px 16px; border-radius: 10px; font-weight: 700;">← Hub</a>
+    <a href="images.html" class="btn-sm btn-ghost" style="padding: 8px 16px; border-radius: 10px; font-weight: 700;">🖼 Image Mode</a>
+    <a href="audio.html" class="btn-sm" style="padding: 8px 16px; border-radius: 10px; font-weight: 700; background: rgba(139,92,246,0.15); border-color: var(--primary); color: var(--text);">🎵 Audio Mode</a>
+    <a href="videos.html" class="btn-sm btn-ghost" style="padding: 8px 16px; border-radius: 10px; font-weight: 700;">🎬 Video Mode</a>
+    <a href="notes.html" class="btn-sm btn-ghost" style="padding: 8px 16px; border-radius: 10px; font-weight: 700;">📝 Note Mode</a>
+  </div>
+
   <div class="status-bar" id="status-bar">⏳ Connecting…</div>
 
-  <div class="dropzone" id="dropzone">
-    <div class="dropzone-icon">🎤</div>
-    <div class="dropzone-text"><strong>Click to browse</strong> or drag &amp; drop audio files here</div>
-    <div class="dropzone-text" style="margin-top:6px;font-size:0.82rem">MP3, WAV, OGG, M4A, FLAC, AAC</div>
+  <div class="uploader-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 28px;">
+    <!-- Dropzone -->
+    <div class="dropzone" id="dropzone" style="margin-bottom: 0; display: flex; flex-direction: column; justify-content: center;">
+      <div class="dropzone-icon">📁</div>
+      <div class="dropzone-text"><strong>Click to browse</strong> or drag &amp; drop audio files here</div>
+      <div class="dropzone-text" style="margin-top:6px;font-size:0.82rem">MP3, WAV, OGG, M4A, FLAC, AAC</div>
+    </div>
+
+    <!-- Mobile Recorder -->
+    <div class="recorder-card" style="background: var(--card); border: 2px dashed rgba(139,92,246,0.3); border-radius: 16px; padding: 24px; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 12px; min-height: 196px;">
+      <div style="font-size: 2.8rem; display: none; color: var(--red); animation: pulse 1.5s infinite;" id="record-pulsar">🎙️</div>
+      <div style="font-size: 2.8rem; color: var(--primary);" id="record-static">🎤</div>
+      <div style="font-weight: 700; font-size: 1.05rem;" id="record-status">Mobile Voice Recorder</div>
+      <div style="font-family: monospace; font-size: 1.3rem; color: var(--muted); font-weight: bold;" id="record-timer">00:00</div>
+      <button class="btn-sm" id="btn-record" onclick="toggleRecording()" style="padding: 10px 20px; font-size: 0.85rem; border-radius: 10px; font-weight: 700; background: var(--primary); color: white; border: none; cursor: pointer; transition: all 0.2s; width: 100%; max-width: 200px;">🔴 Record Live</button>
+    </div>
   </div>
   <input type="file" id="file-input" accept="audio/*" multiple>
 
@@ -159,6 +185,106 @@ dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dra
 dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
 dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('drag-over'); uploadFiles(e.dataTransfer.files); });
 fi.addEventListener('change', () => { if (fi.files.length) uploadFiles(fi.files); fi.value = ''; });
+
+let mediaRecorder;
+let recordedChunks = [];
+let recordInterval;
+let startTime;
+
+function toggleRecording() {
+  const btn = document.getElementById('btn-record');
+  const status = document.getElementById('record-status');
+  const timer = document.getElementById('record-timer');
+  const pulsar = document.getElementById('record-pulsar');
+  const staticIcon = document.getElementById('record-static');
+
+  if (mediaRecorder && mediaRecorder.state === "recording") {
+    mediaRecorder.stop();
+    return;
+  }
+
+  navigator.mediaDevices.getUserMedia({ audio: true })
+    .then(stream => {
+      recordedChunks = [];
+      let mimeType = 'audio/webm';
+      if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'audio/mp4';
+      if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'audio/ogg';
+      if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = '';
+
+      mediaRecorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
+      mediaRecorder.ondataavailable = e => {
+        if (e.data && e.data.size > 0) recordedChunks.push(e.data);
+      };
+
+      mediaRecorder.onstop = () => {
+        stream.getTracks().forEach(track => track.stop());
+        clearInterval(recordInterval);
+        
+        btn.textContent = '🔴 Record Live';
+        btn.style.background = 'var(--primary)';
+        status.textContent = 'Saving voice recording…';
+        pulsar.style.display = 'none';
+        staticIcon.style.display = 'block';
+
+        const blob = new Blob(recordedChunks, { type: mimeType || 'audio/octet-stream' });
+        const d = new Date();
+        const ext = mimeType.includes('mp4') ? 'm4a' : mimeType.includes('ogg') ? 'ogg' : 'webm';
+        const filename = 'voice_' + d.getFullYear() +
+                         String(d.getMonth()+1).padStart(2,'0') +
+                         String(d.getDate()).padStart(2,'0') + '_' +
+                         String(d.getHours()).padStart(2,'0') +
+                         String(d.getMinutes()).padStart(2,'0') +
+                         String(d.getSeconds()).padStart(2,'0') + '.' + ext;
+
+        const fd = new FormData();
+        fd.append('file', blob, filename);
+
+        const progressWrap = document.getElementById('progress-wrap');
+        const progressFill = document.getElementById('progress-fill');
+        const progressLabel = document.getElementById('progress-label');
+        if (progressWrap) progressWrap.style.display = 'block';
+        if (progressFill) progressFill.style.width = '50%';
+        if (progressLabel) progressLabel.textContent = 'Saving recording…';
+
+        fetch('/api/research/upload?container=' + CONTAINER, { method: 'POST', body: fd })
+          .then(r => r.ok ? r.json() : r.text().then(t => Promise.reject(t)))
+          .then(() => {
+            if (progressFill) progressFill.style.width = '100%';
+            toast('Recording auto-saved: ' + filename, 'success');
+            status.textContent = 'Saved successfully!';
+            timer.textContent = '00:00';
+            setTimeout(() => {
+              if (progressWrap) progressWrap.style.display = 'none';
+              status.textContent = 'Mobile Voice Recorder';
+            }, 1500);
+            loadList();
+          })
+          .catch(e => {
+            toast('Failed to save recording: ' + e, 'error');
+            status.textContent = 'Upload failed';
+            if (progressWrap) progressWrap.style.display = 'none';
+          });
+      };
+
+      mediaRecorder.start();
+      startTime = Date.now();
+      pulsar.style.display = 'block';
+      staticIcon.style.display = 'none';
+      btn.textContent = '⏹ Stop';
+      btn.style.background = 'var(--red)';
+      status.textContent = 'Recording live…';
+
+      recordInterval = setInterval(() => {
+        const diff = Date.now() - startTime;
+        const secs = Math.floor(diff / 1000) % 60;
+        const mins = Math.floor(diff / 60000);
+        timer.textContent = String(mins).padStart(2,'0') + ':' + String(secs).padStart(2,'0');
+      }, 1000);
+    })
+    .catch(err => {
+      toast('Microphone error: ' + err.message, 'error');
+    });
+}
 
 document.getElementById('status-bar').textContent = '🟢 Connected to Azure Storage — research-audio';
 loadList();
