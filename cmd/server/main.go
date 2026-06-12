@@ -499,10 +499,23 @@ func parseStorageConnStr(connStr string) (accountName, accountKey string) {
 	return
 }
 
+// sasPerms puts permission chars in Azure's required canonical order: r a c w d x l t f m e o p i y q
+func sasPerms(raw string) string {
+	const order = "racwdxltfmoepiyq"
+	var b strings.Builder
+	for _, c := range order {
+		if strings.ContainsRune(raw, c) {
+			b.WriteRune(c)
+		}
+	}
+	return b.String()
+}
+
 // generateContainerSAS creates a service SAS query string for a blob container.
 // Uses 16-field string-to-sign (sv=2026-04-06, includes signedEncryptionScope as field 11).
-// Format verified against az storage container generate-sas output.
+// Format and permissions order verified against az storage container generate-sas output.
 func generateContainerSAS(accountName, accountKey, container, permissions string, expiry time.Time) (string, error) {
+	permissions = sasPerms(permissions) // enforce canonical order; Azure rejects sp= if out of order
 	const version = "2026-04-06"
 	expiryStr := expiry.UTC().Format("2006-01-02T15:04:05Z")
 	canonResource := "/blob/" + accountName + "/" + container
@@ -598,7 +611,7 @@ func researchUploadHandler(cfg config) http.HandlerFunc {
 		}
 
 		expiry := time.Now().UTC().Add(5 * time.Minute)
-		sasQuery, err := generateContainerSAS(cfg.azureAccountName, cfg.azureAccountKey, container, "cwlr", expiry)
+		sasQuery, err := generateContainerSAS(cfg.azureAccountName, cfg.azureAccountKey, container, "rcwl", expiry)
 		if err != nil {
 			http.Error(w, "sas error", http.StatusInternalServerError)
 			return
@@ -729,7 +742,7 @@ func researchFileHandler(cfg config) http.HandlerFunc {
 			io.Copy(w, resp.Body)
 
 		case http.MethodDelete:
-			sasQuery, err := generateContainerSAS(cfg.azureAccountName, cfg.azureAccountKey, container, "dlr", expiry)
+			sasQuery, err := generateContainerSAS(cfg.azureAccountName, cfg.azureAccountKey, container, "rdl", expiry)
 			if err != nil {
 				http.Error(w, "sas error", http.StatusInternalServerError)
 				return
