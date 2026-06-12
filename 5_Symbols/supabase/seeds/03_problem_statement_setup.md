@@ -11,7 +11,7 @@ Run each section in order in the **Supabase SQL Editor**:
 ## 🗂 Table Structure
 
 | 📦 Table | 🔖 Purpose |
-|---|---|
+| --- | --- |
 | `problem_pages` | Page header — title, headline, stage number |
 | `target_personas` | "Who Faces This Problem" cards |
 | `core_challenges` | Numbered core problem items |
@@ -144,7 +144,7 @@ Then click the **pen icon** (bottom-right corner of the page). Enter the passwor
 ## 🧪 Verification Checklist
 
 | ✅ Check | 🔍 How to verify |
-|---|---|
+| --- | --- |
 | ✅ Tables exist | Supabase → Table Editor — all 5 tables visible |
 | ✅ RLS enabled | Supabase → Auth → Policies — policies listed per table |
 | ✅ Seed data present | Supabase → Table Editor → `problem_pages` — 1 row with fixed UUID |
@@ -156,7 +156,7 @@ Then click the **pen icon** (bottom-right corner of the page). Enter the passwor
 ## 🐛 Troubleshooting
 
 | 🔴 Error | 🔧 Fix |
-|---|---|
+| --- | --- |
 | `404 target_personas` | Table not created — run `06_problem_statement.sql` |
 | `401 Unauthorized` | RLS policy missing or anon key not set in localStorage |
 | Page loads but sections empty | Seed data not inserted — run Step 3 above |

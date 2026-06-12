@@ -339,7 +339,7 @@
 <script>
   // ── Supabase config ──────────────────────────────────────────
   const SB_URL  = localStorage.getItem('supabase_url')      || 'https://rmekfsdhglyiralxvkwc.supabase.co';
-  const SB_KEY  = localStorage.getItem('supabase_anon_key') || '';
+  const SB_KEY  = localStorage.getItem('supabase_anon_key') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZWtmc2RoZ2x5aXJhbHh2a3djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NzYzODgsImV4cCI6MjA5NjM1MjM4OH0.ay6HsmO_CbMGDXL_Dv4DT-paAIAOqlQPfmqqx_mexSU';
   const PAGE_ID = '00000000-0000-0000-0000-000000000001';
 
   const HEADERS = {
@@ -757,12 +757,7 @@
   }
 
   // ── Boot ─────────────────────────────────────────────────────
-  if (!SB_KEY) {
-    showError('supabase_anon_key not set in localStorage — showing static fallback. Run: localStorage.setItem("supabase_anon_key","your-key") then reload.');
-    renderFallback();
-  } else {
-    loadAll();
-  }
+  loadAll();
 </script>
 </body>
 </html>
