@@ -333,6 +333,7 @@
     .action-chip:hover { transform: translateY(-2px); }
     .action-chip.shotlist:hover { background: rgba(16,185,129,0.15); border-color: rgba(16,185,129,0.4); }
     .action-chip.outline:hover { background: rgba(139,92,246,0.15); border-color: rgba(139,92,246,0.4); }
+    .action-chip.research:hover { background: rgba(59,130,246,0.15); border-color: rgba(59,130,246,0.4); }
 
     /* Audio generation */
     .audio-action-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 8px 0 10px; }
@@ -778,6 +779,7 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
           html += `<div class="video-action-bar">`;
           html += `<a class="action-chip shotlist" href="${getShotlistUrl(m.id)}" title="Shot List — Module ${m.id}, Video ${v.id}">🎬</a>`;
           html += `<a class="action-chip outline" href="${getOutlineUrl(m.id, v.id)}" title="Jump to Module ${m.id} in Course Outline">🗺</a>`;
+          html += `<a class="action-chip research" href="../research/index.html?video=${encodeURIComponent(elementId)}" title="Research items linked to this video">🔬</a>`;
           html += `</div>`;
           
           // Editable Script Block
