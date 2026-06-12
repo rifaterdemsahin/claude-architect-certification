@@ -97,7 +97,8 @@ To collaborate on production-ready AI workflows, ensuring:
 ### 🔒 Non-Negotiable Invariants
 
 1. **No secret reaches the browser** — Supabase service key is server-side only.
-2. **Every handler wrapped by `observe`** — all errors funnel to Axiom.
+2. **🚫 HTML containment** — All `.html` files MUST live inside `5_Symbols/`. Permitted root-level exceptions: `index.html` (GitHub Pages) and `markdown_renderer.html` (doc viewer). Never create a new HTML file outside `5_Symbols/`.
+3. **Every handler wrapped by `observe`** — all errors funnel to Axiom.
 3. **After every change:** `go build ./... && go vet ./... && go test ./...` must pass before continuing.
 4. **Parity, not redesign** — behaviour identical to the current site.
 5. **Port one route at a time** — do not touch scope outside what was asked; ask before adding a dependency.

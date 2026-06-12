@@ -179,6 +179,7 @@ This document defines how AI agents interact with the **Claude AI Certification 
 
 - **Stack:** Go stdlib only (no external deps without explicit approval), `html/template` server-render, single binary, scratch Docker image, Fly.io auto-stop machine.
 - **Secret hygiene:** Supabase service key is server-side only — never reaches the browser.
+- **🚫 HTML containment:** All `.html` files MUST live inside `5_Symbols/`. The only permitted exceptions are `index.html` (GitHub Pages requires it at the repo root) and `markdown_renderer.html` (root-level doc viewer entry point). Never create a new HTML file outside `5_Symbols/`.
 - **Observability:** Every HTTP handler must be wrapped by `observe`; all errors funnel to Axiom.
 - **Gate:** After every change run `go build ./... && go vet ./... && go test ./...` before committing.
 - **Parity:** Behaviour must be identical to the current static site — no redesign.

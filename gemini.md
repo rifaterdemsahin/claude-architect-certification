@@ -104,6 +104,7 @@ claude-architect-certification/
 - **Record every prompt** in `prompts.md` — log date, agent, and purpose for each prompt given
 - **README.md must include the public GitHub Pages URL** — e.g., `https://rifaterdemsahin.github.io/<repo-name>/` (see [proxmox example](https://rifaterdemsahin.github.io/proxmox/))
 - **Keep `index.html` at the repo root** — GitHub Pages requires it at the root for the site to work
+- **🚫 HTML containment** — All `.html` files MUST live inside `5_Symbols/`. The only permitted exceptions are `index.html` (GitHub Pages root requirement) and `markdown_renderer.html` (root-level doc viewer). Never create a new HTML file outside `5_Symbols/`.
 - **Active Reflection Routine** — Write a short "retrospective journal" in `6_Semblance/logs/lessons_learned.md` after every milestone.
 - **Keep Debug Menu Config Synchronized** — When markdown files are added, modified, or deleted in any stage, remember to update the debug menu configuration (`navigation_config.json` and the fallback arrays in `index.html` and `markdown_renderer.html`) to reflect these changes immediately.
 - **Architecture Documentation Sync** — When the system architecture changes, immediately update the architecture overview document at `2_Environment/1_architecture.md` (with updated Mermaid diagrams) to keep it working.
