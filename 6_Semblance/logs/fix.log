@@ -75,3 +75,6 @@ Lesson captured in lessons_learned.md
 [2026-06-12] [5_Symbols] [VERIFIED] — Fixed Axiom 422 error by adding startTime to query payload in cmd/server/main.go and get_logs.sh
 
 [2026-06-12] [6_Semblance] [VERIFIED] — Technical debt audit: archived error_log.md (template), moved error_go_vscode_path.md to errors/, populated workarounds.md with 4 real workarounds, updated gap_analysis.md with actual project deviations, promoted all eligible APPLIED fixes to VERIFIED, moved sanity_check.html to _obsolete/, created consulting/README.md. See 6_Semblance/technical_debt_report.md.
+
+[2026-06-12] [5_Symbols] [VERIFIED] — Removed Supabase connection from producer_checklist.html and migrated checklist task storage entirely to localStorage.
+
