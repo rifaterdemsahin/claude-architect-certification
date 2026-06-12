@@ -48,3 +48,4 @@ Severity levels: `CRITICAL` | `ERROR` | `WARNING` | `INFO`
 [2026-06-12] 🔴 [5_Symbols/Go] [HIGH] — Azure 403 Upload Failure: AuthenticationFailed, SAS field 'sp' is not well formed when uploading files to research-audio container. Fix: 6_Semblance/logs/fix.log
 
 [2026-06-12] 🧹 [6_Semblance] [INFO] — Technical debt audit completed. 2 HIGH, 5 MEDIUM issues resolved. 4 LOW items deferred. Full report: 6_Semblance/technical_debt_report.md
+[2026-06-12] 🔴 [5_Symbols/scripts] [HIGH] — `code_references` table missing in Supabase. All REST calls to `/rest/v1/code_references?video_id=eq.*` return HTTP 404. Affects every video row in the scripts page (`5_Symbols/production/preprod/scripts/index.html`). Fix: run `5_Symbols/supabase/migrations/migration_code_references.sql` in Supabase SQL Editor.
