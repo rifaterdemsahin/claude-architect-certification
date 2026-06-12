@@ -21,7 +21,7 @@ REPORT_FILE="$BACKUP_DIR/stats_${TIMESTAMP}.txt"
 
 mkdir -p "$BACKUP_DIR"
 
-# All 18 tables defined in schema.sql
+# All tables defined in schema.sql
 TABLES=(
   modules
   videos
@@ -34,6 +34,7 @@ TABLES=(
   checklist_progress
   course_content
   scripts
+  sentences
   outline
   course_modules
   course_videos
@@ -68,6 +69,34 @@ get_row_count_api() {
   local count
   count=$(echo "$output" | grep -oE '[0-9]+$' | tail -1)
   echo "${count:-?}"
+}
+
+# ──────────────────────────────────────────────
+# Helper: query word count via Supabase REST API
+# ──────────────────────────────────────────────
+get_word_count_api() {
+  local table="$1"
+  local column=""
+  if [ "$table" = "scripts" ]; then column="script_text"; fi
+  if [ "$table" = "sentences" ]; then column="sentence_text"; fi
+  if [ "$table" = "scenes" ]; then column="script"; fi
+  
+  if [ -z "$column" ]; then echo "-"; return; fi
+
+  # Use python for robust word counting to avoid regex issues in bash
+  python3 -c "
+import requests, os, re
+url = \"$SUPABASE_URL\"
+key = \"$SUPABASE_KEY\"
+headers = {'apikey': key, 'Authorization': f'Bearer {key}'}
+res = requests.get(f'{url}/rest/v1/$table?select=$column', headers=headers)
+if res.status_code == 200:
+    data = res.json()
+    total = sum(len(re.findall(r\"\\w+\", item.get(\"$column\", \"\") or \"\")) for item in data)
+    print(total)
+else:
+    print(0)
+" 2>/dev/null || echo "0"
 }
 
 # ──────────────────────────────────────────────
@@ -107,26 +136,36 @@ fi
   echo ""
   echo "  Total tables in schema: $TABLE_COUNT"
   echo ""
-  printf "  %-25s %10s\n" "TABLE" "ROWS"
-  printf "  %-25s %10s\n" "-------------------------" "----------"
+  printf "  %-25s %10s %10s\n" "TABLE" "ROWS" "WORDS"
+  printf "  %-25s %10s %10s\n" "-------------------------" "----------" "----------"
 
   TOTAL_ROWS=0
+  TOTAL_WORDS=0
 
   for table in "${TABLES[@]}"; do
     if [ "$MODE" = "api" ]; then
       count=$(get_row_count_api "$table")
+      words=$(get_word_count_api "$table")
     else
       count=$(get_row_count_local "$table")
+      words="-"
     fi
+    
     case "$count" in
       ''|*[!0-9]*) : ;;
       *) TOTAL_ROWS=$((TOTAL_ROWS + count)) ;;
     esac
-    printf "  %-25s %10s\n" "$table" "$count"
+
+    case "$words" in
+      ''|*[!0-9]*) : ;;
+      *) TOTAL_WORDS=$((TOTAL_WORDS + words)) ;;
+    esac
+
+    printf "  %-25s %10s %10s\n" "$table" "$count" "$words"
   done
 
   echo ""
-  printf "  %-25s %10s\n" "TOTAL ROWS" "$TOTAL_ROWS"
+  printf "  %-25s %10s %10s\n" "TOTAL" "$TOTAL_ROWS" "$TOTAL_WORDS"
   echo ""
   echo "========================================"
   if [ "$MODE" = "local" ]; then
