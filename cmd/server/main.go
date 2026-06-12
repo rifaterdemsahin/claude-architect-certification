@@ -351,7 +351,10 @@ func axiomErrorsHandler(tmpl *template.Template, cfg config, navConfigJS templat
 			apl := fmt.Sprintf(`['%s'] | sort by _time desc | limit 100`, cfg.axiomDataset)
 			data.APL = apl
 			data.QueryURL = fmt.Sprintf("%s/v1/datasets/%s/query", cfg.axiomQueryURL, cfg.axiomDataset)
-			body, _ := json.Marshal(map[string]string{"apl": apl})
+			body, _ := json.Marshal(map[string]any{
+				"apl":       apl,
+				"startTime": "now-24h",
+			})
 			queryURL := fmt.Sprintf("%s/v1/datasets/%s/query", cfg.axiomQueryURL, cfg.axiomDataset)
 			log.Printf("axiom query -> %s (apl: %s)", queryURL, apl)
 
@@ -435,7 +438,9 @@ func clientErrorsHandler(cfg config) http.HandlerFunc {
 			return
 		}
 		payload["_time"] = time.Now().UTC().Format(time.RFC3339)
-		payload["level"] = "error"
+		if _, ok := payload["level"]; !ok {
+			payload["level"] = "error"
+		}
 		payload["source"] = "client"
 		go shipToAxiom(cfg, []map[string]any{payload})
 		w.WriteHeader(http.StatusNoContent)

@@ -8,6 +8,7 @@
         {
           "label": "3. 🔬 Research",
           "children": [
+            { "label": "🗂 Research Hub", "url": "5_Symbols/production/preprod/research/index.html" },
             { "label": "🖼 Images", "url": "5_Symbols/production/preprod/research/images.html" },
             { "label": "🎵 Audio", "url": "5_Symbols/production/preprod/research/audio.html" },
             { "label": "🎬 Videos", "url": "5_Symbols/production/preprod/research/videos.html" },

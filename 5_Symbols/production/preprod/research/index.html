@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🔬 Research Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../../../shared/nav.css">
+  <style>
+    :root {
+      --bg: #030712; --card: rgba(17,24,39,0.9); --border: rgba(139,92,246,0.2);
+      --text: #f3f4f6; --muted: #9ca3af; --primary: #8b5cf6; --green: #10b981;
+      --red: #ef4444; --blue: #3b82f6; --yellow: #f59e0b;
+      --font-h: 'Outfit', sans-serif; --font-b: 'Plus Jakarta Sans', sans-serif;
+      --font-mono: 'Fira Mono', 'Consolas', monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: var(--font-b); line-height: 1.6; padding: 32px 24px 120px; }
+    .container { max-width: 1100px; margin: 0 auto; }
+    h1 { font-family: var(--font-h); font-size: 2.4rem; font-weight: 800; margin-bottom: 6px; }
+    .subtitle { color: var(--muted); margin-bottom: 32px; }
+
+    /* Section grid */
+    .sections { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; margin-bottom: 40px; }
+    .section-card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 20px 22px; cursor: pointer; transition: border-color 0.2s; text-decoration: none; color: inherit; display: block; }
+    .section-card:hover { border-color: rgba(139,92,246,0.6); }
+    .section-icon { font-size: 2.4rem; margin-bottom: 10px; }
+    .section-title { font-family: var(--font-h); font-size: 1.25rem; font-weight: 800; margin-bottom: 4px; }
+    .section-count { font-size: 0.88rem; color: var(--muted); margin-bottom: 12px; }
+    .section-link { font-size: 0.82rem; color: var(--primary); }
+
+    /* Tab system */
+    .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 24px; }
+    .tab { padding: 8px 18px; border-radius: 10px; border: 1px solid var(--border); background: rgba(255,255,255,0.03); color: var(--muted); cursor: pointer; font-size: 0.88rem; font-weight: 600; font-family: var(--font-b); transition: all 0.2s; }
+    .tab:hover { background: rgba(255,255,255,0.07); color: var(--text); }
+    .tab.active { background: rgba(139,92,246,0.15); border-color: var(--primary); color: var(--text); }
+
+    /* Gallery / list */
+    .pane { display: none; }
+    .pane.active { display: block; }
+    .section-header { font-family: var(--font-h); font-size: 1.1rem; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+
+    /* Images grid */
+    .img-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
+    .img-item { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    .img-item img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; background: rgba(255,255,255,0.03); }
+    .img-item .name { padding: 6px 10px; font-size: 0.72rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* Audio list */
+    .audio-list { display: flex; flex-direction: column; gap: 12px; }
+    .audio-row { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+    .audio-row .row-title { font-weight: 600; font-size: 0.9rem; margin-bottom: 8px; }
+    .audio-row audio { width: 100%; height: 36px; accent-color: var(--primary); }
+
+    /* Video list */
+    .video-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+    .video-item { background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+    .video-item video { width: 100%; max-height: 220px; display: block; background: #000; }
+    .video-item .name { padding: 10px 14px; font-size: 0.82rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* Notes list */
+    .notes-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+    .note-item { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px; cursor: pointer; transition: border-color 0.15s; }
+    .note-item:hover { border-color: rgba(139,92,246,0.5); }
+    .note-item .n-title { font-weight: 700; font-size: 0.9rem; margin-bottom: 6px; }
+    .note-item .n-preview { font-size: 0.78rem; color: var(--muted); font-family: var(--font-mono); white-space: pre-wrap; max-height: 80px; overflow: hidden; }
+    .note-item .n-meta { font-size: 0.72rem; color: var(--muted); margin-top: 8px; }
+
+    /* Modal for note */
+    .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; display: none; align-items: center; justify-content: center; padding: 24px; }
+    .modal-bg.open { display: flex; }
+    .modal { background: #0f172a; border: 1px solid var(--border); border-radius: 18px; padding: 24px 28px; max-width: 700px; width: 100%; max-height: 80vh; overflow-y: auto; }
+    .modal-title { font-family: var(--font-h); font-size: 1.2rem; font-weight: 800; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; }
+    .modal-close { background: none; border: none; color: var(--muted); font-size: 1.4rem; cursor: pointer; padding: 0 4px; }
+    .modal-body { font-family: var(--font-mono); font-size: 0.85rem; color: var(--text); white-space: pre-wrap; line-height: 1.7; }
+
+    .empty-state { text-align: center; color: var(--muted); padding: 48px; font-size: 0.95rem; }
+    .loading { text-align: center; color: var(--muted); padding: 32px; }
+    .err { color: var(--red); font-size: 0.85rem; padding: 12px 0; }
+
+    .btn-sm { padding: 4px 12px; border-radius: 7px; border: none; cursor: pointer; font-size: 0.75rem; font-weight: 600; font-family: var(--font-b); background: rgba(139,92,246,0.15); color: var(--primary); border: 1px solid rgba(139,92,246,0.3); text-decoration: none; }
+    .btn-sm:hover { background: rgba(139,92,246,0.25); }
+  </style>
+</head>
+<body>
+<script src="../../../../shared/nav.js"></script>
+<div class="container">
+  <h1>🔬 Research Hub</h1>
+  <p class="subtitle">All pre-production research assets — images, audio, videos, and notes — stored in Azure Blob Storage.</p>
+
+  <!-- Summary cards -->
+  <div class="sections" id="summary-cards">
+    <div class="section-card" onclick="switchTab('images')">
+      <div class="section-icon">🖼</div>
+      <div class="section-title">Images</div>
+      <div class="section-count" id="cnt-images">Loading…</div>
+      <div class="section-link">Browse gallery →</div>
+    </div>
+    <div class="section-card" onclick="switchTab('audio')">
+      <div class="section-icon">🎵</div>
+      <div class="section-title">Audio</div>
+      <div class="section-count" id="cnt-audio">Loading…</div>
+      <div class="section-link">Play clips →</div>
+    </div>
+    <div class="section-card" onclick="switchTab('videos')">
+      <div class="section-icon">🎬</div>
+      <div class="section-title">Videos</div>
+      <div class="section-count" id="cnt-videos">Loading…</div>
+      <div class="section-link">Watch clips →</div>
+    </div>
+    <div class="section-card" onclick="switchTab('notes')">
+      <div class="section-icon">📝</div>
+      <div class="section-title">Notes</div>
+      <div class="section-count" id="cnt-notes">Loading…</div>
+      <div class="section-link">Read notes →</div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('images')">🖼 Images</button>
+    <button class="tab" onclick="switchTab('audio')">🎵 Audio</button>
+    <button class="tab" onclick="switchTab('videos')">🎬 Videos</button>
+    <button class="tab" onclick="switchTab('notes')">📝 Notes</button>
+  </div>
+
+  <!-- Images pane -->
+  <div class="pane active" id="pane-images">
+    <div class="section-header">🖼 Images <a class="btn-sm" href="images.html">+ Upload</a></div>
+    <div class="img-grid" id="grid-images"><div class="loading">Loading…</div></div>
+  </div>
+
+  <!-- Audio pane -->
+  <div class="pane" id="pane-audio">
+    <div class="section-header">🎵 Audio <a class="btn-sm" href="audio.html">+ Upload</a></div>
+    <div class="audio-list" id="list-audio"><div class="loading">Loading…</div></div>
+  </div>
+
+  <!-- Videos pane -->
+  <div class="pane" id="pane-videos">
+    <div class="section-header">🎬 Videos <a class="btn-sm" href="videos.html">+ Upload</a></div>
+    <div class="video-list" id="list-videos"><div class="loading">Loading…</div></div>
+  </div>
+
+  <!-- Notes pane -->
+  <div class="pane" id="pane-notes">
+    <div class="section-header">📝 Notes <a class="btn-sm" href="notes.html">+ New note</a></div>
+    <div class="notes-list" id="list-notes"><div class="loading">Loading…</div></div>
+  </div>
+</div>
+
+<!-- Note reader modal -->
+<div class="modal-bg" id="modal-bg" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-title">
+      <span id="modal-title-text">📄 Note</span>
+      <button class="modal-close" onclick="document.getElementById('modal-bg').classList.remove('open')">✕</button>
+    </div>
+    <pre class="modal-body" id="modal-body"></pre>
+  </div>
+</div>
+
+<script>
+function fmtBytes(b) {
+  if (b < 1024) return b + ' B';
+  if (b < 1024*1024) return (b/1024).toFixed(1) + ' KB';
+  return (b/1024/1024).toFixed(1) + ' MB';
+}
+
+const CONTAINERS = {
+  images: 'research-images',
+  audio:  'research-audio',
+  videos: 'research-videos',
+  notes:  'research-notes'
+};
+
+const data = { images: null, audio: null, videos: null, notes: null };
+
+function fileUrl(container, name) {
+  return '/api/research/file?container=' + container + '&name=' + encodeURIComponent(name);
+}
+
+function renderImages(files) {
+  const el = document.getElementById('grid-images');
+  document.getElementById('cnt-images').textContent = files.length + ' file' + (files.length !== 1 ? 's' : '');
+  if (!files.length) { el.innerHTML = '<div class="empty-state">No images yet. <a href="images.html">Upload one →</a></div>'; return; }
+  el.innerHTML = '';
+  files.forEach(f => {
+    const url = fileUrl(CONTAINERS.images, f.name);
+    const isImg = /^image\//i.test(f.contentType);
+    const div = document.createElement('div');
+    div.className = 'img-item';
+    div.innerHTML = isImg
+      ? `<img src="${url}" alt="${f.name}" loading="lazy"><div class="name" title="${f.name}">${f.name}</div>`
+      : `<div style="padding:24px;text-align:center;font-size:2rem">🖼</div><div class="name">${f.name}</div>`;
+    el.appendChild(div);
+  });
+}
+
+function renderAudio(files) {
+  const el = document.getElementById('list-audio');
+  document.getElementById('cnt-audio').textContent = files.length + ' file' + (files.length !== 1 ? 's' : '');
+  if (!files.length) { el.innerHTML = '<div class="empty-state">No audio yet. <a href="audio.html">Upload one →</a></div>'; return; }
+  el.innerHTML = '';
+  files.forEach(f => {
+    const url = fileUrl(CONTAINERS.audio, f.name);
+    const div = document.createElement('div');
+    div.className = 'audio-row';
+    div.innerHTML = `<div class="row-title">🎵 ${f.name} <span style="color:var(--muted);font-size:0.75rem">${fmtBytes(f.size)}</span></div>
+      <audio controls preload="none" src="${url}" style="width:100%;height:36px;accent-color:var(--primary)"></audio>`;
+    el.appendChild(div);
+  });
+}
+
+function renderVideos(files) {
+  const el = document.getElementById('list-videos');
+  document.getElementById('cnt-videos').textContent = files.length + ' file' + (files.length !== 1 ? 's' : '');
+  if (!files.length) { el.innerHTML = '<div class="empty-state">No videos yet. <a href="videos.html">Upload one →</a></div>'; return; }
+  el.innerHTML = '';
+  files.forEach(f => {
+    const url = fileUrl(CONTAINERS.videos, f.name);
+    const div = document.createElement('div');
+    div.className = 'video-item';
+    div.innerHTML = `<video controls preload="metadata" src="${url}"></video><div class="name" title="${f.name}">${f.name} · ${fmtBytes(f.size)}</div>`;
+    el.appendChild(div);
+  });
+}
+
+function renderNotes(files) {
+  const el = document.getElementById('list-notes');
+  document.getElementById('cnt-notes').textContent = files.length + ' note' + (files.length !== 1 ? 's' : '');
+  if (!files.length) { el.innerHTML = '<div class="empty-state">No notes yet. <a href="notes.html">Write one →</a></div>'; return; }
+  el.innerHTML = '';
+  files.slice().reverse().forEach(f => {
+    const url = fileUrl(CONTAINERS.notes, f.name);
+    const div = document.createElement('div');
+    div.className = 'note-item';
+    div.innerHTML = `<div class="n-title">📄 ${f.name}</div>
+      <div class="n-preview" id="np-${CSS.escape(f.name)}">Loading…</div>
+      <div class="n-meta">${fmtBytes(f.size)} · ${f.lastModified || ''}</div>`;
+    div.addEventListener('click', () => openNote(f.name, url));
+    el.appendChild(div);
+    // load preview
+    fetch(url).then(r => r.text()).then(t => {
+      const p = document.getElementById('np-' + CSS.escape(f.name));
+      if (p) p.textContent = t.trim().slice(0, 160) || '(empty)';
+    }).catch(() => {});
+  });
+}
+
+function openNote(name, url) {
+  document.getElementById('modal-title-text').textContent = '📄 ' + name;
+  document.getElementById('modal-body').textContent = 'Loading…';
+  document.getElementById('modal-bg').classList.add('open');
+  fetch(url).then(r => r.text()).then(t => {
+    document.getElementById('modal-body').textContent = t || '(empty)';
+  }).catch(e => {
+    document.getElementById('modal-body').textContent = 'Error: ' + e.message;
+  });
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modal-bg')) {
+    document.getElementById('modal-bg').classList.remove('open');
+  }
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    const names = ['images','audio','videos','notes'];
+    t.classList.toggle('active', names[i] === name);
+  });
+  document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
+  document.getElementById('pane-' + name).classList.add('active');
+}
+
+// Load all 4 containers in parallel
+['images','audio','videos','notes'].forEach(key => {
+  fetch('/api/research/files?container=' + CONTAINERS[key])
+    .then(r => r.ok ? r.json() : [])
+    .then(files => {
+      data[key] = files;
+      if (key === 'images') renderImages(files);
+      else if (key === 'audio') renderAudio(files);
+      else if (key === 'videos') renderVideos(files);
+      else renderNotes(files);
+    })
+    .catch(() => {
+      document.getElementById('cnt-' + key).textContent = 'unavailable';
+    });
+});
+</script>
+</body>
+</html>
