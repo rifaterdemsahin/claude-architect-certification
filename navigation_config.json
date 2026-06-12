@@ -70,7 +70,11 @@
             },
             {
               "label": "🗄 Supabase Admin (Local)",
-              "url": "http://127.0.0.1:5500/5_Symbols/supabase/ui/admin.html"
+              "url": "5_Symbols/supabase/ui/admin.html"
+            },
+            {
+              "label": "🗃 Preprod Data Admin",
+              "url": "5_Symbols/production/preprod/tools/admin.html"
             },
             {
               "label": "📡 Axiom Errors Admin",
@@ -138,19 +142,27 @@
       "label": "📦 Post Prod",
       "children": [
         {
-          "label": "10. 🧭 Certification Guide & Exam",
+          "label": "1. 🎬 Edit List",
+          "url": "5_Symbols/production/postprod/edit_list.html"
+        },
+        {
+          "label": "2. 📺 Course Playlist",
+          "url": "https://www.youtube.com/watch?v=F8IBooe3bXY&list=PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy/"
+        },
+        {
+          "label": "3. 🧭 Exam & Case Study",
           "url": "markdown_renderer.html?file=4_Formula/certification/exam_and_case_study.md"
         },
         {
-          "label": "11. 🔥 Join $10/mo",
+          "label": "4. 💼 Membership / Business",
           "url": "5_Symbols/production/publish/membership.html"
         },
         {
-          "label": "12. 💰 Business Plan",
+          "label": "5. 📊 Business Plan",
           "url": "markdown_renderer.html?file=4_Formula/certification/business_plan.md"
         },
         {
-          "label": "13. 💼 LinkedIn",
+          "label": "6. 🤝 LinkedIn Outreach",
           "children": [
             {
               "label": "Journey Post (pre-exam)",
@@ -165,10 +177,6 @@
               "url": "5_Symbols/production/postprod/linkedin_messaging.html#msg-c"
             }
           ]
-        },
-        {
-          "label": "14. 🎬 Edit List (Module 1)",
-          "url": "5_Symbols/production/postprod/edit_list.html"
         },
         {
           "label": "🛠️ Tools",
