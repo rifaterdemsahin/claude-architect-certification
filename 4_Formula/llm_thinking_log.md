@@ -55,17 +55,21 @@ Add functionality to relate research assets (images, audio, videos, notes) direc
 4. **Validation**:
    - Ensure the scripts interface handles listing, linking, and unlinking successfully.
 
-## 2026-06-12 — Hover Details for Linked Research Items
+## 2026-06-12 — Create Edit List Page with Canva Embed
 
 ### 🎯 Objective
-Enable detailed metadata display (size, content type, last modified date) when hovering over related research items inside the master script page [scripts/index.html](file:///Users/rifaterdemsahin/projects/claude-architect-certification/5_Symbols/production/preprod/scripts/index.html).
+Create a new "Edit List" page in the post-production section (`5_Symbols/production/postprod/edit_list.html`) to track editing tasks and embed the Module 1 Video 1 Canva presentation.
 
 ### 📐 Design & Implementation Plan
-1. **Metadata Retention**:
-   - Update the `/api/research/files` data mapping in scripts page to preserve properties like `size`, `contentType`, and `lastModified`.
-2. **Premium Tooltip Styling**:
-   - Add a sleek CSS-based glassmorphic tooltip style for displaying metadata.
-3. **Hover Event & Element hydration**:
-   - Wrap the related research link in a hover container and render details such as file size, type, and modification date inside the tooltip element.
+1. **File Creation**: Create `5_Symbols/production/postprod/edit_list.html`.
+2. **Content Integration**:
+   - Embed the Canva video using the provided iframe code.
+   - Include a direct link to the Canva design.
+   - Follow the project's visual style (Flexbox/Grid, Glassmorphism, Emojis).
+3. **Navigation Update**:
+   - Add the new page to `navigation_config.json`.
+   - Update fallback arrays in `index.html` and `markdown_renderer.html`.
+4. **Documentation**: Update `5_Symbols/production/postprod/README.md` if necessary.
+5. **Validation**: Verify the page renders correctly and links are functional.
 
 
