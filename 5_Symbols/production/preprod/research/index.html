@@ -117,12 +117,20 @@
     </div>
   </div>
 
-  <!-- Tabs -->
-  <div class="tabs">
-    <button class="tab active" onclick="switchTab('images')">🖼 Images</button>
-    <button class="tab" onclick="switchTab('audio')">🎵 Audio</button>
-    <button class="tab" onclick="switchTab('videos')">🎬 Videos</button>
-    <button class="tab" onclick="switchTab('notes')">📝 Notes</button>
+  <!-- Tabs & Multiselect Toggle -->
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+    <div class="tabs" style="margin-bottom: 0;">
+      <button class="tab" id="tab-all" onclick="switchTab('all')">✨ All</button>
+      <button class="tab active" id="tab-images" onclick="switchTab('images')">🖼 Images</button>
+      <button class="tab" id="tab-audio" onclick="switchTab('audio')">🎵 Audio</button>
+      <button class="tab" id="tab-videos" onclick="switchTab('videos')">🎬 Videos</button>
+      <button class="tab" id="tab-notes" onclick="switchTab('notes')">📝 Notes</button>
+    </div>
+
+    <label style="display: inline-flex; align-items: center; gap: 8px; font-size: 0.88rem; font-weight: 600; color: var(--muted); cursor: pointer; user-select: none;">
+      <input type="checkbox" id="multiselect-toggle" onchange="toggleMultiselectMode()" style="accent-color: var(--primary); cursor: pointer; width: 16px; height: 16px;">
+      Multiselect Mode
+    </label>
   </div>
 
   <!-- Images pane -->
@@ -266,13 +274,66 @@ function closeModal(e) {
   }
 }
 
+let activeTabs = ['images'];
+let isMultiselect = false;
+
+function toggleMultiselectMode() {
+  isMultiselect = document.getElementById('multiselect-toggle').checked;
+  if (!isMultiselect) {
+    const current = activeTabs.filter(t => t !== 'all')[0] || 'images';
+    activeTabs = [current];
+  }
+  updateUI();
+}
+
 function switchTab(name) {
-  document.querySelectorAll('.tab').forEach((t, i) => {
-    const names = ['images','audio','videos','notes'];
-    t.classList.toggle('active', names[i] === name);
+  if (isMultiselect) {
+    if (name === 'all') {
+      const allCategories = ['images', 'audio', 'videos', 'notes'];
+      const hasAll = allCategories.every(c => activeTabs.includes(c));
+      if (hasAll) {
+        activeTabs = [];
+      } else {
+        activeTabs = [...allCategories];
+      }
+    } else {
+      const idx = activeTabs.indexOf(name);
+      if (idx > -1) {
+        activeTabs.splice(idx, 1);
+      } else {
+        activeTabs.push(name);
+      }
+    }
+  } else {
+    if (name === 'all') {
+      activeTabs = ['images', 'audio', 'videos', 'notes'];
+    } else {
+      activeTabs = [name];
+    }
+  }
+  updateUI();
+}
+
+function updateUI() {
+  const allCategories = ['images', 'audio', 'videos', 'notes'];
+  const isAllActive = allCategories.every(c => activeTabs.includes(c));
+  
+  const tabAllBtn = document.getElementById('tab-all');
+  if (tabAllBtn) {
+    tabAllBtn.classList.toggle('active', isAllActive && activeTabs.length > 0);
+  }
+  
+  allCategories.forEach(c => {
+    const btn = document.getElementById('tab-' + c);
+    if (btn) {
+      btn.classList.toggle('active', activeTabs.includes(c));
+    }
+    
+    const pane = document.getElementById('pane-' + c);
+    if (pane) {
+      pane.classList.toggle('active', activeTabs.includes(c));
+    }
   });
-  document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
-  document.getElementById('pane-' + name).classList.add('active');
 }
 
 // Load all 4 containers in parallel
