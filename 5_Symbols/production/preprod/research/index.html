@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../../../shared/nav.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
       --bg: #030712; --card: rgba(17,24,39,0.9); --border: rgba(139,92,246,0.2);
@@ -216,6 +217,24 @@ function fileUrl(container, name) {
   return '/api/research/file?container=' + container + '&name=' + encodeURIComponent(name);
 }
 
+function renderRelationsMarkup(container, fileName) {
+  const dropId = `drop-${container}-${CSS.escape(fileName)}`;
+  const listId = `list-${container}-${CSS.escape(fileName)}`;
+  return `
+    <div style="margin-top:8px; padding-top:6px; border-top:1px solid rgba(255,255,255,0.06); text-align:left;">
+      <div style="font-size:0.7rem; font-weight:bold; color:var(--muted); margin-bottom:4px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:4px;">
+        <span>🔗 Link Video:</span>
+        <select id="${dropId}" onchange="linkAssetToVideo('${container}', '${fileName.replace(/'/g, "\\'")}', this)" style="background:rgba(255,255,255,0.08); border:1px solid var(--border); border-radius:4px; color:var(--text); font-size:0.65rem; padding:1px 3px; outline:none; max-width: 140px; cursor:pointer;">
+          <option value="">-- link video --</option>
+        </select>
+      </div>
+      <div id="${listId}" data-container="${container}" data-name="${fileName}" style="display:flex; flex-wrap:wrap; gap:4px; margin-top:4px;">
+        <span style="font-size:0.65rem; color:var(--muted)">None linked</span>
+      </div>
+    </div>
+  `;
+}
+
 function renderImages(files) {
   const el = document.getElementById('grid-images');
   document.getElementById('cnt-images').textContent = files.length + ' file' + (files.length !== 1 ? 's' : '');
@@ -226,11 +245,14 @@ function renderImages(files) {
     const isImg = /^image\//i.test(f.contentType);
     const div = document.createElement('div');
     div.className = 'img-item';
-    div.innerHTML = isImg
+    const relMarkup = renderRelationsMarkup(CONTAINERS.images, f.name);
+    div.innerHTML = (isImg
       ? `<img src="${url}" alt="${f.name}" loading="lazy"><div class="name" title="${f.name}">${f.name}</div>`
-      : `<div style="padding:24px;text-align:center;font-size:2rem">🖼</div><div class="name">${f.name}</div>`;
+      : `<div style="padding:24px;text-align:center;font-size:2rem">🖼</div><div class="name">${f.name}</div>`)
+      + `<div style="padding:0 10px 10px 10px;">${relMarkup}</div>`;
     el.appendChild(div);
   });
+  updateAllRelationsUI();
 }
 
 function renderAudio(files) {
@@ -242,10 +264,13 @@ function renderAudio(files) {
     const url = fileUrl(CONTAINERS.audio, f.name);
     const div = document.createElement('div');
     div.className = 'audio-row';
+    const relMarkup = renderRelationsMarkup(CONTAINERS.audio, f.name);
     div.innerHTML = `<div class="row-title">🎵 ${f.name} <span style="color:var(--muted);font-size:0.75rem">${fmtBytes(f.size)}</span></div>
-      <audio controls preload="none" src="${url}" style="width:100%;height:36px;accent-color:var(--primary)"></audio>`;
+      <audio controls preload="none" src="${url}" style="width:100%;height:36px;accent-color:var(--primary)"></audio>
+      ${relMarkup}`;
     el.appendChild(div);
   });
+  updateAllRelationsUI();
 }
 
 function renderVideos(files) {
@@ -257,9 +282,13 @@ function renderVideos(files) {
     const url = fileUrl(CONTAINERS.videos, f.name);
     const div = document.createElement('div');
     div.className = 'video-item';
-    div.innerHTML = `<video controls preload="metadata" src="${url}"></video><div class="name" title="${f.name}">${f.name} · ${fmtBytes(f.size)}</div>`;
+    const relMarkup = renderRelationsMarkup(CONTAINERS.videos, f.name);
+    div.innerHTML = `<video controls preload="metadata" src="${url}"></video>
+      <div class="name" title="${f.name}">${f.name} · ${fmtBytes(f.size)}</div>
+      <div style="padding: 0 14px 14px 14px;">${relMarkup}</div>`;
     el.appendChild(div);
   });
+  updateAllRelationsUI();
 }
 
 function renderNotes(files) {
@@ -271,9 +300,11 @@ function renderNotes(files) {
     const url = fileUrl(CONTAINERS.notes, f.name);
     const div = document.createElement('div');
     div.className = 'note-item';
+    const relMarkup = renderRelationsMarkup(CONTAINERS.notes, f.name);
     div.innerHTML = `<div class="n-title">📄 ${f.name}</div>
       <div class="n-preview" id="np-${CSS.escape(f.name)}">Loading…</div>
-      <div class="n-meta">${fmtBytes(f.size)} · ${f.lastModified || ''}</div>`;
+      <div class="n-meta">${fmtBytes(f.size)} · ${f.lastModified || ''}</div>
+      <div onclick="event.stopPropagation()">${relMarkup}</div>`;
     div.addEventListener('click', () => openNote(f.name, url));
     el.appendChild(div);
     // load preview
@@ -282,6 +313,7 @@ function renderNotes(files) {
       if (p) p.textContent = t.trim().slice(0, 160) || '(empty)';
     }).catch(() => {});
   });
+  updateAllRelationsUI();
 }
 
 function openNote(name, url) {
@@ -470,6 +502,107 @@ function toggleInlineRecording() {
       alert('Microphone error: ' + err.message);
     });
 }
+
+// Supabase client initialization
+const SUPABASE_URL = 'https://rmekfsdhglyiralxvkwc.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZWtmc2RoZ2x5aXJhbHh2a3djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NzYzODgsImV4cCI6MjA5NjM1MjM4OH0.ay6HsmO_CbMGDXL_Dv4DT-paAIAOqlQPfmqqx_mexSU';
+const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+let allVideos = [];
+let allRelationships = [];
+
+async function loadSupabaseData() {
+  const { data: vids, error: err1 } = await client.from('course_videos').select('id, title, video_number, course_modules(module_number)').order('id');
+  if (err1) {
+    console.error('Error loading course videos:', err1);
+  } else {
+    allVideos = vids || [];
+  }
+
+  const { data: rels, error: err2 } = await client.from('research_relationships').select('*');
+  if (err2) {
+    console.error('Error loading relationships:', err2);
+  } else {
+    allRelationships = rels || [];
+  }
+
+  updateAllRelationsUI();
+}
+
+function updateAllRelationsUI() {
+  document.querySelectorAll('select[id^="drop-"]').forEach(select => {
+    const currentVal = select.value;
+    select.innerHTML = '<option value="">-- link video --</option>' + allVideos.map(v => {
+      const modNum = v.course_modules ? v.course_modules.module_number : '?';
+      return `<option value="${v.id}">M${modNum} V${v.video_number}: ${v.title}</option>`;
+    }).join('');
+    select.value = currentVal;
+  });
+
+  document.querySelectorAll('div[id^="list-"]').forEach(el => {
+    const container = el.dataset.container;
+    const name = el.dataset.name;
+
+    const matchedRels = allRelationships.filter(r => r.container === container && r.item_name === name);
+    if (matchedRels.length === 0) {
+      el.innerHTML = '<span style="font-size:0.65rem; color:var(--muted)">None linked</span>';
+      return;
+    }
+
+    el.innerHTML = matchedRels.map(r => {
+      const vidInfo = allVideos.find(v => v.id === r.video_id);
+      let label = `Vid ID: ${r.video_id}`;
+      if (vidInfo) {
+        const modNum = vidInfo.course_modules ? vidInfo.course_modules.module_number : '?';
+        label = `M${modNum} V${vidInfo.video_number}`;
+      }
+      return `
+        <span style="display:inline-flex; align-items:center; gap:3px; background:rgba(139,92,246,0.15); border:1px solid rgba(139,92,246,0.3); border-radius:4px; padding:2px 4px; font-size:0.65rem; color:var(--text);">
+          ${label}
+          <span style="cursor:pointer; font-weight:bold; color:var(--muted); font-size: 0.75rem;" onclick="unlinkAssetFromVideo('${container}', '${name.replace(/'/g, "\\'")}', ${r.video_id}, event)">✕</span>
+        </span>
+      `;
+    }).join('');
+  });
+}
+
+async function linkAssetToVideo(container, itemName, select) {
+  const videoId = parseInt(select.value, 10);
+  if (isNaN(videoId)) return;
+
+  const { error } = await client.from('research_relationships').insert({
+    container,
+    item_name: itemName,
+    video_id: videoId
+  });
+
+  if (error) {
+    alert('Link failed: ' + error.message);
+  } else {
+    allRelationships.push({ container, item_name: itemName, video_id: videoId });
+    updateAllRelationsUI();
+  }
+  select.value = "";
+}
+
+async function unlinkAssetFromVideo(container, itemName, videoId, e) {
+  if (e) e.stopPropagation();
+  const { error } = await client.from('research_relationships').delete().match({
+    container: container,
+    item_name: itemName,
+    video_id: videoId
+  });
+
+  if (error) {
+    alert('Unlink failed: ' + error.message);
+  } else {
+    allRelationships = allRelationships.filter(r => !(r.container === container && r.item_name === itemName && r.video_id === videoId));
+    updateAllRelationsUI();
+  }
+}
+
+// Trigger initial load of Supabase relation data
+loadSupabaseData();
 </script>
 </body>
 </html>
