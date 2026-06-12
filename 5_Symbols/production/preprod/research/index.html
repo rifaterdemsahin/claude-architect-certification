@@ -263,9 +263,9 @@ function renderRelationsMarkup(container, fileName) {
   return `
     <div style="margin-top:8px; padding-top:6px; border-top:1px solid rgba(255,255,255,0.06); text-align:left;">
       <div style="font-size:0.7rem; font-weight:bold; color:var(--muted); margin-bottom:4px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:4px;">
-        <span>🔗 Link Video:</span>
+        <span>📝 Link to Script:</span>
         <select id="${dropId}" onchange="linkAssetToVideo('${container}', '${fileName.replace(/'/g, "\\'")}', this)" style="background:rgba(255,255,255,0.08); border:1px solid var(--border); border-radius:4px; color:var(--text); font-size:0.65rem; padding:1px 3px; outline:none; max-width: 140px; cursor:pointer;">
-          <option value="">-- link video --</option>
+          <option value="">-- choose script --</option>
         </select>
       </div>
       <div id="${listId}" data-container="${container}" data-name="${fileName}" style="display:flex; flex-wrap:wrap; gap:4px; margin-top:4px;">
@@ -640,13 +640,15 @@ function updateAllRelationsUI() {
     el.innerHTML = matchedRels.map(r => {
       const vidInfo = allVideos.find(v => v.id === r.video_id);
       let label = `Vid ID: ${r.video_id}`;
+      let scriptUrl = '../scripts/index.html';
       if (vidInfo) {
         const modNum = vidInfo.course_modules ? vidInfo.course_modules.module_number : '?';
         label = `M${modNum} V${vidInfo.video_number}`;
+        scriptUrl = `../scripts/index.html?module=${modNum}`;
       }
       return `
         <span style="display:inline-flex; align-items:center; gap:3px; background:rgba(139,92,246,0.15); border:1px solid rgba(139,92,246,0.3); border-radius:4px; padding:2px 4px; font-size:0.65rem; color:var(--text);">
-          ${label}
+          <a href="${scriptUrl}" title="Open script for ${label}" style="color:inherit; text-decoration:none;" onmouseover="this.style.color='#c084fc'" onmouseout="this.style.color='inherit'">📝 ${label}</a>
           <span style="cursor:pointer; font-weight:bold; color:var(--muted); font-size: 0.75rem;" onclick="unlinkAssetFromVideo('${container}', '${name.replace(/'/g, "\\'")}', ${r.video_id}, event)">✕</span>
         </span>
       `;
