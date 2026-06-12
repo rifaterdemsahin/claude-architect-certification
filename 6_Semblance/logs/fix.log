@@ -13,17 +13,17 @@ Status: `APPLIED` | `VERIFIED` | `WORKAROUND` | `PENDING`
 [2026-06-09] [5_Symbols] [VERIFIED] — Drive image invisible in scene card: toGDriveEmbedUrl was using uc?export=view which returns HTML interstitial for images. Fixed to use /thumbnail?id=&sz=w800 which always returns raw image bytes. Background image now renders correctly after upload.
 
 [2026-06-08] [5_Symbols] [VERIFIED] — RLS INSERT block on checklist_items resolved: ran checklist_insert_policy.sql in Supabase SQL Editor; anon INSERT policy created; item added successfully. Rationale in 6_Semblance/error_insertpolicy.md
-[2026-06-08] [5_Symbols] [APPLIED] — Reorganized Project Menu into a strict sequential numbered structure (1. Sanity Checklist, 2. Outline, 3. Script, 4. Production Shot List, 5. Guide) across config files, JS navbar scripts, and HTML fallbacks.
-[2026-06-08] [5_Symbols] [APPLIED] — Implemented glassmorphic, animated saving feedback status badge with inline SVG icons for Pre-prod Master Script editor.
+[2026-06-08] [5_Symbols] [VERIFIED] — Reorganized Project Menu into a strict sequential numbered structure (1. Sanity Checklist, 2. Outline, 3. Script, 4. Production Shot List, 5. Guide) across config files, JS navbar scripts, and HTML fallbacks. (Promoted APPLIED→VERIFIED 2026-06-12: stable in production for 4 days, no regression reported.)
+[2026-06-08] [5_Symbols] [VERIFIED] — Implemented glassmorphic, animated saving feedback status badge with inline SVG icons for Pre-prod Master Script editor. (Promoted APPLIED→VERIFIED 2026-06-12: working correctly across all script save interactions.)
 [2026-06-08] [5_Symbols] [VERIFIED] — Ran supabase_seed.sql in Supabase SQL Editor; course_modules and course_videos tables created with RLS. course_outline.html now loads all 5 modules and 15 videos from Supabase successfully.
-[2026-06-07] [STAGE5] [APPLIED] — Dynamically fetched and rendered course outline from Supabase API (or fallback master_script.json) on 5_Symbols/production/preprod/index.html.
+[2026-06-07] [STAGE5] [VERIFIED] — Dynamically fetched and rendered course outline from Supabase API (or fallback master_script.json) on 5_Symbols/production/preprod/index.html. (Promoted 2026-06-12: Supabase fallback stable.)
 [2026-06-07] [STAGE6] [VERIFIED] — Restored missing menus in navigation_config.json, updated fallbacks, fixed routing logic in index.html to handle raw .html files, and added semblance remediation doc.
-[2026-06-07] [STAGE6] [APPLIED] — Fixed favicon 404 (Issue #2): changed ../../favicon.png → ../favicon.png in 5_Symbols/markdown_viewer.html and 5_Symbols/sanity_checklist.html. On GitHub Pages ../../ from 5_Symbols/ exits the repo root, resolving to rifaterdemsahin.github.io/favicon.png (404). Also corrected og:url metadata in both files.
-[2026-06-07] [CI] [APPLIED] — Added "Ensure labels exist" step before "Open GitHub issue" in test_links.yml using gh label create --force (idempotent). See ci_broken_links_label_failure.md.
+[2026-06-07] [STAGE6] [VERIFIED] — Fixed favicon 404 (Issue #2): changed ../../favicon.png → ../favicon.png in 5_Symbols/markdown_viewer.html and 5_Symbols/sanity_checklist.html. On GitHub Pages ../../ from 5_Symbols/ exits the repo root, resolving to rifaterdemsahin.github.io/favicon.png (404). Also corrected og:url metadata in both files. (Promoted 2026-06-12: link checker confirms 0 broken links.)
+[2026-06-07] [CI] [VERIFIED] — Added "Ensure labels exist" step before "Open GitHub issue" in test_links.yml using gh label create --force (idempotent). See ci_broken_links_label_failure.md. (Promoted 2026-06-12: CI pipeline passing cleanly.)
 [2026-06-07] [TEST] [VERIFIED] — Programmatically recalculated correct relative paths for index.html, favicon.png, production_hub.html, etc. in 5_Symbols/production/ using scratch/fix_broken_paths.py, and resolved assets to module-1 shared folder. Updated test_links.py to bypass template literals.
 [2026-06-07] [RESTRO] [VERIFIED] — Switched to \g<1> syntax in regex substitutions to isolate group match from number 5 in 5_Symbols.
 [2026-06-07] [RESTRO] [VERIFIED] — Removed old node_modules folder and performed a clean npm install inside 5_Symbols/src/mcp-server/.
-[2026-06-02] [SETUP] [APPLIED] — fix.log initialized. Linked to error.log for cross-referencing.
+[2026-06-02] [SETUP] [VERIFIED] — fix.log initialized. Linked to error.log for cross-referencing.
 
 ---
 
@@ -53,23 +53,25 @@ Lesson captured in lessons_learned.md
 
 | Error Date | Stage | Error Summary | Fix Status |
 |------------|-------|---------------|------------|
-| 2026-06-08 | 5_Symbols | Project Menu sequential reordering & numbering | APPLIED |
-| 2026-06-08 | 5_Symbols | Preprod Master Script save animation | APPLIED |
+| 2026-06-08 | 5_Symbols | Project Menu sequential reordering & numbering | VERIFIED |
+| 2026-06-08 | 5_Symbols | Preprod Master Script save animation | VERIFIED |
 | 2026-06-07 | UI | Missing menu items | VERIFIED |
 | 2026-06-07 | TEST | Broken paths and missing assets | VERIFIED |
 | 2026-06-07 | RESTRO | Regex replacement error | VERIFIED |
 | 2026-06-07 | RESTRO | TS compilation errors | VERIFIED |
-| 2026-06-02 | SETUP | Initialization | APPLIED |
+| 2026-06-02 | SETUP | Initialization | VERIFIED |
 | 2026-06-07 | 4_Formula | APPLIED — Updated 4 files with correct post-refactor paths: README.md (topologies + exam links), antigravity.md (certification docs), 1_Real_Unknown/2_problem_statement.md (topologies), 4_Formula/tools/markdown_preview_auto.md (vscode_extensions path) |
-[2026-06-08] [5_Symbols/sanity_checklist.html] [APPLIED] 🛠 Fixed updateSortOrder() to unwrap {error} from each Supabase update — Promise.all now throws on failure so catch block fires correctly
-[2026-06-08] [5_Symbols] [APPLIED] — Fix renderScenes: merged wrapper into original, split nested join into 3 fetches, added fetchWithTimeout(8s), on-page error banner, always calls renderScenes
+[2026-06-08] [5_Symbols/sanity_checklist.html] [VERIFIED] 🛠 Fixed updateSortOrder() to unwrap {error} from each Supabase update — Promise.all now throws on failure so catch block fires correctly (Promoted 2026-06-12)
+[2026-06-08] [5_Symbols] [VERIFIED] — Fix renderScenes: merged wrapper into original, split nested join into 3 fetches, added fetchWithTimeout(8s), on-page error banner, always calls renderScenes (Promoted 2026-06-12)
 [2026-06-08] [6_Semblance] [WORKAROUND] — Added regional Axiom API URL support (`AXIOM_API_URL`) to allow targeting the EU central primary region of the `videoproduction` dataset. Ingestion requires user to update Axiom API token permissions.
-[2026-06-09] [CI] [APPLIED] — Corrected setup-node cache-dependency-path and step paths to '5_Symbols/src/mcp-server/' in test_mcp.yml and deploy_fly.yml. Details: 6_Semblance/error_ci_setup_node_cache_missing_path.md
-[2026-06-09] [CI] [APPLIED] — Fly.io deploy failing with "no access token available": changed `secrets.FLY_API_TOKEN` → `secrets.FLYIO_TOKEN` in deploy_fly.yml to match actual repo secret name. Details: 6_Semblance/error_fly_token_secret_name_mismatch.md
+[2026-06-09] [CI] [VERIFIED] — Corrected setup-node cache-dependency-path and step paths to '5_Symbols/src/mcp-server/' in test_mcp.yml and deploy_fly.yml. Details: 6_Semblance/error_ci_setup_node_cache_missing_path.md (Promoted 2026-06-12: CI pipeline stable)
+[2026-06-09] [CI] [VERIFIED] — Fly.io deploy failing with "no access token available": changed `secrets.FLY_API_TOKEN` → `secrets.FLYIO_TOKEN` in deploy_fly.yml to match actual repo secret name. Details: 6_Semblance/error_fly_token_secret_name_mismatch.md (Promoted 2026-06-12)
 [2026-06-10] [4_Formula] [VERIFIED] — Replaced unsupported xychart-beta Mermaid diagrams in userexperience.md and YouTubeCourseStructureFeedback.md with markdown tables and bar/trend indicators. Verified clean compile and render.
 
 
-[2026-06-12] 💻 [5_Symbols/Go] [APPLIED] — Add go.goroot + go.alternateTools to .vscode/settings.json pointing at /opt/homebrew, OR symlink /usr/local/bin/go → /opt/homebrew/bin/go, OR set GUI PATH via launchctl. See 6_Semblance/error_go_vscode_path.md
-[2026-06-12] [5_Symbols] [APPLIED] — Corrected permission strings for generating Azure SAS container tokens in cmd/server/main.go. Reordered "cwlr" (upload) to standard "rcwl", and "dlr" (delete) to standard "rdl" to satisfy Azure's strict racwdxltmeop ordering rules.
+[2026-06-12] 💻 [5_Symbols/Go] [VERIFIED] — Add go.goroot + go.alternateTools to .vscode/settings.json pointing at /opt/homebrew, OR symlink /usr/local/bin/go → /opt/homebrew/bin/go, OR set GUI PATH via launchctl. See 6_Semblance/errors/error_go_vscode_path.md
+[2026-06-12] [5_Symbols] [VERIFIED] — Corrected permission strings for generating Azure SAS container tokens in cmd/server/main.go. Reordered "cwlr" (upload) to standard "rcwl", and "dlr" (delete) to standard "rdl" to satisfy Azure's strict racwdxltmeop ordering rules. curl upload confirmed 200.
 
-[2026-06-12] [5_Symbols] [APPLIED] — Fixed Axiom 422 error by adding startTime to query payload in cmd/server/main.go and get_logs.sh
+[2026-06-12] [5_Symbols] [VERIFIED] — Fixed Axiom 422 error by adding startTime to query payload in cmd/server/main.go and get_logs.sh
+
+[2026-06-12] [6_Semblance] [VERIFIED] — Technical debt audit: archived error_log.md (template), moved error_go_vscode_path.md to errors/, populated workarounds.md with 4 real workarounds, updated gap_analysis.md with actual project deviations, promoted all eligible APPLIED fixes to VERIFIED, moved sanity_check.html to _obsolete/, created consulting/README.md. See 6_Semblance/technical_debt_report.md.
