@@ -761,3 +761,30 @@ The user requested reordering the Preprod menu so that "Sanity Checklist" become
    - Synchronize fallback `projectMenu` objects in `index.html` and `markdown_renderer.html`.
 2. **🌿 Git Workflow**:
    - Commit updates, verify, open the mapping page locally to confirm correctness.
+
+---
+
+## 📅 Date: 2026-06-12
+## 🧠 Stage: Stage 4 (Formula - Thinking & Planning) - Fix Azure Blob Storage SAS Permissions Order
+
+### ❓ Problem Statement
+The user reported an Azure 403 Upload Failure error when trying to upload a file:
+`AuthenticationFailed: Server failed to authenticate the request. SAS field 'sp' is not well formed.`
+This occurred on the audio research page at `https://claude-architect-certification.fly.dev/5_Symbols/production/preprod/research/audio.html` during a file upload to Azure Blob Storage container `research-audio`.
+
+### 📐 Approach & Strategy
+1. **🔍 Root Cause Analysis**:
+   - Azure Shared Access Signatures (SAS) are extremely sensitive to the order of permission characters in the `sp` parameter.
+   - Standard Azure permissions order is `racwdxltmeop`.
+   - In `cmd/server/main.go`, the upload operation asks for `cwlr` permissions. Since `r` comes before `c`, `c` before `w`, and `w` before `l` in `racwdxltmeop`, `cwlr` is not well-formed. It must be ordered as `rcwl`.
+   - Similarly, the delete operation requests `dlr` permissions. Sorted according to `racwdxltmeop`, this must be `rdl`.
+2. **🛠 Implementation Plan**:
+   - Modify the SAS generation calls in `cmd/server/main.go`:
+     - Change `"cwlr"` to `"rcwl"` in `researchUploadHandler`.
+     - Change `"dlr"` to `"rdl"` in `researchFileHandler` delete case.
+   - Document changes in `6_Semblance/logs/error.log` and `6_Semblance/logs/fix.log`.
+3. **🌿 Git Workflow**:
+   - Commit reasoning log planning.
+   - Apply fixes to `cmd/server/main.go`.
+   - Commit implementation.
+   - Run verification build/test commands.
