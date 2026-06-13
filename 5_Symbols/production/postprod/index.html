@@ -36,7 +36,15 @@
     h1 { font-family: var(--font-title); font-size: 2.4rem; font-weight: 800; margin-bottom: 10px; }
     header p { color: var(--text-muted); max-width: 600px; margin: 0 auto; }
 
-    .section-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 40px; }
+    .group { margin-bottom: 48px; }
+    .group-heading {
+      font-family: var(--font-title); font-size: 1.3rem; font-weight: 700; margin-bottom: 16px;
+      display: flex; align-items: center; gap: 10px; color: var(--text-main);
+    }
+    .group-heading::after {
+      content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(255,255,255,0.1), transparent);
+    }
+    .group-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
     .card {
       background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px;
       padding: 28px; transition: all 0.3s; text-decoration: none; color: inherit;
@@ -94,47 +102,96 @@
       <a class="module-tag" href="#">Module 5</a>
     </div>
 
-    <div class="section-grid">
-      <a class="card" href="production_shotlist.html?module=1&section=1">
-        <div class="card-icon">🎬</div>
-        <div class="card-title">Shot List Engine</div>
-        <div class="card-desc">Single-page engine — select any module/section to review scenes, assets, script, and audio via Supabase</div>
-        <div class="card-meta"><span>🌐 HTML</span><span>🎬 All Modules</span></div>
-      </a>
-      <a class="card" href="asset_checklist.html">
-        <div class="card-icon">✅</div>
-        <div class="card-title">Asset Checklist</div>
-        <div class="card-desc">Track generation status for backgrounds, overlays, icons, and lower thirds</div>
-        <div class="card-meta"><span>🌐 HTML</span><span>📋 Checklist</span></div>
-      </a>
-      <a class="card" href="post_production_master.html">
-        <div class="card-icon">🏭</div>
-        <div class="card-title">Post-Production Master</div>
-        <div class="card-desc">Master dashboard for post-production workflow and sign-off</div>
-        <div class="card-meta"><span>🌐 HTML</span><span>📋 Master</span></div>
-      </a>
-      <a class="card" href="visual_gallery.html">
-        <div class="card-icon">🖼️</div>
-        <div class="card-title">Visual Asset Gallery</div>
-        <div class="card-desc">Browse all uploaded backgrounds, overlays, icons, and lower thirds — filterable by type with lightbox preview</div>
-        <div class="card-meta"><span>🌐 HTML</span><span>🎨 Gallery</span></div>
-      </a>
-      <a class="card" href="linkedin_messaging.html">
-        <div class="card-icon">💼</div>
-        <div class="card-title">LinkedIn Messaging</div>
-        <div class="card-desc">Journey Post, Announcement Post, and Recruiter Reply templates with one-click copy</div>
-        <div class="card-meta"><span>🌐 HTML</span><span>📋 Templates</span></div>
-      </a>
-      <a class="card" href="linkedin_controversial.html">
-        <div class="card-icon">🔥</div>
-        <div class="card-title">Controversial Post Playbook</div>
-        <div class="card-desc">Image-based posts that spark debate and attract the AI transformation audience — anatomy, templates, image guide</div>
-        <div class="card-meta"><span>🌐 HTML</span><span>🎯 Audience Growth</span></div>
-      </a>
+    <div class="group">
+      <div class="group-heading">🎬 Edit & Review</div>
+      <div class="group-grid">
+        <a class="card" href="edit_list.html">
+          <div class="card-icon">🎬</div>
+          <div class="card-title">Edit List</div>
+          <div class="card-desc">Supabase-powered content management for certification videos — track, edit, and preview all modules</div>
+          <div class="card-meta"><span>🌐 HTML</span><span>📋 All Modules</span></div>
+        </a>
+        <a class="card" href="production_shotlist.html?module=1&section=1">
+          <div class="card-icon">🎬</div>
+          <div class="card-title">Shot List Engine</div>
+          <div class="card-desc">Single-page engine — select any module/section to review scenes, assets, script, and audio via Supabase</div>
+          <div class="card-meta"><span>🌐 HTML</span><span>🎬 All Modules</span></div>
+        </a>
+        <a class="card" href="asset_checklist.html">
+          <div class="card-icon">✅</div>
+          <div class="card-title">Asset Checklist</div>
+          <div class="card-desc">Track generation status for backgrounds, overlays, icons, and lower thirds</div>
+          <div class="card-meta"><span>🌐 HTML</span><span>📋 Checklist</span></div>
+        </a>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="group-heading">📺 Publishing</div>
+      <div class="group-grid">
+        <a class="card" href="https://www.youtube.com/watch?v=F8IBooe3bXY&list=PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy/" target="_blank">
+          <div class="card-icon">📺</div>
+          <div class="card-title">Course Playlist</div>
+          <div class="card-desc">Full certification course playlist on YouTube — watch all published videos in order</div>
+          <div class="card-meta"><span>▶️ YouTube</span><span>📋 All Modules</span></div>
+        </a>
+        <a class="card" href="post_production_master.html">
+          <div class="card-icon">🏭</div>
+          <div class="card-title">Post-Production Master</div>
+          <div class="card-desc">Master dashboard for post-production workflow and sign-off</div>
+          <div class="card-meta"><span>🌐 HTML</span><span>📋 Master</span></div>
+        </a>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="group-heading">🎨 Visual Assets</div>
+      <div class="group-grid">
+        <a class="card" href="visual_gallery.html">
+          <div class="card-icon">🖼️</div>
+          <div class="card-title">Visual Asset Gallery</div>
+          <div class="card-desc">Browse all uploaded backgrounds, overlays, icons, and lower thirds — filterable by type with lightbox preview</div>
+          <div class="card-meta"><span>🌐 HTML</span><span>🎨 Gallery</span></div>
+        </a>
+        <a class="card" href="lower_thirds.html">
+          <div class="card-icon">🎬</div>
+          <div class="card-title">Lower Thirds Manager</div>
+          <div class="card-desc">Create, edit, and preview lower thirds for every module and video scene — saved to Supabase</div>
+          <div class="card-meta"><span>🌐 HTML</span><span>🎬 Per Scene</span></div>
+        </a>
+      </div>
+    </div>
+
+    <div class="group">
+      <div class="group-heading">🤝 Outreach</div>
+      <div class="group-grid">
+        <a class="card" href="linkedin_messaging.html">
+          <div class="card-icon">💼</div>
+          <div class="card-title">LinkedIn Messaging</div>
+          <div class="card-desc">Journey Post, Announcement Post, and Recruiter Reply templates with one-click copy</div>
+          <div class="card-meta"><span>🌐 HTML</span><span>📋 Templates</span></div>
+        </a>
+        <a class="card" href="linkedin_controversial.html">
+          <div class="card-icon">🔥</div>
+          <div class="card-title">Controversial Post Playbook</div>
+          <div class="card-desc">Image-based posts that spark debate and attract the AI transformation audience — anatomy, templates, image guide</div>
+          <div class="card-meta"><span>🌐 HTML</span><span>🎯 Audience Growth</span></div>
+        </a>
+      </div>
     </div>
 
     <div class="file-list">
       <h2>📁 Files in Post-Production</h2>
+      <div class="file-row">
+        <span class="file-icon">🎬</span>
+        <div class="file-info"><div class="file-name">Edit List</div><div class="file-path">production/postprod/edit_list.html</div></div>
+        <a class="file-action" href="edit_list.html">Open</a>
+      </div>
+      <div class="file-row">
+        <span class="file-icon">📺</span>
+        <div class="file-info"><div class="file-name">Course Playlist</div><div class="file-path">youtube.com/playlist?list=PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy</div></div>
+        <a class="file-action" href="https://www.youtube.com/watch?v=F8IBooe3bXY&list=PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy/" target="_blank">Open</a>
+      </div>
       <div class="file-row">
         <span class="file-icon">🎬</span>
         <div class="file-info"><div class="file-name">Shot List Engine (All Modules)</div><div class="file-path">production/postprod/production_shotlist.html</div></div>
@@ -164,6 +221,11 @@
         <span class="file-icon">🔥</span>
         <div class="file-info"><div class="file-name">Controversial Post Playbook</div><div class="file-path">production/postprod/linkedin_controversial.html</div></div>
         <a class="file-action" href="linkedin_controversial.html">Open</a>
+      </div>
+      <div class="file-row">
+        <span class="file-icon">🎬</span>
+        <div class="file-info"><div class="file-name">Lower Thirds Manager</div><div class="file-path">production/postprod/lower_thirds.html</div></div>
+        <a class="file-action" href="lower_thirds.html">Open</a>
       </div>
     </div>
 

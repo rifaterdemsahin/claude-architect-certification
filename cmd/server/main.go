@@ -1080,6 +1080,69 @@ type ImageGenRequest struct {
 	VideoNumber  int    `json:"video_number"`
 }
 
+func imageEnhancePromptHandler(cfg config) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		if r.Method != http.MethodPost {
+			http.Error(w, `{"error":"method not allowed"}`, http.StatusMethodNotAllowed)
+			return
+		}
+
+		var req struct {
+			Prompt string `json:"prompt"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, `{"error":"invalid request"}`, http.StatusBadRequest)
+			return
+		}
+
+		geminiKey := cfg.getSecret("GEMINI_API_KEY")
+		if geminiKey == "" {
+			http.Error(w, `{"error":"GEMINI_API_KEY missing"}`, http.StatusServiceUnavailable)
+			return
+		}
+
+		refinePrompt := fmt.Sprintf(`You are an expert AI Image Prompt Engineer.
+Refine the following user prompt into a high-quality, descriptive prompt for a professional image generator (like Midjourney or Imagen).
+Style: Minimalist, dark corporate, glassmorphism, tech-focused, professional, 16:9.
+Return ONLY the refined prompt text, no preamble or extra commentary.
+User Prompt: %s`, req.Prompt)
+
+		geminiURL := "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + geminiKey
+		geminiReqBody := map[string]any{
+			"contents": []any{map[string]any{"parts": []any{map[string]any{"text": refinePrompt}}}},
+		}
+
+		b, _ := json.Marshal(geminiReqBody)
+		hresp, err := http.Post(geminiURL, "application/json", bytes.NewReader(b))
+		if err != nil || hresp.StatusCode >= 400 {
+			http.Error(w, `{"error":"Gemini refinement failed"}`, http.StatusBadGateway)
+			return
+		}
+		defer hresp.Body.Close()
+
+		var gResp struct {
+			Candidates []struct {
+				Content struct {
+					Parts []struct {
+						Text string `json:"text"`
+					} `json:"parts"`
+				} `json:"content"`
+			} `json:"candidates"`
+		}
+		json.NewDecoder(hresp.Body).Decode(&gResp)
+
+		refined := ""
+		if len(gResp.Candidates) > 0 && len(gResp.Candidates[0].Content.Parts) > 0 {
+			refined = gResp.Candidates[0].Content.Parts[0].Text
+		}
+
+		json.NewEncoder(w).Encode(map[string]any{
+			"refined_prompt": refined,
+		})
+	}
+}
+
 func imageGenerateHandler(cfg config) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -1384,6 +1447,136 @@ func infographicSaveHandler(cfg config) http.HandlerFunc {
 	}
 }
 
+// ── Lower Thirds Generation ──────────────────────────────────────────────────────
+
+func lowerThirdGenerateHandler(cfg config) http.HandlerFunc {
+	type LTRequest struct {
+		ModuleNumber int `json:"module_number"`
+		VideoNumber  int `json:"video_number"`
+	}
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		if r.Method != http.MethodPost {
+			http.Error(w, `{"error":"method not allowed"}`, http.StatusMethodNotAllowed)
+			return
+		}
+
+		var req LTRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, `{"error":"invalid request"}`, http.StatusBadRequest)
+			return
+		}
+
+		geminiKey := cfg.getSecret("GEMINI_API_KEY")
+		if geminiKey == "" {
+			http.Error(w, `{"error":"GEMINI_API_KEY missing"}`, http.StatusServiceUnavailable)
+			return
+		}
+
+		ctx, cancel := context.WithTimeout(r.Context(), 30*time.Second)
+		defer cancel()
+
+		// Fetch module ID first
+		var modules []struct {
+			ID int `json:"id"`
+		}
+		modQ := fmt.Sprintf("select=id&module_number=eq.%d&limit=1", req.ModuleNumber)
+		if err := supabaseGet(ctx, cfg, "modules", modQ, &modules); err != nil || len(modules) == 0 {
+			http.Error(w, `{"error":"module not found"}`, http.StatusNotFound)
+			return
+		}
+
+		// Fetch the video and script
+		var videos []struct {
+			ID    int    `json:"id"`
+			Title string `json:"title"`
+		}
+		vidQ := fmt.Sprintf("select=id,title&module_id=eq.%d&video_number=eq.%d&limit=1", modules[0].ID, req.VideoNumber)
+		if err := supabaseGet(ctx, cfg, "videos", vidQ, &videos); err != nil || len(videos) == 0 {
+			http.Error(w, `{"error":"video not found"}`, http.StatusNotFound)
+			return
+		}
+		videoID := videos[0].ID
+		videoTitle := videos[0].Title
+
+		var scripts []struct {
+			ScriptText string `json:"script_text"`
+		}
+		scriptQ := fmt.Sprintf("select=script_text&video_id=eq.%d&limit=1", videoID)
+		_ = supabaseGet(ctx, cfg, "scripts", scriptQ, &scripts)
+
+		scriptContent := ""
+		if len(scripts) > 0 {
+			scriptContent = scripts[0].ScriptText
+		}
+
+		// Build Gemini prompt
+		prompt := fmt.Sprintf(`You are an expert video production assistant for the "Claude AI Certification for Architects" course.
+
+Module %d, Video %d: "%s"
+
+%s
+
+Generate 3 lower third overlay suggestions for this video. For each suggestion provide:
+1. Main text (short, punchy, max 40 chars)
+2. Sub text (descriptive, max 60 chars)
+3. Brief rationale (why this fits the content)
+
+Return JSON array:
+[{"main":"...","sub":"...","rationale":"..."}]
+
+Focus on professional, certification-quality overlays. Use the module/video theme.`, req.ModuleNumber, req.VideoNumber, videoTitle,
+			func() string {
+				if scriptContent != "" {
+					return fmt.Sprintf("Here is the video script for context:\n\n%s\n\n---", scriptContent)
+				}
+				return "No script available. Generate based on the module and video title alone."
+			}())
+
+		geminiURL := "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + geminiKey
+		geminiReqBody := map[string]any{
+			"contents": []any{map[string]any{"parts": []any{map[string]any{"text": prompt}}}},
+			"generationConfig": map[string]any{
+				"responseMimeType": "application/json",
+				"temperature":      0.7,
+			},
+		}
+
+		b, _ := json.Marshal(geminiReqBody)
+		hresp, err := http.Post(geminiURL, "application/json", bytes.NewReader(b))
+		if err != nil || hresp.StatusCode >= 400 {
+			http.Error(w, `{"error":"Gemini generation failed"}`, http.StatusBadGateway)
+			return
+		}
+		defer hresp.Body.Close()
+
+		var gResp struct {
+			Candidates []struct {
+				Content struct {
+					Parts []struct {
+						Text string `json:"text"`
+					} `json:"parts"`
+				} `json:"content"`
+			} `json:"candidates"`
+		}
+		json.NewDecoder(hresp.Body).Decode(&gResp)
+
+		responseText := "[]"
+		if len(gResp.Candidates) > 0 && len(gResp.Candidates[0].Content.Parts) > 0 {
+			responseText = gResp.Candidates[0].Content.Parts[0].Text
+		}
+
+		json.NewEncoder(w).Encode(map[string]any{
+			"suggestions":   json.RawMessage(responseText),
+			"script_text":   scriptContent,
+			"video_title":   videoTitle,
+			"module_number": req.ModuleNumber,
+			"video_number":  req.VideoNumber,
+		})
+	}
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 func main() {
@@ -1419,9 +1612,11 @@ func main() {
 	mux.Handle("/api/explanations/generate", observe(cfg, generateExplanationHandler(cfg)))
 	mux.Handle("/api/explanations", observe(cfg, explanationsHandler(cfg)))
 	mux.Handle("/api/images/generate", observe(cfg, imageGenerateHandler(cfg)))
+	mux.Handle("/api/images/enhance-prompt", observe(cfg, imageEnhancePromptHandler(cfg)))
 	mux.Handle("/api/images/save", observe(cfg, imageSaveHandler(cfg)))
 	mux.Handle("/api/infographics/generate", observe(cfg, infographicGenerateHandler(cfg)))
 	mux.Handle("/api/infographics/save", observe(cfg, infographicSaveHandler(cfg)))
+	mux.Handle("/api/lowerthirds/generate", observe(cfg, lowerThirdGenerateHandler(cfg)))
 	mux.Handle("/admin/errors", observe(cfg, axiomErrorsHandler(tmpl, cfg, navConfigJS)))
 	mux.Handle("/", observe(cfg, homeHandler(tmpl, cfg, navConfigJS)))
 

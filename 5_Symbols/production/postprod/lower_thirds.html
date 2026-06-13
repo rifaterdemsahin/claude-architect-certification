@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lower Thirds Manager | Claude AI Certification</title>
+  <meta name="description" content="Create, edit, and preview lower thirds for every module and video scene.">
+  <link rel="icon" type="image/png" href="../../../favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #030712; --bg-card: rgba(17,24,39,0.9); --border-glow: rgba(139,92,246,0.3);
+      --text-main: #f3f4f6; --text-muted: #9ca3af; --primary: #8b5cf6; --primary-glow: rgba(139,92,246,0.6);
+      --secondary: #3b82f6; --success: #10b981; --danger: #ef4444; --accent: #10b981;
+      --font-title: 'Outfit', sans-serif; --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-dark);
+      background-image: radial-gradient(circle at 10% 20%, rgba(16,185,129,0.08) 0%, transparent 40%),
+                        radial-gradient(circle at 90% 80%, rgba(139,92,246,0.08) 0%, transparent 40%);
+      color: var(--text-main); font-family: var(--font-body); line-height: 1.6;
+      padding: 100px 24px 60px;
+    }
+    .container { max-width: 1100px; margin: 0 auto; }
+
+    header { text-align: center; margin-bottom: 48px; }
+    header h1 { font-family: var(--font-title); font-size: 2.6rem; font-weight: 900; letter-spacing: -0.02em; margin-bottom: 10px; }
+    header p { color: var(--text-muted); font-size: 1.1rem; }
+
+    .selector-bar {
+      display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-bottom: 40px;
+    }
+    .selector-bar select {
+      background: var(--bg-card); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px;
+      color: var(--text-main); padding: 12px 20px; font-size: 1rem; font-family: var(--font-body);
+      min-width: 220px; cursor: pointer;
+    }
+    .selector-bar select:focus { outline: none; border-color: var(--accent); }
+
+    .glass-card {
+      background: var(--bg-card); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px;
+      padding: 32px; margin-bottom: 32px; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.6);
+    }
+    .glass-card h2 { font-family: var(--font-title); font-weight: 700; font-size: 1.3rem; margin-bottom: 20px; }
+    .glass-card h3 { font-family: var(--font-title); font-weight: 600; font-size: 1.0rem; margin-bottom: 16px; color: var(--text-muted); }
+
+    .form-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
+    .form-group { flex: 1; min-width: 200px; }
+    .form-group label { display: block; margin-bottom: 6px; color: var(--text-muted); font-weight: 600; font-size: 0.85rem; }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px; padding: 10px 14px; color: var(--text-main); font-family: var(--font-body); font-size: 0.95rem;
+    }
+    .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--accent); }
+    .form-group textarea { resize: vertical; min-height: 60px; }
+
+    .btn {
+      background: var(--accent); color: #000; border: none; border-radius: 10px; padding: 10px 24px;
+      font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-block;
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(16,185,129,0.3); }
+    .btn-secondary { background: rgba(255,255,255,0.1); color: var(--text-main); }
+    .btn-secondary:hover { background: rgba(255,255,255,0.2); box-shadow: none; }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-danger:hover { box-shadow: 0 8px 20px rgba(239,68,68,0.3); }
+    .btn-sm { padding: 6px 14px; font-size: 0.8rem; }
+
+    .lower-third-preview {
+      margin-top: 16px; background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+      padding: 20px 32px; border-left: 12px solid white; border-radius: 8px;
+      display: inline-block; position: relative; min-width: 360px;
+    }
+    .lower-third-preview .lt-main { display: block; font-weight: 700; font-size: 1.2rem; margin-bottom: 4px; }
+    .lower-third-preview .lt-sub { display: block; font-size: 0.85rem; opacity: 0.85; }
+
+    .scene-card {
+      background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px;
+      padding: 20px; margin-bottom: 16px; display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap;
+    }
+    .scene-card .scene-info { flex: 1; min-width: 200px; }
+    .scene-card .scene-info .scene-label { font-weight: 700; color: var(--accent); margin-bottom: 4px; }
+    .scene-card .scene-info .scene-desc { color: var(--text-muted); font-size: 0.85rem; }
+    .scene-card .scene-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+    .empty-state { text-align: center; padding: 48px 24px; color: var(--text-muted); }
+    .empty-state .empty-icon { font-size: 3rem; margin-bottom: 12px; }
+
+.toast {
+      position: fixed; top: 24px; right: 24px; background: var(--success); color: #000;
+      padding: 14px 24px; border-radius: 12px; font-weight: 700; z-index: 1000;
+      transform: translateX(120%); transition: transform 0.4s ease; max-width: 400px;
+    }
+    .toast.show { transform: translateX(0); }
+    .toast.error { background: var(--danger); color: white; }
+
+    .suggestion-card {
+      background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px;
+      padding: 20px; margin-bottom: 16px; cursor: pointer; transition: all 0.2s;
+    }
+    .suggestion-card:hover { border-color: var(--accent); background: rgba(16,185,129,0.05); }
+    .suggestion-card .sug-main { font-weight: 700; font-size: 1.1rem; color: var(--accent); margin-bottom: 4px; }
+    .suggestion-card .sug-sub { color: var(--text-main); font-size: 0.95rem; margin-bottom: 8px; }
+    .suggestion-card .sug-rationale { color: var(--text-muted); font-size: 0.85rem; font-style: italic; }
+    .suggestion-card .sug-apply {
+      display: inline-block; margin-top: 10px; font-size: 0.8rem; color: var(--primary); font-weight: 600;
+    }
+    .script-preview { background: rgba(0,0,0,0.3); border-radius: 12px; padding: 20px; max-height: 300px; overflow-y: auto; white-space: pre-wrap; font-size: 0.9rem; color: var(--text-muted); line-height: 1.7; }
+  </style>
+  <script src="../../../shared/nav.js"></script>
+  <script src="../../../shared/debug-panel.js"></script>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>🎬 Lower Thirds Manager</h1>
+      <p>Create, edit, and preview lower thirds for every module and video scene. Changes are saved to Supabase in real time.</p>
+    </header>
+
+    <div class="selector-bar">
+      <select id="moduleSelect"><option value="">— Select Module —</option></select>
+      <select id="videoSelect"><option value="">— Select Video —</option></select>
+    </div>
+
+    <div id="editorSection" style="display:none;">
+      <div class="glass-card">
+        <h2>✏️ Edit Lower Third</h2>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Scene Number</label>
+            <input type="number" id="sceneNumber" min="1" value="1">
+          </div>
+          <div class="form-group" style="flex:2;">
+            <label>Main Text</label>
+            <input type="text" id="ltMain" placeholder="e.g. Claude Architect Masterclass">
+          </div>
+          <div class="form-group" style="flex:2;">
+            <label>Sub Text</label>
+            <input type="text" id="ltSub" placeholder="e.g. Module 1: Introduction">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Image URL (optional)</label>
+            <input type="url" id="ltImg" placeholder="https://example.com/lt_bg.png">
+          </div>
+        </div>
+        <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-top:8px;">
+          <button class="btn" id="saveBtn">💾 Save Lower Third</button>
+          <button class="btn btn-secondary" id="generateBtn">🤖 Generate with Gemini</button>
+          <button class="btn btn-secondary" id="clearBtn">🗑️ Clear Form</button>
+          <span id="saveStatus" style="color:var(--text-muted);font-size:0.85rem;"></span>
+        </div>
+        <div id="livePreview">
+          <h3>👁️ Live Preview</h3>
+          <div class="lower-third-preview">
+            <span class="lt-main" id="previewMain">Main Text</span>
+            <span class="lt-sub" id="previewSub">Sub Text</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card">
+        <h2>📋 Existing Lower Thirds for This Video</h2>
+        <div id="scenesList">
+          <div class="empty-state">
+            <div class="empty-icon">🎬</div>
+            <p>Select a module and video to view existing lower thirds.</p>
+          </div>
+        </div>
+      <div class="glass-card" id="scriptPanel" style="display:none;">
+        <h2>📜 Video Script</h2>
+        <div id="scriptContent" style="background:rgba(0,0,0,0.3);border-radius:12px;padding:20px;max-height:300px;overflow-y:auto;white-space:pre-wrap;font-size:0.9rem;color:var(--text-muted);line-height:1.7;"></div>
+      </div>
+
+      <div class="glass-card" id="suggestionsPanel" style="display:none;">
+        <h2>🤖 Gemini Suggestions</h2>
+        <div id="suggestionsList"></div>
+        <div id="genLoading" style="display:none;text-align:center;padding:24px;">
+          <div style="font-size:2rem;margin-bottom:12px;">🤖</div>
+          <p>Gemini is generating lower third suggestions from the video script...</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="emptyState" class="glass-card empty-state">
+      <div class="empty-icon">🎬</div>
+      <h2 style="font-family:var(--font-title);margin-bottom:8px;">Select a Module & Video</h2>
+      <p>Choose a module and video above to start managing lower thirds for each scene.</p>
+    </div>
+
+    <footer>
+      <p><a href="index.html" style="color:var(--secondary);text-decoration:none;">← Back to Post-Production</a></p>
+    </footer>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const SUPABASE_URL = localStorage.getItem('supabase_url') || 'https://rmekfsdhglyiralxvkwc.supabase.co';
+    const SUPABASE_ANON_KEY = localStorage.getItem('supabase_anon_key') || '';
+    const HEADERS = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
+
+    let dbModules = [];
+    let dbVideos = [];
+    let currentModuleId = null;
+    let currentVideoId = null;
+    let editingSceneId = null;
+
+    const $ = id => document.getElementById(id);
+
+    function showToast(msg, isError) {
+      const t = $('toast');
+      t.textContent = msg; t.className = 'toast' + (isError ? ' error' : '');
+      setTimeout(() => t.classList.add('show'), 10);
+      setTimeout(() => t.classList.remove('show'), 3500);
+    }
+
+    async function api(path, opts) {
+      const url = `${SUPABASE_URL}/rest/v1/${path}`;
+      const res = await fetch(url, { ...opts, headers: { ...HEADERS, ...(opts?.headers || {}) } });
+      if (!res.ok) { const err = await res.text().catch(() => ''); throw new Error(`${res.status}: ${err}`); }
+      const ct = res.headers.get('content-type') || '';
+      return ct.includes('json') ? res.json() : res.text();
+    }
+
+    async function loadModules() {
+      try {
+        dbModules = await api('modules?select=id,module_number,title&order=module_number.asc');
+        const sel = $('moduleSelect');
+        sel.innerHTML = '<option value="">— Select Module —</option>' +
+          dbModules.map(m => `<option value="${m.id}">M${m.module_number}: ${m.title}</option>`).join('');
+      } catch (e) { showToast('Failed to load modules: ' + e.message, true); }
+    }
+
+    async function loadVideos(moduleId) {
+      if (!moduleId) { $('videoSelect').innerHTML = '<option value="">— Select Video —</option>'; return; }
+      try {
+        dbVideos = await api(`videos?select=id,video_number,title&module_id=eq.${moduleId}&order=video_number.asc`);
+        const sel = $('videoSelect');
+        sel.innerHTML = '<option value="">— Select Video —</option>' +
+          dbVideos.map(v => `<option value="${v.id}">V${v.video_number}: ${v.title}</option>`).join('');
+      } catch (e) { showToast('Failed to load videos: ' + e.message, true); }
+    }
+
+    async function loadScenes(videoId) {
+      const container = $('scenesList');
+      if (!videoId) {
+        container.innerHTML = '<div class="empty-state"><div class="empty-icon">🎬</div><p>Select a video to view scenes.</p></div>';
+        return;
+      }
+      try {
+        const moduleNum = dbModules.find(m => m.id === currentModuleId)?.module_number || 0;
+        const videoNum = dbVideos.find(v => v.id === currentVideoId)?.video_number || 0;
+        const scenes = await api(
+          `scenes?module_number=eq.${moduleNum}&section_number=eq.${videoNum}&select=id,scene_number,lt_main,lt_sub,lt_img&order=scene_number.asc`
+        );
+        if (!scenes.length) {
+          container.innerHTML = '<div class="empty-state"><div class="empty-icon">➕</div><p>No scenes yet. Fill in the form above and click Save to create the first lower third.</p></div>';
+          return;
+        }
+        container.innerHTML = scenes.map(s => `
+          <div class="scene-card" data-id="${s.id}">
+            <div class="scene-info">
+              <div class="scene-label">Scene ${s.scene_number}</div>
+              <div class="scene-desc">${s.lt_main || '(no main text)'}${s.lt_sub ? ' — ' + s.lt_sub : ''}</div>
+            </div>
+            <div class="scene-actions">
+              <button class="btn btn-sm btn-secondary" onclick="editScene(${s.id}, ${s.scene_number}, '${(s.lt_main||'').replace(/'/g,"\\'")}', '${(s.lt_sub||'').replace(/'/g,"\\'")}', '${(s.lt_img||'').replace(/'/g,"\\'")}')">✏️ Edit</button>
+              <button class="btn btn-sm btn-danger" onclick="deleteScene(${s.id})">🗑️</button>
+            </div>
+          </div>
+        `).join('');
+      } catch (e) { showToast('Failed to load scenes: ' + e.message, true); }
+    }
+
+    function updatePreview() {
+      $('previewMain').textContent = $('ltMain').value || 'Main Text';
+      $('previewSub').textContent = $('ltSub').value || 'Sub Text';
+    }
+
+    function editScene(id, sceneNum, main, sub, img) {
+      editingSceneId = id;
+      $('sceneNumber').value = sceneNum;
+      $('ltMain').value = main;
+      $('ltSub').value = sub;
+      $('ltImg').value = img;
+      updatePreview();
+      $('saveBtn').textContent = '🔄 Update Lower Third';
+      $('saveStatus').textContent = 'Editing Scene ' + sceneNum;
+    }
+
+    function clearForm() {
+      editingSceneId = null;
+      $('sceneNumber').value = '1';
+      $('ltMain').value = '';
+      $('ltSub').value = '';
+      $('ltImg').value = '';
+      $('saveBtn').textContent = '💾 Save Lower Third';
+      $('saveStatus').textContent = '';
+      updatePreview();
+    }
+
+    async function saveLowerThird() {
+      const sceneNum = parseInt($('sceneNumber').value);
+      const ltMain = $('ltMain').value.trim();
+      const ltSub = $('ltSub').value.trim();
+      const ltImg = $('ltImg').value.trim();
+
+      if (!sceneNum || sceneNum < 1) { showToast('Enter a valid scene number.', true); return; }
+      if (!ltMain && !ltSub) { showToast('Enter at least main or sub text.', true); return; }
+
+      if (!currentModuleId || !currentVideoId) { showToast('Select a module and video first.', true); return; }
+
+      const moduleNum = dbModules.find(m => m.id === currentModuleId)?.module_number || 0;
+
+      try {
+        if (editingSceneId) {
+          await api(`scenes?id=eq.${editingSceneId}`, {
+            method: 'PATCH',
+            body: JSON.stringify({ lt_main: ltMain, lt_sub: ltSub, lt_img: ltImg })
+          });
+          showToast('✅ Lower third updated!');
+        } else {
+          const videoDbId = currentVideoId;
+          const existing = await api(
+            `scenes?module_number=eq.${moduleNum}&section_number=eq.${sceneNum}&select=id&limit=1`
+          );
+          if (existing.length) {
+            await api(`scenes?id=eq.${existing[0].id}`, {
+              method: 'PATCH',
+              body: JSON.stringify({ lt_main: ltMain, lt_sub: ltSub, lt_img: ltImg })
+            });
+            showToast('✅ Lower third updated for existing scene!');
+          } else {
+            await api('scenes', {
+              method: 'POST',
+              body: JSON.stringify({
+                module_number: moduleNum, section_number: sceneNum, scene_number: sceneNum,
+                lt_main: ltMain, lt_sub: ltSub, lt_img: ltImg
+              })
+            });
+            showToast('✅ Lower third created!');
+          }
+        }
+        clearForm();
+        await loadScenes(currentVideoId);
+      } catch (e) { showToast('Failed to save: ' + e.message, true); }
+    }
+
+    async function deleteScene(id) {
+      if (!confirm('Delete this lower third?')) return;
+      try {
+        await api(`scenes?id=eq.${id}`, { method: 'DELETE' });
+        showToast('🗑️ Lower third deleted.');
+        if (editingSceneId === id) clearForm();
+        await loadScenes(currentVideoId);
+      } catch (e) { showToast('Failed to delete: ' + e.message, true); }
+    }
+
+    function applySuggestion(main, sub) {
+      $('ltMain').value = main;
+      $('ltSub').value = sub;
+      updatePreview();
+      $('saveBtn').textContent = '💾 Save Lower Third';
+      editingSceneId = null;
+      $('saveStatus').textContent = 'Loaded from Gemini suggestion';
+      $('sceneNumber').value = '1';
+      $('ltImg').value = '';
+      $('scriptPanel').style.display = 'none';
+      $('suggestionsPanel').style.display = 'none';
+      showToast('✅ Suggestion loaded into editor');
+    }
+
+    async function generateWithGemini() {
+      if (!currentModuleId || !currentVideoId) { showToast('Select a module and video first.', true); return; }
+
+      const moduleNum = dbModules.find(m => m.id === currentModuleId)?.module_number || 0;
+      const videoNum = dbVideos.find(v => v.id === currentVideoId)?.video_number || 0;
+
+      $('genLoading').style.display = 'block';
+      $('suggestionsList').innerHTML = '';
+      $('suggestionsPanel').style.display = 'block';
+      $('scriptPanel').style.display = 'none';
+      $('generateBtn').disabled = true;
+      $('generateBtn').textContent = '⏳ Generating...';
+
+      try {
+        const res = await fetch('/api/lowerthirds/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ module_number: moduleNum, video_number: videoNum })
+        });
+        if (!res.ok) { const err = await res.text(); throw new Error(err); }
+        const data = await res.json();
+
+        $('genLoading').style.display = 'none';
+        $('generateBtn').disabled = false;
+        $('generateBtn').textContent = '🤖 Generate with Gemini';
+
+        // Show script
+        if (data.script_text) {
+          $('scriptContent').textContent = data.script_text;
+          $('scriptPanel').style.display = 'block';
+        }
+
+        // Parse and show suggestions
+        const suggestions = typeof data.suggestions === 'string' ? JSON.parse(data.suggestions) : data.suggestions;
+        if (suggestions && suggestions.length) {
+          $('suggestionsList').innerHTML = suggestions.map((s, i) => `
+            <div class="suggestion-card" onclick="applySuggestion('${(s.main||'').replace(/'/g,"\\'")}', '${(s.sub||'').replace(/'/g,"\\'")}')">
+              <div class="sug-main">${s.main}</div>
+              <div class="sug-sub">${s.sub}</div>
+              <div class="sug-rationale">${s.rationale || ''}</div>
+              <div class="sug-apply">✏️ Click to apply →</div>
+            </div>
+          `).join('');
+        } else {
+          $('suggestionsList').innerHTML = '<div class="empty-state"><p>No suggestions returned. Try a different video.</p></div>';
+        }
+      } catch (e) {
+        $('genLoading').style.display = 'none';
+        $('generateBtn').disabled = false;
+        $('generateBtn').textContent = '🤖 Generate with Gemini';
+        showToast('Generation failed: ' + e.message, true);
+      }
+    }
+
+    $('moduleSelect').addEventListener('change', () => {
+      const val = parseInt($('moduleSelect').value);
+      currentModuleId = val || null;
+      currentVideoId = null;
+      clearForm();
+      $('editorSection').style.display = 'none';
+      $('emptyState').style.display = 'block';
+      loadVideos(currentModuleId);
+    });
+
+    $('videoSelect').addEventListener('change', () => {
+      currentVideoId = parseInt($('videoSelect').value) || null;
+      clearForm();
+      if (currentVideoId) {
+        $('editorSection').style.display = 'block';
+        $('emptyState').style.display = 'none';
+        loadScenes(currentVideoId);
+      } else {
+        $('editorSection').style.display = 'none';
+        $('emptyState').style.display = 'block';
+      }
+    });
+
+    $('ltMain').addEventListener('input', updatePreview);
+    $('ltSub').addEventListener('input', updatePreview);
+    $('saveBtn').addEventListener('click', saveLowerThird);
+    $('clearBtn').addEventListener('click', clearForm);
+    $('generateBtn').addEventListener('click', generateWithGemini);
+
+    loadModules();
+  </script>
+</body>
+</html>
