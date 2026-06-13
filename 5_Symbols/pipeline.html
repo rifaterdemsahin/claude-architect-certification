@@ -103,9 +103,17 @@
       left: 2.5rem;
       top: 3rem;
       bottom: 3rem;
-      width: 3px;
-      background: linear-gradient(to bottom, var(--accent-violet), var(--accent-cyan), var(--accent-green), var(--accent-amber), var(--accent-pink));
-      opacity: 0.25;
+      width: 4px;
+      background: linear-gradient(to bottom, 
+        var(--accent-violet) 0%, 
+        var(--accent-violet) 40%, 
+        var(--accent-cyan) 50%, 
+        var(--accent-green) 70%, 
+        var(--accent-amber) 90%, 
+        var(--accent-pink) 100%
+      );
+      opacity: 0.6;
+      box-shadow: 0 0 15px rgba(139, 92, 246, 0.3);
       z-index: 0;
     }
 
@@ -206,6 +214,32 @@
       color: var(--text-muted);
       font-size: 0.95rem;
       margin-bottom: 1rem;
+    }
+
+    .stage-image {
+      margin-bottom: 1.5rem;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      background: rgba(0, 0, 0, 0.3);
+      height: 160px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .stage-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.8;
+      transition: var(--transition);
+    }
+
+    .stage-card:hover .stage-image img {
+      opacity: 1;
+      transform: scale(1.03);
     }
 
     .io-boxes {
@@ -321,6 +355,9 @@
           <span class="stage-phase phase-preprod">Pre-Production</span>
         </div>
         <div class="stage-desc">Identify and articulate the core problem the course will solve. What gap exists in the market? Who is affected and why does it matter?</div>
+        <div class="stage-image">
+          <img src="../3_Simulation/flywheel_versus_funnel.jpeg" alt="Problem Definition">
+        </div>
         <div class="io-boxes">
           <div class="io-box input">
             <div class="io-label input">📥 Input</div>
@@ -361,6 +398,9 @@
           <span class="stage-phase phase-preprod">Pre-Production</span>
         </div>
         <div class="stage-desc">Define the course as the solution. Articulate what learners will be able to do after completing the course. This frames the entire production effort.</div>
+        <div class="stage-image">
+          <img src="../3_Simulation/generated/user_screen1_landing.png" alt="Solution Design">
+        </div>
         <div class="io-boxes">
           <div class="io-box input">
             <div class="io-label input">📥 Input</div>
@@ -400,7 +440,10 @@
           <span class="stage-title" style="color:var(--accent-violet);">Research</span>
           <span class="stage-phase phase-preprod">Pre-Production</span>
         </div>
-        <div class="stage-desc">Deep-dive into the subject matter. Gather technical references, visual assets, audio samples, video clips, and supporting notes to inform content creation.</div>
+        <div class="stage-desc">Deep-dive into the subject matter while self-learning the content. Record draft takes (screen captures, walkthroughs) as you explore — these raw recordings become the foundation for the shot list in Production. Research is where you learn the material and capture the first pass of footage simultaneously.</div>
+        <div class="stage-image">
+          <img src="../3_Simulation/classical-vs-selflearning.png" alt="Research Phase">
+        </div>
         <div class="io-boxes">
           <div class="io-box input">
             <div class="io-label input">📥 Input</div>
@@ -417,6 +460,7 @@
             <div class="io-label output">📤 Output</div>
             <div class="io-content">
               <ul>
+                <li>Draft screen recordings &amp; walkthrough takes</li>
                 <li>Images, diagrams &amp; infographics</li>
                 <li>Music, voiceover &amp; SFX assets</li>
                 <li>Reference videos &amp; B-roll clips</li>
@@ -441,6 +485,9 @@
           <span class="stage-phase phase-preprod">Pre-Production</span>
         </div>
         <div class="stage-desc">Structure the course into modules and sections. Define the logical flow, timing estimates, and key learning points for each segment.</div>
+        <div class="stage-image">
+          <img src="../3_Simulation/mockup_navigation.png" alt="Outline Planning">
+        </div>
         <div class="io-boxes">
           <div class="io-box input">
             <div class="io-label input">📥 Input</div>
@@ -481,6 +528,9 @@
           <span class="stage-phase phase-preprod">Pre-Production</span>
         </div>
         <div class="stage-desc">Write the full narration script for each video. Include on-screen visual cues, screen recording directions, and timing annotations for the voiceover.</div>
+        <div class="stage-image">
+          <img src="../3_Simulation/generated/user_screen3_markdown_reader.png" alt="Scripting">
+        </div>
         <div class="io-boxes">
           <div class="io-box input">
             <div class="io-label input">📥 Input</div>
@@ -521,6 +571,9 @@
           <span class="stage-phase phase-preprod">Pre-Production</span>
         </div>
         <div class="stage-desc">Design interactive quiz questions embedded at key checkpoints within each video. Reinforce learning, test comprehension, and keep learners engaged.</div>
+        <div class="stage-image">
+          <img src="../3_Simulation/generated/self_learning_value.png" alt="Interactive Questions">
+        </div>
         <div class="io-boxes">
           <div class="io-box input">
             <div class="io-label input">📥 Input</div>
@@ -561,6 +614,9 @@
           <span class="stage-phase phase-prod">Production</span>
         </div>
         <div class="stage-desc">Translate the script into a detailed shot-by-shot plan. Specify screen recordings, talking head segments, diagrams, B-roll, and all visual assets needed for each scene.</div>
+        <div class="stage-image">
+          <img src="../3_Simulation/mockup_index.png" alt="Shot List Planning">
+        </div>
         <div class="io-boxes">
           <div class="io-box input">
             <div class="io-label input">📥 Input</div>
@@ -601,6 +657,9 @@
           <span class="stage-phase phase-prod">Production</span>
         </div>
         <div class="stage-desc">Map the raw recorded footage (screen captures, talking head, B-roll) to each shot in the shot list. Identify what has been captured, what is missing, and what needs re-recording.</div>
+        <div class="stage-image">
+          <img src="../3_Simulation/generated/user_screen2_debug_menu.png" alt="Footage Analysis">
+        </div>
         <div class="io-boxes">
           <div class="io-box input">
             <div class="io-label input">📥 Input</div>
@@ -641,6 +700,9 @@
           <span class="stage-phase phase-postprod">Post-Production</span>
         </div>
         <div class="stage-desc">Create the editing decision list (EDL) specifying exactly how each scene is assembled: cuts, transitions, overlays, lower thirds, audio levels, and effects.</div>
+        <div class="stage-image">
+          <img src="../3_Simulation/generated/user_screen3_markdown_reader.png" alt="Editing Process">
+        </div>
         <div class="io-boxes">
           <div class="io-box input">
             <div class="io-label input">📥 Input</div>
@@ -681,6 +743,9 @@
           <span class="stage-phase phase-publish">Publishing</span>
         </div>
         <div class="stage-desc">Upload final videos to YouTube and organize them into a structured course playlist. Add descriptions, timestamps, and end-screen elements for seamless navigation.</div>
+        <div class="stage-image">
+          <img src="../3_Simulation/generated/user_screen4_7stage_journey.png" alt="Course Playlist">
+        </div>
         <div class="io-boxes">
           <div class="io-box input">
             <div class="io-label input">📥 Input</div>
@@ -721,6 +786,9 @@
           <span class="stage-phase phase-publish">Publishing</span>
         </div>
         <div class="stage-desc">Design compelling video thumbnails that drive clicks while accurately representing the content. Follow brand guidelines and thumbnail best practices (contrast, text, faces).</div>
+        <div class="stage-image">
+          <img src="../favicon.png" alt="Thumbnail Design" style="object-fit: contain; background: #000; padding: 20px;">
+        </div>
         <div class="io-boxes">
           <div class="io-box input">
             <div class="io-label input">📥 Input</div>
