@@ -199,6 +199,28 @@
     return isUrlActive(item.url);
   }
 
+  /* ---- recursively render a non-top-level menu item ---------------------
+     Groups (items with children) become nested subdropdowns to any depth;
+     the existing .site-subdrop-menu CSS (position:absolute; left:100%)
+     cascades, so a 4th level flies out to the right of the 3rd. ---------- */
+  function renderSubItem(item) {
+    if (item.hideAfterDays && daysSinceLaunch >= item.hideAfterDays) return '';
+    if (item.children) {
+      var visible = item.children.filter(function (c) {
+        return !(c.hideAfterDays && daysSinceLaunch >= c.hideAfterDays);
+      });
+      if (!visible.length) return '';
+      var active = isItemActive(item);
+      var h = '<div class="site-nav-subdropdown' + (active ? ' active' : '') + '">' +
+        '<span class="site-subdrop-trigger">' + item.label + ' &raquo;</span>' +
+        '<div class="site-subdrop-menu">';
+      visible.forEach(function (c) { h += renderSubItem(c); });
+      h += '</div></div>';
+      return h;
+    }
+    return buildDropItemHtml(item.url, item.label, isUrlActive(item.url) ? 'active' : '', false, item.description);
+  }
+
   function buildNav(menu) {
     if (document.getElementById('site-nav')) return;
 
@@ -229,24 +251,7 @@
           '<span class="site-drop-trigger">' + item.label + ' &#9662;</span>' +
           '<div class="site-drop-menu">';
         visible.forEach(function (child) {
-          var isChildActive = isItemActive(child);
-          var childActiveClass = isChildActive ? 'active' : '';
-          if (child.children) {
-            var subVisible = child.children.filter(function (sc) {
-              return !(sc.hideAfterDays && daysSinceLaunch >= sc.hideAfterDays);
-            });
-            if (!subVisible.length) return;
-            html += '<div class="site-nav-subdropdown' + (isChildActive ? ' active' : '') + '">' +
-              '<span class="site-subdrop-trigger">' + child.label + ' &raquo;</span>' +
-              '<div class="site-subdrop-menu">';
-            subVisible.forEach(function (subChild) {
-              var isSubChildActive = isItemActive(subChild);
-              html += buildDropItemHtml(subChild.url, subChild.label, isSubChildActive ? 'active' : '', false, subChild.description);
-            });
-            html += '</div></div>';
-          } else {
-            html += buildDropItemHtml(child.url, child.label, childActiveClass, false, child.description);
-          }
+          html += renderSubItem(child);
         });
         html += '</div></div>';
       } else {

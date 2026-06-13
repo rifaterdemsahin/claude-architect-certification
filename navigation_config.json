@@ -27,10 +27,20 @@
               "url": "5_Symbols/production/preprod/research/index.html",
               "description": "Central dashboard for all pre-production assets including images, audio, and notes."
             },
-            { 
-              "label": "🖼 Images", 
-              "url": "5_Symbols/production/preprod/research/images.html",
-              "description": "Visual assets, mockups, and diagrams used for course production."
+            {
+              "label": "🖼 Images",
+              "children": [
+                {
+                  "label": "🗂 Image Library",
+                  "url": "5_Symbols/production/preprod/research/images.html",
+                  "description": "Visual assets, mockups, and diagrams used for course production."
+                },
+                {
+                  "label": "🖼️ Image Generator",
+                  "url": "5_Symbols/production/postprod/image_generator.html",
+                  "description": "AI-powered image generator for scene backgrounds and assets."
+                }
+              ]
             },
             { 
               "label": "🎵 Audio", 
