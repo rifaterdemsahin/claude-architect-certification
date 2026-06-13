@@ -53,6 +53,13 @@
       backdrop-filter: blur(12px);
     }
 
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
     .form-group { margin-bottom: 20px; }
     .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-muted); }
     .form-group input, .form-group textarea, .form-group select {
@@ -64,7 +71,7 @@
       color: white;
       font-family: inherit;
     }
-    .form-group input:focus { border-color: var(--primary); outline: none; }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: var(--primary); outline: none; }
 
     .btn {
       padding: 12px 24px;
@@ -79,6 +86,7 @@
       font-size: 1rem;
     }
     .btn-primary { background: var(--primary); color: white; }
+    .btn-success { background: var(--success); color: white; }
     .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4); }
     .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
@@ -144,6 +152,36 @@
 
     <div class="glass-card">
       <form id="info-form">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Module Number</label>
+            <select id="module-number" required onchange="loadSentences()">
+              <option value="1">Module 1</option>
+              <option value="2">Module 2</option>
+              <option value="3">Module 3</option>
+              <option value="4">Module 4</option>
+              <option value="5">Module 5</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Video Number</label>
+            <select id="video-number" required onchange="loadSentences()">
+              <option value="1">Video 1</option>
+              <option value="2">Video 2</option>
+              <option value="3">Video 3</option>
+              <option value="4">Video 4</option>
+              <option value="5">Video 5</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Relate to Script Sentence (Optional)</label>
+          <select id="sentence-id">
+            <option value="">-- No specific sentence --</option>
+          </select>
+        </div>
+
         <div class="form-group">
           <label>Topic or Content</label>
           <textarea id="topic" rows="4" required placeholder="e.g., The 7-stage Project Self-Learning System flow..."></textarea>
@@ -174,9 +212,11 @@
       </div>
       <div id="info-grid" class="info-grid"></div>
       
-      <div style="margin-top: 60px; text-align: center;">
+      <div style="margin-top: 60px; text-align: center; display: flex; justify-content: center; gap: 20px;">
+          <button id="save-btn" class="btn btn-success" onclick="saveInfographic()">💾 Save to Supabase</button>
           <button class="btn btn-primary" onclick="window.print()">🖨️ Export as PDF</button>
       </div>
+      <p id="save-status" style="margin-top: 15px; color: var(--success); text-align: center; display: none;"></p>
     </div>
 
     <footer>
@@ -185,7 +225,7 @@
         <a href="index.html">🗂 Research Hub</a>
         <a href="images.html">🖼 Images</a>
         <a href="notes.html">📝 Notes</a>
-        <a href="../../../index.html">🏠 Home</a>
+        <a href="../../../../index.html">🏠 Home</a>
       </div>
     </footer>
   </div>
@@ -194,6 +234,40 @@
   <script src="../../../../shared/nav.js"></script>
 
   <script>
+    let currentLayout = null;
+
+    async function loadSentences() {
+        const moduleNum = document.getElementById('module-number').value;
+        const videoNum = document.getElementById('video-number').value;
+        const select = document.getElementById('sentence-id');
+        
+        try {
+            // We can fetch from Supabase via Go proxy or direct if config is available
+            const configRes = await fetch('/api/config');
+            const config = await configRes.json();
+            
+            const res = await fetch(`${config.supabaseUrl}/rest/v1/sentences?video_id=ilike.*local-${moduleNum}-${videoNum}*&order=sort_order.asc`, {
+                headers: {
+                    'apikey': config.supabaseAnon,
+                    'Authorization': `Bearer ${config.supabaseAnon}`
+                }
+            });
+            
+            if (!res.ok) throw new Error('Failed to fetch sentences');
+            const sentences = await res.json();
+            
+            select.innerHTML = '<option value="">-- No specific sentence --</option>';
+            sentences.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.id;
+                opt.innerText = `[${s.sentence_type}] ${s.sentence_text.substring(0, 50)}...`;
+                select.appendChild(opt);
+            });
+        } catch (err) {
+            console.error('Sentence load error:', err);
+        }
+    }
+
     document.getElementById('info-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       
@@ -218,6 +292,7 @@
         if (!res.ok) throw new Error('Generation failed');
         
         const data = await res.json();
+        currentLayout = data;
         renderInfographic(data);
         
         document.getElementById('info-preview').style.display = 'block';
@@ -249,6 +324,44 @@
         grid.appendChild(div);
       });
     }
+
+    async function saveInfographic() {
+        if (!currentLayout) return;
+        
+        const saveBtn = document.getElementById('save-btn');
+        const status = document.getElementById('save-status');
+        const sentId = document.getElementById('sentence-id').value;
+        
+        saveBtn.disabled = true;
+        saveBtn.innerText = '⌛ Saving...';
+        
+        try {
+            const res = await fetch('/api/infographics/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    module_number: parseInt(document.getElementById('module-number').value),
+                    video_number: parseInt(document.getElementById('video-number').value),
+                    sentence_id: sentId ? parseInt(sentId) : null,
+                    topic: document.getElementById('topic').value,
+                    style: document.getElementById('style').value,
+                    layout_json: currentLayout
+                })
+            });
+            
+            if (!res.ok) throw new Error('Save failed');
+            
+            status.innerText = '✅ Infographic layout saved to Supabase!';
+            status.style.display = 'block';
+            saveBtn.innerText = '✅ Saved';
+        } catch (err) {
+            alert('Save Error: ' + err.message);
+            saveBtn.disabled = false;
+            saveBtn.innerText = '💾 Save to Supabase';
+        }
+    }
+
+    loadSentences();
   </script>
 </body>
 </html>

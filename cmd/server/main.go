@@ -1309,6 +1309,51 @@ Keep it professional, architect-focused, and high-signal.`, req.Topic, req.Style
 	}
 }
 
+func infographicSaveHandler(cfg config) http.HandlerFunc {
+	type InfoSaveRequest struct {
+		ModuleNumber int            `json:"module_number"`
+		VideoNumber  int            `json:"video_number"`
+		SentenceID   *int64         `json:"sentence_id"`
+		Topic        string         `json:"topic"`
+		Style        string         `json:"style"`
+		LayoutJSON   map[string]any `json:"layout_json"`
+	}
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		if r.Method != http.MethodPost {
+			http.Error(w, `{"error":"method not allowed"}`, http.StatusMethodNotAllowed)
+			return
+		}
+
+		var req InfoSaveRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, `{"error":"invalid request"}`, http.StatusBadRequest)
+			return
+		}
+
+		// Save to Supabase
+		ctx := r.Context()
+		dbEntry := map[string]any{
+			"module_number": req.ModuleNumber,
+			"video_number":  req.VideoNumber,
+			"sentence_id":   req.SentenceID,
+			"topic":         req.Topic,
+			"style":         req.Style,
+			"layout_json":   req.LayoutJSON,
+			"status":        "saved",
+		}
+
+		if err := supabasePost(ctx, cfg, "infographics", dbEntry); err != nil {
+			log.Printf("supabase save infographic error: %v", err)
+			http.Error(w, `{"error":"failed to save to database"}`, http.StatusInternalServerError)
+			return
+		}
+
+		json.NewEncoder(w).Encode(map[string]any{"ok": true})
+	}
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 func main() {
@@ -1346,6 +1391,7 @@ func main() {
 	mux.Handle("/api/images/generate", observe(cfg, imageGenerateHandler(cfg)))
 	mux.Handle("/api/images/save", observe(cfg, imageSaveHandler(cfg)))
 	mux.Handle("/api/infographics/generate", observe(cfg, infographicGenerateHandler(cfg)))
+	mux.Handle("/api/infographics/save", observe(cfg, infographicSaveHandler(cfg)))
 	mux.Handle("/admin/errors", observe(cfg, axiomErrorsHandler(tmpl, cfg, navConfigJS)))
 	mux.Handle("/", observe(cfg, homeHandler(tmpl, cfg, navConfigJS)))
 
