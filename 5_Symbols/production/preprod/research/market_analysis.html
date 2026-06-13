@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📊 Market Analysis — Research Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../../../shared/nav.css">
+  <style>
+    :root {
+      --bg: #030712; --card: rgba(17,24,39,0.9); --border: rgba(139,92,246,0.2);
+      --text: #f3f4f6; --muted: #9ca3af; --primary: #8b5cf6; --green: #10b981;
+      --red: #ef4444; --blue: #3b82f6; --yellow: #f59e0b;
+      --font-h: 'Outfit', sans-serif; --font-b: 'Plus Jakarta Sans', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: var(--font-b); line-height: 1.65; padding: 32px 24px 120px; }
+    .container { max-width: 920px; margin: 0 auto; }
+    .breadcrumb { font-size: 0.82rem; color: var(--muted); margin-bottom: 18px; }
+    .breadcrumb a { color: var(--primary); text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+    h1 { font-family: var(--font-h); font-size: 2.4rem; font-weight: 800; margin-bottom: 6px; }
+    .subtitle { color: var(--muted); margin-bottom: 10px; }
+    .meta-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 32px; }
+    .pill { font-size: 0.72rem; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: rgba(139,92,246,0.12); border: 1px solid rgba(139,92,246,0.3); color: #c4b5fd; }
+    .pill.green { background: rgba(16,185,129,0.12); border-color: rgba(16,185,129,0.3); color: #6ee7b7; }
+    .pill.yellow { background: rgba(245,158,11,0.12); border-color: rgba(245,158,11,0.3); color: #fcd34d; }
+
+    h2 { font-family: var(--font-h); font-size: 1.45rem; font-weight: 800; margin: 38px 0 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    h3 { font-family: var(--font-h); font-size: 1.1rem; font-weight: 700; margin: 22px 0 10px; color: #e9d5ff; }
+    p { margin-bottom: 14px; }
+    ul { margin: 0 0 16px 0; padding-left: 4px; list-style: none; }
+    li { margin-bottom: 8px; padding-left: 26px; position: relative; }
+    li::before { content: attr(data-emoji); position: absolute; left: 0; top: 0; }
+
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px 24px; margin-bottom: 18px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 680px) { .grid-2 { grid-template-columns: 1fr; } }
+
+    table { width: 100%; border-collapse: collapse; margin: 8px 0 20px; font-size: 0.88rem; }
+    th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); }
+    th { font-family: var(--font-h); color: #c4b5fd; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; }
+    td:first-child { font-weight: 600; }
+
+    .swot { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
+    @media (max-width: 680px) { .swot { grid-template-columns: 1fr; } }
+    .swot-box { border-radius: 14px; padding: 16px 18px; border: 1px solid var(--border); }
+    .swot-box h4 { font-family: var(--font-h); font-size: 0.95rem; margin-bottom: 10px; }
+    .swot-s { background: rgba(16,185,129,0.06); border-color: rgba(16,185,129,0.25); }
+    .swot-w { background: rgba(239,68,68,0.06); border-color: rgba(239,68,68,0.25); }
+    .swot-o { background: rgba(59,130,246,0.06); border-color: rgba(59,130,246,0.25); }
+    .swot-t { background: rgba(245,158,11,0.06); border-color: rgba(245,158,11,0.25); }
+
+    .callout { background: rgba(139,92,246,0.08); border-left: 3px solid var(--primary); border-radius: 8px; padding: 14px 18px; margin: 16px 0 24px; font-size: 0.92rem; }
+    .est { color: var(--muted); font-size: 0.78rem; font-style: italic; }
+    .big-num { font-family: var(--font-h); font-size: 1.8rem; font-weight: 800; color: var(--green); }
+    .stat-label { font-size: 0.8rem; color: var(--muted); }
+  </style>
+</head>
+<body>
+<script src="../../../../shared/nav.js"></script>
+<div class="container">
+  <div class="breadcrumb"><a href="index.html">🔬 Research Hub</a> &nbsp;›&nbsp; 📊 Market Analysis</div>
+
+  <h1>📊 Market Analysis</h1>
+  <p class="subtitle">Demand, audience, competitors, and positioning for the <strong>Claude AI Architect Certification</strong> course.</p>
+  <div class="meta-row">
+    <span class="pill">🗓 Last updated: 2026-06-13</span>
+    <span class="pill green">🪨 Source: Obsidian research vault</span>
+    <span class="pill yellow">📐 Figures marked <em>est</em> are estimates</span>
+  </div>
+
+  <div class="callout">
+    🎯 <strong>Thesis:</strong> There is a fast-growing, under-served gap between generic "prompt engineering" content and deep, production-grade <em>AI architecture</em> training. Engineers who can design multi-agent systems, MCP servers, and cost-controlled LLM pipelines are scarce and well-paid — but almost no structured certification path exists. This course targets exactly that gap.
+  </div>
+
+  <!-- ───────────────────────── Market sizing ───────────────────────── -->
+  <h2>📈 Market Sizing</h2>
+  <p>Sized top-down from the developer population now building on LLMs. All figures are directional estimates for prioritisation, not financial projections.</p>
+  <div class="grid-2">
+    <div class="card">
+      <div class="big-num">~30M</div>
+      <div class="stat-label">🌍 Global developers (TAM) <span class="est">— est, ~10–15% now touch AI tooling</span></div>
+    </div>
+    <div class="card">
+      <div class="big-num">~3–4M</div>
+      <div class="stat-label">🧩 Devs actively building LLM apps (SAM) <span class="est">— est</span></div>
+    </div>
+    <div class="card">
+      <div class="big-num">~150–300K</div>
+      <div class="stat-label">🎯 Reachable, willing-to-pay learners (SOM) <span class="est">— est</span></div>
+    </div>
+    <div class="card">
+      <div class="big-num">~30–40%</div>
+      <div class="stat-label">📊 Annual growth in AI-engineering job postings <span class="est">— est</span></div>
+    </div>
+  </div>
+
+  <!-- ───────────────────────── Audience ───────────────────────── -->
+  <h2>👥 Target Audience</h2>
+  <div class="card">
+    <h3>Primary persona — "The Builder-Architect"</h3>
+    <ul>
+      <li data-emoji="👷">Mid-to-senior full-stack / backend engineers (3–10 yrs) shipping their first serious AI feature</li>
+      <li data-emoji="🏗">DevOps / platform engineers asked to host, secure, and cost-control LLM infra</li>
+      <li data-emoji="🚀">Technical founders &amp; solo builders productionising an AI prototype</li>
+    </ul>
+    <h3>Secondary persona</h3>
+    <ul>
+      <li data-emoji="🎓">Bootcamp grads &amp; career-switchers seeking a credible, differentiated credential</li>
+      <li data-emoji="🏢">Enterprise teams needing a shared vocabulary for agentic architecture</li>
+    </ul>
+  </div>
+  <h3>🔥 Demand signals</h3>
+  <ul>
+    <li data-emoji="📈">"AI engineer" / "AI architect" among the fastest-growing 2024–2026 job titles <span class="est">(est)</span></li>
+    <li data-emoji="💬">High, recurring questions on MCP, multi-agent orchestration, and token cost control in dev communities</li>
+    <li data-emoji="🧰">Rapid tool churn (Claude, MCP, agent SDKs) keeps practitioners hungry for current, structured guidance</li>
+    <li data-emoji="💸">Employers pay a premium for proven production experience, not just prompt skills</li>
+  </ul>
+
+  <!-- ───────────────────────── Competition ───────────────────────── -->
+  <h2>🥊 Competitive Landscape</h2>
+  <table>
+    <thead>
+      <tr><th>Category</th><th>Examples</th><th>Gap they leave</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>🎬 Generic prompt courses</td><td>YouTube tutorials, Udemy "Prompt Engineering"</td><td>Shallow; no architecture, infra, or cost discipline</td></tr>
+      <tr><td>📚 Platform certs</td><td>Cloud-vendor &amp; LLM-vendor badges</td><td>Vendor-locked; thin on multi-agent &amp; MCP system design</td></tr>
+      <tr><td>🧑‍🏫 Cohort bootcamps</td><td>Live AI-engineering cohorts</td><td>Expensive, time-boxed, not self-paced</td></tr>
+      <tr><td>📰 Newsletters / blogs</td><td>AI-engineering newsletters</td><td>Fragmented; no curriculum, no proof-of-skill</td></tr>
+    </tbody>
+  </table>
+  <div class="callout">
+    🧭 <strong>White space:</strong> a <em>self-paced, architecture-first certification</em> that takes a learner from problem → multi-agent system → deployed, secured, cost-controlled MCP server — with a real POC artifact as proof. None of the above own this end-to-end.
+  </div>
+
+  <!-- ───────────────────────── Positioning ───────────────────────── -->
+  <h2>🧭 Positioning &amp; Differentiation</h2>
+  <ul>
+    <li data-emoji="🏛">"Architecture-first": system design over isolated prompt tricks</li>
+    <li data-emoji="🛠">Production-grade stack — MCP servers, multi-agent orchestration, Supabase, Fly.io, Cloudflare, Azure Key Vault</li>
+    <li data-emoji="💰">Cost-and-security discipline baked in (token budgets, secrets management, ZDR compliance)</li>
+    <li data-emoji="🧪">Proof-of-skill: every learner ships a working POC, not just a quiz score</li>
+    <li data-emoji="🔁">Built on a reusable 7-stage delivery framework learners can take back to work</li>
+  </ul>
+
+  <!-- ───────────────────────── SWOT ───────────────────────── -->
+  <h2>⚖️ SWOT</h2>
+  <div class="swot">
+    <div class="swot-box swot-s">
+      <h4>💪 Strengths</h4>
+      <ul>
+        <li data-emoji="✅">Deep, current, production-focused content</li>
+        <li data-emoji="✅">Real artifact (POC) as differentiator</li>
+        <li data-emoji="✅">Repeatable production pipeline already built</li>
+      </ul>
+    </div>
+    <div class="swot-box swot-w">
+      <h4>🚧 Weaknesses</h4>
+      <ul>
+        <li data-emoji="⚠️">Solo creator → limited production bandwidth</li>
+        <li data-emoji="⚠️">No established brand / cohort community yet</li>
+        <li data-emoji="⚠️">Niche depth narrows the top of funnel</li>
+      </ul>
+    </div>
+    <div class="swot-box swot-o">
+      <h4>🚀 Opportunities</h4>
+      <ul>
+        <li data-emoji="📈">Surging AI-architect demand</li>
+        <li data-emoji="🤝">Partner / sponsor with tooling vendors</li>
+        <li data-emoji="🔁">Spin framework into a template product</li>
+      </ul>
+    </div>
+    <div class="swot-box swot-t">
+      <h4>⚡ Threats</h4>
+      <ul>
+        <li data-emoji="🌀">Fast tool churn ages content quickly</li>
+        <li data-emoji="🏢">Vendors may ship free official certs</li>
+        <li data-emoji="🆓">Free YouTube depth rising</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ───────────────────────── Pricing ───────────────────────── -->
+  <h2>💵 Pricing Hypothesis <span class="est">(est — validate before launch)</span></h2>
+  <table>
+    <thead>
+      <tr><th>Tier</th><th>Price</th><th>Includes</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>🆓 Free funnel</td><td>$0</td><td>YouTube playlist + intro modules → top-of-funnel</td></tr>
+      <tr><td>🎓 Certification</td><td>$199–$399 <span class="est">est</span></td><td>Full course, POC walkthrough, exam, certificate</td></tr>
+      <tr><td>🏢 Team / cohort</td><td>$1.5–3K <span class="est">est</span></td><td>Seats, live Q&amp;A, private support</td></tr>
+    </tbody>
+  </table>
+
+  <!-- ───────────────────────── Takeaways ───────────────────────── -->
+  <h2>🎯 Key Takeaways</h2>
+  <ul>
+    <li data-emoji="1️⃣">Real, growing demand for <strong>AI architecture</strong> skills — not just prompting.</li>
+    <li data-emoji="2️⃣">The architecture-first + shipped-POC angle is genuine white space.</li>
+    <li data-emoji="3️⃣">Lead with a free YouTube funnel; convert to a paid certification.</li>
+    <li data-emoji="4️⃣">Biggest risk is content staleness — design for fast, modular updates.</li>
+    <li data-emoji="5️⃣">Validate pricing and persona with a small pre-launch waitlist before scaling production.</li>
+  </ul>
+
+  <p class="est" style="margin-top:28px;">📝 Analysis authored as part of Stage 03 (Research) pre-production. Quantitative figures marked <em>est</em> are directional estimates pending primary validation (waitlist survey, keyword volume, competitor pricing scrape).</p>
+</div>
+<script src="../../../../shared/debug-panel.js"></script>
+</body>
+</html>

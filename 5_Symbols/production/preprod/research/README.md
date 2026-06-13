@@ -16,6 +16,7 @@ All file operations go through the Go server proxy — no credentials ever reach
 | `audio.html` | `research-audio` | Upload & play audio clips (HTML5 `<audio>` player) |
 | `videos.html` | `research-videos` | Upload & play video clips (HTML5 `<video>` player) |
 | `notes.html` | `research-notes` | Write & save Markdown notes (inline editor + preview) |
+| `market_analysis.html` | — | 📊 Static market analysis: demand sizing, audience, competitors, positioning, SWOT, pricing |
 
 ## 🔗 API Endpoints
 

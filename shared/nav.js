@@ -88,9 +88,13 @@
 
   var FALLBACK = [
     { label: '🎬 Preprod', children: [
-      { label: '1. ❓ Problem', url: '5_Symbols/production/preprod/problem.html' },
+      { label: '1. ❓ Problem', children: [
+        { label: '❓ Problem Statement', url: '5_Symbols/production/preprod/problem.html', description: 'Core problem the course solves — gap, audience, and value proposition.' },
+        { label: '📊 Market Analysis', url: '5_Symbols/production/preprod/research/market_analysis.html', description: 'Demand sizing, target audience, competitive landscape, and positioning.' }
+      ]},
       { label: '2. 🏠 Product (Solution)', url: 'index.html' },
-      { label: '3. ✅ Sanity Checklist', url: '5_Symbols/production/preprod/sanity_checklist.html', hideAfterDays: 90 },
+      { label: '8. ✅ Sanity Checklist', url: '5_Symbols/production/preprod/sanity_checklist.html', hideAfterDays: 90 },
+      { label: '📅 Timeline', url: '5_Symbols/timeline.html' },
       { label: '4. 📋 Outline', url: '5_Symbols/production/preprod/course_outline.html' },
       { label: '5. 🎬 Script', url: '5_Symbols/production/preprod/scripts/index.html' },
       { label: '6. 📋 Producer Checklist', url: '5_Symbols/production/preprod/producer_checklist.html' },
@@ -100,7 +104,6 @@
           { label: '🐙 GitHub Repo', url: 'https://github.com/rifaterdemsahin/claude-architect-certification' },
           { label: '💳 GitHub Billing Usage', url: 'https://github.com/settings/billing/usage?period=3&group=0&customer=592572' },
           { label: '🔥 Supabase', url: 'https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/' },
-          { label: '🗄 Supabase Admin (Local)', url: 'http://127.0.0.1:5500/5_Symbols/supabase/ui/admin.html' },
           { label: '📡 Axiom Errors Admin', url: '/admin/errors' },
           { label: '🏠 Home Template', url: '5_Symbols/templates/index.html' },
           { label: '📋 Error Log Template', url: '5_Symbols/templates/axiom_errors.html' },
@@ -154,7 +157,10 @@
         ]
       }
     ]},
-    { label: '🗄 Supabase Admin', url: 'http://localhost:8086/5_Symbols/supabase/ui/admin.html' }
+    {
+      "label": "📅 Timeline",
+      "url": "5_Symbols/timeline.html"
+    }
   ];
 
   function resolveUrl(url) {
@@ -248,7 +254,6 @@
       }
     });
 
-    html += '<a href="' + ROOT + '5_Symbols/production/publish/membership.html" class="site-nav-join">🔥 Join $10/mo</a>';
     html += '</div></div>';
 
     var nav = document.createElement('nav');

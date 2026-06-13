@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📅 Project Timeline — Claude AI Certification</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --bg-dark: #0b0f19;
+      --bg-card: rgba(22, 28, 45, 0.7);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --accent-violet: #8b5cf6;
+      --accent-cyan: #06b6d4;
+      --text-primary: #f8fafc;
+      --text-muted: #94a3b8;
+      --font-display: 'Outfit', sans-serif;
+      --font-body: 'Inter', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.1) 0px, transparent 50%);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 4rem auto;
+      padding: 0 2rem;
+    }
+
+    h1 {
+      font-family: var(--font-display);
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+      background: linear-gradient(to right, #ffffff, var(--accent-violet));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-align: center;
+    }
+
+    p.subtitle {
+      text-align: center;
+      color: var(--text-muted);
+      margin-bottom: 4rem;
+    }
+
+    /* Timeline Styles */
+    .timeline {
+      position: relative;
+      padding-left: 3.5rem;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 1rem;
+      top: 0.5rem;
+      bottom: 0.5rem;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--accent-violet), var(--accent-cyan), var(--accent-violet));
+      opacity: 0.3;
+    }
+
+    .timeline-item {
+      position: relative;
+      margin-bottom: 2.5rem;
+    }
+
+    .timeline-dot {
+      position: absolute;
+      left: -3.5rem;
+      top: 0;
+      width: 2rem;
+      height: 2rem;
+      background: var(--bg-dark);
+      border: 2px solid var(--accent-violet);
+      border-radius: 50%;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--accent-violet);
+      box-shadow: 0 0 12px rgba(139, 92, 246, 0.6);
+    }
+
+    .timeline-content {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 1.5rem;
+      backdrop-filter: blur(10px);
+      transition: transform 0.25s ease, border-color 0.25s ease;
+    }
+
+    .timeline-content:hover {
+      transform: translateX(8px);
+      border-color: var(--accent-violet);
+    }
+
+    .timeline-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+
+    .timeline-stage {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .timeline-title {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+
+    .timeline-link {
+      font-size: 0.8rem;
+      color: var(--accent-violet);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .timeline-link:hover { text-decoration: underline; }
+
+    .data-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+    }
+
+    .data-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 1rem;
+    }
+
+    .data-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 0.25rem;
+    }
+
+    .data-value { font-size: 0.95rem; }
+    .data-value ul { padding-left: 1.2rem; margin: 0.5rem 0 0; }
+    .data-value li { margin-bottom: 0.35rem; }
+
+    .stat-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+    }
+    .stat-pill {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 90px;
+      padding: 0.6rem 0.9rem;
+      background: rgba(6, 182, 212, 0.08);
+      border: 1px solid rgba(6, 182, 212, 0.2);
+      border-radius: 12px;
+    }
+    .stat-num {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--accent-cyan);
+    }
+    .stat-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      background: rgba(139, 92, 246, 0.2);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      border-radius: 4px;
+      font-size: 0.75rem;
+      margin: 2px;
+    }
+
+    .empty {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    .loading-spinner { text-align: center; padding: 2rem; color: var(--text-muted); }
+    .error { color: #f87171; padding: 1rem; border: 1px solid rgba(248,113,113,0.3); border-radius: 12px; background: rgba(248,113,113,0.08); }
+
+    /* dim future/empty stages slightly */
+    .timeline-item.is-empty .timeline-dot { border-color: var(--text-muted); color: var(--text-muted); box-shadow: none; }
+    .timeline-item.is-empty .timeline-content { opacity: 0.75; }
+  </style>
+  <script src="../shared/nav.js" defer></script>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Project Journey Timeline</h1>
+    <p class="subtitle">Live data from Supabase, read top-to-bottom in the production order: from the problem all the way to proof.</p>
+
+    <div id="timeline" class="timeline">
+      <div class="loading-spinner">
+        <i class="fas fa-circle-notch fa-spin"></i> Loading project history...
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    (async () => {
+      const SUPABASE_URL  = 'https://rmekfsdhglyiralxvkwc.supabase.co';
+      const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZWtmc2RoZ2x5aXJhbHh2a3djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NzYzODgsImV4cCI6MjA5NjM1MjM4OH0.ay6HsmO_CbMGDXL_Dv4DT-paAIAOqlQPfmqqx_mexSU';
+      const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+      const timelineEl = document.getElementById('timeline');
+
+      // --- helpers ----------------------------------------------------------
+      const esc = (s) => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+      // Resolve a query to its rows, swallowing missing-table / RLS errors.
+      async function rows(builder) {
+        try { const { data } = await builder; return data || []; }
+        catch { return []; }
+      }
+      // Resolve a query to a single row.
+      async function one(builder) {
+        try { const { data } = await builder; return data || null; }
+        catch { return null; }
+      }
+      // Exact row count without pulling the rows.
+      async function count(table) {
+        try {
+          const { count } = await db.from(table).select('*', { count: 'exact', head: true });
+          return count || 0;
+        } catch { return 0; }
+      }
+
+      function pill(num, label) {
+        return `<div class="stat-pill"><span class="stat-num">${num}</span><span class="stat-label">${esc(label)}</span></div>`;
+      }
+
+      // --- fetch everything in parallel ------------------------------------
+      const [
+        problem, personas, challenges, solutions, metadata,
+        modules, outlineCount, prodModules, videos,
+        scriptCount, sentenceCount, research, sceneCount,
+        edlCount, milestones, domains
+      ] = await Promise.all([
+        one(db.from('problem_pages').select('*').order('stage_number').limit(1).maybeSingle()),
+        rows(db.from('target_personas').select('*').order('display_order')),
+        rows(db.from('core_challenges').select('*').order('challenge_number')),
+        rows(db.from('course_solutions').select('*').order('step_number')),
+        one(db.from('course_metadata').select('*').limit(1).maybeSingle()),
+        rows(db.from('course_modules').select('*').order('module_number')),
+        count('outline'),
+        rows(db.from('modules').select('*').order('module_number')),
+        rows(db.from('videos').select('*').order('module_number, video_number')),
+        count('scripts'),
+        count('sentences'),
+        rows(db.from('research_relationships').select('container,item_name')),
+        count('scenes'),
+        count('edl_entries'),
+        rows(db.from('milestones').select('*').order('module_number, milestone_number')),
+        rows(db.from('exam_domains').select('*').order('display_order')),
+      ]).catch(() => []);
+
+      // --- build the ordered stage list ------------------------------------
+      const stages = [];
+
+      // 1 — Problem
+      stages.push({
+        num: 1, stage: 'Stage 1 · Real Unknown', title: '❓ Problem',
+        link: { href: 'production/preprod/problem.html', text: 'Open Problem →' },
+        body: (problem || personas.length || challenges.length || domains.length) ? `
+          ${problem ? `<div class="data-card"><div class="data-label">Headline</div><div class="data-value">${esc(problem.headline)}</div></div>` : ''}
+          ${problem && problem.subheadline ? `<div class="data-card"><div class="data-label">Why it matters</div><div class="data-value">${esc(problem.subheadline)}</div></div>` : ''}
+          ${personas.length ? `<div class="data-card"><div class="data-label">Who faces this</div><div class="data-value">${personas.map(p => `<span class="tag">${esc(p.emoji)} ${esc(p.role_title)}</span>`).join('')}</div></div>` : ''}
+          ${challenges.length ? `<div class="data-card"><div class="data-label">Core challenges</div><div class="data-value"><ul>${challenges.map(c => `<li><strong>${esc(c.title)}:</strong> ${esc(c.description)}</li>`).join('')}</ul></div></div>` : ''}
+          ${domains.length ? `<div class="data-card"><div class="data-label">Exam domains tested</div><div class="data-value"><div class="stat-row">${domains.map(d => pill(d.weight_percent + '%', d.domain_name)).join('')}</div>${domains.map(d => `<div style="margin-top:0.5rem;"><span class="tag" style="background:rgba(6,182,212,0.08);border-color:rgba(6,182,212,0.2);color:var(--accent-cyan);">${esc(d.domain_name)}</span> ${(d.topics_covered || []).map(t => `<span class="tag">${esc(t)}</span>`).join('')}</div>`).join('')}</div></div>` : ''}
+        ` : ''
+      });
+
+      // 2 — Product (Solution)
+      stages.push({
+        num: 2, stage: 'Stage 2 · Environment & Concept', title: '🏠 Product (Solution)',
+        link: { href: '../index.html', text: 'Open Product →' },
+        body: (metadata || solutions.length) ? `
+          ${metadata ? `
+            <div class="data-card"><div class="data-label">Course</div><div class="data-value"><strong>${esc(metadata.course_title)}</strong>${metadata.course_description ? `<br><span style="font-size:0.85rem;color:var(--text-muted);">${esc(metadata.course_description)}</span>` : ''}</div></div>
+            ${metadata.target_audience ? `<div class="data-card"><div class="data-label">Target audience</div><div class="data-value">${esc(metadata.target_audience)}</div></div>` : ''}
+            ${Array.isArray(metadata.skills) && metadata.skills.length ? `<div class="data-card"><div class="data-label">Skills targeted</div><div class="data-value">${metadata.skills.map(s => `<span class="tag">${esc(s)}</span>`).join('')}</div></div>` : ''}
+          ` : ''}
+          ${solutions.length ? `<div class="data-card"><div class="data-label">How the course solves it</div><div class="data-value"><ul>${solutions.map(s => `<li><strong>${esc(s.title)}:</strong> ${esc(s.description)}</li>`).join('')}</ul></div></div>` : ''}
+        ` : ''
+      });
+
+      // 3 — Research
+      const byContainer = research.reduce((acc, r) => { acc[r.container] = (acc[r.container] || 0) + 1; return acc; }, {});
+      stages.push({
+        num: 3, stage: 'Stage 4 · Formula', title: '🔬 Research',
+        link: { href: 'production/preprod/research/index.html', text: 'Open Research Hub →' },
+        body: research.length ? `
+          <div class="data-card">
+            <div class="data-label">Research assets linked to the course</div>
+            <div class="data-value"><div class="stat-row">${Object.entries(byContainer).map(([c, n]) => pill(n, c.replace('research-', ''))).join('')}</div></div>
+          </div>
+        ` : ''
+      });
+
+      // 4 — Outline
+      stages.push({
+        num: 4, stage: 'Stage 4 · Formula', title: '📋 Outline',
+        link: { href: 'production/preprod/course_outline.html', text: 'Open Outline →' },
+        body: (modules.length || outlineCount) ? `
+          ${outlineCount ? `<div class="data-card"><div class="data-label">Outline blocks authored</div><div class="data-value"><div class="stat-row">${pill(outlineCount, 'blocks')}${pill(modules.length, 'modules')}</div></div></div>` : ''}
+          ${modules.length ? `<div class="data-grid">${modules.map(m => `<div class="data-card"><div class="data-label">Module ${esc(m.module_number)}</div><div class="data-value"><strong>${esc(m.title)}</strong>${m.description ? `<br><span style="font-size:0.85rem;color:var(--text-muted);">${esc(m.description)}</span>` : ''}</div></div>`).join('')}</div>` : ''}
+        ` : ''
+      });
+
+      // 5 — Script
+      stages.push({
+        num: 5, stage: 'Stage 5 · Symbols', title: '🎬 Script',
+        link: { href: 'production/preprod/scripts/index.html', text: 'Open Scripts →' },
+        body: (scriptCount || sentenceCount || videos.length) ? `
+          <div class="data-card"><div class="data-label">Scripting progress</div><div class="data-value"><div class="stat-row">${pill(scriptCount, 'scripts')}${pill(sentenceCount, 'sentences')}${pill(videos.length, 'videos')}</div></div></div>
+          ${videos.length ? `<div class="data-grid">${videos.map(v => `<div class="data-card"><div class="data-label">Module ${esc(v.module_number)} · Video ${esc(v.video_number)}</div><div class="data-value">${esc(v.title)}${v.duration ? ` <span style="color:var(--text-muted);">(${esc(v.duration)})</span>` : ''}</div></div>`).join('')}</div>` : ''}
+        ` : ''
+      });
+
+      // 6 — Production
+      stages.push({
+        num: 6, stage: 'Stage 5 · Symbols', title: '🎥 Production',
+        link: { href: 'production/production_hub.html', text: 'Open Production Hub →' },
+        body: (sceneCount || prodModules.length) ? `
+          <div class="data-card"><div class="data-label">Shoot scenes prepared</div><div class="data-value"><div class="stat-row">${pill(sceneCount, 'scenes')}${pill(prodModules.length, 'prod modules')}</div></div></div>
+          ${prodModules.length ? `<div class="data-grid">${prodModules.map(m => `<div class="data-card"><div class="data-label">Module ${esc(m.module_number)}</div><div class="data-value">${esc(m.title)}</div></div>`).join('')}</div>` : ''}
+        ` : ''
+      });
+
+      // 7 — Post Prod
+      stages.push({
+        num: 7, stage: 'Stage 5 · Symbols', title: '📦 Post Prod',
+        link: { href: 'production/postprod/edit_list.html', text: 'Open Edit List →' },
+        body: edlCount ? `
+          <div class="data-card"><div class="data-label">Edit decisions logged</div><div class="data-value"><div class="stat-row">${pill(edlCount, 'EDL entries')}</div></div></div>
+        ` : ''
+      });
+
+      // 8 — Proof / Milestones
+      const doneMs = milestones.filter(m => m.checked).length;
+      stages.push({
+        num: 8, stage: 'Stage 7 · Testing Known', title: '🧪 Proof & Milestones',
+        link: { href: 'production/preprod/producer_checklist.html', text: 'Open Checklist →' },
+        body: milestones.length ? `
+          <div class="data-card"><div class="data-label">Production milestones</div><div class="data-value"><div class="stat-row">${pill(doneMs, 'done')}${pill(milestones.length - doneMs, 'remaining')}</div></div></div>
+          <div class="data-grid">${milestones.map(m => `<div class="data-card"><div class="data-label">${m.checked ? '✅' : '⬜'} Module ${esc(m.module_number)} · Milestone ${esc(m.milestone_number)}</div><div class="data-value">${esc(m.title)}</div></div>`).join('')}</div>
+        ` : ''
+      });
+
+      // --- render -----------------------------------------------------------
+      timelineEl.innerHTML = stages.map(s => {
+        const isEmpty = !s.body || !s.body.trim();
+        const inner = isEmpty ? `<div class="empty">No data yet — this stage hasn't started.</div>` : `<div class="data-grid">${s.body}</div>`;
+        return `
+          <div class="timeline-item${isEmpty ? ' is-empty' : ''}">
+            <div class="timeline-dot">${s.num}</div>
+            <div class="timeline-content">
+              <div class="timeline-head">
+                <div>
+                  <div class="timeline-stage">${esc(s.stage)}</div>
+                  <div class="timeline-title">${s.title}</div>
+                </div>
+                ${s.link ? `<a class="timeline-link" href="${s.link.href}">${esc(s.link.text)}</a>` : ''}
+              </div>
+              ${inner}
+            </div>
+          </div>`;
+      }).join('');
+    })().catch(err => {
+      document.getElementById('timeline').innerHTML = `<div class="error">❌ Failed to load timeline: ${err.message}</div>`;
+    });
+  </script>
+</body>
+</html>
