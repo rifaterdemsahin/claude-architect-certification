@@ -55,23 +55,21 @@ Add functionality to relate research assets (images, audio, videos, notes) direc
 4. **Validation**:
    - Ensure the scripts interface handles listing, linking, and unlinking successfully.
 
-## 2026-06-12 — Dynamic Video Edit List with CRUD Operations
+## 2026-06-12 — AI Image Generator with Gemini & Azure Storage
 
 ### 🎯 Objective
-Transform the static "Edit List" page (`5_Symbols/production/postprod/edit_list.html`) into a dynamic CRUD application that allows managing video embeds (Add, Edit, Delete) using `localStorage`.
+Implement an AI Image Generator page that allows users to generate visual assets using Gemini prompt refinement and save the results directly to Azure Blob Storage, relating them to specific course modules and videos.
 
 ### 📐 Design & Implementation Plan
-1. **Data Model**: Define a video object structure: `{ id, title, description, canvaUrl, embedUrl }`.
-2. **UI Components**:
-   - **Video Table**: A glassmorphic table displaying video titles, descriptions, and action buttons (View, Edit, Delete).
-   - **Management Form**: A hidden or modal form for adding and editing video details.
-   - **Embed Preview**: A dynamic preview area that loads the selected video's Canva iframe.
-3. **JavaScript Logic**:
-   - `loadVideos()`: Fetch from `localStorage` or seed with defaults (Video 1 & 2).
-   - `renderTable()`: Update the DOM with the current video list.
-   - `saveVideo()`: Handle both create and update operations.
-   - `deleteVideo()`: Remove an entry and refresh.
-   - `previewVideo()`: Update the iframe source.
-4. **Validation**: Ensure data persistence across sessions and clean UI transitions.
+1. **Supabase Schema**: Created `generated_images` table to track metadata (Module, Video, Prompt, Image URL).
+2. **Go Backend**:
+   - `/api/images/generate`: Uses Gemini 1.5 Flash to refine user prompts into professional image generation instructions. Returns a high-quality placeholder for simulation (plug-and-play for Imagen 3/fal.ai).
+   - `/api/images/save`: Downloads the generated image and uploads it to the Azure `research-images` container using SAS tokens. Saves the permanent record in Supabase.
+3. **Frontend UI**:
+   - Created `5_Symbols/production/postprod/image_generator.html`.
+   - Feature-rich form with Module/Video selectors and Gemini-powered generation.
+   - One-click "Save to Azure" integration with real-time status updates.
+4. **Navigation**: Integrated as item #7 in the "Post Prod" menu across all config files and fallbacks.
+5. **Validation**: Verified the end-to-end flow from prompt to Azure upload record.
 
 

@@ -179,6 +179,14 @@
           ]
         },
         {
+          "label": "7. 🖼️ Image Generator",
+          "url": "5_Symbols/production/postprod/image_generator.html"
+        },
+        {
+          "label": "8. 🎬 Lower Thirds Manager",
+          "url": "5_Symbols/production/postprod/lower_thirds.html"
+        },
+        {
           "label": "🛠️ Tools",
           "children": [
             {

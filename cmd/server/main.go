@@ -1072,6 +1072,161 @@ func explanationsHandler(cfg config) http.HandlerFunc {
 	}
 }
 
+// ── Image Generation ─────────────────────────────────────────────────────────
+
+type ImageGenRequest struct {
+	Prompt       string `json:"prompt"`
+	ModuleNumber int    `json:"module_number"`
+	VideoNumber  int    `json:"video_number"`
+}
+
+func imageGenerateHandler(cfg config) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		if r.Method != http.MethodPost {
+			http.Error(w, `{"error":"method not allowed"}`, http.StatusMethodNotAllowed)
+			return
+		}
+
+		var req ImageGenRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, `{"error":"invalid request"}`, http.StatusBadRequest)
+			return
+		}
+
+		geminiKey := cfg.getSecret("GEMINI_API_KEY")
+		if geminiKey == "" {
+			http.Error(w, `{"error":"GEMINI_API_KEY missing"}`, http.StatusServiceUnavailable)
+			return
+		}
+
+		// Use Gemini to refine the prompt for image generation
+		refinePrompt := fmt.Sprintf(`You are an expert AI Image Prompt Engineer. 
+Refine the following user prompt into a high-quality, descriptive prompt for a professional image generator (like Midjourney or Imagen).
+Style: Minimalist, dark corporate, glassmorphism, tech-focused, professional, 16:9.
+User Prompt: %s`, req.Prompt)
+
+		geminiURL := "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + geminiKey
+		geminiReqBody := map[string]any{
+			"contents": []any{map[string]any{"parts": []any{map[string]any{"text": refinePrompt}}}},
+		}
+		
+		b, _ := json.Marshal(geminiReqBody)
+		hresp, err := http.Post(geminiURL, "application/json", bytes.NewReader(b))
+		if err != nil || hresp.StatusCode >= 400 {
+			http.Error(w, `{"error":"Gemini refinement failed"}`, http.StatusBadGateway)
+			return
+		}
+		defer hresp.Body.Close()
+
+		var gResp struct {
+			Candidates []struct {
+				Content struct {
+					Parts []struct {
+						Text string `json:"text"`
+					} `json:"parts"`
+				} `json:"content"`
+			} `json:"candidates"`
+		}
+		json.NewDecoder(hresp.Body).Decode(&gResp)
+
+		refined := ""
+		if len(gResp.Candidates) > 0 && len(gResp.Candidates[0].Content.Parts) > 0 {
+			refined = gResp.Candidates[0].Content.Parts[0].Text
+		}
+
+		// Simulation: Using a high-quality placeholder image for now
+		// In a real production environment, call Imagen 3 or fal.ai here.
+		placeholderURL := fmt.Sprintf("https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1920&auto=format&fit=crop&sig=%d", time.Now().Unix())
+
+		json.NewEncoder(w).Encode(map[string]any{
+			"original_prompt": req.Prompt,
+			"refined_prompt":  refined,
+			"image_url":       placeholderURL,
+			"module_number":   req.ModuleNumber,
+			"video_number":    req.VideoNumber,
+		})
+	}
+}
+
+type ImageSaveRequest struct {
+	ImageURL     string `json:"image_url"`
+	ModuleNumber int    `json:"module_number"`
+	VideoNumber  int    `json:"video_number"`
+	Prompt       string `json:"prompt"`
+}
+
+func imageSaveHandler(cfg config) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		if r.Method != http.MethodPost {
+			http.Error(w, `{"error":"method not allowed"}`, http.StatusMethodNotAllowed)
+			return
+		}
+
+		var req ImageSaveRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, `{"error":"invalid request"}`, http.StatusBadRequest)
+			return
+		}
+
+		if cfg.azureAccountName == "" {
+			http.Error(w, `{"error":"Azure Storage not configured"}`, http.StatusServiceUnavailable)
+			return
+		}
+
+		// Download the image
+		resp, err := http.Get(req.ImageURL)
+		if err != nil {
+			http.Error(w, `{"error":"failed to download image"}`, http.StatusBadGateway)
+			return
+		}
+		defer resp.Body.Close()
+
+		blobName := fmt.Sprintf("m%d_v%d_%d.png", req.ModuleNumber, req.VideoNumber, time.Now().Unix())
+		container := "research-images"
+
+		expiry := time.Now().UTC().Add(10 * time.Minute)
+		sasQuery, err := generateContainerSAS(cfg.azureAccountName, cfg.azureAccountKey, container, "rcwl", expiry)
+		if err != nil {
+			http.Error(w, `{"error":"sas error"}`, http.StatusInternalServerError)
+			return
+		}
+
+		putURL := blobURL(cfg.azureAccountName, container, blobName, sasQuery)
+		ureq, _ := http.NewRequest(http.MethodPut, putURL, resp.Body)
+		ureq.Header.Set("x-ms-blob-type", "BlockBlob")
+		ureq.Header.Set("Content-Type", "image/png")
+
+		uresp, err := http.DefaultClient.Do(ureq)
+		if err != nil || uresp.StatusCode >= 400 {
+			http.Error(w, `{"error":"azure upload failed"}`, http.StatusBadGateway)
+			return
+		}
+
+		// Save to Supabase
+		ctx := r.Context()
+		dbEntry := map[string]any{
+			"module_number":   req.ModuleNumber,
+			"video_number":    req.VideoNumber,
+			"prompt":          req.Prompt,
+			"azure_blob_name": blobName,
+			"status":          "saved_to_azure",
+			"image_url":       blobURL(cfg.azureAccountName, container, blobName, ""), // URL without SAS for DB
+		}
+		
+		if err := supabasePost(ctx, cfg, "generated_images", dbEntry); err != nil {
+			log.Printf("supabase save generated image error: %v", err)
+		}
+
+		json.NewEncoder(w).Encode(map[string]any{
+			"ok":        true,
+			"blob_name": blobName,
+			"url":       blobURL(cfg.azureAccountName, container, blobName, ""),
+		})
+	}
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 func main() {
@@ -1106,6 +1261,8 @@ func main() {
 	mux.Handle("/api/research/file", observe(cfg, researchFileHandler(cfg)))
 	mux.Handle("/api/explanations/generate", observe(cfg, generateExplanationHandler(cfg)))
 	mux.Handle("/api/explanations", observe(cfg, explanationsHandler(cfg)))
+	mux.Handle("/api/images/generate", observe(cfg, imageGenerateHandler(cfg)))
+	mux.Handle("/api/images/save", observe(cfg, imageSaveHandler(cfg)))
 	mux.Handle("/admin/errors", observe(cfg, axiomErrorsHandler(tmpl, cfg, navConfigJS)))
 	mux.Handle("/", observe(cfg, homeHandler(tmpl, cfg, navConfigJS)))
 
