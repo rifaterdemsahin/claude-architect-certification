@@ -55,7 +55,26 @@ Add functionality to relate research assets (images, audio, videos, notes) direc
 4. **Validation**:
    - Ensure the scripts interface handles listing, linking, and unlinking successfully.
 
-## 2026-06-12 — AI Image Generator with Gemini & Azure Storage
+## 2026-06-13 — Enhance Edit List with Research & Artifacts Tracker
+
+### 🎯 Objective
+Upgrade the Edit List tool ([edit_list.html](file:///Users/rifaterdemsahin/projects/claude-architect-certification/5_Symbols/production/postprod/edit_list.html)) to track related research, artifacts, sentences, and shots for each video, including a checklist to verify their usage in the final edit.
+
+### 📐 Design & Implementation Plan
+1.  **Schema Update**:
+    - Add a new table `video_assets` to Supabase to store granular assets linked to videos.
+    - Fields: `id`, `video_id` (FK), `type` (research/artifact/sentence/shot), `content`, `is_used` (boolean).
+    - Update the SQL instructions in `edit_list.html` to reflect this new table and its RLS policies.
+2.  **UI Enhancements**:
+    - **Video List**: Add a summary count of assets (e.g., "5/8 Assets Used").
+    - **Asset Manager Section**: When a video is selected or in the edit modal, provide a nested interface to add/remove/toggle assets.
+    - **Checklist Table**: Create a dedicated table view for assets within each video row or in a separate modal to track "Used" status.
+3.  **Data Sync**:
+    - Update `fetchVideos()` to also fetch related assets (or fetch them on demand when expanding a video).
+    - Implement CRUD for `video_assets` table.
+4.  **Validation**:
+    - Ensure assets can be added, checked off as "Used", and persist correctly in Supabase.
+
 
 ### 🎯 Objective
 Implement an AI Image Generator page that allows users to generate visual assets using Gemini prompt refinement and save the results directly to Azure Blob Storage, relating them to specific course modules and videos.
