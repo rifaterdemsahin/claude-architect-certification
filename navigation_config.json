@@ -120,15 +120,15 @@
       "label": "🎥 Production",
       "children": [
         {
-          "label": "7. 📸 Shot List & Assets",
+          "label": "1. 📸 Shot List & Assets",
           "url": "5_Symbols/production/postprod/production_shotlist.html?module=1&section=1"
         },
         {
-          "label": "8. ✅ Production Checklist",
+          "label": "2. ✅ Production Checklist",
           "url": "5_Symbols/production/prod/checklist.html"
         },
         {
-          "label": "9. 🎥 Footage Mapping",
+          "label": "3. 🎥 Footage Mapping",
           "url": "5_Symbols/production/prod/footage_mapping.html"
         },
         {
