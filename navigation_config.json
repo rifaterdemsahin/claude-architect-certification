@@ -109,6 +109,11 @@
               "url": "5_Symbols/production/preprod/tools/admin.html"
             },
             {
+              "label": "📜 Project Logs",
+              "url": "5_Symbols/production/preprod/log_viewer.html",
+              "description": "Unified viewer for error.log and fix.log with search and filtering."
+            },
+            {
               "label": "📡 Axiom Errors Admin",
               "url": "/admin/errors"
             },
@@ -528,8 +533,16 @@
       "url": "markdown_renderer.html?file=6_Semblance/logs/workarounds.md"
     },
     {
-      "label": "   ├─ 🐛 Error Log",
-      "url": "markdown_renderer.html?file=6_Semblance/logs/error_log.md"
+      "label": "   ├─ 📜 Project Logs (Unified)",
+      "url": "5_Symbols/production/preprod/log_viewer.html"
+    },
+    {
+      "label": "   ├─ 🐛 Error Log (Raw)",
+      "url": "6_Semblance/logs/error.log"
+    },
+    {
+      "label": "   ├─ 🛠 Fix Log (Raw)",
+      "url": "6_Semblance/logs/fix.log"
     },
     {
       "label": "   ├─ ⚠️ Error: Insert Policy",

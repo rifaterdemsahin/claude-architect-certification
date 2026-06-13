@@ -43,6 +43,7 @@ Pre-Production ──► Production ──► Post-Production ──► Publicat
 
 ## 🚧 Current Tasks (In Progress)
 
+- [ ] `5_Symbols/production/preprod/log_viewer.html` — Unified project log viewer for error tracking and fix verification 📜
 - [ ] `5_Symbols/production/postprod/image_generator.html` — Asset generator for scene backgrounds 🖼
 - [ ] `5_Symbols/production/postprod/lower_thirds.html` — Lower third overlay generator 🏷
 - [ ] `5_Symbols/production/preprod/research/infographic_generator.html` — Research infographic builder 📊

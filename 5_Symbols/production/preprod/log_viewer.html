@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📜 Project Logs Viewer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../../shared/nav.css">
+  <style>
+    :root {
+      --bg: #030712; --card: rgba(17,24,39,0.9); --border: rgba(139,92,246,0.2);
+      --text: #f3f4f6; --muted: #9ca3af; --primary: #8b5cf6; --green: #10b981;
+      --red: #ef4444; --yellow: #f59e0b; --blue: #3b82f6;
+      --font-h: 'Outfit', sans-serif; --font-b: 'Plus Jakarta Sans', sans-serif;
+      --font-mono: 'Fira Mono', 'Consolas', monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: var(--font-b); line-height: 1.6; padding: 32px 24px 120px; }
+    .container { max-width: 1100px; margin: 0 auto; }
+    h1 { font-family: var(--font-h); font-size: 2.4rem; font-weight: 800; margin-bottom: 6px; }
+    .subtitle { color: var(--muted); margin-bottom: 32px; }
+
+    /* Controls */
+    .controls { display: flex; gap: 12px; margin-bottom: 24px; align-items: center; flex-wrap: wrap; }
+    .search-box { flex: 1; min-width: 280px; position: relative; }
+    .search-box input { width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px 12px 42px; color: var(--text); font-size: 0.95rem; outline: none; transition: border-color 0.2s; }
+    .search-box input:focus { border-color: var(--primary); }
+    .search-box::before { content: '🔍'; position: absolute; left: 16px; top: 12px; font-size: 1.1rem; opacity: 0.6; }
+
+    .tabs { display: flex; gap: 6px; background: rgba(255,255,255,0.03); padding: 5px; border-radius: 14px; border: 1px solid var(--border); }
+    .tab { padding: 8px 20px; border-radius: 10px; border: none; background: none; color: var(--muted); cursor: pointer; font-size: 0.9rem; font-weight: 700; transition: all 0.2s; font-family: var(--font-b); }
+    .tab:hover { color: var(--text); }
+    .tab.active { background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(139,92,246,0.3); }
+
+    /* Log Table */
+    .log-container { background: var(--card); border: 1px solid var(--border); border-radius: 20px; overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th { background: rgba(255,255,255,0.03); padding: 14px 16px; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); }
+    td { padding: 14px 16px; font-size: 0.88rem; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(139,92,246,0.03); }
+
+    .col-date { white-space: nowrap; color: var(--muted); font-family: var(--font-mono); font-size: 0.8rem; width: 110px; }
+    .col-stage { width: 140px; }
+    .badge-stage { display: inline-block; padding: 2px 8px; border-radius: 6px; background: rgba(255,255,255,0.06); font-size: 0.72rem; font-weight: 700; color: var(--text); }
+    .col-status { width: 130px; }
+    .badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 8px; font-size: 0.72rem; font-weight: 800; }
+    
+    /* Error badges */
+    .badge-critical { background: rgba(239,68,68,0.15); color: var(--red); border: 1px solid rgba(239,68,68,0.2); }
+    .badge-error { background: rgba(239,68,68,0.12); color: var(--red); border: 1px solid rgba(239,68,68,0.15); }
+    .badge-warning { background: rgba(245,158,11,0.12); color: var(--yellow); border: 1px solid rgba(245,158,11,0.2); }
+    .badge-info { background: rgba(59,130,246,0.12); color: var(--blue); border: 1px solid rgba(59,130,246,0.2); }
+    
+    /* Fix badges */
+    .badge-applied { background: rgba(139,92,246,0.15); color: var(--primary); border: 1px solid rgba(139,92,246,0.2); }
+    .badge-verified { background: rgba(16,185,129,0.15); color: var(--green); border: 1px solid rgba(16,185,129,0.2); }
+    .badge-workaround { background: rgba(245,158,11,0.12); color: var(--yellow); border: 1px solid rgba(245,158,11,0.2); }
+    .badge-pending { background: rgba(255,255,255,0.06); color: var(--muted); border: 1px solid var(--border); }
+
+    .col-desc { line-height: 1.5; color: var(--text); }
+    .desc-text { display: block; margin-bottom: 4px; }
+    .desc-meta { font-size: 0.78rem; color: var(--muted); font-style: italic; }
+
+    .empty-state { text-align: center; padding: 60px; color: var(--muted); }
+    .loading-overlay { display: none; padding: 40px; text-align: center; color: var(--primary); font-weight: 700; }
+
+    @media (max-width: 768px) {
+      .col-date, .col-stage { display: none; }
+      .controls { flex-direction: column; align-items: stretch; }
+    }
+  </style>
+</head>
+<body>
+<script src="../../../shared/nav.js"></script>
+<div class="container">
+  <h1>📜 Project Logs Viewer</h1>
+  <p class="subtitle">Search and track all error reports and verified fixes across the 7-stage journey.</p>
+
+  <div class="controls">
+    <div class="tabs">
+      <button class="tab active" id="tab-error" onclick="switchTab('error')">🐛 Error Log</button>
+      <button class="tab" id="tab-fix" onclick="switchTab('fix')">🛠 Fix Log</button>
+    </div>
+    <div class="search-box">
+      <input type="text" id="search-input" placeholder="Search logs by description, stage, or date..." oninput="filterLogs()">
+    </div>
+    <div id="stats" style="font-size: 0.85rem; font-weight: 700; color: var(--primary); background: rgba(139,92,246,0.1); padding: 8px 16px; border-radius: 10px; border: 1px solid var(--border);">
+      0 entries
+    </div>
+  </div>
+
+  <div class="log-container">
+    <div class="loading-overlay" id="loader">⚡ Loading log data...</div>
+    <table id="log-table">
+      <thead>
+        <tr>
+          <th class="col-date">Date</th>
+          <th class="col-stage">Stage</th>
+          <th class="col-status">Status / Sev</th>
+          <th class="col-desc">Description</th>
+        </tr>
+      </thead>
+      <tbody id="log-body">
+        <!-- Entries injected here -->
+      </tbody>
+    </table>
+    <div id="empty-msg" class="empty-state" style="display:none">
+      <div style="font-size:3rem; margin-bottom:10px;">🔍</div>
+      <div>No log entries found matching your search.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let errorEntries = [];
+  let fixEntries = [];
+  let currentTab = 'error';
+
+  const LOG_PATHS = {
+    error: '/6_Semblance/logs/error.log',
+    fix: '/6_Semblance/logs/fix.log'
+  };
+
+  async function fetchLogs() {
+    document.getElementById('loader').style.display = 'block';
+    try {
+      const [errResp, fixResp] = await Promise.all([
+        fetch(LOG_PATHS.error),
+        fetch(LOG_PATHS.fix)
+      ]);
+
+      const errText = await errResp.text();
+      const fixText = await fixResp.text();
+
+      errorEntries = parseLog(errText, 'error');
+      fixEntries = parseLog(fixText, 'fix');
+
+      renderLogs();
+    } catch (e) {
+      console.error('Fetch failed:', e);
+      document.getElementById('log-body').innerHTML = `<tr><td colspan="4" class="empty-state" style="color:var(--red)">Failed to load log files. Make sure they exist in 6_Semblance/logs/</td></tr>`;
+    } finally {
+      document.getElementById('loader').style.display = 'none';
+    }
+  }
+
+  function parseLog(text, type) {
+    const lines = text.split('\n');
+    const entries = [];
+    
+    // Regex for: [2026-06-08] [5_Symbols] [ERROR] — description
+    // Handles optional emojis and variations in formatting
+    const regex = /^\[([\d-]+)\]\s*(.*?)\s*\[([^\]]+)\]\s*\[([^\]]+)\]\s*[—–-]\s*(.*)$/;
+    // Variation without stage icon: [2026-06-08] [5_Symbols] [ERROR] — description
+    const altRegex = /^\[([\d-]+)\]\s*\[([^\]]+)\]\s*\[([^\]]+)\]\s*[—–-]\s*(.*)$/;
+
+    lines.forEach(line => {
+      line = line.trim();
+      if (!line.startsWith('[')) return;
+
+      let match = line.match(regex);
+      let date, icon, stage, status, desc;
+
+      if (match) {
+        [, date, icon, stage, status, desc] = match;
+      } else {
+        match = line.match(altRegex);
+        if (match) {
+          [, date, stage, status, desc] = match;
+          icon = '';
+        } else {
+          // Final fallback for messy lines
+          return;
+        }
+      }
+
+      entries.push({
+        date,
+        stage: stage.trim(),
+        icon: icon.trim(),
+        status: status.trim().toUpperCase(),
+        description: desc.trim(),
+        raw: line
+      });
+    });
+
+    return entries.reverse(); // Newest first
+  }
+
+  function switchTab(tab) {
+    currentTab = tab;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(`tab-${tab}`).classList.add('active');
+    document.getElementById('search-input').value = '';
+    renderLogs();
+  }
+
+  function renderLogs() {
+    const body = document.getElementById('log-body');
+    const list = currentTab === 'error' ? errorEntries : fixEntries;
+    const search = document.getElementById('search-input').value.toLowerCase();
+    
+    const filtered = list.filter(e => 
+      e.description.toLowerCase().includes(search) || 
+      e.stage.toLowerCase().includes(search) || 
+      e.date.includes(search) ||
+      e.status.toLowerCase().includes(search)
+    );
+
+    document.getElementById('stats').textContent = `${filtered.length} ${currentTab === 'error' ? 'errors' : 'fixes'}`;
+    
+    if (filtered.length === 0) {
+      body.innerHTML = '';
+      document.getElementById('empty-msg').style.display = 'block';
+      return;
+    }
+
+    document.getElementById('empty-msg').style.display = 'none';
+    body.innerHTML = filtered.map(e => `
+      <tr>
+        <td class="col-date">${e.date}</td>
+        <td class="col-stage">
+          <span class="badge-stage">${e.icon ? e.icon + ' ' : ''}${e.stage}</span>
+        </td>
+        <td class="col-status">
+          <span class="badge badge-${e.status.toLowerCase()}">
+            ${getStatusIcon(e.status)} ${e.status}
+          </span>
+        </td>
+        <td class="col-desc">
+          <span class="desc-text">${formatDescription(e.description)}</span>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function getStatusIcon(status) {
+    const icons = {
+      CRITICAL: '💀', ERROR: '🔴', WARNING: '⚠️', INFO: 'ℹ️',
+      APPLIED: '🏗️', VERIFIED: '✅', WORKAROUND: '🩹', PENDING: '⏳', HIGH: '🔴', MEDIUM: '⚠️', LOW: 'ℹ️'
+    };
+    return icons[status] || '📌';
+  }
+
+  function formatDescription(text) {
+    // Basic linkification or emphasis could be added here
+    return text.replace(/`([^`]+)`/g, '<code style="background:rgba(255,255,255,0.1); padding:2px 4px; border-radius:4px; font-family:var(--font-mono); font-size:0.8rem;">$1</code>');
+  }
+
+  function filterLogs() {
+    renderLogs();
+  }
+
+  window.addEventListener('DOMContentLoaded', fetchLogs);
+</script>
+<script src="../../../shared/debug-panel.js"></script>
+</body>
+</html>
