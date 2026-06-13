@@ -41,6 +41,12 @@ Pre-Production ──► Production ──► Post-Production ──► Publicat
 | 4 | Deterministic Routers | Planned |
 | 5 | Financial Engineering | Planned |
 
+## 🚧 Current Tasks (In Progress)
+
+- [ ] `5_Symbols/production/postprod/image_generator.html` — Asset generator for scene backgrounds 🖼
+- [ ] `5_Symbols/production/postprod/lower_thirds.html` — Lower third overlay generator 🏷
+- [ ] `5_Symbols/production/preprod/research/infographic_generator.html` — Research infographic builder 📊
+
 ## Scene Structure (per section)
 
 Each section follows a 3-act scene structure:
