@@ -85,6 +85,7 @@
       font-size: 1rem;
     }
     .btn-primary { background: var(--primary); color: white; }
+    .btn-secondary { background: var(--secondary); color: white; }
     .btn-success { background: var(--success); color: white; }
     .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4); }
     .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
@@ -285,7 +286,11 @@
           <textarea id="prompt" rows="4" required placeholder="e.g., A futuristic server room with purple neon lights and glass walls reflecting data streams..."></textarea>
         </div>
 
-        <div style="text-align: right;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <button type="button" id="enhance-btn" class="btn btn-secondary">
+            <span id="enhance-text">🪄 Enhance with Gemini</span>
+            <div class="loader" id="enhance-loader"></div>
+          </button>
           <button type="submit" id="gen-btn" class="btn btn-primary">
             <span id="btn-text">✨ Generate with Gemini</span>
             <div class="loader" id="btn-loader"></div>
@@ -395,6 +400,42 @@
         closeModal();
       }
     }
+
+    document.getElementById('enhance-btn').addEventListener('click', async () => {
+      const promptField = document.getElementById('prompt');
+      const prompt = promptField.value;
+      if (!prompt) {
+        alert('Please enter a prompt first.');
+        return;
+      }
+
+      const btn = document.getElementById('enhance-btn');
+      const btnText = document.getElementById('enhance-text');
+      const loader = document.getElementById('enhance-loader');
+
+      btn.disabled = true;
+      btnText.style.display = 'none';
+      loader.style.display = 'block';
+
+      try {
+        const res = await fetch('/api/images/enhance-prompt', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt })
+        });
+
+        if (!res.ok) throw new Error('Enhancement failed');
+
+        const data = await res.json();
+        promptField.value = data.refined_prompt;
+      } catch (err) {
+        alert('Error: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btnText.style.display = 'block';
+        loader.style.display = 'none';
+      }
+    });
 
     document.getElementById('gen-form').addEventListener('submit', async (e) => {
       e.preventDefault();

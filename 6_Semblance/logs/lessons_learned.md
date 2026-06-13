@@ -268,3 +268,6 @@ Split audio into two levels matching real post-production workflow: 🎤 voiceov
 
 ## 2026-06-12 — Fix Axiom Query 422 Error
 Axiom's query endpoints (both dataset-specific and general APL) require a `startTime` parameter in the JSON body when performing APL queries. Without it, the API returns a 422 error. Defaulting to `now-24h` is a safe way to ensure recent logs are always available while satisfying the API requirement.
+## Lessons Learned - 2026-06-13
+
+- **API Route Propagation:** When adding new API endpoints to a Go server, a full rebuild and restart of the binary is required for the changes to take effect. If the server is running in the background, existing processes must be terminated first.
