@@ -1,0 +1,2580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Claude AI Certification for Architects - Enterprise Systems & Integration Masterclass Companion Workspace. Learn custom MCP, VPC PrivateLink, multi-agent topologies, and cost-reduction prompt caching.">
+  <title>🏛️ Claude AI Certification for Architects</title>
+  
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+  
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+
+  <style>
+     
+    :root {
+      --bg-dark: #0b0f19;
+      --bg-card: rgba(22, 28, 45, 0.7);
+      --bg-glass: rgba(15, 23, 42, 0.6);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-glow: rgba(139, 92, 246, 0.2);
+      
+      --text-primary: #f8fafc;
+      --text-muted: #94a3b8;
+      
+       
+      --accent-violet: #8b5cf6;
+      --accent-violet-glow: rgba(139, 92, 246, 0.4);
+      --accent-cyan: #06b6d4;
+      --accent-cyan-glow: rgba(6, 182, 212, 0.4);
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      
+      --font-display: 'Outfit', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+     
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.15) 0px, transparent 50%);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      line-height: 1.6;
+      overflow-x: hidden;
+      padding-bottom: 100px;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+      transition: var(--transition);
+    }
+
+     
+    .app-header {
+      backdrop-filter: blur(12px);
+      background-color: var(--bg-glass);
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .app-logo {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent-violet), var(--accent-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+     
+    .project-menu-nav {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+    }
+
+    .menu-link {
+      font-weight: 500;
+      color: var(--text-muted);
+      position: relative;
+      padding: 0.25rem 0;
+    }
+
+    .menu-link:hover, .menu-link.active {
+      color: var(--text-primary);
+    }
+
+    .menu-link::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent-violet), var(--accent-cyan));
+      transition: var(--transition);
+    }
+
+    .menu-link:hover::after, .menu-link.active::after {
+      width: 100%;
+    }
+
+     
+    .menu-group {
+      position: relative;
+    }
+
+    .menu-group-btn {
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 0.25rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      background: none;
+      border: none;
+      font-family: var(--font-body);
+      font-size: 1rem;
+      position: relative;
+      transition: var(--transition);
+    }
+
+    .menu-group-btn::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent-violet), var(--accent-cyan));
+      transition: var(--transition);
+    }
+
+    .menu-group:hover .menu-group-btn,
+    .menu-group-btn:hover {
+      color: var(--text-primary);
+    }
+
+    .menu-group:hover .menu-group-btn::after {
+      width: 100%;
+    }
+
+    .menu-group-btn .chevron {
+      font-size: 0.6rem;
+      transition: transform 0.2s ease;
+    }
+
+    .menu-group:hover .chevron {
+      transform: rotate(180deg);
+    }
+
+    .menu-dropdown {
+      position: absolute;
+      top: calc(100% + 10px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 0.5rem;
+      min-width: 200px;
+      display: none;
+      flex-direction: column;
+      gap: 0.15rem;
+      z-index: 300;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+
+    .menu-group:hover .menu-dropdown {
+      display: flex;
+    }
+
+    .dropdown-link {
+      padding: 0.45rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      transition: var(--transition);
+    }
+
+    .dropdown-link:hover {
+      background: rgba(139, 92, 246, 0.15);
+      color: var(--text-primary);
+    }
+
+     
+    .menu-subgroup {
+      position: relative;
+    }
+
+    .menu-subgroup-btn {
+      width: 100%;
+      background: none;
+      border: none;
+      text-align: left;
+      padding: 0.45rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: var(--transition);
+      font-family: inherit;
+    }
+
+    .menu-subgroup-btn:hover {
+      background: rgba(139, 92, 246, 0.15);
+      color: var(--text-primary);
+    }
+
+    .menu-subdropdown {
+      position: absolute;
+      top: 0;
+      left: 100%;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 0.5rem;
+      min-width: 200px;
+      display: none;
+      flex-direction: column;
+      gap: 0.15rem;
+      z-index: 310;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      margin-left: 2px;
+    }
+
+    .menu-subgroup:hover .menu-subdropdown {
+      display: flex;
+    }
+
+    .subdropdown-link {
+      padding: 0.45rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      transition: var(--transition);
+      text-decoration: none;
+    }
+
+    .subdropdown-link:hover {
+      background: rgba(139, 92, 246, 0.15);
+      color: var(--text-primary);
+    }
+
+     
+    .menu-group.active .menu-group-btn {
+      color: var(--accent-violet) !important;
+      border-bottom: 2px solid var(--accent-violet);
+      border-radius: 0;
+    }
+
+    .dropdown-link.active {
+      background: rgba(139, 92, 246, 0.15) !important;
+      color: var(--accent-cyan) !important;
+      font-weight: 600;
+    }
+
+    .menu-subgroup.active .menu-subgroup-btn {
+      color: var(--accent-cyan) !important;
+      font-weight: 600;
+    }
+
+    .subdropdown-link.active {
+      background: rgba(139, 92, 246, 0.15) !important;
+      color: var(--accent-cyan) !important;
+      font-weight: 600;
+    }
+
+    .nav-btn {
+      background: linear-gradient(135deg, var(--accent-violet), #7c3aed);
+      color: white !important;
+      padding: 6px 16px;
+      border-radius: 100px;
+      font-size: 0.85rem !important;
+      font-weight: 600 !important;
+      box-shadow: 0 4px 15px var(--accent-violet-glow);
+    }
+
+    .nav-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6);
+    }
+
+    .join-btn {
+      background: linear-gradient(135deg, #f59e0b, var(--accent-violet));
+      color: white !important;
+      padding: 6px 16px;
+      border-radius: 100px;
+      font-weight: 700;
+      box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+    }
+
+    .join-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5) !important;
+    }
+
+    .social-links {
+      display: flex;
+      gap: 1.25rem;
+      align-items: center;
+    }
+
+    .social-icon {
+      color: var(--text-muted);
+      font-size: 1.2rem;
+    }
+
+    .social-icon:hover {
+      color: var(--text-primary);
+      transform: translateY(-2px);
+    }
+
+     
+    .hero-section {
+      max-width: 1200px;
+      margin: 4rem auto 2rem auto;
+      padding: 0 2rem;
+      text-align: center;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(139, 92, 246, 0.1);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      padding: 0.35rem 1rem;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--accent-violet);
+      margin-bottom: 1.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: 3.5rem;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 1rem;
+      background: linear-gradient(to right, #ffffff, #c084fc, #6366f1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.02em;
+    }
+
+    .hero-subtitle {
+      font-size: 1.25rem;
+      color: var(--text-muted);
+      max-width: 750px;
+      margin: 0 auto 2.5rem auto;
+      font-weight: 300;
+    }
+
+     
+    .simulator-container {
+      max-width: 1200px;
+      margin: 0 auto 3rem auto;
+      padding: 0 2rem;
+    }
+
+    .glass-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      padding: 2.5rem;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
+      position: relative;
+      overflow: hidden;
+      transition: var(--transition);
+    }
+
+    .glass-card:hover {
+      border-color: var(--border-glow);
+    }
+
+    .glass-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(to right, var(--accent-violet), var(--accent-cyan));
+    }
+
+    .card-title {
+      font-family: var(--font-display);
+      font-size: 1.75rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .simulation-controls {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      border: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-violet), #7c3aed);
+      color: white;
+      box-shadow: 0 4px 15px var(--accent-violet-glow);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-primary);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateY(-2px);
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, var(--accent-red), #dc2626);
+      color: white;
+      box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+    }
+
+    .btn-danger:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(239, 68, 68, 0.6);
+    }
+
+     
+    .flow-chart {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      margin: 40px 0;
+      flex-wrap: wrap;
+      gap: 24px;
+    }
+
+    @media (max-width: 768px) {
+      .flow-chart {
+        flex-direction: column;
+      }
+    }
+
+    .node {
+      background: rgba(31, 41, 55, 0.6);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 16px 24px;
+      width: 200px;
+      text-align: center;
+      transition: all 0.5s ease;
+      z-index: 2;
+      position: relative;
+    }
+
+    .node-active {
+      border-color: var(--accent-violet);
+      box-shadow: 0 0 20px var(--accent-violet-glow);
+      background: rgba(139, 92, 246, 0.1);
+    }
+
+    .node-cached {
+      border-color: var(--accent-green);
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+      background: rgba(16, 185, 129, 0.1);
+    }
+
+    .node-fault {
+      border-color: var(--accent-red);
+      box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+      background: rgba(239, 68, 68, 0.1);
+      animation: shake 0.5s infinite alternate;
+    }
+
+    .node h4 {
+      font-family: var(--font-display);
+      margin-bottom: 6px;
+      font-size: 1rem;
+    }
+
+    .node p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .node-icon {
+      font-size: 1.5rem;
+      margin-bottom: 8px;
+    }
+
+    .flow-line {
+      flex: 1;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      position: relative;
+      min-width: 40px;
+      transition: all 0.5s ease;
+    }
+
+    @media (max-width: 768px) {
+      .flow-line {
+        width: 4px;
+        height: 40px;
+        min-height: 40px;
+      }
+    }
+
+    .flow-line::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(to right, var(--accent-violet), var(--accent-cyan));
+      transition: width 0.5s ease;
+    }
+
+    .flow-line-active::after {
+      width: 100%;
+      animation: flow-pulse 1.5s infinite linear;
+    }
+
+    .flow-line-cached::after {
+      width: 100%;
+      background: var(--accent-green);
+    }
+
+    .flow-line-fault::after {
+      width: 100%;
+      background: var(--accent-red);
+    }
+
+     
+    .status-terminal {
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 16px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.85rem;
+      height: 150px;
+      overflow-y: auto;
+      color: #38bdf8;
+      box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+    }
+
+    .status-terminal p {
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+     
+    .dashboard-grid {
+      max-width: 1200px;
+      margin: 0 auto 4rem auto;
+      padding: 0 2rem;
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 2.5rem;
+      align-items: start;
+    }
+
+    @media (max-width: 968px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+     
+    .timeline-steps {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .step-item {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+
+    .step-number {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background-color: rgba(139, 92, 246, 0.1);
+      border: 1px solid var(--accent-violet);
+      color: var(--accent-violet);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: 600;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+
+    .step-content {
+      flex-grow: 1;
+    }
+
+    .step-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+      margin-bottom: 0.15rem;
+    }
+
+    .step-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+     
+    .modules-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .module-card {
+      background: rgba(30, 41, 59, 0.4);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 1.5rem;
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .module-card:hover {
+      border-color: rgba(6, 182, 212, 0.3);
+      background: rgba(30, 41, 59, 0.6);
+      transform: translateX(4px);
+    }
+
+    .module-badge {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+      letter-spacing: 0.05em;
+    }
+
+    .module-card h3 {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+
+    .module-card p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+
+    .module-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .link-tag {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 0.75rem;
+      color: #93c5fd;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .link-tag:hover {
+      background: rgba(147, 197, 253, 0.1);
+      border-color: rgba(147, 197, 253, 0.3);
+      color: #ffffff;
+    }
+
+     
+    .cert-container {
+      max-width: 1200px;
+      margin: 0 auto 4rem auto;
+      padding: 0 2rem;
+    }
+
+    .cert-banner {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(59, 130, 246, 0.15) 100%);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      border-radius: 24px;
+      padding: 40px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .cert-banner::after {
+      content: '🎓';
+      position: absolute;
+      right: -20px;
+      bottom: -20px;
+      font-size: 8rem;
+      opacity: 0.08;
+      pointer-events: none;
+    }
+
+    .cert-banner h2 {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      margin-bottom: 12px;
+      font-weight: 700;
+    }
+
+    .cert-banner p {
+      max-width: 600px;
+      margin: 0 auto 24px auto;
+      color: var(--text-muted);
+    }
+
+    .cert-banner .btn {
+      display: inline-flex;
+      margin: 0 auto;
+    }
+
+     
+    .debug-toggle-btn {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent-violet), var(--accent-cyan));
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 4px 20px var(--accent-violet-glow);
+      z-index: 999;
+      transition: var(--transition);
+    }
+
+    .debug-toggle-btn:hover {
+      transform: scale(1.1) rotate(15deg);
+      box-shadow: 0 6px 24px rgba(6, 182, 212, 0.6);
+    }
+
+     
+    .debug-menu-overlay {
+      position: fixed;
+      top: 0;
+      right: -420px;
+      width: 400px;
+      height: 100vh;
+      background-color: rgba(11, 15, 25, 0.95);
+      backdrop-filter: blur(20px);
+      border-left: 1px solid var(--border-color);
+      box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+      z-index: 998;
+      transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      padding: 2.5rem 2rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .debug-menu-overlay.open {
+      right: 0;
+    }
+
+    .debug-menu-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 1rem;
+    }
+
+    .debug-menu-title {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .search-wrapper {
+      position: relative;
+      margin-bottom: 1.5rem;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 0.75rem 1rem 0.75rem 2.5rem;
+      background-color: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: white;
+      font-family: var(--font-body);
+      outline: none;
+      transition: var(--transition);
+    }
+
+    .search-input:focus {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 10px rgba(6, 182, 212, 0.2);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 0.85rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+    }
+
+    .debug-links-list {
+      list-style: none;
+      overflow-y: auto;
+      flex-grow: 1;
+      padding-right: 0.5rem;
+    }
+
+    .debug-links-list::-webkit-scrollbar {
+      width: 6px;
+    }
+    .debug-links-list::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .debug-links-list::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+    }
+
+    .debug-item {
+      margin-bottom: 0.5rem;
+    }
+
+    .debug-divider {
+      height: 1px;
+      background-color: var(--border-color);
+      margin: 1rem 0;
+    }
+
+    .debug-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      background-color: rgba(255, 255, 255, 0.02);
+      border: 1px solid transparent;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      transition: var(--transition);
+      color: var(--text-primary);
+    }
+
+    .debug-link:hover {
+      background-color: rgba(6, 182, 212, 0.08);
+      border-color: rgba(6, 182, 212, 0.2);
+      color: var(--accent-cyan);
+      transform: translateX(4px);
+    }
+
+    .debug-link-icon {
+      font-size: 0.85rem;
+      opacity: 0.5;
+    }
+
+     
+    footer {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-top: 40px;
+      border-top: 1px solid var(--border-color);
+      padding-top: 30px;
+    }
+
+    footer a {
+      color: #93c5fd;
+      text-decoration: none;
+    }
+
+     
+    @keyframes pulse {
+      0% { box-shadow: 0 0 10px rgba(139, 92, 246, 0.1); }
+      100% { box-shadow: 0 0 20px rgba(139, 92, 246, 0.3); }
+    }
+
+    @keyframes shake {
+      0% { transform: translate(1px, 1px) rotate(0deg); }
+      10% { transform: translate(-1px, -2px) rotate(-1deg); }
+      20% { transform: translate(-3px, 0px) rotate(1deg); }
+      35% { transform: translate(0px, 2px) rotate(0deg); }
+      50% { transform: translate(1px, -1px) rotate(1deg); }
+      70% { transform: translate(-1px, 2px) rotate(-1deg); }
+      90% { transform: translate(2px, 1px) rotate(0deg); }
+    }
+
+    @keyframes flow-pulse {
+      0% { opacity: 0.6; }
+      50% { opacity: 1; }
+      100% { opacity: 0.6; }
+    }
+
+    @media (max-width: 480px) {
+      .header-container {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1rem;
+      }
+      .debug-menu-overlay {
+        width: 100vw;
+        right: -100vw;
+      }
+      .hero-section {
+        margin-top: 2rem;
+      }
+      .hero-title {
+        font-size: 2.25rem;
+      }
+    }
+
+     
+    .metadata-section {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 2rem;
+    }
+    .metadata-section .section-header {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+    }
+    .meta-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      background: var(--bg-card);
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+    }
+    .meta-table th {
+      background: rgba(139, 92, 246, 0.12);
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 0.55rem 1rem;
+      text-align: left;
+    }
+    .meta-table td {
+      padding: 0.65rem 1rem;
+      border-bottom: 1px solid var(--border-color);
+      vertical-align: top;
+    }
+    .meta-table tr:last-child td { border-bottom: none; }
+    .meta-table td:first-child {
+      color: var(--text-muted);
+      font-weight: 500;
+      width: 220px;
+      white-space: nowrap;
+    }
+    .skill-tag {
+      display: inline-block;
+      background: rgba(139, 92, 246, 0.15);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      color: #c4b5fd;
+      border-radius: 100px;
+      padding: 2px 10px;
+      font-size: 0.8rem;
+      margin: 2px 3px 2px 0;
+    }
+    .tools-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      margin-top: 1.25rem;
+      background: var(--bg-card);
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+    }
+    .tools-table th {
+      background: rgba(6, 182, 212, 0.1);
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 0.55rem 0.85rem;
+      text-align: left;
+    }
+    .tools-table td {
+      padding: 0.6rem 0.85rem;
+      border-bottom: 1px solid var(--border-color);
+      vertical-align: top;
+    }
+    .tools-table tr:last-child td { border-bottom: none; }
+    .valid-badge {
+      color: var(--accent-green);
+      font-size: 0.85rem;
+    }
+    #metaLoadState {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      text-align: center;
+      padding: 1rem;
+    }
+  </style>
+  <script>
+    window.__NAV_FAVS__   = [{"url":"https://claude-architect-certification.fly.dev/5_Symbols/production/preprod/research/index.html","label":"🗂 Research Hub"},{"url":"https://claude-architect-certification.fly.dev/5_Symbols/production/preprod/course_outline.html","label":"4. 📋 Outline"},{"url":"https://claude-architect-certification.fly.dev/5_Symbols/production/preprod/tools/admin.html","label":"🗃 Preprod Data Admin"},{"url":"http://localhost:8083/5_Symbols/production/preprod/research/infographic_generator.html","label":"📊 Infographics"},{"url":"http://localhost:8082/5_Symbols/production/postprod/image_generator.html","label":"7. 🖼️ Image Generator"},{"url":"http://localhost:8080/5_Symbols/production/postprod/lower_thirds.html","label":"8. 🎬 Lower Thirds Manager"},{"url":"http://localhost:8086/5_Symbols/production/preprod/research/infographic_generator.html","label":"📊 Infographics"},{"url":"https://claude-architect-certification.fly.dev/5_Symbols/production/postprod/flywheel.html","label":"9. 🔄 Flywheel System"}];
+    window.__NAV_CONFIG__ = {
+  "projectMenu": [
+    {
+      "label": "🎬 Preprod",
+      "children": [
+        {
+          "label": "1. ❓ Problem",
+          "children": [
+            {
+              "label": "❓ Problem Statement",
+              "url": "5_Symbols/production/preprod/problem.html",
+              "description": "Core problem the course solves — gap, audience, and value proposition."
+            },
+            {
+              "label": "📊 Market Analysis",
+              "url": "5_Symbols/production/preprod/research/market_analysis.html",
+              "description": "Demand sizing, target audience, competitive landscape, and positioning."
+            }
+          ]
+        },
+        { "label": "2. 🏠 Product (Solution)", "url": "index.html" },
+        {
+          "label": "3. 🔬 Research",
+          "children": [
+            { 
+              "label": "🗂 Research Hub", 
+              "url": "5_Symbols/production/preprod/research/index.html",
+              "description": "Central dashboard for all pre-production assets including images, audio, and notes."
+            },
+            { 
+              "label": "🖼 Images", 
+              "url": "5_Symbols/production/preprod/research/images.html",
+              "description": "Visual assets, mockups, and diagrams used for course production."
+            },
+            { 
+              "label": "🎵 Audio", 
+              "url": "5_Symbols/production/preprod/research/audio.html",
+              "description": "Voiceovers, background music, and sound effects for video modules."
+            },
+            { 
+              "label": "🎬 Videos", 
+              "url": "5_Symbols/production/preprod/research/videos.html",
+              "description": "Raw footage, B-roll, and screen recordings for final assembly."
+            },
+            { 
+              "label": "📝 Notes", 
+              "url": "5_Symbols/production/preprod/research/notes.html",
+              "description": "Research findings, technical references, and production scripts."
+            },
+            {
+              "label": "📊 Infographics",
+              "url": "5_Symbols/production/preprod/research/infographic_generator.html",
+              "description": "AI-powered infographic layout and asset generator."
+            }
+          ]
+        },
+        { "label": "4. 📋 Outline", "url": "5_Symbols/production/preprod/course_outline.html" },
+        {
+          "label": "5. 🎬 Script",
+          "children": [
+            { "label": "🗂 Master Script", "url": "5_Symbols/production/preprod/scripts/index.html" },
+            { "label": "✨ Script Generator", "url": "5_Symbols/production/preprod/scripts/generator.html" }
+          ]
+        },
+        {
+          "label": "6. 📋 Producer Checklist",
+          "url": "5_Symbols/production/preprod/producer_checklist.html"
+        },
+        {
+          "label": "7. 🎯 IVQ Manager",
+          "url": "5_Symbols/production/preprod/ivq.html"
+        },
+        {
+          "label": "8. ✅ Sanity Checklist",
+          "url": "5_Symbols/production/preprod/sanity_checklist.html",
+          "hideAfterDays": 90
+        },
+        {
+          "label": "🛠️ Tools",
+          "children": [
+            {
+              "label": "🐙 GitHub Repo",
+              "url": "https://github.com/rifaterdemsahin/claude-architect-certification"
+            },
+            {
+              "label": "💳 GitHub Billing Usage",
+              "url": "https://github.com/settings/billing/usage?period=3&group=0&customer=592572"
+            },
+            {
+              "label": "🔥 Supabase",
+              "url": "https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/"
+            },
+            {
+              "label": "🗄 Database Schema",
+              "url": "https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/database/schemas"
+            },
+            {
+              "label": "🗃 Preprod Data Admin",
+              "url": "5_Symbols/production/preprod/tools/admin.html"
+            },
+            {
+              "label": "📡 Axiom Errors Admin",
+              "url": "/admin/errors"
+            },
+            {
+              "label": "🗺 Project Sitemap",
+              "url": "5_Symbols/tools/sitemap.html"
+            },
+            {
+              "label": "🏠 Home Template",
+              "url": "5_Symbols/templates/index.html"
+            },
+            {
+              "label": "📋 Error Log Template",
+              "url": "5_Symbols/templates/axiom_errors.html"
+            },
+            {
+              "label": "☁️ Google Cloud API",
+              "url": "https://console.cloud.google.com/"
+            },
+            {
+              "label": "🤖 Claude Guide",
+              "url": "claude.md"
+            },
+            {
+              "label": "🔀 OpenRouter Logs",
+              "url": "https://openrouter.ai/logs"
+            },
+            {
+              "label": "🎧 Audio Player (Gemini Studio)",
+              "url": "https://aistudio.google.com/apps/b66c6f93-8411-4eb3-b7b0-63edbb8d509a?showPreview=true&showAssistant=true"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "🎥 Production",
+      "children": [
+        {
+          "label": "1. 📸 Shot List & Assets",
+          "url": "5_Symbols/production/postprod/production_shotlist.html?module=1&section=1"
+        },
+        {
+          "label": "2. ✅ Production Checklist",
+          "url": "5_Symbols/production/prod/checklist.html"
+        },
+        {
+          "label": "3. 🎥 Footage Mapping",
+          "url": "5_Symbols/production/prod/footage_mapping.html"
+        },
+        {
+          "label": "🛠️ Tools",
+          "children": [
+            {
+              "label": "🔊 Audio Generator",
+              "url": "https://secondbrain-kokoro.fly.dev/"
+            },
+            {
+              "label": "📁 Google Drive",
+              "url": "https://drive.google.com/"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "📦 Post Prod",
+      "children": [
+        {
+          "label": "🎬 Content Assembly",
+          "children": [
+            {
+              "label": "1. 🎬 Edit List",
+              "url": "5_Symbols/production/postprod/edit_list.html"
+            },
+            {
+              "label": "2. 📺 Course Playlist",
+              "url": "https://www.youtube.com/watch?v=F8IBooe3bXY&list=PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy/"
+            },
+            {
+              "label": "3. 🖼️ Image Generator",
+              "url": "5_Symbols/production/postprod/image_generator.html"
+            },
+            {
+              "label": "4. 🎬 Lower Thirds Manager",
+              "url": "5_Symbols/production/postprod/lower_thirds.html"
+            }
+          ]
+        },
+        {
+          "label": "🎓 Certification & Proof",
+          "children": [
+            {
+              "label": "5. 📜 Erdem's Certification",
+              "url": "markdown_renderer.html?file=4_Formula/certification/erdems_certification.md"
+            },
+            {
+              "label": "6. 🧭 Exam & Case Study",
+              "url": "markdown_renderer.html?file=4_Formula/certification/exam_and_case_study.md"
+            },
+            {
+              "label": "7. 📊 Business Plan",
+              "url": "markdown_renderer.html?file=4_Formula/certification/business_plan.md"
+            },
+            {
+              "label": "8. 💼 Membership / Business",
+              "url": "5_Symbols/production/publish/membership.html"
+            },
+            {
+              "label": "9. 🔄 Flywheel System",
+              "url": "5_Symbols/production/postprod/flywheel.html"
+            }
+          ]
+        },
+        {
+          "label": "🤝 Outreach",
+          "children": [
+            {
+              "label": "10. 🤝 LinkedIn Outreach",
+              "children": [
+                {
+                  "label": "Journey Post (pre-exam)",
+                  "url": "5_Symbols/production/postprod/linkedin_messaging.html#msg-a"
+                },
+                {
+                  "label": "Announcement Post (after pass)",
+                  "url": "5_Symbols/production/postprod/linkedin_messaging.html#msg-b"
+                },
+                {
+                  "label": "Reply to Recruiter",
+                  "url": "5_Symbols/production/postprod/linkedin_messaging.html#msg-c"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "label": "🛠️ Tools",
+          "children": [
+            {
+              "label": "🎨 Canva",
+              "url": "https://canva.com"
+            },
+            {
+              "label": "📺 YouTube Studio",
+              "url": "https://studio.youtube.com/"
+            },
+            {
+              "label": "🎬 Channel Playlist",
+              "url": "https://www.youtube.com/watch?v=F8IBooe3bXY&list=PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy/"
+            },
+            {
+              "label": "🎬 Studio Playlist Editor",
+              "url": "https://studio.youtube.com/playlist/PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy/edit"
+            },
+            {
+              "label": "✨ Gemini Guide",
+              "url": "gemini.md"
+            },
+            {
+              "label": "📜 Commit History",
+              "url": "https://github.com/rifaterdemsahin/claude-architect-certification/commits/main"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "📅 Timeline",
+      "url": "5_Symbols/timeline.html"
+    },
+    {
+      "label": "🧩 Pipeline",
+      "url": "5_Symbols/pipeline.html"
+    }
+  ],
+  "debugMenu": [
+    { "label": "📁 1. Real Unknown", "url": "1_Real_Unknown/" },
+    {
+      "label": "   ├─ 📖 README",
+      "url": "markdown_renderer.html?file=1_Real_Unknown/README.md"
+    },
+    {
+      "label": "   ├─ 🎯 OKRs",
+      "url": "markdown_renderer.html?file=1_Real_Unknown/1_okr.md"
+    },
+    {
+      "label": "   ├─ ❓ Problem Statement",
+      "url": "markdown_renderer.html?file=1_Real_Unknown/2_problem_statement.md"
+    },
+    {
+      "label": "   ├─ 🧪 Hypotheses",
+      "url": "markdown_renderer.html?file=1_Real_Unknown/3_hypotheses.md"
+    },
+    {
+      "label": "   ├─ ❔ Questions",
+      "url": "markdown_renderer.html?file=1_Real_Unknown/4_questions.md"
+    },
+    {
+      "label": "   ├─ 💰 Cost Tracker",
+      "url": "markdown_renderer.html?file=1_Real_Unknown/5_costs.md"
+    },
+    {
+      "label": "   ├─ 📋 Kanban Board",
+      "url": "markdown_renderer.html?file=1_Real_Unknown/6_kanban.md"
+    },
+    {
+      "label": "   └─ ✅ Sanity Check",
+      "url": "markdown_renderer.html?file=1_Real_Unknown/7_sanity_check.md"
+    },
+
+    { "label": "📁 2. Environment", "url": "2_Environment/" },
+    {
+      "label": "   ├─ 📖 README",
+      "url": "markdown_renderer.html?file=2_Environment/README.md"
+    },
+    {
+      "label": "   ├─ 🏛 Architecture",
+      "url": "markdown_renderer.html?file=2_Environment/1_architecture.md"
+    },
+    {
+      "label": "   ├─ 🌐 GitHub Pages",
+      "url": "markdown_renderer.html?file=2_Environment/2_github_pages.md"
+    },
+    {
+      "label": "   ├─ ⚡ Cloudflare Workers",
+      "url": "markdown_renderer.html?file=2_Environment/3_cloudflare_workers.md"
+    },
+    {
+      "label": "   ├─ 🚀 Fly.io",
+      "url": "markdown_renderer.html?file=2_Environment/4_fly_io.md"
+    },
+    {
+      "label": "   ├─ 🔐 Setup Azure Key Vault",
+      "url": "markdown_renderer.html?file=2_Environment/5_setup_azure.md"
+    },
+    {
+      "label": "   ├─ 💻 Setup Mac",
+      "url": "markdown_renderer.html?file=2_Environment/6_setup_mac.md"
+    },
+    {
+      "label": "   ├─ 🪟 Setup Windows",
+      "url": "markdown_renderer.html?file=2_Environment/7_setup_windows.md"
+    },
+    {
+      "label": "   ├─ 🤖 Setup AI Tools",
+      "url": "markdown_renderer.html?file=2_Environment/8_setup_ai.md"
+    },
+    {
+      "label": "   ├─ 🗺 Navigation Config",
+      "url": "markdown_renderer.html?file=2_Environment/9_navigation.md"
+    },
+    {
+      "label": "   ├─ 🏗 Production Setup",
+      "url": "markdown_renderer.html?file=2_Environment/10_production_setup.md"
+    },
+    {
+      "label": "   ├─ 🗄 Database (Supabase)",
+      "url": "markdown_renderer.html?file=2_Environment/11_database.md"
+    },
+    {
+      "label": "   └─ 💾 Supabase Backup",
+      "url": "markdown_renderer.html?file=2_Environment/12_supabase_backup.md"
+    },
+
+    { "label": "📁 3. Simulation", "url": "3_Simulation/" },
+    {
+      "label": "   ├─ 📖 README",
+      "url": "markdown_renderer.html?file=3_Simulation/README.md"
+    },
+    {
+      "label": "   ├─ 🎨 Image Prompts",
+      "url": "markdown_renderer.html?file=3_Simulation/image_prompts.md"
+    },
+    {
+      "label": "   ├─ 👨‍🏫 Instructor Experience",
+      "url": "markdown_renderer.html?file=3_Simulation/instructor_experience.md"
+    },
+    {
+      "label": "   └─ 👤 User Experience",
+      "url": "markdown_renderer.html?file=3_Simulation/userexperience.md"
+    },
+
+    { "label": "📁 4. Formula", "url": "4_Formula/" },
+    {
+      "label": "   ├─ 📖 README",
+      "url": "markdown_renderer.html?file=4_Formula/README.md"
+    },
+    {
+      "label": "   ├─ 📚 API Reference",
+      "url": "markdown_renderer.html?file=4_Formula/delivery_pilot/api_reference.md"
+    },
+    {
+      "label": "   ├─ 📡 Axiom Logging Ingestion",
+      "url": "markdown_renderer.html?file=4_Formula/tools/axiom_logging_setup.md"
+    },
+    {
+      "label": "   ├─ 🔍 Axiom Query Guide",
+      "url": "markdown_renderer.html?file=4_Formula/tools/axiom_query_guide.md"
+    },
+    {
+      "label": "   ├─ 📐 Decisions (ADRs)",
+      "url": "markdown_renderer.html?file=4_Formula/delivery_pilot/decisions.md"
+    },
+    {
+      "label": "   ├─ 📖 DSL Glossary",
+      "url": "markdown_renderer.html?file=4_Formula/delivery_pilot/dsl.md"
+    },
+    {
+      "label": "   ├─ 🛠 Implementation Guide",
+      "url": "markdown_renderer.html?file=4_Formula/delivery_pilot/implementation_guide.md"
+    },
+    {
+      "label": "   ├─ 🧠 LLM Thinking Log",
+      "url": "markdown_renderer.html?file=4_Formula/delivery_pilot/llm_thinking_log.md"
+    },
+    {
+      "label": "   ├─ 📝 Research Notes",
+      "url": "markdown_renderer.html?file=4_Formula/delivery_pilot/research_notes.md"
+    },
+    {
+      "label": "   ├─ 📋 Certification: Course Outline",
+      "url": "markdown_renderer.html?file=4_Formula/certification/course_outline.md"
+    },
+    {
+      "label": "   ├─ 📜 Certification: Erdem's Certification",
+      "url": "markdown_renderer.html?file=4_Formula/certification/erdems_certification.md"
+    },
+    {
+      "label": "   ├─ 🎓 Certification: Exam & Case Study",
+      "url": "markdown_renderer.html?file=4_Formula/certification/exam_and_case_study.md"
+    },
+    {
+      "label": "   ├─ 📄 Certification: Post-Prod Template",
+      "url": "markdown_renderer.html?file=4_Formula/certification/post_prod_template.md"
+    },
+    {
+      "label": "   ├─ 🎬 Certification: Production Plan",
+      "url": "markdown_renderer.html?file=4_Formula/certification/production_plan.md"
+    },
+    {
+      "label": "   ├─ ✈️ Delivery Pilot Log",
+      "url": "markdown_renderer.html?file=4_Formula/delivery_pilot/llm_thinking_log.md"
+    },
+    {
+      "label": "   ├─ 📁 Production: Google Drive Structure",
+      "url": "markdown_renderer.html?file=4_Formula/production/google_drive_folder_Structure.md"
+    },
+    {
+      "label": "   ├─ 🔌 Production: MCP Google Drive",
+      "url": "markdown_renderer.html?file=4_Formula/production/mcp_google_drive.md"
+    },
+    {
+      "label": "   ├─ 📄 Production: Outline Template",
+      "url": "markdown_renderer.html?file=4_Formula/production/outline_template.md"
+    },
+    {
+      "label": "   ├─ 💬 Production: Prompter",
+      "url": "markdown_renderer.html?file=4_Formula/production/prompter.md"
+    },
+    {
+      "label": "   ├─ 🎬 Production: Script",
+      "url": "markdown_renderer.html?file=4_Formula/production/script.md"
+    },
+    {
+      "label": "   ├─ 🛡 Security: ZDR Checklist",
+      "url": "markdown_renderer.html?file=4_Formula/security/zdr_checklist.md"
+    },
+    {
+      "label": "   ├─ 👁 Tools: Markdown Preview Auto",
+      "url": "markdown_renderer.html?file=4_Formula/tools/markdown_preview_auto.md"
+    },
+    {
+      "label": "   ├─ 🔧 Tools: VS Code Extensions",
+      "url": "markdown_renderer.html?file=4_Formula/tools/vscode_extensions.md"
+    },
+    {
+      "label": "   └─ 🛢️ Tools: Supabase Setup Formula",
+      "url": "markdown_renderer.html?file=4_Formula/tools/supabase_setup_formula.md"
+    },
+
+    { "label": "📁 5. Symbols (Code)", "url": "5_Symbols/" },
+    {
+      "label": "   ├─ 📖 README",
+      "url": "markdown_renderer.html?file=5_Symbols/README.md"
+    },
+    {
+      "label": "   ├─ 🔌 MCP Server README",
+      "url": "markdown_renderer.html?file=5_Symbols/course_src/mcp-server/README.md"
+    },
+    {
+      "label": "   ├─ 🛡 ZDR Compliance",
+      "url": "markdown_renderer.html?file=5_Symbols/course_src/security/ZDR_COMPLIANCE.md"
+    },
+    {
+      "label": "   ├─ 💰 Plan: Business Model",
+      "url": "markdown_renderer.html?file=4_Formula/certification/business_plan.md"
+    },
+    {
+      "label": "   ├─ 📋 Plan: Pre-Prod Module 1",
+      "url": "markdown_renderer.html?file=5_Symbols/production/preprod/module_1_plan.md"
+    },
+    {
+      "label": "   ├─ 📋 Plan: Prod Module 1",
+      "url": "markdown_renderer.html?file=5_Symbols/production/prod/module_1_plan.md"
+    },
+    { "label": "   ├─ 🧪 Sanity Gate (Pre-Prod→Post)", "url": "5_Symbols/production/preprod/sanity_check.html" },
+    { "label": "   ├─ ✅ Production Checklist", "url": "5_Symbols/production/prod/checklist.html" },
+
+    { "label": "📁 6. Semblance", "url": "6_Semblance/" },
+    {
+      "label": "   ├─ 📖 README",
+      "url": "markdown_renderer.html?file=6_Semblance/README.md"
+    },
+    {
+      "label": "   ├─ 🩹 Workarounds",
+      "url": "markdown_renderer.html?file=6_Semblance/logs/workarounds.md"
+    },
+    {
+      "label": "   ├─ 🐛 Error Log",
+      "url": "markdown_renderer.html?file=6_Semblance/logs/error_log.md"
+    },
+    {
+      "label": "   ├─ ⚠️ Error: Insert Policy",
+      "url": "markdown_renderer.html?file=6_Semblance/errors/error_insertpolicy.md"
+    },
+    {
+      "label": "   ├─ 🔗 CI Broken Links",
+      "url": "markdown_renderer.html?file=6_Semblance/errors/error_ci_broken_links_label_failure.md"
+    },
+    {
+      "label": "   ├─ 🔗 CI Setup-Node Caching Error",
+      "url": "markdown_renderer.html?file=6_Semblance/errors/error_ci_setup_node_cache_missing_path.md"
+    },
+    {
+      "label": "   ├─ 🔍 Gap Analysis",
+      "url": "markdown_renderer.html?file=6_Semblance/logs/gap_analysis.md"
+    },
+    {
+      "label": "   ├─ 📝 Lessons Learned",
+      "url": "markdown_renderer.html?file=6_Semblance/logs/lessons_learned.md"
+    },
+    {
+      "label": "   ├─ 🛠 Missing Menu Remediation",
+      "url": "markdown_renderer.html?file=6_Semblance/errors/error_missing_menu_items_remediation.md"
+    },
+    {
+      "label": "   ├─ 🔒 RLS Checklist Insert",
+      "url": "markdown_renderer.html?file=6_Semblance/errors/error_rls_checklist_insert.md"
+    },
+    {
+      "label": "   └─ 🗄 Archive: 2026-06-06 (and more)",
+      "url": "6_Semblance/archive/daily/"
+    },
+
+    { "label": "📁 7. Testing Known", "url": "7_Testing_Known/" },
+    {
+      "label": "   ├─ 📖 README",
+      "url": "markdown_renderer.html?file=7_Testing_Known/README.md"
+    },
+    {
+      "label": "   ├─ ✅ Sanity Check Report",
+      "url": "markdown_renderer.html?file=7_Testing_Known/sanity_check_report.md"
+    },
+    {
+      "label": "   └─ 🧪 Validation Report",
+      "url": "markdown_renderer.html?file=7_Testing_Known/validation_report.md"
+    },
+
+    { "label": "---", "url": "divider" },
+
+    { "label": "📁 Root Documents", "url": "" },
+    {
+      "label": "   ├─ 📖 README (repo root)",
+      "url": "markdown_renderer.html?file=README.md"
+    },
+    {
+      "label": "   ├─ 🤖 agents.md",
+      "url": "markdown_renderer.html?file=agents.md"
+    },
+    {
+      "label": "   ├─ 🌀 antigravity.md",
+      "url": "markdown_renderer.html?file=antigravity.md"
+    },
+    {
+      "label": "   ├─ 🤖 claude.md",
+      "url": "markdown_renderer.html?file=claude.md"
+    },
+    {
+      "label": "   ├─ 👨‍💻 copilot.md",
+      "url": "markdown_renderer.html?file=copilot.md"
+    },
+    {
+      "label": "   ├─ ✨ gemini.md",
+      "url": "markdown_renderer.html?file=gemini.md"
+    },
+    {
+      "label": "   ├─ ⚡ kilocode.md",
+      "url": "markdown_renderer.html?file=kilocode.md"
+    },
+    {
+      "label": "   ├─ 🌙 kimi.md",
+      "url": "markdown_renderer.html?file=kimi.md"
+    },
+    {
+      "label": "   ├─ 💬 prompts.md",
+      "url": "markdown_renderer.html?file=prompts.md"
+    },
+    { "label": "   └─ ✅ todos.md", "url": "markdown_renderer.html?file=todos.md" }
+  ]
+}
+;
+  </script>
+  <script src="shared/nav.js" defer></script>
+  <script src="shared/debug-panel.js" defer></script>
+  <script>
+  (function() {
+    window.addEventListener('DOMContentLoaded', function() {
+      fetch('/api/errors', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          _time: new Date().toISOString(),
+          level: 'info',
+          stage: 'homepage',
+          message: 'Page loaded: ' + window.location.pathname + window.location.search,
+          url: window.location.href,
+          userAgent: navigator.userAgent
+        })
+      }).catch(function(e) { console.warn('page-load report failed', e); });
+    });
+
+    window.addEventListener('error', function(e) {
+      fetch('/api/errors', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          _time: new Date().toISOString(),
+          level: 'error',
+          stage: 'homepage',
+          message: e.message + ' at ' + (e.filename || 'unknown') + ':' + e.lineno + ':' + e.colno,
+          url: window.location.href
+        })
+      }).catch(function() {});
+    });
+
+    window.addEventListener('unhandledrejection', function(e) {
+      var msg = e.reason instanceof Error ? (e.reason.stack || e.reason.message) : String(e.reason);
+      fetch('/api/errors', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          _time: new Date().toISOString(),
+          level: 'error',
+          stage: 'homepage',
+          message: 'Unhandled promise rejection: ' + msg,
+          url: window.location.href
+        })
+      }).catch(function() {});
+    });
+
+    console.log('[Homepage] Verbose logging active — errors will be reported to /api/errors');
+  })();
+  </script>
+</head>
+<body>
+
+  <header class="app-header">
+    <div class="header-container">
+      <a href="index.html" class="app-logo">
+        <i class="fa-solid fa-microchip"></i>
+        <span>Claude Architect</span>
+      </a>
+      <div class="project-menu-nav" id="projectMenu">
+        
+      </div>
+    </div>
+  </header>
+
+  
+  <section class="hero-section">
+    <div class="hero-badge">
+      <i class="fa-solid fa-award"></i> Enterprise Systems & Integration
+    </div>
+    <h1 class="hero-title">Claude AI Certification for Architects</h1>
+    <p class="hero-subtitle">
+      A hands-on, production-grade guide to building secure, optimized, and sovereign AI workflows at enterprise scale. Learn system topologies, custom MCP servers, and prompt optimization.
+    </p>
+  </section>
+
+  
+  <section class="simulator-container">
+    <div class="glass-card">
+      <h2 class="card-title">
+        <i class="fa-solid fa-laptop-code" style="color: var(--accent-violet);"></i>
+        <span>🕹️ Interactive Architecture Simulator</span>
+      </h2>
+      <div class="simulation-controls">
+        <button id="btn-standard" class="btn btn-primary">⚡ Standard Request</button>
+        <button id="btn-caching" class="btn btn-secondary">🔋 Run Cached Request</button>
+        <button id="btn-outage" class="btn btn-danger">🚨 Trigger Outage Simulation</button>
+      </div>
+
+      <div class="flow-chart">
+        
+        <div id="node-user" class="node">
+          <div class="node-icon">👤</div>
+          <h4>User Prompt</h4>
+          <p id="label-user">Awaiting click</p>
+        </div>
+
+        <div id="line-1" class="flow-line"></div>
+
+        
+        <div id="node-router" class="node">
+          <div class="node-icon">🚦</div>
+          <h4>Router / Guards</h4>
+          <p id="label-router">Security & loops checks</p>
+        </div>
+
+        <div id="line-2" class="flow-line"></div>
+
+        
+        <div id="node-cache" class="node">
+          <div class="node-icon">💾</div>
+          <h4>Prompt Cache</h4>
+          <p id="label-cache">Checkpoints</p>
+        </div>
+
+        <div id="line-3" class="flow-line"></div>
+
+        
+        <div id="node-mcp" class="node">
+          <div class="node-icon">🔒</div>
+          <h4>Fly.io MCP Server</h4>
+          <p id="label-mcp">Data bridge</p>
+        </div>
+      </div>
+
+      <div class="status-terminal" id="terminal">
+        <p>> System ready. Select an execution scenario above to trace payload flow...</p>
+      </div>
+    </div>
+  </section>
+
+  
+  <section class="metadata-section">
+    <div class="glass-card">
+      <h2 class="section-header">
+        <i class="fa-solid fa-table-list" style="color:var(--accent-violet);"></i>
+        📋 Course Overview &amp; Metadata
+        <span style="margin-left:auto;font-size:0.75rem;font-weight:400;color:var(--text-muted);">Source: Supabase · course_metadata</span>
+      </h2>
+
+      
+        <table class="meta-table" id="metaTable">
+          <thead><tr><th>Field</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td>📚 Course Title</td><td>Claude AI Certification for Architects: Enterprise Systems &amp; Integration</td></tr>
+            <tr><td>👤 Instructor</td><td>Rifat Erdem Sahin</td></tr>
+            <tr><td>🎯 Target Audience</td><td>Enterprise architects, DevOps engineers, and senior developers building production AI systems at scale</td></tr>
+            <tr><td>⏱️ Total Duration</td><td>5 hours (15 videos across 5 modules)</td></tr>
+            <tr><td>📊 Difficulty Level</td><td>Advanced</td></tr>
+            <tr><td>🎓 Learning Objectives</td><td><div style="margin-bottom:4px;">1. Design multi-agent Claude topologies with deterministic routing</div><div style="margin-bottom:4px;">2. Build custom MCP servers for enterprise data integration</div><div style="margin-bottom:4px;">3. Implement prompt caching strategies for 80%&#43; cost reduction</div><div style="margin-bottom:4px;">4. Configure VPC PrivateLink for Zero Data Retention (ZDR) compliance</div><div style="margin-bottom:4px;">5. Deploy sovereign AI pipelines on Fly.io with Qdrant vector search</div></td></tr>
+            <tr><td>💡 Key Takeaways</td><td>Enterprise AI requires deterministic routing, not just prompting. Prompt caching cuts API costs by 80%&#43;. Zero Data Retention via VPC PrivateLink enables HIPAA/GDPR-compliant deployments. MCP servers bridge Claude to any enterprise data source without hallucination risk.</td></tr>
+            <tr><td>🌍 Real World Connections</td><td>Case study: Fortune 500 inventory management with multi-region Claude routing. News: Anthropic ZDR enterprise partnerships with major cloud providers. Example: Claude-powered production code review pipeline (as used throughout this course).</td></tr>
+            <tr><td>📋 Recommended Background</td><td>REST APIs, Python or JS, familiarity with cloud services (AWS/Azure/GCP). No prior AI/ML required.</td></tr>
+            <tr><td>🧪 Proof of Learning</td><td>Learners must design a multi-agent architecture diagram, implement a working MCP server, demonstrate 80%&#43; cache hit rate in a simulated load test, and pass a 30-question exam covering ZDR, routing topologies, and cost optimization strategies.</td></tr>
+            <tr><td>📝 Course Description</td><td>This advanced certification prepares enterprise architects and engineers to design, deploy, and operate production-grade Claude AI systems at scale. Master multi-agent topologies with deterministic routing, build custom MCP servers connecting Claude to live enterprise data sources, and implement prompt caching strategies that reduce costs by 80% or more. The course covers Zero Data Retention configuration via VPC PrivateLink for regulatory compliance, sovereign AI deployment on Fly.io with Qdrant vector search, and real-time multi-tenant architectures. Each module combines architectural theory with hands-on implementation using the Claude API, Anthropic SDK, and enterprise tooling. By the end, you will be able to architect, review, and defend Claude AI systems in production — and pass the Claude Certified Architect exam with confidence.</td></tr>
+            <tr><td>🏷️ Skills</td><td><span class="skill-tag">Multi-Agent System Design</span> <span class="skill-tag">MCP Server Development</span> <span class="skill-tag">Prompt Engineering &amp; Caching</span> <span class="skill-tag">Enterprise AI Security (ZDR/VPC)</span> <span class="skill-tag">Claude API Integration</span> </td></tr>
+          </tbody>
+        </table>
+
+        
+        <div id="toolsWrap" style="margin-top:1.5rem;">
+          <h3 style="font-family:var(--font-display);font-size:1.1rem;font-weight:700;margin-bottom:0.75rem;display:flex;align-items:center;gap:0.5rem;">
+            <i class="fa-solid fa-screwdriver-wrench" style="color:var(--accent-cyan);"></i>
+            🛠️ Tools Used in This Course
+            <span style="font-size:0.75rem;font-weight:400;color:var(--text-muted);margin-left:auto;">Source: Supabase · course_tools</span>
+          </h3>
+          <table class="tools-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Tool</th>
+                <th>Purpose / Use in Course</th>
+                <th>Free or Paid</th>
+                <th>Trial Available</th>
+                <th>Trial Duration &amp; Limits</th>
+                <th>Validity</th>
+              </tr>
+            </thead>
+            <tbody>
+              
+              <tr>
+                <td style="color:var(--text-muted);text-align:center;">1</td>
+                <td><strong>Claude API (Anthropic)</strong></td>
+                <td>Core AI model — all inference, tool use, and multi-agent calls</td>
+                <td>Paid ($5 free credits on sign-up)</td>
+                <td>✅ Yes</td>
+                <td>$5 free credits on sign-up</td>
+                <td class="valid-badge">✅ Production-ready</td>
+              </tr>
+              
+              <tr>
+                <td style="color:var(--text-muted);text-align:center;">2</td>
+                <td><strong>Claude Code CLI</strong></td>
+                <td>Development environment, code generation, and project scaffolding</td>
+                <td>Free</td>
+                <td>❌ No</td>
+                <td>N/A</td>
+                <td class="valid-badge">✅ Production-ready</td>
+              </tr>
+              
+              <tr>
+                <td style="color:var(--text-muted);text-align:center;">3</td>
+                <td><strong>Supabase</strong></td>
+                <td>PostgreSQL database, row-level security, file storage, realtime subs</td>
+                <td>Free tier available</td>
+                <td>✅ Yes</td>
+                <td>Unlimited free tier (up to project limits)</td>
+                <td class="valid-badge">✅ Production-ready</td>
+              </tr>
+              
+              <tr>
+                <td style="color:var(--text-muted);text-align:center;">4</td>
+                <td><strong>Fly.io</strong></td>
+                <td>Python/FastAPI backend hosting and Qdrant vector DB deployment</td>
+                <td>Pay-as-you-go ($0 until scale)</td>
+                <td>✅ Yes</td>
+                <td>$0 until usage triggers billing</td>
+                <td class="valid-badge">✅ Production-ready</td>
+              </tr>
+              
+              <tr>
+                <td style="color:var(--text-muted);text-align:center;">5</td>
+                <td><strong>GitHub Actions</strong></td>
+                <td>CI/CD pipeline — static deploy, link validation, automated testing</td>
+                <td>Free for public repos</td>
+                <td>❌ No</td>
+                <td>N/A</td>
+                <td class="valid-badge">✅ Production-ready</td>
+              </tr>
+              
+              <tr>
+                <td style="color:var(--text-muted);text-align:center;">6</td>
+                <td><strong>Azure Key Vault</strong></td>
+                <td>Secrets management — FIPS 140-2 HSMs, RBAC, key rotation, audit logs</td>
+                <td>Paid (~$0.03/10k operations, Standard)</td>
+                <td>✅ Yes</td>
+                <td>30-day free trial on Azure account</td>
+                <td class="valid-badge">✅ Production-ready</td>
+              </tr>
+              
+              <tr>
+                <td style="color:var(--text-muted);text-align:center;">7</td>
+                <td><strong>Qdrant</strong></td>
+                <td>Vector database for semantic search and RAG pipelines on Fly.io</td>
+                <td>Free self-hosted / Cloud free tier</td>
+                <td>✅ Yes</td>
+                <td>Cloud free tier available</td>
+                <td class="valid-badge">✅ Production-ready</td>
+              </tr>
+              
+            </tbody>
+          </table>
+        </div>
+        
+      
+    </div>
+  </section>
+
+  
+  <main class="dashboard-grid">
+    
+    
+    <section class="glass-card" id="framework-section">
+      <h2 class="card-title">
+        <i class="fa-solid fa-list-ol" style="color: var(--accent-violet);"></i>
+        <span>The 7-Stage Framework</span>
+      </h2>
+      <ul class="timeline-steps">
+        <li class="step-item">
+          <span class="step-number">1</span>
+          <div class="step-content">
+            <h3 class="step-title">Real Unknown</h3>
+            <p class="step-desc">Identifying core problem statements, OKRs, and hypotheses in <a href="markdown_renderer.html?file=1_Real_Unknown/README.md" style="color: var(--accent-cyan); text-decoration: underline;">1_Real_Unknown</a>.</p>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-number">2</span>
+          <div class="step-content">
+            <h3 class="step-title">Environment Setup</h3>
+            <p class="step-desc">Setting up Azure Key Vault secrets, local credentials, and AI tools in <a href="markdown_renderer.html?file=2_Environment/README.md" style="color: var(--accent-cyan); text-decoration: underline;">2_Environment</a>.</p>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-number">3</span>
+          <div class="step-content">
+            <h3 class="step-title">Simulation</h3>
+            <p class="step-desc">Building user journeys, layout simulations, and carousel configs in <a href="markdown_renderer.html?file=3_Simulation/README.md" style="color: var(--accent-cyan); text-decoration: underline;">3_Simulation</a>.</p>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-number">4</span>
+          <div class="step-content">
+            <h3 class="step-title">Formula</h3>
+            <p class="step-desc">Documenting decisions (ADRs) and recipe guides in <a href="markdown_renderer.html?file=4_Formula/README.md" style="color: var(--accent-cyan); text-decoration: underline;">4_Formula</a>.</p>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-number">5</span>
+          <div class="step-content">
+            <h3 class="step-title">Symbols (Code)</h3>
+            <p class="step-desc">Writing the core source code, Docker configs, and workflows in <a href="markdown_renderer.html?file=5_Symbols/README.md" style="color: var(--accent-cyan); text-decoration: underline;">5_Symbols</a>.</p>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-number">6</span>
+          <div class="step-content">
+            <h3 class="step-title">Semblance</h3>
+            <p class="step-desc">Tracking active workarounds, error logs, and learnings in <a href="markdown_renderer.html?file=6_Semblance/README.md" style="color: var(--accent-cyan); text-decoration: underline;">6_Semblance</a>.</p>
+          </div>
+        </li>
+        <li class="step-item">
+          <span class="step-number">7</span>
+          <div class="step-content">
+            <h3 class="step-title">Testing Known</h3>
+            <p class="step-desc">Validating everything against hypotheses and OKRs in <a href="markdown_renderer.html?file=7_Testing_Known/README.md" style="color: var(--accent-cyan); text-decoration: underline;">7_Testing_Known</a>.</p>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    
+    <section class="glass-card">
+      <h2 class="card-title">
+        <i class="fa-solid fa-graduation-cap" style="color: var(--accent-cyan);"></i>
+        <span>Curriculum & Code Blueprints</span>
+      </h2>
+      <div class="modules-list">
+        
+        
+        <div class="module-card">
+          <div class="module-badge">Module 1</div>
+          <h3>Claude Ecosystem & Flows</h3>
+          <p>Anatomy of Claude, token mechanics, stateful orchestration loops, and message routing topologies.</p>
+          <div class="module-links">
+            <a href="markdown_renderer.html?file=4_Formula/topologies/multi_agent_flow.md" class="link-tag"><i class="fa-solid fa-file-invoice"></i> Topology Guide</a>
+          </div>
+        </div>
+
+        
+        <div class="module-card">
+          <div class="module-badge">Module 2</div>
+          <h3>Model Context Protocol (MCP)</h3>
+          <p>Connecting Claude to secure private databridges (SQLite/PostgreSQL) with read-only boundaries and stdio/SSE transports on Fly.io.</p>
+          <div class="module-links">
+            <a href="markdown_renderer.html?file=5_Symbols/course_src/mcp-server/README.md" class="link-tag"><i class="fa-solid fa-file-invoice"></i> Deploy Guide</a>
+            <a href="markdown_renderer.html?file=5_Symbols/course_src/mcp-server/fly.toml" class="link-tag"><i class="fa-solid fa-code"></i> fly.toml</a>
+          </div>
+        </div>
+
+        
+        <div class="module-card">
+          <div class="module-badge">Module 3</div>
+          <h3>Zero-Data Retention (ZDR)</h3>
+          <p>Restricting API endpoints using AWS Bedrock VPC Interface Endpoints (PrivateLink) and implementing strict compliance logs.</p>
+          <div class="module-links">
+            <a href="markdown_renderer.html?file=5_Symbols/course_src/security/ZDR_COMPLIANCE.md" class="link-tag"><i class="fa-solid fa-shield-halved"></i> ZDR Protocol</a>
+            <a href="markdown_renderer.html?file=5_Symbols/templates/aws-bedrock-private-link.tf" class="link-tag"><i class="fa-solid fa-file-code"></i> Terraform Blueprint</a>
+          </div>
+        </div>
+
+        
+        <div class="module-card">
+          <div class="module-badge">Module 4</div>
+          <h3>Deterministic Routers</h3>
+          <p>Building specialized agent classifiers and execution circuit-breakers in Python to shut down rogue loops cleanly.</p>
+          <div class="module-links">
+            <a href="markdown_renderer.html?file=5_Symbols/course_src/multi-agent/router.py" class="link-tag"><i class="fa-brands fa-python"></i> router.py</a>
+          </div>
+        </div>
+
+        
+        <div class="module-card">
+          <div class="module-badge">Module 5</div>
+          <h3>Financial Engineering</h3>
+          <p>Minimizing enterprise operational overhead by up to 90% using explicit, prefix-matching prompt cache points.</p>
+          <div class="module-links">
+            <a href="markdown_renderer.html?file=5_Symbols/course_src/optimization/cache_layer.py" class="link-tag"><i class="fa-brands fa-python"></i> cache_layer.py</a>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  
+  <section class="cert-container">
+    <div class="cert-banner">
+      <h2>🎓 Certification Exam & Case Study</h2>
+      <p>Audit system failures under pressure and test your knowledge on real-world enterprise outage remediation scenarios.</p>
+      <a href="markdown_renderer.html?file=4_Formula/certification/exam_and_case_study.md" class="btn btn-primary">
+        <i class="fa-solid fa-file-signature"></i> Start Exam Walkthrough
+      </a>
+    </div>
+  </section>
+
+  
+  <footer>
+    <p style="margin-bottom: 8px;">Built for the <strong><a href="https://www.youtube.com/playlist?list=PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy" target="_blank" style="color: #c084fc;">Claude AI Certification for Architects</a></strong> Masterclass.</p>
+    <p style="margin-bottom: 12px; font-size: 0.85rem; opacity: 0.8;">
+      Instructor: <a href="https://www.linkedin.com/in/rifaterdemsahin" target="_blank" style="color: #93c5fd; text-decoration: underline; margin-right: 16px;">Rifat Erdem Sahin LinkedIn</a>
+      GitHub Project: <a href="https://github.com/rifaterdemsahin/claude-architect-certification" target="_blank" style="color: #93c5fd; text-decoration: underline;">Project Repository</a>
+    </p>
+    <div style="margin-top: 12px; display: flex; justify-content: center; gap: 16px; align-items: center;">
+      <a href="https://github.com/rifaterdemsahin/claude-architect-certification/actions/workflows/static.yml" target="_blank">
+        <img src="https://github.com/rifaterdemsahin/claude-architect-certification/actions/workflows/static.yml/badge.svg" alt="Deploy Status" style="vertical-align: middle;">
+      </a>
+    </div>
+  </footer>
+
+  
+  <button class="debug-toggle-btn" id="debugToggle" title="Toggle Developer Debug Menu">
+    <i class="fa-solid fa-bug"></i>
+  </button>
+
+  
+  <div class="debug-menu-overlay" id="debugMenuOverlay">
+    <div class="debug-menu-header">
+      <h2 class="debug-menu-title">
+        <i class="fa-solid fa-terminal"></i>
+        <span>Debug Menu</span>
+      </h2>
+      <button id="debugClose" style="background:none; border:none; color:white; cursor:pointer; font-size:1.1rem;">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    
+    <div class="search-wrapper">
+      <i class="fa-solid fa-magnifying-glass search-icon"></i>
+      <input type="text" class="search-input" id="debugSearch" placeholder="Search stages, files, or agents... (Ctrl+K)">
+      <span id="searchMatchCount" style="position:absolute; right:0.85rem; top:50%; transform:translateY(-50%); font-size:0.75rem; color:var(--text-muted);"></span>
+    </div>
+
+    
+    <ul class="debug-links-list" id="debugLinksList">
+      
+    </ul>
+  </div>
+
+  <script>
+    
+    const LAUNCH_DATE = new Date('2026-06-07');
+    const DAY_MS = 1000 * 60 * 60 * 24;
+    const daysSinceLaunch = Math.floor((Date.now() - LAUNCH_DATE.getTime()) / DAY_MS);
+    const showDevPhaseItems = daysSinceLaunch < 90;
+
+    
+    let navigationData = window.__NAV_CONFIG__ || { projectMenu: [], debugMenu: [] };
+
+    
+    function setCookie(name, value, days = 7) {
+      const d = new Date();
+      d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
+      document.cookie = `${name}=${value};path=/;expires=${d.toUTCString()};SameSite=Strict`;
+    }
+
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+      return null;
+    }
+
+    function debugLog(message, data = '') {
+      if (getCookie("debug") === "true") {
+        console.log(`%c[Debug Mode] ${message}`, 'color: #06b6d4; font-weight: bold;', data);
+      }
+    }
+
+    
+    document.addEventListener("DOMContentLoaded", () => {
+      debugLog("DOM content fully loaded. Initializing debug logs...");
+
+      const debugToggle = document.getElementById("debugToggle");
+      const debugClose = document.getElementById("debugClose");
+      const debugMenuOverlay = document.getElementById("debugMenuOverlay");
+      const debugSearch = document.getElementById("debugSearch");
+      const debugLinksList = document.getElementById("debugLinksList");
+      const projectMenuContainer = document.getElementById("projectMenu");
+
+      
+      initMenus();
+
+      function initMenus() {
+        debugLog("Initializing Project and Debug Menus.", navigationData);
+
+        
+        if (!showDevPhaseItems) {
+          const frameworkSection = document.getElementById("framework-section");
+          if (frameworkSection) frameworkSection.style.display = "none";
+        }
+
+        
+        if (!projectMenuContainer) return;
+
+        function resolveUrl(url) {
+          if (!url) return "#";
+          if (url === "index.html" || url.startsWith("http") || url.includes("markdown_renderer.html") || url.endsWith(".html")) return url;
+          return `markdown_renderer.html?file=${url}`;
+        }
+
+        function getAbsoluteUrl(url) {
+          const a = document.createElement('a');
+          a.href = url;
+          return a.href;
+        }
+
+        function isUrlActive(childUrl) {
+          if (!childUrl || childUrl === '#') return false;
+          const resolved = resolveUrl(childUrl);
+          let absResolved = getAbsoluteUrl(resolved);
+          let absCurrent = window.location.href;
+          
+          absResolved = absResolved.replace(/\/$/, '').replace(/\/index\.html$/, '').split('#')[0];
+          absCurrent = absCurrent.replace(/\/$/, '').replace(/\/index\.html$/, '').split('#')[0];
+          
+          if (absCurrent.includes('markdown_renderer.html')) {
+            const currentParams = new URLSearchParams(window.location.search);
+            const currentFile = currentParams.get('file');
+            if (currentFile) {
+              if (resolved.includes('file=' + currentFile)) {
+                return true;
+              }
+            }
+          }
+          
+          return absResolved === absCurrent;
+        }
+
+        function isItemActive(item) {
+          if (item.children) {
+            return item.children.some(isItemActive);
+          }
+          return isUrlActive(item.url);
+        }
+
+        navigationData.projectMenu.forEach((item) => {
+          if (item.children) {
+            
+            const visibleChildren = item.children.filter(c => !(c.hideAfterDays && daysSinceLaunch >= c.hideAfterDays));
+            if (!visibleChildren.length) return;
+
+            const isActive = isItemActive(item);
+            const activeClass = isActive ? " active" : "";
+
+            const group = document.createElement("div");
+            group.className = "menu-group" + activeClass;
+
+            const btn = document.createElement("button");
+            btn.className = "menu-group-btn";
+            btn.innerHTML = `${item.label} <span class="chevron">▾</span>`;
+            group.appendChild(btn);
+
+            const dropdown = document.createElement("div");
+            dropdown.className = "menu-dropdown";
+
+             visibleChildren.forEach(child => {
+              const isChildActive = isItemActive(child);
+              const childActiveClass = isChildActive ? " active" : "";
+              if (child.children) {
+                const subVisible = child.children.filter(sc => !(sc.hideAfterDays && daysSinceLaunch >= sc.hideAfterDays));
+                if (!subVisible.length) return;
+
+                const subGroup = document.createElement("div");
+                subGroup.className = "menu-subgroup" + childActiveClass;
+
+                const subBtn = document.createElement("button");
+                subBtn.className = "menu-subgroup-btn";
+                subBtn.innerHTML = `${child.label} <span class="chevron-right">▸</span>`;
+                subGroup.appendChild(subBtn);
+
+                const subDropdown = document.createElement("div");
+                subDropdown.className = "menu-subdropdown";
+
+                subVisible.forEach(subChild => {
+                  const isSubChildActive = isItemActive(subChild);
+                  const subChildActiveClass = isSubChildActive ? " active" : "";
+                  const subA = document.createElement("a");
+                  subA.href = resolveUrl(subChild.url);
+                  subA.className = "subdropdown-link" + subChildActiveClass;
+                  subA.textContent = subChild.label;
+                  subDropdown.appendChild(subA);
+                });
+
+                subGroup.appendChild(subDropdown);
+                dropdown.appendChild(subGroup);
+              } else {
+                const a = document.createElement("a");
+                a.href = resolveUrl(child.url);
+                a.className = "dropdown-link" + childActiveClass;
+                a.textContent = child.label;
+                dropdown.appendChild(a);
+              }
+            });
+
+            group.appendChild(dropdown);
+            projectMenuContainer.appendChild(group);
+          } else {
+            
+            if (item.hideAfterDays && daysSinceLaunch >= item.hideAfterDays) return;
+            const isActive = isItemActive(item);
+            const activeClass = isActive ? " active" : "";
+            const link = document.createElement("a");
+            link.href = resolveUrl(item.url);
+            link.className = "menu-link" + activeClass;
+            link.textContent = item.label;
+            projectMenuContainer.appendChild(link);
+          }
+        });
+
+        
+        buildDebugMenu();
+      }
+
+      function buildDebugMenu(filterText = "") {
+        debugLog(`Building Debug Menu with filter: "${filterText}"`);
+        debugLinksList.innerHTML = "";
+        const query = filterText.toLowerCase();
+        const matchCount = document.getElementById("searchMatchCount");
+        let visibleCount = 0;
+
+        navigationData.debugMenu.forEach(item => {
+          const labelLower = item.label.toLowerCase();
+          const urlLower = item.url.toLowerCase();
+          const matchesQuery = !query ||
+            labelLower.includes(query) ||
+            urlLower.includes(query) ||
+            urlLower.replace(/^markdown_renderer\.html\?file=/, "").includes(query);
+
+          if (query && item.label === "---") return;
+          if (query && !matchesQuery) return;
+
+          if (item.label === "---") {
+            const divider = document.createElement("li");
+            divider.className = "debug-divider";
+            debugLinksList.appendChild(divider);
+          } else {
+            visibleCount++;
+            const li = document.createElement("li");
+            li.className = "debug-item";
+            
+            const a = document.createElement("a");
+            
+            
+            let finalUrl = item.url;
+            if (finalUrl && finalUrl !== "divider" && !finalUrl.startsWith("http") &&
+                !finalUrl.includes("markdown_renderer.html") && !finalUrl.endsWith(".html") &&
+                !finalUrl.endsWith("/")) {
+              finalUrl = `markdown_renderer.html?file=${finalUrl}`;
+            }
+
+            
+            if (!item.url || item.url === "divider") {
+              a.className = "debug-link";
+              a.style.cursor = "default";
+              a.style.opacity = "0.7";
+              a.href = "#";
+              a.addEventListener("click", (e) => e.preventDefault());
+              a.innerHTML = `<span>${item.label}</span>`;
+            } else {
+              a.href = finalUrl;
+              a.className = "debug-link";
+              a.innerHTML = `<span>${item.label}</span><i class="fa-solid fa-chevron-right debug-link-icon"></i>`;
+            }
+            li.appendChild(a);
+            debugLinksList.appendChild(li);
+          }
+        });
+
+        if (matchCount) {
+          const total = navigationData.debugMenu.filter(i => i.label !== "---").length;
+          matchCount.textContent = query ? `${visibleCount}/${total}` : `${total}`;
+        }
+
+        if (visibleCount === 0 && query) {
+          const noResult = document.createElement("li");
+          noResult.className = "debug-item";
+          noResult.innerHTML = `<div class="debug-link" style="justify-content:center; opacity:0.5;">No results for "${filterText}"</div>`;
+          debugLinksList.appendChild(noResult);
+        }
+      }
+
+      
+      debugSearch.addEventListener("input", (e) => {
+        buildDebugMenu(e.target.value);
+      });
+
+      
+      document.addEventListener("keydown", (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+          e.preventDefault();
+          if (!debugMenuOverlay.classList.contains("open")) {
+            debugMenuOverlay.classList.add("open");
+            setCookie("debug", "true");
+          }
+          debugSearch.focus();
+        }
+        if (e.key === "Escape" && debugMenuOverlay.classList.contains("open")) {
+          debugMenuOverlay.classList.remove("open");
+          setCookie("debug", "false");
+          debugSearch.blur();
+        }
+      });
+
+      
+      const debugState = getCookie("debug");
+      if (debugState === "true") {
+        debugMenuOverlay.classList.add("open");
+      }
+
+      debugToggle.addEventListener("click", () => {
+        const isOpen = debugMenuOverlay.classList.toggle("open");
+        setCookie("debug", isOpen ? "true" : "false");
+      });
+
+      debugClose.addEventListener("click", () => {
+        debugMenuOverlay.classList.remove("open");
+        setCookie("debug", "false");
+      });
+    });
+
+    
+    
+    
+    const term = document.getElementById('terminal');
+    const nodes = {
+      user: document.getElementById('node-user'),
+      router: document.getElementById('node-router'),
+      cache: document.getElementById('node-cache'),
+      mcp: document.getElementById('node-mcp')
+    };
+    const lines = {
+      l1: document.getElementById('line-1'),
+      l2: document.getElementById('line-2'),
+      l3: document.getElementById('line-3')
+    };
+    const labels = {
+      user: document.getElementById('label-user'),
+      router: document.getElementById('label-router'),
+      cache: document.getElementById('label-cache'),
+      mcp: document.getElementById('label-mcp')
+    };
+
+    function resetNodes() {
+      Object.values(nodes).forEach(n => n.className = 'node');
+      Object.values(lines).forEach(l => l.className = 'flow-line');
+      labels.user.textContent = 'Awaiting click';
+      labels.router.textContent = 'Security & loops checks';
+      labels.cache.textContent = 'Checkpoints';
+      labels.mcp.textContent = 'Data bridge';
+    }
+
+    function termLog(text, color = '#38bdf8') {
+      const p = document.createElement('p');
+      p.style.color = color;
+      p.textContent = `> ${text}`;
+      term.appendChild(p);
+      term.scrollTop = term.scrollHeight;
+    }
+
+    document.getElementById('btn-standard').addEventListener('click', () => {
+      resetNodes();
+      term.innerHTML = '';
+      termLog('Initiating Standard User Request...');
+      
+      setTimeout(() => {
+        nodes.user.classList.add('node-active');
+        labels.user.textContent = 'User: "Query stock in eu-west-1"';
+        lines.l1.classList.add('flow-line-active');
+        termLog('Dispatching prompt payload to Router classifier...', '#818cf8');
+      }, 300);
+
+      setTimeout(() => {
+        nodes.router.classList.add('node-active');
+        labels.router.textContent = 'Router: INVENTORY_AGENT routed';
+        lines.l2.classList.add('flow-line-active');
+        termLog('No cache token found. Evaluating full context prompt (Cache Write)...', '#818cf8');
+      }, 1000);
+
+      setTimeout(() => {
+        nodes.cache.classList.add('node-active');
+        labels.cache.textContent = 'Cache: Ephemeral Write';
+        lines.l3.classList.add('flow-line-active');
+        termLog('Writing context block to edge cache (100% cost)...', '#f43f5e');
+      }, 1800);
+
+      setTimeout(() => {
+        nodes.mcp.classList.add('node-active');
+        labels.mcp.textContent = 'MCP Server: SQLite query run';
+        termLog('SUCCESS: SQL parameters bound. Returning SKU stock data.', '#10b981');
+      }, 2600);
+    });
+
+    document.getElementById('btn-caching').addEventListener('click', () => {
+      resetNodes();
+      term.innerHTML = '';
+      termLog('Initiating Warm User Request (Identical context payload)...');
+      
+      setTimeout(() => {
+        nodes.user.classList.add('node-cached');
+        labels.user.textContent = 'User: "Optimize stock ratios"';
+        lines.l1.className = 'flow-line flow-line-cached';
+        termLog('Dispatching payload to Router...', '#10b981');
+      }, 300);
+
+      setTimeout(() => {
+        nodes.router.classList.add('node-cached');
+        labels.router.textContent = 'Router: Dispatched';
+        lines.l2.className = 'flow-line flow-line-cached';
+        termLog('Matching prefix... Ephemeral cache hit detected!', '#10b981');
+      }, 900);
+
+      setTimeout(() => {
+        nodes.cache.classList.add('node-cached');
+        labels.cache.textContent = 'Cache: 100% Hit (90% cost cut)';
+        lines.l3.className = 'flow-line flow-line-cached';
+        termLog('Cache read hit. Zero latency overhead introduced.', '#10b981');
+      }, 1500);
+
+      setTimeout(() => {
+        nodes.mcp.classList.add('node-cached');
+        labels.mcp.textContent = 'MCP Server: Response completed';
+        termLog('SUCCESS: Optimization advice dispatched to client.', '#10b981');
+      }, 2100);
+    });
+
+    document.getElementById('btn-outage').addEventListener('click', () => {
+      resetNodes();
+      term.innerHTML = '';
+      termLog('CRITICAL OUTAGE SCENARIO INITIATED: Malformed input recursion loop', '#ef4444');
+      
+      setTimeout(() => {
+        nodes.user.className = 'node node-fault';
+        labels.user.textContent = 'User: Malformed circular receipt';
+        lines.l1.className = 'flow-line flow-line-fault';
+        termLog('Agent loop depth counter triggered. Depth: 1', '#ef4444');
+      }, 400);
+
+      setTimeout(() => {
+        nodes.router.className = 'node node-fault';
+        labels.router.textContent = 'Router: Recursive cycles detected';
+        lines.l2.className = 'flow-line flow-line-fault';
+        termLog('Warning: Agent attempting recursive call. Depth: 2', '#f59e0b');
+      }, 1000);
+
+      setTimeout(() => {
+        nodes.cache.className = 'node node-fault';
+        labels.cache.textContent = 'Loop Breaker Tripped!';
+        lines.l3.className = 'flow-line flow-line-fault';
+        termLog('SHUTDOWN: max_loop_depth (3) exceeded. Circuit breaker tripped!', '#ef4444');
+      }, 1600);
+
+      setTimeout(() => {
+        nodes.mcp.className = 'node node-fault';
+        labels.mcp.textContent = 'Database Isolated';
+        termLog('ALERT: Execution halted to protect downstream DB connection pool and API tokens.', '#ef4444');
+      }, 2200);
+    });
+  </script>
+
+  
+
+</body>
+</html>
