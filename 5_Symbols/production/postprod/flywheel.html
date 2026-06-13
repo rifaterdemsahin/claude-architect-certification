@@ -62,6 +62,26 @@
     .kickstart p { color: var(--text-muted); max-width: 680px; margin: 0 auto; }
     .kickstart strong { color: var(--accent); }
 
+    /* Why a flywheel — self-feeding loop */
+    .why { background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 24px; padding: 32px; margin-bottom: 40px; }
+    .why h2 { font-family: var(--font-title); font-size: 1.6rem; font-weight: 800; margin-bottom: 8px; text-align: center; }
+    .why-sub { color: var(--text-muted); text-align: center; max-width: 640px; margin: 0 auto 28px; font-size: 0.95rem; }
+    .loop-chain { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px; margin-bottom: 32px; }
+    .loop-node { background: linear-gradient(135deg, rgba(20,184,166,0.12), rgba(139,92,246,0.12)); border: 1px solid rgba(255,255,255,0.08); border-radius: 100px; padding: 10px 18px; font-weight: 700; font-size: 0.9rem; white-space: nowrap; }
+    .loop-arrow { color: var(--accent); font-weight: 900; font-size: 1.1rem; }
+    .loop-return { width: 100%; text-align: center; color: var(--teal); font-size: 0.85rem; margin-top: 6px; font-weight: 600; }
+    .why-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .why-card { background: rgba(3,7,18,0.45); border: 1px solid rgba(255,255,255,0.05); border-left: 3px solid var(--teal); border-radius: 16px; padding: 20px 22px; }
+    .why-card h4 { font-family: var(--font-title); font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+    .why-card p { color: var(--text-muted); font-size: 0.9rem; }
+    .why-card p strong { color: var(--text-main); font-weight: 600; }
+    .funnel-vs { margin-top: 24px; background: linear-gradient(135deg, rgba(239,68,68,0.06), rgba(20,184,166,0.06)); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 20px 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .funnel-vs > div h5 { font-family: var(--font-title); font-weight: 700; margin-bottom: 6px; font-size: 0.95rem; }
+    .funnel-vs .vs-funnel h5 { color: #ef4444; }
+    .funnel-vs .vs-flywheel h5 { color: var(--teal); }
+    .funnel-vs p { color: var(--text-muted); font-size: 0.88rem; }
+    @media (max-width: 640px) { .funnel-vs { grid-template-columns: 1fr; } }
+
     footer { text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
 
     @media (max-width: 768px) {
@@ -162,6 +182,55 @@
     <div class="kickstart">
       <h2>🚀 How the Wheel Gets Its First Push</h2>
       <p>A flywheel is heavy at rest. The <strong>initial flywheel is turned with Rifat's contracting time</strong> — paid client work funds and powers the first rotations. Once members and audience build, the wheel carries its own momentum, and every new member adds the motivation to <strong>create more, learn more, and turn it again</strong>.</p>
+    </div>
+
+    <!-- Why this is a flywheel -->
+    <div class="why">
+      <h2>🔁 Why This Is a Flywheel — and How It Feeds Itself</h2>
+      <p class="why-sub">It is not a flywheel because it draws a circle. It is a flywheel because <strong style="color:var(--teal)">the output of every step becomes the fuel for the next</strong> — so the same effort returns bigger each lap.</p>
+
+      <div class="loop-chain">
+        <span class="loop-node">🎓 Learn</span>
+        <span class="loop-arrow">→</span>
+        <span class="loop-node">🔨 Build</span>
+        <span class="loop-arrow">→</span>
+        <span class="loop-node">✅ Certify</span>
+        <span class="loop-arrow">→</span>
+        <span class="loop-node">📝 Publish</span>
+        <span class="loop-arrow">→</span>
+        <span class="loop-node">💲 Sell</span>
+        <span class="loop-return">↺ revenue + members + motivation flow straight back into the next Learn — the wheel never stops at the sale</span>
+      </div>
+
+      <div class="why-grid">
+        <div class="why-card">
+          <h4>♻️ Each step is the next step's raw material</h4>
+          <p>Learning produces a <strong>build</strong>. The build produces a <strong>certification</strong>. The cert produces a <strong>course</strong>. The course produces <strong>sales</strong>. Nothing is thrown away — every output is an input downstream.</p>
+        </div>
+        <div class="why-card">
+          <h4>📈 It compounds instead of resetting</h4>
+          <p>A funnel empties and you start cold again. Here, the audience, repos, and credibility from lap 1 are <strong>already there</strong> at the start of lap 2 — so each turn starts warmer and goes further.</p>
+        </div>
+        <div class="why-card">
+          <h4>🤝 Members are the feedback loop</h4>
+          <p>Every member funds the business <strong>and</strong> adds motivation. More members → more reason to learn the next cert → more content → more members. The loop literally feeds itself.</p>
+        </div>
+        <div class="why-card">
+          <h4>⚡ Self-sustaining after the first push</h4>
+          <p>Contracting time delivers the initial push. After that the wheel's own momentum — revenue, audience, motivation — keeps it turning, so it needs <strong>less force per lap</strong>, not more.</p>
+        </div>
+      </div>
+
+      <div class="funnel-vs">
+        <div class="vs-funnel">
+          <h5>❌ A funnel would mean…</h5>
+          <p>One pass: attract → sell → done. The sale is the end. To sell again you refill the top from zero.</p>
+        </div>
+        <div class="vs-flywheel">
+          <h5>✅ A flywheel means…</h5>
+          <p>The sale is the <strong style="color:var(--text-main)">beginning</strong>: it pays for and motivates the next learn-build-certify-publish-sell lap, which is bigger than the last.</p>
+        </div>
+      </div>
     </div>
 
     <footer>
