@@ -494,9 +494,10 @@ func axiomErrorsHandler(tmpl *template.Template, cfg config, navConfigJS templat
 
 func configHandler(cfg config) http.HandlerFunc {
 	type configResp struct {
-		SupabaseURL    string `json:"supabaseUrl"`
-		SupabaseAnon   string `json:"supabaseAnon"`
-		GoogleClientID string `json:"googleClientId"`
+		SupabaseURL      string `json:"supabaseUrl"`
+		SupabaseAnon     string `json:"supabaseAnon"`
+		GoogleClientID   string `json:"googleClientId"`
+		AzureAccountName string `json:"azureAccountName"`
 	}
 	// Use getSecret for anything that might be in Key Vault
 	gID := cfg.googleClientID
@@ -504,9 +505,10 @@ func configHandler(cfg config) http.HandlerFunc {
 		gID = cfg.getSecret("GOOGLE_CLIENT_ID")
 	}
 	payload, _ := json.Marshal(configResp{
-		SupabaseURL:    cfg.supabaseURL,
-		SupabaseAnon:   cfg.supabaseAnon,
-		GoogleClientID: gID,
+		SupabaseURL:      cfg.supabaseURL,
+		SupabaseAnon:     cfg.supabaseAnon,
+		GoogleClientID:   gID,
+		AzureAccountName: cfg.azureAccountName,
 	})
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
