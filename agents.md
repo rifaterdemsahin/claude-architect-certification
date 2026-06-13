@@ -159,6 +159,7 @@ This document defines how AI agents interact with the **Claude AI Certification 
 | Gemini | [gemini.md](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/gemini.md) | Multimodal analysis, image tasks |
 | GitHub Copilot | [copilot.md](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/copilot.md) | GitHub-native integrations |
 | Kilo Code | [kilocode.md](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/kilocode.md) | Precision code generation |
+| Kimi | [kimi.md](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/kimi.md) | Long-context code reasoning and synthesis |
 
 ---
 
@@ -263,7 +264,7 @@ Files that contain or support the actual certification course material:
 
 ### 🚀 DELIVERY PILOT files
 Files that define the delivery pilot reusable framework:
-- `claude.md`, `gemini.md`, `agents.md`, `copilot.md`, `kilocode.md` — agent guides
+- `claude.md`, `gemini.md`, `agents.md`, `copilot.md`, `kilocode.md`, `kimi.md` — agent guides
 - `1_Real_Unknown/` — OKR, problem statement, hypotheses, questions, costs, kanban, sanity check
 - `2_Environment/` — architecture, GitHub Pages, Cloudflare Workers, Fly.io, Azure, Mac/Windows/AI setup, navigation
 - `4_Formula/llm_thinking_log.md`, `decisions.md`, `research_notes.md`, `implementation_guide.md`, `dsl.md`

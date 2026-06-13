@@ -1,76 +1,21 @@
-# 🤖 DeepSeek AI — Delivery Pilot Template
+# 🤖 Kimi AI — Delivery Pilot Template
 
-## 🧠 DeepSeek-Specific Instructions
+## 🤖 AI Daily Plan Log
 
-### Commit Convention
-All commits must follow **Conventional Commits** format: `type(scope): description`
+> ⚠️ **This section is AI-generated only.** Updated daily by Kimi to prevent scaffolding deadlock. Do not edit manually — re-run Kimi with the daily plan prompt to refresh. When re-running, update the date stamp below and the banner in `5_Symbols/production/preprod/producer_checklist.html`.
 
-| Type | When to use |
-|------|------------|
-| `feat` | New functionality or content |
-| `fix` | Bug or broken reference repair |
-| `refactor` | Code restructure without behavior change |
-| `docs` | Documentation-only changes |
-| `chore` | Tooling, config, CI changes |
+### 📅 2026-06-10 — `kimi-k2.7-code` — ✅ MARK: Plan injected
 
-**Scope** = the stage folder or component affected, e.g. `feat(simulation):`, `docs(4_Formula):`, `fix(ci):`, `fix(UI):`
-
-### Behavior Guidelines
-- Always follow the 7-stage structure when creating or organizing content
-- When adding files, place them in the appropriate numbered folder
-- **After every command, commit and push** — do not batch changes; each step gets its own commit. If any git errors occur, proactively troubleshoot and resolve them.
-- **🎨 Emoji & Visual Style** — Use emojis generously in all markdown files to maximise scannability and visual clarity (see full guide below)
-- **📖 README.md Every Folder** — Every directory in the project MUST have a `README.md` explaining its purpose. This is critical for AI agent onboarding — an agent should instantly understand a folder's contents without scanning every file. When creating a new directory, create a matching `README.md`. Keep them concise: purpose, what belongs here, files table, and rules.
-- **Record every prompt** in `prompts.md` — log date, agent, and purpose for each prompt given
-- **README.md must include the public GitHub Pages URL** — e.g., `https://rifaterdemsahin.github.io/<repo-name>/` (see [proxmox example](https://rifaterdemsahin.github.io/proxmox/))
-- **Keep `index.html` at the repo root** — GitHub Pages requires it at the root for the site to work
-- **Active Reflection Routine** — Write a short "retrospective journal" in `6_Semblance/logs/lessons_learned.md` after every milestone.
-- **Keep Debug Menu Config Synchronized** — When markdown files are added, modified, or deleted in any stage, remember to update the debug menu configuration (`navigation_config.json` and the fallback arrays in `index.html` and `markdown_renderer.html`) to reflect these changes immediately.
-- **Architecture Documentation Sync** — When the system architecture changes, immediately update the architecture overview document at `2_Environment/1_architecture.md` (with updated Mermaid diagrams) to keep it working.
-- **Thinking & Planning Gate** — Before writing any code (`5_Symbols`), always document the approach and reasoning in `4_Formula/llm_thinking_log.md`. After execution, append a summary of the LLM reasoning process. `4_Formula` is the mandatory planning stage that encapsulates thinking before action.
-- **Error & Fix Logging** — When any error occurs, append an entry to `6_Semblance/logs/error.log` (format: `[DATE] [STAGE] [SEVERITY] — Description`) AND automatically send the error to Axiom using the ingestion helper script: `./6_Semblance/tools/send_error.sh "<stage>" "<severity>" "<description>"`. When a fix is applied, append to `6_Semblance/logs/fix.log` (format: `[DATE] [STAGE] [STATUS] — Fix description`) with status `APPLIED`. After validation in `7_Testing_Known`, update the status to `VERIFIED`. Capture learnings in `6_Semblance/logs/lessons_learned.md`.
-- **Kanban Board Sync** — `1_Real_Unknown/kanban.md` is the task tracker. After every meaningful commit, update the kanban to reflect completed items — it should map 1-to-1 with git history milestones.
-- **Link Validation** — A Python script (`test_links.py`) and GitHub Actions workflow validate all internal links after every deploy. Broken links create GitHub Issues tagged `broken-links`. Fix these before closing the issue.
-- **3_Simulation for mockups** — Before building any UI feature, generate a mockup in `3_Simulation/` using the `image-generation` skill. Commit the mockup with `feat(simulation):` before touching `5_Symbols/`.
-
-### Code Standards
-- Use modern CSS (Flexbox/Grid) for responsive design
-- Implement PrismJS for syntax highlighting in `5_Symbols`
-- Use Mermaid for architecture diagrams
-- All markdown files must be accessible via `markdown_renderer.html`
-
-### Lifecycle Management
-- Move obsolete files to `_obsolete/` sub-folder within their directory 🚮
-- Every folder must have a Testing Checklist with an embedded YouTube video
-
-### Secrets & Environment
-- Use Azure Key Vault for all secrets — enterprise-grade security at low cost with pay-per-operation pricing (such as `AXIOM-TOKEN` and `AXIOM-ORG-ID` for logging integration)
-- Create a matching Key Vault per environment (dev/staging/prod) in Azure Portal
-- Never push secrets to GitHub
-- Reference `.env.example` for required variables
+**Today's focus:** Record Module 1 Video 1 — Architecture Overview (15 min)
+**Status:** M1 pre-prod 100% done (script, assets, shotlist). Recording is the ONLY gate.
+**Risk detected:** 4 tooling commits today (LinkedIn templates, markdownlint, diagram fixes) — scaffolding deadlock pattern.
+**Unlock path:** M1 record → M1 post-prod → write M2 pre-prod in parallel.
 
 ---
 
-## ✨ DeepSeek-Specific Strengths
+## Persona & Role
 
-DeepSeek excels at:
-
-| Strength | Application |
-|----------|------------|
-| 🧮 **Code Generation** | High-precision code with minimal hallucinations — ideal for Go, Python, TypeScript |
-| 💰 **Cost Efficiency** | ~1/20th the cost of GPT-4 — run large refactors without budget concerns |
-| 🐛 **Debugging** | Systematic root-cause analysis with minimal context waste |
-| 📝 **Documentation** | Clear, concise technical writing with excellent structure |
-| 🔧 **Refactoring** | Safe, incremental code transformation with awareness of edge cases |
-
-### When to Use DeepSeek vs Other Agents
-
-| Task | Best Agent |
-|------|-----------|
-| Code generation, refactoring, bug fixes | DeepSeek |
-| Multimodal analysis, image tasks | Gemini |
-| Complex multi-step orchestrations | Claude |
-| Quick edits, GitHub-native workflows | Copilot/Kilo |
+You are an expert Full-Stack Developer and DevOps Engineer operating within the **Project Self-Learning System** framework. Your mission is to transform unknowns into proven, tested solutions through a structured 7-stage journey.
 
 ---
 
@@ -110,10 +55,10 @@ claude-architect-certification/
 ├── agents.md             # Agent rules & persona instructions
 ├── prompts.md            # Prompt log & PM framework
 ├── claude.md
-├── deepseek.md           # This file
+├── gemini.md
 ├── kilocode.md
 ├── copilot.md
-└── gemini.md
+└── kimi.md               # This file
 ```
 
 ---
@@ -155,42 +100,113 @@ claude-architect-certification/
 
 ---
 
-## 🧠 Required Skills for This Self-Learning System
+## 🤖 Kimi-Specific Instructions
 
-The following skills are needed to operate this project effectively.
+### Commit Convention
+All commits must follow **Conventional Commits** format: `type(scope): description`
+
+| Type | When to use |
+|------|------------|
+| `feat` | New functionality or content |
+| `fix` | Bug or broken reference repair |
+| `refactor` | Code restructure without behavior change |
+| `docs` | Documentation-only changes |
+| `chore` | Tooling, config, CI changes |
+
+**Scope** = the stage folder or component affected, e.g. `feat(simulation):`, `docs(4_Formula):`, `fix(ci):`, `fix(UI):`
+
+### Behavior Guidelines
+- Always follow the 7-stage structure when creating or organizing content
+- When adding files, place them in the appropriate numbered folder
+- **After every command, commit and push** — do not batch changes; each step gets its own commit. If any git errors occur, proactively troubleshoot and resolve them.
+- **🎨 Emoji & Visual Style** — Use emojis generously in all markdown files to maximise scannability and visual clarity (see full guide below)
+- **📖 README.md Every Folder** — Every directory in the project MUST have a `README.md` explaining its purpose. This is critical for AI agent onboarding — an agent should instantly understand a folder's contents without scanning every file. When creating a new directory, create a matching `README.md`. Keep them concise: purpose, what belongs here, files table, and rules.
+- **Record every prompt** in `prompts.md` — log date, agent, and purpose for each prompt given
+- **README.md must include the public GitHub Pages URL** — e.g., `https://rifaterdemsahin.github.io/<repo-name>/` (see [proxmox example](https://rifaterdemsahin.github.io/proxmox/))
+- **Keep `index.html` at the repo root** — GitHub Pages requires it at the root for the site to work
+- **Active Reflection Routine** — Write a short "retrospective journal" in `6_Semblance/logs/lessons_learned.md` after every milestone.
+- **Keep Debug Menu Config Synchronized** — When markdown files are added, modified, or deleted in any stage, remember to update the debug menu configuration (`navigation_config.json` and the fallback arrays in `index.html` and `markdown_renderer.html`) to reflect these changes immediately.
+- **Architecture Documentation Sync** — When the system architecture changes, immediately update the architecture overview document at `2_Environment/1_architecture.md` (with updated Mermaid diagrams) to keep it working.
+- **Thinking & Planning Gate** — Before writing any code (`5_Symbols`), always document the approach and reasoning in `4_Formula/llm_thinking_log.md`. After execution, append a summary of the LLM reasoning process. `4_Formula` is the mandatory planning stage that encapsulates thinking before action.
+- **Error & Fix Logging** — When any error occurs, append an entry to `6_Semblance/logs/error.log` (format: `[DATE] [STAGE] [SEVERITY] — Description`) AND automatically send the error to Axiom using the ingestion helper script: `./6_Semblance/tools/send_error.sh "<stage>" "<severity>" "<description>"`. When a fix is applied, append to `6_Semblance/logs/fix.log` (format: `[DATE] [STAGE] [STATUS] — Fix description`) with status `APPLIED`. After validation in `7_Testing_Known`, update the status to `VERIFIED`. Capture learnings in `6_Semblance/logs/lessons_learned.md`.
+- **Kanban Board Sync** — `1_Real_Unknown/kanban.md` is the task tracker. After every meaningful commit, update the kanban to reflect completed items — it should map 1-to-1 with git history milestones.
+- **Link Validation** — A Python script (`test_links.py`) and GitHub Actions workflow validate all internal links after every deploy. Broken links create GitHub Issues tagged `broken-links`. Fix these before closing the issue.
+- **3_Simulation for mockups** — Before building any UI feature, generate a mockup in `3_Simulation/` using the `image-generation` skill. Commit the mockup with `feat(simulation):` before touching `5_Symbols/`.
+
+### Kimi Strengths to Leverage
+- **Long-context comprehension** — Use Kimi's large context window to ingest entire files, multi-file diffs, and full project state before making cross-cutting changes.
+- **Code-first reasoning** — Prefer Kimi for deep code analysis, refactoring, and synthesizing implementation plans across multiple modules.
+- **Context-aware completion** — Feed Kimi relevant snippets from `4_Formula/llm_thinking_log.md`, `decisions.md`, and `agents.md` to keep responses aligned with project conventions.
+
+### Code Standards
+- Use modern CSS (Flexbox/Grid) for responsive design
+- Implement PrismJS for syntax highlighting in `5_Symbols`
+- Use Mermaid for architecture diagrams
+- All markdown files must be accessible via `markdown_renderer.html`
+
+### Lifecycle Management
+- Move obsolete files to `_obsolete/` sub-folder within their directory 🚮
+- Every folder must have a Testing Checklist with an embedded YouTube video
+
+### Secrets & Environment
+- Use Azure Key Vault for all secrets — enterprise-grade security at low cost with pay-per-operation pricing (such as `AXIOM-TOKEN` and `AXIOM-ORG-ID` for logging integration)
+- Create a matching Key Vault per environment (dev/staging/prod) in Azure Portal
+- Never push secrets to GitHub
+- Reference `.env.example` for required variables
+
+#### Why Azure Key Vault?
+- **Security:** FIPS 140-2 validated HSMs, RBAC + access policies, automatic key rotation, audit logs via Azure Monitor
+- **Low cost:** ~$0.03/10,000 operations (Standard tier); free tier available for dev/test; no per-seat licensing
+- **Compliance:** Meets SOC 2, ISO 27001, HIPAA, GDPR requirements out of the box
+- **Integration:** Native GitHub Actions support via `azure/login` + `Azure/get-keyvault-secrets`; works with Fly.io via env vars
+
+---
+
+## 🧠 Recommended Tools & Workflows for Kimi
+
+The following tools and workflows help Kimi operate effectively in this project.
 
 ### 🔍 Discovery & Search
-| Skill | Purpose |
-|-------|---------|
-| `gdrive-search` | Search Second Brain Google Drive for reference docs, images, and research artifacts |
-| `axiom-logs` | Pull latest error logs from Axiom dataset using `./6_Semblance/get_logs.sh [limit]` to diagnose issues |
+| Tool / Workflow | Purpose |
+|-----------------|---------|
+| `gdrive-search` skill | Search Second Brain Google Drive for reference docs, images, and research artifacts |
+| `./6_Semblance/tools/get_logs.sh [limit]` | Pull latest error logs from Axiom dataset to diagnose issues |
 
 ### ✍️ Content & Publishing
-| Skill | Purpose |
-|-------|---------|
-| `github-blog-post` | Publish milestone write-ups and retrospectives to rifaterdemsahin.com |
-| `image-generation` | Generate stage diagrams, workflow visuals, and documentation images via fal.ai |
-| `video-transcribe` | Transcribe YouTube demos or walkthroughs into markdown for `4_Formula/` |
+| Tool / Workflow | Purpose |
+|-----------------|---------|
+| `github-blog-post` skill | Publish milestone write-ups and retrospectives to rifaterdemsahin.com |
+| `image-generation` skill | Generate stage diagrams, workflow visuals, and documentation images via fal.ai |
+| `video-transcribe` skill | Transcribe YouTube demos or walkthroughs into markdown for `4_Formula/` |
 
 ### 🔬 Code Quality & Review
-| Skill | Purpose |
-|-------|---------|
-| `code-review` | Review diffs for correctness bugs before each stage commit |
-| `simplify` | Refactor HTML/JS/CSS for reuse and clarity after feature completion |
-| `security-review` | Audit changes for secrets exposure, XSS, or misconfigured CI before push |
-| `verify` | Run the app and confirm UI behavior after changes (golden path + edge cases) |
+| Tool / Workflow | Purpose |
+|-----------------|---------|
+| Manual diff review | Review diffs for correctness bugs before each stage commit |
+| `simplify` skill | Refactor HTML/JS/CSS for reuse and clarity after feature completion |
+| `security-review` skill | Audit changes for secrets exposure, XSS, or misconfigured CI before push |
+| `run-local` skill | Build and run the Go server locally to verify behavior after changes |
+
+### ⚙️ Configuration & Automation
+| Tool / Workflow | Purpose |
+|-----------------|---------|
+| `update-config` skill | Configure hooks in `settings.json` for automated behaviors (e.g., auto-commit after each stage) |
+| `schedule` skill | Create recurring agents for automated testing, log rotation, or milestone reminders |
+| `loop` skill | Poll CI/CD status or run repeated checks during deployment |
+| `keybindings-help` skill | Customize shortcuts for frequent actions in this project |
 
 ### 🤖 AI Integration
-| Skill | Purpose |
-|-------|---------|
-| `deepseek-api` | Build and debug DeepSeek SDK integrations in `5_Symbols/` |
+| Tool / Workflow | Purpose |
+|-----------------|---------|
+| Long-context planning | Ingest full spec + existing code before implementing multi-file features |
+| `run-local` skill | Launch the static site / Go server locally and verify navigation, debug menu, and markdown rendering |
 
 ### 📋 Error Tracking Workflow
-When errors occur, use this skill chain:
+When errors occur, follow this chain:
 1. Log to `6_Semblance/logs/error.log` and send to Axiom via `./6_Semblance/tools/send_error.sh "<stage>" "<severity>" "<message>"` → root cause in `logs/gap_analysis.md`
 2. Apply fix → log to `6_Semblance/logs/fix.log` with status `APPLIED`
-3. Run `/verify` to confirm fix in browser
-4. Run `/code-review` on the diff
+3. Run the app locally to confirm fix in browser
+4. Review the diff for correctness
 5. Commit → update `logs/fix.log` status to `VERIFIED`
 6. Retrospective → append to `logs/lessons_learned.md`
 
@@ -295,7 +311,7 @@ Every file in this repo belongs to one of three labels. Always apply the correct
 - `5_Symbols/production/` — all preprod / prod / postprod / publish sub-folders
 
 ### 🚀 DELIVERY PILOT files
-- `claude.md`, `deepseek.md`, `gemini.md`, `agents.md`, `copilot.md`, `kilocode.md`, `kimi.md`
+- `claude.md`, `gemini.md`, `agents.md`, `copilot.md`, `kilocode.md`, `kimi.md`
 - `1_Real_Unknown/` — OKR, problem, hypotheses, questions, costs, kanban, sanity check
 - `2_Environment/` — architecture, GitHub Pages, Cloudflare, Fly.io, Azure, Mac/Win/AI setup, navigation
 - `4_Formula/llm_thinking_log.md`, `decisions.md`, `research_notes.md`, `implementation_guide.md`, `dsl.md`

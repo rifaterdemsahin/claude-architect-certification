@@ -29,7 +29,7 @@ This is what end-users see. It contains:
 This is the delivery-pilot framework navigation. It contains:
 
 - Links to all 7 stages (`1_Real_Unknown` through `7_Testing_Known`)
-- Agent instruction files (`claude.md`, `gemini.md`, `copilot.md`, `kilocode.md`)
+- Agent instruction files (`claude.md`, `gemini.md`, `copilot.md`, `kilocode.md`, `kimi.md`)
 - Framework tools (`agents.md`, `prompts.md`)
 - Search with autocomplete
 

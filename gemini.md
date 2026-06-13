@@ -221,7 +221,7 @@ Every file in this repo belongs to one of three labels. Always apply the correct
 - `5_Symbols/production/` — all preprod / prod / postprod / publish sub-folders
 
 ### 🚀 DELIVERY PILOT files
-- `claude.md`, `gemini.md`, `agents.md`, `copilot.md`, `kilocode.md`
+- `claude.md`, `gemini.md`, `agents.md`, `copilot.md`, `kilocode.md`, `kimi.md`
 - `1_Real_Unknown/` — OKR, problem, hypotheses, questions, costs, kanban, sanity check
 - `2_Environment/` — architecture, GitHub Pages, Cloudflare, Fly.io, Azure, Mac/Win/AI setup, navigation
 - `4_Formula/llm_thinking_log.md`, `decisions.md`, `research_notes.md`, `implementation_guide.md`, `dsl.md`

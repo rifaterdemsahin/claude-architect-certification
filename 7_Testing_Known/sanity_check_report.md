@@ -30,7 +30,7 @@ While the conceptual model is highly effective for structuring thinking, there a
 
 ### Strengths
 - **Clear Separation of Concerns**: The separation between environment setup (Stage 2), UI simulation (Stage 3), logic formula (Stage 4), code (Stage 5), and validation (Stage 7) is excellent.
-- **Agent Guidelines**: Having dedicated agent files (`claude.md`, `gemini.md`, `copilot.md`, `kilocode.md`) helps define rules for agents operating in this workspace.
+- **Agent Guidelines**: Having dedicated agent files (`claude.md`, `gemini.md`, `copilot.md`, `kilocode.md`, `kimi.md`) helps define rules for agents operating in this workspace.
 
 ### Critical Gaps
 1. **Missing Root Files**: 
