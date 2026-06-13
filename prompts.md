@@ -256,4 +256,4 @@ Record every prompt given to AI agents below. Include the date, agent, and purpo
 ### 2026-06-13 — Track Asset Generators in TODOs
 - **Agent:** Gemini CLI
 - **Purpose:** Locate and "open" asset generator HTML files, and track them in the 'In Progress' section of `todos.md`.
-- **Outcome:** Added `image_generator.html`, `lower_thirds.html`, and `infographic_generator.html` to `todos.md`, and opened them locally.
+- **Outcome:** Added `image_generator.html`, `lower_thirds.html`, `infographic_generator.html`, and `pipeline.html` to `todos.md`, and opened them locally.

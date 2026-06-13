@@ -46,6 +46,7 @@ Pre-Production ──► Production ──► Post-Production ──► Publicat
 - [ ] `5_Symbols/production/postprod/image_generator.html` — Asset generator for scene backgrounds 🖼
 - [ ] `5_Symbols/production/postprod/lower_thirds.html` — Lower third overlay generator 🏷
 - [ ] `5_Symbols/production/preprod/research/infographic_generator.html` — Research infographic builder 📊
+- [ ] `5_Symbols/pipeline.html` — Production pipeline visualization 🔗
 
 ## Scene Structure (per section)
 
