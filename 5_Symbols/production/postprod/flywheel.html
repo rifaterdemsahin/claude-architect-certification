@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Flywheel — Learn · Build · Certify · Publish · Sell</title>
+  <meta name="description" content="How Rifat Erdem Sahin's self-learning flywheel compounds: learn a new AI certification, build hands-on in GitHub, earn the proof, publish the course, and sell with YouTube — each member adds momentum.">
+  <meta name="keywords" content="flywheel, marketing flywheel, funnel vs flywheel, Claude AI Certification, self-learning, YouTube membership">
+  <meta name="author" content="Rifat Erdem Sahin">
+  <link rel="icon" type="image/png" href="../../../favicon.png">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://rifaterdemsahin.github.io/claude-architect-certification/5_Symbols/production/postprod/flywheel.html">
+  <meta property="og:title" content="The Flywheel — Learn · Build · Certify · Publish · Sell">
+  <meta property="og:description" content="A circular system that compounds with every turn — see how each step feeds the next.">
+  <meta property="og:image" content="https://rifaterdemsahin.github.io/claude-architect-certification/3_Simulation/flywheel_versus_funnel.jpeg">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg-dark: #030712; --bg-card: rgba(17,24,39,0.85); --text-main: #f3f4f6; --text-muted: #9ca3af; --primary: #8b5cf6; --secondary: #3b82f6; --accent: #f59e0b; --success: #10b981; --teal: #14b8a6; --font-title: 'Outfit', sans-serif; --font-body: 'Plus Jakarta Sans', sans-serif; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background-color: var(--bg-dark); background-image: radial-gradient(circle at 10% 20%, rgba(139,92,246,0.08) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(20,184,166,0.06) 0%, transparent 40%); color: var(--text-main); font-family: var(--font-body); line-height: 1.6; padding-top: 70px; padding-bottom: 80px; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+    header { text-align: center; margin-bottom: 36px; }
+    .badge { display: inline-block; padding: 6px 16px; background: linear-gradient(135deg, rgba(20,184,166,0.2), rgba(139,92,246,0.2)); border: 1px solid rgba(20,184,166,0.3); border-radius: 100px; font-size: 0.8rem; font-weight: 600; color: var(--teal); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 14px; }
+    h1 { font-family: var(--font-title); font-size: 2.8rem; font-weight: 900; margin-bottom: 10px; }
+    header p { color: var(--text-muted); max-width: 640px; margin: 0 auto; font-size: 1.1rem; }
+
+    /* Hero image: funnel vs flywheel */
+    .hero-visual { text-align: center; margin: 0 auto 48px; max-width: 880px; background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 24px; padding: 28px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+    .hero-visual img { max-width: 100%; height: auto; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); }
+    .hero-caption { color: var(--text-muted); font-size: 0.9rem; margin-top: 16px; }
+    .hero-caption strong { color: var(--teal); }
+
+    .section-title { font-family: var(--font-title); font-size: 1.6rem; font-weight: 800; margin: 0 0 8px; text-align: center; }
+    .section-sub { color: var(--text-muted); text-align: center; max-width: 600px; margin: 0 auto 28px; font-size: 0.95rem; }
+
+    /* Flywheel steps */
+    .steps { display: grid; gap: 18px; margin-bottom: 48px; }
+    .step { background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px; padding: 24px 28px; display: grid; grid-template-columns: 64px 1fr; gap: 20px; align-items: start; position: relative; transition: all 0.3s; }
+    .step:hover { border-color: rgba(20,184,166,0.3); transform: translateX(4px); }
+    .step-num { width: 64px; height: 64px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 2rem; background: linear-gradient(135deg, rgba(20,184,166,0.15), rgba(139,92,246,0.15)); border: 1px solid rgba(255,255,255,0.08); }
+    .step h3 { font-family: var(--font-title); font-weight: 700; font-size: 1.2rem; margin-bottom: 6px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .step-tag { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 3px 10px; border-radius: 100px; background: rgba(20,184,166,0.15); color: var(--teal); }
+    .step p { color: var(--text-muted); font-size: 0.95rem; }
+    .step p strong { color: var(--text-main); font-weight: 600; }
+    .step .feeds { margin-top: 10px; font-size: 0.85rem; color: var(--accent); display: flex; align-items: center; gap: 8px; }
+
+    /* Momentum / engine cards */
+    .engine-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; margin-bottom: 48px; }
+    .engine-card { background: linear-gradient(135deg, rgba(139,92,246,0.05), rgba(20,184,166,0.05)); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px; padding: 24px; }
+    .engine-icon { font-size: 1.8rem; margin-bottom: 10px; }
+    .engine-card h4 { font-family: var(--font-title); font-weight: 700; margin-bottom: 6px; }
+    .engine-card p { color: var(--text-muted); font-size: 0.9rem; }
+
+    /* Kickstart callout */
+    .kickstart { background: linear-gradient(135deg, rgba(245,158,11,0.08), rgba(139,92,246,0.08)); border: 1px solid rgba(245,158,11,0.2); border-radius: 24px; padding: 32px; margin-bottom: 40px; text-align: center; }
+    .kickstart h2 { font-family: var(--font-title); font-size: 1.5rem; font-weight: 800; margin-bottom: 12px; }
+    .kickstart p { color: var(--text-muted); max-width: 680px; margin: 0 auto; }
+    .kickstart strong { color: var(--accent); }
+
+    footer { text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
+
+    @media (max-width: 768px) {
+      h1 { font-size: 2.1rem; }
+      .step { grid-template-columns: 1fr; }
+      .step-num { width: 56px; height: 56px; font-size: 1.6rem; }
+    }
+  </style>
+  <script src="../../../shared/nav.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="badge">🔄 The Marketing Flywheel</div>
+      <h1>Learn → Build → Certify → Publish → Sell</h1>
+      <p>A funnel runs cold and ends at the sale. A <strong style="color:var(--teal)">flywheel</strong> is circular — every turn pushes the next one harder. Here is how the loop spins for <strong style="color:var(--text-main)">Rifat Erdem Sahin</strong>.</p>
+    </header>
+
+    <!-- Hero: funnel vs flywheel image -->
+    <div class="hero-visual">
+      <img src="../../../3_Simulation/flywheel_versus_funnel.jpeg" alt="Funnel versus Flywheel: a linear one-pass funnel that starts cold, against a circular flywheel that compounds each turn through Learn, Build, Certify, Publish and Sell.">
+      <p class="hero-caption"><strong>Funnel</strong> = linear · one pass · starts cold &nbsp;·&nbsp; <strong>Flywheel</strong> = circular · compounds each turn</p>
+    </div>
+
+    <!-- The 5 steps -->
+    <h2 class="section-title">⚙️ Five Steps, One Loop</h2>
+    <p class="section-sub">Each step hands momentum to the next. Nothing is wasted — the output of selling funds and motivates the next round of learning.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">🎓</div>
+        <div>
+          <h3>1. Learn <span class="step-tag">Motivation</span></h3>
+          <p>Rifat picks a <strong>new AI certification concept</strong> that genuinely excites him and target-studies it in the open — exam objectives, docs, and real architectures, not theory for its own sake.</p>
+          <p class="feeds">→ feeds <strong style="color:var(--accent)">Build</strong>: fresh knowledge needs a hands-on proving ground</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">🔨</div>
+        <div>
+          <h3>2. Build <span class="step-tag">Hands-on</span></h3>
+          <p>He <strong>builds it hands-on in GitHub</strong> — real repos, MCP servers, error logs and fixes — so the learning becomes runnable, reviewable, cloneable proof of work.</p>
+          <p class="feeds">→ feeds <strong style="color:var(--accent)">Certify</strong>: a working build is the best exam prep</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">✅</div>
+        <div>
+          <h3>3. Certify <span class="step-tag">Proof</span></h3>
+          <p>He sits the exam and <strong>gets the proof as the certification</strong> — posting the official score transparently. The credential validates the build and earns trust.</p>
+          <p class="feeds">→ feeds <strong style="color:var(--accent)">Publish</strong>: a proven path is worth teaching</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">📝</div>
+        <div>
+          <h3>4. Publish <span class="step-tag">Course</span></h3>
+          <p>The journey is packaged and <strong>published as the course</strong> — scripts, diagrams, and the exact repos. <strong>Module 1 is free for everyone</strong> so the loop has an open front door.</p>
+          <p class="feeds">→ feeds <strong style="color:var(--accent)">Sell</strong>: free content seeds the audience</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">💲</div>
+        <div>
+          <h3>5. Sell <span class="step-tag">YouTube + Members</span></h3>
+          <p>He <strong>sells with YouTube Shorts and videos</strong> that drive viewers to the full modules. Viewers <strong>join as members for ongoing support</strong>, which keeps the business online.</p>
+          <p class="feeds">↺ closes the loop back into <strong style="color:var(--accent)">Learn</strong>: each member adds the motivation to create more</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- What keeps it spinning -->
+    <h2 class="section-title">🔋 What Keeps the Wheel Spinning</h2>
+    <p class="section-sub">Three forces stop the flywheel from slowing down between turns.</p>
+    <div class="engine-grid">
+      <div class="engine-card">
+        <div class="engine-icon">🎁</div>
+        <h4>Module 1 is Free</h4>
+        <p>A zero-friction entry point pulls a steady stream of new viewers into the wheel — the open door that keeps it fed.</p>
+      </div>
+      <div class="engine-card">
+        <div class="engine-icon">🤝</div>
+        <h4>Members Fund the Loop</h4>
+        <p>Members join for ongoing support to <strong style="color:var(--text-main)">keep the business online</strong>. Every member adds momentum — and the motivation to create the next module.</p>
+      </div>
+      <div class="engine-card">
+        <div class="engine-icon">📺</div>
+        <h4>Shorts Compound Reach</h4>
+        <p>YouTube Shorts and videos multiply each turn's reach, so the audience built in one cycle makes the next sell easier.</p>
+      </div>
+    </div>
+
+    <!-- Kickstart -->
+    <div class="kickstart">
+      <h2>🚀 How the Wheel Gets Its First Push</h2>
+      <p>A flywheel is heavy at rest. The <strong>initial flywheel is turned with Rifat's contracting time</strong> — paid client work funds and powers the first rotations. Once members and audience build, the wheel carries its own momentum, and every new member adds the motivation to <strong>create more, learn more, and turn it again</strong>.</p>
+    </div>
+
+    <footer>
+      <p style="margin-bottom: 8px;"><a href="../../../index.html" style="color: var(--secondary); text-decoration: none;">← Back to Home</a> &nbsp;·&nbsp; <a href="../publish/membership.html" style="color: var(--secondary); text-decoration: none;">💼 Join Members →</a></p>
+      <p style="margin-bottom: 12px; font-size: 0.85rem; opacity: 0.8;">
+        Instructor: <a href="https://www.linkedin.com/in/rifaterdemsahin" target="_blank" style="color: #93c5fd; text-decoration: underline; margin-right: 16px;">Rifat Erdem Sahin LinkedIn</a>
+        YouTube: <a href="https://www.youtube.com/@RifatErdemSahin" target="_blank" style="color: #93c5fd; text-decoration: underline;">@RifatErdemSahin</a>
+      </p>
+    </footer>
+  </div>
+  <script src="../../../shared/debug-panel.js"></script>
+</body>
+</html>

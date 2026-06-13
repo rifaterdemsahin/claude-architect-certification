@@ -115,6 +115,10 @@
             {
               "label": "🔀 OpenRouter Logs",
               "url": "https://openrouter.ai/logs"
+            },
+            {
+              "label": "🎧 Audio Player (Gemini Studio)",
+              "url": "https://aistudio.google.com/apps/b66c6f93-8411-4eb3-b7b0-63edbb8d509a?showPreview=true&showAssistant=true"
             }
           ]
         }
@@ -192,6 +196,10 @@
             {
               "label": "8. 💼 Membership / Business",
               "url": "5_Symbols/production/publish/membership.html"
+            },
+            {
+              "label": "9. 🔄 Flywheel System",
+              "url": "5_Symbols/production/postprod/flywheel.html"
             }
           ]
         },
@@ -199,7 +207,7 @@
           "label": "🤝 Outreach",
           "children": [
             {
-              "label": "9. 🤝 LinkedIn Outreach",
+              "label": "10. 🤝 LinkedIn Outreach",
               "children": [
                 {
                   "label": "Journey Post (pre-exam)",
