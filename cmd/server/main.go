@@ -1227,6 +1227,88 @@ func imageSaveHandler(cfg config) http.HandlerFunc {
 	}
 }
 
+// ── Infographic Generation ───────────────────────────────────────────────────
+
+func infographicGenerateHandler(cfg config) http.HandlerFunc {
+	type InfoGenRequest struct {
+		Topic string `json:"topic"`
+		Style string `json:"style"` // "modern", "minimalist", "technical"
+	}
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		if r.Method != http.MethodPost {
+			http.Error(w, `{"error":"method not allowed"}`, http.StatusMethodNotAllowed)
+			return
+		}
+
+		var req InfoGenRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, `{"error":"invalid request"}`, http.StatusBadRequest)
+			return
+		}
+
+		geminiKey := cfg.getSecret("GEMINI_API_KEY")
+		if geminiKey == "" {
+			http.Error(w, `{"error":"GEMINI_API_KEY missing"}`, http.StatusServiceUnavailable)
+			return
+		}
+
+		prompt := fmt.Sprintf(`You are an expert Infographic Designer and Cloud Architect.
+Create a structured JSON layout for an infographic about: "%s".
+The style should be: %s.
+
+Return ONLY a JSON object with the following structure:
+{
+  "title": "Clear catchy title",
+  "subtitle": "Informative subtitle",
+  "sections": [
+    {
+      "icon": "Emoji representative",
+      "heading": "Section Heading",
+      "content": "Short concise bullet points or description (max 30 words)"
+    }
+  ],
+  "visual_cue": "A description for an AI image generator to create a background or supporting visual for this infographic"
+}
+
+Keep it professional, architect-focused, and high-signal.`, req.Topic, req.Style)
+
+		geminiURL := "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + geminiKey
+		geminiReqBody := map[string]any{
+			"contents": []any{map[string]any{"parts": []any{map[string]any{"text": prompt}}}},
+			"generationConfig": map[string]any{
+				"responseMimeType": "application/json",
+			},
+		}
+
+		b, _ := json.Marshal(geminiReqBody)
+		hresp, err := http.Post(geminiURL, "application/json", bytes.NewReader(b))
+		if err != nil || hresp.StatusCode >= 400 {
+			http.Error(w, `{"error":"Gemini generation failed"}`, http.StatusBadGateway)
+			return
+		}
+		defer hresp.Body.Close()
+
+		var gResp struct {
+			Candidates []struct {
+				Content struct {
+					Parts []struct {
+						Text string `json:"text"`
+					} `json:"parts"`
+				} `json:"content"`
+			} `json:"candidates"`
+		}
+		json.NewDecoder(hresp.Body).Decode(&gResp)
+
+		if len(gResp.Candidates) > 0 && len(gResp.Candidates[0].Content.Parts) > 0 {
+			w.Write([]byte(gResp.Candidates[0].Content.Parts[0].Text))
+		} else {
+			http.Error(w, `{"error":"Empty response from AI"}`, http.StatusInternalServerError)
+		}
+	}
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 func main() {
@@ -1263,6 +1345,7 @@ func main() {
 	mux.Handle("/api/explanations", observe(cfg, explanationsHandler(cfg)))
 	mux.Handle("/api/images/generate", observe(cfg, imageGenerateHandler(cfg)))
 	mux.Handle("/api/images/save", observe(cfg, imageSaveHandler(cfg)))
+	mux.Handle("/api/infographics/generate", observe(cfg, infographicGenerateHandler(cfg)))
 	mux.Handle("/admin/errors", observe(cfg, axiomErrorsHandler(tmpl, cfg, navConfigJS)))
 	mux.Handle("/", observe(cfg, homeHandler(tmpl, cfg, navConfigJS)))
 

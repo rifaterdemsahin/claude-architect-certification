@@ -32,6 +32,11 @@
               "label": "📝 Notes", 
               "url": "5_Symbols/production/preprod/research/notes.html",
               "description": "Research findings, technical references, and production scripts."
+            },
+            {
+              "label": "📊 Infographics",
+              "url": "5_Symbols/production/preprod/research/infographic_generator.html",
+              "description": "AI-powered infographic layout and asset generator."
             }
           ]
         },
