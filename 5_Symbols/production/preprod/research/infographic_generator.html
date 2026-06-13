@@ -176,7 +176,10 @@
         </div>
 
         <div class="form-group">
-          <label>Relate to Script Sentence (Optional)</label>
+          <label style="display: flex; justify-content: space-between; align-items: center;">
+            Relate to Script Sentence (Optional)
+            <button type="button" class="btn btn-secondary" style="padding: 4px 12px; font-size: 0.75rem;" onclick="showFullScript()">📖 Read Full Script</button>
+          </label>
           <select id="sentence-id">
             <option value="">-- No specific sentence --</option>
           </select>
@@ -230,6 +233,18 @@
     </footer>
   </div>
 
+  <div id="script-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 3000; backdrop-filter: blur(10px);">
+    <div class="glass-card" style="width: 90%; max-width: 800px; max-height: 85vh; display: flex; flex-direction: column; padding: 0; overflow: hidden;">
+        <div style="padding: 24px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center;">
+            <h2 id="modal-script-title" style="font-family: var(--font-title); margin: 0;">📜 Full Script View</h2>
+            <button class="btn btn-danger" style="padding: 8px 16px;" onclick="closeScriptModal()">Close</button>
+        </div>
+        <div id="script-content" style="padding: 32px; overflow-y: auto; flex: 1; color: var(--text-main); font-size: 1.05rem; line-height: 1.8;">
+            <!-- Script text will be injected here -->
+        </div>
+    </div>
+  </div>
+
   <script src="../../../../shared/debug-panel.js"></script>
   <script src="../../../../shared/nav.js"></script>
 
@@ -255,6 +270,7 @@
             
             if (!res.ok) throw new Error('Failed to fetch sentences');
             const sentences = await res.json();
+            window._currentSentences = sentences; // Store globally for the modal
             
             select.innerHTML = '<option value="">-- No specific sentence --</option>';
             sentences.forEach(s => {
@@ -266,6 +282,33 @@
         } catch (err) {
             console.error('Sentence load error:', err);
         }
+    }
+
+    function showFullScript() {
+        const moduleNum = document.getElementById('module-number').value;
+        const videoNum = document.getElementById('video-number').value;
+        const modal = document.getElementById('script-modal');
+        const content = document.getElementById('script-content');
+        const title = document.getElementById('modal-script-title');
+
+        title.innerText = `📜 Module ${moduleNum} Video ${videoNum} Script`;
+        
+        if (!window._currentSentences || window._currentSentences.length === 0) {
+            content.innerHTML = '<p style="color: var(--danger); text-align: center;">No script data found for this selection.</p>';
+        } else {
+            content.innerHTML = window._currentSentences.map(s => `
+                <div style="margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <span style="font-size: 0.7rem; text-transform: uppercase; color: var(--primary); font-weight: 800; display: block; margin-bottom: 4px;">${s.sentence_type}</span>
+                    ${s.sentence_text}
+                </div>
+            `).join('');
+        }
+
+        modal.style.display = 'flex';
+    }
+
+    function closeScriptModal() {
+        document.getElementById('script-modal').style.display = 'none';
     }
 
     document.getElementById('info-form').addEventListener('submit', async (e) => {

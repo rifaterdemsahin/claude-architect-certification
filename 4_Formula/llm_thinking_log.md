@@ -92,3 +92,14 @@ Implement an AI Image Generator page that allows users to generate visual assets
 5. **Validation**: Verified the end-to-end flow from prompt to Azure upload record.
 
 
+
+## 2026-06-12 — Full Script Viewer Modal for Infographic Generator
+
+### 🎯 Objective
+Enable users to view and read the entire course script directly within the Infographic Generator page to provide context for visual asset creation.
+
+### 📐 Design & Implementation Plan
+1. **Modal UI**: Added a high-blur glassmorphic modal (#script-modal) with a scrollable content area.
+2. **Data Integration**: Enhanced the loadSentences() logic to cache the full video script in memory when a Module/Video is selected.
+3. **Trigger Logic**: Added a "📖 Read Full Script" button that renders the cached script sentences with type labels (e.g., [VOICE], [SCREENSHARE]).
+4. **Validation**: Verified that changing Module/Video selection updates the script viewer content correctly.
