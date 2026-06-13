@@ -146,6 +146,102 @@
       animation: spin 1s ease-in-out infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .modal-content {
+      background: var(--bg-card);
+      border: 1px solid var(--border-glow);
+      border-radius: 24px;
+      width: 100%;
+      max-width: 800px;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-header {
+      padding: 20px 32px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h2 {
+      font-family: var(--font-title);
+      font-size: 1.5rem;
+      margin: 0;
+    }
+
+    .modal-body {
+      padding: 32px;
+      overflow-y: auto;
+      font-size: 1rem;
+      line-height: 1.7;
+      color: var(--text-main);
+    }
+
+    .modal-body h1, .modal-body h2, .modal-body h3 {
+      margin-top: 24px;
+      margin-bottom: 12px;
+      color: var(--primary);
+    }
+
+    .modal-body p { margin-bottom: 16px; }
+
+    .modal-body blockquote {
+      border-left: 4px solid var(--primary);
+      background: rgba(139, 92, 246, 0.1);
+      padding: 16px;
+      margin: 20px 0;
+      border-radius: 0 12px 12px 0;
+      font-style: italic;
+    }
+
+    .modal-body pre {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 16px;
+      border-radius: 12px;
+      overflow-x: auto;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      margin: 20px 0;
+    }
+
+    .close-modal {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 2rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+    .close-modal:hover { color: white; }
+
+    .script-btn {
+      margin-bottom: 15px;
+      background: rgba(139, 92, 246, 0.1);
+      border: 1px solid var(--border-glow);
+      color: var(--primary);
+      width: 100%;
+      justify-content: center;
+    }
+    .script-btn:hover { background: rgba(139, 92, 246, 0.2); }
   </style>
 </head>
 <body>
@@ -156,6 +252,10 @@
     </header>
 
     <div class="glass-card">
+      <button id="view-script-btn" class="btn script-btn" type="button">
+        📖 View Production Script
+      </button>
+
       <form id="gen-form">
         <div class="form-grid">
           <div class="form-group">
@@ -215,6 +315,22 @@
       </div>
     </div>
 
+    <!-- Script Modal -->
+    <div id="script-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="modal-title">🎬 Production Script</h2>
+          <button class="close-modal" onclick="closeModal()">&times;</button>
+        </div>
+        <div id="modal-body" class="modal-body">
+          <div style="text-align: center; padding: 40px;">
+            <div class="loader" style="display: inline-block;"></div>
+            <p style="margin-top: 15px;">Fetching script...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <footer>
       <p style="font-weight: 800; font-size: 1.1rem; color: white; margin-bottom: 20px;">Claude AI Certification | Asset Production</p>
       <div class="nav-links">
@@ -231,6 +347,54 @@
 
   <script>
     let currentImageData = null;
+
+    // Script Modal Logic
+    const modal = document.getElementById('script-modal');
+    const modalBody = document.getElementById('modal-body');
+    const viewScriptBtn = document.getElementById('view-script-btn');
+
+    viewScriptBtn.addEventListener('click', async () => {
+      const moduleNum = document.getElementById('module-number').value;
+      modal.style.display = 'flex';
+      modalBody.innerHTML = '<div style="text-align: center; padding: 40px;"><div class="loader" style="display: inline-block;"></div><p style="margin-top: 15px;">Fetching script for Module ' + moduleNum + '...</p></div>';
+
+      try {
+        // Determine which file to fetch
+        let scriptPath = '../../../4_Formula/production/script.md'; // Default fallback
+        if (moduleNum === '1') {
+          scriptPath = '../../../5_Symbols/production/prod/module_1_plan.md';
+        }
+
+        const res = await fetch(scriptPath);
+        if (!res.ok) throw new Error('Script file not found');
+        const text = await res.text();
+        
+        // Basic Markdown to HTML conversion
+        let html = text
+          .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+          .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+          .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+          .replace(/^\> (.*$)/gim, '<blockquote>$1</blockquote>')
+          .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
+          .replace(/\*(.*)\*/gim, '<em>$1</em>')
+          .replace(/\n/g, '<br>');
+        
+        modalBody.innerHTML = html;
+      } catch (err) {
+        modalBody.innerHTML = '<div style="color: var(--danger); text-align: center; padding: 40px;">❌ Error: ' + err.message + '</div>';
+      }
+    });
+
+    function closeModal() {
+      modal.style.display = 'none';
+    }
+
+    // Close modal on outside click
+    window.onclick = function(event) {
+      if (event.target == modal) {
+        closeModal();
+      }
+    }
 
     document.getElementById('gen-form').addEventListener('submit', async (e) => {
       e.preventDefault();
