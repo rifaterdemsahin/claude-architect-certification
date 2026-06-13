@@ -300,6 +300,48 @@
       color: var(--accent-violet);
     }
 
+    .stage-tools {
+      margin-top: 1.25rem;
+      padding-top: 1rem;
+      border-top: 1px dashed var(--border-color);
+    }
+
+    .stage-tools .io-label {
+      color: var(--accent-amber);
+      margin-bottom: 0.6rem;
+    }
+
+    .tool-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+
+    .tool-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.78rem;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+      background: rgba(245, 158, 11, 0.08);
+      border: 1px solid rgba(245, 158, 11, 0.18);
+      color: var(--text-primary);
+    }
+
+    .tool-chip.est {
+      background: rgba(148, 163, 184, 0.08);
+      border-color: rgba(148, 163, 184, 0.2);
+      color: var(--text-muted);
+    }
+
+    .tool-chip.est::after {
+      content: '~est';
+      font-size: 0.6rem;
+      opacity: 0.6;
+      margin-left: 0.1rem;
+    }
+
     .stage-link {
       display: inline-block;
       margin-top: 0.75rem;
@@ -343,6 +385,8 @@
     <span class="legend-item"><span class="legend-dot" style="background:var(--accent-amber)"></span> Publishing</span>
   </div>
 
+  <p class="subtitle" style="font-size:0.85rem; margin-bottom:3rem;">🛠 Each stage lists the tools used. Chips marked <span class="tool-chip est" style="font-size:0.7rem;">tool</span> are estimated — likely candidates where the exact tool isn't pinned down.</p>
+
   <div class="pipeline-flow">
 
     <!-- 1. Problem -->
@@ -356,7 +400,7 @@
         </div>
         <div class="stage-desc">Identify and articulate the core problem the course will solve. What gap exists in the market? Who is affected and why does it matter?</div>
         <div class="stage-image">
-          <img src="../3_Simulation/generated/pipeline/01_problem.svg" alt="Problem Definition">
+          <img src="../3_Simulation/generated/pipeline/01_problem.png" alt="Problem Definition">
         </div>
         <div class="io-boxes">
           <div class="io-box input">
@@ -382,6 +426,16 @@
             </div>
           </div>
         </div>
+        <div class="stage-tools">
+          <div class="io-label">🛠 Tools Used</div>
+          <div class="tool-chips">
+            <span class="tool-chip">🤖 Claude</span>
+            <span class="tool-chip est">🔍 Perplexity</span>
+            <span class="tool-chip">🗄️ Supabase</span>
+            <span class="tool-chip">🪨 Obsidian</span>
+            <span class="tool-chip est">💬 Reddit / forums</span>
+          </div>
+        </div>
         <a class="stage-link" href="5_Symbols/production/preprod/problem.html">→ Open Problem page</a>
       </div>
     </div>
@@ -399,7 +453,7 @@
         </div>
         <div class="stage-desc">Define the course as the solution. Articulate what learners will be able to do after completing the course. This frames the entire production effort.</div>
         <div class="stage-image">
-          <img src="../3_Simulation/generated/pipeline/02_solution.svg" alt="Solution Design">
+          <img src="../3_Simulation/generated/pipeline/02_solution.png" alt="Solution Design">
         </div>
         <div class="io-boxes">
           <div class="io-box input">
@@ -425,6 +479,16 @@
             </div>
           </div>
         </div>
+        <div class="stage-tools">
+          <div class="io-label">🛠 Tools Used</div>
+          <div class="tool-chips">
+            <span class="tool-chip">🤖 Claude</span>
+            <span class="tool-chip">📝 Markdown</span>
+            <span class="tool-chip">🪨 Obsidian</span>
+            <span class="tool-chip est">🎨 Canva</span>
+            <span class="tool-chip est">📐 Bloom's taxonomy template</span>
+          </div>
+        </div>
         <a class="stage-link" href="index.html">→ Open Home page</a>
       </div>
     </div>
@@ -442,7 +506,7 @@
         </div>
         <div class="stage-desc">Deep-dive into the subject matter while self-learning the content. Record draft takes (screen captures, walkthroughs) as you explore — these raw recordings become the foundation for the shot list in Production. Research is where you learn the material and capture the first pass of footage simultaneously.</div>
         <div class="stage-image">
-          <img src="../3_Simulation/generated/pipeline/03_research.svg" alt="Research Phase">
+          <img src="../3_Simulation/generated/pipeline/03_research.png" alt="Research Phase">
         </div>
         <div class="io-boxes">
           <div class="io-box input">
@@ -469,6 +533,18 @@
             </div>
           </div>
         </div>
+        <div class="stage-tools">
+          <div class="io-label">🛠 Tools Used</div>
+          <div class="tool-chips">
+            <span class="tool-chip">🤖 Claude</span>
+            <span class="tool-chip">🎥 OBS Studio</span>
+            <span class="tool-chip">🖼 fal.ai (image-gen)</span>
+            <span class="tool-chip">📁 Google Drive</span>
+            <span class="tool-chip est">🔍 Perplexity</span>
+            <span class="tool-chip est">🎤 ElevenLabs</span>
+            <span class="tool-chip est">📺 YouTube</span>
+          </div>
+        </div>
         <a class="stage-link" href="5_Symbols/production/preprod/research/index.html">→ Open Research Hub</a>
       </div>
     </div>
@@ -486,7 +562,7 @@
         </div>
         <div class="stage-desc">Structure the course into modules and sections. Define the logical flow, timing estimates, and key learning points for each segment.</div>
         <div class="stage-image">
-          <img src="../3_Simulation/generated/pipeline/04_outline.svg" alt="Outline Planning">
+          <img src="../3_Simulation/generated/pipeline/04_outline.png" alt="Outline Planning">
         </div>
         <div class="io-boxes">
           <div class="io-box input">
@@ -512,6 +588,15 @@
             </div>
           </div>
         </div>
+        <div class="stage-tools">
+          <div class="io-label">🛠 Tools Used</div>
+          <div class="tool-chips">
+            <span class="tool-chip">🤖 Claude</span>
+            <span class="tool-chip">📝 Markdown</span>
+            <span class="tool-chip">🪨 Obsidian</span>
+            <span class="tool-chip est">📄 Google Docs</span>
+          </div>
+        </div>
         <a class="stage-link" href="5_Symbols/production/preprod/course_outline.html">→ Open Outline page</a>
       </div>
     </div>
@@ -529,7 +614,7 @@
         </div>
         <div class="stage-desc">Write the full narration script for each video. Include on-screen visual cues, screen recording directions, and timing annotations for the voiceover.</div>
         <div class="stage-image">
-          <img src="../3_Simulation/generated/pipeline/05_script.svg" alt="Scripting">
+          <img src="../3_Simulation/generated/pipeline/05_script.png" alt="Scripting">
         </div>
         <div class="io-boxes">
           <div class="io-box input">
@@ -555,6 +640,14 @@
             </div>
           </div>
         </div>
+        <div class="stage-tools">
+          <div class="io-label">🛠 Tools Used</div>
+          <div class="tool-chips">
+            <span class="tool-chip">🤖 Claude</span>
+            <span class="tool-chip">📝 Markdown</span>
+            <span class="tool-chip est">📄 Google Docs</span>
+          </div>
+        </div>
         <a class="stage-link" href="5_Symbols/production/preprod/scripts/index.html">→ Open Script page</a>
       </div>
     </div>
@@ -572,7 +665,7 @@
         </div>
         <div class="stage-desc">Design interactive quiz questions embedded at key checkpoints within each video. Reinforce learning, test comprehension, and keep learners engaged.</div>
         <div class="stage-image">
-          <img src="../3_Simulation/generated/pipeline/06_ivq.svg" alt="Interactive Questions">
+          <img src="../3_Simulation/generated/pipeline/06_ivq.png" alt="Interactive Questions">
         </div>
         <div class="io-boxes">
           <div class="io-box input">
@@ -598,6 +691,14 @@
             </div>
           </div>
         </div>
+        <div class="stage-tools">
+          <div class="io-label">🛠 Tools Used</div>
+          <div class="tool-chips">
+            <span class="tool-chip">🤖 Claude</span>
+            <span class="tool-chip">🎯 Custom IVQ HTML</span>
+            <span class="tool-chip">🗄️ Supabase</span>
+          </div>
+        </div>
         <a class="stage-link" href="5_Symbols/production/preprod/ivq.html">→ Open IVQ Manager</a>
       </div>
     </div>
@@ -615,7 +716,7 @@
         </div>
         <div class="stage-desc">Translate the script into a detailed shot-by-shot plan. Specify screen recordings, talking head segments, diagrams, B-roll, and all visual assets needed for each scene.</div>
         <div class="stage-image">
-          <img src="../3_Simulation/generated/pipeline/07_shotlist.svg" alt="Shot List Planning">
+          <img src="../3_Simulation/generated/pipeline/07_shotlist.png" alt="Shot List Planning">
         </div>
         <div class="io-boxes">
           <div class="io-box input">
@@ -641,6 +742,15 @@
             </div>
           </div>
         </div>
+        <div class="stage-tools">
+          <div class="io-label">🛠 Tools Used</div>
+          <div class="tool-chips">
+            <span class="tool-chip">🤖 Claude</span>
+            <span class="tool-chip">📸 Custom Shotlist HTML</span>
+            <span class="tool-chip">🖼 fal.ai (image-gen)</span>
+            <span class="tool-chip">🗄️ Supabase</span>
+          </div>
+        </div>
         <a class="stage-link" href="5_Symbols/production/postprod/production_shotlist.html?module=1&section=1">→ Open Shot List</a>
       </div>
     </div>
@@ -658,7 +768,7 @@
         </div>
         <div class="stage-desc">Map the raw recorded footage (screen captures, talking head, B-roll) to each shot in the shot list. Identify what has been captured, what is missing, and what needs re-recording.</div>
         <div class="stage-image">
-          <img src="../3_Simulation/generated/pipeline/08_mapping.svg" alt="Footage Analysis">
+          <img src="../3_Simulation/generated/pipeline/08_mapping.png" alt="Footage Analysis">
         </div>
         <div class="io-boxes">
           <div class="io-box input">
@@ -684,6 +794,15 @@
             </div>
           </div>
         </div>
+        <div class="stage-tools">
+          <div class="io-label">🛠 Tools Used</div>
+          <div class="tool-chips">
+            <span class="tool-chip">🎥 OBS Studio</span>
+            <span class="tool-chip">🎞 Custom Mapping HTML</span>
+            <span class="tool-chip">📁 Google Drive</span>
+            <span class="tool-chip est">🎨 Canva</span>
+          </div>
+        </div>
         <a class="stage-link" href="5_Symbols/production/prod/footage_mapping.html">→ Open Footage Mapping</a>
       </div>
     </div>
@@ -701,7 +820,7 @@
         </div>
         <div class="stage-desc">Create the editing decision list (EDL) specifying exactly how each scene is assembled: cuts, transitions, overlays, lower thirds, audio levels, and effects.</div>
         <div class="stage-image">
-          <img src="../3_Simulation/generated/pipeline/09_editlist.svg" alt="Editing Process">
+          <img src="../3_Simulation/generated/pipeline/09_editlist.png" alt="Editing Process">
         </div>
         <div class="io-boxes">
           <div class="io-box input">
@@ -727,6 +846,14 @@
             </div>
           </div>
         </div>
+        <div class="stage-tools">
+          <div class="io-label">🛠 Tools Used</div>
+          <div class="tool-chips">
+            <span class="tool-chip">✂️ Custom EDL HTML</span>
+            <span class="tool-chip est">🎬 DaVinci Resolve</span>
+            <span class="tool-chip est">🎚 Audacity</span>
+          </div>
+        </div>
         <a class="stage-link" href="5_Symbols/production/postprod/edit_list.html">→ Open Edit List</a>
       </div>
     </div>
@@ -744,7 +871,7 @@
         </div>
         <div class="stage-desc">Upload final videos to YouTube and organize them into a structured course playlist. Add descriptions, timestamps, and end-screen elements for seamless navigation.</div>
         <div class="stage-image">
-          <img src="../3_Simulation/generated/pipeline/10_playlist.svg" alt="Course Playlist">
+          <img src="../3_Simulation/generated/pipeline/10_playlist.png" alt="Course Playlist">
         </div>
         <div class="io-boxes">
           <div class="io-box input">
@@ -770,6 +897,13 @@
             </div>
           </div>
         </div>
+        <div class="stage-tools">
+          <div class="io-label">🛠 Tools Used</div>
+          <div class="tool-chips">
+            <span class="tool-chip">📺 YouTube Studio</span>
+            <span class="tool-chip est">🤖 Claude (descriptions/SEO)</span>
+          </div>
+        </div>
         <a class="stage-link" href="https://www.youtube.com/watch?v=F8IBooe3bXY&list=PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy/">→ View Course Playlist</a>
       </div>
     </div>
@@ -787,7 +921,7 @@
         </div>
         <div class="stage-desc">Design compelling video thumbnails that drive clicks while accurately representing the content. Follow brand guidelines and thumbnail best practices (contrast, text, faces).</div>
         <div class="stage-image">
-          <img src="../3_Simulation/generated/pipeline/11_thumbnail.svg" alt="Thumbnail Design" style="object-fit: contain; background: #000; padding: 20px;">
+          <img src="../3_Simulation/generated/pipeline/11_thumbnail.png" alt="Thumbnail Design" style="object-fit: contain; background: #000; padding: 20px;">
         </div>
         <div class="io-boxes">
           <div class="io-box input">
@@ -811,6 +945,14 @@
                 <li>A/B test results (if applicable)</li>
               </ul>
             </div>
+          </div>
+        </div>
+        <div class="stage-tools">
+          <div class="io-label">🛠 Tools Used</div>
+          <div class="tool-chips">
+            <span class="tool-chip">🖼 Custom Image Generator</span>
+            <span class="tool-chip">🖼 fal.ai (image-gen)</span>
+            <span class="tool-chip est">🎨 Canva</span>
           </div>
         </div>
         <a class="stage-link" href="5_Symbols/production/postprod/image_generator.html">→ Open Image Generator</a>
