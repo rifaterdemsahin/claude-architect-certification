@@ -38,7 +38,10 @@
         { "label": "4. 📋 Outline", "url": "5_Symbols/production/preprod/course_outline.html" },
         {
           "label": "5. 🎬 Script",
-          "url": "5_Symbols/production/preprod/scripts/index.html"
+          "children": [
+            { "label": "🗂 Master Script", "url": "5_Symbols/production/preprod/scripts/index.html" },
+            { "label": "✨ Script Generator", "url": "5_Symbols/production/preprod/scripts/generator.html" }
+          ]
         },
         {
           "label": "6. 📋 Producer Checklist",

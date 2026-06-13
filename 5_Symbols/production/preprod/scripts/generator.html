@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Script Generator | Claude AI Certification</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #030712;
+      --bg-card: rgba(17, 24, 39, 0.85);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --primary: #8b5cf6;
+      --secondary: #3b82f6;
+      --accent: #f59e0b;
+      --font-title: 'Outfit', sans-serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.08) 0%, transparent 40%);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      line-height: 1.6;
+      padding-top: 70px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 24px;
+      flex: 1;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 16px;
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(139, 92, 246, 0.2));
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      border-radius: 100px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      font-family: var(--font-title);
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+      background: linear-gradient(to right, #fff, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 1rem;
+    }
+
+    .generator-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 24px;
+      padding: 32px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 600px) {
+      .form-grid { grid-template-columns: 1fr; }
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    select, input {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 12px 16px;
+      color: white;
+      font-family: var(--font-body);
+      font-size: 1rem;
+      transition: all 0.2s;
+    }
+
+    select:focus, input:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: rgba(139, 92, 246, 0.05);
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .btn {
+      padding: 14px 24px;
+      border-radius: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-family: var(--font-body);
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);
+    }
+
+    .btn-primary:hover {
+      background: #7c3aed;
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .output-area {
+      position: relative;
+      margin-top: 32px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 400px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 20px;
+      color: #e2e8f0;
+      font-family: 'Monaco', 'Consolas', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      resize: vertical;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: rgba(139, 92, 246, 0.1);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      color: #c084fc;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover {
+      background: var(--primary);
+      color: white;
+    }
+
+    footer {
+      text-align: center;
+      padding: 40px 0;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    footer a {
+      color: var(--secondary);
+      text-decoration: none;
+    }
+
+    .success-msg {
+      color: #10b981;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-top: 8px;
+      text-align: center;
+      display: none;
+    }
+
+    /* Template Previews */
+    .template-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .template-box {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .template-box:hover {
+      background: rgba(139, 92, 246, 0.05);
+      border-color: rgba(139, 92, 246, 0.2);
+    }
+
+    .template-box.active {
+      background: rgba(139, 92, 246, 0.1);
+      border-color: var(--primary);
+      color: #c084fc;
+    }
+
+    .template-icon {
+      font-size: 1.5rem;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .template-name {
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+  </style>
+  <script src="../../../../shared/nav.js"></script>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div class="badge">Production Tool</div>
+      <h1>Script Generator</h1>
+      <p>Select a module and video to generate a high-impact script template.</p>
+    </header>
+
+    <div class="generator-card">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="module-select">📍 Module</label>
+          <select id="module-select" onchange="updateVideos()">
+            <option value="1">Module 1: Architecture</option>
+            <option value="2">Module 2: MCP Bridges</option>
+            <option value="3">Module 3: Security & ZDR</option>
+            <option value="4">Module 4: Agent Orchestration</option>
+            <option value="5">Module 5: Optimization</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="video-select">🎬 Video</label>
+          <select id="video-select">
+            <option value="1">Video 1: Overview</option>
+            <option value="2">Video 2: Implementation</option>
+            <option value="3">Video 3: Advanced Patterns</option>
+            <option value="4">Video 4: Testing & Validation</option>
+          </select>
+        </div>
+      </div>
+
+      <label>✨ Choose Template</label>
+      <div class="template-grid">
+        <div class="template-box active" onclick="setTemplate('intro')" id="tpl-intro">
+          <span class="template-icon">🔥</span>
+          <span class="template-name">Module Intro</span>
+        </div>
+        <div class="template-box" onclick="setTemplate('body')" id="tpl-body">
+          <span class="template-icon">🖥️</span>
+          <span class="template-name">Body / Screenshare</span>
+        </div>
+        <div class="template-box" onclick="setTemplate('outro')" id="tpl-outro">
+          <span class="template-icon">🏁</span>
+          <span class="template-name">Module Outro</span>
+        </div>
+      </div>
+
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="generateScript()">🚀 Generate Script</button>
+      </div>
+
+      <div class="output-area">
+        <button class="copy-btn" onclick="copyToClipboard()">📋 Copy</button>
+        <textarea id="script-output" placeholder="Generated script will appear here..."></textarea>
+        <div id="copy-status" class="success-msg">✅ Copied to clipboard!</div>
+      </div>
+    </div>
+
+    <footer>
+      <p>
+        <a href="index.html">← Master Script</a> | 
+        <a href="../producer_checklist.html">Producer Checklist</a>
+      </p>
+    </footer>
+  </div>
+
+  <script>
+    let currentTemplate = 'intro';
+
+    const TEMPLATES = {
+      intro: `Format: Talking Head | Duration: [DURATION]
+
+🔥 HOOK (on camera, high energy):
+"[BOLD CLAIM or CHALLENGE — something that stops the viewer cold]"
+
+If you've ever [PAIN POINT they know too well], this module changes everything.
+
+By the end of this [DURATION] you will be able to:
+✅ [SKILL 1 — concrete, measurable]
+✅ [SKILL 2 — concrete, measurable]
+✅ [SKILL 3 — concrete, measurable]
+
+This is the knowledge that separates engineers who build toys from engineers who build [HIGH-STAKES OUTCOME].
+
+Here's what we're going to cover:
+- [TOPIC 1] — because [WHY IT MATTERS]
+- [TOPIC 2] — because [WHY IT MATTERS]
+- [TOPIC 3] — because [WHY IT MATTERS]
+
+Let's get into it. First up: [FIRST TOPIC].`,
+
+      body: `Format: Talking Head + Screen Share | Duration: [DURATION]
+
+"[HOOK SENTENCE — one punchy line that frames the core problem]" That's the topic we're unpacking today.
+
+Overview & Objectives:
+- [OBJECTIVE 1]
+- [OBJECTIVE 2]
+- [OBJECTIVE 3]
+
+Let's start with [FIRST TOPIC] — from [STARTING POINT] through [END POINT].
+
+[Screenshare Starts]
+Diagram: [DIAGRAM TITLE]
+- Step 1: [STEP 1]
+- Step 2: [STEP 2]
+- Step 3: [STEP 3]
+- Step 4: [STEP 4]
+Key insight: [KEY INSIGHT — one sentence distilling the diagram]
+[Screenshare Ends]
+
+Here's the key takeaway: [MAIN TAKEAWAY — the single most important idea]
+
+Now, before we move to [NEXT SECTION], let's check your understanding.`,
+
+      outro: `Format: Talking Head | Duration: [DURATION]
+
+RECAP (calm, confident):
+You now know how to [SKILL 1], [SKILL 2], and [SKILL 3].
+
+That's not trivial. Most teams [COMMON MISTAKE they used to make] — you won't.
+
+But here's what I haven't told you yet.
+
+[TEASER — one sentence that hints at a bigger problem or mystery]:
+"[CLIFFHANGER STATEMENT — something that raises a question they now desperately want answered]"
+
+In the next module, we go deeper: [NEXT MODULE TOPIC].
+And the approach? It's nothing like what you'd expect.
+
+[Call to action]:
+If this clicked for you — share it with [TARGET AUDIENCE]. They'll thank you.
+
+See you in Module [NEXT MODULE NUMBER].`
+    };
+
+    const MODULE_DATA = {
+      1: { name: "Architecture", videos: ["Overview", "API Anatomy", "Token Mechanics", "Orchestration Patterns"] },
+      2: { name: "MCP Bridges", videos: ["Context", "Fly.io Deployment", "SQLite Bridge", "Security Boundaries"] },
+      3: { name: "Security & ZDR", videos: ["Compliance", "VPC PrivateLink", "Terraform Config", "Audit Logs"] },
+      4: { name: "Agent Orchestration", videos: ["Routers", "Loop Detection", "Circuit Breakers", "Recursion Attacks"] },
+      5: { name: "Optimization", videos: ["Prompt Caching", "Hit Rates", "LRU Strategies", "Cost Reduction"] }
+    };
+
+    function updateVideos() {
+      const modId = document.getElementById('module-select').value;
+      const vidSelect = document.getElementById('video-select');
+      const videos = MODULE_DATA[modId].videos;
+      
+      vidSelect.innerHTML = videos.map((v, i) => `<option value="${i+1}">Video ${i+1}: ${v}</option>`).join('');
+    }
+
+    function setTemplate(tpl) {
+      currentTemplate = tpl;
+      document.querySelectorAll('.template-box').forEach(box => box.classList.remove('active'));
+      document.getElementById('tpl-' + tpl).classList.add('active');
+    }
+
+    function generateScript() {
+      const modId = document.getElementById('module-select').value;
+      const vidId = document.getElementById('video-select').value;
+      const modName = MODULE_DATA[modId].name;
+      const vidName = MODULE_DATA[modId].videos[vidId-1];
+      
+      let script = TEMPLATES[currentTemplate];
+      
+      // Basic replacements
+      script = script.replace(/\[TOPIC 1\]/g, modName);
+      script = script.replace(/\[FIRST TOPIC\]/g, vidName);
+      
+      document.getElementById('script-output').value = script;
+    }
+
+    function copyToClipboard() {
+      const textarea = document.getElementById('script-output');
+      textarea.select();
+      document.execCommand('copy');
+      
+      const status = document.getElementById('copy-status');
+      status.style.display = 'block';
+      setTimeout(() => status.style.display = 'none', 2000);
+    }
+
+    // Initialize
+    updateVideos();
+  </script>
+<script src="../../../../shared/debug-panel.js"></script>
+</body>
+</html>

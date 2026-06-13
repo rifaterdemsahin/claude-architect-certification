@@ -8,6 +8,7 @@ This folder contains the master script data and viewer for the **Claude AI Certi
 scripts/
 ├── README.md            # This file
 ├── index.html           # Master Script Viewer (read-only, loads from Supabase or JSON)
+├── generator.html       # Script Generator (template-based script creation)
 └── master_script.json   # Fallback data source when Supabase is unreachable
 ```
 
