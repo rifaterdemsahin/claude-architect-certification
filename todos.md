@@ -47,6 +47,7 @@ Pre-Production ──► Production ──► Post-Production ──► Publicat
 - [ ] `5_Symbols/production/postprod/lower_thirds.html` — Lower third overlay generator 🏷
 - [ ] `5_Symbols/production/preprod/research/infographic_generator.html` — Research infographic builder 📊
 - [ ] `5_Symbols/pipeline.html` — Production pipeline visualization 🔗
+- [ ] `5_Symbols/timeline.html` — Vertical project journey timeline from Supabase (Problem → Product → Research → Outline → Script → Production → Post Prod → Proof) 📅
 
 ## Scene Structure (per section)
 
