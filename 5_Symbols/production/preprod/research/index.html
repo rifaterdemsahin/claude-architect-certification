@@ -100,6 +100,11 @@
 
     .btn-sm { padding: 4px 12px; border-radius: 7px; border: none; cursor: pointer; font-size: 0.75rem; font-weight: 600; font-family: var(--font-b); background: rgba(139,92,246,0.15); color: var(--primary); border: 1px solid rgba(139,92,246,0.3); text-decoration: none; }
     .btn-sm:hover { background: rgba(139,92,246,0.25); }
+    /* Delete button */
+    .btn-del { padding: 4px 10px; border-radius: 7px; cursor: pointer; font-size: 0.72rem; font-weight: 600; font-family: var(--font-b); background: rgba(239,68,68,0.12); color: #fca5a5; border: 1px solid rgba(239,68,68,0.4); display: inline-flex; align-items: center; gap: 4px; }
+    .btn-del:hover { background: rgba(239,68,68,0.28); color: #fff; }
+    .btn-del:disabled { opacity: 0.5; cursor: wait; }
+    .del-row { margin-top: 6px; text-align: right; }
     @keyframes pulse {
       0% { opacity: 0.6; transform: scale(1); }
       50% { opacity: 1; transform: scale(1.05); }
@@ -134,6 +139,7 @@
       <a href="audio.html" class="btn-sm" style="padding: 8px 14px; border-radius: 8px; font-weight: 700;">🎵 Add / Record Audio</a>
       <a href="videos.html" class="btn-sm" style="padding: 8px 14px; border-radius: 8px; font-weight: 700;">🎬 Add Video</a>
       <a href="notes.html" class="btn-sm" style="padding: 8px 14px; border-radius: 8px; font-weight: 700;">📝 Add Note</a>
+      <a href="market_analysis.html" class="btn-sm" style="padding: 8px 14px; border-radius: 8px; font-weight: 700;">📊 Market Analysis</a>
     </div>
   </div>
 
@@ -167,6 +173,13 @@
       <div class="section-count" id="cnt-notes">Loading…</div>
       <div class="section-link">Read notes →</div>
     </div>
+    <a class="section-card" href="market_analysis.html">
+      <div class="section-icon">📊</div>
+      <div class="section-title">Market Analysis</div>
+      <div class="section-desc">Demand sizing, target audience, competitive landscape, and positioning.</div>
+      <div class="section-count" style="color:var(--green)">Ready to read</div>
+      <div class="section-link">Open analysis →</div>
+    </a>
   </div>
 
   <!-- Tabs & Multiselect Toggle -->
@@ -262,6 +275,34 @@ function fileUrl(container, name) {
   return '/api/research/file?container=' + container + '&name=' + encodeURIComponent(name);
 }
 
+// Delete-button markup for an asset card
+function delBtn(container, name) {
+  const safe = name.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+  return `<div class="del-row"><button class="btn-del" onclick="deleteAsset('${container}','${safe}',event)" title="Permanently delete this file">🗑 Delete</button></div>`;
+}
+
+// Permanently delete an asset from its Azure container, then refresh the list
+async function deleteAsset(container, name, e) {
+  if (e) e.stopPropagation();
+  if (!confirm('🗑 Permanently delete "' + name + '"?\n\nThis removes the file from storage and cannot be undone.')) return;
+  const btn = e && e.target && e.target.closest ? e.target.closest('.btn-del') : null;
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Deleting…'; }
+  try {
+    const r = await fetch(fileUrl(container, name), { method: 'DELETE' });
+    if (!r.ok && r.status !== 204) throw new Error((await r.text()) || ('HTTP ' + r.status));
+    const key = Object.keys(CONTAINERS).find(k => CONTAINERS[k] === container);
+    const files = await fetch('/api/research/files?container=' + container).then(x => x.ok ? x.json() : []);
+    data[key] = files;
+    if (key === 'images') renderImages(files);
+    else if (key === 'audio') renderAudio(files);
+    else if (key === 'videos') renderVideos(files);
+    else renderNotes(files);
+  } catch (err) {
+    alert('Delete failed: ' + err.message);
+    if (btn) { btn.disabled = false; btn.textContent = '🗑 Delete'; }
+  }
+}
+
 function renderRelationsMarkup(container, fileName) {
   const dropId     = `drop-${container}-${CSS.escape(fileName)}`;
   const listId     = `list-${container}-${CSS.escape(fileName)}`;
@@ -307,7 +348,7 @@ function renderImages(files) {
     div.innerHTML = (isImg
       ? `<img src="${url}" alt="${f.name}" loading="lazy" onclick="openLightboxImage('${url.replace(/'/g,"\\'")}', '${f.name.replace(/'/g,"\\'")}')"><div class="name" title="${f.name}">${f.name}</div>`
       : `<div style="padding:24px;text-align:center;font-size:2rem;cursor:pointer;" onclick="openLightboxImage('${url.replace(/'/g,"\\'")}', '${f.name.replace(/'/g,"\\'")}')">🖼</div><div class="name">${f.name}</div>`)
-      + `<div style="padding:0 10px 10px 10px;">${relMarkup}</div>`;
+      + `<div style="padding:0 10px 10px 10px;">${relMarkup}${delBtn(CONTAINERS.images, f.name)}</div>`;
     el.appendChild(div);
   });
   updateAllRelationsUI();
@@ -325,7 +366,7 @@ function renderAudio(files) {
     const relMarkup = renderRelationsMarkup(CONTAINERS.audio, f.name);
     div.innerHTML = `<div class="row-title">🎵 ${f.name} <span style="color:var(--muted);font-size:0.75rem">${fmtBytes(f.size)}</span></div>
       <audio controls preload="none" src="${url}" style="width:100%;height:36px;accent-color:var(--primary)"></audio>
-      ${relMarkup}`;
+      ${relMarkup}${delBtn(CONTAINERS.audio, f.name)}`;
     el.appendChild(div);
   });
   updateAllRelationsUI();
@@ -346,7 +387,7 @@ function renderVideos(files) {
         <div class="video-play-btn"><span>▶</span></div>
       </div>
       <div class="name" title="${f.name}">${f.name} · ${fmtBytes(f.size)}</div>
-      <div style="padding: 0 14px 14px 14px;">${relMarkup}</div>`;
+      <div style="padding: 0 14px 14px 14px;">${relMarkup}${delBtn(CONTAINERS.videos, f.name)}</div>`;
     el.appendChild(div);
   });
   updateAllRelationsUI();
@@ -365,7 +406,7 @@ function renderNotes(files) {
     div.innerHTML = `<div class="n-title">📄 ${f.name}</div>
       <div class="n-preview" id="np-${CSS.escape(f.name)}">Loading…</div>
       <div class="n-meta">${fmtBytes(f.size)} · ${f.lastModified || ''}</div>
-      <div onclick="event.stopPropagation()">${relMarkup}</div>`;
+      <div onclick="event.stopPropagation()">${relMarkup}${delBtn(CONTAINERS.notes, f.name)}</div>`;
     div.addEventListener('click', () => openNote(f.name, url));
     el.appendChild(div);
     // load preview
