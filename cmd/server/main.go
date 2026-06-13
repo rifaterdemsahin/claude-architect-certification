@@ -1332,16 +1332,43 @@ func infographicSaveHandler(cfg config) http.HandlerFunc {
 			return
 		}
 
-		// Save to Supabase
+		// 1. Save to Azure Blob Storage first
+		blobName := fmt.Sprintf("infographic_m%d_v%d_%d.json", req.ModuleNumber, req.VideoNumber, time.Now().Unix())
+		container := "research-notes" // Storing layout JSON in notes container
+
+		if cfg.azureAccountName != "" {
+			expiry := time.Now().UTC().Add(10 * time.Minute)
+			sasQuery, err := generateContainerSAS(cfg.azureAccountName, cfg.azureAccountKey, container, "rcwl", expiry)
+			if err == nil {
+				putURL := blobURL(cfg.azureAccountName, container, blobName, sasQuery)
+				layoutBytes, _ := json.Marshal(req.LayoutJSON)
+				
+				ureq, _ := http.NewRequest(http.MethodPut, putURL, bytes.NewReader(layoutBytes))
+				ureq.Header.Set("x-ms-blob-type", "BlockBlob")
+				ureq.Header.Set("Content-Type", "application/json")
+
+				uresp, err := http.DefaultClient.Do(ureq)
+				if err != nil || uresp.StatusCode >= 400 {
+					log.Printf("azure infographic upload failed: %v", err)
+					blobName = "" // mark as failed for DB
+				}
+			} else {
+				log.Printf("sas error for infographic: %v", err)
+				blobName = ""
+			}
+		}
+
+		// 2. Save to Supabase
 		ctx := r.Context()
 		dbEntry := map[string]any{
-			"module_number": req.ModuleNumber,
-			"video_number":  req.VideoNumber,
-			"sentence_id":   req.SentenceID,
-			"topic":         req.Topic,
-			"style":         req.Style,
-			"layout_json":   req.LayoutJSON,
-			"status":        "saved",
+			"module_number":  req.ModuleNumber,
+			"video_number":   req.VideoNumber,
+			"sentence_id":    req.SentenceID,
+			"topic":          req.Topic,
+			"style":          req.Style,
+			"layout_json":    req.LayoutJSON,
+			"azure_blob_name": blobName,
+			"status":         "saved_to_azure",
 		}
 
 		if err := supabasePost(ctx, cfg, "infographics", dbEntry); err != nil {
@@ -1350,7 +1377,10 @@ func infographicSaveHandler(cfg config) http.HandlerFunc {
 			return
 		}
 
-		json.NewEncoder(w).Encode(map[string]any{"ok": true})
+		json.NewEncoder(w).Encode(map[string]any{
+			"ok":        true,
+			"blob_name": blobName,
+		})
 	}
 }
 

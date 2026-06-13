@@ -351,7 +351,8 @@
             
             if (!res.ok) throw new Error('Save failed');
             
-            status.innerText = '✅ Infographic layout saved to Supabase!';
+            const result = await res.json();
+            status.innerText = `✅ Infographic layout saved to Supabase & Azure (${result.blob_name})!`;
             status.style.display = 'block';
             saveBtn.innerText = '✅ Saved';
         } catch (err) {
