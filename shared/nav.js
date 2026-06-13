@@ -121,9 +121,28 @@
       }
     ]},
     { label: '📦 Post Prod', children: [
-      { label: '9. 🧭 Certification Guide & Exam', url: 'markdown_renderer.html?file=4_Formula/certification/exam_and_case_study.md' },
-      { label: '10. 🔥 Join $10/mo', url: '5_Symbols/production/publish/membership.html' },
-      { label: '11. 💰 Business Plan', url: 'markdown_renderer.html?file=4_Formula/certification/business_plan.md' },
+      { label: '🎬 Content Assembly', children: [
+        { label: '1. 🎬 Edit List', url: '5_Symbols/production/postprod/edit_list.html' },
+        { label: '2. 📺 Course Playlist', url: 'https://www.youtube.com/watch?v=F8IBooe3bXY&list=PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy/' },
+        { label: '3. 🖼️ Image Generator', url: '5_Symbols/production/postprod/image_generator.html' },
+        { label: '4. 🎬 Lower Thirds Manager', url: '5_Symbols/production/postprod/lower_thirds.html' }
+      ]},
+      { label: '🎓 Certification & Proof', children: [
+        { label: '5. 📜 Erdem\'s Certification', url: 'markdown_renderer.html?file=4_Formula/certification/erdems_certification.md' },
+        { label: '6. 🧭 Exam & Case Study', url: 'markdown_renderer.html?file=4_Formula/certification/exam_and_case_study.md' },
+        { label: '7. 📊 Business Plan', url: 'markdown_renderer.html?file=4_Formula/certification/business_plan.md' },
+        { label: '8. 💼 Membership / Business', url: '5_Symbols/production/publish/membership.html' }
+      ]},
+      { label: '🤝 Outreach', children: [
+        {
+          label: '9. 🤝 LinkedIn Outreach',
+          children: [
+            { label: 'Journey Post (pre-exam)', url: '5_Symbols/production/postprod/linkedin_messaging.html#msg-a' },
+            { label: 'Announcement Post (after pass)', url: '5_Symbols/production/postprod/linkedin_messaging.html#msg-b' },
+            { label: 'Reply to Recruiter', url: '5_Symbols/production/postprod/linkedin_messaging.html#msg-c' }
+          ]
+        }
+      ]},
       {
         label: '🛠️ Tools',
         children: [
@@ -134,7 +153,8 @@
           { label: '✨ Gemini Guide', url: 'gemini.md' }
         ]
       }
-    ]}
+    ]},
+    { label: '🗄 Supabase Admin', url: 'http://localhost:8086/5_Symbols/supabase/ui/admin.html' }
   ];
 
   function resolveUrl(url) {

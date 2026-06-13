@@ -77,6 +77,10 @@
               "url": "https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/"
             },
             {
+              "label": "🗄 Database Schema",
+              "url": "https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/database/schemas"
+            },
+            {
               "label": "🗄 Supabase Admin (Local)",
               "url": "5_Symbols/supabase/ui/admin.html"
             },
@@ -150,49 +154,68 @@
       "label": "📦 Post Prod",
       "children": [
         {
-          "label": "1. 🎬 Edit List",
-          "url": "5_Symbols/production/postprod/edit_list.html"
-        },
-        {
-          "label": "2. 📺 Course Playlist",
-          "url": "https://www.youtube.com/watch?v=F8IBooe3bXY&list=PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy/"
-        },
-        {
-          "label": "3. 🧭 Exam & Case Study",
-          "url": "markdown_renderer.html?file=4_Formula/certification/exam_and_case_study.md"
-        },
-        {
-          "label": "4. 💼 Membership / Business",
-          "url": "5_Symbols/production/publish/membership.html"
-        },
-        {
-          "label": "5. 📊 Business Plan",
-          "url": "markdown_renderer.html?file=4_Formula/certification/business_plan.md"
-        },
-        {
-          "label": "6. 🤝 LinkedIn Outreach",
+          "label": "🎬 Content Assembly",
           "children": [
             {
-              "label": "Journey Post (pre-exam)",
-              "url": "5_Symbols/production/postprod/linkedin_messaging.html#msg-a"
+              "label": "1. 🎬 Edit List",
+              "url": "5_Symbols/production/postprod/edit_list.html"
             },
             {
-              "label": "Announcement Post (after pass)",
-              "url": "5_Symbols/production/postprod/linkedin_messaging.html#msg-b"
+              "label": "2. 📺 Course Playlist",
+              "url": "https://www.youtube.com/watch?v=F8IBooe3bXY&list=PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy/"
             },
             {
-              "label": "Reply to Recruiter",
-              "url": "5_Symbols/production/postprod/linkedin_messaging.html#msg-c"
+              "label": "3. 🖼️ Image Generator",
+              "url": "5_Symbols/production/postprod/image_generator.html"
+            },
+            {
+              "label": "4. 🎬 Lower Thirds Manager",
+              "url": "5_Symbols/production/postprod/lower_thirds.html"
             }
           ]
         },
         {
-          "label": "7. 🖼️ Image Generator",
-          "url": "5_Symbols/production/postprod/image_generator.html"
+          "label": "🎓 Certification & Proof",
+          "children": [
+            {
+              "label": "5. 📜 Erdem's Certification",
+              "url": "markdown_renderer.html?file=4_Formula/certification/erdems_certification.md"
+            },
+            {
+              "label": "6. 🧭 Exam & Case Study",
+              "url": "markdown_renderer.html?file=4_Formula/certification/exam_and_case_study.md"
+            },
+            {
+              "label": "7. 📊 Business Plan",
+              "url": "markdown_renderer.html?file=4_Formula/certification/business_plan.md"
+            },
+            {
+              "label": "8. 💼 Membership / Business",
+              "url": "5_Symbols/production/publish/membership.html"
+            }
+          ]
         },
         {
-          "label": "8. 🎬 Lower Thirds Manager",
-          "url": "5_Symbols/production/postprod/lower_thirds.html"
+          "label": "🤝 Outreach",
+          "children": [
+            {
+              "label": "9. 🤝 LinkedIn Outreach",
+              "children": [
+                {
+                  "label": "Journey Post (pre-exam)",
+                  "url": "5_Symbols/production/postprod/linkedin_messaging.html#msg-a"
+                },
+                {
+                  "label": "Announcement Post (after pass)",
+                  "url": "5_Symbols/production/postprod/linkedin_messaging.html#msg-b"
+                },
+                {
+                  "label": "Reply to Recruiter",
+                  "url": "5_Symbols/production/postprod/linkedin_messaging.html#msg-c"
+                }
+              ]
+            }
+          ]
         },
         {
           "label": "🛠️ Tools",
@@ -224,6 +247,10 @@
           ]
         }
       ]
+    },
+    {
+      "label": "🗄 Supabase Admin",
+      "url": "http://localhost:8086/5_Symbols/supabase/ui/admin.html"
     }
   ],
   "debugMenu": [
@@ -373,6 +400,10 @@
     {
       "label": "   ├─ 📋 Certification: Course Outline",
       "url": "markdown_renderer.html?file=4_Formula/certification/course_outline.md"
+    },
+    {
+      "label": "   ├─ 📜 Certification: Erdem's Certification",
+      "url": "markdown_renderer.html?file=4_Formula/certification/erdems_certification.md"
     },
     {
       "label": "   ├─ 🎓 Certification: Exam & Case Study",

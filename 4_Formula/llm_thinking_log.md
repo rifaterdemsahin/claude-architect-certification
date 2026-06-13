@@ -1,5 +1,25 @@
 # LLM Thinking Log
 
+## 2026-06-13 — Erdem's Certification & Post Prod Menu Grouping
+
+### 🎯 Objective
+Create a dedicated certification proof page for Erdem and reorganize the Post Prod menu into logical groups to improve navigation and structure as the project matures.
+
+### 📐 Design & Implementation Plan
+1. **Certification Content**:
+   - Create `4_Formula/certification/erdems_certification.md` to serve as a "formal receipt" and proof of hands-on implementation across the 7 stages.
+   - Use emojis and clear status indicators (✅, ⏳) to maintain visual consistency.
+2. **Navigation Refactoring**:
+   - Update `navigation_config.json` to introduce three main groups in the **Post Prod** menu:
+     - **🎬 Content Assembly**: Edit List, Course Playlist, Image Generator, Lower Thirds Manager.
+     - **🎓 Certification & Proof**: Erdem's Certification, Exam & Case Study, Business Plan, Membership / Business.
+     - **🤝 Outreach**: LinkedIn Outreach.
+   - Maintain sequential numbering across the new groups.
+3. **Debug Menu Sync**:
+   - Add the new certification page to the Debug Menu under the **Formula** stage for easy access by developers and AI agents.
+4. **Validation**:
+   - Verify JSON validity and path correctness.
+
 ## 2026-06-12 — Remove Supabase Connection from Producer Checklist
 
 ### 🎯 Objective

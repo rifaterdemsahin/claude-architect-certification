@@ -81,3 +81,4 @@ Lesson captured in lessons_learned.md
 
 [2026-06-12 20:45:00] [POC] APPLIED — Fixed missing google_client_id and supabase_anon_key by exposing them via Go /api/config and auto-fetching in debug-panel and production_shotlist.html.
 [2026-06-13] [5_Symbols] [APPLIED] — Rebuilt server and restarted process to activate /api/images/enhance-prompt endpoint.
+[2026-06-13] [POST-PROD] [APPLIED] — Reorganized Post Prod menu into logical groups (Content, Certification, Outreach) and added Erdem's Certification page.
