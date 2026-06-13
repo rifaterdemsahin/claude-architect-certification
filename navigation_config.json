@@ -81,10 +81,6 @@
               "url": "https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/database/schemas"
             },
             {
-              "label": "🗄 Supabase Admin (Local)",
-              "url": "5_Symbols/supabase/ui/admin.html"
-            },
-            {
               "label": "🗃 Preprod Data Admin",
               "url": "5_Symbols/production/preprod/tools/admin.html"
             },
@@ -257,8 +253,12 @@
       ]
     },
     {
-      "label": "🗄 Supabase Admin",
-      "url": "http://localhost:8086/5_Symbols/supabase/ui/admin.html"
+      "label": "📅 Timeline",
+      "url": "5_Symbols/timeline.html"
+    },
+    {
+      "label": "🧩 Pipeline",
+      "url": "5_Symbols/pipeline.html"
     }
   ],
   "debugMenu": [
