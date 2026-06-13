@@ -243,6 +243,73 @@
       justify-content: center;
     }
     .script-btn:hover { background: rgba(139, 92, 246, 0.2); }
+
+    .asset-types-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      margin: 20px 0;
+    }
+    .asset-type-card {
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      user-select: none;
+    }
+    .asset-type-card:hover { border-color: var(--primary); background: rgba(139, 92, 246, 0.05); }
+    .asset-type-card.selected {
+      border-color: var(--primary);
+      background: rgba(139, 92, 246, 0.12);
+      box-shadow: 0 0 20px rgba(139, 92, 246, 0.15);
+    }
+    .asset-type-card input[type="checkbox"] { display: none; }
+    .asset-type-card .card-icon { font-size: 1.4rem; margin-bottom: 4px; }
+    .asset-type-card .card-title { font-weight: 700; font-size: 0.82rem; }
+    .asset-type-card .card-desc { font-size: 0.7rem; color: var(--text-muted); margin-top: 3px; line-height: 1.3; }
+    .asset-type-card .check-mark {
+      position: absolute;
+      top: 6px; right: 8px;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; color: transparent;
+      transition: all 0.2s;
+    }
+    .asset-type-card.selected .check-mark {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+    .guide-toggle {
+      background: none; border: none; color: var(--text-muted);
+      cursor: pointer; font-size: 0.85rem; padding: 4px 8px;
+      border-radius: 8px; transition: all 0.2s;
+    }
+    .guide-toggle:hover { color: var(--primary); background: rgba(139,92,246,0.1); }
+    .guide-panel {
+      display: none;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px;
+      padding: 20px;
+      margin-top: 12px;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    .guide-panel.visible { display: block; }
+    .guide-panel h4 { color: var(--primary); margin-bottom: 8px; }
+    .guide-panel table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+    .guide-panel td, .guide-panel th {
+      padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.06);
+      text-align: left; vertical-align: top;
+    }
+    .guide-panel th { color: var(--text-muted); font-weight: 600; font-size: 0.8rem; text-transform: uppercase; }
+    .guide-panel td { font-size: 0.85rem; }
   </style>
 </head>
 <body>
@@ -286,16 +353,135 @@
           <textarea id="prompt" rows="4" required placeholder="e.g., A futuristic server room with purple neon lights and glass walls reflecting data streams..."></textarea>
         </div>
 
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <button type="button" id="enhance-btn" class="btn btn-secondary">
-            <span id="enhance-text">🪄 Enhance with Gemini</span>
-            <div class="loader" id="enhance-loader"></div>
-          </button>
-          <button type="submit" id="gen-btn" class="btn btn-primary">
-            <span id="btn-text">✨ Generate with Gemini</span>
-            <div class="loader" id="btn-loader"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <label style="font-weight:700;color:var(--text-muted);font-size:0.9rem;">🎯 Asset Type(s)</label>
+          <button type="button" id="guide-toggle-btn" class="guide-toggle">📖 Guide</button>
+        </div>
+        <div class="asset-types-grid" id="asset-types-container">
+          <label class="asset-type-card" data-type="explain">
+            <input type="checkbox" value="explain"><div class="check-mark">✓</div>
+            <div class="card-icon">📝</div><div class="card-title">Explain</div>
+            <div class="card-desc">Annotated concept — callouts, arrows, labels</div>
+          </label>
+          <label class="asset-type-card" data-type="infographic">
+            <input type="checkbox" value="infographic"><div class="check-mark">✓</div>
+            <div class="card-icon">📊</div><div class="card-title">Infographic</div>
+            <div class="card-desc">Data layout with stats, icons, sections</div>
+          </label>
+          <label class="asset-type-card" data-type="graphic">
+            <input type="checkbox" value="graphic"><div class="check-mark">✓</div>
+            <div class="card-icon">🖼️</div><div class="card-title">Standalone Graphic</div>
+            <div class="card-desc">Full-scene hero, backdrop, thumbnail</div>
+          </label>
+          <label class="asset-type-card" data-type="diagram">
+            <input type="checkbox" value="diagram"><div class="check-mark">✓</div>
+            <div class="card-icon">🔷</div><div class="card-title">Diagram</div>
+            <div class="card-desc">Flow chart, topology, process map</div>
+          </label>
+          <label class="asset-type-card" data-type="code">
+            <input type="checkbox" value="code"><div class="check-mark">✓</div>
+            <div class="card-icon">💻</div><div class="card-title">Code / Terminal</div>
+            <div class="card-desc">Syntax-highlighted code, CLI, configs</div>
+          </label>
+          <label class="asset-type-card" data-type="comparison">
+            <input type="checkbox" value="comparison"><div class="check-mark">✓</div>
+            <div class="card-icon">⚖️</div><div class="card-title">Comparison</div>
+            <div class="card-desc">Side-by-side before/after or X vs Y</div>
+          </label>
+          <label class="asset-type-card" data-type="stepbystep">
+            <input type="checkbox" value="stepbystep"><div class="check-mark">✓</div>
+            <div class="card-icon">🔢</div><div class="card-title">Step-by-Step</div>
+            <div class="card-desc">Numbered sequence / runbook card</div>
+          </label>
+          <label class="asset-type-card" data-type="thumbnail">
+            <input type="checkbox" value="thumbnail"><div class="check-mark">✓</div>
+            <div class="card-icon">▶️</div><div class="card-title">Thumbnail</div>
+            <div class="card-desc">YouTube 16:9 hero, bold text zone</div>
+          </label>
+          <label class="asset-type-card" data-type="architecture">
+            <input type="checkbox" value="architecture"><div class="check-mark">✓</div>
+            <div class="card-icon">🏛️</div><div class="card-title">Architecture</div>
+            <div class="card-desc">Cloud/system layout, boxes, data flow</div>
+          </label>
+          <label class="asset-type-card" data-type="callout">
+            <input type="checkbox" value="callout"><div class="check-mark">✓</div>
+            <div class="card-icon">💡</div><div class="card-title">Callout / Key Takeaway</div>
+            <div class="card-desc">Single big-idea quote or highlight</div>
+          </label>
+          <label class="asset-type-card" data-type="timeline">
+            <input type="checkbox" value="timeline"><div class="check-mark">✓</div>
+            <div class="card-icon">📅</div><div class="card-title">Timeline / Roadmap</div>
+            <div class="card-desc">Horizontal progression, milestones</div>
+          </label>
+          <label class="asset-type-card" data-type="table">
+            <input type="checkbox" value="table"><div class="check-mark">✓</div>
+            <div class="card-icon">📋</div><div class="card-title">Table / Matrix</div>
+            <div class="card-desc">Feature matrix, decision grid, tiers</div>
+          </label>
+          <label class="asset-type-card" data-type="titlecard">
+            <input type="checkbox" value="titlecard"><div class="check-mark">✓</div>
+            <div class="card-icon">🎬</div><div class="card-title">Title / Section Card</div>
+            <div class="card-desc">Chapter divider, module intro frame</div>
+          </label>
+          <label class="asset-type-card" data-type="analogy">
+            <input type="checkbox" value="analogy"><div class="check-mark">✓</div>
+            <div class="card-icon">🧩</div><div class="card-title">Analogy / Metaphor</div>
+            <div class="card-desc">Illustrative concept comparison image</div>
+          </label>
+          <label class="asset-type-card" data-type="transparent">
+            <input type="checkbox" value="transparent"><div class="check-mark">✓</div>
+            <div class="card-icon">🔲</div><div class="card-title">Transparent / Layered PNG</div>
+            <div class="card-desc">No background, ready for motion overlay</div>
+          </label>
+          <label class="asset-type-card" data-type="icon">
+            <input type="checkbox" value="icon"><div class="check-mark">✓</div>
+            <div class="card-icon">🏷️</div><div class="card-title">Icon / Badge</div>
+            <div class="card-desc">Single glyph, cert badge, visual lang</div>
+          </label>
+        </div>
+
+        <div id="guide-panel" class="guide-panel">
+          <h4>📖 Asset Type Guide</h4>
+          <p>Select one or more. The AI will tailor the prompt to each selected type:</p>
+          <table>
+            <tr><th>Type</th><th>Best For</th><th>Style Prompt Addition</th></tr>
+            <tr><td>📝 Explain</td><td>Annotated walkthroughs, callout visuals</td><td>"Annotated diagram with clear callouts, labels, and explanatory flow"</td></tr>
+            <tr><td>📊 Infographic</td><td>Stats, milestones, comparisons</td><td>"Structured infographic with data points, icons, section dividers, hierarchy"</td></tr>
+            <tr><td>🖼️ Standalone Graphic</td><td>Hero images, thumbnails, backdrop</td><td>"Full illustrative scene, cinematic lighting, 16:9, hero quality"</td></tr>
+            <tr><td>🔷 Diagram</td><td>Flowcharts, topology, process flows</td><td>"Clean diagram with labeled components, directional arrows, minimalist palette"</td></tr>
+            <tr><td>💻 Code / Terminal</td><td>Commands, configs, YAML, manifests</td><td>"Stylised code or terminal window with syntax highlighting, dark background"</td></tr>
+            <tr><td>⚖️ Comparison</td><td>X vs Y, before/after, prototype vs prod</td><td>"Side-by-side or split layout showing contrast, labels for each side"</td></tr>
+            <tr><td>🔢 Step-by-Step</td><td>Runbooks, numbered processes</td><td>"Numbered sequence card with clear progression arrows or checklist design"</td></tr>
+            <tr><td>▶️ Thumbnail</td><td>YouTube 16:9 hero, bold focal point</td><td>"Bold high-contrast 16:9 layout with prominent text zone and focal imagery"</td></tr>
+            <tr><td>🏛️ Architecture</td><td>Cloud/system diagrams, service boxes</td><td>"System architecture with service boxes, zones, data flow arrows, cloud icons"</td></tr>
+            <tr><td>💡 Callout / Takeaway</td><td>Single big-idea quote, key highlight</td><td>"Clean quote-card design with emphasis on one key insight or statistic"</td></tr>
+            <tr><td>📅 Timeline / Roadmap</td><td>Module roadmaps, release history</td><td>"Horizontal timeline with milestone nodes, dates, and progression arc"</td></tr>
+            <tr><td>📋 Table / Matrix</td><td>Feature matrices, decision tables, tiers</td><td>"Structured grid layout with labelled rows and columns, clear cell hierarchy"</td></tr>
+            <tr><td>🎬 Title / Section Card</td><td>Chapter dividers, module intro frame</td><td>"Clean transition card with title, subtitle, and decorative accent"</td></tr>
+            <tr><td>🧩 Analogy / Metaphor</td><td>Concept illustrations, "X is like Y"</td><td>"Illustrative metaphor image linking the technical concept to a familiar scene"</td></tr>
+            <tr><td>🔲 Transparent PNG</td><td>Motion-ready overlay assets</td><td>"Asset with no background, isolated subject, suitable for compositing"</td></tr>
+            <tr><td>🏷️ Icon / Badge</td><td>Course-wide visual language, cert badges</td><td>"Single clean glyph, scalable, minimal detail, high contrast on any background"</td></tr>
+          </table>
+          <p style="margin-top:12px;color:var(--text-muted);font-size:0.8rem;">When multiple types are selected, the Enhance button generates a prompt covering all selected types.</p>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+          <div style="display: flex; gap: 12px; align-items: center;">
+            <button type="button" id="enhance-btn" class="btn btn-secondary">
+              <span id="enhance-text">🪄 Enhance with Gemini</span>
+              <div class="loader" id="enhance-loader"></div>
+            </button>
+            <button type="submit" id="gen-btn" class="btn btn-primary">
+              <span id="btn-text">✨ Generate with Gemini</span>
+              <div class="loader" id="btn-loader"></div>
+            </button>
+          </div>
+          <button type="button" id="test-gemini-btn" class="btn" style="background:rgba(16,185,129,0.15);border:1px solid var(--success);color:var(--success);">
+            <span id="test-gemini-text">🔌 Test Gemini Connection</span>
+            <div class="loader" id="test-gemini-loader"></div>
           </button>
         </div>
+        <div id="gemini-status" style="margin-top:12px;padding:12px 16px;border-radius:12px;display:none;"></div>
       </form>
     </div>
 
@@ -305,12 +491,24 @@
           <h3>🧠 Refined Gemini Prompt</h3>
           <p id="refined-prompt-text"></p>
         </div>
-        
+
+        <div id="cost-box" style="display:none;background:rgba(16,185,129,0.08);border:1px solid var(--success);border-radius:12px;padding:14px 18px;margin-bottom:24px;text-align:left;">
+          <span style="font-weight:700;color:var(--success);">💰 Generation Cost:</span>
+          <span id="cost-text" style="color:var(--text-main);"></span>
+          <div id="cost-detail" style="color:var(--text-muted);font-size:0.8rem;margin-top:4px;"></div>
+        </div>
+
         <img id="result-img" src="" alt="Generated Visual" class="result-image">
-        
-        <div style="display: flex; justify-content: center; gap: 20px;">
+
+        <div style="display: flex; justify-content: center; gap: 16px; flex-wrap: wrap;">
           <button id="save-btn" class="btn btn-success">
             💾 Save to Azure Blob Storage
+          </button>
+          <button id="copy-btn" class="btn btn-secondary" type="button">
+            📋 Copy Image
+          </button>
+          <button id="download-btn" class="btn btn-secondary" type="button">
+            ⬇️ Download
           </button>
           <button id="reset-btn" class="btn btn-secondary" onclick="resetForm()">
             🔄 Try Another
@@ -401,13 +599,31 @@
       }
     }
 
+    // ── Asset Type Card Toggles ──
+    document.querySelectorAll('.asset-type-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const cb = card.querySelector('input[type="checkbox"]');
+        cb.checked = !cb.checked;
+        card.classList.toggle('selected', cb.checked);
+      });
+    });
+
+    // ── Guide Toggle ──
+    document.getElementById('guide-toggle-btn').addEventListener('click', () => {
+      document.getElementById('guide-panel').classList.toggle('visible');
+    });
+
+    function getSelectedAssetTypes() {
+      return Array.from(document.querySelectorAll('.asset-type-card.selected'))
+        .map(c => c.dataset.type);
+    }
+
     document.getElementById('enhance-btn').addEventListener('click', async () => {
       const promptField = document.getElementById('prompt');
       const prompt = promptField.value;
-      if (!prompt) {
-        alert('Please enter a prompt first.');
-        return;
-      }
+      if (!prompt) { alert('Please enter a prompt first.'); return; }
+
+      const assetTypes = getSelectedAssetTypes();
 
       const btn = document.getElementById('enhance-btn');
       const btnText = document.getElementById('enhance-text');
@@ -421,10 +637,13 @@
         const res = await fetch('/api/images/enhance-prompt', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt })
+          body: JSON.stringify({ prompt, asset_types: assetTypes })
         });
 
-        if (!res.ok) throw new Error('Enhancement failed');
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || 'Enhancement failed');
+        }
 
         const data = await res.json();
         promptField.value = data.refined_prompt;
@@ -443,6 +662,7 @@
       const prompt = document.getElementById('prompt').value;
       const moduleNumber = parseInt(document.getElementById('module-number').value);
       const videoNumber = parseInt(document.getElementById('video-number').value);
+      const assetTypes = getSelectedAssetTypes();
       
       const btn = document.getElementById('gen-btn');
       const btnText = document.getElementById('btn-text');
@@ -456,19 +676,44 @@
         const res = await fetch('/api/images/generate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt, module_number: moduleNumber, video_number: videoNumber })
+          body: JSON.stringify({
+            prompt,
+            module_number: moduleNumber,
+            video_number: videoNumber,
+            asset_types: assetTypes
+          })
         });
         
-        if (!res.ok) throw new Error('Generation failed');
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || 'Generation failed');
+        }
         
         const data = await res.json();
         currentImageData = data;
         
         document.getElementById('refined-prompt-text').innerText = data.refined_prompt;
         document.getElementById('result-img').src = data.image_url;
+
+        // Show generation cost + model
+        const costBox = document.getElementById('cost-box');
+        if (typeof data.cost_usd === 'number') {
+          const cost = data.cost_usd;
+          // Show enough precision for sub-cent amounts.
+          const costStr = cost < 0.01 ? `$${cost.toFixed(5)}` : `$${cost.toFixed(4)}`;
+          document.getElementById('cost-text').innerText = `${costStr} USD`;
+          const t = data.tokens || {};
+          document.getElementById('cost-detail').innerText =
+            `Model: ${data.model || 'gemini-2.5-flash-image'} · ` +
+            `refine ${(t.refine_prompt||0)}+${(t.refine_candidates||0)} tok · ` +
+            `image ${(t.image_prompt||0)}+${(t.image_candidates||0)} tok`;
+          costBox.style.display = 'block';
+        } else {
+          costBox.style.display = 'none';
+        }
+
         document.getElementById('result-container').style.display = 'block';
         
-        // Scroll to result
         window.scrollTo({ top: document.getElementById('result-container').offsetTop - 50, behavior: 'smooth' });
       } catch (err) {
         alert('Error: ' + err.message);
@@ -500,7 +745,10 @@
           })
         });
         
-        if (!res.ok) throw new Error('Save failed');
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || 'Save failed');
+        }
         
         const data = await res.json();
         status.innerText = `✅ Saved as ${data.blob_name} in research-images container!`;
@@ -513,14 +761,106 @@
       }
     });
 
+    // ── Copy image to clipboard ──
+    document.getElementById('copy-btn').addEventListener('click', async () => {
+      if (!currentImageData) return;
+      const btn = document.getElementById('copy-btn');
+      const original = btn.innerText;
+      try {
+        const res = await fetch(currentImageData.image_url);
+        const blob = await res.blob();
+        // Clipboard API needs PNG; convert if necessary via a canvas.
+        let pngBlob = blob;
+        if (blob.type !== 'image/png') {
+          pngBlob = await new Promise((resolve) => {
+            const img = new Image();
+            img.onload = () => {
+              const canvas = document.createElement('canvas');
+              canvas.width = img.naturalWidth;
+              canvas.height = img.naturalHeight;
+              canvas.getContext('2d').drawImage(img, 0, 0);
+              canvas.toBlob(resolve, 'image/png');
+            };
+            img.src = currentImageData.image_url;
+          });
+        }
+        await navigator.clipboard.write([new ClipboardItem({ 'image/png': pngBlob })]);
+        btn.innerText = '✅ Copied!';
+      } catch (err) {
+        btn.innerText = '❌ Copy failed';
+        console.error(err);
+      }
+      setTimeout(() => { btn.innerText = original; }, 2000);
+    });
+
+    // ── Download image ──
+    document.getElementById('download-btn').addEventListener('click', () => {
+      if (!currentImageData) return;
+      const a = document.createElement('a');
+      a.href = currentImageData.image_url;
+      const m = currentImageData.module_number;
+      const v = currentImageData.video_number;
+      a.download = `m${m}_v${v}_${Date.now()}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    });
+
     function resetForm() {
       document.getElementById('gen-form').reset();
       document.getElementById('result-container').style.display = 'none';
       document.getElementById('save-btn').disabled = false;
       document.getElementById('save-btn').innerText = '💾 Save to Azure Blob Storage';
       document.getElementById('save-status').style.display = 'none';
+      document.getElementById('cost-box').style.display = 'none';
       currentImageData = null;
     }
+
+    document.getElementById('test-gemini-btn').addEventListener('click', async () => {
+      const btn = document.getElementById('test-gemini-btn');
+      const btnText = document.getElementById('test-gemini-text');
+      const loader = document.getElementById('test-gemini-loader');
+      const statusDiv = document.getElementById('gemini-status');
+
+      btn.disabled = true;
+      btnText.textContent = '⏳ Testing...';
+      loader.style.display = 'block';
+      statusDiv.style.display = 'none';
+
+      try {
+        const res = await fetch('/api/images/test-gemini');
+        const data = await res.json();
+
+        if (data.status === 'ok') {
+          statusDiv.style.background = 'rgba(16,185,129,0.1)';
+          statusDiv.style.border = '1px solid var(--success)';
+          statusDiv.style.color = 'var(--success)';
+          statusDiv.innerHTML = `✅ <strong>Connected</strong> — ${data.message}<br><small>Model: ${data.model} | Reply: "${data.ping_reply}"</small>`;
+        } else {
+          statusDiv.style.background = 'rgba(239,68,68,0.1)';
+          statusDiv.style.border = '1px solid var(--danger)';
+          statusDiv.style.color = 'var(--danger)';
+          let detail = data.message;
+          if (data.detail) {
+            try {
+              const parsed = JSON.parse(data.detail);
+              detail += ' — ' + (parsed.error?.message || parsed.error || data.detail.substring(0, 200));
+            } catch { detail += ' — ' + data.detail.substring(0, 200); }
+          }
+          statusDiv.innerHTML = `❌ <strong>Connection Failed</strong><br>${detail}`;
+        }
+      } catch (err) {
+        statusDiv.style.background = 'rgba(239,68,68,0.1)';
+        statusDiv.style.border = '1px solid var(--danger)';
+        statusDiv.style.color = 'var(--danger)';
+        statusDiv.innerHTML = `❌ <strong>Request Error</strong><br>${err.message}`;
+      }
+
+      statusDiv.style.display = 'block';
+      btn.disabled = false;
+      btnText.textContent = '🔌 Test Gemini Connection';
+      loader.style.display = 'none';
+    });
   </script>
 </body>
 </html>

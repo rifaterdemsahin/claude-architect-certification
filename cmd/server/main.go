@@ -38,7 +38,31 @@ type config struct {
 	googleClientID     string
 }
 
+func loadDotEnv(path string) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return
+	}
+	for _, line := range strings.Split(string(data), "\n") {
+		line = strings.TrimSpace(line)
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+		parts := strings.SplitN(line, "=", 2)
+		if len(parts) != 2 {
+			continue
+		}
+		key := strings.TrimSpace(parts[0])
+		val := strings.TrimSpace(parts[1])
+		val = strings.Trim(val, "'\"")
+		if os.Getenv(key) == "" {
+			os.Setenv(key, val)
+		}
+	}
+}
+
 func loadConfig() config {
+	loadDotEnv(".env")
 	cfg := config{
 		supabaseURL:       mustEnv("SUPABASE_URL"),
 		supabaseAnon:      mustEnv("SUPABASE_ANON_KEY"),
@@ -952,7 +976,7 @@ func generateExplanationHandler(cfg config) http.HandlerFunc {
 		}
 
 		// Prepare Gemini API request
-		geminiURL := "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + geminiKey
+		geminiURL := "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + geminiKey
 		geminiReqBody := map[string]any{
 			"contents": []any{
 				map[string]any{
@@ -1077,9 +1101,66 @@ func explanationsHandler(cfg config) http.HandlerFunc {
 // ── Image Generation ─────────────────────────────────────────────────────────
 
 type ImageGenRequest struct {
-	Prompt       string `json:"prompt"`
-	ModuleNumber int    `json:"module_number"`
-	VideoNumber  int    `json:"video_number"`
+	Prompt       string   `json:"prompt"`
+	ModuleNumber int      `json:"module_number"`
+	VideoNumber  int      `json:"video_number"`
+	AssetTypes   []string `json:"asset_types"`
+}
+
+// geminiContentResp covers both text and inline-image (base64) responses from
+// the generateContent endpoint, plus token usage for cost calculation.
+type geminiContentResp struct {
+	Candidates []struct {
+		Content struct {
+			Parts []struct {
+				Text       string `json:"text"`
+				InlineData struct {
+					MimeType string `json:"mimeType"`
+					Data     string `json:"data"`
+				} `json:"inlineData"`
+			} `json:"parts"`
+		} `json:"content"`
+	} `json:"candidates"`
+	UsageMetadata struct {
+		PromptTokenCount     int `json:"promptTokenCount"`
+		CandidatesTokenCount int `json:"candidatesTokenCount"`
+		TotalTokenCount      int `json:"totalTokenCount"`
+	} `json:"usageMetadata"`
+}
+
+var assetTypeStyles = map[string]string{
+	"explain":      "Annotated diagram style with clear callouts, labels, and explanatory arrows — suitable for a slide or textbook",
+	"infographic":  "Structured infographic layout with data points, icons, section dividers, statistics, and a clear visual hierarchy",
+	"graphic":      "Full illustrative scene with cinematic lighting, rich detail, suitable for a video thumbnail or hero background, 16:9",
+	"diagram":      "Clean technical diagram with labeled components, directional arrows, minimalist color palette, and precise geometry",
+	"code":         "Stylised code snippet or terminal window with syntax highlighting, dark background, monospace font, suitable for commands, configs, YAML, or manifests",
+	"comparison":   "Side-by-side or before/after split layout showing contrast between two items, with labels on each side and a clear divider",
+	"stepbystep":   "Numbered sequence card with clear progression arrows, step indicators, or checklist design walking through a process",
+	"thumbnail":    "Bold high-contrast 16:9 YouTube-optimised layout with prominent text zone, strong focal point, and space for overlay graphics",
+	"architecture": "System architecture diagram with service boxes, trust zones, data flow arrows, and cloud service icons in a clean technical layout",
+	"callout":      "Clean quote-card or highlight-card design emphasising one key insight, statistic, or takeaway with minimal surrounding detail",
+	"timeline":     "Horizontal timeline with milestone nodes, dates, labels, and a clear progression arc from left to right",
+	"table":        "Structured grid or matrix layout with labelled rows and columns, clear cell hierarchy, suitable for feature comparisons or tiered pricing",
+	"titlecard":    "Clean transition or chapter-divider card with title, subtitle, decorative accent line, minimal background detail",
+	"analogy":      "Illustrative metaphor image linking a technical concept to a familiar real-world scene or object, with subtle labelling",
+	"transparent":  "Asset with no background, isolated subject on transparent canvas, clean edges, suitable for compositing in video editing",
+	"icon":         "Single clean glyph or badge, scalable, minimal detail, high contrast, suitable for repeatable visual language across the course",
+}
+
+func buildAssetTypeInstruction(types []string) string {
+	if len(types) == 0 {
+		return "Style: Minimalist, dark corporate, glassmorphism, tech-focused, professional, 16:9."
+	}
+	var lines []string
+	for _, t := range types {
+		if style, ok := assetTypeStyles[t]; ok {
+			lines = append(lines, fmt.Sprintf("  - %s", style))
+		}
+	}
+	if len(lines) == 0 {
+		return "Style: Minimalist, dark corporate, glassmorphism, tech-focused, professional, 16:9."
+	}
+	return fmt.Sprintf("Generate a prompt for the following asset type(s):\n%s\n\nThe visual style should be: dark corporate, glassmorphism, tech-focused, professional.", strings.Join(lines, "\n"))
 }
 
 func imageEnhancePromptHandler(cfg config) http.HandlerFunc {
@@ -1091,7 +1172,8 @@ func imageEnhancePromptHandler(cfg config) http.HandlerFunc {
 		}
 
 		var req struct {
-			Prompt string `json:"prompt"`
+			Prompt     string   `json:"prompt"`
+			AssetTypes []string `json:"asset_types"`
 		}
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			http.Error(w, `{"error":"invalid request"}`, http.StatusBadRequest)
@@ -1104,13 +1186,14 @@ func imageEnhancePromptHandler(cfg config) http.HandlerFunc {
 			return
 		}
 
+		typeInstr := buildAssetTypeInstruction(req.AssetTypes)
 		refinePrompt := fmt.Sprintf(`You are an expert AI Image Prompt Engineer.
 Refine the following user prompt into a high-quality, descriptive prompt for a professional image generator (like Midjourney or Imagen).
-Style: Minimalist, dark corporate, glassmorphism, tech-focused, professional, 16:9.
+%s
 Return ONLY the refined prompt text, no preamble or extra commentary.
-User Prompt: %s`, req.Prompt)
+User Prompt: %s`, typeInstr, req.Prompt)
 
-		geminiURL := "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + geminiKey
+		geminiURL := "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + geminiKey
 		geminiReqBody := map[string]any{
 			"contents": []any{map[string]any{"parts": []any{map[string]any{"text": refinePrompt}}}},
 		}
@@ -1165,51 +1248,113 @@ func imageGenerateHandler(cfg config) http.HandlerFunc {
 			return
 		}
 
-		// Use Gemini to refine the prompt for image generation
-		refinePrompt := fmt.Sprintf(`You are an expert AI Image Prompt Engineer. 
-Refine the following user prompt into a high-quality, descriptive prompt for a professional image generator (like Midjourney or Imagen).
-Style: Minimalist, dark corporate, glassmorphism, tech-focused, professional, 16:9.
-User Prompt: %s`, req.Prompt)
+		ctx, cancel := context.WithTimeout(r.Context(), 120*time.Second)
+		defer cancel()
 
-		geminiURL := "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + geminiKey
-		geminiReqBody := map[string]any{
+		// ── Step 1: Refine the user prompt with the text model ──
+		typeInstr := buildAssetTypeInstruction(req.AssetTypes)
+		refinePrompt := fmt.Sprintf(`You are an expert AI Image Prompt Engineer.
+Refine the following user prompt into a single high-quality, descriptive image-generation prompt.
+%s
+Return only the refined prompt text, no preamble.
+User Prompt: %s`, typeInstr, req.Prompt)
+
+		refineURL := "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + geminiKey
+		refineBody, _ := json.Marshal(map[string]any{
 			"contents": []any{map[string]any{"parts": []any{map[string]any{"text": refinePrompt}}}},
-		}
-		
-		b, _ := json.Marshal(geminiReqBody)
-		hresp, err := http.Post(geminiURL, "application/json", bytes.NewReader(b))
-		if err != nil || hresp.StatusCode >= 400 {
+		})
+		refineReq, _ := http.NewRequestWithContext(ctx, "POST", refineURL, bytes.NewReader(refineBody))
+		refineReq.Header.Set("Content-Type", "application/json")
+		refineResp, err := http.DefaultClient.Do(refineReq)
+		if err != nil || refineResp.StatusCode >= 400 {
 			http.Error(w, `{"error":"Gemini refinement failed"}`, http.StatusBadGateway)
 			return
 		}
-		defer hresp.Body.Close()
+		defer refineResp.Body.Close()
 
-		var gResp struct {
-			Candidates []struct {
-				Content struct {
-					Parts []struct {
-						Text string `json:"text"`
-					} `json:"parts"`
-				} `json:"content"`
-			} `json:"candidates"`
-		}
-		json.NewDecoder(hresp.Body).Decode(&gResp)
+		var refineParsed geminiContentResp
+		json.NewDecoder(refineResp.Body).Decode(&refineParsed)
 
-		refined := ""
-		if len(gResp.Candidates) > 0 && len(gResp.Candidates[0].Content.Parts) > 0 {
-			refined = gResp.Candidates[0].Content.Parts[0].Text
+		refined := req.Prompt
+		if len(refineParsed.Candidates) > 0 && len(refineParsed.Candidates[0].Content.Parts) > 0 {
+			if t := strings.TrimSpace(refineParsed.Candidates[0].Content.Parts[0].Text); t != "" {
+				refined = t
+			}
 		}
 
-		// Simulation: Using a high-quality placeholder image for now
-		// In a real production environment, call Imagen 3 or fal.ai here.
-		placeholderURL := fmt.Sprintf("https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1920&auto=format&fit=crop&sig=%d", time.Now().Unix())
+		// ── Step 2: Generate the actual image with the Gemini image model ──
+		// gemini-2.5-flash-image ("Nano Banana") is the same model the Gemini
+		// web app uses; it returns the image as inline base64 data.
+		const imageModel = "gemini-2.5-flash-image"
+		imageURL := "https://generativelanguage.googleapis.com/v1beta/models/" + imageModel + ":generateContent?key=" + geminiKey
+		imageBody, _ := json.Marshal(map[string]any{
+			"contents": []any{map[string]any{"parts": []any{map[string]any{"text": refined}}}},
+			"generationConfig": map[string]any{
+				"responseModalities": []string{"IMAGE"},
+			},
+		})
+		imageReq, _ := http.NewRequestWithContext(ctx, "POST", imageURL, bytes.NewReader(imageBody))
+		imageReq.Header.Set("Content-Type", "application/json")
+		imageResp, err := http.DefaultClient.Do(imageReq)
+		if err != nil {
+			http.Error(w, `{"error":"Gemini image generation failed"}`, http.StatusBadGateway)
+			return
+		}
+		defer imageResp.Body.Close()
+		if imageResp.StatusCode >= 400 {
+			body, _ := io.ReadAll(imageResp.Body)
+			http.Error(w, fmt.Sprintf(`{"error":"Gemini image generation %d: %s"}`, imageResp.StatusCode, strings.TrimSpace(string(body))), http.StatusBadGateway)
+			return
+		}
+
+		var imgParsed geminiContentResp
+		if err := json.NewDecoder(imageResp.Body).Decode(&imgParsed); err != nil {
+			http.Error(w, `{"error":"failed to decode image response"}`, http.StatusBadGateway)
+			return
+		}
+
+		// Extract the inline image data (base64) → build a data URL.
+		dataURL := ""
+		if len(imgParsed.Candidates) > 0 {
+			for _, p := range imgParsed.Candidates[0].Content.Parts {
+				if p.InlineData.Data != "" {
+					mime := p.InlineData.MimeType
+					if mime == "" {
+						mime = "image/png"
+					}
+					dataURL = "data:" + mime + ";base64," + p.InlineData.Data
+					break
+				}
+			}
+		}
+		if dataURL == "" {
+			http.Error(w, `{"error":"Gemini returned no image data"}`, http.StatusBadGateway)
+			return
+		}
+
+		// ── Step 3: Cost — refinement (gemini-2.5-flash) + image (gemini-2.5-flash-image) ──
+		// Pricing per 1M tokens (USD): flash text in $0.30 / out $2.50;
+		// flash-image text in $0.30 / image out $30.00 (1290 tokens per image ≈ $0.039).
+		refineCost := float64(refineParsed.UsageMetadata.PromptTokenCount)*0.30/1e6 +
+			float64(refineParsed.UsageMetadata.CandidatesTokenCount)*2.50/1e6
+		imageCost := float64(imgParsed.UsageMetadata.PromptTokenCount)*0.30/1e6 +
+			float64(imgParsed.UsageMetadata.CandidatesTokenCount)*30.0/1e6
+		totalCost := refineCost + imageCost
 
 		json.NewEncoder(w).Encode(map[string]any{
 			"original_prompt": req.Prompt,
 			"refined_prompt":  refined,
-			"image_url":       placeholderURL,
+			"image_url":       dataURL,
 			"module_number":   req.ModuleNumber,
 			"video_number":    req.VideoNumber,
+			"model":           imageModel,
+			"cost_usd":        totalCost,
+			"tokens": map[string]any{
+				"refine_prompt":     refineParsed.UsageMetadata.PromptTokenCount,
+				"refine_candidates": refineParsed.UsageMetadata.CandidatesTokenCount,
+				"image_prompt":      imgParsed.UsageMetadata.PromptTokenCount,
+				"image_candidates":  imgParsed.UsageMetadata.CandidatesTokenCount,
+			},
 		})
 	}
 }
@@ -1240,13 +1385,43 @@ func imageSaveHandler(cfg config) http.HandlerFunc {
 			return
 		}
 
-		// Download the image
-		resp, err := http.Get(req.ImageURL)
-		if err != nil {
-			http.Error(w, `{"error":"failed to download image"}`, http.StatusBadGateway)
-			return
+		// Obtain the image bytes — either from an inline data URL (Gemini
+		// returns base64) or by downloading a remote URL.
+		var imageData []byte
+		contentType := "image/png"
+		if strings.HasPrefix(req.ImageURL, "data:") {
+			meta, b64, found := strings.Cut(strings.TrimPrefix(req.ImageURL, "data:"), ",")
+			if !found {
+				http.Error(w, `{"error":"invalid data URL"}`, http.StatusBadRequest)
+				return
+			}
+			if mime, _, ok := strings.Cut(meta, ";"); ok && mime != "" {
+				contentType = mime
+			} else if meta != "" {
+				contentType = meta
+			}
+			decoded, err := base64.StdEncoding.DecodeString(b64)
+			if err != nil {
+				http.Error(w, `{"error":"failed to decode image data"}`, http.StatusBadRequest)
+				return
+			}
+			imageData = decoded
+		} else {
+			resp, err := http.Get(req.ImageURL)
+			if err != nil {
+				http.Error(w, `{"error":"failed to download image"}`, http.StatusBadGateway)
+				return
+			}
+			defer resp.Body.Close()
+			imageData, err = io.ReadAll(resp.Body)
+			if err != nil {
+				http.Error(w, `{"error":"failed to read image data"}`, http.StatusBadGateway)
+				return
+			}
+			if ct := resp.Header.Get("Content-Type"); ct != "" {
+				contentType = ct
+			}
 		}
-		defer resp.Body.Close()
 
 		blobName := fmt.Sprintf("m%d_v%d_%d.png", req.ModuleNumber, req.VideoNumber, time.Now().Unix())
 		container := "research-images"
@@ -1259,13 +1434,20 @@ func imageSaveHandler(cfg config) http.HandlerFunc {
 		}
 
 		putURL := blobURL(cfg.azureAccountName, container, blobName, sasQuery)
-		ureq, _ := http.NewRequest(http.MethodPut, putURL, resp.Body)
+		ureq, _ := http.NewRequest(http.MethodPut, putURL, bytes.NewReader(imageData))
 		ureq.Header.Set("x-ms-blob-type", "BlockBlob")
-		ureq.Header.Set("Content-Type", "image/png")
+		ureq.Header.Set("Content-Type", contentType)
+		ureq.ContentLength = int64(len(imageData))
 
 		uresp, err := http.DefaultClient.Do(ureq)
-		if err != nil || uresp.StatusCode >= 400 {
-			http.Error(w, `{"error":"azure upload failed"}`, http.StatusBadGateway)
+		if err != nil {
+			http.Error(w, fmt.Sprintf(`{"error":"azure upload failed: %s"}`, err.Error()), http.StatusBadGateway)
+			return
+		}
+		defer uresp.Body.Close()
+		if uresp.StatusCode >= 400 {
+			b, _ := io.ReadAll(uresp.Body)
+			http.Error(w, fmt.Sprintf(`{"error":"azure upload %d: %s"}`, uresp.StatusCode, strings.TrimSpace(string(b))), http.StatusBadGateway)
 			return
 		}
 
@@ -1288,6 +1470,85 @@ func imageSaveHandler(cfg config) http.HandlerFunc {
 			"ok":        true,
 			"blob_name": blobName,
 			"url":       blobURL(cfg.azureAccountName, container, blobName, ""),
+		})
+	}
+}
+
+// ── Gemini Connection Test ────────────────────────────────────────────────────
+
+func imageTestGeminiHandler(cfg config) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		if r.Method != http.MethodGet {
+			http.Error(w, `{"error":"method not allowed"}`, http.StatusMethodNotAllowed)
+			return
+		}
+
+		geminiKey := cfg.getSecret("GEMINI_API_KEY")
+		if geminiKey == "" {
+			json.NewEncoder(w).Encode(map[string]any{
+				"status":  "error",
+				"message": "GEMINI_API_KEY not found in env or Key Vault",
+				"key_set": false,
+			})
+			return
+		}
+
+		// Try a minimal ping to Gemini
+		geminiURL := "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + geminiKey
+		body := map[string]any{
+			"contents": []any{map[string]any{"parts": []any{map[string]any{"text": "Say OK"}}}},
+		}
+		b, _ := json.Marshal(body)
+		hresp, err := http.Post(geminiURL, "application/json", bytes.NewReader(b))
+		if err != nil {
+			json.NewEncoder(w).Encode(map[string]any{
+				"status":  "error",
+				"message": fmt.Sprintf("Network error: %v", err),
+				"key_set": true,
+				"detail":  err.Error(),
+			})
+			return
+		}
+		defer hresp.Body.Close()
+
+		respBody, _ := io.ReadAll(hresp.Body)
+
+		if hresp.StatusCode >= 400 {
+			json.NewEncoder(w).Encode(map[string]any{
+				"status":     "error",
+				"key_set":    true,
+				"message":    fmt.Sprintf("Gemini API returned HTTP %d", hresp.StatusCode),
+				"detail":     string(respBody),
+				"statusCode": hresp.StatusCode,
+			})
+			return
+		}
+
+		var gResp struct {
+			Candidates []struct {
+				Content struct {
+					Parts []struct {
+						Text string `json:"text"`
+					} `json:"parts"`
+				} `json:"content"`
+				FinishReason string `json:"finishReason"`
+			} `json:"candidates"`
+		}
+		json.Unmarshal(respBody, &gResp)
+
+		reply := ""
+		if len(gResp.Candidates) > 0 && len(gResp.Candidates[0].Content.Parts) > 0 {
+			reply = gResp.Candidates[0].Content.Parts[0].Text
+		}
+
+		json.NewEncoder(w).Encode(map[string]any{
+			"status":       "ok",
+			"message":      "Gemini API is reachable and key is valid",
+			"key_set":      true,
+			"model":        "gemini-2.5-flash",
+			"ping_reply":   reply,
+			"finishReason": func() string { if len(gResp.Candidates) > 0 { return gResp.Candidates[0].FinishReason }; return "" }(),
 		})
 	}
 }
@@ -1339,7 +1600,7 @@ Return ONLY a JSON object with the following structure:
 
 Keep it professional, architect-focused, and high-signal.`, req.Topic, req.Style)
 
-		geminiURL := "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + geminiKey
+		geminiURL := "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + geminiKey
 		geminiReqBody := map[string]any{
 			"contents": []any{map[string]any{"parts": []any{map[string]any{"text": prompt}}}},
 			"generationConfig": map[string]any{
@@ -1616,6 +1877,7 @@ func main() {
 	mux.Handle("/api/images/generate", observe(cfg, imageGenerateHandler(cfg)))
 	mux.Handle("/api/images/enhance-prompt", observe(cfg, imageEnhancePromptHandler(cfg)))
 	mux.Handle("/api/images/save", observe(cfg, imageSaveHandler(cfg)))
+	mux.Handle("/api/images/test-gemini", observe(cfg, imageTestGeminiHandler(cfg)))
 	mux.Handle("/api/infographics/generate", observe(cfg, infographicGenerateHandler(cfg)))
 	mux.Handle("/api/infographics/save", observe(cfg, infographicSaveHandler(cfg)))
 	mux.Handle("/api/lowerthirds/generate", observe(cfg, lowerThirdGenerateHandler(cfg)))
