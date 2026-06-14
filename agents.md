@@ -87,6 +87,15 @@ This document defines how AI agents interact with the **Claude AI Certification 
 - **Status:** IMPLEMENTED, COMMITTED, PUSHED.
 
 ### 2026-06-14
+- **Task:** 🐛 Fix "double menu on top" bug at `/index.html`.
+- **Action:**
+    - Documented approach in `4_Formula/llm_thinking_log.md`.
+    - Root cause: pages had a hardcoded `<header class="app-header">` with `#projectMenu` (built by legacy `initMenus()`) **and** also loaded `shared/nav.js`, which injects its own `#site-nav` — two menus stacked at the top.
+    - Removed the hardcoded headers from `index.html`, `home.html`, and `5_Symbols/templates/index.html`; wrapped each legacy project-menu build in `if (projectMenuContainer) { … }` so `buildDebugMenu()` still runs.
+    - Confirmed `5_Symbols/production/preprod/course_outline.html` only had orphan `.project-menu-nav` CSS (no element) — left as-is.
+    - Documented the rule in all agent guides (`claude.md`, `gemini.md`, `copilot.md`, `kilocode.md`, `kimi.md`, `agents.md`): top nav is rendered exclusively by `shared/nav.js`; never hardcode a top `<header>`/`<nav>`.
+- **Status:** IMPLEMENTED, COMMITTED, PUSHED.
+
 - **Task:** 🔗 Pipeline Asset Mapping & Modal Preview.
 - **Action:**
     - Documented approach in `4_Formula/llm_thinking_log.md`.
@@ -219,6 +228,7 @@ This document defines how AI agents interact with the **Claude AI Certification 
 - **Error & Fix Logging:** Log all runtime errors to `6_Semblance/logs/error.log` and fixes to `6_Semblance/logs/fix.log`. Additionally, automatically send all error logs to Axiom using the ingestion helper script: `./6_Semblance/tools/send_error.sh "<stage>" "<severity>" "<description>"`.
 - **Active Reflection:** Write a retrospective journal in `6_Semblance/logs/lessons_learned.md` after every milestone.
 - **Menu Sync:** Keep `navigation_config.json` synchronized when adding/removing documents.
+- **⚠️ One Top Nav (No Double Menu):** The top navigation is rendered **exclusively** by `shared/nav.js`. NEVER add a hardcoded `<header class="app-header">`, `<div class="project-menu-nav">`, an element with `id="projectMenu"`, or any `<nav>` to a page that already loads `shared/nav.js` — it stacks two menus at the top (the "double menu on top" bug at `/index.html`). If a legacy `initMenus()` builds `#projectMenu`, wrap that build in `if (projectMenuContainer) { … }` so `buildDebugMenu()` still runs, then delete the hardcoded `<header>`. Keep only the bottom-right Debug Menu.
 - **SQL Canonical Location:** All Supabase SQL files (schema, seeds) live in `5_Symbols/supabase/`. When creating or modifying SQL, always place the file there. Current files:
   - `schema.sql` — full consolidated table definitions and RLS policies
   - `seed.sql` — consolidated seed data (modules, videos, outline, milestones, pricing)

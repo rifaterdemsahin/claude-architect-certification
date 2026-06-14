@@ -1,5 +1,21 @@
 # LLM Thinking Log
 
+## 2026-06-14 — 🐛 Fix "double menu on top" at /index.html
+
+### 🧠 Problem
+User reported a double navigation menu stacked at the top of `http://localhost:8080/index.html` and asked to fix every place causing it and record the rule in all agents.
+
+### 🔬 Root cause
+Several pages render a **hardcoded** top nav — `<header class="app-header">` containing `<div class="project-menu-nav" id="projectMenu">`, populated by a legacy `initMenus()` — **and** also load `shared/nav.js`, which injects its own `<nav id="site-nav">` at the top of `<body>`. Two menus end up stacked. Per CLAUDE.md, navigation must be a shared component only; `shared/nav.js` is the single source of truth.
+
+### 🗺 Approach
+- Detect: pages that load `shared/nav.js` AND contain `<header class="app-header">` / `id="projectMenu"` / `initMenus(`. Found real duplicates: `index.html`, `home.html`, `5_Symbols/templates/index.html`. (`course_outline.html` only had orphan `.project-menu-nav` CSS — no element — so left untouched.)
+- Fix: delete the hardcoded `<header>` block; wrap the legacy project-menu build in `if (projectMenuContainer) { … }` so the early-`return` no longer skips `buildDebugMenu()` (bottom-right Debug Menu must keep working).
+- Prevent recurrence: add a "one top nav only / no double menu" rule to all agent guides (`claude.md`, `gemini.md`, `copilot.md`, `kilocode.md`, `kimi.md`, `agents.md`).
+
+### ✅ Outcome
+Top nav now rendered solely by `shared/nav.js`; Debug Menu preserved. Inline JS of `index.html` and `home.html` verified to parse via `new Function`. Logged to `6_Semblance/logs/error.log` + `fix.log`.
+
 ## 2026-06-14 — ☁️ Project-wide: remove Google Drive dependency → Azure
 
 ### 🎯 Objective

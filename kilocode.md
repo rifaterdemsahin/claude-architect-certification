@@ -72,6 +72,7 @@ claude-architect-certification/
 - Both menus use Flexbox/Grid, responsive, and read from JSON config
 - Search with autocomplete in the Debug Menu
 - No direct link to `markdown_renderer.html`
+- **⚠️ One top nav only — no double menu** — The top navigation is rendered **exclusively** by the shared component (`shared/nav.js`). NEVER add a hardcoded `<header class="app-header">`, `<div class="project-menu-nav">`, an element with `id="projectMenu"`, or any `<nav>` to a page that already loads `shared/nav.js`. Doing so stacks two menus at the top (the "double menu on top" bug at `/index.html`). If you find one, delete the hardcoded markup and let `nav.js` own the top menu — keep only the bottom-right Debug Menu.
 
 ### Social Links (required in `index.html`)
 - GitHub Repository link

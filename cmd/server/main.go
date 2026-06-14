@@ -1949,6 +1949,91 @@ Be concise, critical, and constructive.`, req.ItemName, req.ItemDesc, req.UserNo
 	}
 }
 
+func fixGrammarHandler(cfg config) http.HandlerFunc {
+	type FixRequest struct {
+		Text string `json:"text"`
+	}
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		if r.Method != http.MethodPost {
+			http.Error(w, `{"error":"method not allowed"}`, http.StatusMethodNotAllowed)
+			return
+		}
+
+		var req FixRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, `{"error":"invalid request body"}`, http.StatusBadRequest)
+			return
+		}
+
+		if strings.TrimSpace(req.Text) == "" {
+			json.NewEncoder(w).Encode(map[string]string{"fixed_text": ""})
+			return
+		}
+
+		geminiKey := cfg.getSecret("GEMINI_API_KEY")
+		if geminiKey == "" {
+			http.Error(w, `{"error":"GEMINI_API_KEY missing"}`, http.StatusServiceUnavailable)
+			return
+		}
+
+		prompt := fmt.Sprintf(`You are an expert editor and technical writer. 
+Fix any spelling, grammar, and punctuation errors in the following text. 
+Maintain the original meaning, tone, and formatting (bullet points, etc.). 
+Return ONLY the corrected text, no preamble or extra commentary.
+
+TEXT TO FIX:
+%s`, req.Text)
+
+		ctx, cancel := context.WithTimeout(r.Context(), 20*time.Second)
+		defer cancel()
+
+		geminiURL := "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + geminiKey
+		geminiReqBody := map[string]any{
+			"contents": []any{map[string]any{"parts": []any{map[string]any{"text": prompt}}}},
+		}
+
+		b, _ := json.Marshal(geminiReqBody)
+		hreq, err := http.NewRequestWithContext(ctx, "POST", geminiURL, bytes.NewReader(b))
+		if err != nil {
+			http.Error(w, `{"error":"failed to build request"}`, http.StatusInternalServerError)
+			return
+		}
+		hreq.Header.Set("Content-Type", "application/json")
+
+		hresp, err := http.DefaultClient.Do(hreq)
+		if err != nil {
+			http.Error(w, `{"error":"Gemini API call failed"}`, http.StatusBadGateway)
+			return
+		}
+		defer hresp.Body.Close()
+
+		var gResp struct {
+			Candidates []struct {
+				Content struct {
+					Parts []struct {
+						Text string `json:"text"`
+					} `json:"parts"`
+				} `json:"content"`
+			} `json:"candidates"`
+		}
+		if err := json.NewDecoder(hresp.Body).Decode(&gResp); err != nil {
+			http.Error(w, `{"error":"failed to decode response"}`, http.StatusInternalServerError)
+			return
+		}
+
+		fixed := ""
+		if len(gResp.Candidates) > 0 && len(gResp.Candidates[0].Content.Parts) > 0 {
+			fixed = gResp.Candidates[0].Content.Parts[0].Text
+		}
+
+		json.NewEncoder(w).Encode(map[string]string{
+			"fixed_text": strings.TrimSpace(fixed),
+		})
+	}
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 func main() {
@@ -1991,6 +2076,7 @@ func main() {
 	mux.Handle("/api/infographics/save", observe(cfg, infographicSaveHandler(cfg)))
 	mux.Handle("/api/lowerthirds/generate", observe(cfg, lowerThirdGenerateHandler(cfg)))
 	mux.Handle("/api/ai/sanity-check", observe(cfg, sanityCheckHandler(cfg)))
+	mux.Handle("/api/ai/fix-grammar", observe(cfg, fixGrammarHandler(cfg)))
 	mux.Handle("/admin/errors", observe(cfg, axiomErrorsHandler(tmpl, cfg, navConfigJS)))
 	mux.Handle("/", observe(cfg, homeHandler(tmpl, cfg, navConfigJS)))
 

@@ -11,14 +11,14 @@
 
 ## Key Results
 
-| KR | Metric | Target |
-|----|--------|--------|
-| KR-1 | Production-ready MCP server deployed | Fly.io with SQLite/PostgreSQL bridge |
-| KR-2 | ZDR compliance verified | All API endpoints restricted via VPC |
-| KR-3 | Router with loop breaker tested | max_loop_depth=3, circuit breaker tripped |
-| KR-4 | Prompt caching benchmarked | 90% cost reduction on warm requests |
-| KR-5 | Video course published | 5 modules, all scenes reviewed |
-| KR-6 | Asset generation complete | BG, overlays, icons, lower thirds per scene |
+| KR   | Metric                               | Target                                      |
+| ---- | ------------------------------------ | ------------------------------------------- |
+| KR-1 | Production-ready MCP server deployed | Fly.io with SQLite/PostgreSQL bridge        |
+| KR-2 | ZDR compliance verified              | All API endpoints restricted via VPC        |
+| KR-3 | Router with loop breaker tested      | max_loop_depth=3, circuit breaker tripped   |
+| KR-4 | Prompt caching benchmarked           | 90% cost reduction on warm requests         |
+| KR-5 | Video course published               | 5 modules, all scenes reviewed              |
+| KR-6 | Asset generation complete            | BG, overlays, icons, lower thirds per scene |
 
 ## Production Pipeline Overview
 
@@ -33,13 +33,13 @@ Pre-Production ──► Production ──► Post-Production ──► Publicat
 
 ## Module Roadmap
 
-| Module | Title | Status |
-|--------|-------|--------|
-| 1 | Claude Ecosystem & Flows | In Progress |
-| 2 | Model Context Protocol (MCP) | Planned |
-| 3 | Zero-Data Retention (ZDR) | Planned |
-| 4 | Deterministic Routers | Planned |
-| 5 | Financial Engineering | Planned |
+| Module | Title                        | Status      |
+| ------ | ---------------------------- | ----------- |
+| 1      | Claude Ecosystem & Flows     | In Progress |
+| 2      | Model Context Protocol (MCP) | Planned     |
+| 3      | Zero-Data Retention (ZDR)    | Planned     |
+| 4      | Deterministic Routers        | Planned     |
+| 5      | Financial Engineering        | Planned     |
 
 ## 🚧 Current Tasks (In Progress)
 
@@ -53,6 +53,7 @@ Pre-Production ──► Production ──► Post-Production ──► Publicat
 ## Scene Structure (per section)
 
 Each section follows a 3-act scene structure:
+
 - **Scene 1**: Hook & thesis (e.g. "Systems Engineering > Clever Prompting")
 - **Scene 2**: Technical deep dive (e.g. MCP architecture)
 - **Scene 3**: Resources & call to action (e.g. GitHub repo)
@@ -76,3 +77,12 @@ assets/archives/module1_section1_scene1.zip — Per-scene bundle
 - [ ] EDL verified against waveform
 - [ ] Composite preview matches intended look
 - [ ] Scene bundles zipped for editor handoff
+
+# Backlog
+
+- [ ] Analytics should be in the postprod menu not preprod menu
+- [ ] pingz terminal should open when i turn on all the terminals
+- [ ] open local should open the lastest worked on page and also the ones in progress
+- [ ] terminals should be on an logged in with the llm provider they have . 5_Symbols/tools/vscode_terminal_profiles/formula.md
+- [ ] batch push and commits in the background should run periodily and when the fly.io deployment done it should open the page
+- [ ]

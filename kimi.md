@@ -88,6 +88,7 @@ claude-architect-certification/
 - Debug mode persists via `debug=true` cookie
 - Both menus use Flexbox/Grid, responsive, and read from `navigation_config.json`
 - Navigation is a **shared JavaScript component** — do not hardcode navbars in individual HTML files; extract to the shared component
+- **⚠️ One top nav only — no double menu** — The top navigation is rendered **exclusively** by `shared/nav.js`. NEVER add a hardcoded `<header class="app-header">`, `<div class="project-menu-nav">`, an element with `id="projectMenu"`, or any `<nav>` to a page that already loads `shared/nav.js` — it stacks two menus at the top (the "double menu on top" bug at `/index.html`). If a page has a legacy `initMenus()` that builds `#projectMenu`, wrap that build in `if (projectMenuContainer) { … }` so `buildDebugMenu()` still runs, and delete the hardcoded `<header>`. Keep only the bottom-right Debug Menu.
 - Search with autocomplete in the Debug Menu
 - No direct link to `markdown_renderer.html`
 - **Docs/API menus are removed** — do not re-add them

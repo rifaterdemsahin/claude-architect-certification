@@ -63,6 +63,9 @@
     .btn-sanity { background: rgba(139,92,246,0.1); border: 1px solid rgba(139,92,246,0.3); color: var(--primary); padding: 4px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap; align-self: center; }
     .btn-sanity:hover { background: var(--primary); color: white; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(139,92,246,0.3); }
 
+    .btn-fix-grammar { background: rgba(20,184,166,0.1); border: 1px solid rgba(20,184,166,0.3); color: var(--teal); padding: 4px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap; align-self: center; margin-left: 8px; }
+    .btn-fix-grammar:hover { background: var(--teal); color: white; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(20,184,166,0.3); }
+
     .answer-box { width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 12px; color: var(--text-main); font-family: var(--font-body); font-size: 0.9rem; resize: vertical; min-height: 80px; transition: border-color 0.2s; }
     .answer-box:focus { outline: none; border-color: var(--primary); }
     .answer-box::placeholder { color: rgba(156,163,175,0.4); }
@@ -263,7 +266,10 @@
                 <strong class="item-name">${item.item_name}</strong>
                 <span class="item-desc">${item.item_desc}</span>
               </div>
-              <button class="btn-sanity" onclick="openSanityCheck(${item.id})">✨ Sanity Check</button>
+              <div style="display: flex; gap: 8px;">
+                <button class="btn-fix-grammar" onclick="fixGrammar(${item.id})">✍️ Spell Check</button>
+                <button class="btn-sanity" onclick="openSanityCheck(${item.id})">✨ Sanity Check</button>
+              </div>
             </div>
             <textarea class="answer-box" data-id="${item.id}" placeholder="Your notes/findings..." oninput="scheduleSave(${item.id})">${p.notes || ''}</textarea>
           </div>
@@ -301,7 +307,10 @@
                       <strong class="item-name">${itemName}</strong>
                       <p class="item-desc">${item.item_desc}</p>
                     </div>
-                    <button class="btn-sanity" onclick="openSanityCheck(${item.id})">✨ Sanity Check</button>
+                    <div style="display: flex; gap: 8px;">
+                      <button class="btn-fix-grammar" onclick="fixGrammar(${item.id})">✍️ Spell Check</button>
+                      <button class="btn-sanity" onclick="openSanityCheck(${item.id})">✨ Sanity Check</button>
+                    </div>
                   </div>
                   <textarea class="answer-box" data-id="${item.id}" placeholder="Your findings/hypotheses..." oninput="scheduleSave(${item.id})">${p.notes || ''}</textarea>
                 </div>
@@ -398,6 +407,55 @@
 
     function closeSanityCheck() {
       document.getElementById('sanity-modal').style.display = 'none';
+    }
+
+    async function fixGrammar(itemId) {
+      const textarea = document.querySelector(`.answer-box[data-id="${itemId}"]`);
+      const originalText = textarea.value;
+
+      if (!originalText.trim()) {
+        showToast('Please enter some text first', true);
+        return;
+      }
+
+      setSyncStatus('saving');
+      const btn = document.querySelector(`[data-item-id="${itemId}"] .btn-fix-grammar`);
+      const originalBtnText = btn.textContent;
+      btn.textContent = '⏳ Fixing...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(apiBase() + '/api/ai/fix-grammar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: originalText })
+        });
+
+        const contentType = res.headers.get('content-type') || '';
+        if (!contentType.includes('application/json')) {
+          throw new Error('Backend unavailable');
+        }
+
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+
+        if (data.fixed_text) {
+          textarea.value = data.fixed_text;
+          // Trigger save to Supabase
+          await handleSave(itemId);
+          showToast('✨ Text polished and saved');
+        } else {
+          showToast('No changes needed');
+          setSyncStatus('connected');
+        }
+      } catch (err) {
+        console.error('Fix grammar failed:', err);
+        setSyncStatus('error');
+        showToast('❌ Fix failed: ' + err.message, true);
+      } finally {
+        btn.textContent = originalBtnText;
+        btn.disabled = false;
+      }
     }
 
     window.addEventListener('DOMContentLoaded', loadData);
