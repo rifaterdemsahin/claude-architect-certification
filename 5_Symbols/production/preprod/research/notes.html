@@ -247,7 +247,7 @@ async function loadSupabaseData() {
     { data: rels,  error: err2 },
     { data: sents, error: err3 }
   ] = await Promise.all([
-    client.from('course_videos').select('id, title, video_number, course_modules(module_number)').order('id'),
+    client.from('videos').select('id, title, video_number, modules(module_number)').order('id'),
     client.from('research_relationships').select('*'),
     client.from('sentences').select('id, sentence_type, section, sentence_text, script_id').order('sort_order')
   ]);
@@ -300,7 +300,7 @@ function updateAllRelationsUI() {
   document.querySelectorAll('select[id^="drop-"]').forEach(select => {
     const currentVal = select.value;
     const videoOptions = allVideos.map(v => {
-      const modNum = v.course_modules ? v.course_modules.module_number : '?';
+      const modNum = v.modules ? v.modules.module_number : '?';
       return {
         id: v.id,
         text: `M${modNum} V${v.video_number}: ${v.title}`
@@ -344,7 +344,7 @@ function updateAllRelationsUI() {
       let label = `Vid #${r.video_id}`;
       let scriptUrl = '../scripts/index.html';
       if (vidInfo) {
-        const modNum = vidInfo.course_modules ? vidInfo.course_modules.module_number : '?';
+        const modNum = vidInfo.modules ? vidInfo.modules.module_number : '?';
         label = `M${modNum} V${vidInfo.video_number}`;
         scriptUrl = `../scripts/index.html?module=${modNum}`;
       }
