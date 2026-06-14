@@ -626,6 +626,10 @@
       "url": "markdown_renderer.html?file=6_Semblance/errors/error_rls_checklist_insert.md"
     },
     {
+      "label": "   ├─ 🔐 Error: Accessibility Permissions (osascript)",
+      "url": "markdown_renderer.html?file=6_Semblance/logs/accessibility_error.md"
+    },
+    {
       "label": "   └─ 🗄 Archive: 2026-06-06 (and more)",
       "url": "6_Semblance/archive/daily/"
     },

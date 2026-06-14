@@ -271,3 +271,4 @@ Axiom's query endpoints (both dataset-specific and general APL) require a `start
 ## Lessons Learned - 2026-06-13
 
 - **API Route Propagation:** When adding new API endpoints to a Go server, a full rebuild and restart of the binary is required for the changes to take effect. If the server is running in the background, existing processes must be terminated first.
+\n### [2026-06-14] 🔐 AppleScript & Accessibility\n- **Issue:** Automation of VS Code terminals via `osascript` fails if Accessibility permissions are not granted to the calling app (Terminal/Gemini CLI).\n- **Lesson:** Always provide a clear visual guide for permission escalation when using system-level automation. Screenshot verification from the user is a reliable way to confirm environment state.
