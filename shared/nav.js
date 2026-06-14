@@ -137,11 +137,8 @@
         { label: '📊 Market Analysis', url: '5_Symbols/production/preprod/research/market_analysis.html', description: 'Demand sizing, target audience, competitive landscape, and positioning.' }
       ]},
       { label: '2. 🏠 Product (Solution)', url: 'index.html' },
-      { label: '8. ✅ Sanity Checklist', url: '5_Symbols/production/preprod/sanity_checklist.html', hideAfterDays: 90 },
-      { label: '📅 Timeline', url: '5_Symbols/timeline.html' },
       { label: '4. 📋 Outline', url: '5_Symbols/production/preprod/course_outline.html' },
       { label: '5. 🎬 Script', url: '5_Symbols/production/preprod/scripts/index.html' },
-      { label: '6. 📋 Producer Checklist', url: '5_Symbols/production/preprod/producer_checklist.html' },
       {
         label: '🛠️ Tools',
         children: [
@@ -156,6 +153,7 @@
         ]
       }
     ]},
+    { label: '📋 Planning', url: '5_Symbols/production/preprod/planning.html' },
     { label: '🎥 Production', children: [
       { label: '7. 📸 Shot List & Assets', url: '5_Symbols/production/postprod/production_shotlist.html?module=1&section=1' },
       { label: '8. ✅ Production Checklist', url: '5_Symbols/production/prod/checklist.html' },
@@ -204,11 +202,7 @@
           { label: '✨ Gemini Guide', url: 'gemini.md' }
         ]
       }
-    ]},
-    {
-      "label": "📅 Timeline",
-      "url": "5_Symbols/timeline.html"
-    }
+    ]}
   ];
 
   function resolveUrl(url) {

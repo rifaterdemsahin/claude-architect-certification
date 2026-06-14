@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planning Hub | Claude AI Certification</title>
+  <meta name="description" content="Planning Hub — the founder's critical path (Problem → Outline → Script) plus every planning page: sanity checklist, producer checklist, critical path, pipeline, and timeline.">
+  <meta name="keywords" content="Claude AI, Planning, Critical Path, Pipeline, Timeline, Checklist">
+  <meta name="author" content="Rifat Erdem Sahin">
+  <link rel="icon" type="image/png" href="../../../favicon.png">
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://rifaterdemsahin.github.io/claude-architect-certification/production/preprod/planning.html">
+  <meta property="og:title" content="Planning Hub | Claude AI Certification">
+  <meta property="og:description" content="One place for the critical path and every planning page before shooting.">
+  <meta property="og:image" content="https://rifaterdemsahin.github.io/claude-architect-certification/favicon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #030712; --bg-card: rgba(17,24,39,0.8); --text-main: #f3f4f6; --text-muted: #9ca3af;
+      --primary: #8b5cf6; --secondary: #3b82f6; --accent: #f59e0b; --good: #10b981;
+      --font-title: 'Outfit', sans-serif; --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-dark);
+      background-image: radial-gradient(circle at 10% 20%, rgba(139,92,246,0.08) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(59,130,246,0.08) 0%, transparent 40%);
+      color: var(--text-main); font-family: var(--font-body); line-height: 1.6; padding-bottom: 80px;
+    }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+    header { text-align: center; padding: 48px 0 8px; }
+    .badge { display: inline-block; padding: 6px 16px; background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(139,92,246,0.2)); border: 1px solid rgba(245,158,11,0.3); border-radius: 100px; font-size: 0.8rem; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 14px; }
+    h1 { font-family: var(--font-title); font-size: 2.4rem; font-weight: 800; margin-bottom: 10px; }
+    header p { color: var(--text-muted); max-width: 640px; margin: 0 auto; }
+
+    .section-title { font-family: var(--font-title); font-size: 1.15rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.07em; margin: 40px 0 16px; }
+
+    /* ── Critical Path flow ── */
+    .flow { display: flex; align-items: stretch; gap: 0; flex-wrap: wrap; margin-bottom: 8px; }
+    .flow-step {
+      flex: 1; min-width: 180px; background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 18px; padding: 22px; text-decoration: none; color: inherit; transition: all 0.3s; position: relative;
+    }
+    .flow-step:hover { border-color: var(--primary); transform: translateY(-4px); box-shadow: 0 16px 32px rgba(0,0,0,0.3); }
+    .flow-step.shoot { border-color: rgba(245,158,11,0.4); background: linear-gradient(160deg, rgba(245,158,11,0.08), var(--bg-card)); }
+    .flow-num { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 8px; }
+    .flow-icon { font-size: 1.8rem; margin-bottom: 8px; }
+    .flow-name { font-family: var(--font-title); font-weight: 700; font-size: 1.1rem; margin-bottom: 6px; }
+    .flow-desc { color: var(--text-muted); font-size: 0.82rem; }
+    .flow-arrow { display: flex; align-items: center; justify-content: center; font-size: 1.6rem; color: var(--primary); padding: 0 6px; }
+    @media (max-width: 760px) { .flow-arrow { transform: rotate(90deg); padding: 6px 0; width: 100%; } }
+
+    .gate-note {
+      background: rgba(139,92,246,0.06); border: 1px solid rgba(139,92,246,0.18); border-radius: 14px;
+      padding: 14px 18px; margin: 16px 0 8px; font-size: 0.9rem; color: var(--text-main);
+    }
+    .gate-note strong { color: #c084fc; }
+
+    /* ── Planning cards grid ── */
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 18px; }
+    .card {
+      background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px;
+      padding: 24px; transition: all 0.3s; text-decoration: none; color: inherit; display: block;
+    }
+    .card:hover { border-color: var(--accent); transform: translateY(-4px); box-shadow: 0 16px 32px rgba(0,0,0,0.3); }
+    .card-icon { font-size: 1.9rem; margin-bottom: 10px; }
+    .card-title { font-family: var(--font-title); font-weight: 700; font-size: 1.1rem; margin-bottom: 6px; }
+    .card-desc { color: var(--text-muted); font-size: 0.86rem; }
+    .card-tag { display: inline-block; margin-top: 14px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent); background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.2); padding: 3px 10px; border-radius: 100px; }
+
+    footer { text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 48px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
+    footer a { color: var(--secondary); text-decoration: none; }
+  </style>
+  <script src="../../../shared/nav.js"></script>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div class="badge">Phase 1 of 3 · Planning</div>
+      <h1>📋 Planning Hub</h1>
+      <p>The founder's critical path and every planning page in one place. Complete the path <strong>before</strong> shooting — then keep the momentum going with reversals.</p>
+    </header>
+
+    <!-- ── The Founder's Critical Path ── -->
+    <div class="section-title">🧱 Founder's Critical Path</div>
+    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 18px;">
+      Three foundational steps, in strict order. No outline without a problem, no script without an outline, no shooting without a script.
+    </p>
+
+    <div class="flow">
+      <a class="flow-step" href="problem.html">
+        <div class="flow-num">Step 1 · Gate</div>
+        <div class="flow-icon">❓</div>
+        <div class="flow-name">Problem</div>
+        <div class="flow-desc">Nail what this module solves and why it matters. First, always.</div>
+      </a>
+      <div class="flow-arrow">→</div>
+      <a class="flow-step" href="course_outline.html">
+        <div class="flow-num">Step 2 · Gate</div>
+        <div class="flow-icon">📋</div>
+        <div class="flow-name">Outline</div>
+        <div class="flow-desc">Structure the answer into ordered segments that map to the problem.</div>
+      </a>
+      <div class="flow-arrow">→</div>
+      <a class="flow-step" href="scripts/index.html">
+        <div class="flow-num">Step 3 · Gate</div>
+        <div class="flow-icon">🎬</div>
+        <div class="flow-name">Script</div>
+        <div class="flow-desc">Turn the outline into shootable talking points covering every point.</div>
+      </a>
+      <div class="flow-arrow">→</div>
+      <a class="flow-step shoot" href="../postprod/production_shotlist.html?module=1&section=1">
+        <div class="flow-num">Cleared</div>
+        <div class="flow-icon">🎥</div>
+        <div class="flow-name">Shoot</div>
+        <div class="flow-desc">Only when all three gates are green. Hit record — reversals first.</div>
+      </a>
+    </div>
+
+    <div class="gate-note">
+      <strong>Order is non-negotiable.</strong> Each step is a gate — you do not advance until the previous one is done well enough to work through. Read the full rationale in the
+      <a href="../../../markdown_renderer.html?file=1_Real_Unknown/critical_task.md" style="color:#c084fc; font-weight:700;">Critical Task →</a>
+    </div>
+
+    <!-- ── Planning Pages collected ── -->
+    <div class="section-title">🗂 Planning Pages</div>
+    <div class="grid">
+      <a class="card" href="../../../markdown_renderer.html?file=1_Real_Unknown/critical_task.md">
+        <div class="card-icon">🔴</div>
+        <div class="card-title">Critical Path</div>
+        <div class="card-desc">The one rule: ship the course, don't build the platform. Problem → Outline → Script → Shoot, with the reversals-first rationale.</div>
+        <span class="card-tag">Critical</span>
+      </a>
+
+      <a class="card" href="sanity_checklist.html">
+        <div class="card-icon">✅</div>
+        <div class="card-title">Sanity Checklist</div>
+        <div class="card-desc">Pre-flight validation checks — confirm everything is in order before going live.</div>
+        <span class="card-tag">Checklist</span>
+      </a>
+
+      <a class="card" href="producer_checklist.html">
+        <div class="card-icon">📋</div>
+        <div class="card-title">Producer Checklist</div>
+        <div class="card-desc">Producer-level readiness checklist across the full pre-production pass.</div>
+        <span class="card-tag">Checklist</span>
+      </a>
+
+      <a class="card" href="../../pipeline.html">
+        <div class="card-icon">🧩</div>
+        <div class="card-title">Pipeline</div>
+        <div class="card-desc">End-to-end production pipeline — problem, research, outline, script, shot list, and beyond.</div>
+        <span class="card-tag">Flow</span>
+      </a>
+
+      <a class="card" href="../../timeline.html">
+        <div class="card-icon">📅</div>
+        <div class="card-title">Timeline</div>
+        <div class="card-desc">When each stage happens — the schedule that keeps the ball moving.</div>
+        <span class="card-tag">Schedule</span>
+      </a>
+    </div>
+
+    <footer>
+      <p style="margin-bottom: 8px;">
+        <a href="index.html">← Back to Pre-Production</a>
+        &nbsp;&nbsp;·&nbsp;&nbsp;
+        <a href="../../../markdown_renderer.html?file=1_Real_Unknown/critical_task.md" style="color: var(--text-muted);">🔴 Critical Task</a>
+      </p>
+      <p style="font-size: 0.85rem; opacity: 0.8;">
+        Instructor: <a href="https://www.linkedin.com/in/rifaterdemsahin" target="_blank" style="color: #93c5fd; text-decoration: underline;">Rifat Erdem Sahin</a>
+      </p>
+    </footer>
+  </div>
+
+  <script src="../../../shared/debug-panel.js"></script>
+</body>
+</html>
