@@ -58,7 +58,39 @@ If a "fix" is not removing a blocker to **hitting record**, it waits.
 
 ---
 
+## 🧱 Foundational Critical Path — Problem → Outline → Script
+
+> **The founder's critical path.** These three steps are the foundation. They
+> **must be completed, in this exact order, before any shooting starts.** Skip
+> or reorder them and there is nothing solid to work through.
+
+```
+1️⃣ PROBLEM  →  2️⃣ OUTLINE  →  3️⃣ SCRIPT  →  🎬 SHOOT
+```
+
+| # | Step | What it means | Where it lives | Gate to pass |
+|---|------|---------------|----------------|--------------|
+| 1️⃣ | **Problem** | Nail *what* this module solves and *why* it matters. First, always. | [`2_problem_statement.md`](2_problem_statement.md) | Problem is clear and specific |
+| 2️⃣ | **Outline** | Structure the answer to the problem into ordered segments. | [`4_Formula/certification/course_outline.md`](../4_Formula/certification/course_outline.md) | Outline maps directly to the problem |
+| 3️⃣ | **Script** | Turn the outline into talking points / a shootable script. | [`4_Formula/production/script.md`](../4_Formula/production/script.md) | Script covers every outline point |
+
+- **Order is non-negotiable:** no outline without a problem, no script without
+  an outline, no shooting without a script.
+- Each step is a **gate** — you do not advance until the previous one is done
+  well enough to work through.
+- Only when all three ✅ are green does the **Critical Tasks** loop below begin.
+
+**Founder's critical-path checklist (per module):**
+- [ ] 1️⃣ Problem defined
+- [ ] 2️⃣ Outline built from the problem
+- [ ] 3️⃣ Script written from the outline
+- [ ] ✅ All three complete → cleared to shoot
+
+---
+
 ## ✅ Critical Tasks — In Order, Move the Ball
+
+> Only start this loop once the **Problem → Outline → Script** path above is ✅.
 
 ### 1. Pick ONE module to shoot today
 - [ ] Open `4_Formula/certification/course_outline.md` and choose the next un-recorded segment
