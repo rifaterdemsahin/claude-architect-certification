@@ -199,6 +199,57 @@ This log documents the thinking phase summaries and reasoning processes of the L
 
 ---
 
+## 📅 2026-06-14 — Implement Generic Redirect from Fly.io Staging to GitHub Pages Live Site
+
+### 📥 Input / Task
+- Create a redirect mechanism from Fly.io staging deployment to GitHub Pages live site.
+- Make the solution generic (reusable across all pages, not just one page).
+- Document the decision and implementation in the LLM thinking log.
+
+### 💭 Thinking & Reasoning Process
+1. **Problem Identification**: The customer_discovery.html page was accessed from `https://claude-architect-certification.fly.dev/5_Symbols/production/postprod/customer_discovery.html`, but the user wanted to redirect to the GitHub Pages live site (`https://rifaterdemsahin.github.io/claude-architect-certification/...`) to consolidate traffic and ensure users access the canonical production version.
+
+2. **Initial vs. Final Approach**:
+   - **Initial**: Attempted to add inline JavaScript redirect code directly in customer_discovery.html.
+   - **Realized**: This approach was not scalable or maintainable. Other pages in the same directory and across other production sections (preprod, prod) would need the same solution, leading to code duplication.
+   - **Final**: Created a reusable, shared redirect script (`shared/redirect-to-live-site.js`) that any HTML page can include via a single `<script>` tag.
+
+3. **Design Decisions**:
+   - **Location**: Placed redirect script in `shared/` directory alongside other shared utilities (nav.js, debug-panel.js, reversal-recorder.js).
+   - **Scope**: Script targets only the Fly.io staging host (`claude-architect-certification.fly.dev`); production/live site visitors are unaffected.
+   - **Preservation**: The redirect preserves the full path and query parameters using `location.pathname` and `location.search`, ensuring deep links and bookmarks remain functional.
+   - **Timing**: Script executes in the `<head>` immediately after `<meta name="viewport">`, before other resources load, ensuring fast redirect without wasted resource loading.
+
+4. **Implementation Steps**:
+   - Created `shared/redirect-to-live-site.js` with clear documentation and IIFE (Immediately Invoked Function Expression) pattern to avoid global scope pollution.
+   - Updated `customer_discovery.html` to include the shared script instead of inline code.
+   - Applied the redirect script to 13 total pages in `/5_Symbols/production/postprod/`:
+     - asset_checklist.html
+     - audio_scoring.html
+     - customer_discovery.html
+     - edit_list.html
+     - flywheel.html
+     - image_generator.html
+     - index.html
+     - linkedin_controversial.html
+     - linkedin_messaging.html
+     - lower_thirds.html
+     - post_production_checklist.html
+     - post_production_master.html
+     - production_shotlist.html
+     - visual_gallery.html
+   - Used an Explore agent to efficiently add the script to 12 pages in parallel (excluding customer_discovery.html and index.html which required special handling).
+
+5. **Extensibility**: The solution is designed to be extended to other production sections (preprod, prod, publish, etc.) by simply adding the same `<script>` tag to pages in those directories. A single shared script handles the redirect logic for the entire application.
+
+### 📤 Outcomes & Decisions
+- Created `shared/redirect-to-live-site.js` as a reusable redirect utility.
+- Updated 14 HTML files in postprod directory to include the redirect.
+- All changes committed with descriptive messages.
+- Solution is maintainable, scalable, and does not affect production visitors.
+
+---
+
 ## 📅 2026-05-30 — Create Missing Root Templates
 
 ### 📥 Input / Task
