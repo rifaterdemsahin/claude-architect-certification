@@ -24,6 +24,7 @@ Status: `APPLIED` | `VERIFIED` | `WORKAROUND` | `PENDING`
 [2026-06-07] [TEST] [VERIFIED] — Programmatically recalculated correct relative paths for index.html, favicon.png, production_hub.html, etc. in 5_Symbols/production/ using scratch/fix_broken_paths.py, and resolved assets to module-1 shared folder. Updated test_links.py to bypass template literals.
 [2026-06-07] [RESTRO] [VERIFIED] — Switched to \g<1> syntax in regex substitutions to isolate group match from number 5 in 5_Symbols.
 [2026-06-07] [RESTRO] [VERIFIED] — Removed old node_modules folder and performed a clean npm install inside 5_Symbols/src/mcp-server/.
+[2026-06-14] [5_Symbols/tools] [APPLIED] — VS Code: terminal tab title not visible: added `"overrideName": true` to all agent profiles in `settings-snippet.json`; added a `Ping` profile with `ping -c 4 8.8.8.8`; added matching keybinding `Ctrl+Shift+0`; updated `rename_terminal_tabs.sh`, `formula.md`, and navigation fallbacks. Documented in 6_Semblance/errors/error_vscode_terminal_title_not_visible.md. Status → VERIFIED once a coloured agent tab appears in VS Code:.
 [2026-06-02] [SETUP] [VERIFIED] — fix.log initialized. Linked to error.log for cross-referencing.
 
 ---

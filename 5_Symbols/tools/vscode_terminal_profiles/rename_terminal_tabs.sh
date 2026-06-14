@@ -13,5 +13,6 @@ case "$AGENT" in
   claude|Claude)        vstitle "🧠 Claude" ;;
   kimi|Kimi)            vstitle "🌙 Kimi" ;;
   kilo|Kilo)            vstitle "⚡ Kilo" ;;
+  ping|Ping)            vstitle "📡 Ping" ;;
   *)                    vstitle "$AGENT" ;;
 esac

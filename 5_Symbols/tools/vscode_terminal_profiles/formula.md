@@ -7,6 +7,7 @@ Use this formula when you want dedicated terminal tabs for `Gemini`, `Claude`, `
 - Each AI agent gets its own VS Code: integrated terminal tab.
 - Tabs show the agent name and an icon.
 - The terminal **icon** is tinted with a unique theme colour.
+- The tab **label** shows the profile name instead of the shell process (`overrideName: true`).
 
 ## ✅ What Works Out of the Box
 
@@ -38,7 +39,7 @@ Launch         = keybinding.cmd + workbench.action.terminal.newWithProfile { pro
 
 Open `Cmd+Shift+P` → **Preferences: Open User Settings (JSON)** and add the platform block for your OS.
 
-The macOS example below is ready to copy from [`settings-snippet.json`](5_Symbols/tools/vscode_terminal_profiles/settings-snippet.json):
+The macOS example below is ready to copy from [`settings-snippet.json`](5_Symbols/tools/vscode_terminal_profiles/settings-snippet.json). Notice the `"overrideName": true` flag — this is what makes the profile name (e.g. **Claude**) appear on the tab instead of `zsh`.
 
 ```jsonc
 {
@@ -47,25 +48,36 @@ The macOS example below is ready to copy from [`settings-snippet.json`](5_Symbol
       "path": "zsh",
       "args": [],
       "icon": "sparkle",
-      "color": "terminal.ansiYellow"
+      "color": "terminal.ansiYellow",
+      "overrideName": true
     },
     "Claude": {
       "path": "zsh",
       "args": [],
       "icon": "comment",
-      "color": "terminal.ansiCyan"
+      "color": "terminal.ansiCyan",
+      "overrideName": true
     },
     "Kimi": {
       "path": "zsh",
       "args": [],
       "icon": "moon",
-      "color": "terminal.ansiMagenta"
+      "color": "terminal.ansiMagenta",
+      "overrideName": true
     },
     "Kilo": {
       "path": "zsh",
       "args": [],
       "icon": "zap",
-      "color": "terminal.ansiRed"
+      "color": "terminal.ansiRed",
+      "overrideName": true
+    },
+    "Ping": {
+      "path": "zsh",
+      "args": ["-c", "ping -c 4 8.8.8.8"],
+      "icon": "broadcast",
+      "color": "terminal.ansiGreen",
+      "overrideName": true
     }
   }
 }
@@ -90,7 +102,8 @@ Open `Cmd+Shift+P` → **Preferences: Open Keyboard Shortcuts (JSON)** and paste
   { "key": "ctrl+shift+g", "command": "workbench.action.terminal.newWithProfile", "args": { "profileName": "Gemini" } },
   { "key": "ctrl+shift+c", "command": "workbench.action.terminal.newWithProfile", "args": { "profileName": "Claude" } },
   { "key": "ctrl+shift+k", "command": "workbench.action.terminal.newWithProfile", "args": { "profileName": "Kimi" } },
-  { "key": "ctrl+shift+l", "command": "workbench.action.terminal.newWithProfile", "args": { "profileName": "Kilo" } }
+  { "key": "ctrl+shift+l", "command": "workbench.action.terminal.newWithProfile", "args": { "profileName": "Kilo" } },
+  { "key": "ctrl+shift+0", "command": "workbench.action.terminal.newWithProfile", "args": { "profileName": "Ping" } }
 ]
 ```
 
@@ -109,6 +122,7 @@ source rename_terminal_tabs.sh gemini
 source rename_terminal_tabs.sh claude
 source rename_terminal_tabs.sh kimi
 source rename_terminal_tabs.sh kilo
+source rename_terminal_tabs.sh ping
 source rename_terminal_tabs.sh "Custom Name"
 ```
 
@@ -132,6 +146,7 @@ All are `terminal.ansi*` colours, so they adapt to the current VS Code: theme.
 | Claude | `terminal.ansiCyan` | 🧠 calm / coding |
 | Kimi   | `terminal.ansiMagenta` | 🌙 night mode accent |
 | Kilo   | `terminal.ansiRed` | ⚡ alert / action |
+| Ping   | `terminal.ansiGreen` | 📡 connectivity check |
 
 Other valid ids: `terminal.ansiBlack`, `terminal.ansiBlue`, `terminal.ansiGreen`, `terminal.ansiWhite`, `terminal.ansiBrightRed`, etc.
 
@@ -157,5 +172,6 @@ vscode.window.createTerminal({ name: 'Claude', color: new vscode.ThemeColor('ter
 |---------|-----|
 | Keybinding does nothing | Check that a profile with the exact `"profileName"` exists in your user `settings.json`. |
 | Colour does not appear | The colour only tints the terminal tab **icon**, not the whole tab background. |
-| Title reverts after running a command | Add `export PROMPT_COMMAND=''` (bash) or clear `precmd` hooks that overwrite xtem titles. |
+| **Title stays as `zsh` or does not show the agent name** | Add `"overrideName": true` to the profile, OR set `"terminal.integrated.tabs.title": "${sequence}"` in `settings.json`. |
+| Title reverts after running a command | Add `export PROMPT_COMMAND=''` (bash) or clear `precmd` hooks that overwrite xterm titles. |
 | Profile not in the `+` terminal menu | Reload the VS Code: window (`Cmd+Shift+P` → **Developer: Reload Window**). |

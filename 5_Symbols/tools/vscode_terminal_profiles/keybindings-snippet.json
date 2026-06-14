@@ -18,5 +18,10 @@
     "key": "ctrl+shift+l",
     "command": "workbench.action.terminal.newWithProfile",
     "args": { "profileName": "Kilo" }
+  },
+  {
+    "key": "ctrl+shift+0",
+    "command": "workbench.action.terminal.newWithProfile",
+    "args": { "profileName": "Ping" }
   }
 ]

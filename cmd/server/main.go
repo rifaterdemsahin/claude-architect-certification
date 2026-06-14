@@ -224,6 +224,15 @@ func observe(cfg config, next http.Handler) http.Handler {
 		start := time.Now()
 		sw := &statusWriter{ResponseWriter: w, status: http.StatusOK}
 
+		// Cross-origin support for every route: the static GitHub Pages site
+		// (display-only) diverts all /api calls to this Fly.io backend. Allow
+		// *.github.io and local dev, and answer CORS preflights here.
+		setCORS(sw, r)
+		if r.Method == http.MethodOptions {
+			sw.WriteHeader(http.StatusNoContent)
+			return
+		}
+
 		defer func() {
 			if rec := recover(); rec != nil {
 				http.Error(sw, "internal server error", http.StatusInternalServerError)
@@ -1841,8 +1850,8 @@ func setCORS(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", origin)
 	}
 	w.Header().Set("Vary", "Origin")
-	w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, apikey")
 }
 
 func sanityCheckHandler(cfg config) http.HandlerFunc {
