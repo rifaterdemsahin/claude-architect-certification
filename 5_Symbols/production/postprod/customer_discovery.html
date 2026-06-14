@@ -186,6 +186,12 @@
   </div>
 
   <script>
+    // Redirect from Fly.io staging to GitHub Pages live site
+    if (location.hostname === 'claude-architect-certification.fly.dev') {
+      const path = location.pathname.replace('/5_Symbols/production/postprod/', '');
+      location.replace(`https://rifaterdemsahin.github.io/claude-architect-certification/5_Symbols/production/postprod/${path}${location.search}`);
+    }
+
     const SUPABASE_URL  = 'https://rmekfsdhglyiralxvkwc.supabase.co';
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZWtmc2RoZ2x5aXJhbHh2a3djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NzYzODgsImV4cCI6MjA5NjM1MjM4OH0.ay6HsmO_CbMGDXL_Dv4DT-paAIAOqlQPfmqqx_mexSU';
     const USER_ID = 'default';
