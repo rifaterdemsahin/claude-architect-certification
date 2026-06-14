@@ -319,7 +319,45 @@
       window.location.pathname, 0, 0, e.reason instanceof Error ? e.reason : null);
   });
 
+  // When the site is viewed on the static GitHub Pages mirror, show a bottom
+  // banner pointing visitors to the real live (Fly.io) deployment, which has
+  // the working backend (AI Sanity Check, image generation, etc.).
+  function showLiveSiteBanner() {
+    if (location.hostname.indexOf('github.io') === -1) return;
+    if (document.getElementById('live-site-banner')) return;
+
+    var liveUrl = 'https://claude-architect-certification.fly.dev' +
+      location.pathname.replace(/^\/claude-architect-certification/, '') +
+      location.search + location.hash;
+
+    var bar = document.createElement('div');
+    bar.id = 'live-site-banner';
+    bar.innerHTML =
+      '<span>📦 You\'re on the static GitHub Pages mirror. ' +
+      'For the full live site with working AI features, visit the ' +
+      '<a href="' + liveUrl + '">live app ↗</a></span>' +
+      '<button type="button" aria-label="Dismiss">✕</button>';
+    bar.style.cssText = [
+      'position:fixed', 'left:0', 'right:0', 'bottom:0', 'z-index:10050',
+      'display:flex', 'align-items:center', 'justify-content:center', 'gap:14px',
+      'padding:10px 18px', 'font-family:system-ui,-apple-system,sans-serif',
+      'font-size:0.85rem', 'color:#f3f4f6',
+      'background:rgba(17,24,39,0.96)', 'backdrop-filter:blur(8px)',
+      'border-top:1px solid rgba(139,92,246,0.4)',
+      'box-shadow:0 -4px 20px rgba(0,0,0,0.5)'
+    ].join(';');
+
+    var a = bar.querySelector('a');
+    a.style.cssText = 'color:#a78bfa;font-weight:700;text-decoration:underline;';
+    var btn = bar.querySelector('button');
+    btn.style.cssText = 'background:none;border:none;color:#9ca3af;font-size:1rem;cursor:pointer;line-height:1;padding:4px;';
+    btn.addEventListener('click', function () { bar.remove(); });
+
+    document.body.appendChild(bar);
+  }
+
   function init() {
+    showLiveSiteBanner();
     if (document.getElementById('site-nav')) return;
     var preloaded = window.__NAV_CONFIG__;
     if (preloaded && preloaded.projectMenu) {
