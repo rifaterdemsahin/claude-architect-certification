@@ -18,12 +18,15 @@
             }
           ]
         },
-        { "label": "2. 🏠 Product (Solution)", "url": "index.html" },
+        {
+          "label": "2. 🏠 Product (Solution)",
+          "url": "index.html"
+        },
         {
           "label": "3. 🔬 Research",
           "children": [
-            { 
-              "label": "🗂 Research Hub", 
+            {
+              "label": "🗂 Research Hub",
               "url": "5_Symbols/production/preprod/research/index.html",
               "description": "Central dashboard for all pre-production assets including images, audio, and notes."
             },
@@ -40,29 +43,29 @@
                   "url": "5_Symbols/production/postprod/image_generator.html",
                   "description": "AI-powered image generator for scene backgrounds and assets."
                 }
-]
-        },
-        {
-          "label": "📊 Analytics",
-          "children": [
+              ]
+            },
             {
-              "label": "📈 Video Analytics",
-              "url": "https://studio.youtube.com/video/bsH-vBGNERE/analytics/tab-overview/period-default/explore?entity_type=VIDEO&entity_id=bsH-vBGNERE&time_period=since_publish%2Ctime_period_unit_nth_days%2C1&explore_type=TABLE_AND_CHART&metric=AVERAGE_WATCH_PERCENTAGE&granularity=DAY&t_metrics=AVERAGE_WATCH_PERCENTAGE&dimension=VIDEO&o_column=VIDEO&o_direction=ANALYTICS_ORDER_DIRECTION_ASC&comparison_entity_id=j5lku3LYoK4&comparison_time_period=since_publish%2Ctime_period_unit_nth_days%2C1&comparison_entity_type=VIDEO&comparison_type=CONTENT_AND_CHANNEL"
-            }
-          ]
-        },
-        {
-              "label": "🎵 Audio", 
+              "label": "📊 Analytics",
+              "children": [
+                {
+                  "label": "📈 Video Analytics",
+                  "url": "https://studio.youtube.com/video/bsH-vBGNERE/analytics/tab-overview/period-default/explore?entity_type=VIDEO&entity_id=bsH-vBGNERE&time_period=since_publish%2Ctime_period_unit_nth_days%2C1&explore_type=TABLE_AND_CHART&metric=AVERAGE_WATCH_PERCENTAGE&granularity=DAY&t_metrics=AVERAGE_WATCH_PERCENTAGE&dimension=VIDEO&o_column=VIDEO&o_direction=ANALYTICS_ORDER_DIRECTION_ASC&comparison_entity_id=j5lku3LYoK4&comparison_time_period=since_publish%2Ctime_period_unit_nth_days%2C1&comparison_entity_type=VIDEO&comparison_type=CONTENT_AND_CHANNEL"
+                }
+              ]
+            },
+            {
+              "label": "🎵 Audio",
               "url": "5_Symbols/production/preprod/research/audio.html",
               "description": "Voiceovers, background music, and sound effects for video modules."
             },
-            { 
-              "label": "🎬 Videos", 
+            {
+              "label": "🎬 Videos",
               "url": "5_Symbols/production/preprod/research/videos.html",
               "description": "Raw footage, B-roll, and screen recordings for final assembly."
             },
-            { 
-              "label": "📝 Notes", 
+            {
+              "label": "📝 Notes",
               "url": "5_Symbols/production/preprod/research/notes.html",
               "description": "Research findings, technical references, and production scripts."
             },
@@ -78,26 +81,26 @@
             }
           ]
         },
-        { "label": "4. 📋 Outline", "url": "5_Symbols/production/preprod/course_outline.html" },
+        {
+          "label": "4. 📋 Outline",
+          "url": "5_Symbols/production/preprod/course_outline.html"
+        },
         {
           "label": "5. 🎬 Script",
           "children": [
-            { "label": "🗂 Master Script", "url": "5_Symbols/production/preprod/scripts/index.html" },
-            { "label": "✨ Script Generator", "url": "5_Symbols/production/preprod/scripts/generator.html" }
+            {
+              "label": "🗂 Master Script",
+              "url": "5_Symbols/production/preprod/scripts/index.html"
+            },
+            {
+              "label": "✨ Script Generator",
+              "url": "5_Symbols/production/preprod/scripts/generator.html"
+            }
           ]
-        },
-        {
-          "label": "6. 📋 Producer Checklist",
-          "url": "5_Symbols/production/preprod/producer_checklist.html"
         },
         {
           "label": "7. 🎯 IVQ Manager",
           "url": "5_Symbols/production/preprod/ivq.html"
-        },
-        {
-          "label": "8. ✅ Sanity Checklist",
-          "url": "5_Symbols/production/preprod/sanity_checklist.html",
-          "hideAfterDays": 90
         },
         {
           "label": "🛠️ Tools",
@@ -162,6 +165,10 @@
           ]
         }
       ]
+    },
+    {
+      "label": "📋 Planning",
+      "url": "5_Symbols/production/preprod/planning.html"
     },
     {
       "label": "🎥 Production",
@@ -321,18 +328,13 @@
           ]
         }
       ]
-    },
-    {
-      "label": "📅 Timeline",
-      "url": "5_Symbols/timeline.html"
-    },
-    {
-      "label": "🧩 Pipeline",
-      "url": "5_Symbols/pipeline.html"
     }
   ],
   "debugMenu": [
-    { "label": "📁 1. Real Unknown", "url": "1_Real_Unknown/" },
+    {
+      "label": "📁 1. Real Unknown",
+      "url": "1_Real_Unknown/"
+    },
     {
       "label": "   ├─ 📖 README",
       "url": "markdown_renderer.html?file=1_Real_Unknown/README.md"
@@ -365,8 +367,10 @@
       "label": "   └─ ✅ Sanity Check",
       "url": "markdown_renderer.html?file=1_Real_Unknown/7_sanity_check.md"
     },
-
-    { "label": "📁 2. Environment", "url": "2_Environment/" },
+    {
+      "label": "📁 2. Environment",
+      "url": "2_Environment/"
+    },
     {
       "label": "   ├─ 📖 README",
       "url": "markdown_renderer.html?file=2_Environment/README.md"
@@ -419,8 +423,10 @@
       "label": "   └─ 💾 Supabase Backup",
       "url": "markdown_renderer.html?file=2_Environment/12_supabase_backup.md"
     },
-
-    { "label": "📁 3. Simulation", "url": "3_Simulation/" },
+    {
+      "label": "📁 3. Simulation",
+      "url": "3_Simulation/"
+    },
     {
       "label": "   ├─ 📖 README",
       "url": "markdown_renderer.html?file=3_Simulation/README.md"
@@ -437,8 +443,10 @@
       "label": "   └─ 👤 User Experience",
       "url": "markdown_renderer.html?file=3_Simulation/userexperience.md"
     },
-
-    { "label": "📁 4. Formula", "url": "4_Formula/" },
+    {
+      "label": "📁 4. Formula",
+      "url": "4_Formula/"
+    },
     {
       "label": "   ├─ 📖 README",
       "url": "markdown_renderer.html?file=4_Formula/README.md"
@@ -543,8 +551,10 @@
       "label": "   └─ 🛢️ Tools: Supabase Setup Formula",
       "url": "markdown_renderer.html?file=4_Formula/tools/supabase_setup_formula.md"
     },
-
-    { "label": "📁 5. Symbols (Code)", "url": "5_Symbols/" },
+    {
+      "label": "📁 5. Symbols (Code)",
+      "url": "5_Symbols/"
+    },
     {
       "label": "   ├─ 📖 README",
       "url": "markdown_renderer.html?file=5_Symbols/README.md"
@@ -569,10 +579,18 @@
       "label": "   ├─ 📋 Plan: Prod Module 1",
       "url": "markdown_renderer.html?file=5_Symbols/production/prod/module_1_plan.md"
     },
-    { "label": "   ├─ 🧪 Sanity Gate (Pre-Prod→Post)", "url": "5_Symbols/production/preprod/sanity_check.html" },
-    { "label": "   ├─ ✅ Production Checklist", "url": "5_Symbols/production/prod/checklist.html" },
-
-    { "label": "📁 6. Semblance", "url": "6_Semblance/" },
+    {
+      "label": "   ├─ 🧪 Sanity Gate (Pre-Prod→Post)",
+      "url": "5_Symbols/production/preprod/sanity_check.html"
+    },
+    {
+      "label": "   ├─ ✅ Production Checklist",
+      "url": "5_Symbols/production/prod/checklist.html"
+    },
+    {
+      "label": "📁 6. Semblance",
+      "url": "6_Semblance/"
+    },
     {
       "label": "   ├─ 📖 README",
       "url": "markdown_renderer.html?file=6_Semblance/README.md"
@@ -637,8 +655,10 @@
       "label": "   └─ 🗄 Archive: 2026-06-06 (and more)",
       "url": "6_Semblance/archive/daily/"
     },
-
-    { "label": "📁 7. Testing Known", "url": "7_Testing_Known/" },
+    {
+      "label": "📁 7. Testing Known",
+      "url": "7_Testing_Known/"
+    },
     {
       "label": "   ├─ 📖 README",
       "url": "markdown_renderer.html?file=7_Testing_Known/README.md"
@@ -651,10 +671,14 @@
       "label": "   └─ 🧪 Validation Report",
       "url": "markdown_renderer.html?file=7_Testing_Known/validation_report.md"
     },
-
-    { "label": "---", "url": "divider" },
-
-    { "label": "📁 Root Documents", "url": "" },
+    {
+      "label": "---",
+      "url": "divider"
+    },
+    {
+      "label": "📁 Root Documents",
+      "url": ""
+    },
     {
       "label": "   ├─ 📖 README (repo root)",
       "url": "markdown_renderer.html?file=README.md"
@@ -691,6 +715,9 @@
       "label": "   ├─ 💬 prompts.md",
       "url": "markdown_renderer.html?file=prompts.md"
     },
-    { "label": "   └─ ✅ todos.md", "url": "markdown_renderer.html?file=todos.md" }
+    {
+      "label": "   └─ ✅ todos.md",
+      "url": "markdown_renderer.html?file=todos.md"
+    }
   ]
 }
