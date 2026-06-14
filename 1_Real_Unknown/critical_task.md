@@ -6,6 +6,25 @@
 
 ---
 
+## 💡 Rationale — Why Reversals First
+
+**Keep doing the reversals and the rest takes care of itself.**
+
+- If I just **keep recording reversals**, I build up a body of raw captures over time.
+- At the end, that pile of reversals becomes my **research safety net** — if I
+  missed a point or skipped a detail, the captures are there to mine and fill
+  the gaps. Recording first means nothing is lost.
+- And when I **feel confident enough**, I can drop down into the **shot list**
+  (`production_shotlist.html`) and shape those reversals into the real, edited
+  course material.
+
+The order is deliberate: **record now (low pressure, high volume) → research
+the gaps later → refine into the shot list only when confident.** Reversals are
+the input that makes the other two possible. That's why hitting record every
+session is the critical task.
+
+---
+
 ## 🎯 The Single Objective
 
 **Record and publish course modules using the tools that already exist.**
