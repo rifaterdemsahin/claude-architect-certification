@@ -1,0 +1,113 @@
+{
+  "terminal.integrated.profiles.osx": {
+    "Gemini": {
+      "path": "zsh",
+      "args": [],
+      "icon": "sparkle",
+      "color": "terminal.ansiYellow",
+      "overrideName": true
+    },
+    "Claude": {
+      "path": "zsh",
+      "args": [],
+      "icon": "comment",
+      "color": "terminal.ansiCyan",
+      "overrideName": true
+    },
+    "Kimi": {
+      "path": "zsh",
+      "args": [],
+      "icon": "moon",
+      "color": "terminal.ansiMagenta",
+      "overrideName": true
+    },
+    "Kilo": {
+      "path": "zsh",
+      "args": [],
+      "icon": "zap",
+      "color": "terminal.ansiRed",
+      "overrideName": true
+    },
+    "Ping": {
+      "path": "zsh",
+      "args": ["-c", "ping -c 4 8.8.8.8"],
+      "icon": "broadcast",
+      "color": "terminal.ansiGreen",
+      "overrideName": true
+    }
+  },
+  "terminal.integrated.profiles.linux": {
+    "Gemini": {
+      "path": "bash",
+      "args": [],
+      "icon": "sparkle",
+      "color": "terminal.ansiYellow",
+      "overrideName": true
+    },
+    "Claude": {
+      "path": "bash",
+      "args": [],
+      "icon": "comment",
+      "color": "terminal.ansiCyan",
+      "overrideName": true
+    },
+    "Kimi": {
+      "path": "bash",
+      "args": [],
+      "icon": "moon",
+      "color": "terminal.ansiMagenta",
+      "overrideName": true
+    },
+    "Kilo": {
+      "path": "bash",
+      "args": [],
+      "icon": "zap",
+      "color": "terminal.ansiRed",
+      "overrideName": true
+    },
+    "Ping": {
+      "path": "bash",
+      "args": ["-c", "ping -c 4 8.8.8.8"],
+      "icon": "broadcast",
+      "color": "terminal.ansiGreen",
+      "overrideName": true
+    }
+  },
+  "terminal.integrated.profiles.windows": {
+    "Gemini": {
+      "path": "pwsh",
+      "args": ["-NoLogo"],
+      "icon": "sparkle",
+      "color": "terminal.ansiYellow",
+      "overrideName": true
+    },
+    "Claude": {
+      "path": "pwsh",
+      "args": ["-NoLogo"],
+      "icon": "comment",
+      "color": "terminal.ansiCyan",
+      "overrideName": true
+    },
+    "Kimi": {
+      "path": "pwsh",
+      "args": ["-NoLogo"],
+      "icon": "moon",
+      "color": "terminal.ansiMagenta",
+      "overrideName": true
+    },
+    "Kilo": {
+      "path": "pwsh",
+      "args": ["-NoLogo"],
+      "icon": "zap",
+      "color": "terminal.ansiRed",
+      "overrideName": true
+    },
+    "Ping": {
+      "path": "pwsh",
+      "args": ["-NoLogo", "-Command", "ping -n 4 8.8.8.8"],
+      "icon": "broadcast",
+      "color": "terminal.ansiGreen",
+      "overrideName": true
+    }
+  }
+}

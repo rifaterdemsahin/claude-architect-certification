@@ -1,5 +1,37 @@
 # LLM Thinking Log
 
+## 2026-06-14 — ☁️ Project-wide: remove Google Drive dependency → Azure
+
+### 🎯 Objective
+Eliminate the Google Drive dependency everywhere and standardize on Azure Blob Storage (via the Go server's SAS-signed endpoints).
+
+### 📐 Design & Implementation Plan
+1. **scripts/index.html** (generated audio): replaced the GIS OAuth + Drive multipart upload (`uploadToDrive`, `findOrCreateDriveFolder`, `getGisToken`, the folder-ID modal, the Drive config panel/CSS, the `gsi/client` script) with `uploadAudioToAzure()` → `POST /api/research/upload?container=research-audio`; stored URL is the read proxy. `saveAudio()` now uploads directly (no folder prompt).
+2. **settings.html**: converted the "Google Drive" config card (folder ID + OAuth client ID inputs) into a read-only **Azure Blob Storage** status card that pings `/api/config` for the account name and links to the in-app asset browser.
+3. **Nav tool links**: `📁 Google Drive` → `☁️ Azure Portal` (`https://portal.azure.com/`) in `navigation_config.json`, `shared/nav.js`, `index.html`, `markdown_renderer.html`, `home.html`, `course_src/templates/markdown_renderer.html`.
+4. **shared/debug-panel.js**: dropped the `google_client_id` auto-set + status line.
+5. **Go server**: removed `googleClientID` config field, the `GOOGLE_CLIENT_ID` env read, and `googleClientId` from `/api/config`.
+6. **Kept** the `toGDriveEmbedUrl` pass-through helper (pure string rewrite, no Google service) so legacy Drive URLs already stored in Supabase still render. Course-content docs about the producer's Drive folder structure were left untouched (documentation, not a code dependency).
+
+### ✅ Outcome
+Project-wide sweep for functional Drive references (GIS, Drive/Picker APIs, OAuth, client IDs) returns zero. All four modified pages' inline JS parses; `go build ./cmd/server/` succeeds.
+
+## 2026-06-14 — 🎨 VS Code: Agent Terminal Profiles
+
+### 🎯 Objective
+Give each AI agent a dedicated, colour-coded VS Code: integrated terminal tab (Gemini, Claude, Kimi, Kilo) without relying on any extension.
+
+### 📐 Design & Implementation Plan
+1. **Profiles over extensions**: VS Code: terminal profiles support `icon` and `color` natively; use `terminal.integrated.profiles.<platform>` in user `settings.json`.
+2. **One keybinding per agent**: Bind `workbench.action.terminal.newWithProfile` with `args.profileName` in `keybindings.json`.
+3. **Rename existing terminals**: Provide a POSIX shell script that emits the ANSI OSC 0 escape sequence (`\033]0;<name>\007`) so a running terminal can relabel itself from the shell.
+4. **Documentation**: Create `5_Symbols/tools/vscode_terminal_profiles/formula.md` with the formula, ready-to-paste JSON, colour reference, and a note that no extension is needed.
+5. **Menu sync**: Add the new guide to `navigation_config.json` under Production > Tools and mirror it in all fallback menus (`index.html`, `markdown_renderer.html`, `home.html`, `shared/nav.js`, `course_src/templates/markdown_renderer.html`).
+6. **Validation**: Check JSON validity of snippets and `navigation_config.json`; run `bash -n` on the rename script and make it executable.
+
+### ✅ Outcome
+New `5_Symbols/tools/vscode_terminal_profiles/` folder with formula, settings/keybindings snippets, and rename script. Profile names `Gemini` (yellow), `Claude` (cyan), `Kimi` (magenta), `Kilo` (red), each with icon and colour. Menu fallbacks updated.
+
 ## 2026-06-14 — ☁️ Shot List uploads: Google Drive → Azure Blob
 
 ### 🎯 Objective

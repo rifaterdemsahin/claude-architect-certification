@@ -586,8 +586,14 @@
     <div id="reversal-notice" style="background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 20px; padding: 16px 24px; margin-bottom: 32px; font-size: 0.95rem; display: flex; align-items: center; gap: 16px; backdrop-filter: blur(10px);">
       <span style="font-size: 1.8rem;">🎬</span>
       <span style="line-height: 1.5;">
-        <strong>Reversal Shot Mode:</strong> Capture quick reference takes using the global <b style="color:var(--primary);">Screen Recorder</b> or <b style="color:var(--primary);">Audio Recorder</b> (top-right). Recorded clips land here automatically as "Reversal" shots, where you can link them to your module and video to accelerate production.
+        <strong>Reversal Shot Mode:</strong> Capture quick reference takes using the global <b style="color:var(--primary);">Screen Recorder</b>, <b style="color:var(--primary);">Audio Recorder</b>, or <b style="color:var(--primary);">📷 Capture</b> (top-right). Recorded clips and screen captures land here automatically as "Reversal" shots, where you can link them to your module and video to accelerate production.
       </span>
+    </div>
+
+    <!-- Screen Captures Gallery -->
+    <div id="captures-panel" class="scene-table-panel" style="display:none;">
+      <div class="panel-header">📷 Screen Captures — click to insert as scene background</div>
+      <div id="captures-gallery" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;"></div>
     </div>
 
     <!-- Scene Summary Table -->
@@ -705,7 +711,7 @@
         <div class="form-group">
           <label>Background Image URL <span style="color:var(--text-muted);font-weight:400;font-size:0.7rem;">(Upload to Azure, or paste a URL)</span></label>
           <div class="input-with-picker">
-            <input type="text" id="fBg" placeholder="https://drive.google.com/file/d/... or assets/...png">
+            <input type="text" id="fBg" placeholder="Upload to Azure, or paste a URL (e.g. assets/...png)">
             <button class="btn-pick-drive" onclick="browseAzure('fBg')" title="Browse Azure files">☁️ Azure</button>
             <button class="btn-upload-drive" onclick="triggerUpload('fBg')" title="Upload local file to Azure">⬆️ Upload</button>
           </div>
@@ -713,7 +719,7 @@
         <div class="form-group">
           <label>🎵 Music URL <span style="color:var(--text-muted);font-weight:400;font-size:0.7rem;">(Scene-level background music — Azure)</span></label>
           <div class="input-with-picker">
-            <input type="text" id="fMusicUrl" placeholder="https://drive.google.com/file/d/... or .mp3 filename">
+            <input type="text" id="fMusicUrl" placeholder="Upload to Azure, or paste a URL (e.g. .mp3 filename)">
             <button class="btn-pick-drive" onclick="browseAzure('fMusicUrl')" title="Browse Azure files">☁️ Azure</button>
             <button class="btn-upload-drive" onclick="triggerUpload('fMusicUrl')" title="Upload music to Azure">⬆️ Upload</button>
           </div>
@@ -721,7 +727,7 @@
         <div class="form-group">
           <label>🔊 Sound Effects URL <span style="color:var(--text-muted);font-weight:400;font-size:0.7rem;">(Scene-level SFX — Azure)</span></label>
           <div class="input-with-picker">
-            <input type="text" id="fSfxUrl" placeholder="https://drive.google.com/file/d/... or .wav filename">
+            <input type="text" id="fSfxUrl" placeholder="Upload to Azure, or paste a URL (e.g. .wav filename)">
             <button class="btn-pick-drive" onclick="browseAzure('fSfxUrl')" title="Browse Azure files">☁️ Azure</button>
             <button class="btn-upload-drive" onclick="triggerUpload('fSfxUrl')" title="Upload SFX to Azure">⬆️ Upload</button>
           </div>
@@ -729,7 +735,7 @@
         <div class="form-group">
           <label>Lower Third Image URL <span style="color:var(--text-muted);font-weight:400;font-size:0.7rem;">(Azure)</span></label>
           <div class="input-with-picker">
-            <input type="text" id="fLtImg" placeholder="https://drive.google.com/file/d/... or assets/overlays/lt_intro.png">
+            <input type="text" id="fLtImg" placeholder="Upload to Azure, or paste a URL (e.g. assets/overlays/lt_intro.png)">
             <button class="btn-pick-drive" onclick="browseAzure('fLtImg')" title="Browse Azure files">☁️ Azure</button>
             <button class="btn-upload-drive" onclick="triggerUpload('fLtImg')" title="Upload local file to Azure">⬆️ Upload</button>
           </div>
@@ -745,7 +751,7 @@
         <div class="form-group">
           <label>Overlay Lower Third URL <span style="color:var(--text-muted);font-weight:400;font-size:0.7rem;">(Azure)</span></label>
           <div class="input-with-picker">
-            <input type="text" id="fOverlayLt" placeholder="https://drive.google.com/file/d/... or assets/overlays/lt_intro.png">
+            <input type="text" id="fOverlayLt" placeholder="Upload to Azure, or paste a URL (e.g. assets/overlays/lt_intro.png)">
             <button class="btn-pick-drive" onclick="browseAzure('fOverlayLt')" title="Browse Azure files">☁️ Azure</button>
             <button class="btn-upload-drive" onclick="triggerUpload('fOverlayLt')" title="Upload local file to Azure">⬆️ Upload</button>
           </div>
@@ -753,7 +759,7 @@
         <div class="form-group">
           <label>Overlay Text Image URL <span style="color:var(--text-muted);font-weight:400;font-size:0.7rem;">(Azure)</span></label>
           <div class="input-with-picker">
-            <input type="text" id="fOverlayText" placeholder="https://drive.google.com/file/d/... or assets/overlays/overlay_systems.png">
+            <input type="text" id="fOverlayText" placeholder="Upload to Azure, or paste a URL (e.g. assets/overlays/overlay_systems.png)">
             <button class="btn-pick-drive" onclick="browseAzure('fOverlayText')" title="Browse Azure files">☁️ Azure</button>
             <button class="btn-upload-drive" onclick="triggerUpload('fOverlayText')" title="Upload local file to Azure">⬆️ Upload</button>
           </div>
@@ -761,7 +767,7 @@
         <div class="form-group full-width">
           <label>📄 Reference Doc URL <span style="color:var(--text-muted);font-weight:400;font-size:0.7rem;">(Google Slides, Doc, or any reference link)</span></label>
           <div class="input-with-picker">
-            <input type="text" id="fRefDocUrl" placeholder="https://docs.google.com/presentation/d/... or drive.google.com/file/d/...">
+            <input type="text" id="fRefDocUrl" placeholder="Upload to Azure, or paste any reference URL">
             <button class="btn-pick-drive" onclick="browseAzure('fRefDocUrl')" title="Browse Azure files">☁️ Azure</button>
             <button class="btn-upload-drive" onclick="triggerUpload('fRefDocUrl')" title="Upload to Azure">⬆️ Upload</button>
           </div>
@@ -1370,6 +1376,10 @@
 
       // If we arrived from the reversal recorder, stage the clip + open the form
       await consumeStagedReversal();
+      await consumeStagedCapture();
+
+      // Render any saved screen captures
+      await renderCapturesGallery();
     });
 
     async function testSupabaseConnection() {
@@ -1974,6 +1984,103 @@
       if (url) idbDeleteClip(window._pendingReversal.id); // clean up after success
     }
     window.uploadPendingReversal = uploadPendingReversal;
+
+    // ====== Screen capture handoff (from reversal-recorder.js) ======
+    async function loadSavedCaptures() {
+      const db = await idbOpen();
+      if (!db || !db.objectStoreNames.contains('clips')) { if (db) db.close(); return []; }
+      return new Promise((resolve) => {
+        const all = [];
+        const req = db.transaction('clips', 'readonly').objectStore('clips').openCursor();
+        req.onsuccess = (e) => {
+          const cursor = e.target.result;
+          if (cursor) {
+            if (cursor.value.meta && cursor.value.meta.type === 'capture') {
+              all.push(cursor.value);
+            }
+            cursor.continue();
+          } else {
+            db.close();
+            resolve(all);
+          }
+        };
+        req.onerror = () => { db.close(); resolve(all); };
+      });
+    }
+
+    async function renderCapturesGallery() {
+      const panel = document.getElementById('captures-panel');
+      const gallery = document.getElementById('captures-gallery');
+      if (!panel || !gallery) return;
+      const captures = await loadSavedCaptures();
+      if (!captures.length) { panel.style.display = 'none'; return; }
+      panel.style.display = 'block';
+      gallery.innerHTML = captures.map(c => {
+        const meta = c.meta || {};
+        const blobUrl = URL.createObjectURL(c.blob);
+        return `<div style="background:rgba(0,0,0,0.4);border-radius:12px;overflow:hidden;border:2px solid rgba(139,92,246,0.2);cursor:pointer;transition:all 0.2s;"
+                     onclick="useCaptureAsBackground('${meta.id || ''}')"
+                     title="Click to use as scene background">
+          <img src="${blobUrl}" style="width:100%;height:120px;object-fit:cover;display:block;">
+          <div style="padding:6px 10px;font-size:0.7rem;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+            ${meta.filename || 'capture.png'}
+          </div>
+        </div>`;
+      }).join('');
+      // Add a "link to new scene" button
+      const linkBtn = document.createElement('div');
+      linkBtn.style.cssText = 'grid-column:1/-1;text-align:center;margin-top:8px;';
+      linkBtn.innerHTML = `<button class="btn-inline-action" onclick="openSceneForm()" style="font-size:0.85rem;padding:8px 16px;">
+        🎬 Create New Scene from Capture
+      </button>`;
+      gallery.appendChild(linkBtn);
+    }
+
+    async function useCaptureAsBackground(captureId) {
+      openSceneForm();
+      if (!captureId) return;
+      const rec = await idbGetClip(captureId);
+      if (!rec || !rec.blob) return;
+      const meta = rec.meta || {};
+      const file = new File([rec.blob], meta.filename || (captureId + '.png'),
+        { type: rec.blob.type || 'image/png' });
+      const url = await uploadFileToAzure(file, 'fBg');
+      if (url) {
+        document.getElementById('fBg').value = url;
+        idbDeleteClip(captureId);
+        document.getElementById('captures-panel').style.display = 'none';
+      }
+    }
+
+    async function consumeStagedCapture() {
+      const id = new URLSearchParams(location.search).get('capture');
+      if (!id) return;
+      const rec = await idbGetClip(id);
+      if (!rec || !rec.blob) {
+        if (window.dbg) window.dbg('⚠️ capture clip not found in IndexedDB: ' + id);
+        return;
+      }
+      const meta = rec.meta || {};
+      const file = new File([rec.blob], meta.filename || (id + '.png'),
+        { type: rec.blob.type || 'image/png' });
+      window._pendingCapture = { id, file, meta };
+
+      // Upload immediately to Azure and set as scene background
+      const url = await uploadFileToAzure(file, 'fBg');
+      if (url) {
+        idbDeleteClip(id);
+        // Open the scene form pre-filled
+        openSceneForm();
+        document.getElementById('fBg').value = url;
+        document.getElementById('fScript').value =
+          `📷 Screen capture from ${meta.page || ''} · ${meta.timestamp || ''}`;
+        autoEstimateTiming(document.getElementById('fScript').value);
+      }
+
+      // Scroll the selector panel into view
+      const panel = document.querySelector('.selector-panel');
+      if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
 
     // Save voiceover URL to localStorage and update audio player (video-level)
     function onVoiceoverChange(url) {

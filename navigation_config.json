@@ -185,6 +185,11 @@
               "url": "https://secondbrain-kokoro.fly.dev/"
             },
             {
+              "label": "🎨 VS Code: Terminal Profiles",
+              "url": "markdown_renderer.html?file=5_Symbols/tools/vscode_terminal_profiles/formula.md",
+              "description": "Name and colour-code VS Code: integrated terminals for each AI agent."
+            },
+            {
               "label": "☁️ Azure Portal",
               "url": "https://portal.azure.com/"
             },

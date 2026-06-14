@@ -1,0 +1,22 @@
+[
+  {
+    "key": "ctrl+shift+g",
+    "command": "workbench.action.terminal.newWithProfile",
+    "args": { "profileName": "Gemini" }
+  },
+  {
+    "key": "ctrl+shift+c",
+    "command": "workbench.action.terminal.newWithProfile",
+    "args": { "profileName": "Claude" }
+  },
+  {
+    "key": "ctrl+shift+k",
+    "command": "workbench.action.terminal.newWithProfile",
+    "args": { "profileName": "Kimi" }
+  },
+  {
+    "key": "ctrl+shift+l",
+    "command": "workbench.action.terminal.newWithProfile",
+    "args": { "profileName": "Kilo" }
+  }
+]

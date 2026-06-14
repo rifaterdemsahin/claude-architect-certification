@@ -33,8 +33,9 @@
   var IDB_STORE = 'clips';
 
   var MODES = {
-    audio:  { icon: '🎤', label: 'Audio',  ext: 'webm' },
-    screen: { icon: '🖥', label: 'Screen', ext: 'webm' }
+    audio:  { icon: '🎤', label: 'Audio',   ext: 'webm' },
+    screen: { icon: '🖥', label: 'Screen',  ext: 'webm' },
+    capture: { icon: '📷', label: 'Capture', ext: 'png'  }
   };
 
   var mediaRecorder = null;
@@ -159,6 +160,10 @@
 
   /* ---- start / stop ---------------------------------------------------- */
   function toggle(mode) {
+    if (mode === 'capture') {
+      captureScreenshot();
+      return;
+    }
     if (mediaRecorder && mediaRecorder.state === 'recording') {
       if (mode === activeMode) stop();
       return; // ignore clicks on the other (disabled) mode
@@ -252,7 +257,7 @@
     if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
   }
 
-  async function finalize() {
+  async   function finalize() {
     var mode = activeMode;
     var m = MODES[mode] || MODES.screen;
     var durationMs = Date.now() - startedAt;
@@ -310,6 +315,109 @@
       setTimeout(function () {
         window.location.href = SHOTLIST_URL + '?reversal=' + encodeURIComponent(entry.id);
       }, 600); // small delay so the download is allowed to begin
+    }
+  }
+
+  /* ---- screenshot capture (still frame) --------------------------------- */
+  async function captureScreenshot() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+      alert('Screen capture is not supported in this browser.');
+      return;
+    }
+    var stream = null;
+    try {
+      stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+    } catch (err) {
+      logDbg('capture cancelled/denied: ' + err.message);
+      return;
+    }
+    if (!stream) return;
+
+    // Use ImageCapture if available (Chrome), fall back to <video> + canvas.
+    var blob = null;
+    var w, h;
+    try {
+      if (window.ImageCapture && stream.getVideoTracks().length) {
+        var ic = new ImageCapture(stream.getVideoTracks()[0]);
+        var bitmap = await ic.grabFrame();
+        w = bitmap.width;
+        h = bitmap.height;
+        var canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        canvas.getContext('2d').drawImage(bitmap, 0, 0);
+        blob = await new Promise(function (r) { canvas.toBlob(r, 'image/png'); });
+      } else {
+        // Fallback: play a <video> element and grab a frame
+        var video = document.createElement('video');
+        video.srcObject = stream;
+        video.muted = true;
+        await video.play();
+        await new Promise(function (r) { requestAnimationFrame(r); });
+        w = video.videoWidth;
+        h = video.videoHeight;
+        var canvas2 = document.createElement('canvas');
+        canvas2.width = w;
+        canvas2.height = h;
+        canvas2.getContext('2d').drawImage(video, 0, 0);
+        blob = await new Promise(function (r) { canvas2.toBlob(r, 'image/png'); });
+        video.pause();
+        video.remove();
+      }
+    } catch (err) {
+      logDbg('grabFrame failed: ' + err.message);
+      // One more fallback via canvas draw of the video
+      try {
+        var video2 = document.createElement('video');
+        video2.srcObject = stream;
+        video2.muted = true;
+        await video2.play();
+        await new Promise(function (r) { setTimeout(r, 200); });
+        var canvas3 = document.createElement('canvas');
+        canvas3.width = video2.videoWidth || 1920;
+        canvas3.height = video2.videoHeight || 1080;
+        canvas3.getContext('2d').drawImage(video2, 0, 0);
+        blob = await new Promise(function (r) { canvas3.toBlob(r, 'image/png'); });
+        video2.pause();
+        video2.remove();
+      } catch (e2) {
+        logDbg('fallback capture failed: ' + e2.message);
+      }
+    } finally {
+      // Always stop the screen share
+      stream.getTracks().forEach(function (t) { t.stop(); });
+    }
+
+    if (!blob) { alert('Failed to capture screenshot.'); return; }
+
+    var stamp = new Date();
+    var pad = function (n) { return (n < 10 ? '0' : '') + n; };
+    var filename = 'capture_' + stamp.getFullYear() + pad(stamp.getMonth() + 1) + pad(stamp.getDate()) +
+      '_' + pad(stamp.getHours()) + pad(stamp.getMinutes()) + pad(stamp.getSeconds()) + '.png';
+
+    var entry = {
+      id: 'cap_' + stamp.getTime(),
+      type: 'capture',
+      mode: 'capture',
+      page: location.pathname + location.search,
+      title: document.title || location.pathname,
+      filename: filename,
+      timestamp: stamp.toISOString(),
+      sizeBytes: blob.size,
+      url: URL.createObjectURL(blob),
+      width: w || 0,
+      height: h || 0
+    };
+
+    saveShot(entry);
+    await idbPut(entry, blob);
+    logDbg('capture saved: ' + filename + ' (' + Math.round(blob.size / 1024) + ' KB)');
+
+    // Navigate to the shot list so the user can link the capture.
+    if (SHOTLIST_URL) {
+      setTimeout(function () {
+        window.location.href = SHOTLIST_URL + '?capture=' + encodeURIComponent(entry.id);
+      }, 100);
     }
   }
 
