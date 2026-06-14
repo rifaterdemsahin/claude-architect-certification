@@ -322,3 +322,24 @@ Sort the dropdown list items (videos and sentences) alphabetically (A-Z) in all 
    - Refresh the page and confirm both dropdowns (Script and Sentence) are ordered A-Z.
 
 
+## 2026-06-14 — 🔗 Video and Sentence Dropdown Linking Filter
+
+### 🎯 Objective
+Add dynamic linking/filtering between the Video and Sentence dropdown fields on the Research Images page (`images.html`). Selecting or linking an image to a video should filter the sentence dropdown to show only sentences belonging to that specific video script.
+
+### 📐 Design & Implementation Plan
+1. **Database Join Query**:
+   - Updated the Supabase fetch query for sentences: `client.from('sentences').select('id, sentence_type, section, sentence_text, script_id, scripts(video_id, videos(video_number, modules(module_number)))')`
+   - Mapped sentences to their corresponding `courseVideoId` by matching `video_number` and `module_number` from the two different schema paths (`videos` and `course_videos`).
+2. **Dynamic UI Filtering**:
+   - Associated container/name datasets on the sentence dropdown selects.
+   - Filtered the dropdown choices on render so that:
+     - If the page is filtered by `?video=ID` parameter, show only sentences from that video.
+     - Else if the image card has linked videos, show only sentences belonging to those videos.
+     - Else, keep the selector empty with a helper option reading `-- link video first --`.
+3. **Validation**:
+   - Verified that linking a video immediately activates the sentence dropdown with only that video's sentences.
+   - Compiled with `go build` to confirm general system stability.
+
+
+
