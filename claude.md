@@ -124,6 +124,7 @@ All commits must follow **Conventional Commits** format: `type(scope): descripti
 - **README.md must include the public GitHub Pages URL** — e.g., `https://rifaterdemsahin.github.io/<repo-name>/` (see [proxmox example](https://rifaterdemsahin.github.io/proxmox/))
 - **Keep `index.html` at the repo root** — GitHub Pages requires it at the root for the site to work
 - **Active Reflection Routine** — Write a short "retrospective journal" in `6_Semblance/logs/lessons_learned.md` after every milestone.
+- **Pipeline Asset Naming** — Maintain consistent numbering and naming for pipeline stages in `3_Simulation/generated/pipeline/` using the format `[01-11]_[phase]_pipeline.png` to ensure seamless integration with `5_Symbols/pipeline.html`.
 - **Keep Debug Menu Config Synchronized** — When markdown files are added, modified, or deleted in any stage, remember to update the debug menu configuration (`navigation_config.json` and the fallback arrays in `index.html` and `markdown_renderer.html`) to reflect these changes immediately.
 - **Architecture Documentation Sync** — When the system architecture changes, immediately update the architecture overview document at `2_Environment/1_architecture.md` (with updated Mermaid diagrams) to keep it working.
 - **Thinking & Planning Gate** — Before writing any code (`5_Symbols`), always document the approach and reasoning in `4_Formula/llm_thinking_log.md`. After execution, append a summary of the LLM reasoning process. `4_Formula` is the mandatory planning stage that encapsulates thinking before action.

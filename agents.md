@@ -87,6 +87,15 @@ This document defines how AI agents interact with the **Claude AI Certification 
 - **Status:** IMPLEMENTED, COMMITTED, PUSHED.
 
 ### 2026-06-14
+- **Task:** 🔗 Pipeline Asset Mapping & Modal Preview.
+- **Action:**
+    - Documented approach in `4_Formula/llm_thinking_log.md`.
+    - Renamed 11 pipeline images in `3_Simulation/generated/pipeline/` to follow consistent `[01-11]_[phase]_pipeline.png` naming convention.
+    - Updated `5_Symbols/pipeline.html` to reference the renamed high-fidelity assets.
+    - Implemented a glassmorphic modal overlay in `pipeline.html` with zoom-in functionality and click-to-close behavior.
+    - Verified all 11 stages render correctly with high-fidelity images and functional interactive previews.
+- **Status:** IMPLEMENTED, COMMITTED, PUSHED.
+
 - **Task:** 🎬 Implement Global Reversal Recorder and Shot List Integration.
 - **Action:**
     - Documented approach in `4_Formula/llm_thinking_log.md`.
