@@ -1155,19 +1155,8 @@
 </head>
 <body>
 
-  <header class="app-header">
-    <div class="header-container">
-      <a href="index.html" class="app-logo">
-        <i class="fa-solid fa-microchip"></i>
-        <span>Claude Architect</span>
-      </a>
-      <div class="project-menu-nav" id="projectMenu">
-        <a href="index.html" class="menu-link active">🏠 Home</a>
-        <a href="5_Symbols/timeline.html" class="menu-link">📅 Timeline</a>
-        <!-- Other items built by initMenus() -->
-      </div>
-    </div>
-  </header>
+  <!-- Top navigation is rendered by the shared component (shared/nav.js).
+       Do NOT add a hardcoded <header>/nav here — it causes a double menu. -->
 
   <!-- Hero Section -->
   <section class="hero-section">
@@ -1541,7 +1530,8 @@
         }
 
         // 1. Build Project Menu (legacy fallback — nav is now rendered by shared/nav.js)
-        if (!projectMenuContainer) return;
+        // Project menu now rendered by shared/nav.js; legacy build skipped to avoid double menu.
+        if (projectMenuContainer) {
 
         function resolveUrl(url) {
           if (!url) return "#";
@@ -1657,6 +1647,7 @@
             projectMenuContainer.appendChild(link);
           }
         });
+        } // end if (projectMenuContainer)
 
         // 2. Build Debug Menu
         buildDebugMenu();

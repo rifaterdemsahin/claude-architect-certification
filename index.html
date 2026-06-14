@@ -1101,19 +1101,8 @@
 </head>
 <body>
 
-  <header class="app-header">
-    <div class="header-container">
-      <a href="index.html" class="app-logo">
-        <i class="fa-solid fa-microchip"></i>
-        <span>Claude Architect</span>
-      </a>
-      <div class="project-menu-nav" id="projectMenu">
-        <a href="index.html" class="menu-link active">🏠 Home</a>
-        <a href="5_Symbols/timeline.html" class="menu-link">📅 Timeline</a>
-        <!-- Built by initMenus() -->
-      </div>
-    </div>
-  </header>
+  <!-- Top navigation is rendered by the shared component (shared/nav.js).
+       Do NOT add a hardcoded <header>/nav here — it causes a double menu. -->
 
   <!-- Hero Section -->
   <section class="hero-section">
@@ -1477,7 +1466,7 @@
               children: [
               { label: "📝 Prompters", url: "https://zacue.com/index.html" },
                 { label: "🔊 Audio Generator", url: "https://secondbrain-kokoro.fly.dev/" },
-                { label: "📁 Google Drive", url: "https://drive.google.com/" },
+                { label: "☁️ Azure Portal", url: "https://portal.azure.com/" },
                 { label: "🎨 Thumbnail Assembly (Canva)", url: "https://www.canva.com/design/DAGJhH098do/7a-TDVcjX482MetGV3HLPA/edit" }
               ]
             }
@@ -1695,8 +1684,10 @@
           if (frameworkSection) frameworkSection.style.display = "none";
         }
 
-        // 1. Build Project Menu (legacy fallback — nav is now rendered by shared/nav.js)
-        if (!projectMenuContainer) return;
+        // 1. Build Project Menu (legacy fallback — nav is now rendered by shared/nav.js).
+        // The hardcoded #projectMenu header was removed to fix the double-menu bug,
+        // so this block is skipped; the Debug Menu below still builds.
+        if (projectMenuContainer) {
 
         function resolveUrl(url) {
           if (!url) return "#";
@@ -1812,6 +1803,7 @@
             projectMenuContainer.appendChild(link);
           }
         });
+        } // end if (projectMenuContainer)
 
         // 2. Build Debug Menu
         buildDebugMenu();

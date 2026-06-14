@@ -1262,8 +1262,8 @@
               "url": "https://secondbrain-kokoro.fly.dev/"
             },
             {
-              "label": "📁 Google Drive",
-              "url": "https://drive.google.com/"
+              "label": "☁️ Azure Portal",
+              "url": "https://portal.azure.com/"
             },
             {
               "label": "🎨 Thumbnail Assembly (Canva)",
@@ -1775,17 +1775,8 @@
 </head>
 <body>
 
-  <header class="app-header">
-    <div class="header-container">
-      <a href="index.html" class="app-logo">
-        <i class="fa-solid fa-microchip"></i>
-        <span>Claude Architect</span>
-      </a>
-      <div class="project-menu-nav" id="projectMenu">
-        
-      </div>
-    </div>
-  </header>
+  <!-- Top navigation is rendered by the shared component (shared/nav.js).
+       Do NOT add a hardcoded <header>/nav here — it causes a double menu. -->
 
   
   <section class="hero-section">
@@ -2215,7 +2206,8 @@
         }
 
         
-        if (!projectMenuContainer) return;
+        // Project menu now rendered by shared/nav.js; legacy build skipped to avoid double menu.
+        if (projectMenuContainer) {
 
         function resolveUrl(url) {
           if (!url) return "#";
@@ -2331,8 +2323,8 @@
             projectMenuContainer.appendChild(link);
           }
         });
+        } // end if (projectMenuContainer)
 
-        
         buildDebugMenu();
       }
 

@@ -91,10 +91,6 @@
           localStorage.setItem('supabase_anon_key', cfg.supabaseAnon);
           push('info', `⚙️ Auto-set supabase_anon_key from /api/config`);
         }
-        if (cfg.googleClientId && !localStorage.getItem('google_client_id')) {
-          localStorage.setItem('google_client_id', cfg.googleClientId);
-          push('info', `⚙️ Auto-set google_client_id from /api/config`);
-        }
       }
     } catch (e) {
       push('warn', `Failed to fetch /api/config for auto-setup: ${e.message}`);
@@ -102,7 +98,6 @@
 
     push('info', `supabase_url: ${localStorage.getItem('supabase_url') || '(not set)'}`);
     push('info', `supabase_anon_key: ${localStorage.getItem('supabase_anon_key') ? '✅ set (' + localStorage.getItem('supabase_anon_key').slice(0,20) + '…)' : '❌ missing'}`);
-    push('info', `google_client_id: ${localStorage.getItem('google_client_id') ? '✅ set' : '❌ missing'}`);
   });
 
   // ── Custom log helper exposed globally ───────────────────────────────────
