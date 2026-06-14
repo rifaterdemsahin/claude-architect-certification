@@ -227,6 +227,7 @@
       align-items: center;
       justify-content: center;
       position: relative;
+      cursor: pointer;
     }
 
     .stage-image img {
@@ -362,6 +363,67 @@
       opacity: 0.4;
     }
 
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(12px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 2rem;
+      cursor: zoom-out;
+    }
+
+    .modal-content {
+      max-width: 90%;
+      max-height: 90vh;
+      border-radius: 20px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+      position: relative;
+      cursor: default;
+      overflow: hidden;
+    }
+
+    .modal-content img {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-height: 90vh;
+      object-fit: contain;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      width: 2.5rem;
+      height: 2.5rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: var(--transition);
+      z-index: 10;
+    }
+
+    .modal-close:hover {
+      background: var(--accent-red);
+      border-color: var(--accent-red);
+      transform: rotate(90deg);
+    }
+
     @media (max-width: 640px) {
       h1 { font-size: 2rem; }
       .io-boxes { grid-template-columns: 1fr; }
@@ -369,6 +431,7 @@
       .stage-icon { left: 0.5rem; width: 2.5rem; height: 2.5rem; font-size: 1rem; }
       .pipeline-flow::before { left: 1.75rem; }
       .stage-arrow { padding-left: 4.5rem; }
+      .modal-overlay { padding: 1rem; }
     }
   </style>
 </head>
@@ -400,7 +463,7 @@
         </div>
         <div class="stage-desc">Identify and articulate the core problem the course will solve. What gap exists in the market? Who is affected and why does it matter?</div>
         <div class="stage-image">
-          <img src="../3_Simulation/generated/pipeline/01_problem.png" alt="Problem Definition">
+          <img src="../3_Simulation/generated/pipeline/01_problem_pipeline.png" alt="Problem Definition">
         </div>
         <div class="io-boxes">
           <div class="io-box input">
@@ -453,7 +516,7 @@
         </div>
         <div class="stage-desc">Define the course as the solution. Articulate what learners will be able to do after completing the course. This frames the entire production effort.</div>
         <div class="stage-image">
-          <img src="../3_Simulation/generated/pipeline/02_solution.png" alt="Solution Design">
+          <img src="../3_Simulation/generated/pipeline/02_solution_pipeline.png" alt="Solution Design">
         </div>
         <div class="io-boxes">
           <div class="io-box input">
@@ -506,7 +569,7 @@
         </div>
         <div class="stage-desc">Deep-dive into the subject matter while self-learning the content. Record draft takes (screen captures, walkthroughs) as you explore — these raw recordings become the foundation for the shot list in Production. Research is where you learn the material and capture the first pass of footage simultaneously.</div>
         <div class="stage-image">
-          <img src="../3_Simulation/generated/pipeline/03_research.png" alt="Research Phase">
+          <img src="../3_Simulation/generated/pipeline/03_research_pipeline.png" alt="Research Phase">
         </div>
         <div class="io-boxes">
           <div class="io-box input">
@@ -562,7 +625,7 @@
         </div>
         <div class="stage-desc">Structure the course into modules and sections. Define the logical flow, timing estimates, and key learning points for each segment.</div>
         <div class="stage-image">
-          <img src="../3_Simulation/generated/pipeline/04_outline.png" alt="Outline Planning">
+          <img src="../3_Simulation/generated/pipeline/04_outline_pipeline.png" alt="Outline Planning">
         </div>
         <div class="io-boxes">
           <div class="io-box input">
@@ -614,7 +677,7 @@
         </div>
         <div class="stage-desc">Write the full narration script for each video. Include on-screen visual cues, screen recording directions, and timing annotations for the voiceover.</div>
         <div class="stage-image">
-          <img src="../3_Simulation/generated/pipeline/05_script.png" alt="Scripting">
+          <img src="../3_Simulation/generated/pipeline/05_script_pipeline.png" alt="Scripting">
         </div>
         <div class="io-boxes">
           <div class="io-box input">
@@ -665,7 +728,7 @@
         </div>
         <div class="stage-desc">Design interactive quiz questions embedded at key checkpoints within each video. Reinforce learning, test comprehension, and keep learners engaged.</div>
         <div class="stage-image">
-          <img src="../3_Simulation/generated/pipeline/06_ivq.png" alt="Interactive Questions">
+          <img src="../3_Simulation/generated/pipeline/06_ivq_pipeline.png" alt="Interactive Questions">
         </div>
         <div class="io-boxes">
           <div class="io-box input">
@@ -716,7 +779,7 @@
         </div>
         <div class="stage-desc">Translate the script into a detailed shot-by-shot plan. Specify screen recordings, talking head segments, diagrams, B-roll, and all visual assets needed for each scene. Use the screen and audio recorder to capture "reversal shots" that are automatically linked to modules and videos to streamline production.</div>
         <div class="stage-image">
-          <img src="../3_Simulation/generated/pipeline/07_shotlist.png" alt="Shot List Planning">
+          <img src="../3_Simulation/generated/pipeline/07_shotlist_pipeline.png" alt="Shot List Planning">
         </div>
         <div class="io-boxes">
           <div class="io-box input">
@@ -769,7 +832,7 @@
         </div>
         <div class="stage-desc">Map the raw recorded footage (screen captures, talking head, B-roll) to each shot in the shot list. Identify what has been captured, what is missing, and what needs re-recording.</div>
         <div class="stage-image">
-          <img src="../3_Simulation/generated/pipeline/08_mapping.png" alt="Footage Analysis">
+          <img src="../3_Simulation/generated/pipeline/08_footage_mapping_pipeline.png" alt="Footage Analysis">
         </div>
         <div class="io-boxes">
           <div class="io-box input">
@@ -821,7 +884,7 @@
         </div>
         <div class="stage-desc">Create the editing decision list (EDL) specifying exactly how each scene is assembled: cuts, transitions, overlays, lower thirds, audio levels, and effects.</div>
         <div class="stage-image">
-          <img src="../3_Simulation/generated/pipeline/09_editlist.png" alt="Editing Process">
+          <img src="../3_Simulation/generated/pipeline/09_edit_list_pipeline.png" alt="Editing Process">
         </div>
         <div class="io-boxes">
           <div class="io-box input">
@@ -872,7 +935,7 @@
         </div>
         <div class="stage-desc">Upload final videos to YouTube and organize them into a structured course playlist. Add descriptions, timestamps, and end-screen elements for seamless navigation.</div>
         <div class="stage-image">
-          <img src="../3_Simulation/generated/pipeline/10_playlist.png" alt="Course Playlist">
+          <img src="../3_Simulation/generated/pipeline/10_course_playlist_pipeline.png" alt="Course Playlist">
         </div>
         <div class="io-boxes">
           <div class="io-box input">
@@ -922,7 +985,7 @@
         </div>
         <div class="stage-desc">Design compelling video thumbnails that drive clicks while accurately representing the content. Follow brand guidelines and thumbnail best practices (contrast, text, faces).</div>
         <div class="stage-image">
-          <img src="../3_Simulation/generated/pipeline/11_thumbnail.png" alt="Thumbnail Design" style="object-fit: contain; background: #000; padding: 20px;">
+          <img src="../3_Simulation/generated/pipeline/11_thumbnail_pipeline.png" alt="Thumbnail Design" style="object-fit: contain; background: #000; padding: 20px;">
         </div>
         <div class="io-boxes">
           <div class="io-box input">
@@ -963,6 +1026,49 @@
   </div>
 </div>
 
+<!-- Modal Overlay -->
+<div class="modal-overlay" id="image-modal">
+  <div class="modal-close" id="modal-close">
+    <i class="fas fa-times"></i>
+  </div>
+  <div class="modal-content">
+    <img src="" alt="Full Screen Preview" id="modal-image">
+  </div>
+</div>
+
 <script src="../shared/nav.js"></script>
+<script>
+  // Modal Functionality
+  const modal = document.getElementById('image-modal');
+  const modalImg = document.getElementById('modal-image');
+  const closeBtn = document.getElementById('modal-close');
+  const stageImages = document.querySelectorAll('.stage-image img');
+
+  stageImages.forEach(img => {
+    img.parentElement.addEventListener('click', () => {
+      modal.style.display = 'flex';
+      modalImg.src = img.src;
+      modalImg.alt = img.alt;
+      document.body.style.overflow = 'hidden'; // Prevent scrolling
+    });
+  });
+
+  const closeModal = () => {
+    modal.style.display = 'none';
+    document.body.style.overflow = ''; // Restore scrolling
+  };
+
+  closeBtn.addEventListener('click', closeModal);
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeModal();
+  });
+
+  // ESC key to close
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.style.display === 'flex') {
+      closeModal();
+    }
+  });
+</script>
 </body>
 </html>
