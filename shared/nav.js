@@ -11,6 +11,47 @@
      depth 5 (postprod/module-X/s/): ../../../../../shared/nav.js
    ================================================================ */
 (function () {
+  /* ================================================================
+     Backend routing: GitHub Pages is static (display-only). The Go
+     backend runs on Fly.io. When this page is served from *.github.io
+     we transparently route every relative /api/… fetch to Fly.io, so
+     backend features work without per-page changes.
+     ================================================================ */
+  var FLY_BACKEND = 'https://claude-architect-certification.fly.dev';
+  var GH_REPO_PREFIX = '/claude-architect-certification'; // Pages serves under this; Fly serves at root
+  var ON_PAGES = location.hostname.endsWith('github.io');
+  window.API_BASE = ON_PAGES ? FLY_BACKEND : '';
+
+  if (ON_PAGES && !window.__API_REWRITER__) {
+    window.__API_REWRITER__ = true;
+    var _origFetch = window.fetch.bind(window);
+    var toFly = function (u) {
+      if (typeof u !== 'string') return null;
+      if (u.indexOf('/api/') === 0) return FLY_BACKEND + u;                 // root-absolute /api/…
+      if (u.indexOf(location.origin + '/api/') === 0) return FLY_BACKEND + u.slice(location.origin.length);
+      return null;
+    };
+    window.fetch = function (input, init) {
+      try {
+        if (typeof input === 'string') {
+          var r = toFly(input);
+          if (r) input = r;
+        } else if (input && input.url) {
+          var r2 = toFly(input.url);
+          if (r2) input = new Request(r2, input);
+        }
+      } catch (_) {}
+      return _origFetch(input, init);
+    };
+  }
+
+  // Build the Fly.io equivalent of the current Pages URL (strip repo prefix).
+  function flyAppUrl() {
+    var p = location.pathname;
+    if (p.indexOf(GH_REPO_PREFIX) === 0) p = p.slice(GH_REPO_PREFIX.length) || '/';
+    return FLY_BACKEND + p + location.search + location.hash;
+  }
+
   var ROOT = document.currentScript.src.replace(/shared\/nav\.js(\?[^]*)?$/, '');
 
   var link = document.createElement('link');
@@ -243,6 +284,12 @@
     var html = '<div class="site-nav-container">' +
       '<a href="' + ROOT + 'index.html" class="site-nav-logo">🏛️ Claude Architect</a>' +
       '<div class="site-nav-links">';
+
+    // On GitHub Pages, offer a one-click jump to the full app on Fly.io
+    // (backend-powered features run there, not on static Pages).
+    if (ON_PAGES) {
+      html += '<a href="' + flyAppUrl() + '" class="site-nav-fly" title="Open the full app on Fly.io — backend features (uploads, AI, Supabase writes) run there">🚀 Open in App</a>';
+    }
 
     // Favorites dropdown — shown only when there are favorites
     html += '<div class="site-nav-dropdown" id="site-nav-favs"' + (favs.length ? '' : ' style="display:none"') + '>' +
