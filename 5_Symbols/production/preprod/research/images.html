@@ -94,7 +94,7 @@
 
   <div class="dropzone" id="dropzone">
     <div class="dropzone-icon">📷</div>
-    <div class="dropzone-text"><strong>Click to browse</strong> or drag &amp; drop images here</div>
+    <div class="dropzone-text"><strong>Click to browse</strong>, drag &amp; drop, or <strong>paste (⌘/Ctrl+V)</strong> images here</div>
     <div class="dropzone-text" style="margin-top:6px;font-size:0.82rem">PNG, JPG, GIF, WebP, SVG</div>
   </div>
   <input type="file" id="file-input" accept="image/*" multiple>
@@ -249,6 +249,30 @@ dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
 dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('drag-over'); uploadFiles(e.dataTransfer.files); });
 fi.addEventListener('change', () => { if (fi.files.length) uploadFiles(fi.files); fi.value = ''; });
 
+// Paste from clipboard (⌘/Ctrl+V) — captures screenshots and copied images
+document.addEventListener('paste', e => {
+  const items = (e.clipboardData || window.clipboardData)?.items;
+  if (!items) return;
+  const files = [];
+  for (const item of items) {
+    if (item.kind === 'file' && /^image\//i.test(item.type)) {
+      const blob = item.getAsFile();
+      if (!blob) continue;
+      // Pasted blobs often have no name — generate one with the right extension
+      const ext = (blob.type.split('/')[1] || 'png').replace('jpeg', 'jpg');
+      const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+      const name = (blob.name && blob.name !== 'image.png') ? blob.name : `pasted-${stamp}.${ext}`;
+      files.push(new File([blob], name, { type: blob.type }));
+    }
+  }
+  if (files.length) {
+    e.preventDefault();
+    dz.classList.add('drag-over');
+    setTimeout(() => dz.classList.remove('drag-over'), 400);
+    uploadFiles(files);
+  }
+});
+
 // ── Supabase & Relations Logic ─────────────────────────────────────────────
 const SUPABASE_URL = 'https://rmekfsdhglyiralxvkwc.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZWtmc2RoZ2x5aXJhbHh2a3djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NzYzODgsImV4cCI6MjA5NjM1MjM4OH0.ay6HsmO_CbMGDXL_Dv4DT-paAIAOqlQPfmqqx_mexSU';
@@ -316,9 +340,17 @@ function updateAllRelationsUI() {
   // Video dropdowns
   document.querySelectorAll('select[id^="drop-"]').forEach(select => {
     const currentVal = select.value;
-    select.innerHTML = '<option value="">-- link video --</option>' + allVideos.map(v => {
+    const videoOptions = allVideos.map(v => {
       const modNum = v.course_modules ? v.course_modules.module_number : '?';
-      return `<option value="${v.id}">M${modNum} V${v.video_number}: ${v.title}</option>`;
+      return {
+        id: v.id,
+        text: `M${modNum} V${v.video_number}: ${v.title}`
+      };
+    });
+    videoOptions.sort((a, b) => a.text.localeCompare(b.text));
+
+    select.innerHTML = '<option value="">-- link video --</option>' + videoOptions.map(o => {
+      return `<option value="${o.id}">${o.text}</option>`;
     }).join('');
     select.value = currentVal;
   });
@@ -326,9 +358,17 @@ function updateAllRelationsUI() {
   // Sentence dropdowns
   document.querySelectorAll('select[id^="sent-drop-"]').forEach(select => {
     const currentVal = select.value;
-    select.innerHTML = '<option value="">-- choose sentence --</option>' + allSentences.map(s => {
+    const sentenceOptions = allSentences.map(s => {
       const preview = s.sentence_text.length > 48 ? s.sentence_text.slice(0, 48) + '…' : s.sentence_text;
-      return `<option value="${s.id}">[${s.sentence_type}] ${preview}</option>`;
+      return {
+        id: s.id,
+        text: `[${s.sentence_type}] ${preview}`
+      };
+    });
+    sentenceOptions.sort((a, b) => a.text.localeCompare(b.text));
+
+    select.innerHTML = '<option value="">-- choose sentence --</option>' + sentenceOptions.map(o => {
+      return `<option value="${o.id}">${o.text}</option>`;
     }).join('');
     select.value = currentVal;
   });

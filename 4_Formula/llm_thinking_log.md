@@ -277,3 +277,48 @@ Create an interactive DSL dictionary page under `5_Symbols/production/preprod/re
 - CREATE: `5_Symbols/production/preprod/research/domain_specific_language.html`
 - MODIFY: `navigation_config.json`
 - MODIFY: `4_Formula/llm_thinking_log.md` (this entry)
+
+---
+
+## 2026-06-14 — 📖 Add Table Read Step to Production Pipeline and Shotlist Types
+
+### 🎯 Objective
+Add a "Table Read" step to the production pipeline page (`pipeline.html`) and as one of the options in the production shotlist editor's scene type dropdown (`production_shotlist.html`) to help capture early feedback and fix issues before recording.
+
+### 📐 Design & Implementation Plan
+1. **Pipeline Stage Updates (`5_Symbols/pipeline.html`)**:
+   - Add stage "07. Table Read" (Phase: Pre-Production, acting as a bridge/fixer).
+   - Bump stages 07-11 to 08-12.
+   - Shift existing asset filenames: `07_shotlist` -> `08_shotlist`, `08_footage_mapping` -> `09_footage_mapping`, `09_edit_list` -> `10_edit_list`, `10_course_playlist` -> `11_course_playlist`, `11_thumbnail` -> `12_thumbnail`.
+   - Update `3_Simulation/generated/pipeline/README.md` to reflect the new 12-stage pipeline.
+2. **Generate Asset**:
+   - Generate `3_Simulation/generated/pipeline/07_tableread_pipeline.png` to represent the script rehearsal, review, and fixer step.
+3. **Shot List Type Option (`5_Symbols/production/postprod/production_shotlist.html`)**:
+   - Add `tableread` to the `<select id="fType">` dropdown: `<option value="tableread">📖 Table Read</option>`.
+   - Ensure the UI handles the new type gracefully.
+
+### 🗺 Files to Create/Modify
+- MODIFY: `5_Symbols/pipeline.html`
+- MODIFY: `5_Symbols/production/postprod/production_shotlist.html`
+- MODIFY: `3_Simulation/generated/pipeline/README.md`
+- CREATE: `3_Simulation/generated/pipeline/07_tableread_pipeline.png` (via image generation tool)
+- MODIFY: `4_Formula/llm_thinking_log.md` (this entry)
+
+
+## 2026-06-14 — 🔬 Sort Research Page Dropdowns A-Z
+
+### 🎯 Objective
+Sort the dropdown list items (videos and sentences) alphabetically (A-Z) in all pre-production research pages (`index.html`, `images.html`, `audio.html`, `videos.html`, and `notes.html`) to make it easier for users to locate specific scripts and sentences when linking files.
+
+### 📐 Design & Implementation Plan
+1. **Sort arrays before rendering**:
+   - In `updateAllRelationsUI()`, map `allVideos` and `allSentences` to their respective option string representation.
+   - Sort these mapped options alphabetically using `localeCompare`.
+   - Render the sorted options into the select elements' `innerHTML`.
+2. **Apply across all files**:
+   - Apply this logic in `index.html`, `images.html`, `audio.html`, `videos.html`, and `notes.html` in `5_Symbols/production/preprod/research/`.
+3. **Validation**:
+   - Run `go build` to verify standard syntax/compilation is clean.
+   - Refresh the page and confirm both dropdowns (Script and Sentence) are ordered A-Z.
+
+

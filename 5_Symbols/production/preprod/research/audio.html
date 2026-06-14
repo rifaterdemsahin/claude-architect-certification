@@ -372,9 +372,17 @@ function updateAllRelationsUI() {
   // Video dropdowns
   document.querySelectorAll('select[id^="drop-"]').forEach(select => {
     const currentVal = select.value;
-    select.innerHTML = '<option value="">-- link video --</option>' + allVideos.map(v => {
+    const videoOptions = allVideos.map(v => {
       const modNum = v.course_modules ? v.course_modules.module_number : '?';
-      return `<option value="${v.id}">M${modNum} V${v.video_number}: ${v.title}</option>`;
+      return {
+        id: v.id,
+        text: `M${modNum} V${v.video_number}: ${v.title}`
+      };
+    });
+    videoOptions.sort((a, b) => a.text.localeCompare(b.text));
+
+    select.innerHTML = '<option value="">-- link video --</option>' + videoOptions.map(o => {
+      return `<option value="${o.id}">${o.text}</option>`;
     }).join('');
     select.value = currentVal;
   });
@@ -382,9 +390,17 @@ function updateAllRelationsUI() {
   // Sentence dropdowns
   document.querySelectorAll('select[id^="sent-drop-"]').forEach(select => {
     const currentVal = select.value;
-    select.innerHTML = '<option value="">-- choose sentence --</option>' + allSentences.map(s => {
+    const sentenceOptions = allSentences.map(s => {
       const preview = s.sentence_text.length > 48 ? s.sentence_text.slice(0, 48) + '…' : s.sentence_text;
-      return `<option value="${s.id}">[${s.sentence_type}] ${preview}</option>`;
+      return {
+        id: s.id,
+        text: `[${s.sentence_type}] ${preview}`
+      };
+    });
+    sentenceOptions.sort((a, b) => a.text.localeCompare(b.text));
+
+    select.innerHTML = '<option value="">-- choose sentence --</option>' + sentenceOptions.map(o => {
+      return `<option value="${o.id}">${o.text}</option>`;
     }).join('');
     select.value = currentVal;
   });
