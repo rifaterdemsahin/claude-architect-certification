@@ -127,6 +127,7 @@
       {
         label: '🛠️ Tools',
         children: [
+          { label: '📝 Prompters', url: 'https://zacue.com/index.html' },
           { label: '🔊 Audio Generator', url: 'https://secondbrain-kokoro.fly.dev/' },
           { label: '📁 Google Drive', url: 'https://drive.google.com/' },
           { label: '🎨 Thumbnail Assembly (Canva)', url: 'https://www.canva.com/design/DAGJhH098do/7a-TDVcjX482MetGV3HLPA/edit' }

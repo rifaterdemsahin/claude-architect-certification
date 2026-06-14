@@ -891,3 +891,35 @@ The user wants to add an `explanations` datastructure that links explanations to
 5. **🌿 Menu & Navigation**:
    - Update `navigation_config.json` to include the new explanations page under a suitable phase/menu.
 
+---
+
+## 📅 2026-06-14 — Synchronize Agent Thinking Rules & Formula
+
+### 📥 Input / Task
+- Ensure all agents are instructed to record to `llm_thinking_log.md`.
+- Scan and update missing instructions in agent files.
+- Create a formula document on how they work.
+
+### 💭 Thinking & Reasoning Process
+1. **Goal Identification**: Standardize the "Thinking & Planning Gate" across all AI personas to ensure consistent transparency and architectural alignment.
+2. **Analysis / Research**:
+   - Scanned root directory for agent files (`claude.md`, `gemini.md`, `copilot.md`, `kilocode.md`, `kimi.md`, `deepseek.md`, `antigravity.md`, `agents.md`).
+   - Verified that most agents already had the instruction, but `antigravity.md` was missing it.
+   - Identified the need for a central "formula" document to explain the *how* and *why* of this process.
+3. **Architecture Check**:
+   - The formula belongs in `4_Formula/delivery_pilot/` as a core methodology.
+   - The navigation system (`navigation_config.json`) needs to expose this new standard.
+4. **Implementation Plan**:
+   - Create `4_Formula/delivery_pilot/llm_thinking_formula.md` with the standard template and rules.
+   - Update `antigravity.md` with the missing Working Rules.
+   - Update `4_Formula/delivery_pilot/README.md` and `navigation_config.json` for discoverability.
+   - Finalize by logging the task here.
+
+### 📤 Outcomes & Decisions
+- Created `4_Formula/delivery_pilot/llm_thinking_formula.md`.
+- Updated `antigravity.md` with the "Thinking & Planning Gate" rule.
+- Updated `4_Formula/delivery_pilot/README.md` and `navigation_config.json`.
+- Verified all agent files now explicitly mandate the use of the thinking log.
+- **Key Files Modified**: `antigravity.md`, `4_Formula/delivery_pilot/llm_thinking_formula.md`, `4_Formula/delivery_pilot/README.md`, `navigation_config.json`, `4_Formula/delivery_pilot/llm_thinking_log.md`.
+
+

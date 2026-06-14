@@ -592,6 +592,14 @@
       <button class="btn-settings" onclick="openSettings()" title="Settings">⚙️</button>
     </div>
 
+    <!-- Reversal Recorder Notice -->
+    <div id="reversal-notice" style="background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 20px; padding: 16px 24px; margin-bottom: 32px; font-size: 0.95rem; display: flex; align-items: center; gap: 16px; backdrop-filter: blur(10px);">
+      <span style="font-size: 1.8rem;">🎬</span>
+      <span style="line-height: 1.5;">
+        <strong>Reversal Shot Mode:</strong> Capture quick reference takes using the global <b style="color:var(--primary);">Screen Recorder</b> or <b style="color:var(--primary);">Audio Recorder</b> (top-right). Recorded clips land here automatically as "Reversal" shots, where you can link them to your module and video to accelerate production.
+      </span>
+    </div>
+
     <!-- Scene Summary Table -->
     <div class="scene-table-panel" id="scene-table-panel" style="display:none;">
       <div class="panel-header">📋 Scene Summary — click any row to scroll to scene card</div>
@@ -668,6 +676,24 @@
         <div class="form-group">
           <label>Scene Number</label>
           <input type="number" id="fSceneNumber" value="1" min="1">
+        </div>
+        <div class="form-group">
+          <label>🏷️ Type</label>
+          <select id="fType" onchange="onSceneTypeChange()">
+            <option value="standard">🎬 Standard</option>
+            <option value="reversal">🔁 Reversal</option>
+            <option value="broll">📹 B-Roll</option>
+            <option value="interview">🎤 Interview</option>
+          </select>
+        </div>
+        <div class="form-group full-width" id="reversalClipGroup" style="display:none;">
+          <label>🔁 Reversal / Clip URL <span style="color:var(--text-muted);font-weight:400;font-size:0.7rem;">(recorded clip — stored on the scene's bundle)</span></label>
+          <div class="input-with-picker">
+            <input type="text" id="fBundleUrl" placeholder="Upload the recorded clip to Google Drive →">
+            <button class="btn-pick-drive" onclick="openGDrivePicker('fBundleUrl')" title="Pick from Google Drive">📁 Drive</button>
+            <button class="btn-upload-drive" id="btnUploadReversal" onclick="uploadPendingReversal()" title="Upload the recorded reversal clip to Google Drive">⬆️ Upload Reversal Clip</button>
+          </div>
+          <span class="field-hint" id="reversalClipHint"></span>
         </div>
         <div class="form-group">
           <label>Timing <button type="button" class="btn-inline-action" onclick="estimateTiming()">⏱️ Estimate from Script</button></label>
@@ -1255,6 +1281,8 @@
                 refDocUrl: s.ref_doc_url || '',
                 musicUrl: s.music_url || '',
                 sfxUrl: s.sfx_url || '',
+                bundleUrl: s.bundle_url || '',
+                sceneType: s.scene_type || 'standard',
                 cues: cues.map(c => ({ icon: c.icon, label: c.label, prompt: c.prompt || '' })),
                 edl: edl.map(e => `${e.timing}: ${e.description}`)
               };
@@ -1360,6 +1388,9 @@
 
       // Load scenes data
       await loadDataAndRender();
+
+      // If we arrived from the reversal recorder, stage the clip + open the form
+      await consumeStagedReversal();
     });
 
     async function testSupabaseConnection() {
@@ -1441,6 +1472,10 @@
       document.getElementById('fOverlayLt').value = '';
       document.getElementById('fOverlayText').value = '';
       document.getElementById('fRefDocUrl').value = '';
+      document.getElementById('fType').value = 'standard';
+      document.getElementById('fBundleUrl').value = '';
+      document.getElementById('reversalClipHint').textContent = '';
+      onSceneTypeChange();
       document.getElementById('fTimingHint').textContent = '';
       document.getElementById('fScriptHint').textContent = '';
       document.getElementById('loadScriptPicker').style.display = 'none';
@@ -1463,6 +1498,9 @@
           document.getElementById('fOverlayLt').value = stripLocalhostUrl(scene.overlayLt || '');
           document.getElementById('fOverlayText').value = stripLocalhostUrl(scene.overlayText || '');
           document.getElementById('fRefDocUrl').value = stripLocalhostUrl(scene.refDocUrl || '');
+          document.getElementById('fType').value = scene.sceneType || 'standard';
+          document.getElementById('fBundleUrl').value = stripLocalhostUrl(scene.bundleUrl || '');
+          onSceneTypeChange();
         }
       }
 
@@ -1544,28 +1582,36 @@
         lt_sub: document.getElementById('fLtSub').value,
         overlay_lt: document.getElementById('fOverlayLt').value,
         overlay_text: document.getElementById('fOverlayText').value,
-        ref_doc_url: document.getElementById('fRefDocUrl').value
+        ref_doc_url: document.getElementById('fRefDocUrl').value,
+        bundle_url: document.getElementById('fBundleUrl').value,
+        scene_type: document.getElementById('fType').value || 'standard'
       };
 
-      try {
-        let sceneResult;
-        if (sceneDbId) {
-          // UPDATE existing scene
-          const res = await fetch(`${supabaseUrl}/rest/v1/scenes?id=eq.${sceneDbId}`, {
-            method: 'PATCH', headers: { ...headers, 'Prefer': 'return=representation' },
-            body: JSON.stringify(sceneBody)
-          });
-          if (!res.ok) throw new Error(`Update failed: ${await res.text()}`);
-          sceneResult = await res.json();
-        } else {
-          // INSERT new scene
-          const res = await fetch(`${supabaseUrl}/rest/v1/scenes`, {
-            method: 'POST', headers,
-            body: JSON.stringify(sceneBody)
-          });
-          if (!res.ok) throw new Error(`Insert failed: ${await res.text()}`);
-          sceneResult = await res.json();
+      // Save with a graceful fallback: if the `scene_type` column hasn't been
+      // migrated yet, PostgREST rejects the whole row — retry once without it.
+      async function persistScene() {
+        const url = sceneDbId
+          ? `${supabaseUrl}/rest/v1/scenes?id=eq.${sceneDbId}`
+          : `${supabaseUrl}/rest/v1/scenes`;
+        const method = sceneDbId ? 'PATCH' : 'POST';
+        let res = await fetch(url, { method, headers, body: JSON.stringify(sceneBody) });
+        if (!res.ok) {
+          const errText = await res.text();
+          if (/scene_type/.test(errText)) {
+            const fallback = { ...sceneBody };
+            delete fallback.scene_type;
+            if (window.dbg) window.dbg('⚠️ scene_type column missing — saving without it (run migration_scene_type.sql)');
+            res = await fetch(url, { method, headers, body: JSON.stringify(fallback) });
+            if (!res.ok) throw new Error(`${sceneDbId ? 'Update' : 'Insert'} failed: ${await res.text()}`);
+          } else {
+            throw new Error(`${sceneDbId ? 'Update' : 'Insert'} failed: ${errText}`);
+          }
         }
+        return res.json();
+      }
+
+      try {
+        let sceneResult = await persistScene();
 
         const savedScene = Array.isArray(sceneResult) ? sceneResult[0] : sceneResult;
         const newSceneId = savedScene.id;
@@ -1696,6 +1742,7 @@
             const action = _pendingDriveAction;
             _pendingDriveAction = null;
             if (action.type === 'picker') openGDrivePicker(action.targetInputId);
+            else if (action.type === 'reversal') uploadPendingReversal();
             else if (action.type === 'upload') triggerUpload(action.targetInputId);
           }
         }
@@ -1802,8 +1849,100 @@
       fLtImg:       'lt_image',
       fOverlayLt:   'overlay_lt',
       fOverlayText: 'overlay_text',
-      fRefDocUrl:   'ref_doc_url'
+      fRefDocUrl:   'ref_doc_url',
+      fBundleUrl:   'bundle_url'
     };
+
+    // Show the reversal clip field only for the reversal type
+    function onSceneTypeChange() {
+      const type = document.getElementById('fType').value;
+      const group = document.getElementById('reversalClipGroup');
+      if (group) group.style.display = (type === 'reversal') ? '' : 'none';
+    }
+    window.onSceneTypeChange = onSceneTypeChange;
+
+    // ====== Reversal clip handoff (from shared/reversal-recorder.js) ======
+    // The recorder stashes the recorded Blob in IndexedDB and redirects here
+    // with ?reversal=<id>. We pull it back, stage it for upload, and open the
+    // scene form pre-set to the reversal type so the user just links module/video.
+    function idbOpen() {
+      return new Promise((resolve) => {
+        try {
+          const open = indexedDB.open('reversal_db', 1);
+          open.onupgradeneeded = () => {
+            const db = open.result;
+            if (!db.objectStoreNames.contains('clips')) db.createObjectStore('clips', { keyPath: 'id' });
+          };
+          open.onsuccess = () => resolve(open.result);
+          open.onerror = () => resolve(null);
+        } catch (_) { resolve(null); }
+      });
+    }
+
+    async function idbGetClip(id) {
+      const db = await idbOpen();
+      if (!db || !db.objectStoreNames.contains('clips')) { if (db) db.close(); return null; }
+      return new Promise((resolve) => {
+        const req = db.transaction('clips', 'readonly').objectStore('clips').get(id);
+        req.onsuccess = () => { db.close(); resolve(req.result || null); };
+        req.onerror = () => { db.close(); resolve(null); };
+      });
+    }
+
+    async function idbDeleteClip(id) {
+      const db = await idbOpen();
+      if (!db || !db.objectStoreNames.contains('clips')) { if (db) db.close(); return; }
+      const tx = db.transaction('clips', 'readwrite');
+      tx.objectStore('clips').delete(id);
+      tx.oncomplete = () => db.close();
+    }
+
+    async function consumeStagedReversal() {
+      const id = new URLSearchParams(location.search).get('reversal');
+      if (!id) return;
+      const rec = await idbGetClip(id);
+      if (!rec || !rec.blob) {
+        if (window.dbg) window.dbg('⚠️ reversal clip not found in IndexedDB: ' + id);
+        return;
+      }
+      const meta = rec.meta || {};
+      const file = new File([rec.blob], meta.filename || (id + '.webm'),
+        { type: rec.blob.type || 'video/webm' });
+      window._pendingReversal = { id, file, meta };
+
+      // Open the scene form pre-staged as a reversal shot
+      openSceneForm();
+      document.getElementById('fType').value = 'reversal';
+      onSceneTypeChange();
+      const secs = meta.durationMs ? Math.round(meta.durationMs / 1000) : 0;
+      document.getElementById('fScript').value =
+        `🔁 ${meta.mode === 'audio' ? 'Audio' : 'Screen'} reversal recorded ${meta.startedAt || ''} · ${secs}s · from ${meta.page || ''}`;
+      autoEstimateTiming(document.getElementById('fScript').value);
+      const hint = document.getElementById('reversalClipHint');
+      if (hint) hint.innerHTML =
+        `🎬 Clip ready: <strong>${file.name}</strong> · ${(file.size / 1024 / 1024).toFixed(2)} MB — ` +
+        `pick <strong>Module + Video</strong> above to link, then <strong>⬆️ Upload Reversal Clip</strong>.`;
+
+      // Nudge the user to set the module/video link
+      const panel = document.querySelector('.selector-panel');
+      if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    async function uploadPendingReversal() {
+      if (!window._pendingReversal || !window._pendingReversal.file) {
+        return triggerUpload('fBundleUrl'); // no staged clip → manual file pick
+      }
+      if (!gdriveAccessToken) {
+        _pendingDriveAction = { type: 'reversal' };
+        gdriveLogin();
+        return;
+      }
+      await uploadFileToDrive(window._pendingReversal.file, 'fBundleUrl');
+      if (document.getElementById('fBundleUrl').value) {
+        idbDeleteClip(window._pendingReversal.id); // clean up after success
+      }
+    }
+    window.uploadPendingReversal = uploadPendingReversal;
 
     // Save voiceover URL to localStorage and update audio player (video-level)
     function onVoiceoverChange(url) {

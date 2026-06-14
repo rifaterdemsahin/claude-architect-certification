@@ -56,6 +56,7 @@ CREATE TABLE IF NOT EXISTS scenes (
   overlay_lt TEXT,
   overlay_text TEXT,
   bundle_url TEXT,
+  scene_type TEXT DEFAULT 'standard',
   created_at TIMESTAMPTZ DEFAULT NOW(),
   UNIQUE(module_number, section_number, scene_number)
 );

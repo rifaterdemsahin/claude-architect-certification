@@ -69,6 +69,7 @@ claude-architect-certification/
 - **AI Stack:** Qdrant + Ollama (`nomic-embed-text`, 4096 dimensions)
 - **Backend:** Fly.io for Python services
 - **CI/CD:** GitHub Actions
+- **Database:** Supabase (`scenes` table updated with `scene_type` column for reversal shots)
 
 ### Navigation & UI Rules
 

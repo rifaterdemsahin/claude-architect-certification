@@ -105,6 +105,7 @@ To collaborate on production-ready AI workflows, ensuring:
 6. **Work in slices** — update `PLAN.md` after each slice (done / next).
 
 ### 📋 Working Rules
+- **Thinking & Planning Gate** — Before writing any code (`5_Symbols`), always document the approach and reasoning in `4_Formula/llm_thinking_log.md`. After execution, append a summary of the LLM reasoning process. `4_Formula` is the mandatory planning stage that encapsulates thinking before action.
 - Go stdlib only unless the user explicitly approves a dependency.
 - One slice = one commit; follow Conventional Commits.
 - After each slice: mark ✅ in `PLAN.md`, set the next slice.

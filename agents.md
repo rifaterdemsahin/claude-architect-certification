@@ -86,7 +86,18 @@ This document defines how AI agents interact with the **Claude AI Certification 
     - Verified all links using `test_links.py` to ensure intact references.
 - **Status:** IMPLEMENTED, COMMITTED, PUSHED.
 
-### 2026-06-08
+### 2026-06-14
+- **Task:** 🎬 Implement Global Reversal Recorder and Shot List Integration.
+- **Action:**
+    - Documented approach in `4_Formula/llm_thinking_log.md`.
+    - Created `shared/reversal-recorder.js` for one-click screen/audio capture.
+    - Updated `shared/nav.js` to load the recorder site-wide.
+    - Added `scene_type` column to Supabase `scenes` table (migration `migration_scene_type.sql` applied).
+    - Updated `5_Symbols/production/postprod/production_shotlist.html` to consume recordings from IndexedDB and auto-set the "Reversal" type.
+    - Updated `5_Symbols/pipeline.html` and `5_Symbols/production/postprod/production_shotlist.html` with documentation and UI notices about the feature.
+- **Status:** IMPLEMENTED, COMMITTED, PUSHED.
+
+### 2026-06-09
 - **Task:** 🎨 Add emoji visual style rules to all agent files (`agents.md`, `claude.md`, `gemini.md`, `kilocode.md`).
 - **Action:** Added `🎨 Emoji & Visual Style` subsection to every agent guide with emoji map by context, usage rules, and per-stage emoji sets.
 - **Status:** IMPLEMENTED, COMMITTED, PUSHED.

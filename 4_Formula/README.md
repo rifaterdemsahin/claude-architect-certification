@@ -90,6 +90,7 @@
 | `delivery_pilot/research_notes.md` | Technology evaluations that informed decisions |
 | `delivery_pilot/api_reference.md` | Key API endpoints (Qdrant, Claude, Azure Key Vault, GitHub Actions) |
 | `delivery_pilot/mcp_deployment_formula.md` | 🧠 Where `temp_mcp.yml` should live — GitHub vs Fly.io pros/cons + split model |
+| `reversal_recorder_formula.md` | 🎬 How `shared/reversal-recorder.js` works — media APIs, data flow, storage decision |
 
 ---
 

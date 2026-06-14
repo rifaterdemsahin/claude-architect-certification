@@ -67,7 +67,7 @@ claude-architect-certification/
 ### Infrastructure
 - **Static Hosting:** GitHub Pages via GitHub Actions
 - **Edge Routing & Auth:** Cloudflare Workers — fast actions, rate-limiting, caching, simple auth (<10ms globally)
-- **Backend Services:** Supabase — PostgreSQL, row-level security auth, file storage, realtime subscriptions
+- **Backend Services:** Supabase — PostgreSQL (`scenes` table updated with `scene_type` for reversal shots), row-level security auth, file storage, realtime subscriptions
 - **Python Backend:** Fly.io — FastAPI/Flask services, also hosts Qdrant
 - **Secrets Management:** Azure Key Vault (never commit secrets to git; pay-per-operation, no idle cost)
 - **AI Stack:** Qdrant on Fly.io (cloud-only, no local Docker or Ollama required)

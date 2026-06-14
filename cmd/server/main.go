@@ -1143,6 +1143,7 @@ var assetTypeStyles = map[string]string{
 	"table":        "Structured grid or matrix layout with labelled rows and columns, clear cell hierarchy, suitable for feature comparisons or tiered pricing",
 	"titlecard":    "Clean transition or chapter-divider card with title, subtitle, decorative accent line, minimal background detail",
 	"analogy":      "Illustrative metaphor image linking a technical concept to a familiar real-world scene or object, with subtle labelling",
+	"background":   "Ambient environmental background with soft focal depth, abstract textures, cinematic lighting, and wide-angle perspective suitable for video backdrops",
 	"transparent":  "Asset with no background, isolated subject on transparent canvas, clean edges, suitable for compositing in video editing",
 	"icon":         "Single clean glyph or badge, scalable, minimal detail, high contrast, suitable for repeatable visual language across the course",
 }

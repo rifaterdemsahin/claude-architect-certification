@@ -7,6 +7,7 @@
 | File | Description |
 |------|-------------|
 | `llm_thinking_log.md` | Consolidated reasoning log before & after every implementation |
+| `llm_thinking_formula.md` | **Mandatory Gate** — instructions on how to log thinking |
 | `decisions.md` | Architecture Decision Records (ADRs) — why X over Y |
 | `dsl.md` | Domain terminology glossary |
 | `implementation_guide.md` | Main step-by-step build sequence |
