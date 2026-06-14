@@ -18,7 +18,6 @@
      backend features work without per-page changes.
      ================================================================ */
   var FLY_BACKEND = 'https://claude-architect-certification.fly.dev';
-  var GH_REPO_PREFIX = '/claude-architect-certification'; // Pages serves under this; Fly serves at root
   var ON_PAGES = location.hostname.endsWith('github.io');
   window.API_BASE = ON_PAGES ? FLY_BACKEND : '';
 
@@ -45,12 +44,7 @@
     };
   }
 
-  // Build the Fly.io equivalent of the current Pages URL (strip repo prefix).
-  function flyAppUrl() {
-    var p = location.pathname;
-    if (p.indexOf(GH_REPO_PREFIX) === 0) p = p.slice(GH_REPO_PREFIX.length) || '/';
-    return FLY_BACKEND + p + location.search + location.hash;
-  }
+  // (The "open the live app" link is rendered by showLiveSiteBanner() below.)
 
   var ROOT = document.currentScript.src.replace(/shared\/nav\.js(\?[^]*)?$/, '');
 
@@ -284,12 +278,6 @@
     var html = '<div class="site-nav-container">' +
       '<a href="' + ROOT + 'index.html" class="site-nav-logo">🏛️ Claude Architect</a>' +
       '<div class="site-nav-links">';
-
-    // On GitHub Pages, offer a one-click jump to the full app on Fly.io
-    // (backend-powered features run there, not on static Pages).
-    if (ON_PAGES) {
-      html += '<a href="' + flyAppUrl() + '" class="site-nav-fly" title="Open the full app on Fly.io — backend features (uploads, AI, Supabase writes) run there">🚀 Open in App</a>';
-    }
 
     // Favorites dropdown — shown only when there are favorites
     html += '<div class="site-nav-dropdown" id="site-nav-favs"' + (favs.length ? '' : ' style="display:none"') + '>' +

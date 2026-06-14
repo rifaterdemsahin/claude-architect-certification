@@ -1,5 +1,22 @@
 # LLM Thinking Log
 
+## 2026-06-14 — 🌉 Project-wide: route GitHub Pages /api calls to Fly.io backend
+
+### 🎯 Objective
+Fix "Failed to fetch" on the static GitHub Pages site: Pages is display-only, the Go backend runs on Fly.io. Route every backend call to Fly.io transparently and give users a one-click link to the full app.
+
+### 📐 Design & Implementation Plan
+1. **Global fetch rewrite (`shared/nav.js`)** — the universal early include. When `location.hostname` ends with `github.io`, monkey-patch `window.fetch` so any relative `/api/…` (or same-origin `${origin}/api/…`) request is rewritten to `https://claude-architect-certification.fly.dev/api/…`. Exposes `window.API_BASE`. Verified every `/api`-calling HTML page includes `nav.js`, so coverage is project-wide with one change.
+2. **Link to the live app** — a parallel change already added `showLiveSiteBanner()` in `nav.js` (a dismissible bottom banner that strips the repo prefix and links to the Fly.io app). I deferred to it rather than add a redundant nav button.
+3. **Backend CORS for all routes (`cmd/server/main.go`)** — move `setCORS` into the `observe` middleware (wraps every route) and answer `OPTIONS` preflights with 204 there. Broaden allowed methods to `GET, POST, PUT, PATCH, DELETE, OPTIONS` and headers to `Content-Type, Authorization, apikey`. Previously only the sanity-check route had CORS, POST-only.
+
+### ⚠️ Notes / limitations
+- Stored media URLs like `/api/research/file?…` used directly as `<img>/<audio>` `src` are **not** rewritten (the patch only covers `fetch`). Those load on Fly.io — the "Open in App" link is the path for full media/backed features.
+- The CORS change requires a **Fly.io redeploy** to take effect; the Pages-side rewrite ships via the normal Pages build.
+
+### ✅ Outcome
+`go build ./cmd/server/` passes; `nav.js` syntax-checks. Pages now route backend calls to Fly.io; users get an explicit "Open in App" link.
+
 ## 2026-06-14 — 🐛 Fix "double menu on top" at /index.html
 
 ### 🧠 Problem

@@ -37,19 +37,6 @@
   gap: 20px;
 }
 
-/* "Open in App" CTA — shown only on GitHub Pages, links to the Fly.io app */
-.site-nav-links a.site-nav-fly {
-  color: #fff;
-  background: linear-gradient(135deg, #8b5cf6, #6d28d9);
-  padding: 6px 14px;
-  border-radius: 9999px;
-  font-weight: 800;
-  font-size: 0.8rem;
-  white-space: nowrap;
-  box-shadow: 0 3px 12px rgba(139, 92, 246, 0.45);
-}
-.site-nav-links a.site-nav-fly:hover { color: #fff; filter: brightness(1.1); }
-
 .site-nav-links a {
   color: #9ca3af;
   text-decoration: none;
