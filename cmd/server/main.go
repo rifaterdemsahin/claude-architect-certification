@@ -35,7 +35,6 @@ type config struct {
 	azureTenantID      string
 	azureClientID      string
 	azureClientSecret  string
-	googleClientID     string
 }
 
 func loadDotEnv(path string) {
@@ -75,7 +74,6 @@ func loadConfig() config {
 		azureTenantID:     os.Getenv("AZURE_TENANT_ID"),
 		azureClientID:     os.Getenv("AZURE_CLIENT_ID"),
 		azureClientSecret: os.Getenv("AZURE_CLIENT_SECRET"),
-		googleClientID:    os.Getenv("GOOGLE_CLIENT_ID"),
 	}
 	if connStr := os.Getenv("AZURE_STORAGE_CONN_STR"); connStr != "" {
 		cfg.azureAccountName, cfg.azureAccountKey = parseStorageConnStr(connStr)
@@ -520,18 +518,11 @@ func configHandler(cfg config) http.HandlerFunc {
 	type configResp struct {
 		SupabaseURL      string `json:"supabaseUrl"`
 		SupabaseAnon     string `json:"supabaseAnon"`
-		GoogleClientID   string `json:"googleClientId"`
 		AzureAccountName string `json:"azureAccountName"`
-	}
-	// Use getSecret for anything that might be in Key Vault
-	gID := cfg.googleClientID
-	if gID == "" {
-		gID = cfg.getSecret("GOOGLE_CLIENT_ID")
 	}
 	payload, _ := json.Marshal(configResp{
 		SupabaseURL:      cfg.supabaseURL,
 		SupabaseAnon:     cfg.supabaseAnon,
-		GoogleClientID:   gID,
 		AzureAccountName: cfg.azureAccountName,
 	})
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -1841,6 +1832,19 @@ Focus on professional, certification-quality overlays. Use the module/video them
 	}
 }
 
+// setCORS allows the static GitHub Pages site (and local dev) to call this
+// backend cross-origin. The GitHub Pages site diverts /api calls here because
+// Pages cannot run the Go backend that proxies to Gemini.
+func setCORS(w http.ResponseWriter, r *http.Request) {
+	origin := r.Header.Get("Origin")
+	if strings.HasSuffix(origin, ".github.io") || strings.HasPrefix(origin, "http://localhost") {
+		w.Header().Set("Access-Control-Allow-Origin", origin)
+	}
+	w.Header().Set("Vary", "Origin")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+}
+
 func sanityCheckHandler(cfg config) http.HandlerFunc {
 	type SanityRequest struct {
 		ItemName string `json:"item_name"`
@@ -1849,6 +1853,12 @@ func sanityCheckHandler(cfg config) http.HandlerFunc {
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
+		// Allow the static GitHub Pages site to call this backend cross-origin.
+		setCORS(w, r)
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
 		w.Header().Set("Content-Type", "application/json")
 		if r.Method != http.MethodPost {
 			http.Error(w, `{"error":"method not allowed"}`, http.StatusMethodNotAllowed)
