@@ -257,3 +257,8 @@ Record every prompt given to AI agents below. Include the date, agent, and purpo
 - **Agent:** Gemini CLI
 - **Purpose:** Locate and "open" asset generator HTML files, and track them in the 'In Progress' section of `todos.md`.
 - **Outcome:** Added `image_generator.html`, `lower_thirds.html`, `infographic_generator.html`, and `pipeline.html` to `todos.md`, and opened them locally.
+
+### 2026-06-13 — Add Thumbnail Assembly Tool Link
+- **Agent:** Gemini CLI
+- **Purpose:** Add a specific Canva design link for "thumbnail assembly" to the Production Tools navigation menu.
+- **Outcome:** Updated `navigation_config.json`, `shared/nav.js`, `index.html`, `markdown_renderer.html`, `home.html`, `5_Symbols/course_src/templates/markdown_renderer.html`, and `5_Symbols/tools/sitemap.html`.

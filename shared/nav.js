@@ -18,6 +18,15 @@
   link.href = ROOT + 'shared/nav.css';
   document.head.appendChild(link);
 
+  // Load the global top-right Reversal recorder on every page that has nav.
+  if (!document.getElementById('reversal-recorder-js')) {
+    var rev = document.createElement('script');
+    rev.id = 'reversal-recorder-js';
+    rev.src = ROOT + 'shared/reversal-recorder.js';
+    rev.defer = true;
+    document.head.appendChild(rev);
+  }
+
   var LAUNCH_DATE = new Date('2026-06-07');
   var daysSinceLaunch = Math.floor((Date.now() - LAUNCH_DATE.getTime()) / (1000 * 60 * 60 * 24));
 
@@ -119,7 +128,8 @@
         label: '🛠️ Tools',
         children: [
           { label: '🔊 Audio Generator', url: 'https://secondbrain-kokoro.fly.dev/' },
-          { label: '📁 Google Drive', url: 'https://drive.google.com/' }
+          { label: '📁 Google Drive', url: 'https://drive.google.com/' },
+          { label: '🎨 Thumbnail Assembly (Canva)', url: 'https://www.canva.com/design/DAGJhH098do/7a-TDVcjX482MetGV3HLPA/edit' }
         ]
       }
     ]},
