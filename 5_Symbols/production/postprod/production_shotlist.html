@@ -487,15 +487,7 @@
     .settings-info code { background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; color: #93c5fd; font-family: monospace; font-size: 0.85em; }
     .settings-divider { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 20px 0; }
 
-    /* Google Drive & Settings Buttons */
-    .btn-gdrive {
-      background: linear-gradient(135deg, #10b981, #059669);
-      color: white; border: none; padding: 0 20px; height: 52px; border-radius: 12px;
-      font-weight: 700; cursor: pointer; white-space: nowrap; font-size: 0.9rem;
-      transition: all 0.3s; align-self: flex-end; flex-shrink: 0;
-    }
-    .btn-gdrive:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4); }
-    .btn-gdrive.connected { background: linear-gradient(135deg, #059669, #047857); }
+    /* Settings Button */
     .btn-settings {
       background: rgba(255,255,255,0.06); color: var(--text-muted);
       border: 1px solid rgba(255,255,255,0.1); width: 52px; height: 52px;
@@ -553,7 +545,6 @@
   </style>
   <script src="../../../shared/nav.js"></script>
   <script src="../../../shared/debug-panel.js"></script>
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
 
@@ -587,7 +578,6 @@
           <option value="">— All Scenes —</option>
         </select>
       </div>
-      <button class="btn-gdrive" id="btn-gdrive-login" onclick="gdriveLogin()">🔗 Google Drive</button>
       <span id="conn-status" title="Supabase connection status" style="font-size:0.72rem; white-space:nowrap; color:var(--text-muted); align-self:flex-end; padding-bottom:16px; cursor:help;">⏳</span>
       <button class="btn-settings" onclick="openSettings()" title="Settings">⚙️</button>
     </div>
@@ -624,7 +614,7 @@
         <span class="audio-label">🎤 Voiceover — Video Level</span>
         <div class="input-with-picker" style="margin-top:8px;">
           <input type="text" id="fVoiceoverUrl" placeholder="Paste Drive voiceover URL or upload…" style="min-width:200px;" oninput="onVoiceoverChange(this.value)">
-          <button class="btn-pick-drive" onclick="openGDrivePicker('fVoiceoverUrl')" title="Pick from Google Drive">📁 Drive</button>
+          <button class="btn-pick-drive" onclick="browseAzure('fVoiceoverUrl')" title="Browse Azure files">☁️ Azure</button>
           <button class="btn-upload-drive" onclick="triggerUpload('fVoiceoverUrl')" title="Upload voiceover audio">⬆️ Upload</button>
         </div>
       </div>
@@ -689,9 +679,9 @@
         <div class="form-group full-width" id="reversalClipGroup" style="display:none;">
           <label>🔁 Reversal / Clip URL <span style="color:var(--text-muted);font-weight:400;font-size:0.7rem;">(recorded clip — stored on the scene's bundle)</span></label>
           <div class="input-with-picker">
-            <input type="text" id="fBundleUrl" placeholder="Upload the recorded clip to Google Drive →">
-            <button class="btn-pick-drive" onclick="openGDrivePicker('fBundleUrl')" title="Pick from Google Drive">📁 Drive</button>
-            <button class="btn-upload-drive" id="btnUploadReversal" onclick="uploadPendingReversal()" title="Upload the recorded reversal clip to Google Drive">⬆️ Upload Reversal Clip</button>
+            <input type="text" id="fBundleUrl" placeholder="Upload the recorded clip to Azure →">
+            <button class="btn-pick-drive" onclick="browseAzure('fBundleUrl')" title="Browse Azure files">☁️ Azure</button>
+            <button class="btn-upload-drive" id="btnUploadReversal" onclick="uploadPendingReversal()" title="Upload the recorded reversal clip to Azure">⬆️ Upload Reversal Clip</button>
           </div>
           <span class="field-hint" id="reversalClipHint"></span>
         </div>
@@ -713,35 +703,35 @@
           <span class="field-hint" id="fScriptHint"></span>
         </div>
         <div class="form-group">
-          <label>Background Image URL <span style="color:var(--text-muted);font-weight:400;font-size:0.7rem;">(Upload to Google Drive → paste share link)</span></label>
+          <label>Background Image URL <span style="color:var(--text-muted);font-weight:400;font-size:0.7rem;">(Upload to Azure, or paste a URL)</span></label>
           <div class="input-with-picker">
             <input type="text" id="fBg" placeholder="https://drive.google.com/file/d/... or assets/...png">
-            <button class="btn-pick-drive" onclick="openGDrivePicker('fBg')" title="Pick from Google Drive">📁 Drive</button>
-            <button class="btn-upload-drive" onclick="triggerUpload('fBg')" title="Upload local file to Google Drive">⬆️ Upload</button>
+            <button class="btn-pick-drive" onclick="browseAzure('fBg')" title="Browse Azure files">☁️ Azure</button>
+            <button class="btn-upload-drive" onclick="triggerUpload('fBg')" title="Upload local file to Azure">⬆️ Upload</button>
           </div>
         </div>
         <div class="form-group">
-          <label>🎵 Music URL <span style="color:var(--text-muted);font-weight:400;font-size:0.7rem;">(Scene-level background music — Google Drive)</span></label>
+          <label>🎵 Music URL <span style="color:var(--text-muted);font-weight:400;font-size:0.7rem;">(Scene-level background music — Azure)</span></label>
           <div class="input-with-picker">
             <input type="text" id="fMusicUrl" placeholder="https://drive.google.com/file/d/... or .mp3 filename">
-            <button class="btn-pick-drive" onclick="openGDrivePicker('fMusicUrl')" title="Pick from Google Drive">📁 Drive</button>
-            <button class="btn-upload-drive" onclick="triggerUpload('fMusicUrl')" title="Upload music to Google Drive">⬆️ Upload</button>
+            <button class="btn-pick-drive" onclick="browseAzure('fMusicUrl')" title="Browse Azure files">☁️ Azure</button>
+            <button class="btn-upload-drive" onclick="triggerUpload('fMusicUrl')" title="Upload music to Azure">⬆️ Upload</button>
           </div>
         </div>
         <div class="form-group">
-          <label>🔊 Sound Effects URL <span style="color:var(--text-muted);font-weight:400;font-size:0.7rem;">(Scene-level SFX — Google Drive)</span></label>
+          <label>🔊 Sound Effects URL <span style="color:var(--text-muted);font-weight:400;font-size:0.7rem;">(Scene-level SFX — Azure)</span></label>
           <div class="input-with-picker">
             <input type="text" id="fSfxUrl" placeholder="https://drive.google.com/file/d/... or .wav filename">
-            <button class="btn-pick-drive" onclick="openGDrivePicker('fSfxUrl')" title="Pick from Google Drive">📁 Drive</button>
-            <button class="btn-upload-drive" onclick="triggerUpload('fSfxUrl')" title="Upload SFX to Google Drive">⬆️ Upload</button>
+            <button class="btn-pick-drive" onclick="browseAzure('fSfxUrl')" title="Browse Azure files">☁️ Azure</button>
+            <button class="btn-upload-drive" onclick="triggerUpload('fSfxUrl')" title="Upload SFX to Azure">⬆️ Upload</button>
           </div>
         </div>
         <div class="form-group">
-          <label>Lower Third Image URL <span style="color:var(--text-muted);font-weight:400;font-size:0.7rem;">(Google Drive)</span></label>
+          <label>Lower Third Image URL <span style="color:var(--text-muted);font-weight:400;font-size:0.7rem;">(Azure)</span></label>
           <div class="input-with-picker">
             <input type="text" id="fLtImg" placeholder="https://drive.google.com/file/d/... or assets/overlays/lt_intro.png">
-            <button class="btn-pick-drive" onclick="openGDrivePicker('fLtImg')" title="Pick from Google Drive">📁 Drive</button>
-            <button class="btn-upload-drive" onclick="triggerUpload('fLtImg')" title="Upload local file to Google Drive">⬆️ Upload</button>
+            <button class="btn-pick-drive" onclick="browseAzure('fLtImg')" title="Browse Azure files">☁️ Azure</button>
+            <button class="btn-upload-drive" onclick="triggerUpload('fLtImg')" title="Upload local file to Azure">⬆️ Upload</button>
           </div>
         </div>
         <div class="form-group">
@@ -753,27 +743,27 @@
           <input type="text" id="fLtSub" placeholder="Module 1: Introduction">
         </div>
         <div class="form-group">
-          <label>Overlay Lower Third URL <span style="color:var(--text-muted);font-weight:400;font-size:0.7rem;">(Google Drive)</span></label>
+          <label>Overlay Lower Third URL <span style="color:var(--text-muted);font-weight:400;font-size:0.7rem;">(Azure)</span></label>
           <div class="input-with-picker">
             <input type="text" id="fOverlayLt" placeholder="https://drive.google.com/file/d/... or assets/overlays/lt_intro.png">
-            <button class="btn-pick-drive" onclick="openGDrivePicker('fOverlayLt')" title="Pick from Google Drive">📁 Drive</button>
-            <button class="btn-upload-drive" onclick="triggerUpload('fOverlayLt')" title="Upload local file to Google Drive">⬆️ Upload</button>
+            <button class="btn-pick-drive" onclick="browseAzure('fOverlayLt')" title="Browse Azure files">☁️ Azure</button>
+            <button class="btn-upload-drive" onclick="triggerUpload('fOverlayLt')" title="Upload local file to Azure">⬆️ Upload</button>
           </div>
         </div>
         <div class="form-group">
-          <label>Overlay Text Image URL <span style="color:var(--text-muted);font-weight:400;font-size:0.7rem;">(Google Drive)</span></label>
+          <label>Overlay Text Image URL <span style="color:var(--text-muted);font-weight:400;font-size:0.7rem;">(Azure)</span></label>
           <div class="input-with-picker">
             <input type="text" id="fOverlayText" placeholder="https://drive.google.com/file/d/... or assets/overlays/overlay_systems.png">
-            <button class="btn-pick-drive" onclick="openGDrivePicker('fOverlayText')" title="Pick from Google Drive">📁 Drive</button>
-            <button class="btn-upload-drive" onclick="triggerUpload('fOverlayText')" title="Upload local file to Google Drive">⬆️ Upload</button>
+            <button class="btn-pick-drive" onclick="browseAzure('fOverlayText')" title="Browse Azure files">☁️ Azure</button>
+            <button class="btn-upload-drive" onclick="triggerUpload('fOverlayText')" title="Upload local file to Azure">⬆️ Upload</button>
           </div>
         </div>
         <div class="form-group full-width">
           <label>📄 Reference Doc URL <span style="color:var(--text-muted);font-weight:400;font-size:0.7rem;">(Google Slides, Doc, or any reference link)</span></label>
           <div class="input-with-picker">
             <input type="text" id="fRefDocUrl" placeholder="https://docs.google.com/presentation/d/... or drive.google.com/file/d/...">
-            <button class="btn-pick-drive" onclick="openGDrivePicker('fRefDocUrl')" title="Pick from Google Drive">📁 Drive</button>
-            <button class="btn-upload-drive" onclick="triggerUpload('fRefDocUrl')" title="Upload to Google Drive">⬆️ Upload</button>
+            <button class="btn-pick-drive" onclick="browseAzure('fRefDocUrl')" title="Browse Azure files">☁️ Azure</button>
+            <button class="btn-upload-drive" onclick="triggerUpload('fRefDocUrl')" title="Upload to Azure">⬆️ Upload</button>
           </div>
         </div>
       </div>
@@ -794,20 +784,11 @@
       <div class="settings-info">
         <strong>🔐 Supabase Anon Key</strong> — copy the <code>anon public</code> key from:<br>
         <a href="https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/settings/api-keys/legacy" target="_blank" rel="noopener" style="color:#60a5fa;">🔗 Supabase API Keys (Legacy) →</a><br><br>
-        <strong>🔗 Google Drive OAuth</strong> — requires a Google Cloud project:<br>
-        1. Enable <code>Drive API</code> + <code>Google Picker API</code><br>
-        2. Create an <strong>OAuth 2.0 Client ID</strong> (Web application type):<br>
-        <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener" style="color:#60a5fa;">🔗 Google OAuth Client ID →</a><br>
-        3. Add <code>http://localhost:8765</code> to <strong>Authorized JavaScript Origins</strong>
+        <strong>☁️ Azure Blob Storage</strong> — asset uploads go to Azure via the server. No client-side login needed: the Go server holds the storage connection string (from Azure Key Vault) and signs short-lived SAS tokens server-side.
       </div>
       <div class="form-group" style="margin-bottom:16px;">
         <label>Supabase Anon Key</label>
         <input type="text" id="settingsSupabaseKey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
-      </div>
-      <hr class="settings-divider">
-      <div class="form-group" style="margin-bottom:8px;">
-        <label>Google OAuth Client ID <span style="color:var(--text-muted);font-weight:400;font-size:0.7rem;">(console.cloud.google.com → Credentials → OAuth 2.0 Client IDs)</span></label>
-        <input type="text" id="settingsGoogleClientId" placeholder="123456789-abcdef.apps.googleusercontent.com">
       </div>
       <div class="form-actions">
         <button class="btn-form-cancel" onclick="closeSettings()">Cancel</button>
@@ -1344,11 +1325,10 @@
       }
     }
 
-    // ⚡ Credential defaults — anon key and client ID are public-safe
+    // ⚡ Credential defaults — anon key is public-safe
     const CRED_DEFAULTS = {
       supabase_url: 'https://rmekfsdhglyiralxvkwc.supabase.co',
-      supabase_anon_key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZWtmc2RoZ2x5aXJhbHh2a3djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NzYzODgsImV4cCI6MjA5NjM1MjM4OH0.ay6HsmO_CbMGDXL_Dv4DT-paAIAOqlQPfmqqx_mexSU',
-      google_client_id: '327591678159-hq0cedjmjo9fgc9s6fiutrr4jlo3jhqp.apps.googleusercontent.com'
+      supabase_anon_key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZWtmc2RoZ2x5aXJhbHh2a3djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NzYzODgsImV4cCI6MjA5NjM1MjM4OH0.ay6HsmO_CbMGDXL_Dv4DT-paAIAOqlQPfmqqx_mexSU'
     };
 
     // Page Entry point
@@ -1360,7 +1340,6 @@
           const cfg = await cfgRes.json();
           if (cfg.supabaseUrl) localStorage.setItem('supabase_url', cfg.supabaseUrl);
           if (cfg.supabaseAnon) localStorage.setItem('supabase_anon_key', cfg.supabaseAnon);
-          if (cfg.googleClientId) localStorage.setItem('google_client_id', cfg.googleClientId);
           if (window.dbg) window.dbg('⚙️ Loaded configuration from /api/config');
         }
       } catch (e) {
@@ -1701,83 +1680,142 @@
       }).join('');
     }
 
-    // ========== Google Drive Integration ==========
-    let gdriveAccessToken = null;
-    let pickerApiLoaded = false;
-    let _pendingDriveAction = null; // {type:'upload'|'picker', targetInputId}
+    // ========== Azure Blob Storage Integration ==========
+    // Assets upload to Azure via the Go server (/api/research/upload), which
+    // holds the storage connection string and generates short-lived SAS tokens
+    // server-side. Stored URLs point at the read proxy (/api/research/file) so
+    // blobs stay private and are streamed through the server.
 
-    async function loadPickerApi() {
-      if (pickerApiLoaded) return;
-      return new Promise((resolve, reject) => {
-        const script = document.createElement('script');
-        script.src = 'https://apis.google.com/js/api.js';
-        script.onload = () => gapi.load('picker', () => { pickerApiLoaded = true; resolve(); });
-        script.onerror = reject;
-        document.head.appendChild(script);
-      });
+    // Field → Azure container (by asset type)
+    const AZURE_CONTAINER_BY_FIELD = {
+      fBg:           'research-images',
+      fLtImg:        'research-images',
+      fOverlayLt:    'research-images',
+      fOverlayText:  'research-images',
+      fMusicUrl:     'research-audio',
+      fSfxUrl:       'research-audio',
+      fVoiceoverUrl: 'research-audio',
+      fRefDocUrl:    'research-notes',
+      fBundleUrl:    'research-videos'
+    };
+
+    function azureContainerFor(targetInputId, file) {
+      // Reversal clips: route audio-only recordings to the audio container
+      if (targetInputId === 'fBundleUrl' && file && /^audio\//.test(file.type || '')) return 'research-audio';
+      return AZURE_CONTAINER_BY_FIELD[targetInputId] || 'research-notes';
     }
 
-    async function gdriveLogin() {
-      const clientId = localStorage.getItem('google_client_id') || '';
-      if (!clientId) {
-        alert('Enter your Google Client ID in ⚙️ Settings first.\n\nSteps:\n1. Go to console.cloud.google.com\n2. Enable Drive API + Picker API\n3. Create OAuth 2.0 Client ID (Web app type)\n4. Add http://localhost:8765 to Authorized JavaScript Origins');
-        openSettings();
-        return;
+    function azureBlobUrl(container, name) {
+      return `/api/research/file?container=${container}&name=${encodeURIComponent(name)}`;
+    }
+
+    function findUploadBtn(targetInputId) {
+      let btn = null;
+      document.querySelectorAll('.btn-upload-drive').forEach(b => {
+        if ((b.getAttribute('onclick') || '').includes(`'${targetInputId}'`)) btn = b;
+      });
+      if (!btn && targetInputId === 'fBundleUrl') btn = document.getElementById('btnUploadReversal');
+      return btn;
+    }
+
+    async function uploadFileToAzure(file, targetInputId) {
+      const container = azureContainerFor(targetInputId, file);
+      const mod = document.getElementById('module-select').value || 0;
+      const sec = document.getElementById('video-select').value || 0;
+      const clean = (file.name || 'file').replace(/[^\w.\-]+/g, '_');
+      const blobName = `m${mod}_s${sec}_${Date.now()}_${clean}`;
+
+      const btn = findUploadBtn(targetInputId);
+      const original = btn ? btn.textContent : '⬆️ Upload';
+      try {
+        if (btn) { btn.textContent = '⏳…'; btn.disabled = true; }
+        if (window.dbg) window.dbg(`Uploading "${blobName}" (${(file.size / 1024).toFixed(0)}KB) → Azure/${container}…`);
+
+        const fd = new FormData();
+        fd.append('file', new File([file], blobName, { type: file.type || 'application/octet-stream' }));
+        const res = await fetch('/api/research/upload?container=' + container, { method: 'POST', body: fd });
+        if (!res.ok) throw new Error(`Azure ${res.status}: ${(await res.text()).slice(0, 200)}`);
+        const data = await res.json();
+
+        const url = azureBlobUrl(container, data.name || blobName);
+        const el = document.getElementById(targetInputId);
+        if (el) el.value = url;
+        if (window.dbg) window.dbg(`✅ Uploaded → ${url}`);
+
+        if (targetInputId === 'fVoiceoverUrl') onVoiceoverChange(url);
+        else await saveFieldToSupabase(targetInputId, url);
+
+        if (btn) { btn.textContent = '✅ Saved!'; setTimeout(() => { if (btn) btn.textContent = original; }, 2500); }
+        return url;
+      } catch (err) {
+        console.error('Azure upload error:', err);
+        alert('❌ Upload failed: ' + err.message);
+        if (btn) { btn.textContent = original; btn.disabled = false; }
       }
-      if (!window.google || !window.google.accounts) {
-        alert('Google Identity Services not ready yet. Try again in a moment.');
-        return;
-      }
-      const tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: clientId,
-        scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.readonly',
-        callback: async (response) => {
-          if (response.error) { console.error('GDrive auth error:', response); return; }
-          gdriveAccessToken = response.access_token;
-          const btn = document.getElementById('btn-gdrive-login');
-          if (btn) { btn.textContent = '✅ Drive Connected'; btn.classList.add('connected'); }
-          await loadPickerApi();
-          // Execute any action that was waiting on auth
-          if (_pendingDriveAction) {
-            const action = _pendingDriveAction;
-            _pendingDriveAction = null;
-            if (action.type === 'picker') openGDrivePicker(action.targetInputId);
-            else if (action.type === 'reversal') uploadPendingReversal();
-            else if (action.type === 'upload') triggerUpload(action.targetInputId);
-          }
+    }
+
+    // ---- Browse existing Azure blobs (replaces the Google Drive picker) ----
+    function ensureAzurePicker() {
+      let modal = document.getElementById('azPicker');
+      if (modal) return modal;
+      modal = document.createElement('div');
+      modal.id = 'azPicker';
+      modal.style.cssText = 'display:none;position:fixed;inset:0;z-index:10005;background:rgba(3,7,18,0.75);backdrop-filter:blur(4px);align-items:center;justify-content:center;';
+      modal.innerHTML = `
+        <div style="background:#0b1220;border:1px solid rgba(139,92,246,0.35);border-radius:16px;width:min(560px,92vw);max-height:80vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.6);">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid rgba(139,92,246,0.2);">
+            <strong id="azPickerTitle">☁️ Azure</strong>
+            <button type="button" onclick="document.getElementById('azPicker').style.display='none'" style="background:none;border:none;color:var(--text-muted);font-size:1.2rem;cursor:pointer;">✕</button>
+          </div>
+          <div id="azPickerList" style="overflow-y:auto;padding:16px 20px;"></div>
+        </div>`;
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) { modal.style.display = 'none'; return; }
+        const item = e.target.closest('.az-pick-item');
+        if (!item) return;
+        const url = item.getAttribute('data-url');
+        const target = modal.dataset.target;
+        const el = document.getElementById(target);
+        if (el) el.value = url;
+        if (target === 'fVoiceoverUrl') onVoiceoverChange(url);
+        else saveFieldToSupabase(target, url);
+        modal.style.display = 'none';
+      });
+      document.body.appendChild(modal);
+      return modal;
+    }
+
+    async function browseAzure(targetInputId) {
+      const container = azureContainerFor(targetInputId, null);
+      const modal = ensureAzurePicker();
+      modal.dataset.target = targetInputId;
+      modal.querySelector('#azPickerTitle').textContent = `☁️ Azure · ${container}`;
+      const list = modal.querySelector('#azPickerList');
+      list.innerHTML = '<div style="opacity:.6;padding:16px;">Loading…</div>';
+      modal.style.display = 'flex';
+      try {
+        const res = await fetch('/api/research/files?container=' + container);
+        if (!res.ok) throw new Error((await res.text()).slice(0, 200));
+        const files = await res.json();
+        if (!files || !files.length) {
+          list.innerHTML = '<div style="opacity:.6;padding:16px;">No files in this container yet — use ⬆️ Upload.</div>';
+          return;
         }
-      });
-      tokenClient.requestAccessToken();
-    }
-
-    async function openGDrivePicker(targetInputId) {
-      if (!gdriveAccessToken) {
-        _pendingDriveAction = { type: 'picker', targetInputId };
-        gdriveLogin();
-        return;
+        list.innerHTML = files.map(f => {
+          const url = azureBlobUrl(container, f.name).replace(/"/g, '&quot;');
+          const kb = f.size ? (f.size / 1024).toFixed(0) + ' KB' : '';
+          return `<button type="button" class="az-pick-item" data-url="${url}" style="display:flex;justify-content:space-between;gap:12px;width:100%;text-align:left;background:rgba(255,255,255,0.04);color:var(--text-main);border:1px solid rgba(139,92,246,0.2);border-radius:8px;padding:8px 12px;margin-bottom:6px;cursor:pointer;"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${f.name}</span><span style="opacity:.5;font-size:.7rem;flex-shrink:0;">${kb}</span></button>`;
+        }).join('');
+      } catch (e) {
+        list.innerHTML = `<div style="color:#fca5a5;padding:16px;">Failed to list: ${e.message}</div>`;
       }
-      await loadPickerApi();
-      if (!window.google || !window.google.picker) { alert('Google Picker API not loaded yet. Try again.'); return; }
-      new google.picker.PickerBuilder()
-        .addView(new google.picker.DocsView().setIncludeFolders(false))
-        .setOAuthToken(gdriveAccessToken)
-        .setCallback(data => {
-          if (data.action === google.picker.Action.PICKED && data.docs && data.docs[0]) {
-            const id = data.docs[0].id;
-            const url = `https://drive.google.com/file/d/${id}/view?usp=sharing`;
-            const el = document.getElementById(targetInputId);
-            if (el) el.value = url;
-            if (targetInputId === 'fVoiceoverUrl') onVoiceoverChange(url);
-          }
-        })
-        .build().setVisible(true);
     }
+    window.browseAzure = browseAzure;
 
     // ========== Settings ==========
     function openSettings() {
       document.getElementById('settingsOverlay').classList.add('open');
       document.getElementById('settingsSupabaseKey').value = localStorage.getItem('supabase_anon_key') || '';
-      document.getElementById('settingsGoogleClientId').value = localStorage.getItem('google_client_id') || '';
     }
 
     function closeSettings() {
@@ -1840,7 +1878,7 @@
       document.getElementById('loadScriptPicker').style.display = 'none';
     }
 
-    // ========== Upload local file → Google Drive ==========
+    // ========== Upload local file → Azure Blob Storage ==========
     // Field ID → Supabase column name
     const FIELD_TO_COLUMN = {
       fBg:          'bg_image',
@@ -1932,15 +1970,8 @@
       if (!window._pendingReversal || !window._pendingReversal.file) {
         return triggerUpload('fBundleUrl'); // no staged clip → manual file pick
       }
-      if (!gdriveAccessToken) {
-        _pendingDriveAction = { type: 'reversal' };
-        gdriveLogin();
-        return;
-      }
-      await uploadFileToDrive(window._pendingReversal.file, 'fBundleUrl');
-      if (document.getElementById('fBundleUrl').value) {
-        idbDeleteClip(window._pendingReversal.id); // clean up after success
-      }
+      const url = await uploadFileToAzure(window._pendingReversal.file, 'fBundleUrl');
+      if (url) idbDeleteClip(window._pendingReversal.id); // clean up after success
     }
     window.uploadPendingReversal = uploadPendingReversal;
 
@@ -1953,17 +1984,12 @@
     }
 
     function triggerUpload(targetInputId) {
-      if (!gdriveAccessToken) {
-        _pendingDriveAction = { type: 'upload', targetInputId };
-        gdriveLogin();
-        return;
-      }
       const input = document.getElementById('_driveFileInput');
       input.onchange = async (e) => {
         const file = e.target.files[0];
         input.value = '';
         if (!file) return;
-        await uploadFileToDrive(file, targetInputId);
+        await uploadFileToAzure(file, targetInputId);
       };
       input.click();
     }
@@ -2000,66 +2026,10 @@
       }
     }
 
-    async function uploadFileToDrive(file, targetInputId) {
-      const uploadBtns = document.querySelectorAll(`.btn-upload-drive`);
-      // Find the specific button by its onclick
-      let btn = null;
-      uploadBtns.forEach(b => { if (b.getAttribute('onclick') === `triggerUpload('${targetInputId}')`) btn = b; });
-      const originalText = btn ? btn.textContent : '⬆️ Upload';
-      try {
-        if (btn) { btn.textContent = '⏳…'; btn.disabled = true; }
-        if (window.dbg) window.dbg(`Uploading "${file.name}" (${(file.size / 1024).toFixed(0)}KB) to Google Drive…`);
-
-        const meta = { name: file.name, mimeType: file.type || 'application/octet-stream' };
-        const form = new FormData();
-        form.append('metadata', new Blob([JSON.stringify(meta)], { type: 'application/json' }));
-        form.append('file', file);
-
-        const uploadRes = await fetch(
-          'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name',
-          { method: 'POST', headers: { 'Authorization': `Bearer ${gdriveAccessToken}` }, body: form }
-        );
-        if (!uploadRes.ok) {
-          const errText = await uploadRes.text();
-          throw new Error(`Drive upload ${uploadRes.status}: ${errText}`);
-        }
-        const data = await uploadRes.json();
-
-        // Share publicly (anyone with link can view)
-        await fetch(`https://www.googleapis.com/drive/v3/files/${data.id}/permissions`, {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${gdriveAccessToken}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ role: 'reader', type: 'anyone' })
-        });
-
-        const url = `https://drive.google.com/file/d/${data.id}/view?usp=sharing`;
-        const el = document.getElementById(targetInputId);
-        if (el) el.value = url;
-        if (window.dbg) window.dbg(`✅ Uploaded "${data.name}" → ${url}`);
-        // Voiceover is video-level (localStorage), scenes fields go to Supabase
-        if (targetInputId === 'fVoiceoverUrl') {
-          onVoiceoverChange(url);
-        } else {
-          await saveFieldToSupabase(targetInputId, url);
-        }
-        if (btn) {
-          btn.textContent = '✅ Saved!';
-          setTimeout(() => { if (btn) { btn.textContent = originalText; } }, 2500);
-        }
-      } catch (err) {
-        console.error('Drive upload error:', err);
-        alert('❌ Upload failed: ' + err.message);
-        if (btn) { btn.textContent = originalText; btn.disabled = false; }
-      }
-    }
-
     function saveSettings() {
       const key = document.getElementById('settingsSupabaseKey').value.trim();
-      const gClientId = document.getElementById('settingsGoogleClientId').value.trim();
       if (key) { localStorage.setItem('supabase_anon_key', key); setCookie('supabase_anon_key', key, 365); }
       else { localStorage.removeItem('supabase_anon_key'); setCookie('supabase_anon_key', '', -1); }
-      if (gClientId) { localStorage.setItem('google_client_id', gClientId); setCookie('google_client_id', gClientId, 365); }
-      else { localStorage.removeItem('google_client_id'); setCookie('google_client_id', '', -1); }
       closeSettings();
       testSupabaseConnection().then(() => loadDataAndRender());
     }

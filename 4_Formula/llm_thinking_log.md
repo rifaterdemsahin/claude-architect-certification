@@ -1,5 +1,19 @@
 # LLM Thinking Log
 
+## 2026-06-14 — ☁️ Shot List uploads: Google Drive → Azure Blob
+
+### 🎯 Objective
+On `production_shotlist.html`, replace all Google Drive uploads/pickers with **Azure Blob Storage**, reusing the proven server endpoints.
+
+### 📐 Design & Implementation Plan
+1. **Reuse the Go server**: `/api/research/upload?container=<c>` (multipart, server-side SAS) for writes; `/api/research/files` to browse; stored URLs point at the read proxy `/api/research/file?container=&name=` so blobs stay private.
+2. **Container routing by asset type**: images → `research-images`, audio (music/sfx/voiceover + audio reversal clips) → `research-audio`, video reversal clips → `research-videos`, ref docs → `research-notes`. Blob names prefixed `m{mod}_s{sec}_{ts}_{name}` to avoid collisions.
+3. **New JS**: `uploadFileToAzure()`, `browseAzure()` (lightweight picker modal listing container blobs), `azureContainerFor()`, `azureBlobUrl()`. `triggerUpload()` and `uploadPendingReversal()` repointed to Azure — **no client-side OAuth**.
+4. **Remove Google**: deleted `uploadFileToDrive`, `gdriveLogin`, `openGDrivePicker`, `loadPickerApi`, the GIS `<script>`, the Drive login button, and the Google Client ID setting. Kept `toGDriveEmbedUrl` only as a pass-through for any legacy Drive URLs already stored.
+
+### ✅ Outcome
+All shot-list asset uploads (including the reversal clip handoff) now go to Azure through the server. Inline JS parses; no dangling Drive references remain.
+
 ## 2026-06-13 — Add Background Asset Type to Image Generator
 
 ### 🎯 Objective
@@ -153,16 +167,19 @@ Add a top-right control on **every page** that, with **one click**, records audi
 ### ✅ Outcome
 Implemented `shared/reversal-recorder.js` and wired it through `nav.js`. Reversal shots persist across pages in localStorage and download as timestamped `.webm` files.
 
-## 2026-06-14 — 🔗 Reversal → Shot List handoff (upload + module/video linking, auto-type)
+## 2026-06-14 — 🔗 Pipeline Asset Mapping & Modal Preview
 
 ### 🎯 Objective
-After a reversal recording is saved, **open the shot list**, stage the clip for **upload**, expose **module + video linking**, and **auto-select the `reversal` type**.
+Map the high-fidelity pipeline images from `3_Simulation/generated/pipeline` to the Production Pipeline page (`5_Symbols/pipeline.html`) and implement a modal popup for full-screen preview.
 
 ### 📐 Design & Implementation Plan
-1. **Survive navigation**: a `blob:` URL dies on reload, so the recorder stashes the recorded Blob in **IndexedDB** (`reversal_db` → `clips` store, keyed by the shot id) before redirecting. The local download still fires as the durable copy.
-2. **Handoff**: recorder navigates to `…/production_shotlist.html?reversal=<id>` (same tab — `MediaRecorder.onstop` is not a user gesture, so `window.open` would be popup-blocked).
-3. **Shot list consumes it**: on load, if `?reversal=<id>` is present, read the Blob from IndexedDB → wrap as a `File` → open the scene form pre-staged.
-4. **Auto-type**: add a **Type** `<select>` to the scene form (Standard / Reversal / B-Roll / Interview); arriving from a reversal sets it to **`reversal`**. Persist via new `scene_type` column with a **resilient save** (retry without the column if the migration hasn't been applied) so existing saves never break.
-5. **Upload**: add a **🎬 Reversal/Clip URL** field mapped to the existing `bundle_url` column, with a dedicated **⬆️ Upload Reversal Clip** button that pushes the staged `File` to Drive via the existing `uploadFileToDrive()`.
-6. **Linking**: the page's top **Module** + **Video/Section** selectors already drive `module_number`/`section_number` on save — a banner instructs the user to pick them, and we scroll them into view.
-7. **Migration**: `migration_scene_type.sql` → `ALTER TABLE scenes ADD COLUMN IF NOT EXISTS scene_type TEXT DEFAULT 'standard'`.
+1. **Asset Standardization**: Rename raw pipeline images to follow a consistent `[01-11]_[phase]_pipeline.png` naming convention to match the 11-stage workflow.
+2. **HTML Update**: Update `5_Symbols/pipeline.html` to reference the renamed assets.
+3. **Modal Component**:
+   - Add a hidden glassmorphic modal overlay (`#image-modal`) to the pipeline page.
+   - Implement JavaScript to capture clicks on stage images, update the modal's source, and toggle visibility.
+   - Ensure the modal is responsive and supports "click-to-close" on the backdrop.
+4. **Validation**:
+   - Verify all 11 images load correctly.
+   - Test modal opening/closing behavior on desktop and mobile.
+   - Commit and push changes according to the Project Self-Learning System mandates.

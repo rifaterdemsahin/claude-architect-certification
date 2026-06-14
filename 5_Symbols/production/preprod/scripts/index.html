@@ -354,21 +354,6 @@
     .audio-player-container { margin: 0 0 10px; }
     .audio-player-container audio { width: 100%; border-radius: 8px; }
 
-    /* Google Drive config panel */
-    .gdrive-config { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 20px; }
-    .gdrive-toggle { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); color: var(--text-muted); padding: 6px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-body); }
-    .gdrive-toggle:hover { background: rgba(255,255,255,0.08); color: var(--text-main); }
-    .gdrive-toggle.configured { border-color: rgba(16,185,129,0.3); color: #34d399; background: rgba(16,185,129,0.06); }
-    .gdrive-form { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 12px 16px; width: 100%; max-width: 620px; }
-    .gdrive-input { background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; padding: 7px 12px; color: var(--text-main); font-size: 0.82rem; flex: 1; min-width: 200px; font-family: var(--font-body); }
-    .gdrive-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 8px rgba(139,92,246,0.2); }
-    .btn-gdrive-save { background: var(--primary); color: white; border: none; padding: 7px 16px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: all 0.2s; font-family: var(--font-body); white-space: nowrap; }
-    .btn-gdrive-save:hover { background: #7c3aed; }
-    .btn-gdrive-clear { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25); color: #f87171; padding: 7px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: var(--font-body); white-space: nowrap; }
-    .btn-gdrive-clear:hover { background: rgba(239,68,68,0.2); }
-    .gdrive-msg { font-size: 0.78rem; font-weight: 600; min-width: 60px; }
-    .gdrive-msg.ok { color: #34d399; }
-    .gdrive-msg.cleared { color: #9ca3af; }
 
     /* Save Audio modal */
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: flex; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(4px); }
@@ -515,7 +500,6 @@
     }
   </style>
   <script src="../../../../shared/nav.js"></script>
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
 
@@ -528,19 +512,6 @@
       <h1>Master Script</h1>
       <p>Course-wide script outline with video breakdowns, timing cues, and production notes for all 5 modules.</p>
     </header>
-
-    <!-- Google Drive config -->
-    <div class="gdrive-config" id="gdrive-config">
-      <button class="gdrive-toggle" id="gdrive-toggle" onclick="toggleGdriveConfig()" title="Configure Google Drive for audio uploads">
-        <span id="gdrive-icon">🔴</span> Google Drive
-      </button>
-      <div class="gdrive-form" id="gdrive-form" style="display:none;">
-        <input type="password" class="gdrive-input" id="gdrive-input" placeholder="Paste Google Client ID…" onkeydown="if(event.key==='Enter')saveGoogleClientId()">
-        <button class="btn-gdrive-save" onclick="saveGoogleClientId()">💾 Save</button>
-        <button class="btn-gdrive-clear" onclick="clearGoogleClientId()">🗑 Clear</button>
-        <span class="gdrive-msg" id="gdrive-msg"></span>
-      </div>
-    </div>
 
     <div id="module-nav" class="module-nav"></div>
     <div id="content-area">
@@ -1013,159 +984,18 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
       document.cookie = `${name}=${encodeURIComponent(val)};max-age=${days * 86400};path=/;SameSite=Lax`;
     }
 
-    // ── Save Audio modal state ─────────────────────────────────────────────────
-    let _pendingSaveAudio = null;
-
-    window.openSaveAudioModal = function(videoId, moduleIdx, videoIdx) {
-      _pendingSaveAudio = { videoId, moduleIdx, videoIdx };
-      const savedFolder = getCookie('prod_drive_folder_id') || '';
-      document.getElementById('modal-folder-id').value = savedFolder;
-      document.getElementById('save-audio-modal').style.display = 'flex';
-      document.getElementById('modal-folder-id').focus();
-    };
-
-    window.closeSaveAudioModal = function() {
-      document.getElementById('save-audio-modal').style.display = 'none';
-      _pendingSaveAudio = null;
-    };
-
-    window.confirmSaveAudio = function() {
-      const folderId = document.getElementById('modal-folder-id').value.trim();
-      if (!folderId) { alert('Please enter a Google Drive folder ID.'); return; }
-      if (document.getElementById('modal-remember').checked) {
-        setCookie('prod_drive_folder_id', folderId, 365);
-      }
-      document.getElementById('save-audio-modal').style.display = 'none';
-      if (_pendingSaveAudio) {
-        const { videoId, moduleIdx, videoIdx } = _pendingSaveAudio;
-        _pendingSaveAudio = null;
-        executeAudioUpload(videoId, moduleIdx, videoIdx, folderId);
-      }
-    };
-
-    // GOOGLE_CLIENT_ID — read from localStorage first, cookie as fallback
-    let GOOGLE_CLIENT_ID = localStorage.getItem('google_client_id') || getCookie('google_client_id') || '';
-
-    // ── Google Drive config UI ─────────────────────────────────────────────────
-    function updateGoogleConfigUI() {
-      const icon = document.getElementById('gdrive-icon');
-      const toggle = document.getElementById('gdrive-toggle');
-      if (!icon || !toggle) return;
-      if (GOOGLE_CLIENT_ID) {
-        icon.textContent = '🟢';
-        toggle.classList.add('configured');
-        toggle.title = 'Google Drive configured — click to update';
-      } else {
-        icon.textContent = '🔴';
-        toggle.classList.remove('configured');
-        toggle.title = 'Google Drive not configured — click to set Client ID';
-      }
-    }
-
-    function toggleGdriveConfig() {
-      const form = document.getElementById('gdrive-form');
-      const isHidden = form.style.display === 'none';
-      form.style.display = isHidden ? 'flex' : 'none';
-      if (isHidden) {
-        const input = document.getElementById('gdrive-input');
-        input.value = GOOGLE_CLIENT_ID || '';
-        input.focus();
-        input.select();
-      }
-    }
-
-    function saveGoogleClientId() {
-      const val = document.getElementById('gdrive-input').value.trim();
-      if (!val) return;
-      localStorage.setItem('google_client_id', val);
-      setCookie('google_client_id', val, 365);
-      GOOGLE_CLIENT_ID = val;
-      _gisClient = null;
-      _gisToken = null;
-      updateGoogleConfigUI();
-      const msg = document.getElementById('gdrive-msg');
-      msg.textContent = '✅ Saved';
-      msg.className = 'gdrive-msg ok';
-      setTimeout(() => {
-        msg.textContent = '';
-        document.getElementById('gdrive-form').style.display = 'none';
-      }, 1400);
-    }
-
-    function clearGoogleClientId() {
-      localStorage.removeItem('google_client_id');
-      setCookie('google_client_id', '', -1);
-      GOOGLE_CLIENT_ID = '';
-      _gisClient = null;
-      _gisToken = null;
-      document.getElementById('gdrive-input').value = '';
-      updateGoogleConfigUI();
-      const msg = document.getElementById('gdrive-msg');
-      msg.textContent = '🗑 Cleared';
-      msg.className = 'gdrive-msg cleared';
-      setTimeout(() => msg.textContent = '', 1800);
-    }
-
-    // ── Google Identity Services (GIS) token flow ──────────────────────────────
-    let _gisClient = null;
-    let _gisToken = null;
-
-    function initGisClient() {
-      if (!GOOGLE_CLIENT_ID || !window.google?.accounts?.oauth2) return;
-      _gisClient = google.accounts.oauth2.initTokenClient({
-        client_id: GOOGLE_CLIENT_ID,
-        scope: 'https://www.googleapis.com/auth/drive.file',
-        callback: () => {}
-      });
-    }
-
-    async function getGisToken() {
-      if (!_gisClient) initGisClient();
-      if (!_gisClient) throw new Error('Google auth not ready — set google_client_id in localStorage');
-      return new Promise((resolve, reject) => {
-        _gisClient.callback = (resp) => {
-          if (resp.error) reject(new Error(resp.error));
-          else { _gisToken = resp.access_token; resolve(resp.access_token); }
-        };
-        _gisClient.requestAccessToken({ prompt: _gisToken ? '' : 'consent' });
-      });
-    }
-
-    // ── Google Drive helpers ────────────────────────────────────────────────────
-    async function findOrCreateDriveFolder(token, name) {
-      const q = encodeURIComponent(`name='${name}' and mimeType='application/vnd.google-apps.folder' and trashed=false`);
-      const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id)`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+    // ── Azure Blob upload (via Go server) ───────────────────────────────────────
+    // Generated audio is pushed to the `research-audio` container. The server
+    // holds the storage connection string and signs SAS tokens; the returned URL
+    // points at the read proxy so the blob stays private.
+    async function uploadAudioToAzure(mp3Blob, filename) {
+      const blobName = `${Date.now()}_${filename.replace(/[^\w.\-]+/g, '_')}`;
+      const fd = new FormData();
+      fd.append('file', new File([mp3Blob], blobName, { type: mp3Blob.type || 'audio/mpeg' }));
+      const res = await fetch('/api/research/upload?container=research-audio', { method: 'POST', body: fd });
+      if (!res.ok) throw new Error(`Azure ${res.status}: ${(await res.text()).slice(0, 200)}`);
       const data = await res.json();
-      if (data.files && data.files.length > 0) return data.files[0].id;
-      const createRes = await fetch('https://www.googleapis.com/drive/v3/files', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, mimeType: 'application/vnd.google-apps.folder' })
-      });
-      const folder = await createRes.json();
-      return folder.id;
-    }
-
-    async function uploadToDrive(token, mp3Blob, filename, folderId) {
-      if (!folderId) folderId = await findOrCreateDriveFolder(token, 'Claude Architect Audio');
-      const metadata = JSON.stringify({ name: filename, parents: [folderId], mimeType: 'audio/mpeg' });
-      const form = new FormData();
-      form.append('metadata', new Blob([metadata], { type: 'application/json' }));
-      form.append('file', mp3Blob, filename);
-      const uploadRes = await fetch(
-        'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id',
-        { method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, body: form }
-      );
-      const file = await uploadRes.json();
-      if (!file.id) throw new Error('Drive upload returned no file id');
-      await fetch(`https://www.googleapis.com/drive/v3/files/${file.id}/permissions`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ role: 'reader', type: 'anyone' })
-      });
-      return `https://drive.google.com/file/d/${file.id}/view`;
+      return `/api/research/file?container=research-audio&name=${encodeURIComponent(data.name || blobName)}`;
     }
 
     // ── Supabase audio_url persistence ─────────────────────────────────────────
@@ -1221,10 +1051,10 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
       const elementId = videoId || `local-${moduleIdx}-${videoIdx}`;
       const scriptText = getScriptFromSentences(elementId);
       if (!scriptText.trim()) { alert('No script paragraphs found. Add sentences first.'); return; }
-      openSaveAudioModal(videoId, moduleIdx, videoIdx);
+      executeAudioUpload(videoId, moduleIdx, videoIdx);
     };
 
-    async function executeAudioUpload(videoId, moduleIdx, videoIdx, folderId) {
+    async function executeAudioUpload(videoId, moduleIdx, videoIdx) {
       const elementId = videoId || `local-${moduleIdx}-${videoIdx}`;
       const scriptText = getScriptFromSentences(elementId);
 
@@ -1248,25 +1078,20 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
         const blobUrl = URL.createObjectURL(mp3Blob);
         playerEl.innerHTML = `<audio controls src="${blobUrl}"></audio>`;
 
-        if (GOOGLE_CLIENT_ID) {
-          setAudioStatus(statusEl, 'uploading', '☁️ Uploading to Drive…');
-          try {
-            const token = await getGisToken();
-            const filename = `module${moduleIdx + 1}-video${videoIdx}-script.mp3`;
-            const driveLink = await uploadToDrive(token, mp3Blob, filename, folderId);
-            await saveAudioUrl(videoId, driveLink);
-            if (listenEl) {
-              listenEl.href = driveLink;
-              listenEl.style.display = 'inline-flex';
-            }
-            if (vTarget) vTarget.audioUrl = driveLink;
-            setAudioStatus(statusEl, 'success', '✅ Saved to Drive');
-          } catch (driveErr) {
-            console.warn('Drive upload failed:', driveErr);
-            setAudioStatus(statusEl, 'warn', '⚠️ Playing locally — Drive upload failed');
+        setAudioStatus(statusEl, 'uploading', '☁️ Uploading to Azure…');
+        try {
+          const filename = `module${moduleIdx + 1}-video${videoIdx}-script.mp3`;
+          const azureUrl = await uploadAudioToAzure(mp3Blob, filename);
+          await saveAudioUrl(videoId, azureUrl);
+          if (listenEl) {
+            listenEl.href = azureUrl;
+            listenEl.style.display = 'inline-flex';
           }
-        } else {
-          setAudioStatus(statusEl, 'warn', '⚠️ Playing locally — set google_client_id to save');
+          if (vTarget) vTarget.audioUrl = azureUrl;
+          setAudioStatus(statusEl, 'success', '✅ Saved to Azure');
+        } catch (azureErr) {
+          console.warn('Azure upload failed:', azureErr);
+          setAudioStatus(statusEl, 'warn', '⚠️ Playing locally — Azure upload failed');
         }
       } catch (err) {
         console.error('Audio generation failed:', err);
@@ -1651,7 +1476,6 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
       if (data) {
         window.loadedData = data;
         render(data);
-        updateGoogleConfigUI();
         loadResearchData();
         data.modules.forEach((m, mi) => {
           m.videos.forEach(v => {
@@ -1873,28 +1697,6 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
       document.getElementById('research-note-modal').style.display = 'none';
     };
   </script>
-
-  <!-- Save Audio Modal -->
-  <div class="modal-overlay" id="save-audio-modal" style="display:none;" onclick="if(event.target===this)closeSaveAudioModal()">
-    <div class="modal-box">
-      <h3>💾 Save Audio to Google Drive</h3>
-      <p class="modal-desc">Upload generated audio to your production Drive folder.</p>
-      <div class="modal-field">
-        <label>Drive Folder ID</label>
-        <input type="text" class="gdrive-input" id="modal-folder-id" placeholder="Paste Google Drive folder ID…" style="flex:none;width:100%;" />
-        <span class="modal-field-hint">Open the folder in Drive → copy the ID from the URL after /folders/</span>
-      </div>
-      <label class="modal-remember">
-        <input type="checkbox" id="modal-remember" checked />
-        Remember as default production folder
-      </label>
-      <div class="modal-actions">
-        <button class="btn-save" onclick="confirmSaveAudio()">☁️ Upload to Drive</button>
-        <button class="btn-cancel" onclick="closeSaveAudioModal()">Cancel</button>
-        <a href="../../settings.html" class="modal-settings-link" target="_blank">⚙️ Production Settings</a>
-      </div>
-    </div>
-  </div>
 
   <!-- Research Note Modal -->
   <div class="modal-overlay" id="research-note-modal" style="display:none;" onclick="if(event.target===this)closeResearchNoteModal()">

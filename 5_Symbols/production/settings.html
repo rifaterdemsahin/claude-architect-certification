@@ -62,33 +62,25 @@
       <p>Configure shared credentials and storage locations used across all production pages. Settings are saved as cookies and reused automatically.</p>
     </header>
 
-    <!-- Google Drive -->
+    <!-- Azure Blob Storage -->
     <div class="settings-card">
-      <h2>☁️ Google Drive</h2>
-      <p>Set the master production folder where generated audio files are saved. All pages read this location automatically.</p>
+      <h2>☁️ Azure Blob Storage</h2>
+      <p>Production assets (generated audio, images, reversal clips, references) are uploaded to Azure Blob Storage. <strong>No client-side configuration is needed</strong> — the server holds the storage connection string (from Azure Key Vault) and signs short-lived SAS tokens for every upload and read.</p>
 
       <div class="status-row">
-        <div class="status-dot" id="folder-dot"></div>
-        <span class="status-label" id="folder-status-label">Not configured</span>
+        <div class="status-dot" id="azure-dot"></div>
+        <span class="status-label" id="azure-status-label">Checking…</span>
       </div>
 
       <div class="field">
-        <label>Production Folder ID</label>
-        <input type="text" id="folder-id-input" placeholder="Paste your Google Drive folder ID…" />
-        <span class="field-hint">Open the folder in Google Drive → copy the ID from the URL after /folders/</span>
-      </div>
-
-      <div class="field">
-        <label>Google OAuth Client ID</label>
-        <input type="password" id="client-id-input" placeholder="Paste your Google Client ID…" />
-        <span class="field-hint">From Google Cloud Console → Credentials → OAuth 2.0 Client ID</span>
+        <label>Containers</label>
+        <span class="field-hint" id="azure-containers">research-images · research-audio · research-videos · research-notes</span>
       </div>
 
       <div class="btn-row">
-        <button class="btn-primary" onclick="saveDriveSettings()">💾 Save Drive Settings</button>
-        <button class="btn-danger" onclick="clearDriveSettings()">🗑 Clear</button>
+        <a class="btn-primary" href="preprod/research/images.html" style="text-decoration:none;">🖼️ Browse Assets</a>
       </div>
-      <div class="toast" id="drive-toast"></div>
+      <div class="toast" id="azure-toast"></div>
     </div>
 
     <footer>
@@ -108,47 +100,23 @@
       document.cookie = `${name}=;max-age=0;path=/;SameSite=Lax`;
     }
 
-    function updateUI() {
-      const folderId = getCookie('prod_drive_folder_id') || localStorage.getItem('prod_drive_folder_id') || '';
-      const clientId = getCookie('google_client_id') || localStorage.getItem('google_client_id') || '';
-      document.getElementById('folder-id-input').value = folderId;
-      document.getElementById('client-id-input').value = clientId;
-
-      const dot = document.getElementById('folder-dot');
-      const label = document.getElementById('folder-status-label');
-      if (folderId) {
-        dot.className = 'status-dot set';
-        label.textContent = `Folder configured: ${folderId.slice(0, 20)}…`;
-      } else {
+    async function updateUI() {
+      const dot = document.getElementById('azure-dot');
+      const label = document.getElementById('azure-status-label');
+      try {
+        const res = await fetch('/api/config');
+        const cfg = res.ok ? await res.json() : {};
+        if (cfg.azureAccountName) {
+          dot.className = 'status-dot set';
+          label.textContent = `Connected · account: ${cfg.azureAccountName}`;
+        } else {
+          dot.className = 'status-dot unset';
+          label.textContent = 'Azure Storage not configured on the server (set AZURE_STORAGE_CONN_STR).';
+        }
+      } catch (e) {
         dot.className = 'status-dot unset';
-        label.textContent = 'No folder configured — audio will use fallback folder name';
+        label.textContent = 'Could not reach the server to check Azure status.';
       }
-    }
-
-    function showToast(id, msg, type) {
-      const el = document.getElementById(id);
-      el.textContent = msg;
-      el.className = `toast ${type}`;
-      setTimeout(() => { el.className = 'toast'; }, 3500);
-    }
-
-    function saveDriveSettings() {
-      const folderId = document.getElementById('folder-id-input').value.trim();
-      const clientId = document.getElementById('client-id-input').value.trim();
-      if (!folderId && !clientId) { showToast('drive-toast', 'Enter at least one value to save.', 'err'); return; }
-      if (folderId) { setCookie('prod_drive_folder_id', folderId, 365); localStorage.setItem('prod_drive_folder_id', folderId); }
-      if (clientId) { setCookie('google_client_id', clientId, 365); localStorage.setItem('google_client_id', clientId); }
-      showToast('drive-toast', '✅ Settings saved — all production pages will use these values.', 'ok');
-      updateUI();
-    }
-
-    function clearDriveSettings() {
-      clearCookie('prod_drive_folder_id'); localStorage.removeItem('prod_drive_folder_id');
-      clearCookie('google_client_id'); localStorage.removeItem('google_client_id');
-      document.getElementById('folder-id-input').value = '';
-      document.getElementById('client-id-input').value = '';
-      showToast('drive-toast', 'Settings cleared.', 'ok');
-      updateUI();
     }
 
     updateUI();
