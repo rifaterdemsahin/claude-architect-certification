@@ -1841,6 +1841,95 @@ Focus on professional, certification-quality overlays. Use the module/video them
 	}
 }
 
+func sanityCheckHandler(cfg config) http.HandlerFunc {
+	type SanityRequest struct {
+		ItemName string `json:"item_name"`
+		ItemDesc string `json:"item_desc"`
+		UserNote string `json:"user_note"`
+	}
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		if r.Method != http.MethodPost {
+			http.Error(w, `{"error":"method not allowed"}`, http.StatusMethodNotAllowed)
+			return
+		}
+
+		var req SanityRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, `{"error":"invalid request body"}`, http.StatusBadRequest)
+			return
+		}
+
+		geminiKey := cfg.getSecret("GEMINI_API_KEY")
+		if geminiKey == "" {
+			http.Error(w, `{"error":"GEMINI_API_KEY missing"}`, http.StatusServiceUnavailable)
+			return
+		}
+
+		prompt := fmt.Sprintf(`You are an expert Startup Consultant and Product Strategist. 
+Analyze the following user finding/note for a specific Customer Discovery task.
+
+**Task Name:** %s
+**Task Description:** %s
+**User Finding:** %s
+
+Provide a "Sanity Check" feedback in Markdown format.
+Include the following sections:
+- **✅ Pros:** What is good about this finding or approach?
+- **❌ Cons:** What are the potential risks or flaws?
+- **🕵️ Gaps:** What is missing? What questions should the user ask next?
+
+Be concise, critical, and constructive.`, req.ItemName, req.ItemDesc, req.UserNote)
+
+		ctx, cancel := context.WithTimeout(r.Context(), 30*time.Second)
+		defer cancel()
+
+		geminiURL := "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + geminiKey
+		geminiReqBody := map[string]any{
+			"contents": []any{map[string]any{"parts": []any{map[string]any{"text": prompt}}}},
+		}
+
+		b, _ := json.Marshal(geminiReqBody)
+		hreq, err := http.NewRequestWithContext(ctx, "POST", geminiURL, bytes.NewReader(b))
+		if err != nil {
+			http.Error(w, `{"error":"failed to build request"}`, http.StatusInternalServerError)
+			return
+		}
+		hreq.Header.Set("Content-Type", "application/json")
+
+		hresp, err := http.DefaultClient.Do(hreq)
+		if err != nil {
+			http.Error(w, `{"error":"Gemini API call failed"}`, http.StatusBadGateway)
+			return
+		}
+		defer hresp.Body.Close()
+
+		var gResp struct {
+			Candidates []struct {
+				Content struct {
+					Parts []struct {
+						Text string `json:"text"`
+					} `json:"parts"`
+				} `json:"content"`
+			} `json:"candidates"`
+		}
+		if err := json.NewDecoder(hresp.Body).Decode(&gResp); err != nil {
+			http.Error(w, `{"error":"failed to decode response"}`, http.StatusInternalServerError)
+			return
+		}
+
+		feedback := ""
+		if len(gResp.Candidates) > 0 && len(gResp.Candidates[0].Content.Parts) > 0 {
+			feedback = gResp.Candidates[0].Content.Parts[0].Text
+		}
+
+		json.NewEncoder(w).Encode(map[string]string{
+			"feedback": feedback,
+		})
+	}
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 func main() {
@@ -1882,6 +1971,7 @@ func main() {
 	mux.Handle("/api/infographics/generate", observe(cfg, infographicGenerateHandler(cfg)))
 	mux.Handle("/api/infographics/save", observe(cfg, infographicSaveHandler(cfg)))
 	mux.Handle("/api/lowerthirds/generate", observe(cfg, lowerThirdGenerateHandler(cfg)))
+	mux.Handle("/api/ai/sanity-check", observe(cfg, sanityCheckHandler(cfg)))
 	mux.Handle("/admin/errors", observe(cfg, axiomErrorsHandler(tmpl, cfg, navConfigJS)))
 	mux.Handle("/", observe(cfg, homeHandler(tmpl, cfg, navConfigJS)))
 

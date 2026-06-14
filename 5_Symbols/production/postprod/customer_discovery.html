@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
   <style>
     :root { --bg-dark: #030712; --bg-card: rgba(17,24,39,0.85); --text-main: #f3f4f6; --text-muted: #9ca3af; --primary: #8b5cf6; --secondary: #3b82f6; --accent: #f59e0b; --success: #10b981; --teal: #14b8a6; --font-title: 'Outfit', sans-serif; --font-body: 'Plus Jakarta Sans', sans-serif; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -22,24 +23,8 @@
     header p { color: var(--text-muted); max-width: 720px; margin: 0 auto; font-size: 1.1rem; }
 
     /* Sync bar */
-    .sync-bar {
-      background: var(--bg-card);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 12px;
-      padding: 10px 18px;
-      margin-bottom: 24px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 0.85rem;
-    }
-    .sync-badge {
-      padding: 2px 10px;
-      border-radius: 20px;
-      font-size: 0.7rem;
-      font-weight: 700;
-      text-transform: uppercase;
-    }
+    .sync-bar { background: var(--bg-card); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 10px 18px; margin-bottom: 24px; display: flex; align-items: center; gap: 12px; font-size: 0.85rem; }
+    .sync-badge { padding: 2px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
     .sync-badge.connected { background: rgba(16,185,129,0.15); color: #10b981; }
     .sync-badge.saving { background: rgba(59,130,246,0.15); color: #3b82f6; }
     .sync-badge.error { background: rgba(239,68,68,0.15); color: #ef4444; }
@@ -57,6 +42,7 @@
     .pyramid-item .check-box { appearance: none; width: 22px; height: 22px; border: 2px solid var(--primary); border-radius: 6px; cursor: pointer; position: relative; flex-shrink: 0; }
     .pyramid-item .check-box:checked { background: var(--success); border-color: var(--success); }
     .pyramid-item .check-box:checked::after { content: '✓'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-weight: 900; font-size: 14px; }
+    .pyramid-item-text { flex-grow: 1; }
     .pyramid-item-text strong { color: var(--text-main); display: block; margin-bottom: 4px; }
 
     .phase-container { margin-bottom: 32px; }
@@ -70,18 +56,36 @@
     .check-box { appearance: none; width: 22px; height: 22px; border: 2px solid var(--teal); border-radius: 6px; cursor: pointer; margin-top: 2px; flex-shrink: 0; position: relative; background: rgba(20,184,166,0.1); }
     .check-box:checked { background: var(--success); border-color: var(--success); }
     .check-box:checked::after { content: '✓'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-weight: 900; font-size: 14px; }
+    .task-content { flex-grow: 1; }
     .task-content strong { color: var(--text-main); font-weight: 600; }
     .task-content p { color: var(--text-muted); font-size: 0.9rem; margin-top: 2px; }
+
+    .btn-sanity { background: rgba(139,92,246,0.1); border: 1px solid rgba(139,92,246,0.3); color: var(--primary); padding: 4px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap; align-self: center; }
+    .btn-sanity:hover { background: var(--primary); color: white; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(139,92,246,0.3); }
 
     .answer-box { width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 12px; color: var(--text-main); font-family: var(--font-body); font-size: 0.9rem; resize: vertical; min-height: 80px; transition: border-color 0.2s; }
     .answer-box:focus { outline: none; border-color: var(--primary); }
     .answer-box::placeholder { color: rgba(156,163,175,0.4); }
+
+    /* Modal Styling */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 10001; }
+    .modal-content { background: var(--bg-card); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; width: 90%; max-width: 800px; max-height: 85vh; overflow-y: auto; padding: 40px; box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6); position: relative; }
+    .modal-close { position: absolute; top: 20px; right: 20px; background: none; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; }
+    .modal-close:hover { color: white; }
+    .modal-header { margin-bottom: 24px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 16px; }
+    .modal-header h2 { font-family: var(--font-title); font-size: 1.8rem; color: var(--teal); }
+    .modal-header p { color: var(--text-muted); font-size: 0.9rem; margin-top: 4px; }
+    .sanity-feedback { font-size: 1rem; color: #cbd5e1; line-height: 1.7; }
+    .sanity-feedback h1, .sanity-feedback h2, .sanity-feedback h3 { color: var(--text-main); margin-top: 20px; margin-bottom: 12px; }
+    .sanity-feedback ul { padding-left: 20px; margin-bottom: 16px; }
+    .sanity-feedback li { margin-bottom: 8px; }
 
     footer { text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
     footer a { color: var(--secondary); text-decoration: none; }
 
     @media (max-width: 768px) {
       h1 { font-size: 2.1rem; }
+      .modal-content { padding: 24px; }
     }
   </style>
   <script src="../../../shared/nav.js"></script>
@@ -139,6 +143,22 @@
     </footer>
   </div>
 
+  <!-- Sanity Check Modal -->
+  <div class="modal-overlay" id="sanity-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeSanityCheck()">✕</button>
+      <div class="modal-header">
+        <h2 id="modal-item-name">Sanity Check</h2>
+        <p id="modal-item-desc"></p>
+      </div>
+      <div id="sanity-feedback-content" class="sanity-feedback">
+        <div style="text-align: center; padding: 40px;">
+          <div class="loading-spinner">✨ Gemini is thinking...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     const SUPABASE_URL  = 'https://rmekfsdhglyiralxvkwc.supabase.co';
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZWtmc2RoZ2x5aXJhbHh2a3djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NzYzODgsImV4cCI6MjA5NjM1MjM4OH0.ay6HsmO_CbMGDXL_Dv4DT-paAIAOqlQPfmqqx_mexSU';
@@ -190,13 +210,14 @@
       container.innerHTML = items.map(item => {
         const p = progressMap[item.id] || {};
         return `
-          <div class="pyramid-item">
+          <div class="pyramid-item" data-item-id="${item.id}">
             <div class="pyramid-item-header">
               <input type="checkbox" class="check-box" data-id="${item.id}" ${p.checked ? 'checked' : ''} onchange="handleSave(${item.id})">
               <div class="pyramid-item-text">
-                <strong>${item.item_name}</strong>
-                ${item.item_desc}
+                <strong class="item-name">${item.item_name}</strong>
+                <span class="item-desc">${item.item_desc}</span>
               </div>
+              <button class="btn-sanity" onclick="openSanityCheck(${item.id})">✨ Sanity Check</button>
             </div>
             <textarea class="answer-box" data-id="${item.id}" placeholder="Your notes/findings..." oninput="scheduleSave(${item.id})">${p.notes || ''}</textarea>
           </div>
@@ -207,7 +228,6 @@
     function renderPhases(items, progressMap) {
       const container = document.getElementById('phases-container');
       
-      // Group items by phase (Phase 1, Phase 2, etc.)
       const phases = {};
       items.forEach(item => {
         const phaseName = item.item_name.split(':')[0];
@@ -228,13 +248,14 @@
               const p = progressMap[item.id] || {};
               const itemName = item.item_name.split(':').slice(1).join(':').trim();
               return `
-                <div class="task-item">
+                <div class="task-item" data-item-id="${item.id}">
                   <div class="task-item-header">
                     <input type="checkbox" class="check-box" data-id="${item.id}" ${p.checked ? 'checked' : ''} onchange="handleSave(${item.id})">
                     <div class="task-content">
-                      <strong>${itemName}</strong>
-                      <p>${item.item_desc}</p>
+                      <strong class="item-name">${itemName}</strong>
+                      <p class="item-desc">${item.item_desc}</p>
                     </div>
+                    <button class="btn-sanity" onclick="openSanityCheck(${item.id})">✨ Sanity Check</button>
                   </div>
                   <textarea class="answer-box" data-id="${item.id}" placeholder="Your findings/hypotheses..." oninput="scheduleSave(${item.id})">${p.notes || ''}</textarea>
                 </div>
@@ -281,7 +302,52 @@
       }
     }
 
+    // AI Sanity Check
+    async function openSanityCheck(itemId) {
+      const itemEl = document.querySelector(`[data-item-id="${itemId}"]`);
+      const name = itemEl.querySelector('.item-name').textContent;
+      const desc = itemEl.querySelector('.item-desc').textContent;
+      const note = itemEl.querySelector('.answer-box').value;
+
+      document.getElementById('modal-item-name').textContent = 'Sanity Check: ' + name;
+      document.getElementById('modal-item-desc').textContent = desc;
+      document.getElementById('sanity-feedback-content').innerHTML = '<div style="text-align: center; padding: 40px;">✨ Gemini is thinking...</div>';
+      document.getElementById('sanity-modal').style.display = 'flex';
+
+      if (!note.trim()) {
+        document.getElementById('sanity-feedback-content').innerHTML = '<div style="color: var(--accent); text-align: center; padding: 20px;">Please enter some notes or findings first for Gemini to analyze.</div>';
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/ai/sanity-check', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            item_name: name,
+            item_desc: desc,
+            user_note: note
+          })
+        });
+        
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+
+        document.getElementById('sanity-feedback-content').innerHTML = marked.parse(data.feedback || 'No feedback received.');
+      } catch (err) {
+        document.getElementById('sanity-feedback-content').innerHTML = '<div style="color: var(--danger); text-align: center; padding: 20px;">Error: ' + err.message + '</div>';
+      }
+    }
+
+    function closeSanityCheck() {
+      document.getElementById('sanity-modal').style.display = 'none';
+    }
+
     window.addEventListener('DOMContentLoaded', loadData);
+    // Close modal on overlay click
+    document.getElementById('sanity-modal').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('sanity-modal')) closeSanityCheck();
+    });
   </script>
   <script src="../../../shared/debug-panel.js"></script>
 </body>
