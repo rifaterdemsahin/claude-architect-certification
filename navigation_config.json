@@ -211,15 +211,20 @@
               "url": "https://www.youtube.com/watch?v=F8IBooe3bXY&list=PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy/"
             },
             {
-              "label": "3. 🖼️ Image Generator",
+              "label": "3. 🔍 Customer Discovery",
+              "url": "5_Symbols/production/postprod/customer_discovery.html",
+              "description": "Validation framework from macro-philosophical foundation to micro-execution steps."
+            },
+            {
+              "label": "4. 🖼️ Image Generator",
               "url": "5_Symbols/production/postprod/image_generator.html"
             },
             {
-              "label": "4. 🎬 Lower Thirds Manager",
+              "label": "5. 🎬 Lower Thirds Manager",
               "url": "5_Symbols/production/postprod/lower_thirds.html"
             },
             {
-              "label": "5. ✅ Post Production Checklist",
+              "label": "6. ✅ Post Production Checklist",
               "url": "5_Symbols/production/postprod/post_production_checklist.html"
             }
           ]

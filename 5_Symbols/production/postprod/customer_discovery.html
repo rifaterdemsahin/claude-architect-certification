@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Discovery Framework — From Pyramid to Workflow</title>
+  <meta name="description" content="A complete, step-by-step logical order for the Customer Discovery process, moving from foundational mindset to chronological execution.">
+  <link rel="icon" type="image/png" href="../../../favicon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg-dark: #030712; --bg-card: rgba(17,24,39,0.85); --text-main: #f3f4f6; --text-muted: #9ca3af; --primary: #8b5cf6; --secondary: #3b82f6; --accent: #f59e0b; --success: #10b981; --teal: #14b8a6; --font-title: 'Outfit', sans-serif; --font-body: 'Plus Jakarta Sans', sans-serif; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background-color: var(--bg-dark); background-image: radial-gradient(circle at 10% 20%, rgba(139,92,246,0.08) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(20,184,166,0.06) 0%, transparent 40%); color: var(--text-main); font-family: var(--font-body); line-height: 1.6; padding-top: 70px; padding-bottom: 80px; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+    header { text-align: center; margin-bottom: 36px; }
+    .badge { display: inline-block; padding: 6px 16px; background: linear-gradient(135deg, rgba(20,184,166,0.2), rgba(139,92,246,0.2)); border: 1px solid rgba(20,184,166,0.3); border-radius: 100px; font-size: 0.8rem; font-weight: 600; color: var(--teal); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 14px; }
+    h1 { font-family: var(--font-title); font-size: 2.8rem; font-weight: 900; margin-bottom: 10px; }
+    header p { color: var(--text-muted); max-width: 720px; margin: 0 auto; font-size: 1.1rem; }
+
+    .framework-visual { text-align: center; margin: 0 auto 48px; max-width: 880px; background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 24px; padding: 28px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+    .framework-visual img { max-width: 100%; height: auto; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); }
+    .framework-caption { color: var(--text-muted); font-size: 0.9rem; margin-top: 16px; }
+
+    .section-title { font-family: var(--font-title); font-size: 1.8rem; font-weight: 800; margin: 40px 0 16px; text-align: center; color: var(--text-main); }
+    .section-intro { color: var(--text-muted); text-align: center; max-width: 800px; margin: 0 auto 32px; font-size: 1.05rem; }
+
+    .content-card { background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 24px; padding: 32px; margin-bottom: 40px; }
+    .content-card h2 { font-family: var(--font-title); font-size: 1.5rem; margin-bottom: 20px; color: var(--teal); border-bottom: 1px solid rgba(20,184,166,0.2); padding-bottom: 10px; }
+
+    .pyramid-list { list-style: none; padding-left: 0; }
+    .pyramid-item { margin-bottom: 16px; padding: 16px; background: rgba(139,92,246,0.05); border-left: 4px solid var(--primary); border-radius: 0 12px 12px 0; display: flex; align-items: center; gap: 15px; }
+    .pyramid-item .check { color: var(--success); font-size: 1.2rem; }
+    .pyramid-item-text strong { color: var(--text-main); display: block; margin-bottom: 4px; }
+
+    .phase-container { margin-bottom: 32px; }
+    .phase-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; color: var(--accent); }
+    .phase-header h3 { font-family: var(--font-title); font-size: 1.3rem; margin: 0; }
+    
+    .task-list { list-style: none; padding-left: 0; display: grid; gap: 12px; }
+    .task-item { display: flex; align-items: start; gap: 12px; background: rgba(255,255,255,0.03); padding: 12px 16px; border-radius: 12px; transition: all 0.2s; border: 1px solid transparent; }
+    .task-item:hover { background: rgba(255,255,255,0.05); border-color: rgba(20,184,166,0.2); }
+    .checkbox { width: 22px; height: 22px; border-radius: 6px; border: 2px solid var(--teal); display: flex; align-items: center; justify-content: center; margin-top: 2px; flex-shrink: 0; font-size: 14px; color: var(--success); background: rgba(20,184,166,0.1); }
+    .task-content strong { color: var(--text-main); font-weight: 600; }
+    .task-content p { color: var(--text-muted); font-size: 0.9rem; margin-top: 2px; }
+
+    footer { text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
+    footer a { color: var(--secondary); text-decoration: none; }
+
+    @media (max-width: 768px) {
+      h1 { font-size: 2.1rem; }
+    }
+  </style>
+  <script src="../../../shared/nav.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="badge">🔍 Customer Discovery</div>
+      <h1>Macro Foundation → Micro Execution</h1>
+      <p>Based on the two frameworks, the ideal logical order flows from the <strong>macro-philosophical foundation</strong> (the pyramid) to the <strong>micro-execution steps</strong> (the workflow chart).</p>
+    </header>
+
+    <div class="framework-visual">
+      <img src="../../../3_Simulation/customer_discovery/customer_discovery1.png" alt="Customer Discovery Pyramid Framework">
+      <p class="framework-caption"><strong>Part 1:</strong> The Foundational Mindset (The Pyramid)</p>
+    </div>
+
+    <div class="content-card">
+      <h2>Part 1: The Foundational Mindset (The Pyramid)</h2>
+      <p style="margin-bottom: 20px;">Before executing any steps, you must understand <em>why</em> you are doing them. You build from the bottom up:</p>
+      
+      <div class="pyramid-list">
+        <div class="pyramid-item">
+          <span class="check">✅</span>
+          <div class="pyramid-item-text">
+            <strong>1. 🕵️ Customer Discovery</strong>
+            Going out to talk to real people to validate assumptions.
+          </div>
+        </div>
+        <div class="pyramid-item">
+          <span class="check">✅</span>
+          <div class="pyramid-item-text">
+            <strong>2. 🩹 Solving a Problem or Pain Point</strong>
+            Using those insights to address a genuine friction point.
+          </div>
+        </div>
+        <div class="pyramid-item">
+          <span class="check">✅</span>
+          <div class="pyramid-item-text">
+            <strong>3. 💎 Providing Value to Users</strong>
+            Turning that solution into something so useful that customers care about it.
+          </div>
+        </div>
+        <div class="pyramid-item">
+          <span class="check">✅</span>
+          <div class="pyramid-item-text">
+            <strong>4. 🏆 Successful Business</strong>
+            The ultimate peak achieved only after the bottom three layers are solid.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="framework-visual">
+      <img src="../../../3_Simulation/customer_discovery/customer_discovery2.webp" alt="Customer Discovery Workflow Process">
+      <p class="framework-caption"><strong>Part 2:</strong> The Step-by-Step Customer Discovery Process</p>
+    </div>
+
+    <div class="content-card">
+      <h2>Part 2: The Step-by-Step Customer Discovery Process</h2>
+      <p style="margin-bottom: 24px;">This is the chronological execution path based on Steve Blank’s Customer Development methodology.</p>
+
+      <div class="phase-container">
+        <div class="phase-header">
+          <span>📝</span>
+          <h3>Phase 1: Formulate Hypotheses (Write down your assumptions)</h3>
+        </div>
+        <div class="task-list">
+          <div class="task-item">
+            <div class="checkbox">✅</div>
+            <div class="task-content">
+              <strong>1. Product Hypothesis</strong>
+              <p>What are you building, and what features do you think it needs?</p>
+            </div>
+          </div>
+          <div class="task-item">
+            <div class="checkbox">✅</div>
+            <div class="task-content">
+              <strong>2. Customer & Problem Hypothesis</strong>
+              <p>Who do you think has this problem, and how severe is it?</p>
+            </div>
+          </div>
+          <div class="task-item">
+            <div class="checkbox">✅</div>
+            <div class="task-content">
+              <strong>3. Distribution & Pricing Hypothesis</strong>
+              <p>How will you reach these customers, and how much will they pay?</p>
+            </div>
+          </div>
+          <div class="task-item">
+            <div class="checkbox">✅</div>
+            <div class="task-content">
+              <strong>4. Demand Creation Hypothesis</strong>
+              <p>How will you acquire and grow your user base?</p>
+            </div>
+          </div>
+          <div class="task-item">
+            <div class="checkbox">✅</div>
+            <div class="task-content">
+              <strong>5. Market Type Hypothesis</strong>
+              <p>Are you entering an existing market, cloning one, or creating a brand new one?</p>
+            </div>
+          </div>
+          <div class="task-item">
+            <div class="checkbox">✅</div>
+            <div class="task-content">
+              <strong>6. Competitive Hypothesis</strong>
+              <p>Who are the current competitors, and how will you beat them?</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="phase-container">
+        <div class="phase-header">
+          <span>🗣️</span>
+          <h3>Phase 2: Test the Problem Hypothesis (Talk to people)</h3>
+        </div>
+        <div class="task-list">
+          <div class="task-item">
+            <div class="checkbox">✅</div>
+            <div class="task-content">
+              <strong>7. First Contacts</strong>
+              <p>Reach out to potential customers who fit your target persona.</p>
+            </div>
+          </div>
+          <div class="task-item">
+            <div class="checkbox">✅</div>
+            <div class="task-content">
+              <strong>8. Problem Presentation</strong>
+              <p>Share the problem (not your solution yet!) to see if it resonates with them.</p>
+            </div>
+          </div>
+          <div class="task-item">
+            <div class="checkbox">✅</div>
+            <div class="task-content">
+              <strong>9. Customer Understanding</strong>
+              <p>Listen deeply to how they currently cope with this issue.</p>
+            </div>
+          </div>
+          <div class="task-item">
+            <div class="checkbox">✅</div>
+            <div class="task-content">
+              <strong>10. Market Knowledge</strong>
+              <p>Use these conversations to build a broader understanding of the market landscape.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="phase-container">
+        <div class="phase-header">
+          <span>💡</span>
+          <h3>Phase 3: Test the Product Hypothesis (Show the solution)</h3>
+        </div>
+        <div class="task-list">
+          <div class="task-item">
+            <div class="checkbox">✅</div>
+            <div class="task-content">
+              <strong>11. First Reality Check</strong>
+              <p>Take your initial feedback and align it with your product concept.</p>
+            </div>
+          </div>
+          <div class="task-item">
+            <div class="checkbox">✅</div>
+            <div class="task-content">
+              <strong>12. Product Presentation</strong>
+              <p>Show a mockup, prototype, or MVP (Minimum Viable Product) to the customers.</p>
+            </div>
+          </div>
+          <div class="task-item">
+            <div class="checkbox">✅</div>
+            <div class="task-content">
+              <strong>13. More Customer Visits</strong>
+              <p>Gather deep feedback from a wider pool of users on the prototype.</p>
+            </div>
+          </div>
+          <div class="task-item">
+            <div class="checkbox">✅</div>
+            <div class="task-content">
+              <strong>14. Second Reality Check</strong>
+              <p>Analyze whether the product actually solves the problem well enough for them to buy it.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="phase-container">
+        <div class="phase-header">
+          <span>⚖️</span>
+          <h3>Phase 4: Verify and Decide (The Moment of Truth)</h3>
+        </div>
+        <div class="task-list">
+          <div class="task-item">
+            <div class="checkbox">✅</div>
+            <div class="task-content">
+              <strong>15. Verify the Product</strong>
+              <p>Does the product actually work for the user?</p>
+            </div>
+          </div>
+          <div class="task-item">
+            <div class="checkbox">✅</div>
+            <div class="task-content">
+              <strong>16. Verify the Problem</strong>
+              <p>Is this a must-solve problem that customers are willing to pay for?</p>
+            </div>
+          </div>
+          <div class="task-item">
+            <div class="checkbox">✅</div>
+            <div class="task-content">
+              <strong>17. Verify the Business Model</strong>
+              <p>Can you make money, scale, and acquire customers sustainably?</p>
+            </div>
+          </div>
+          <div class="task-item">
+            <div class="checkbox">✅</div>
+            <div class="task-content">
+              <strong>18. Iterate or Exit</strong>
+              <p>Based on the data, either <strong>pivot</strong>, <strong>proceed</strong>, or <strong>stop</strong>.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <p style="margin-bottom: 8px;"><a href="../../../index.html">← Back to Home</a> &nbsp;·&nbsp; <a href="flywheel.html">🔄 Flywheel System →</a></p>
+      <p style="margin-bottom: 12px; font-size: 0.85rem; opacity: 0.8;">
+        Instructor: <a href="https://www.linkedin.com/in/rifaterdemsahin" target="_blank">Rifat Erdem Sahin LinkedIn</a>
+        YouTube: <a href="https://www.youtube.com/@RifatErdemSahin" target="_blank">@RifatErdemSahin</a>
+      </p>
+    </footer>
+  </div>
+  <script src="../../../shared/debug-panel.js"></script>
+</body>
+</html>

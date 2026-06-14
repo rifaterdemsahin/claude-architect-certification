@@ -138,8 +138,9 @@
       { label: '🎬 Content Assembly', children: [
         { label: '1. 🎬 Edit List', url: '5_Symbols/production/postprod/edit_list.html' },
         { label: '2. 📺 Course Playlist', url: 'https://www.youtube.com/watch?v=F8IBooe3bXY&list=PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy/' },
-        { label: '3. 🖼️ Image Generator', url: '5_Symbols/production/postprod/image_generator.html' },
-        { label: '4. 🎬 Lower Thirds Manager', url: '5_Symbols/production/postprod/lower_thirds.html' }
+        { label: '3. 🔍 Customer Discovery', url: '5_Symbols/production/postprod/customer_discovery.html' },
+        { label: '4. 🖼️ Image Generator', url: '5_Symbols/production/postprod/image_generator.html' },
+        { label: '5. 🎬 Lower Thirds Manager', url: '5_Symbols/production/postprod/lower_thirds.html' }
       ]},
       { label: '🎓 Certification & Proof', children: [
         { label: '5. 📜 Erdem\'s Certification', url: 'markdown_renderer.html?file=4_Formula/certification/erdems_certification.md' },
