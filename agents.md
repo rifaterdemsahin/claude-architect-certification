@@ -183,13 +183,29 @@ This document defines how AI agents interact with the **Claude AI Certification 
 
 ## 🏛️ Supported Agent Roles
 
-| Agent | Guide File | Purpose |
-|-------|------------|---------|
-| Claude | [claude.md](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/claude.md) | Full-stack dev, DevOps, 7-stage framework |
-| Gemini | [gemini.md](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/gemini.md) | Multimodal analysis, image tasks |
-| GitHub Copilot | [copilot.md](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/copilot.md) | GitHub-native integrations |
-| Kilo Code | [kilocode.md](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/kilocode.md) | Precision code generation |
-| Kimi | [kimi.md](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/kimi.md) | Long-context code reasoning and synthesis |
+| Agent | CLI / Tool | Purpose | Primary Model |
+|-------|------------|---------|---------------|
+| **Claude** | `claude` | Full-stack dev, DevOps, 7-stage framework | `claude-3-5-sonnet` |
+| **AntiGravity** | `agy` | High-performance reasoning, specialized tasks | `agy-default` |
+| **Kilo xAI** | `kilo -m xai/...` | Real-time info, bold reasoning | `grok-beta` |
+| **Kilo Kimi 2.7** | `kilo -m kimi/...` | Long-context code synthesis | `kimi-2.7` |
+| **Kilo DeepSeek V4 Flash** | `kilo -m deepseek/...`| Precision code generation, efficiency | `deepseek-v4-flash` |
+| GitHub Copilot | [copilot.md](copilot.md) | Inline autocompletion | `gpt-4o` |
+
+---
+
+## 🚀 Multi-Agent Terminal Automation
+
+To prevent context pollution, each agent runs in a dedicated, color-coded VS Code terminal.
+
+### ⚡ Opening Agents
+Use the following AppleScript patterns (documented in `4_Formula/tools/vscode_terminal_profiles_formula.md`) to launch the roster:
+
+1. **Claude**: `claude` (Yellow 🤖)
+2. **AntiGravity**: `agy` (Blue 🌌)
+3. **Kilo xAI**: `kilo -m xai/grok-beta` (Purple 🧠)
+4. **Kilo Kimi**: `kilo -m kimi/kimi-2.7` (Green 🍃)
+5. **Kilo DeepSeek**: `kilo -m deepseek/deepseek-v4-flash` (Cyan ⚡)
 
 ---
 

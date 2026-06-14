@@ -536,6 +536,10 @@
       "url": "markdown_renderer.html?file=4_Formula/tools/vscode_extensions.md"
     },
     {
+      "label": "   ├─ 🎨 Tools: VS Code Terminal Profiles Formula",
+      "url": "markdown_renderer.html?file=4_Formula/tools/vscode_terminal_profiles_formula.md"
+    },
+    {
       "label": "   └─ 🛢️ Tools: Supabase Setup Formula",
       "url": "markdown_renderer.html?file=4_Formula/tools/supabase_setup_formula.md"
     },
