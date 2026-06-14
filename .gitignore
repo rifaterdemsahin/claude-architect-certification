@@ -43,3 +43,6 @@ backup/
 
 problem-server
 .gemini/
+
+# Go build artifact (server binary) — never commit
+/main
