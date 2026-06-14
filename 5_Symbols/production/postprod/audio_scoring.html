@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audio Scoring | Post-Production</title>
+  <meta name="description" content="Find and map sound effects and background music to every scene in the script for post-production.">
+  <meta name="keywords" content="audio scoring, sound effects, SFX, background music, post-production, Claude AI Certification">
+  <meta name="author" content="Rifat Erdem Sahin">
+  <link rel="icon" type="image/png" href="../../../favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #030712; --bg-card: rgba(17,24,39,0.8); --text-main: #f3f4f6; --text-muted: #9ca3af;
+      --primary: #8b5cf6; --secondary: #3b82f6; --accent: #10b981;
+      --font-title: 'Outfit', sans-serif; --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-dark);
+      background-image: radial-gradient(circle at 10% 20%, rgba(16,185,129,0.06) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(139,92,246,0.06) 0%, transparent 40%);
+      color: var(--text-main); font-family: var(--font-body); line-height: 1.6; padding-bottom: 80px;
+    }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+    .badge { display: inline-block; padding: 6px 16px; background: linear-gradient(135deg, rgba(139,92,246,0.2), rgba(16,185,129,0.2)); border: 1px solid rgba(139,92,246,0.3); border-radius: 100px; font-size: 0.8rem; font-weight: 600; color: #c4b5fd; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 14px; }
+    h1 { font-family: var(--font-title); font-size: 2.4rem; font-weight: 800; margin-bottom: 10px; }
+    header p { color: var(--text-muted); max-width: 600px; margin: 0 auto 32px; }
+    .group { margin-bottom: 48px; }
+    .group-heading {
+      font-family: var(--font-title); font-size: 1.3rem; font-weight: 700; margin-bottom: 16px;
+      display: flex; align-items: center; gap: 10px; color: var(--text-main);
+    }
+    .group-heading::after {
+      content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(255,255,255,0.1), transparent);
+    }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+    .card {
+      background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px;
+      padding: 28px; transition: all 0.3s; text-decoration: none; color: inherit;
+    }
+    .card:hover { border-color: var(--accent); transform: translateY(-4px); box-shadow: 0 16px 32px rgba(0,0,0,0.3); }
+    .card-icon { font-size: 2rem; margin-bottom: 12px; }
+    .card-title { font-family: var(--font-title); font-weight: 700; font-size: 1.15rem; margin-bottom: 8px; }
+    .card-desc { color: var(--text-muted); font-size: 0.9rem; }
+    .card-meta { margin-top: 16px; font-size: 0.8rem; color: var(--text-muted); display: flex; gap: 12px; flex-wrap: wrap; }
+    .card-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; }
+    .tag { display: inline-block; padding: 3px 10px; border-radius: 100px; font-size: 0.7rem; font-weight: 700; background: rgba(139,92,246,0.15); color: #c4b5fd; border: 1px solid rgba(139,92,246,0.2); }
+    .tag-green { background: rgba(16,185,129,0.15); color: #6ee7b7; border-color: rgba(16,185,129,0.2); }
+    .tag-blue { background: rgba(59,130,246,0.15); color: #93c5fd; border-color: rgba(59,130,246,0.2); }
+    .tag-yellow { background: rgba(251,191,36,0.15); color: #fde68a; border-color: rgba(251,191,36,0.2); }
+    .scoring-table {
+      background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px;
+      overflow: hidden; margin-bottom: 32px;
+    }
+    .scoring-table table { width: 100%; border-collapse: collapse; }
+    .scoring-table th {
+      text-align: left; padding: 16px 20px; font-family: var(--font-title); font-weight: 700;
+      font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em;
+      border-bottom: 1px solid rgba(255,255,255,0.06); background: rgba(0,0,0,0.2);
+    }
+    .scoring-table td { padding: 14px 20px; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.9rem; vertical-align: top; }
+    .scoring-table tr:last-child td { border-bottom: none; }
+    .scoring-table tr:hover td { background: rgba(139,92,246,0.04); }
+    .score-status {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 12px; border-radius: 100px; font-size: 0.75rem; font-weight: 700;
+    }
+    .status-done { background: rgba(16,185,129,0.15); color: #6ee7b7; }
+    .status-pending { background: rgba(251,191,36,0.15); color: #fde68a; }
+    .status-search { background: rgba(59,130,246,0.15); color: #93c5fd; }
+    .audio-player { width: 100%; height: 36px; accent-color: var(--primary); border-radius: 6px; }
+    .inline-audio { display: flex; align-items: center; gap: 10px; }
+    .resource-card {
+      background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px;
+      padding: 20px; display: flex; align-items: flex-start; gap: 16px; transition: all 0.2s; text-decoration: none; color: inherit;
+    }
+    .resource-card:hover { border-color: var(--secondary); transform: translateY(-2px); }
+    .resource-icon { font-size: 1.8rem; flex-shrink: 0; }
+    .resource-body { flex: 1; }
+    .resource-name { font-weight: 700; margin-bottom: 4px; }
+    .resource-desc { font-size: 0.85rem; color: var(--text-muted); }
+    .resources-list { display: flex; flex-direction: column; gap: 12px; }
+    footer { text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
+    @media (max-width: 768px) {
+      .scoring-table table, .scoring-table thead, .scoring-table tbody, .scoring-table th, .scoring-table td, .scoring-table tr { display: block; }
+      .scoring-table thead { display: none; }
+      .scoring-table td { padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+      .scoring-table td::before { content: attr(data-label); display: block; font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+      .scoring-table tr { margin-bottom: 12px; border-bottom: 2px solid rgba(255,255,255,0.06); }
+    }
+  </style>
+  <script src="../../../shared/nav.js"></script>
+  <script src="../../../shared/debug-panel.js"></script>
+</head>
+<body>
+
+<div class="container">
+  <header style="padding: 60px 0 40px; text-align: center;">
+    <div class="badge">Post-Production</div>
+    <h1>Audio Scoring Board</h1>
+    <p>Find, audition, and assign sound effects and background music to every scene in the script.</p>
+  </header>
+
+  <!-- Scoring Table -->
+  <div class="group">
+    <div class="group-heading">🎬 Scene Audio Map</div>
+    <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.9rem;">
+      For each scene, identify the required SFX and background music. Use the resources below to find suitable tracks, then log your selections.
+    </p>
+    <div class="scoring-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Scene</th>
+            <th>Description</th>
+            <th>SFX Needed</th>
+            <th>Background Music</th>
+            <th>Status</th>
+            <th>Preview</th>
+          </tr>
+        </thead>
+        <tbody id="scoreTableBody">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Reference Audio Library -->
+  <div class="group">
+    <div class="group-heading">🎵 Reference Audio Library</div>
+    <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.9rem;">
+      Uploaded reference tracks, temp music, and auditioned SFX files. Use the <a href="audio.html" style="color: var(--secondary);">Research Audio</a> page to upload new files.
+    </p>
+    <div id="audioLibrary">
+      <div class="empty-state" style="text-align: center; padding: 48px; color: var(--text-muted);">
+        <div style="font-size: 2.5rem; margin-bottom: 12px; opacity: 0.3;">🎵</div>
+        <p>No reference audio loaded yet. Upload tracks via the Research Audio page, then assign them to scenes above.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Royalty-Free Resources -->
+  <div class="group">
+    <div class="group-heading">🔍 Find Audio Resources</div>
+    <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.9rem;">
+      Curated list of royalty-free / Creative Commons audio libraries for sourcing SFX and background music.
+    </p>
+    <div class="resources-list">
+      <a class="resource-card" href="https://freesound.org/" target="_blank">
+        <div class="resource-icon">🔊</div>
+        <div class="resource-body">
+          <div class="resource-name">Freesound.org</div>
+          <div class="resource-desc">Massive community database of CC0 / Creative Commons sound effects and field recordings. Free account required for downloads.</div>
+          <div class="card-tags"><span class="tag">SFX</span><span class="tag tag-green">CC0</span></div>
+        </div>
+      </a>
+      <a class="resource-card" href="https://pixabay.com/music/" target="_blank">
+        <div class="resource-icon">🎵</div>
+        <div class="resource-body">
+          <div class="resource-name">Pixabay Music</div>
+          <div class="resource-desc">Royalty-free background music and loops. No attribution required. Search by mood, genre, tempo.</div>
+          <div class="card-tags"><span class="tag tag-green">Music</span><span class="tag tag-green">CC0</span></div>
+        </div>
+      </a>
+      <a class="resource-card" href="https://uppbeat.io/" target="_blank">
+        <div class="resource-icon">🎶</div>
+        <div class="resource-body">
+          <div class="resource-name">Uppbeat</div>
+          <div class="resource-desc">Free music for creators. Curated playlists by mood and genre. Attribution required on free plan.</div>
+          <div class="card-tags"><span class="tag tag-blue">Music</span><span class="tag tag-yellow">Attribution</span></div>
+        </div>
+      </a>
+      <a class="resource-card" href="https://www.zapsplat.com/" target="_blank">
+        <div class="resource-icon">⚡</div>
+        <div class="resource-body">
+          <div class="resource-name">ZapSplat</div>
+          <div class="resource-desc">Large library of SFX and production music. Free plan includes 10 downloads/month, attribution required.</div>
+          <div class="card-tags"><span class="tag">SFX</span><span class="tag tag-blue">Music</span><span class="tag tag-yellow">Attribution</span></div>
+        </div>
+      </a>
+      <a class="resource-card" href="https://mixkit.co/free-sound-effects/" target="_blank">
+        <div class="resource-icon">🎛️</div>
+        <div class="resource-body">
+          <div class="resource-name">Mixkit</div>
+          <div class="resource-desc">Free SFX and music tracks. No attribution needed. Categorized by type — UI sounds, transitions, ambient.</div>
+          <div class="card-tags"><span class="tag">SFX</span><span class="tag tag-green">CC0</span></div>
+        </div>
+      </a>
+      <a class="resource-card" href="https://artlist.io/" target="_blank">
+        <div class="resource-icon">🎧</div>
+        <div class="resource-body">
+          <div class="resource-name">Artlist (Paid)</div>
+          <div class="resource-desc">Premium music and SFX for video. Single license covers all videos. High-quality cinematic tracks.</div>
+          <div class="card-tags"><span class="tag tag-blue">Premium</span><span class="tag tag-blue">Music</span><span class="tag">SFX</span></div>
+        </div>
+      </a>
+      <a class="resource-card" href="https://www.epidemicsound.com/" target="_blank">
+        <div class="resource-icon">🎼</div>
+        <div class="resource-body">
+          <div class="resource-name">Epidemic Sound (Paid)</div>
+          <div class="resource-desc">Industry-standard for YouTubers. Massive catalogue of music and SFX. Subscription-based with full monetisation.</div>
+          <div class="card-tags"><span class="tag tag-blue">Premium</span><span class="tag tag-blue">Music</span><span class="tag">SFX</span></div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- Script Section Reference -->
+  <div class="group">
+    <div class="group-heading">📝 Script Reference</div>
+    <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.9rem;">
+      Open the master script to review scene-by-scene dialogue and plan your audio cues.
+    </p>
+    <div class="grid">
+      <a class="card" href="../preprod/scripts/index.html">
+        <div class="card-icon">📜</div>
+        <div class="card-title">Master Script</div>
+        <div class="card-desc">View all module scripts with sentence-level detail for precise audio cue placement.</div>
+        <div class="card-meta"><span>🌐 HTML</span><span>All Modules</span></div>
+      </a>
+      <a class="card" href="production_shotlist.html">
+        <div class="card-icon">🎬</div>
+        <div class="card-title">Shot List</div>
+        <div class="card-desc">Review composited scenes and visual assets alongside your audio selections.</div>
+        <div class="card-meta"><span>🌐 HTML</span><span>All Modules</span></div>
+      </a>
+      <a class="card" href="https://secondbrain-kokoro.fly.dev/" target="_blank">
+        <div class="card-icon">🔊</div>
+        <div class="card-title">Audio Generator</div>
+        <div class="card-desc">Generate AI voiceovers and test narration pacing to match your background music.</div>
+        <div class="card-meta"><span>🔗 Kokoro TTS</span><span>External</span></div>
+      </a>
+    </div>
+  </div>
+
+  <footer>
+    <p style="margin-bottom: 8px;"><a href="index.html" style="color: var(--secondary); text-decoration: none;">← Back to Post-Production</a></p>
+    <p style="margin-bottom: 12px; font-size: 0.85rem; opacity: 0.8;">
+      Instructor: <a href="https://www.linkedin.com/in/rifaterdemsahin" target="_blank" style="color: #93c5fd; text-decoration: underline; margin-right: 16px;">Rifat Erdem Sahin LinkedIn</a>
+      GitHub Project: <a href="https://github.com/rifaterdemsahin/claude-architect-certification" target="_blank" style="color: #93c5fd; text-decoration: underline;">Project Repository</a>
+    </p>
+    <div style="margin-top: 12px; display: flex; justify-content: center; gap: 16px; align-items: center;">
+      <a href="https://github.com/rifaterdemsahin/claude-architect-certification/actions/workflows/static.yml" target="_blank">
+        <img src="https://github.com/rifaterdemsahin/claude-architect-certification/actions/workflows/static.yml/badge.svg" alt="Deploy Status" style="vertical-align: middle;">
+      </a>
+    </div>
+  </footer>
+</div>
+
+<script>
+const SCENES = [
+  { scene: 'M1 S1 S1', desc: 'Neural Network — Systems Architecture Intro',   sfx: 'Whoosh transition, click pop',   music: 'Ambient electronic, 80 bpm',   status: 'search' },
+  { scene: 'M1 S1 S2', desc: 'MCP Server — Client-Server Handshake',           sfx: 'Connection chime, data blip',     music: 'Tech groove, 90 bpm',           status: 'pending' },
+  { scene: 'M1 S1 S3', desc: 'GitHub Ecosystem — CI/CD Pipeline',              sfx: 'Git merge swoosh, success ding',  music: 'Upbeat coding, 100 bpm',        status: 'pending' },
+  { scene: 'M1 S2 S1', desc: 'Supabase — Database Schema Design',              sfx: 'Keyboard typing, SQL execute',    music: 'Lo-fi study, 75 bpm',           status: 'pending' },
+  { scene: 'M1 S2 S2', desc: 'RLS Policies — Row-Level Security',              sfx: 'Lock engage, key turn',           music: 'Cinematic tension, 60 bpm',     status: 'pending' },
+  { scene: 'M1 S2 S3', desc: 'Edge Functions — Serverless Logic',              sfx: 'Deploy whoosh, server hum',       music: 'Electronic pulse, 95 bpm',      status: 'pending' },
+  { scene: 'M1 S3 S1', desc: 'Fly.io — Container Deployment',                  sfx: 'Docker build, rocket launch',     music: 'Epic orchestral, 85 bpm',       status: 'pending' },
+  { scene: 'M1 S3 S2', desc: 'Azure Key Vault — Secrets Management',           sfx: 'Vault door, lock sequence',       music: 'Mysterious synth, 70 bpm',      status: 'pending' },
+  { scene: 'M1 S3 S3', desc: 'Axiom — Observability & Logging',               sfx: 'Data stream, alert ping',         music: 'Data pulse, 100 bpm',           status: 'pending' },
+];
+
+const STATUS_MAP = {
+  done:    { label: '✅ Done',       cls: 'status-done' },
+  pending: { label: '⏳ Pending',    cls: 'status-pending' },
+  search:  { label: '🔍 Searching', cls: 'status-search' },
+};
+
+function renderScoreTable() {
+  const tbody = document.getElementById('scoreTableBody');
+  tbody.innerHTML = SCENES.map(s => {
+    const st = STATUS_MAP[s.status] || STATUS_MAP.pending;
+    return `<tr>
+      <td data-label="Scene"><strong>${s.scene}</strong></td>
+      <td data-label="Description">${s.desc}</td>
+      <td data-label="SFX">${s.sfx}</td>
+      <td data-label="Music">${s.music}</td>
+      <td data-label="Status"><span class="score-status ${st.cls}">${st.label}</span></td>
+      <td data-label="Preview"><span style="color: var(--text-muted); font-size: 0.85rem;">—</span></td>
+    </tr>`;
+  }).join('');
+}
+
+renderScoreTable();
+</script>
+</body>
+</html>

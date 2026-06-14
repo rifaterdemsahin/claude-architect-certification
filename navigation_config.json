@@ -185,8 +185,8 @@
               "url": "https://secondbrain-kokoro.fly.dev/"
             },
             {
-              "label": "📁 Google Drive",
-              "url": "https://drive.google.com/"
+              "label": "☁️ Azure Portal",
+              "url": "https://portal.azure.com/"
             },
             {
               "label": "🎨 Thumbnail Assembly (Canva)",
@@ -226,6 +226,11 @@
             {
               "label": "6. ✅ Post Production Checklist",
               "url": "5_Symbols/production/postprod/post_production_checklist.html"
+            },
+            {
+              "label": "7. 🎵 Audio Scoring",
+              "url": "5_Symbols/production/postprod/audio_scoring.html",
+              "description": "Find sound effects and background music for every script scene in post-production."
             }
           ]
         },
