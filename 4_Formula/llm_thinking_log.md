@@ -215,3 +215,32 @@ Map the high-fidelity pipeline images from `3_Simulation/generated/pipeline` to 
    - Verify all 11 images load correctly.
    - Test modal opening/closing behavior on desktop and mobile.
    - Commit and push changes according to the Project Self-Learning System mandates.
+
+---
+## 2026-06-14 — 📖 Create Domain-Specific Language (DSL) Dictionary page under Preprod Research
+
+### 🎯 Objective
+Create an interactive DSL dictionary page under `5_Symbols/production/preprod/research/domain_specific_language.html` that defines project terminology, maps entries to Supabase, and provides search/filter/edit functionality.
+
+### 📐 Design & Implementation Plan
+1. **SQL Migration** (`5_Symbols/supabase/migrations/migration_dsl_entries.sql`):
+   - Create `dsl_entries` table: id, term, definition, context, category, related_terms (jsonb), examples (jsonb), source, created_at, updated_at
+   - Enable RLS with public read/write policies
+   - Seed 20+ entries covering Framework, Architecture, Production, Infrastructure, Agent, Content, and Storage categories
+
+2. **HTML Page** (`domain_specific_language.html`):
+   - Dark theme matching existing research pages (Outfit/Plus Jakarta fonts, glassmorphic cards)
+   - Search bar + category filter dropdown
+   - Entry form (add/edit): term, definition, context, category, related terms, examples, source
+   - Dictionary card list with click-to-expand for full details
+   - Supabase client for CRUD operations
+   - Inline badge display for related terms (clickable links to scroll/filter)
+
+3. **Navigation Update**:
+   - Add "📖 DSL Dictionary" link under Research section in `navigation_config.json`
+
+### 🗺 Files to Create/Modify
+- CREATE: `5_Symbols/supabase/migrations/migration_dsl_entries.sql`
+- CREATE: `5_Symbols/production/preprod/research/domain_specific_language.html`
+- MODIFY: `navigation_config.json`
+- MODIFY: `4_Formula/llm_thinking_log.md` (this entry)

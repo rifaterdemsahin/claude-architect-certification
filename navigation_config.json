@@ -70,6 +70,11 @@
               "label": "📊 Infographics",
               "url": "5_Symbols/production/preprod/research/infographic_generator.html",
               "description": "AI-powered infographic layout and asset generator."
+            },
+            {
+              "label": "📖 DSL Dictionary",
+              "url": "5_Symbols/production/preprod/research/domain_specific_language.html",
+              "description": "Domain-specific language dictionary — definitions, context, and examples of project terminology."
             }
           ]
         },

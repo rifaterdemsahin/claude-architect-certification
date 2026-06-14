@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📖 DSL Dictionary</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../../../shared/nav.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --bg: #030712; --card: rgba(17,24,39,0.9); --border: rgba(139,92,246,0.2);
+      --text: #f3f4f6; --muted: #9ca3af; --primary: #8b5cf6; --green: #10b981;
+      --red: #ef4444; --blue: #3b82f6; --yellow: #f59e0b;
+      --font-h: 'Outfit', sans-serif; --font-b: 'Plus Jakarta Sans', sans-serif;
+      --font-mono: 'Fira Mono', 'Consolas', monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: var(--font-b); line-height: 1.6; padding: 32px 24px 120px; }
+    .container { max-width: 960px; margin: 0 auto; }
+    h1 { font-family: var(--font-h); font-size: 2.2rem; font-weight: 800; margin-bottom: 6px; }
+    .subtitle { color: var(--muted); margin-bottom: 28px; }
+    .status-bar { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 20px; margin-bottom: 24px; font-size: 0.85rem; }
+
+    /* Search & Filter Bar */
+    .toolbar { display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; align-items: center; }
+    .search-input { flex: 1; min-width: 200px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 10px 16px; color: var(--text); font-size: 0.92rem; outline: none; font-family: var(--font-b); }
+    .search-input:focus { border-color: var(--primary); }
+    .search-input::placeholder { color: var(--muted); }
+    .filter-select { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 10px 14px; color: var(--text); font-size: 0.88rem; outline: none; cursor: pointer; min-width: 140px; font-family: var(--font-b); }
+    .filter-select:focus { border-color: var(--primary); }
+    .filter-select option { background: #0f172a; }
+
+    /* Count */
+    .count-label { font-size: 0.82rem; color: var(--muted); margin-bottom: 14px; }
+
+    /* Dictionary Card */
+    .dict-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px 20px; margin-bottom: 12px; cursor: pointer; transition: all 0.15s; }
+    .dict-card:hover { border-color: rgba(139,92,246,0.5); }
+    .dict-card.expanded { border-color: var(--primary); background: rgba(139,92,246,0.06); }
+    .dict-header { display: flex; align-items: center; gap: 10px; }
+    .dict-term { font-family: var(--font-h); font-size: 1.05rem; font-weight: 700; flex: 1; min-width: 0; }
+    .dict-category { font-size: 0.68rem; font-weight: 600; padding: 3px 10px; border-radius: 20px; white-space: nowrap; text-transform: uppercase; letter-spacing: 0.5px; }
+    .cat-framework { background: rgba(139,92,246,0.15); color: #c084fc; border: 1px solid rgba(139,92,246,0.3); }
+    .cat-architecture { background: rgba(59,130,246,0.15); color: #93c5fd; border: 1px solid rgba(59,130,246,0.3); }
+    .cat-production { background: rgba(16,185,129,0.15); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.3); }
+    .cat-infrastructure { background: rgba(245,158,11,0.15); color: #fcd34d; border: 1px solid rgba(245,158,11,0.3); }
+    .cat-agent { background: rgba(236,72,153,0.15); color: #f9a8d4; border: 1px solid rgba(236,72,153,0.3); }
+    .cat-content { background: rgba(251,146,60,0.15); color: #fdba74; border: 1px solid rgba(251,146,60,0.3); }
+    .cat-data { background: rgba(52,211,153,0.15); color: #6ee7b7; border: 1px solid rgba(52,211,153,0.3); }
+    .cat-general { background: rgba(255,255,255,0.08); color: var(--muted); border: 1px solid rgba(255,255,255,0.1); }
+
+    .dict-definition { font-size: 0.88rem; color: var(--text); line-height: 1.6; margin: 8px 0 6px; }
+    .dict-expand-icon { font-size: 0.75rem; color: var(--muted); transition: transform 0.2s; }
+    .dict-card.expanded .dict-expand-icon { transform: rotate(180deg); }
+
+    /* Expanded details */
+    .dict-details { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.06); }
+    .dict-card.expanded .dict-details { display: block; }
+    .detail-label { font-size: 0.72rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .detail-text { font-size: 0.85rem; color: var(--text); line-height: 1.5; margin-bottom: 12px; }
+    .related-badge { display: inline-block; background: rgba(139,92,246,0.12); border: 1px solid rgba(139,92,246,0.25); border-radius: 6px; padding: 3px 10px; font-size: 0.75rem; color: #c084fc; cursor: pointer; margin: 2px 4px 2px 0; transition: all 0.15s; }
+    .related-badge:hover { background: rgba(139,92,246,0.25); }
+    .example-item { background: rgba(0,0,0,0.3); border-left: 2px solid var(--primary); border-radius: 0 6px 6px 0; padding: 8px 12px; margin: 4px 0; font-size: 0.82rem; font-family: var(--font-mono); color: #d1d5db; }
+    .dict-actions { display: flex; gap: 6px; margin-top: 12px; }
+    .btn-sm { padding: 5px 12px; border-radius: 7px; border: none; cursor: pointer; font-size: 0.75rem; font-weight: 600; font-family: var(--font-b); transition: all 0.2s; }
+    .btn-edit { background: rgba(59,130,246,0.15); color: var(--blue); border: 1px solid rgba(59,130,246,0.3); }
+    .btn-edit:hover { background: rgba(59,130,246,0.25); }
+    .btn-delete { background: rgba(239,68,68,0.12); color: var(--red); border: 1px solid rgba(239,68,68,0.2); }
+    .btn-delete:hover { background: rgba(239,68,68,0.22); }
+
+    /* Editor Form */
+    .editor-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px 24px; margin-bottom: 28px; }
+    .editor-title { font-family: var(--font-h); font-size: 1rem; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    .form-group { display: flex; flex-direction: column; gap: 4px; }
+    .form-group.full { grid-column: 1 / -1; }
+    .form-label { font-size: 0.78rem; font-weight: 600; color: var(--muted); }
+    .form-input, .form-textarea, .form-select { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08); border-radius: 9px; padding: 8px 12px; color: var(--text); font-size: 0.88rem; outline: none; font-family: var(--font-b); }
+    .form-input:focus, .form-textarea:focus, .form-select:focus { border-color: var(--primary); }
+    .form-textarea { min-height: 80px; resize: vertical; font-family: var(--font-mono); }
+    .form-select { cursor: pointer; }
+    .form-select option { background: #0f172a; }
+    .form-help { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+    .editor-footer { display: flex; gap: 8px; margin-top: 14px; align-items: center; flex-wrap: wrap; }
+    .btn { padding: 9px 18px; border-radius: 10px; font-weight: 700; border: none; cursor: pointer; font-size: 0.88rem; transition: all 0.2s; font-family: var(--font-b); }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: #7c3aed; }
+    .btn-ghost-lg { background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid rgba(255,255,255,0.08); }
+    .btn-ghost-lg:hover { background: rgba(255,255,255,0.1); color: var(--text); }
+    .btn-cancel { background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid rgba(255,255,255,0.08); }
+    .btn-cancel:hover { background: rgba(255,255,255,0.1); color: var(--text); }
+    .save-status { font-size: 0.82rem; color: var(--muted); }
+
+    .empty-state { text-align: center; color: var(--muted); padding: 48px; font-size: 0.95rem; }
+    .loading { text-align: center; color: var(--muted); padding: 32px; }
+
+    .toast { position: fixed; bottom: 24px; right: 24px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 18px; font-size: 0.88rem; z-index: 1000; max-width: 340px; transition: opacity 0.3s; }
+    .toast.error { border-color: rgba(239,68,68,0.4); }
+    .toast.success { border-color: rgba(16,185,129,0.4); }
+  </style>
+</head>
+<body>
+<script src="../../../../shared/nav.js"></script>
+<div class="container">
+  <h1>📖 Domain-Specific Language Dictionary</h1>
+  <p class="subtitle">Glossary of project terminology, framework concepts, and domain terms with context, examples, and cross-references.</p>
+
+  <!-- Status bar -->
+  <div class="status-bar" id="status-bar">⏳ Connecting to Supabase…</div>
+
+  <!-- Navigation Mode Bar -->
+  <div style="display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap;">
+    <a href="index.html" style="padding: 8px 16px; border-radius: 10px; font-weight: 700; font-size: 0.85rem; background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid rgba(255,255,255,0.08); text-decoration: none;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">← Hub</a>
+    <span style="padding: 8px 16px; border-radius: 10px; font-weight: 700; font-size: 0.85rem; background: rgba(139,92,246,0.15); border: 1px solid var(--primary); color: var(--text);">📖 DSL Dictionary</span>
+  </div>
+
+  <!-- Editor Form (Add / Edit) -->
+  <div class="editor-card" id="editor-card">
+    <div class="editor-title" id="editor-title">➕ Add New Term</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" for="input-term">Term *</label>
+        <input class="form-input" id="input-term" type="text" placeholder="e.g. Delivery Pilot" maxlength="120">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="input-category">Category *</label>
+        <select class="form-select" id="input-category">
+          <option value="framework">🏛 Framework</option>
+          <option value="architecture">🗂 Architecture</option>
+          <option value="production">🎬 Production</option>
+          <option value="infrastructure">☁️ Infrastructure</option>
+          <option value="agent">🤖 Agent</option>
+          <option value="content">📝 Content</option>
+          <option value="data">💾 Data</option>
+          <option value="general">📌 General</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group full" style="margin-bottom: 12px;">
+      <label class="form-label" for="input-definition">Definition *</label>
+      <textarea class="form-textarea" id="input-definition" placeholder="Clear, concise definition of the term..." style="min-height: 70px;"></textarea>
+    </div>
+    <div class="form-group full" style="margin-bottom: 12px;">
+      <label class="form-label" for="input-context">Context</label>
+      <textarea class="form-textarea" id="input-context" placeholder="Where / how is this term used in the project?" style="min-height: 50px;"></textarea>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" for="input-related">Related Terms (comma-separated)</label>
+        <input class="form-input" id="input-related" type="text" placeholder="Term A, Term B, Term C">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="input-source">Source</label>
+        <input class="form-input" id="input-source" type="text" placeholder="e.g. DSL Glossary, Architecture Doc">
+      </div>
+    </div>
+    <div class="form-group full" style="margin-bottom: 12px;">
+      <label class="form-label" for="input-examples">Examples (one per line)</label>
+      <textarea class="form-textarea" id="input-examples" placeholder="- Example usage 1&#10;- Example usage 2" style="min-height: 60px;"></textarea>
+    </div>
+    <div class="editor-footer">
+      <button class="btn btn-primary" onclick="saveEntry()">💾 Save Term</button>
+      <button class="btn btn-ghost-lg" onclick="resetForm()">➕ New</button>
+      <button class="btn btn-cancel" id="btn-cancel-edit" style="display:none;" onclick="cancelEdit()">✕ Cancel Edit</button>
+      <span class="save-status" id="save-status"></span>
+    </div>
+  </div>
+
+  <!-- Search & Filter Bar -->
+  <div class="toolbar">
+    <input class="search-input" id="search-input" type="text" placeholder="🔍 Search terms, definitions, context..." oninput="onSearch()">
+    <select class="filter-select" id="filter-category" onchange="onSearch()">
+      <option value="">All Categories</option>
+      <option value="framework">🏛 Framework</option>
+      <option value="architecture">🗂 Architecture</option>
+      <option value="production">🎬 Production</option>
+      <option value="infrastructure">☁️ Infrastructure</option>
+      <option value="agent">🤖 Agent</option>
+      <option value="content">📝 Content</option>
+      <option value="data">💾 Data</option>
+      <option value="general">📌 General</option>
+    </select>
+  </div>
+
+  <div class="count-label" id="count-label">Loading entries…</div>
+  <div id="list"><div class="loading">⏳ Loading dictionary entries from Supabase…</div></div>
+</div>
+
+<div class="toast" id="toast" style="opacity:0;pointer-events:none"></div>
+
+<script>
+// ── Supabase Setup ──────────────────────────────────────────────────────────
+const SUPABASE_URL = 'https://rmekfsdhglyiralxvkwc.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZWtmc2RoZ2x5aXJhbHh2a3djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NzYzODgsImV4cCI6MjA5NjM1MjM4OH0.ay6HsmO_CbMGDXL_Dv4DT-paAIAOqlQPfmqqx_mexSU';
+const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+let allEntries = [];
+let editingId = null;
+let _toastTimer;
+
+// ── Toast ───────────────────────────────────────────────────────────────────
+function toast(msg, type) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast ' + (type || '');
+  el.style.opacity = '1';
+  el.style.pointerEvents = 'auto';
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => { el.style.opacity = '0'; el.style.pointerEvents = 'none'; }, 3500);
+}
+
+// ── Category helpers ────────────────────────────────────────────────────────
+function categoryClass(cat) {
+  return 'cat-' + (cat || 'general');
+}
+
+function categoryEmoji(cat) {
+  const map = { framework:'🏛', architecture:'🗂', production:'🎬', infrastructure:'☁️', agent:'🤖', content:'📝', data:'💾' };
+  return map[cat] || '📌';
+}
+
+// ── Load entries from Supabase ─────────────────────────────────────────────
+async function loadEntries() {
+  document.getElementById('status-bar').textContent = '⏳ Loading DSL entries…';
+  const { data, error } = await client.from('dsl_entries').select('*').order('term');
+  if (error) {
+    console.error('DSL load error:', error);
+    document.getElementById('status-bar').textContent = '🔴 Failed to load: ' + error.message;
+    document.getElementById('list').innerHTML = '<div class="empty-state">❌ Failed to load entries: ' + error.message + '</div>';
+    return;
+  }
+  allEntries = data || [];
+  document.getElementById('status-bar').textContent = '🟢 Connected — ' + allEntries.length + ' DSL entries loaded';
+  applyFilter();
+}
+
+// ── Search & Filter ────────────────────────────────────────────────────────
+function onSearch() {
+  applyFilter();
+}
+
+function applyFilter() {
+  const query = document.getElementById('search-input').value.toLowerCase().trim();
+  const catFilter = document.getElementById('filter-category').value;
+
+  let filtered = allEntries;
+  if (catFilter) {
+    filtered = filtered.filter(e => e.category === catFilter);
+  }
+  if (query) {
+    filtered = filtered.filter(e =>
+      e.term.toLowerCase().includes(query) ||
+      (e.definition || '').toLowerCase().includes(query) ||
+      (e.context || '').toLowerCase().includes(query) ||
+      ((e.related_terms || [])).some(r => r.toLowerCase().includes(query))
+    );
+  }
+  renderList(filtered);
+}
+
+// ── Render ─────────────────────────────────────────────────────────────────
+function renderList(entries) {
+  const list = document.getElementById('list');
+  document.getElementById('count-label').textContent = entries.length + ' entr' + (entries.length !== 1 ? 'ies' : 'y') + ' shown';
+
+  if (!entries || entries.length === 0) {
+    list.innerHTML = '<div class="empty-state">📖 No matching terms. Try a different search or <a href="#" onclick="resetForm();return false;" style="color:var(--primary);">add a new term</a>.</div>';
+    return;
+  }
+
+  list.innerHTML = '';
+  entries.forEach(e => {
+    const card = document.createElement('div');
+    card.className = 'dict-card';
+    card.dataset.id = e.id;
+
+    const relTerms = e.related_terms || [];
+    const examples = e.examples || [];
+
+    card.innerHTML = `
+      <div class="dict-header" onclick="toggleExpand(this.parentElement)">
+        <div class="dict-term">${categoryEmoji(e.category)} ${escHtml(e.term)}</div>
+        <span class="dict-category ${categoryClass(e.category)}">${e.category}</span>
+        <span class="dict-expand-icon">▼</span>
+      </div>
+      <div class="dict-definition">${escHtml(e.definition)}</div>
+      <div class="dict-details">
+        ${e.context ? `<div class="detail-label">📍 Context</div><div class="detail-text">${escHtml(e.context)}</div>` : ''}
+        ${relTerms.length ? `
+          <div class="detail-label">🔗 Related Terms</div>
+          <div class="detail-text">${relTerms.map(t => `<span class="related-badge" onclick="searchRelated('${escHtml(t)}')">${escHtml(t)}</span>`).join('')}</div>
+        ` : ''}
+        ${examples.length ? `
+          <div class="detail-label">📋 Examples</div>
+          ${examples.map(ex => `<div class="example-item">${escHtml(ex)}</div>`).join('')}
+        ` : ''}
+        ${e.source ? `<div class="detail-label" style="margin-top:8px;">📚 Source</div><div class="detail-text" style="font-size:0.82rem;color:var(--muted);font-family:var(--font-mono);">${escHtml(e.source)}</div>` : ''}
+        <div class="dict-actions">
+          <button class="btn-sm btn-edit" onclick="editEntry(${e.id});event.stopPropagation();">✏️ Edit</button>
+          <button class="btn-sm btn-delete" onclick="deleteEntry(${e.id});event.stopPropagation();">🗑 Delete</button>
+        </div>
+      </div>
+    `;
+    list.appendChild(card);
+  });
+}
+
+function toggleExpand(card) {
+  card.classList.toggle('expanded');
+}
+
+function escHtml(str) {
+  if (!str) return '';
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+function searchRelated(term) {
+  document.getElementById('search-input').value = term;
+  applyFilter();
+  // Scroll to top of list
+  document.getElementById('list').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── Save (Create / Update) ──────────────────────────────────────────────────
+async function saveEntry() {
+  const term = document.getElementById('input-term').value.trim();
+  const definition = document.getElementById('input-definition').value.trim();
+  const category = document.getElementById('input-category').value;
+  const context = document.getElementById('input-context').value.trim();
+  const relatedRaw = document.getElementById('input-related').value.trim();
+  const source = document.getElementById('input-source').value.trim();
+  const examplesRaw = document.getElementById('input-examples').value.trim();
+
+  if (!term || !definition) {
+    toast('Term and Definition are required.', 'error');
+    return;
+  }
+
+  const relatedTerms = relatedRaw ? relatedRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
+  const examples = examplesRaw ? examplesRaw.split('\n').map(s => s.trim().replace(/^-\s*/, '')).filter(Boolean) : [];
+
+  const payload = { term, definition, category, context, related_terms: relatedTerms, examples, source };
+
+  document.getElementById('save-status').textContent = '⏳ Saving…';
+
+  try {
+    if (editingId) {
+      // Update
+      payload.updated_at = new Date().toISOString();
+      const { error } = await client.from('dsl_entries').update(payload).eq('id', editingId);
+      if (error) throw error;
+      toast('✅ Updated: ' + term, 'success');
+    } else {
+      // Insert
+      const { error } = await client.from('dsl_entries').insert(payload);
+      if (error) throw error;
+      toast('✅ Added: ' + term, 'success');
+    }
+
+    document.getElementById('save-status').textContent = '✅ Saved';
+    resetForm();
+    await loadEntries();
+  } catch (e) {
+    document.getElementById('save-status').textContent = '❌ Error';
+    toast('Save failed: ' + e.message, 'error');
+  }
+}
+
+// ── Edit ────────────────────────────────────────────────────────────────────
+async function editEntry(id) {
+  const { data, error } = await client.from('dsl_entries').select('*').eq('id', id).single();
+  if (error || !data) {
+    toast('Failed to load entry: ' + (error?.message || 'not found'), 'error');
+    return;
+  }
+
+  editingId = data.id;
+  document.getElementById('editor-title').textContent = '✏️ Edit Term: ' + data.term;
+  document.getElementById('input-term').value = data.term || '';
+  document.getElementById('input-definition').value = data.definition || '';
+  document.getElementById('input-category').value = data.category || 'general';
+  document.getElementById('input-context').value = data.context || '';
+  document.getElementById('input-related').value = (data.related_terms || []).join(', ');
+  document.getElementById('input-source').value = data.source || '';
+  document.getElementById('input-examples').value = (data.examples || []).map(ex => '- ' + ex).join('\n');
+  document.getElementById('btn-cancel-edit').style.display = 'inline-block';
+  document.getElementById('save-status').textContent = '';
+  document.getElementById('editor-card').scrollIntoView({ behavior: 'smooth' });
+}
+
+function cancelEdit() {
+  resetForm();
+}
+
+function resetForm() {
+  editingId = null;
+  document.getElementById('editor-title').textContent = '➕ Add New Term';
+  document.getElementById('input-term').value = '';
+  document.getElementById('input-definition').value = '';
+  document.getElementById('input-category').value = 'framework';
+  document.getElementById('input-context').value = '';
+  document.getElementById('input-related').value = '';
+  document.getElementById('input-source').value = '';
+  document.getElementById('input-examples').value = '';
+  document.getElementById('btn-cancel-edit').style.display = 'none';
+  document.getElementById('save-status').textContent = '';
+}
+
+// ── Delete ──────────────────────────────────────────────────────────────────
+async function deleteEntry(id) {
+  const entry = allEntries.find(e => e.id === id);
+  if (!entry) return;
+  if (!confirm('🗑 Permanently delete "' + entry.term + '"?\n\nThis removes the entry from the dictionary and cannot be undone.')) return;
+
+  const { error } = await client.from('dsl_entries').delete().eq('id', id);
+  if (error) {
+    toast('Delete failed: ' + error.message, 'error');
+  } else {
+    toast('🗑 Deleted: ' + entry.term, 'success');
+    if (editingId === id) resetForm();
+    await loadEntries();
+  }
+}
+
+// ── Init ────────────────────────────────────────────────────────────────────
+document.getElementById('status-bar').textContent = '⏳ Connecting to Supabase…';
+loadEntries();
+</script>
+<script src="../../../../shared/debug-panel.js"></script>
+</body>
+</html>
