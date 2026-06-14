@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Post Production Checklist | Claude AI Certification</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --bg-dark: #030712; --bg-card: rgba(17,24,39,0.85);
+      --text-main: #f3f4f6; --text-muted: #9ca3af;
+      --primary: #8b5cf6; --secondary: #3b82f6; --success: #10b981;
+      --warning: #f59e0b; --danger: #ef4444;
+      --font-title: 'Outfit', sans-serif; --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg-dark);
+      background-image: radial-gradient(circle at 10% 20%, rgba(139,92,246,0.08) 0%, transparent 40%);
+      color: var(--text-main); font-family: var(--font-body); line-height: 1.6; padding-bottom: 80px;
+    }
+    .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+    header { padding: 100px 0 24px; text-align: center; }
+    h1 { font-family: var(--font-title); font-size: 2.2rem; font-weight: 800; margin-bottom: 6px; }
+    header p { color: var(--text-muted); font-size: 0.95rem; }
+
+    .tabs { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+    .tab { padding: 10px 20px; border-radius: 100px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; font-weight: 700; font-size: 0.85rem; transition: all 0.3s; background: transparent; color: var(--text-muted); }
+    .tab.active { background: var(--primary); color: white; border-color: var(--primary); }
+    .tab:hover { border-color: var(--primary); }
+    .tab .count { background: rgba(255,255,255,0.1); border-radius: 20px; padding: 1px 8px; margin-left: 6px; font-size: 0.75rem; }
+    .tab.active .count { background: rgba(255,255,255,0.2); }
+
+    .stats { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
+    .stat-card { background: var(--bg-card); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 16px 24px; flex: 1; min-width: 120px; text-align: center; }
+    .stat-num { font-family: var(--font-title); font-size: 1.8rem; font-weight: 800; }
+    .stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
+
+    .sync-bar { display: flex; align-items: center; gap: 12px; background: var(--bg-card); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 12px 18px; margin-bottom: 24px; }
+    .sync-badge { padding: 3px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
+    .sync-badge.connected { background: rgba(16,185,129,0.15); color: #10b981; }
+    .sync-badge.saving { background: rgba(59,130,246,0.15); color: #3b82f6; }
+    .sync-badge.error { background: rgba(239,68,68,0.15); color: #ef4444; }
+
+    .checklist { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+    .check-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 10px; background: rgba(0,0,0,0.2); transition: all 0.2s; }
+    .check-item:hover { background: rgba(139,92,246,0.06); }
+    .check-box { width: 20px; height: 20px; border-radius: 5px; accent-color: var(--success); cursor: pointer; flex-shrink: 0; }
+    .item-name { flex: 1; font-size: 0.9rem; }
+    .item-desc { font-size: 0.75rem; color: var(--text-muted); }
+    .item-actions { display: flex; gap: 4px; }
+    .item-btn { background: none; border: 1px solid rgba(255,255,255,0.08); color: var(--text-muted); padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 0.7rem; transition: all 0.2s; }
+    .item-btn:hover { border-color: var(--primary); color: var(--primary); }
+    .item-btn.danger:hover { border-color: var(--danger); color: var(--danger); }
+
+    .add-form { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+    .add-form input, .add-form select { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 10px 14px; color: white; font-family: var(--font-body); font-size: 0.85rem; }
+    .add-form input { flex: 1; min-width: 180px; }
+    .add-form input::placeholder { color: var(--text-muted); }
+    .add-form button { background: var(--primary); border: none; border-radius: 8px; padding: 10px 20px; color: white; font-weight: 700; cursor: pointer; transition: 0.2s; }
+    .add-form button:hover { background: #7c3aed; }
+    .add-form select { min-width: 140px; }
+
+    .category-header { font-family: var(--font-title); font-weight: 700; font-size: 1rem; margin: 16px 0 8px; color: var(--text-muted); display: flex; align-items: center; gap: 8px; }
+    .category-header i { color: var(--primary); }
+    .empty-state { text-align: center; padding: 40px; color: var(--text-muted); }
+
+    @media (max-width: 600px) {
+      h1 { font-size: 1.6rem; }
+      .tabs { gap: 4px; }
+      .tab { font-size: 0.75rem; padding: 8px 14px; }
+      .stat-card { padding: 12px 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1><i class="fas fa-clipboard-check" style="color:var(--primary);margin-right:10px;"></i>Post Production Checklist</h1>
+      <p>Track your post-production pipeline from assembly to publication</p>
+    </header>
+
+    <div class="stats" id="stats-bar">
+      <div class="stat-card"><div class="stat-num" id="total-count">0</div><div class="stat-label">Total</div></div>
+      <div class="stat-card"><div class="stat-num" id="done-count" style="color:var(--success)">0</div><div class="stat-label">Done</div></div>
+      <div class="stat-card"><div class="stat-num" id="progress-pct" style="color:var(--primary)">0%</div><div class="stat-label">Progress</div></div>
+    </div>
+
+    <div class="sync-bar" id="sync-bar">
+      <i class="fas fa-cloud-upload-alt" style="color:var(--primary)"></i>
+      <span id="sync-status" style="flex:1;font-size:0.9rem;">Loading...</span>
+      <span class="sync-badge" id="sync-badge">syncing</span>
+    </div>
+
+    <div class="tabs" id="tabs-container"></div>
+
+    <div id="checklist-container"></div>
+
+    <div class="add-form" id="add-form">
+      <input type="text" id="new-item-name" placeholder="New task...">
+      <select id="new-item-category">
+        <option value="Video Assembly">Video Assembly</option>
+        <option value="Audio">Audio</option>
+        <option value="Graphics">Graphics</option>
+        <option value="Captions">Captions</option>
+        <option value="QC">Quality Control</option>
+        <option value="Export">Export & Upload</option>
+      </select>
+      <button id="add-btn"><i class="fas fa-plus"></i> Add</button>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const SUPABASE_URL = 'https://rmekfsdhglyiralxvkwc.supabase.co';
+      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZWtmc2RoZ2x5aXJhbHh2a3djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU4MDU4NjUsImV4cCI6MjA2MTM4MTg2NX0.VeGabMD6FNMyCf9bOZFRfqHqKegrOGXIHpO2kYFiyPE';
+
+      const CATEGORIES = ['Video Assembly', 'Audio', 'Graphics', 'Captions', 'QC', 'Export'];
+
+      const DEFAULT_ITEMS = [
+        { name: 'Sync all footage to timeline', category: 'Video Assembly', done: false },
+        { name: 'Apply rough cuts per edit list', category: 'Video Assembly', done: false },
+        { name: 'Add transitions between scenes', category: 'Video Assembly', done: false },
+        { name: 'Review and trim B-roll overlays', category: 'Video Assembly', done: false },
+        { name: 'Check video pacing and timing', category: 'Video Assembly', done: false },
+        { name: 'Normalize audio levels across clips', category: 'Audio', done: false },
+        { name: 'Add background music track', category: 'Audio', done: false },
+        { name: 'Mix voiceover with background audio', category: 'Audio', done: false },
+        { name: 'Remove background noise / hiss', category: 'Audio', done: false },
+        { name: 'Add sound effects where needed', category: 'Audio', done: false },
+        { name: 'Add lower thirds for speaker names', category: 'Graphics', done: false },
+        { name: 'Overlay screen callouts / annotations', category: 'Graphics', done: false },
+        { name: 'Insert chapter markers / section dividers', category: 'Graphics', done: false },
+        { name: 'Add intro and outro cards', category: 'Graphics', done: false },
+        { name: 'Generate and sync captions', category: 'Captions', done: false },
+        { name: 'Review caption accuracy', category: 'Captions', done: false },
+        { name: 'Style captions (font, size, position)', category: 'Captions', done: false },
+        { name: 'Full play-through review', category: 'QC', done: false },
+        { name: 'Check audio-video sync', category: 'QC', done: false },
+        { name: 'Verify all links and resources mentioned', category: 'QC', done: false },
+        { name: 'Review thumbnail frame', category: 'QC', done: false },
+        { name: 'Export master file (high-res)', category: 'Export & Upload', done: false },
+        { name: 'Upload to YouTube / platform', category: 'Export & Upload', done: false },
+        { name: 'Set title, description, tags, and playlist', category: 'Export & Upload', done: false },
+        { name: 'Schedule or publish video', category: 'Export & Upload', done: false },
+      ];
+
+      let items = [];
+      let activeTab = 'Video Assembly';
+      let loading = true;
+
+      function getSyncBadgeEl() { return document.getElementById('sync-badge'); }
+      function getSyncStatusEl() { return document.getElementById('sync-status'); }
+      function getTotalEl() { return document.getElementById('total-count'); }
+      function getDoneEl() { return document.getElementById('done-count'); }
+      function getPctEl() { return document.getElementById('progress-pct'); }
+
+      function setSyncState(state, msg) {
+        const badge = getSyncBadgeEl();
+        const status = getSyncStatusEl();
+        badge.className = 'sync-badge';
+        if (state === 'connected') { badge.classList.add('connected'); badge.textContent = 'connected'; }
+        else if (state === 'saving') { badge.classList.add('saving'); badge.textContent = 'saving...'; }
+        else { badge.classList.add('error'); badge.textContent = 'error'; }
+        status.textContent = msg;
+      }
+
+      async function fetchItems() {
+        loading = true;
+        setSyncState('saving', 'Loading checklist...');
+        try {
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/postprod_checklist?select=*&order=id.asc`, {
+            headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+          });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          if (data && data.length > 0) {
+            items = data;
+          } else {
+            items = JSON.parse(JSON.stringify(DEFAULT_ITEMS));
+            await seedItems();
+          }
+          setSyncState('connected', `Loaded ${items.length} items`);
+        } catch (e) {
+          console.warn('Supabase fetch failed, using defaults:', e);
+          items = JSON.parse(JSON.stringify(DEFAULT_ITEMS));
+          setSyncState('error', 'Offline — using local defaults');
+        }
+        loading = false;
+        render();
+      }
+
+      async function seedItems() {
+        const toInsert = items.map(({ name, category, done }) => ({ name, category, done }));
+        try {
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/postprod_checklist`, {
+            method: 'POST',
+            headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+            body: JSON.stringify(toInsert)
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.length > 0) items = data;
+          }
+        } catch (e) {
+          console.warn('Seed failed:', e);
+        }
+      }
+
+      async function toggleItem(id, done) {
+        const idx = items.findIndex(i => i.id === id);
+        if (idx === -1) return;
+        items[idx].done = done;
+        render();
+        setSyncState('saving', 'Saving...');
+        try {
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/postprod_checklist?id=eq.${id}`, {
+            method: 'PATCH',
+            headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ done })
+          });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          setSyncState('connected', 'Saved');
+        } catch (e) {
+          console.warn('Toggle failed:', e);
+          setSyncState('error', 'Save failed');
+        }
+      }
+
+      async function deleteItem(id) {
+        items = items.filter(i => i.id !== id);
+        render();
+        setSyncState('saving', 'Deleting...');
+        try {
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/postprod_checklist?id=eq.${id}`, {
+            method: 'DELETE',
+            headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+          });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          setSyncState('connected', 'Deleted');
+        } catch (e) {
+          console.warn('Delete failed:', e);
+          setSyncState('error', 'Delete failed');
+        }
+      }
+
+      async function addItem(name, category) {
+        const newItem = { name, category, done: false };
+        items.push(newItem);
+        render();
+        setSyncState('saving', 'Adding...');
+        try {
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/postprod_checklist`, {
+            method: 'POST',
+            headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+            body: JSON.stringify(newItem)
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.length > 0) {
+              const idx = items.length - 1;
+              items[idx] = data[0];
+            }
+          }
+          setSyncState('connected', 'Added');
+        } catch (e) {
+          console.warn('Add failed:', e);
+          setSyncState('error', 'Add failed');
+        }
+      }
+
+      function renderTabs() {
+        const container = document.getElementById('tabs-container');
+        container.innerHTML = '';
+        CATEGORIES.forEach(cat => {
+          const count = items.filter(i => i.category === cat && !i.done).length;
+          const tab = document.createElement('button');
+          tab.className = 'tab' + (cat === activeTab ? ' active' : '');
+          tab.innerHTML = `${cat} <span class="count">${count}</span>`;
+          tab.addEventListener('click', () => { activeTab = cat; render(); });
+          container.appendChild(tab);
+        });
+      }
+
+      function renderStats() {
+        const total = items.length;
+        const done = items.filter(i => i.done).length;
+        const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+        getTotalEl().textContent = total;
+        getDoneEl().textContent = done;
+        getPctEl().textContent = pct + '%';
+      }
+
+      function renderChecklist() {
+        const container = document.getElementById('checklist-container');
+        const filtered = items.filter(i => i.category === activeTab);
+        if (filtered.length === 0) {
+          container.innerHTML = `<div class="empty-state"><i class="fas fa-check-circle" style="font-size:2rem;color:var(--success);margin-bottom:12px;display:block;"></i>All tasks in this category are done!</div>`;
+          return;
+        }
+        const ul = document.createElement('ul');
+        ul.className = 'checklist';
+        filtered.forEach(item => {
+          const li = document.createElement('li');
+          li.className = 'check-item';
+          li.innerHTML = `
+            <input type="checkbox" class="check-box" ${item.done ? 'checked' : ''}>
+            <div style="flex:1">
+              <div class="item-name" style="${item.done ? 'text-decoration:line-through;color:var(--text-muted)' : ''}">${item.name}</div>
+              <div class="item-desc">${item.category}</div>
+            </div>
+            <div class="item-actions">
+              <button class="item-btn danger" data-id="${item.id}"><i class="fas fa-trash"></i></button>
+            </div>
+          `;
+          const cb = li.querySelector('.check-box');
+          cb.addEventListener('change', () => {
+            if (item.id) toggleItem(item.id, cb.checked);
+            else { item.done = cb.checked; render(); }
+          });
+          const delBtn = li.querySelector('.item-btn');
+          delBtn.addEventListener('click', () => {
+            if (item.id) deleteItem(item.id);
+            else { items = items.filter(i => i !== item); render(); }
+          });
+          ul.appendChild(li);
+        });
+        container.innerHTML = '';
+        container.appendChild(ul);
+      }
+
+      function render() {
+        renderTabs();
+        renderStats();
+        renderChecklist();
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        fetchItems();
+
+        document.getElementById('add-btn').addEventListener('click', () => {
+          const name = document.getElementById('new-item-name').value.trim();
+          const category = document.getElementById('new-item-category').value;
+          if (!name) return;
+          addItem(name, category);
+          document.getElementById('new-item-name').value = '';
+        });
+
+        document.getElementById('new-item-name').addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') document.getElementById('add-btn').click();
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

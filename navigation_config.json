@@ -40,9 +40,18 @@
                   "url": "5_Symbols/production/postprod/image_generator.html",
                   "description": "AI-powered image generator for scene backgrounds and assets."
                 }
-              ]
-            },
-            { 
+]
+        },
+        {
+          "label": "📊 Analytics",
+          "children": [
+            {
+              "label": "📈 Video Analytics",
+              "url": "https://studio.youtube.com/video/bsH-vBGNERE/analytics/tab-overview/period-default/explore?entity_type=VIDEO&entity_id=bsH-vBGNERE&time_period=since_publish%2Ctime_period_unit_nth_days%2C1&explore_type=TABLE_AND_CHART&metric=AVERAGE_WATCH_PERCENTAGE&granularity=DAY&t_metrics=AVERAGE_WATCH_PERCENTAGE&dimension=VIDEO&o_column=VIDEO&o_direction=ANALYTICS_ORDER_DIRECTION_ASC&comparison_entity_id=j5lku3LYoK4&comparison_time_period=since_publish%2Ctime_period_unit_nth_days%2C1&comparison_entity_type=VIDEO&comparison_type=CONTENT_AND_CHANNEL"
+            }
+          ]
+        },
+        {
               "label": "🎵 Audio", 
               "url": "5_Symbols/production/preprod/research/audio.html",
               "description": "Voiceovers, background music, and sound effects for video modules."
@@ -208,6 +217,10 @@
             {
               "label": "4. 🎬 Lower Thirds Manager",
               "url": "5_Symbols/production/postprod/lower_thirds.html"
+            },
+            {
+              "label": "5. ✅ Post Production Checklist",
+              "url": "5_Symbols/production/postprod/post_production_checklist.html"
             }
           ]
         },
@@ -571,6 +584,10 @@
     {
       "label": "   ├─ 🔍 Gap Analysis",
       "url": "markdown_renderer.html?file=6_Semblance/logs/gap_analysis.md"
+    },
+    {
+      "label": "   ├─ 🧪 Fly vs GH Pages Sync Issue",
+      "url": "markdown_renderer.html?file=6_Semblance/sync_issue_fly_vs_ghpages.md"
     },
     {
       "label": "   ├─ 📝 Lessons Learned",

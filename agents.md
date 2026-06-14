@@ -94,7 +94,8 @@ This document defines how AI agents interact with the **Claude AI Certification 
     - Updated `5_Symbols/pipeline.html` to reference the renamed high-fidelity assets.
     - Implemented a glassmorphic modal overlay in `pipeline.html` with zoom-in functionality and click-to-close behavior.
     - Verified all 11 stages render correctly with high-fidelity images and functional interactive previews.
-- **Status:** IMPLEMENTED, COMMITTED, PUSHED.
+    - **Created `6_Semblance/sync_issue_fly_vs_ghpages.md` to analyze why updates are visible on GitHub Pages but stale on Fly.io.**
+- **Status:** IMPLEMENTED, COMMITTED, PUSHED (Analyzing Fly.io stale deployment).
 
 - **Task:** 🎬 Implement Global Reversal Recorder and Shot List Integration.
 - **Action:**
