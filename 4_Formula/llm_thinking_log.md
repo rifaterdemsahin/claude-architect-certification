@@ -1,5 +1,22 @@
 # LLM Thinking Log
 
+## 2026-06-15 — 🔗 Add Copy Sentence Link & Display Unlinked Images
+
+### 🎯 Objective
+1. Add a copy link button (🔗) next to each sentence in the script editor to copy a direct link pointing to that sentence row (`#sent-row-{rid}`).
+2. On page load, if a sentence row hash is present in the URL, automatically scroll to and highlight that sentence.
+3. In the sentence-image linking modal, display a grid of existing research images that are NOT linked to the current sentence.
+4. Add a link button (➕) next to or on each unlinked image inside the modal to link it to the current sentence.
+
+### 📐 Design & Implementation Plan
+1. **Modify `5_Symbols/production/preprod/scripts/index.html`**:
+   - **Styles**: Add `.btn-sent-link` and `.sent-img-thumb .img-add` styles.
+   - **Sentence Rows**: In `renderSentencesPanel`, append the copy link button `<button class="btn-sent-link" onclick="copySentenceLink('${rid}', ${s.id})" title="Copy link to this sentence">🔗</button>` to the `.sent-row-btns` block.
+   - **Copy Link JS**: Implement `window.copySentenceLink(rid, sentenceId)` which updates `location.hash` and copies the full URL to the clipboard.
+   - **Hash Scroll JS**: In `hydrateSentences`, add a check to scroll to and highlight the sentence row when matching `location.hash`.
+   - **Modal HTML**: In the `#img-modal` layout, add the `#img-modal-unlinked` wrapper.
+   - **Modal JS**: Implement `refreshModalUnlinked()` and `linkExistingImageToSent(name)`. Call `refreshModalUnlinked()` from `openSentImageModal`, `linkExistingImageToSent`, `uploadAndLinkSentImage`, and `unlinkSentImage`.
+
 ## 2026-06-15 — 🐛 Fix duplicate key constraint in research relationships link
 
 ### 🎯 Objective
@@ -416,4 +433,18 @@ Fix the issue where pipeline images in `3_Simulation/generated/pipeline/` and th
 3. **Redeploy and Force Updates**:
    - Execute `flyctl deploy --ha=false --remote-only` locally to force-update the active Fly.io machines with the latest image container containing the new pipeline files and images.
 4. **Verify Outcome**:
-   - Query Fly.io directly for the updated page and image assets using `curl -I`. Verify that HTTP 200 is returned along with the correct content lengths and recent last-modified timestamps.
+    - Query Fly.io directly for the updated page and image assets using `curl -I`. Verify that HTTP 200 is returned along with the correct content lengths and recent last-modified timestamps.
+
+## 2026-06-15 — 🎨 Ways of Working Page & Pipeline Script Approach
+
+### 🎯 Objective
+Integrate the visual script table read method ("Create right, paste left, read out loud") with its associated image `gemini_imagecreate.png` into the Production Pipeline and the Preproduction menu structure.
+
+### 📐 Design & Implementation Plan
+1. **Create Ways of Working page**: Create `5_Symbols/production/preprod/ways_of_working.html` documenting the visual script table read loop and displaying the `gemini_imagecreate.png` image.
+2. **Update Planning Hub**: Add the Ways of Working page as a workflow card in `5_Symbols/production/preprod/planning.html`.
+3. **Pipeline script stage integration**: Update Stage 5 (Script) in `5_Symbols/pipeline.html` to detail the ways of working (generating images side-by-side with reading out loud) and display the `gemini_imagecreate.png` image.
+4. **Navigation menu restructuring**:
+   - Update `navigation_config.json` to change the `📋 Planning` top-level menu item to a dropdown containing the Planning Hub, Ways of Working, and all other planning sub-pages.
+   - Sync `shared/nav.js` fallback array with the same restructured Planning dropdown.
+5. **Validation**: Confirm Go compilation builds successfully.

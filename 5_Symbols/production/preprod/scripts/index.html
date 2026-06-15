@@ -402,6 +402,7 @@
     .sent-para-num { font-size: 0.6rem; font-weight: 800; color: rgba(139,92,246,0.5); min-width: 18px; text-align: center; flex-shrink: 0; padding-top: 3px; letter-spacing: 0.02em; }
     .sent-row-btns { display: flex; flex-direction: column; gap: 3px; flex-shrink: 0; }
     .btn-sent-edit   { background: rgba(139,92,246,0.08); color: #c084fc; border: 1px solid rgba(139,92,246,0.18); padding: 3px 7px; border-radius: 5px; font-size: 0.68rem; cursor: pointer; font-family: var(--font-body); line-height: 1.4; }
+    .btn-sent-link   { background: rgba(59,130,246,0.08); color: #60a5fa; border: 1px solid rgba(59,130,246,0.18); padding: 3px 7px; border-radius: 5px; font-size: 0.68rem; cursor: pointer; font-family: var(--font-body); line-height: 1.4; }
     .btn-sent-delete { background: rgba(239,68,68,0.08); color: #f87171; border: 1px solid rgba(239,68,68,0.15); padding: 3px 7px; border-radius: 5px; font-size: 0.68rem; cursor: pointer; font-family: var(--font-body); line-height: 1.4; }
     .sent-edit-form  { background: rgba(0,0,0,0.25); border-radius: 8px; padding: 10px; margin-top: 6px; width: 100%; }
     .sent-edit-row   { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
@@ -507,7 +508,16 @@
     .sent-img-thumb { position: relative; width: 56px; height: 56px; border-radius: 7px; overflow: hidden; border: 1px solid rgba(255,255,255,0.12); background: rgba(0,0,0,0.3); cursor: pointer; flex-shrink: 0; }
     .sent-img-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .sent-img-thumb .img-del { position: absolute; top: 1px; right: 1px; width: 16px; height: 16px; line-height: 14px; text-align: center; border-radius: 4px; background: rgba(0,0,0,0.7); color: #f87171; font-size: 0.7rem; border: none; cursor: pointer; padding: 0; opacity: 0; transition: opacity 0.15s; }
-    .sent-img-thumb:hover .img-del { opacity: 1; }
+    .sent-img-thumb .img-add { position: absolute; top: 1px; right: 1px; width: 16px; height: 16px; line-height: 14px; text-align: center; border-radius: 4px; background: rgba(0,0,0,0.7); color: #34d399; font-size: 0.7rem; border: none; cursor: pointer; padding: 0; opacity: 0; transition: opacity 0.15s; }
+    .sent-img-thumb:hover .img-del, .sent-img-thumb:hover .img-add { opacity: 1; }
+
+    /* Image Preview Modal */
+    .img-preview-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 10001; backdrop-filter: blur(6px); cursor: zoom-out; }
+    .img-preview-overlay.open { display: flex; }
+    .img-preview-box { max-width: 90vw; max-height: 90vh; border-radius: 14px; overflow: hidden; box-shadow: 0 24px 80px rgba(0,0,0,0.7); cursor: default; position: relative; }
+    .img-preview-box img { display: block; max-width: 90vw; max-height: 90vh; object-fit: contain; border-radius: 14px; }
+    .img-preview-close { position: fixed; top: 20px; right: 28px; width: 40px; height: 40px; border-radius: 50%; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.15); color: #fff; font-size: 1.4rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; z-index: 10002; }
+    .img-preview-close:hover { background: rgba(255,255,255,0.15); }
 
     /* Sentence image modal */
     .img-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.78); display: none; align-items: center; justify-content: center; z-index: 10000; backdrop-filter: blur(4px); }
@@ -1254,6 +1264,20 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
       container.innerHTML = renderSentencesPanel(sentences, fmt, dur, elementId, Number(sid) || null);
       if (wasOpen) { const d = container.querySelector('details.sentences-panel'); if (d) d.open = true; }
       loadSentImages(elementId, sentences);
+
+      // Handle scrolling to sentence hash if targeted
+      if (location.hash && location.hash.startsWith('#sent-row-')) {
+        const targetId = location.hash.slice(1);
+        const targetEl = document.getElementById(targetId);
+        if (targetEl && targetId.includes(elementId)) {
+          setTimeout(() => {
+            targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            targetEl.style.outline = '2px solid var(--accent)';
+            targetEl.style.borderRadius = '8px';
+            setTimeout(() => { targetEl.style.outline = ''; }, 3000);
+          }, 300);
+        }
+      }
     }
 
     async function rehydrateSentences(elementId) {
@@ -1363,10 +1387,28 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
       if (!box) return;
       box.innerHTML = names.map(n => `
         <div class="sent-img-thumb" title="${esc2(n)}">
-          <img src="${imgFileUrl(n)}" alt="${esc2(n)}" onclick="window.open('${imgFileUrl(n)}','_blank')">
+          <img src="${imgFileUrl(n)}" alt="${esc2(n)}" onclick="openImagePreview('${imgFileUrl(n)}','${esc2(n).replace(/'/g,"\\'")}')">
           <button class="img-del" title="Unlink image" onclick="event.stopPropagation();unlinkSentImage(${sentId},'${esc2(n).replace(/'/g,"\\'")}','${rid}')">✕</button>
         </div>`).join('');
     }
+
+    // Copy Link function
+    window.copySentenceLink = function(rid, sentenceId) {
+      const url = new URL(window.location.href);
+      url.hash = `sent-row-${rid}`;
+      navigator.clipboard.writeText(url.toString())
+        .then(() => {
+          const btn = document.querySelector(`#sent-view-${rid} .btn-sent-link`);
+          if (btn) {
+            const orig = btn.textContent;
+            btn.textContent = '✅';
+            setTimeout(() => { btn.textContent = orig; }, 1500);
+          }
+        })
+        .catch(err => {
+          console.error('Failed to copy link: ', err);
+        });
+    };
 
     // Modal state
     let imgModalSentId = null;
@@ -1387,6 +1429,7 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
       document.getElementById('btn-img-upload').disabled = true;
       document.getElementById('img-modal').classList.add('open');
       refreshModalLinked();
+      refreshModalUnlinked();
     };
 
     window.closeSentImageModal = function() {
@@ -1445,11 +1488,32 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
         document.getElementById('img-paste-preview').innerHTML = '';
         document.getElementById('img-paste-zone').style.display = 'block';
         await refreshModalLinked();
+        await refreshModalUnlinked();
         await refreshSentThumbs(imgModalSentId, imgModalRid);
       } catch (err) {
         console.error(err);
         setImgStatus('err', '❌ ' + err.message);
         btn.disabled = false;
+      }
+    };
+
+    window.linkExistingImageToSent = async function(name) {
+      if (imgModalSentId == null) return;
+      try {
+        setImgStatus('busy', '🔗 Linking image…');
+        const link = await fetch(`${SUPABASE_URL}/rest/v1/research_relationships`, {
+          method: 'POST',
+          headers: sentAuthHeaders(),
+          body: JSON.stringify({ container: IMG_CONTAINER, item_name: name, sentence_id: imgModalSentId })
+        });
+        if (!link.ok) throw new Error(`Link ${link.status}: ${(await link.text()).slice(0, 160)}`);
+        setImgStatus('ok', '✅ Image linked');
+        await refreshModalLinked();
+        await refreshModalUnlinked();
+        await refreshSentThumbs(imgModalSentId, imgModalRid);
+      } catch (err) {
+        console.error(err);
+        setImgStatus('err', '❌ ' + err.message);
       }
     };
 
@@ -1464,6 +1528,7 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
         await refreshSentThumbs(sentId, rid);
         if (document.getElementById('img-modal').classList.contains('open') && imgModalSentId === sentId) {
           await refreshModalLinked();
+          await refreshModalUnlinked();
         }
       } catch (err) { alert('Unlink failed: ' + err.message); }
     };
@@ -1493,9 +1558,44 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
       wrap.style.display = 'block';
       grid.innerHTML = names.map(n => `
         <div class="sent-img-thumb" title="${esc2(n)}">
-          <img src="${imgFileUrl(n)}" alt="${esc2(n)}" onclick="window.open('${imgFileUrl(n)}','_blank')">
+          <img src="${imgFileUrl(n)}" alt="${esc2(n)}" onclick="openImagePreview('${imgFileUrl(n)}','${esc2(n).replace(/'/g,"\\'")}')">
           <button class="img-del" title="Unlink image" onclick="event.stopPropagation();unlinkSentImage(${imgModalSentId},'${esc2(n).replace(/'/g,"\\'")}','${imgModalRid}')">✕</button>
         </div>`).join('');
+    }
+
+    async function refreshModalUnlinked() {
+      const grid = document.getElementById('img-modal-unlinked-grid');
+      const wrap = document.getElementById('img-modal-unlinked');
+      if (!grid || !wrap) return;
+      grid.innerHTML = '<span style="color:var(--text-muted);font-size:0.78rem;">Loading available images…</span>';
+      
+      try {
+        const filesRes = await fetch(`/api/research/files?container=${IMG_CONTAINER}`);
+        const allFiles = filesRes.ok ? await filesRes.json() : [];
+        const imagesOnly = (allFiles || []).filter(f => !f.name.startsWith('__thumb__'));
+        
+        const linkedNames = await fetchSentImageNames(imgModalSentId);
+        const linkedSet = new Set(linkedNames);
+        
+        const unlinkedImages = imagesOnly.filter(f => !linkedSet.has(f.name));
+        
+        if (!unlinkedImages.length) {
+          wrap.style.display = 'none';
+          return;
+        }
+        wrap.style.display = 'block';
+        grid.innerHTML = unlinkedImages.map(f => {
+          const n = f.name;
+          return `
+            <div class="sent-img-thumb" title="${esc2(n)}">
+              <img src="${imgFileUrl(n)}" alt="${esc2(n)}" onclick="openImagePreview('${imgFileUrl(n)}','${esc2(n).replace(/'/g,"\\'")}')">
+              <button class="img-add" title="Link to sentence" onclick="event.stopPropagation();linkExistingImageToSent('${esc2(n).replace(/'/g,"\\SHA_QUOTE")}')">➕</button>
+            </div>`.replace(/SHA_QUOTE/g, "\\'");
+        }).join('');
+      } catch (err) {
+        console.error(err);
+        grid.innerHTML = `<span style="color:var(--text-danger);font-size:0.78rem;">Failed to load available images.</span>`;
+      }
     }
 
     // Wire up modal paste / browse / drop once the DOM is ready.
@@ -1935,6 +2035,28 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
     window.closeResearchNoteModal = function() {
       document.getElementById('research-note-modal').style.display = 'none';
     };
+
+    // ── Image Preview Modal ──────────────────────────────────────────────────────
+    window.openImagePreview = function(url, name) {
+      const overlay = document.getElementById('img-preview-overlay');
+      const img = overlay.querySelector('img');
+      img.src = url;
+      img.alt = name || 'Image preview';
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    };
+
+    window.closeImagePreview = function() {
+      const overlay = document.getElementById('img-preview-overlay');
+      overlay.classList.remove('open');
+      document.body.style.overflow = '';
+    };
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && document.getElementById('img-preview-overlay').classList.contains('open')) {
+        closeImagePreview();
+      }
+    });
   </script>
 
   <!-- Research Note Modal -->
@@ -1971,6 +2093,18 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
         <div class="img-modal-linked-label">🔗 Linked images</div>
         <div class="img-modal-linked-grid" id="img-modal-linked-grid"></div>
       </div>
+      <div class="img-modal-linked" id="img-modal-unlinked" style="display:none; margin-top: 18px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.08);">
+        <div class="img-modal-linked-label">🖼 Available Images (Unlinked)</div>
+        <div class="img-modal-linked-grid" id="img-modal-unlinked-grid"></div>
+      </div>
+    </div>
+  </div>
+
+<!-- Image Preview Modal -->
+  <div class="img-preview-overlay" id="img-preview-overlay" onclick="closeImagePreview()">
+    <button class="img-preview-close" onclick="event.stopPropagation();closeImagePreview()">✕</button>
+    <div class="img-preview-box" onclick="event.stopPropagation()">
+      <img src="" alt="Preview">
     </div>
   </div>
 
