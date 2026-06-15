@@ -325,6 +325,7 @@
       <div class="toolbar">
         <button class="btn btn-secondary btn-sm" onclick="parseSentences()">🔍 Parse Sentences</button>
         <button class="btn btn-success" onclick="generateAll()" id="generate-all-btn" disabled>🚀 Generate All Images</button>
+        <button class="btn btn-secondary btn-sm" onclick="backfillThumbnails()" id="backfill-btn" title="Generate thumbnails for all previously saved images and update Supabase">🖼️ Backfill Thumbnails</button>
         <span class="stats" id="sentence-stats">0 sentences</span>
       </div>
       <div class="progress-bar-wrap" id="progress-wrap">
@@ -710,6 +711,26 @@
       const done = sentences.filter(s => s.status === 'done').length;
       const failed = sentences.filter(s => s.status === 'error').length;
       toast(`Done: ${done} generated, ${failed} failed`, failed > 0 ? 'error' : 'success');
+    }
+
+    async function backfillThumbnails() {
+      const btn = document.getElementById('backfill-btn');
+      btn.disabled = true;
+      const orig = btn.textContent;
+      btn.textContent = '⏳ Backfilling...';
+      try {
+        const res = await fetch('/api/images/backfill-thumbnails', { method: 'POST' });
+        if (!res.ok) throw new Error('Backfill failed: ' + res.statusText);
+        const data = await res.json();
+        toast(`Backfill: ${data.processed} thumbnails created, ${data.failed} failed (of ${data.candidates} candidates)`,
+          data.failed > 0 ? 'error' : 'success');
+        if (data.errors && data.errors.length) console.warn('backfill errors:', data.errors);
+      } catch (err) {
+        toast(err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = orig;
+      }
     }
 
     function updateProgress() {

@@ -379,7 +379,7 @@ async function loadSupabaseData() {
   ] = await Promise.all([
     client.from('videos').select('id, title, video_number, modules(module_number)').order('id'),
     client.from('research_relationships').select('*'),
-    client.from('sentences').select('id, sentence_type, section, sentence_text, script_id, scripts(video_id, videos(video_number, modules(module_number)))').order('sort_order')
+    client.from('sentences').select('id, sentence_type, section, sentence_text, script_id, scripts(video_id)').order('sort_order')
   ]);
 
   if (err1) console.error('Error loading course videos:', err1);
@@ -391,22 +391,13 @@ async function loadSupabaseData() {
   if (err3) console.error('Error loading sentences:', err3);
   else {
     allSentences = (sents || []).map(s => {
-      let courseVideoId = null;
-      if (s.scripts && s.scripts.videos) {
-        const vNum = s.scripts.videos.video_number;
-        const mNum = s.scripts.videos.modules ? s.scripts.videos.modules.module_number : null;
-        const match = allVideos.find(cv => cv.video_number === vNum && cv.modules && cv.modules.module_number === mNum);
-        if (match) {
-          courseVideoId = match.id;
-        }
-      }
       return {
         id: s.id,
         sentence_type: s.sentence_type,
         section: s.section,
         sentence_text: s.sentence_text,
         script_id: s.script_id,
-        courseVideoId: courseVideoId
+        video_id: s.scripts ? s.scripts.video_id : null
       };
     });
   }
@@ -482,12 +473,12 @@ function updateAllRelationsUI() {
     let placeholderText = '-- choose sentence --';
 
     if (urlVideoId) {
-      filtered = allSentences.filter(s => s.courseVideoId === urlVideoId);
+      filtered = allSentences.filter(s => s.video_id === urlVideoId);
       if (filtered.length === 0) {
         placeholderText = '-- no sentences for this video --';
       }
     } else if (linkedVideoIds.length > 0) {
-      filtered = allSentences.filter(s => linkedVideoIds.includes(s.courseVideoId));
+      filtered = allSentences.filter(s => linkedVideoIds.includes(s.video_id));
       if (filtered.length === 0) {
         placeholderText = '-- no sentences for linked video --';
       }

@@ -203,7 +203,7 @@ async function loadSupabaseData() {
   ] = await Promise.all([
     client.from('videos').select('id, title, video_number, modules(module_number)').order('id'),
     client.from('research_relationships').select('*'),
-    client.from('sentences').select('id, sentence_type, section, sentence_text, script_id').order('sort_order')
+    client.from('sentences').select('id, sentence_type, section, sentence_text, script_id, scripts(video_id)').order('sort_order')
   ]);
 
   if (err1) console.error('Error loading course videos:', err1);
@@ -213,7 +213,18 @@ async function loadSupabaseData() {
   else allRelationships = rels || [];
 
   if (err3) console.error('Error loading sentences:', err3);
-  else allSentences = sents || [];
+  else {
+    allSentences = (sents || []).map(s => {
+      return {
+        id: s.id,
+        sentence_type: s.sentence_type,
+        section: s.section,
+        sentence_text: s.sentence_text,
+        script_id: s.script_id,
+        video_id: s.scripts ? s.scripts.video_id : null
+      };
+    });
+  }
 
   updateAllRelationsUI();
 }
@@ -238,7 +249,7 @@ function renderRelationsMarkup(container, fileName) {
 
       <div style="margin-top:6px; padding-top:5px; border-top:1px solid rgba(255,255,255,0.04); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:4px;">
         <span style="font-size:0.7rem; font-weight:bold; color:var(--muted);">📋 Link to Sentence:</span>
-        <select id="${sentDropId}" onchange="linkAssetToSentence('${container}', '${safeFile}', this)" style="background:rgba(255,255,255,0.08); border:1px solid rgba(59,130,246,0.3); border-radius:4px; color:var(--text); font-size:0.65rem; padding:1px 3px; outline:none; max-width: 140px; cursor:pointer;">
+        <select id="${sentDropId}" data-container="${container}" data-name="${fileName}" onchange="linkAssetToSentence('${container}', '${safeFile}', this)" style="background:rgba(255,255,255,0.08); border:1px solid rgba(59,130,246,0.3); border-radius:4px; color:var(--text); font-size:0.65rem; padding:1px 3px; outline:none; max-width: 140px; cursor:pointer;">
           <option value="">-- choose sentence --</option>
         </select>
       </div>
@@ -271,7 +282,37 @@ function updateAllRelationsUI() {
   // Sentence dropdowns
   document.querySelectorAll('select[id^="sent-drop-"]').forEach(select => {
     const currentVal = select.value;
-    const sentenceOptions = allSentences.map(s => {
+    const container = select.dataset.container;
+    const name = select.dataset.name;
+
+    // Find linked videos for this item
+    const linkedVideoRels = allRelationships.filter(r => r.container === container && r.item_name === name && r.video_id != null);
+    const linkedVideoIds = linkedVideoRels.map(r => r.video_id);
+
+    // Also consider URL parameters if active
+    const params = new URLSearchParams(location.search);
+    const urlVideoId = params.get('video') ? parseInt(params.get('video'), 10) : null;
+
+    let filtered = allSentences;
+    let placeholderText = '-- choose sentence --';
+
+    if (urlVideoId) {
+      filtered = allSentences.filter(s => s.video_id === urlVideoId);
+      if (filtered.length === 0) {
+        placeholderText = '-- no sentences for this video --';
+      }
+    } else if (linkedVideoIds.length > 0) {
+      filtered = allSentences.filter(s => linkedVideoIds.includes(s.video_id));
+      if (filtered.length === 0) {
+        placeholderText = '-- no sentences for linked video --';
+      }
+    } else {
+      // If no video is linked, don't show any sentences to choose from
+      filtered = [];
+      placeholderText = '-- link video first --';
+    }
+
+    const sentenceOptions = filtered.map(s => {
       const preview = s.sentence_text.length > 48 ? s.sentence_text.slice(0, 48) + '…' : s.sentence_text;
       return {
         id: s.id,
@@ -280,7 +321,7 @@ function updateAllRelationsUI() {
     });
     sentenceOptions.sort((a, b) => a.text.localeCompare(b.text));
 
-    select.innerHTML = '<option value="">-- choose sentence --</option>' + sentenceOptions.map(o => {
+    select.innerHTML = `<option value="">${placeholderText}</option>` + sentenceOptions.map(o => {
       return `<option value="${o.id}">${o.text}</option>`;
     }).join('');
     select.value = currentVal;
