@@ -94,4 +94,6 @@ Lesson captured in lessons_learned.md
 [2026-06-14] [6_Semblance] [APPLIED] — Accessibility permissions granted; osascript automation for VS Code terminal successfully executed.
 [2026-06-14] 🛠 5_Symbols [APPLIED] — Repointed research_relationships.video_id FK to videos(id) (migration_research_rel_repoint_videos.sql); switched all research hub pages from course_videos/course_modules to videos/modules
 [2026-06-14] [5_Symbols/preprod] [APPLIED] — Created scaffolding_risk.md risk analysis under Preprod; added Risk category and Scaffolding Risk menu items to navigation_config.json and fallbacks in index.html, home.html, and markdown_renderer.html.
+[2026-06-15] [5_Symbols/research] [APPLIED] — Added client-side exists check using `allRelationships` cache in linkAssetToVideo and linkAssetToSentence functions in index.html, audio.html, images.html, notes.html, and videos.html to prevent duplicate key constraint violations in research_relationships.
+
 

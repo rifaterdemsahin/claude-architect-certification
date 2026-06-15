@@ -147,10 +147,15 @@ function setStatus(ok) {
 function loadGallery() {
   fetch('/api/research/files?container=' + CONTAINER)
     .then(r => r.json())
-    .then(files => {
+    .then(allFiles => {
       const gallery = document.getElementById('gallery');
+      // Separate auto-generated thumbnails from the real items.
+      const thumbSet = new Set(
+        (allFiles || []).filter(f => f.name.startsWith(THUMB_PREFIX)).map(f => f.name)
+      );
+      const files = (allFiles || []).filter(f => !f.name.startsWith(THUMB_PREFIX));
       document.getElementById('count').textContent = '(' + files.length + ')';
-      if (!files || files.length === 0) {
+      if (files.length === 0) {
         gallery.innerHTML = '<div class="empty-state">No images yet — upload one above.</div>';
         return;
       }
@@ -159,11 +164,18 @@ function loadGallery() {
         const card = document.createElement('div');
         card.className = 'img-card';
         const isImg = /^image\//i.test(f.contentType);
-        const imgUrl = `/api/research/file?container=${CONTAINER}&name=${encodeURIComponent(f.name)}`;
+        const fileUrl = `/api/research/file?container=${CONTAINER}&name=${encodeURIComponent(f.name)}`;
+        // Use the auto-generated thumbnail for the grid when available; the
+        // lightbox always opens the full-resolution original.
+        const thumbName = THUMB_PREFIX + f.name;
+        const thumbUrl = thumbSet.has(thumbName)
+          ? `/api/research/file?container=${CONTAINER}&name=${encodeURIComponent(thumbName)}`
+          : fileUrl;
+        const imgUrl = fileUrl;
         const relMarkup = renderRelationsMarkup(CONTAINER, f.name);
         card.innerHTML = `
           ${isImg
-            ? `<img class="img-thumb" src="${imgUrl}" alt="${f.name}" loading="lazy" onclick="openLightbox('${imgUrl.replace(/'/g,"\\'")}','${f.name.replace(/'/g,"\\'")}' )">`
+            ? `<img class="img-thumb" src="${thumbUrl}" alt="${f.name}" loading="lazy" onclick="openLightbox('${imgUrl.replace(/'/g,"\\'")}','${f.name.replace(/'/g,"\\'")}' )">`
             : `<div class="img-thumb-placeholder" style="cursor:zoom-in;" onclick="openLightbox('${imgUrl.replace(/'/g,"\\'")}','${f.name.replace(/'/g,"\\'")}')">🖼</div>`}
           <div class="img-info">
             <div class="img-name" title="${f.name}">${f.name}</div>
@@ -183,6 +195,40 @@ function loadGallery() {
     });
 }
 
+const THUMB_PREFIX = '__thumb__';
+const THUMB_MAX = 320; // longest edge, px
+
+// Draw an image file onto a canvas resized to THUMB_MAX and return a JPEG Blob.
+// Resolves null for non-raster / unsupported files so the caller falls back to
+// the full image as its own thumbnail.
+function makeThumbnail(file) {
+  return new Promise(resolve => {
+    if (!/^image\//i.test(file.type) || /svg/i.test(file.type)) { resolve(null); return; }
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      try {
+        const scale = Math.min(1, THUMB_MAX / Math.max(img.width, img.height));
+        const w = Math.max(1, Math.round(img.width * scale));
+        const h = Math.max(1, Math.round(img.height * scale));
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        canvas.toBlob(b => { URL.revokeObjectURL(url); resolve(b); }, 'image/jpeg', 0.82);
+      } catch (e) { URL.revokeObjectURL(url); resolve(null); }
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); resolve(null); };
+    img.src = url;
+  });
+}
+
+function uploadOne(file, name) {
+  const fd = new FormData();
+  fd.append('file', name ? new File([file], name, { type: file.type }) : file);
+  return fetch('/api/research/upload?container=' + CONTAINER, { method: 'POST', body: fd })
+    .then(r => r.ok ? r.json() : r.text().then(t => Promise.reject(t)));
+}
+
 function uploadFiles(files) {
   const progressWrap = document.getElementById('progress-wrap');
   const progressFill = document.getElementById('progress-fill');
@@ -191,18 +237,30 @@ function uploadFiles(files) {
   progressWrap.style.display = 'block';
   progressFill.style.width = '0%';
 
-  Array.from(files).reduce((chain, file) => chain.then(() => {
+  Array.from(files).reduce((chain, file) => chain.then(async () => {
     progressLabel.textContent = `Uploading ${file.name} (${done+1}/${total})…`;
-    const fd = new FormData();
-    fd.append('file', file);
-    return fetch('/api/research/upload?container=' + CONTAINER, { method: 'POST', body: fd })
-      .then(r => r.ok ? r.json() : r.text().then(t => Promise.reject(t)))
-      .then(() => {
-        done++;
-        progressFill.style.width = Math.round(done/total*100) + '%';
-        toast('Uploaded: ' + file.name, 'success');
-      })
-      .catch(e => toast('Upload failed: ' + e, 'error'));
+    try {
+      // 1. Upload the original blob.
+      await uploadOne(file);
+
+      // 2. Auto-generate + upload a thumbnail (best-effort).
+      let thumbName = null;
+      const thumbBlob = await makeThumbnail(file);
+      if (thumbBlob) {
+        thumbName = THUMB_PREFIX + file.name;
+        try { await uploadOne(thumbBlob, thumbName); }
+        catch (e) { console.warn('Thumbnail upload failed:', e); thumbName = null; }
+      }
+
+      // 3. Record the reference in Supabase (non-fatal).
+      recordAsset(file.name, thumbName, file.type, file.size);
+
+      done++;
+      progressFill.style.width = Math.round(done/total*100) + '%';
+      toast('Uploaded: ' + file.name, 'success');
+    } catch (e) {
+      toast('Upload failed: ' + e, 'error');
+    }
   }), Promise.resolve())
   .then(() => {
     setTimeout(() => { progressWrap.style.display = 'none'; }, 1200);
@@ -213,7 +271,15 @@ function uploadFiles(files) {
 function deleteFile(name) {
   if (!confirm('Delete ' + name + '?')) return;
   fetch('/api/research/file?container=' + CONTAINER + '&name=' + encodeURIComponent(name), { method: 'DELETE' })
-    .then(r => { if (r.ok || r.status === 204) { toast('Deleted: ' + name, 'success'); loadGallery(); } else toast('Delete failed', 'error'); })
+    .then(r => {
+      if (r.ok || r.status === 204) {
+        toast('Deleted: ' + name, 'success');
+        // Best-effort cleanup of the auto-generated thumbnail and the Supabase record.
+        fetch('/api/research/file?container=' + CONTAINER + '&name=' + encodeURIComponent(THUMB_PREFIX + name), { method: 'DELETE' }).catch(() => {});
+        forgetAsset(name);
+        loadGallery();
+      } else toast('Delete failed', 'error');
+    })
     .catch(e => toast('Delete error: ' + e.message, 'error'));
 }
 
@@ -281,6 +347,29 @@ const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 let allVideos = [];
 let allRelationships = [];
 let allSentences = [];
+
+// Record (upsert) a reference to an uploaded asset + its thumbnail in Supabase.
+// Non-fatal: a missing table or RLS issue only logs a warning so uploads still work.
+async function recordAsset(itemName, thumbName, contentType, sizeBytes) {
+  try {
+    const { error } = await client.from('research_assets').upsert({
+      container: CONTAINER,
+      item_name: itemName,
+      thumb_name: thumbName,
+      content_type: contentType || null,
+      size_bytes: sizeBytes || null,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'container,item_name' });
+    if (error) console.warn('research_assets upsert failed:', error.message);
+  } catch (e) { console.warn('research_assets upsert error:', e); }
+}
+
+// Remove the Supabase reference when an asset is deleted (non-fatal).
+async function forgetAsset(itemName) {
+  try {
+    await client.from('research_assets').delete().eq('container', CONTAINER).eq('item_name', itemName);
+  } catch (e) { console.warn('research_assets delete error:', e); }
+}
 
 async function loadSupabaseData() {
   const [
@@ -467,6 +556,12 @@ function updateAllRelationsUI() {
 async function linkAssetToVideo(container, itemName, select) {
   const videoId = parseInt(select.value, 10);
   if (isNaN(videoId)) return;
+  const exists = allRelationships.some(r => r.container === container && r.item_name === itemName && r.video_id === videoId);
+  if (exists) {
+    alert('This asset is already linked to this video.');
+    select.value = "";
+    return;
+  }
   const { error } = await client.from('research_relationships').insert({ container, item_name: itemName, video_id: videoId });
   if (error) alert('Link failed: ' + error.message);
   else { allRelationships.push({ container, item_name: itemName, video_id: videoId }); updateAllRelationsUI(); }
@@ -483,6 +578,12 @@ async function unlinkAssetFromVideo(container, itemName, videoId, e) {
 async function linkAssetToSentence(container, itemName, select) {
   const sentenceId = parseInt(select.value, 10);
   if (isNaN(sentenceId)) return;
+  const exists = allRelationships.some(r => r.container === container && r.item_name === itemName && r.sentence_id === sentenceId);
+  if (exists) {
+    alert('This asset is already linked to this sentence.');
+    select.value = "";
+    return;
+  }
   const { data, error } = await client.from('research_relationships').insert({ container, item_name: itemName, video_id: null, sentence_id: sentenceId }).select();
   if (error) alert('Link failed: ' + error.message);
   else { allRelationships.push(...(data || [{ container, item_name: itemName, sentence_id: sentenceId }])); updateAllRelationsUI(); }

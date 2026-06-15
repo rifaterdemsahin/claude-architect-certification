@@ -330,6 +330,12 @@ function updateAllRelationsUI() {
 async function linkAssetToVideo(container, itemName, select) {
   const videoId = parseInt(select.value, 10);
   if (isNaN(videoId)) return;
+  const exists = allRelationships.some(r => r.container === container && r.item_name === itemName && r.video_id === videoId);
+  if (exists) {
+    alert('This asset is already linked to this video.');
+    select.value = "";
+    return;
+  }
   const { error } = await client.from('research_relationships').insert({ container, item_name: itemName, video_id: videoId });
   if (error) alert('Link failed: ' + error.message);
   else { allRelationships.push({ container, item_name: itemName, video_id: videoId }); updateAllRelationsUI(); }
@@ -346,6 +352,12 @@ async function unlinkAssetFromVideo(container, itemName, videoId, e) {
 async function linkAssetToSentence(container, itemName, select) {
   const sentenceId = parseInt(select.value, 10);
   if (isNaN(sentenceId)) return;
+  const exists = allRelationships.some(r => r.container === container && r.item_name === itemName && r.sentence_id === sentenceId);
+  if (exists) {
+    alert('This asset is already linked to this sentence.');
+    select.value = "";
+    return;
+  }
   const { data, error } = await client.from('research_relationships').insert({ container, item_name: itemName, video_id: null, sentence_id: sentenceId }).select();
   if (error) alert('Link failed: ' + error.message);
   else { allRelationships.push(...(data || [{ container, item_name: itemName, sentence_id: sentenceId }])); updateAllRelationsUI(); }

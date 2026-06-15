@@ -1,5 +1,21 @@
 # LLM Thinking Log
 
+## 2026-06-15 — 🐛 Fix duplicate key constraint in research relationships link
+
+### 🎯 Objective
+Fix the duplicate key value violation unique constraint "research_relationships_container_item_name_video_id_key" when linking research assets to videos or sentences in `/5_Symbols/production/preprod/research/`. Log the error details and resolution into the Semblance logs.
+
+### 📐 Design & Implementation Plan
+1. **Identify Vulnerable Files**: The error happens when inserting a relationship that already exists in `research_relationships`. The files `index.html`, `audio.html`, `images.html`, `notes.html`, and `videos.html` in `/5_Symbols/production/preprod/research/` all have `linkAssetToVideo` and `linkAssetToSentence` functions.
+2. **Implement Client-Side Duplication Checks**:
+   - In `linkAssetToVideo`, query `allRelationships` to check if a relation with the same `container`, `item_name`, and `video_id` already exists. If it does, alert the user and return early without making a database call.
+   - In `linkAssetToSentence`, query `allRelationships` to check if a relation with the same `container`, `item_name`, and `sentence_id` already exists. If it does, alert the user and return early.
+3. **Log the Error & Fix**:
+   - Write error details to `6_Semblance/logs/error.log`.
+   - Send telemetry using `./6_Semblance/tools/send_error.sh` (or write to `fix.log` and error page).
+   - Write fix details to `6_Semblance/logs/fix.log`.
+4. **Validation**: Build the project using `go build ./...` and verify integrity.
+
 ## 2026-06-14 — 🌉 Project-wide: route GitHub Pages /api calls to Fly.io backend
 
 ### 🎯 Objective
