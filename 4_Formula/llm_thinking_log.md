@@ -15,6 +15,8 @@ Fix the duplicate key value violation unique constraint "research_relationships_
    - Send telemetry using `./6_Semblance/tools/send_error.sh` (or write to `fix.log` and error page).
    - Write fix details to `6_Semblance/logs/fix.log`.
 4. **Validation**: Build the project using `go build ./...` and verify integrity.
+5. **Track Supabase Database Seed / Schema**:
+   - Add/stage untracked Supabase migration, schema and seed files (`09_research_assets.sql`, `02_seed_research_relationships.sql`) and scripts/index.html modifications.
 
 ## 2026-06-14 — 🌉 Project-wide: route GitHub Pages /api calls to Fly.io backend
 
