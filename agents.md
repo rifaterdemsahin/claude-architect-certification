@@ -86,6 +86,16 @@ This document defines how AI agents interact with the **Claude AI Certification 
     - Verified all links using `test_links.py` to ensure intact references.
 - **Status:** IMPLEMENTED, COMMITTED, PUSHED.
 
+### 2026-06-15
+- **Task:** 🔗 Add Copy Sentence Link & Display Unlinked Images.
+- **Action:**
+    - Documented approach in `4_Formula/llm_thinking_log.md`.
+    - Added a permalink copy button (🔗) next to each sentence in `5_Symbols/production/preprod/scripts/index.html` allowing users to copy direct URLs to specific sentences (`#sent-row-{rid}`).
+    - Added an automatic smooth scrolling and visual highlighting check on load for targeted sentence row hashes.
+    - Integrated an "Available Images (Unlinked)" panel inside the sentence image modal.
+    - Implemented client-side logic in the modal to query `/api/research/files?container=research-images`, filter out already linked files, and present unlinked images with a one-click link button (➕) to map them to the active sentence.
+- **Status:** IMPLEMENTED, COMMITTED, PUSHED.
+
 ### 2026-06-14
 - **Task:** 🐛 Fix "double menu on top" bug at `/index.html`.
 - **Action:**
