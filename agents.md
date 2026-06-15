@@ -87,6 +87,14 @@ This document defines how AI agents interact with the **Claude AI Certification 
 - **Status:** IMPLEMENTED, COMMITTED, PUSHED.
 
 ### 2026-06-15
+- **Task:** 🎬 Add Production Doctrine Page and Link to Ways of Working Menu.
+- **Action:**
+    - Documented approach in `4_Formula/llm_thinking_log.md`.
+    - Created `5_Symbols/production/preprod/production_doctrine.html` containing the custom visual template, while loading unified scripts (`nav.js` and `debug-panel.js`).
+    - Updated `navigation_config.json` and `shared/nav.js` dropdowns to include the new page under Planning.
+    - Integrated a card for the doctrine in `planning.html` and linked it directly in the footer of `ways_of_working.html`.
+- **Status:** IMPLEMENTED, COMMITTED, PUSHED.
+
 - **Task:** 🔗 Add Copy Sentence Link & Display Unlinked Images.
 - **Action:**
     - Documented approach in `4_Formula/llm_thinking_log.md`.

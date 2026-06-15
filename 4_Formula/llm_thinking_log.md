@@ -1,5 +1,15 @@
 # LLM Thinking Log
 
+## 2026-06-15 — 🎬 Add Production Doctrine Page and Link to Ways of Working Menu
+
+### 🎯 Objective
+Create a standalone page for "Production Doctrine — The Recording Is the Process" with matching visual formatting, and add it to the Ways of Working dropdown navigation, the Planning Hub index, and the footer of the existing Ways of Working page.
+
+### 📐 Design & Implementation Plan
+1. **Create HTML**: Write the provided document to `5_Symbols/production/preprod/production_doctrine.html`, integrating shared script handles (`nav.js` and `debug-panel.js`).
+2. **Update Navigation Config**: Include "Production Doctrine" as a dropdown child of `📋 Planning` in `navigation_config.json` and `shared/nav.js`.
+3. **Update Index Links**: Add a card to the Planning Hub page (`5_Symbols/production/preprod/planning.html`) and a direct link to the footer of `ways_of_working.html`.
+
 ## 2026-06-15 — 🔗 Add Copy Sentence Link & Display Unlinked Images
 
 ### 🎯 Objective
