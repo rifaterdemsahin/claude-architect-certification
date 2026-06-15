@@ -1358,7 +1358,11 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
 
     // ── Sentence ⇄ Image linking ───────────────────────────────────────────────
     const IMG_CONTAINER = 'research-images';
+    const THUMB_PREFIX = '__thumb__';
     const imgFileUrl = (name) => `/api/research/file?container=${IMG_CONTAINER}&name=${encodeURIComponent(name)}`;
+    // Small auto-generated thumbnail for grid tiles; falls back to the full
+    // image via onerror when an image predates thumbnail generation.
+    const imgThumbUrl = (name) => `/api/research/file?container=${IMG_CONTAINER}&name=${encodeURIComponent(THUMB_PREFIX + name)}`;
 
     // Fetch all image relationships for the given sentences in one query and
     // render the thumbnails inline under each sentence row.
@@ -1387,7 +1391,7 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
       if (!box) return;
       box.innerHTML = names.map(n => `
         <div class="sent-img-thumb" title="${esc2(n)}">
-          <img src="${imgFileUrl(n)}" alt="${esc2(n)}" onclick="openImagePreview('${imgFileUrl(n)}','${esc2(n).replace(/'/g,"\\'")}')">
+          <img src="${imgThumbUrl(n)}" onerror="this.onerror=null;this.src='${imgFileUrl(n)}'" alt="${esc2(n)}" onclick="openImagePreview('${imgFileUrl(n)}','${esc2(n).replace(/'/g,"\\'")}')">
           <button class="img-del" title="Unlink image" onclick="event.stopPropagation();unlinkSentImage(${sentId},'${esc2(n).replace(/'/g,"\\'")}','${rid}')">✕</button>
         </div>`).join('');
     }
@@ -1558,7 +1562,7 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
       wrap.style.display = 'block';
       grid.innerHTML = names.map(n => `
         <div class="sent-img-thumb" title="${esc2(n)}">
-          <img src="${imgFileUrl(n)}" alt="${esc2(n)}" onclick="openImagePreview('${imgFileUrl(n)}','${esc2(n).replace(/'/g,"\\'")}')">
+          <img src="${imgThumbUrl(n)}" onerror="this.onerror=null;this.src='${imgFileUrl(n)}'" alt="${esc2(n)}" onclick="openImagePreview('${imgFileUrl(n)}','${esc2(n).replace(/'/g,"\\'")}')">
           <button class="img-del" title="Unlink image" onclick="event.stopPropagation();unlinkSentImage(${imgModalSentId},'${esc2(n).replace(/'/g,"\\'")}','${imgModalRid}')">✕</button>
         </div>`).join('');
     }
@@ -1588,7 +1592,7 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
           const n = f.name;
           return `
             <div class="sent-img-thumb" title="${esc2(n)}">
-              <img src="${imgFileUrl(n)}" alt="${esc2(n)}" onclick="openImagePreview('${imgFileUrl(n)}','${esc2(n).replace(/'/g,"\\'")}')">
+              <img src="${imgThumbUrl(n)}" onerror="this.onerror=null;this.src='${imgFileUrl(n)}'" alt="${esc2(n)}" onclick="openImagePreview('${imgFileUrl(n)}','${esc2(n).replace(/'/g,"\\'")}')">
               <button class="img-add" title="Link to sentence" onclick="event.stopPropagation();linkExistingImageToSent('${esc2(n).replace(/'/g,"\\SHA_QUOTE")}')">➕</button>
             </div>`.replace(/SHA_QUOTE/g, "\\'");
         }).join('');
