@@ -156,6 +156,7 @@
     { label: '📋 Planning', children: [
       { label: '🗂️ Planning Hub', url: '5_Symbols/production/preprod/planning.html', description: 'Critical path overview and pre-production checklists.' },
       { label: '🎨 Ways of Working', url: '5_Symbols/production/preprod/ways_of_working.html', description: 'Visual script table read method with real-time image creation.' },
+      { label: '🎬 Production Doctrine', url: '5_Symbols/production/preprod/production_doctrine.html', description: 'Operating manual and doctrine: the recording is the process.' },
       { label: '🔴 Critical Path', url: 'markdown_renderer.html?file=1_Real_Unknown/critical_task.md', description: 'Rules for shipping the course content before the platform.' },
       { label: '✅ Sanity Checklist', url: '5_Symbols/production/preprod/sanity_checklist.html', description: 'Pre-flight checks before going live.' },
       { label: '📋 Producer Checklist', url: '5_Symbols/production/preprod/producer_checklist.html', description: 'Pre-production readiness verification checklist.' },

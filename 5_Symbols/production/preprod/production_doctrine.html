@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Production Doctrine — The Recording Is the Process</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --stage:#0d1117;        /* darkened soundstage */
+    --panel:#151b24;        /* lifted surface */
+    --panel-2:#1b232e;
+    --line:#27313d;         /* hairline */
+    --chalk:#ECE7DD;        /* clapperboard chalk */
+    --slate:#8A93A0;        /* muted slate */
+    --rec:#E0533D;          /* REC light / the trap / your fantasy */
+    --tungsten:#E8B04B;     /* work light / the outcome / their fantasy */
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--stage);
+    color:var(--chalk);
+    font-family:"Inter",system-ui,sans-serif;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+    padding-top: 60px; /* Allow space for site-nav */
+  }
+
+  .wrap{max-width:1040px;margin:0 auto;padding:0 28px}
+
+  /* ---- shared type devices ---- */
+  .mono{font-family:"Space Mono",monospace}
+  .eyebrow{
+    font-family:"Space Mono",monospace;
+    font-size:.72rem;letter-spacing:.28em;text-transform:uppercase;
+    color:var(--slate);
+  }
+  .display{
+    font-family:"Anton",sans-serif;
+    text-transform:uppercase;
+    line-height:.96;letter-spacing:.005em;
+    font-weight:400;
+  }
+
+  /* ---- REC dot ---- */
+  .rec-dot{
+    display:inline-block;width:.62em;height:.62em;border-radius:50%;
+    background:var(--rec);vertical-align:middle;margin-right:.55em;
+    box-shadow:0 0 0 0 rgba(224,83,61,.55);
+    animation:pulse 1.7s ease-out infinite;
+  }
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(224,83,61,.5)}
+    70%{box-shadow:0 0 0 9px rgba(224,83,61,0)}
+    100%{box-shadow:0 0 0 0 rgba(224,83,61,0)}
+  }
+
+  /* ============ HERO ============ */
+  .hero{
+    min-height:90vh;display:flex;flex-direction:column;justify-content:center;
+    padding:96px 0 60px;position:relative;
+    background:
+      radial-gradient(120% 80% at 80% -10%, rgba(232,176,75,.10), transparent 55%),
+      radial-gradient(90% 70% at -10% 10%, rgba(224,83,61,.10), transparent 50%);
+  }
+  .hero .topline{display:flex;align-items:center;gap:14px;margin-bottom:34px;flex-wrap:wrap}
+  .hero h1{
+    font-size:clamp(2.7rem,8.2vw,6.4rem);
+    margin:6px 0 8px;
+    max-width:14ch;
+  }
+  .hero h1 .a{color:var(--rec)}
+  .hero h1 .b{color:var(--tungsten)}
+  .hero .lede{
+    font-size:clamp(1rem,1.5vw,1.18rem);
+    color:var(--slate);max-width:48ch;margin-top:22px;
+  }
+
+  /* ---- camera reversal signature ---- */
+  .signature{
+    margin-top:54px;
+    display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:18px;
+    max-width:560px;
+    perspective:900px;
+  }
+  .sig-label{font-family:"Space Mono",monospace;font-size:.78rem;letter-spacing:.18em;text-transform:uppercase}
+  .sig-label small{display:block;color:var(--slate);letter-spacing:.16em;font-size:.66rem;margin-top:4px}
+  .sig-left{text-align:right;color:var(--rec)}
+  .sig-right{text-align:left;color:var(--tungsten)}
+
+  .cam-stage{display:flex;justify-content:center}
+  .camera{
+    width:78px;height:54px;position:relative;
+    transform:rotateY(180deg);
+    transition:transform 1.4s cubic-bezier(.7,.02,.18,1);
+  }
+  .camera.facing{transform:rotateY(0deg)}
+  .cam-body{
+    position:absolute;left:8px;top:14px;width:46px;height:30px;border-radius:4px;
+    background:var(--chalk);
+  }
+  .cam-vf{position:absolute;left:18px;top:6px;width:18px;height:10px;border-radius:3px 3px 0 0;background:var(--chalk)}
+  .cam-lens{
+    position:absolute;right:6px;top:20px;width:0;height:0;
+    border-top:9px solid transparent;border-bottom:9px solid transparent;
+    border-left:16px solid var(--tungsten);
+  }
+  .cam-reel{position:absolute;left:14px;top:18px;width:11px;height:11px;border-radius:50%;border:2px solid var(--stage)}
+  .cam-reel.two{left:30px}
+
+  .scrollcue{
+    position:absolute;bottom:30px;left:28px;
+    font-family:"Space Mono",monospace;font-size:.68rem;letter-spacing:.24em;
+    color:var(--slate);text-transform:uppercase;
+  }
+
+  /* ============ SCENES ============ */
+  .scene{
+    padding:72px 0;border-top:1px solid var(--line);
+    opacity:0;transform:translateY(22px);
+    transition:opacity .7s ease,transform .7s ease;
+  }
+  .scene.in{opacity:1;transform:none}
+  .scene-head{display:flex;align-items:baseline;gap:20px;margin-bottom:26px;flex-wrap:wrap}
+  .scene-no{
+    font-family:"Space Mono",monospace;font-weight:700;
+    color:var(--tungsten);font-size:.9rem;letter-spacing:.1em;
+    border:1px solid var(--line);padding:5px 11px;border-radius:3px;
+    white-space:nowrap;
+  }
+  .scene h2{
+    font-family:"Anton",sans-serif;text-transform:uppercase;font-weight:400;
+    font-size:clamp(1.7rem,4.2vw,2.9rem);line-height:1.02;letter-spacing:.01em;
+  }
+  .scene .body{max-width:64ch;font-size:1.04rem;color:#cdd3da}
+  .scene .body strong{color:var(--chalk);font-weight:600}
+  .scene .body .red{color:var(--rec);font-weight:600}
+  .scene .body .amber{color:var(--tungsten);font-weight:600}
+  .scene .body p+p{margin-top:16px}
+
+  /* opposition device (set vs scene) */
+  .vs{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:30px}
+  .vs .card{
+    border:1px solid var(--line);border-radius:6px;padding:20px 22px;background:var(--panel);
+  }
+  .vs .card .tag{font-family:"Space Mono",monospace;font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;margin-bottom:10px}
+  .vs .card.set .tag{color:var(--rec)}
+  .vs .card.scene-card .tag{color:var(--tungsten)}
+  .vs .card p{font-size:.96rem;color:#cdd3da}
+
+  /* retention graph */
+  .graph-wrap{margin-top:30px;border:1px solid var(--line);border-radius:6px;background:var(--panel);padding:24px 22px}
+  .graph-wrap .cap{font-family:"Space Mono",monospace;font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;color:var(--slate);margin-bottom:16px}
+  svg.graph{width:100%;height:auto;display:block}
+  .diag{margin-top:20px;display:grid;gap:10px}
+  .diag .row{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:start;font-size:.95rem;color:#cdd3da}
+  .diag .row .k{font-family:"Space Mono",monospace;color:var(--tungsten);font-size:.82rem;white-space:nowrap;padding-top:1px}
+
+  /* checklist / preflight */
+  .preflight{
+    padding:80px 0 96px;border-top:1px solid var(--line);
+    opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease;
+  }
+  .preflight.in{opacity:1;transform:none}
+  .preflight h2{font-family:"Anton",sans-serif;text-transform:uppercase;font-weight:400;font-size:clamp(1.9rem,5vw,3.2rem);margin-bottom:8px}
+  .preflight .sub{color:var(--slate);font-family:"Space Mono",monospace;font-size:.74rem;letter-spacing:.2em;text-transform:uppercase;margin-bottom:30px}
+  .check{list-style:none;display:grid;gap:2px}
+  .check li{
+    display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start;
+    padding:18px 4px;border-bottom:1px solid var(--line);font-size:1.06rem;
+  }
+  .check li .box{
+    width:18px;height:18px;border:1.5px solid var(--tungsten);border-radius:3px;margin-top:5px;flex:none;
+  }
+  .finale{margin-top:54px}
+  .finale .big{
+    font-family:"Anton",sans-serif;text-transform:uppercase;font-weight:400;
+    font-size:clamp(2rem,6vw,4rem);line-height:.98;
+  }
+  .finale .big .b{color:var(--tungsten)}
+  footer{border-top:1px solid var(--line);padding:30px 0 60px;color:var(--slate);font-family:"Space Mono",monospace;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase}
+
+  a:focus-visible,li:focus-visible{outline:2px solid var(--tungsten);outline-offset:3px}
+
+  @media(max-width:640px){
+    .vs{grid-template-columns:1fr}
+    .signature{grid-template-columns:1fr;gap:10px;text-align:center}
+    .sig-left,.sig-right{text-align:center}
+    .cam-stage{margin:6px 0}
+    .scrollcue{display:none}
+  }
+
+  @media(prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important}
+    .camera{transform:rotateY(0deg)}
+    .scene,.preflight{opacity:1;transform:none}
+  }
+</style>
+<script src="../../../shared/nav.js"></script>
+<script src="../../../shared/seo.js" defer></script>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="topline">
+      <span class="eyebrow"><span class="rec-dot"></span>DeliveryPilot · Production Doctrine</span>
+      <span class="eyebrow" style="opacity:.6">v1 — operating manual</span>
+    </div>
+    <h1 class="display">The recording is the <span class="b">process.</span> Everything else is <span class="a">set dressing.</span></h1>
+    <p class="lede">One page to read before you sit down to record. It exists for a single reason: to turn the camera away from your competence and toward the viewer's outcome.</p>
+
+    <div class="signature" aria-hidden="true">
+      <div class="sig-left sig-label">The set<small>your capability</small></div>
+      <div class="cam-stage">
+        <div class="camera" id="camera">
+          <div class="cam-body"></div>
+          <div class="cam-vf"></div>
+          <div class="cam-reel"></div>
+          <div class="cam-reel two"></div>
+          <div class="cam-lens"></div>
+        </div>
+      </div>
+      <div class="sig-right sig-label">The scene<small>their outcome</small></div>
+    </div>
+  </div>
+  <div class="scrollcue">↓ scroll — six scenes</div>
+</header>
+
+<main class="wrap">
+
+  <section class="scene">
+    <div class="scene-head">
+      <span class="scene-no">SC.01</span>
+      <h2>Two loops, one reward</h2>
+    </div>
+    <div class="body">
+      <p><strong>Building is a closed loop.</strong> You write the thing, it runs, you get an instant, unambiguous "you're good at this." No waiting, no audience, no doubt. <strong>Recording is an open loop:</strong> the first take is rough and the feedback is delayed and uncertain.</p>
+      <p>The same split shows up in the numbers. <span class="red">Likes</span> are the closed loop — cheap, early, affirming. <span class="amber">Retention</span> is the open loop — the signal that actually tells you whether the thing works. You keep collecting the reward that feels good and under-weighting the one that's true.</p>
+      <p>The fix isn't motivation. It's moving the reward: make <strong>finishing the take</strong> the hit, not the take being good.</p>
+    </div>
+  </section>
+
+  <section class="scene">
+    <div class="scene-head">
+      <span class="scene-no">SC.02</span>
+      <h2>Demonstration or transfer</h2>
+    </div>
+    <div class="body">
+      <p>Every video does one of two things. It <span class="red">demonstrates your competence</span> — "here's my pipeline, here's everything I built" — or it <span class="amber">transfers capability</span> to the person watching. The set tour, or the scene.</p>
+      <p>Viewers retain when the video is about <strong>them getting something</strong>, not about you having done something. A builder records the way a builder thinks: comprehensive, sequential, complete. Completeness is exactly what kills retention.</p>
+    </div>
+    <div class="vs" aria-hidden="false">
+      <div class="card set">
+        <div class="tag">The set tour</div>
+        <p>Context that mattered to you while making it. Config walkthroughs. The complete version. The viewer didn't come for this.</p>
+      </div>
+      <div class="card scene-card">
+        <div class="tag">The scene</div>
+        <p>The specific thing they can do by the end. The payoff the title promised. The reason they pressed play.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="scene">
+    <div class="scene-head">
+      <span class="scene-no">SC.03</span>
+      <h2>Whose fantasy</h2>
+    </div>
+    <div class="body">
+      <p>You don't reverse the audience's desire. You reverse <strong>which way the camera points.</strong></p>
+      <p>Right now it points at <span class="red">your fantasy</span> — "I am competent, look what I built." Production turns it 180° toward <span class="amber">their fantasy</span> — the version of themselves they're reaching for: "I can build like this, I can have this new kind of work."</p>
+      <p>Same footage. Same capability. Camera turned around. Your competence becomes the vehicle, never the subject.</p>
+    </div>
+  </section>
+
+  <section class="scene">
+    <div class="scene-head">
+      <span class="scene-no">SC.04</span>
+      <h2>Pre-production has no bottom</h2>
+    </div>
+    <div class="body">
+      <p>The set gets built in pre-production — the research, the tooling, everything you understand in detail. And it's supposed to <strong>stay there.</strong> You build the set; you don't show it.</p>
+      <p>But the trap is real: pre-production has no floor. There's always more to research, more to wire up. If you tell yourself "I'll do the deep building now and reverse it for the audience <em>later</em>," then <span class="red">later</span> is exactly where recording goes to die.</p>
+      <p>So the audience's outcome governs the <strong>whole</strong> pipeline, not just production. Build the <span class="amber">smallest set</span> that makes the scene work — not the most complete one you're capable of. The completeness instinct doesn't get a free pass just because it moved upstream.</p>
+    </div>
+  </section>
+
+  <section class="scene">
+    <div class="scene-head">
+      <span class="scene-no">SC.05</span>
+      <h2>The instrument</h2>
+    </div>
+    <div class="body">
+      <p>Likes feel nice; they can't tell you where it broke. The <strong>audience-retention graph</strong> can. The shape is the diagnosis — go read it before you guess.</p>
+    </div>
+    <div class="graph-wrap">
+      <div class="cap">Audience retention — read the shape</div>
+      <svg class="graph" viewBox="0 0 600 180" role="img" aria-label="Three retention curve shapes: a cliff, a steady decline, and a sharp mid-video drop.">
+        <line x1="40" y1="150" x2="580" y2="150" stroke="#27313d" stroke-width="1"/>
+        <line x1="40" y1="20" x2="40" y2="150" stroke="#27313d" stroke-width="1"/>
+        <!-- cliff -->
+        <path d="M40,30 L70,30 L95,135 L580,145" fill="none" stroke="#E0533D" stroke-width="2.5"/>
+        <!-- steady decline -->
+        <path d="M40,40 L580,130" fill="none" stroke="#8A93A0" stroke-width="2.5" stroke-dasharray="2 6"/>
+        <!-- mid drop -->
+        <path d="M40,55 L290,72 L300,128 L580,138" fill="none" stroke="#E8B04B" stroke-width="2.5"/>
+      </svg>
+      <div class="diag">
+        <div class="row"><span class="k" style="color:var(--rec)">CLIFF · 0–30s</span><span>The opening doesn't pay the promise the title made. Hook problem.</span></div>
+        <div class="row"><span class="k" style="color:var(--slate)">STEADY DECLINE</span><span>Too slow, too complete. Pacing and density. Cut the thorough-but-boring middle.</span></div>
+        <div class="row"><span class="k">SHARP DROP</span><span>A dead section lives right there. Find it. Cut it.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="scene">
+    <div class="scene-head">
+      <span class="scene-no">SC.06</span>
+      <h2>The forcing function</h2>
+    </div>
+    <div class="body">
+      <p>The fix is never another improvement. It's a <strong>constraint.</strong></p>
+      <p>One take. One module. A date on the calendar. Published near-unedited. The reward comes from <span class="amber">done</span>, not from <span class="red">perfect</span>. The thing fighting you is the belief that the process has to get better before the recording is good enough. It doesn't. The recording <strong>is</strong> the process.</p>
+    </div>
+  </section>
+
+</main>
+
+<section class="preflight wrap">
+  <h2>Before you hit record</h2>
+  <div class="sub">five questions · answer them, then roll</div>
+  <ul class="check">
+    <li><span class="box"></span><span>Does the first minute pay the promise the title made — or is it setup?</span></li>
+    <li><span class="box"></span><span>Is the camera on <em>their outcome</em>, or on <em>my capability</em>?</span></li>
+    <li><span class="box"></span><span>Is this the smallest set that works, or the most complete one I could build?</span></li>
+    <li><span class="box"></span><span>Is there a date on this module — or just an intention?</span></li>
+    <li><span class="box"></span><span>Am I about to polish, or about to ship?</span></li>
+  </ul>
+
+  <div class="finale">
+    <p class="display big">Point the camera at the outcome.<br><span class="b">Hit record.</span></p>
+  </div>
+</section>
+
+<footer class="wrap">
+  <span class="rec-dot"></span>Production doctrine · for the next module, not the next pipeline
+</footer>
+
+<script>
+  // Trigger the camera reversal once the hero is on screen
+  window.addEventListener('load', function(){
+    setTimeout(function(){
+      var cam = document.getElementById('camera');
+      if(cam) cam.classList.add('facing');
+    }, 450);
+  });
+
+  // Reveal scenes on scroll
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
+    });
+  }, {threshold:.16});
+  document.querySelectorAll('.scene, .preflight').forEach(function(el){ io.observe(el); });
+</script>
+
+<script src="../../../shared/debug-panel.js"></script>
+</body>
+</html>

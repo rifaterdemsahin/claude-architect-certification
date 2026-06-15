@@ -190,6 +190,11 @@
           "description": "Visual script table read method with real-time image creation."
         },
         {
+          "label": "🎬 Production Doctrine",
+          "url": "5_Symbols/production/preprod/production_doctrine.html",
+          "description": "Operating manual and doctrine: the recording is the process."
+        },
+        {
           "label": "🔴 Critical Path",
           "url": "markdown_renderer.html?file=1_Real_Unknown/critical_task.md",
           "description": "Rules for shipping the course content before the platform."
