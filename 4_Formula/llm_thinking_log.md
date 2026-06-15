@@ -448,3 +448,20 @@ Integrate the visual script table read method ("Create right, paste left, read o
    - Update `navigation_config.json` to change the `📋 Planning` top-level menu item to a dropdown containing the Planning Hub, Ways of Working, and all other planning sub-pages.
    - Sync `shared/nav.js` fallback array with the same restructured Planning dropdown.
 5. **Validation**: Confirm Go compilation builds successfully.
+
+## 2026-06-15 — 🔬 Dynamic Sentence Dropdown Filtering in Research Pages
+
+### 🎯 Objective
+Filter the sentences dropdown on all research pages (`index.html`, `images.html`, `audio.html`, `videos.html`, and `notes.html`) to show only the sentences that belong to the video script currently selected or linked to that asset.
+
+### 📐 Design & Implementation Plan
+1. **Unify Supabase queries**:
+   - Query `course_videos` instead of `videos` in `images.html` to align with the table used by `research_relationships` and prevent undefined video ID resolution bugs.
+   - Fetch sentences with `scripts(video_id, videos(video_number, modules(module_number)))` to resolve which script and video number they belong to.
+2. **Resolve courseVideoId**:
+   - Map `sents` so that `courseVideoId` matches the correct `course_videos.id` by comparing `video_number` and `module_number` across schemas.
+3. **Filter in updateAllRelationsUI()**:
+   - Get the linked `video_id`s or the filter query parameter.
+   - If a video is linked or selected, show only sentences from that video. Else, keep the dropdown empty and show a placeholder (`-- link video first --`).
+4. **Validation**:
+   - Verify `go build ./cmd/...` passes.
