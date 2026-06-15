@@ -280,6 +280,10 @@
 
     var html = '<div class="site-nav-container">' +
       '<a href="' + ROOT + 'index.html" class="site-nav-logo">🏛️ Claude Architect</a>' +
+      '<div class="site-nav-search-container">' +
+        '<input type="text" id="site-nav-search" placeholder="Search menu (Press \'/\')..." autocomplete="off" aria-label="Search navigation menu" />' +
+        '<div id="site-nav-search-results" class="site-nav-search-results"></div>' +
+      '</div>' +
       '<div class="site-nav-links">';
 
     // Favorites dropdown — shown only when there are favorites
@@ -394,6 +398,150 @@
     document.body.appendChild(bar);
   }
 
+  var searchIndex = [];
+  function buildSearchIndex(items, parentPath) {
+    var index = [];
+    items.forEach(function (item) {
+      var currentPath = parentPath ? parentPath + ' ➔ ' + item.label : item.label;
+      if (item.children) {
+        index = index.concat(buildSearchIndex(item.children, currentPath));
+      } else if (item.url) {
+        index.push({
+          label: item.label,
+          path: parentPath || 'Direct Links',
+          url: resolveUrl(item.url),
+          description: item.description || ''
+        });
+      }
+    });
+    return index;
+  }
+
+  function setupSearch(menuItems) {
+    searchIndex = buildSearchIndex(menuItems || FALLBACK, '');
+
+    var input = document.getElementById('site-nav-search');
+    var resultsContainer = document.getElementById('site-nav-search-results');
+    if (!input || !resultsContainer) return;
+
+    var selectedIndex = -1;
+    var currentFiltered = [];
+
+    function renderResults(filtered) {
+      currentFiltered = filtered;
+      if (!filtered.length) {
+        resultsContainer.innerHTML = '<div class="site-search-no-results">No matches found</div>';
+        return;
+      }
+
+      var query = input.value.trim().toLowerCase();
+      var html = filtered.map(function (item, idx) {
+        var isSelected = idx === selectedIndex ? ' selected' : '';
+        var displayTitle = highlightText(item.label, query);
+        var displayDesc = highlightText(item.description, query);
+        return '<a href="' + item.url + '" class="site-search-item' + isSelected + '" data-index="' + idx + '">' +
+          '<div class="item-path">' + item.path + '</div>' +
+          '<div class="item-title">' + displayTitle + '</div>' +
+          (item.description ? '<div class="item-desc">' + displayDesc + '</div>' : '') +
+          '</a>';
+      }).join('');
+      resultsContainer.innerHTML = html;
+    }
+
+    function highlightText(text, query) {
+      if (!query || !text) return text || '';
+      var idx = text.toLowerCase().indexOf(query);
+      if (idx === -1) return text;
+      return text.substring(0, idx) +
+        '<mark>' + text.substring(idx, idx + query.length) + '</mark>' +
+        text.substring(idx + query.length);
+    }
+
+    input.addEventListener('input', function () {
+      var query = input.value.trim().toLowerCase();
+      if (!query) {
+        resultsContainer.classList.remove('open');
+        selectedIndex = -1;
+        return;
+      }
+
+      var filtered = searchIndex.filter(function (item) {
+        return item.label.toLowerCase().includes(query) ||
+               item.path.toLowerCase().includes(query) ||
+               item.description.toLowerCase().includes(query);
+      });
+
+      selectedIndex = filtered.length > 0 ? 0 : -1;
+      resultsContainer.classList.add('open');
+      renderResults(filtered);
+    });
+
+    input.addEventListener('keydown', function (e) {
+      if (!resultsContainer.classList.contains('open')) return;
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (currentFiltered.length > 0) {
+          selectedIndex = (selectedIndex + 1) % currentFiltered.length;
+          renderResults(currentFiltered);
+          scrollSelectedIntoView();
+        }
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (currentFiltered.length > 0) {
+          selectedIndex = (selectedIndex - 1 + currentFiltered.length) % currentFiltered.length;
+          renderResults(currentFiltered);
+          scrollSelectedIntoView();
+        }
+      } else if (e.key === 'Enter') {
+        if (selectedIndex >= 0 && selectedIndex < currentFiltered.length) {
+          e.preventDefault();
+          window.location.href = currentFiltered[selectedIndex].url;
+        }
+      } else if (e.key === 'Escape') {
+        resultsContainer.classList.remove('open');
+        input.blur();
+      }
+    });
+
+    function scrollSelectedIntoView() {
+      var el = resultsContainer.querySelector('.site-search-item.selected');
+      if (el) {
+        el.scrollIntoView({ block: 'nearest' });
+      }
+    }
+
+    // Close when clicking outside
+    document.addEventListener('click', function (e) {
+      if (!input.contains(e.target) && !resultsContainer.contains(e.target)) {
+        resultsContainer.classList.remove('open');
+      }
+    });
+
+    // Re-open on focus if query is not empty
+    input.addEventListener('focus', function () {
+      if (input.value.trim()) {
+        resultsContainer.classList.add('open');
+      }
+    });
+  }
+
+  // Global key listener for focusing search (Ctrl+K, Cmd+K, or slash)
+  document.addEventListener('keydown', function (e) {
+    var active = document.activeElement;
+    var isInput = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable);
+    if (isInput) return;
+
+    if (e.key === '/' || ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k')) {
+      var input = document.getElementById('site-nav-search');
+      if (input) {
+        e.preventDefault();
+        input.focus();
+        input.select();
+      }
+    }
+  });
+
   function init() {
     showLiveSiteBanner();
     if (document.getElementById('site-nav')) return;
@@ -401,12 +549,13 @@
     if (preloaded && preloaded.projectMenu) {
       buildNav(preloaded.projectMenu);
       attachDropdownHandlers();
+      setupSearch(preloaded.projectMenu);
       return;
     }
     fetch(ROOT + 'navigation_config.json', { cache: 'no-store' })
       .then(function (r) { return r.json(); })
-      .then(function (data) { buildNav(data.projectMenu); attachDropdownHandlers(); })
-      .catch(function () { buildNav(FALLBACK); attachDropdownHandlers(); });
+      .then(function (data) { buildNav(data.projectMenu); attachDropdownHandlers(); setupSearch(data.projectMenu); })
+      .catch(function () { buildNav(FALLBACK); attachDropdownHandlers(); setupSearch(FALLBACK); });
   }
 
   function attachDropdownHandlers() {

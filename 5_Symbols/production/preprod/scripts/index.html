@@ -399,7 +399,9 @@
     .sent-badge.screenshare { background: rgba(59,130,246,0.08);  color: #3b82f6; }
     .sent-badge.b_roll      { background: rgba(16,185,129,0.08);  color: #10b981; }
     .sent-text { font-size: 0.84rem; color: var(--text-main); line-height: 1.55; flex: 1; }
-    .sent-para-num { font-size: 0.6rem; font-weight: 800; color: rgba(139,92,246,0.5); min-width: 18px; text-align: center; flex-shrink: 0; padding-top: 3px; letter-spacing: 0.02em; }
+    .sent-nums { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 34px; flex-shrink: 0; padding-top: 3px; }
+    .sent-line-num { font-size: 0.6rem; font-weight: 800; color: rgba(139,92,246,0.75); text-align: center; letter-spacing: 0.02em; white-space: nowrap; }
+    .sent-para-num { font-size: 0.58rem; font-weight: 700; color: rgba(139,92,246,0.4); min-width: 18px; text-align: center; letter-spacing: 0.02em; }
     .sent-row-btns { display: flex; flex-direction: column; gap: 3px; flex-shrink: 0; }
     .btn-sent-edit   { background: rgba(139,92,246,0.08); color: #c084fc; border: 1px solid rgba(139,92,246,0.18); padding: 3px 7px; border-radius: 5px; font-size: 0.68rem; cursor: pointer; font-family: var(--font-body); line-height: 1.4; }
     .btn-sent-link   { background: rgba(59,130,246,0.08); color: #60a5fa; border: 1px solid rgba(59,130,246,0.18); padding: 3px 7px; border-radius: 5px; font-size: 0.68rem; cursor: pointer; font-family: var(--font-body); line-height: 1.4; }
@@ -1188,17 +1190,27 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
         grouped[s.section].push(s);
       });
 
-      let paraNum = 0;
+      // Estimated overall line number: cumulative across the whole script, iterating
+      // by one per estimated display line (~60 chars/line). Scene number resets per section.
+      const CHARS_PER_LINE = 60;
+      let lineNum = 1;
       const groupHtml = SECTION_ORDER
         .filter(sec => grouped[sec] && grouped[sec].length)
         .map(sec => {
+          let sceneNum = 0;
           const rows = grouped[sec].map(s => {
-            paraNum++;
+            sceneNum++;
+            const startLine = lineNum;
+            const estLines = Math.max(1, Math.ceil((s.sentence_text || '').length / CHARS_PER_LINE));
+            lineNum += estLines;
             const rid = `${elementId}-${s.id}`;
             return `
             <div class="sent-row" id="sent-row-${rid}">
               <div class="sent-view" id="sent-view-${rid}" data-text="${esc2(s.sentence_text)}">
-                <span class="sent-para-num">${paraNum}</span>
+                <div class="sent-nums">
+                  <span class="sent-line-num" title="Estimated line number across the whole script">L${startLine}</span>
+                  <span class="sent-para-num" title="Sentence position within this scene">${sceneNum}</span>
+                </div>
                 <div class="sent-badges">
                   <span class="sent-badge ${esc2(s.sentence_type)}">${esc2(s.sentence_type)}</span>
                   <span class="sent-badge ${esc2(s.visual_mode)}">${esc2(s.visual_mode).replace(/_/g,' ')}</span>
