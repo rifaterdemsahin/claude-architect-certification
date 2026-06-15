@@ -17,6 +17,8 @@ Fix the duplicate key value violation unique constraint "research_relationships_
 4. **Validation**: Build the project using `go build ./...` and verify integrity.
 5. **Track Supabase Database Seed / Schema**:
    - Add/stage untracked Supabase migration, schema and seed files (`09_research_assets.sql`, `02_seed_research_relationships.sql`) and scripts/index.html modifications.
+6. **Execute Agent Spawner script**:
+   - Run the AppleScript spawner at `.gemini/skills/open-agents/run.sh` to spawn all color-coded agent terminals (Claude-1, Claude-2, AntiGravity-1, AntiGravity-2, Kilo-xAI, Kilo-Kimi, Kilo-DeepSeek, Pingz).
 
 ## 2026-06-14 — 🌉 Project-wide: route GitHub Pages /api calls to Fly.io backend
 
