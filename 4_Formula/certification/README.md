@@ -10,6 +10,7 @@
 | `exam_and_case_study.md` | Exam questions and case study design |
 | `post_prod_template.md` | Post-production review template |
 | `production_plan.md` | Video and content production schedule |
+| `certificate_validity_post_production.md` | 6-month certificate validity + Delivery Pilot/video-backend short-cycle update & YouTube Shorts → Join membership engine |
 | `business_plan.md` | Course business plan and pricing strategy |
 | `YouTubeCourseStructureFeedback.md` | Feedback and revisions on course structure |
 

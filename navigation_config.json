@@ -267,6 +267,10 @@
               "url": "markdown_renderer.html?file=4_Formula/certification/business_plan.md"
             },
             {
+              "label": "7b. ⏳ Certificate Validity & Post-Production",
+              "url": "markdown_renderer.html?file=4_Formula/certification/certificate_validity_post_production.md"
+            },
+            {
               "label": "8. 💼 Membership / Business",
               "url": "5_Symbols/production/publish/membership.html"
             },
@@ -506,6 +510,10 @@
     {
       "label": "   ├─ 🎬 Certification: Production Plan",
       "url": "markdown_renderer.html?file=4_Formula/certification/production_plan.md"
+    },
+    {
+      "label": "   ├─ ⏳ Certification: Validity & Post-Production",
+      "url": "markdown_renderer.html?file=4_Formula/certification/certificate_validity_post_production.md"
     },
     {
       "label": "   ├─ ✈️ Delivery Pilot Log",
