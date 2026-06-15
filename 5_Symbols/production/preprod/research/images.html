@@ -67,7 +67,14 @@
 <script src="../../../../shared/nav.js"></script>
 <div class="container">
   <h1>🖼 Research Images</h1>
-  <p class="subtitle">Upload and manage reference images for research — stored in Azure Blob Storage.</p>
+  <p class="subtitle">Upload and manage reference images for research — stored in Azure Blob Storage. ⚡ Thumbnails are generated automatically and indexed in Supabase.</p>
+
+  <!-- Thumbnail generation status (shown while thumbnails are being created) -->
+  <div id="thumb-status" style="display:none; background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.3); border-radius: 12px; padding: 10px 16px; margin-bottom: 20px; align-items: center; gap: 10px; font-size: 0.85rem; font-weight: 600;">
+    <span class="thumb-spinner" style="display:inline-block; width:14px; height:14px; border:2px solid rgba(245,158,11,0.3); border-top-color: var(--yellow); border-radius:50%; animation: thumbspin 0.7s linear infinite;"></span>
+    <span id="thumb-status-text">⚙️ Generating thumbnails…</span>
+  </div>
+  <style>@keyframes thumbspin { to { transform: rotate(360deg); } }</style>
 
   <!-- Navigation Mode Bar -->
   <div class="creation-modes" style="display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap;">
@@ -168,14 +175,17 @@ function loadGallery() {
         // Use the auto-generated thumbnail for the grid when available; the
         // lightbox always opens the full-resolution original.
         const thumbName = THUMB_PREFIX + f.name;
-        const thumbUrl = thumbSet.has(thumbName)
+        const hasThumb = thumbSet.has(thumbName);
+        const thumbUrl = hasThumb
           ? `/api/research/file?container=${CONTAINER}&name=${encodeURIComponent(thumbName)}`
           : fileUrl;
         const imgUrl = fileUrl;
         const relMarkup = renderRelationsMarkup(CONTAINER, f.name);
+        // Mark images still missing a thumbnail so the backfill can target them.
+        const needsAttr = (isImg && !hasThumb) ? ` data-needs-thumb="1" data-name="${f.name.replace(/"/g,'&quot;')}"` : '';
         card.innerHTML = `
           ${isImg
-            ? `<img class="img-thumb" src="${thumbUrl}" alt="${f.name}" loading="lazy" onclick="openLightbox('${imgUrl.replace(/'/g,"\\'")}','${f.name.replace(/'/g,"\\'")}' )">`
+            ? `<img class="img-thumb"${needsAttr} src="${thumbUrl}" alt="${f.name}" loading="lazy" onclick="openLightbox('${imgUrl.replace(/'/g,"\\'")}','${f.name.replace(/'/g,"\\'")}' )">`
             : `<div class="img-thumb-placeholder" style="cursor:zoom-in;" onclick="openLightbox('${imgUrl.replace(/'/g,"\\'")}','${f.name.replace(/'/g,"\\'")}')">🖼</div>`}
           <div class="img-info">
             <div class="img-name" title="${f.name}">${f.name}</div>
@@ -189,6 +199,8 @@ function loadGallery() {
         gallery.appendChild(card);
       });
       updateAllRelationsUI();
+      // Generate + map thumbnails for any images uploaded before this feature.
+      backfillThumbnails(files, thumbSet);
     })
     .catch(e => {
       document.getElementById('gallery').innerHTML = '<div class="empty-state">Failed to load: ' + e.message + '</div>';
@@ -229,6 +241,47 @@ function uploadOne(file, name) {
     .then(r => r.ok ? r.json() : r.text().then(t => Promise.reject(t)));
 }
 
+// Backfill: for images uploaded before this feature (no __thumb__ blob),
+// download the original, generate a thumbnail, upload it, record the asset,
+// and swap the grid image to the new thumbnail — all best-effort.
+let _backfilling = false;
+async function backfillThumbnails(files, thumbSet) {
+  if (_backfilling) return;
+  const pending = files.filter(f => /^image\//i.test(f.contentType)
+    && !/svg/i.test(f.contentType)
+    && !thumbSet.has(THUMB_PREFIX + f.name));
+  if (!pending.length) return;
+  _backfilling = true;
+  let made = 0;
+  const statusEl = document.getElementById('thumb-status');
+  const statusText = document.getElementById('thumb-status-text');
+  if (statusEl) statusEl.style.display = 'flex';
+  for (const f of pending) {
+    try {
+      if (statusText) statusText.textContent = `⚙️ Generating thumbnails… (${made + 1}/${pending.length}) ${f.name}`;
+      const fileUrl = `/api/research/file?container=${CONTAINER}&name=${encodeURIComponent(f.name)}`;
+      const blob = await fetch(fileUrl).then(r => r.ok ? r.blob() : Promise.reject('fetch ' + r.status));
+      const srcFile = new File([blob], f.name, { type: blob.type || f.contentType });
+      const thumbBlob = await makeThumbnail(srcFile);
+      if (!thumbBlob) continue;
+      const thumbName = THUMB_PREFIX + f.name;
+      await uploadOne(thumbBlob, thumbName);
+      recordAsset(f.name, thumbName, f.contentType, f.size);
+      made++;
+      // Swap the live card to the freshly created thumbnail.
+      const imgEl = document.querySelector(`img.img-thumb[data-needs-thumb][data-name="${(window.CSS && CSS.escape) ? CSS.escape(f.name) : f.name}"]`)
+        || Array.from(document.querySelectorAll('img.img-thumb[data-needs-thumb]')).find(el => el.dataset.name === f.name);
+      if (imgEl) {
+        imgEl.src = `/api/research/file?container=${CONTAINER}&name=${encodeURIComponent(thumbName)}`;
+        imgEl.removeAttribute('data-needs-thumb');
+      }
+    } catch (e) { console.warn('Thumbnail backfill failed for', f.name, e); }
+  }
+  _backfilling = false;
+  if (statusEl) statusEl.style.display = 'none';
+  if (made) toast(`Generated ${made} thumbnail${made !== 1 ? 's' : ''}`, 'success');
+}
+
 function uploadFiles(files) {
   const progressWrap = document.getElementById('progress-wrap');
   const progressFill = document.getElementById('progress-fill');
@@ -245,6 +298,7 @@ function uploadFiles(files) {
 
       // 2. Auto-generate + upload a thumbnail (best-effort).
       let thumbName = null;
+      progressLabel.textContent = `⚙️ Generating thumbnail for ${file.name}…`;
       const thumbBlob = await makeThumbnail(file);
       if (thumbBlob) {
         thumbName = THUMB_PREFIX + file.name;
