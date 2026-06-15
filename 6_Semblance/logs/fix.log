@@ -95,5 +95,7 @@ Lesson captured in lessons_learned.md
 [2026-06-14] 🛠 5_Symbols [APPLIED] — Repointed research_relationships.video_id FK to videos(id) (migration_research_rel_repoint_videos.sql); switched all research hub pages from course_videos/course_modules to videos/modules
 [2026-06-14] [5_Symbols/preprod] [APPLIED] — Created scaffolding_risk.md risk analysis under Preprod; added Risk category and Scaffolding Risk menu items to navigation_config.json and fallbacks in index.html, home.html, and markdown_renderer.html.
 [2026-06-15] [5_Symbols/research] [APPLIED] — Added client-side exists check using `allRelationships` cache in linkAssetToVideo and linkAssetToSentence functions in index.html, audio.html, images.html, notes.html, and videos.html to prevent duplicate key constraint violations in research_relationships.
+[2026-06-15] [5_Symbols/pipeline.html] [VERIFIED] — Resolved stale deployment of pipeline.html and pipeline image assets in `3_Simulation/generated/pipeline/` on Fly.io. Verified Fly.io was serving old assets from June 13th, successfully ran `flyctl deploy --ha=false --remote-only` to force deployment of the latest build, and verified that page and assets now return 200 with correct metadata and content lengths.
+
 
 

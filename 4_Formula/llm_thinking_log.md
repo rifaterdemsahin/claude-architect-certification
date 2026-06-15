@@ -402,3 +402,18 @@ Deploy the latest research page edits (video filtering logic, images page, and S
 1. **Move Main Utilities**: Move `sync_secrets.go` and `generate_pipeline_images.go` into their own subdirectories under `5_Symbols/tools/` to avoid conflicts during `go build ./...`.
 2. **Commit and Deploy**: Commit the uncommitted research files and migrations, then push to GitHub to trigger the Fly.io deployment.
 3. **Database Migration**: Ensure the foreign key repoint migration is documented for execution on Supabase.
+
+## 2026-06-15 — 🚀 Fly.io Stale Deployment & Pipeline Images Resolution
+
+### 🎯 Objective
+Fix the issue where pipeline images in `3_Simulation/generated/pipeline/` and the updated `5_Symbols/pipeline.html` were not reflected on the live Fly.io deployment.
+
+### 📐 Design & Implementation Plan
+1. **Analyze Deployment State**:
+   - Compare `last-modified` headers on the live Fly.io app with local file states. Found that Fly.io was serving a stale build from June 13th, whereas the images and page updates were committed on June 14th.
+2. **Verify Local Integrity**:
+   - Confirm Go compilation via `go build ./...` and `go vet ./...` (completed successfully).
+3. **Redeploy and Force Updates**:
+   - Execute `flyctl deploy --ha=false --remote-only` locally to force-update the active Fly.io machines with the latest image container containing the new pipeline files and images.
+4. **Verify Outcome**:
+   - Query Fly.io directly for the updated page and image assets using `curl -I`. Verify that HTTP 200 is returned along with the correct content lengths and recent last-modified timestamps.
