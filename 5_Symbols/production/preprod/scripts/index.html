@@ -399,9 +399,10 @@
     .sent-badge.screenshare { background: rgba(59,130,246,0.08);  color: #3b82f6; }
     .sent-badge.b_roll      { background: rgba(16,185,129,0.08);  color: #10b981; }
     .sent-text { font-size: 0.84rem; color: var(--text-main); line-height: 1.55; flex: 1; }
-    .sent-nums { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 34px; flex-shrink: 0; padding-top: 3px; }
-    .sent-line-num { font-size: 0.6rem; font-weight: 800; color: rgba(139,92,246,0.75); text-align: center; letter-spacing: 0.02em; white-space: nowrap; }
-    .sent-para-num { font-size: 0.58rem; font-weight: 700; color: rgba(139,92,246,0.4); min-width: 18px; text-align: center; letter-spacing: 0.02em; }
+    .sent-nums { display: flex; flex-direction: column; align-items: center; gap: 1px; min-width: 40px; flex-shrink: 0; padding-top: 3px; }
+    .sent-line-num  { font-size: 0.6rem;  font-weight: 800; color: rgba(139,92,246,0.85); text-align: center; letter-spacing: 0.02em; white-space: nowrap; }
+    .sent-video-num { font-size: 0.56rem; font-weight: 700; color: rgba(139,92,246,0.55); text-align: center; letter-spacing: 0.02em; white-space: nowrap; }
+    .sent-para-num  { font-size: 0.54rem; font-weight: 700; color: rgba(139,92,246,0.35); text-align: center; letter-spacing: 0.02em; white-space: nowrap; }
     .sent-row-btns { display: flex; flex-direction: column; gap: 3px; flex-shrink: 0; }
     .btn-sent-edit   { background: rgba(139,92,246,0.08); color: #c084fc; border: 1px solid rgba(139,92,246,0.18); padding: 3px 7px; border-radius: 5px; font-size: 0.68rem; cursor: pointer; font-family: var(--font-body); line-height: 1.4; }
     .btn-sent-link   { background: rgba(59,130,246,0.08); color: #60a5fa; border: 1px solid rgba(59,130,246,0.18); padding: 3px 7px; border-radius: 5px; font-size: 0.68rem; cursor: pointer; font-family: var(--font-body); line-height: 1.4; }
@@ -1190,26 +1191,30 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
         grouped[s.section].push(s);
       });
 
-      // Estimated overall line number: cumulative across the whole script, iterating
-      // by one per estimated display line (~60 chars/line). Scene number resets per section.
+      // Estimated line numbers (~60 chars/line), iterating by one per estimated display line:
+      //   L = overall line number across the whole script (never resets — fixed up by renumberOverallLines)
+      //   V = line number within this video (resets per video panel)
+      //   S = line number within this scene/section (resets per scene)
       const CHARS_PER_LINE = 60;
-      let lineNum = 1;
+      let vLine = 1;
       const groupHtml = SECTION_ORDER
         .filter(sec => grouped[sec] && grouped[sec].length)
         .map(sec => {
-          let sceneNum = 0;
+          let sLine = 1;
           const rows = grouped[sec].map(s => {
-            sceneNum++;
-            const startLine = lineNum;
+            const vStart = vLine;
+            const sStart = sLine;
             const estLines = Math.max(1, Math.ceil((s.sentence_text || '').length / CHARS_PER_LINE));
-            lineNum += estLines;
+            vLine += estLines;
+            sLine += estLines;
             const rid = `${elementId}-${s.id}`;
             return `
             <div class="sent-row" id="sent-row-${rid}">
               <div class="sent-view" id="sent-view-${rid}" data-text="${esc2(s.sentence_text)}">
                 <div class="sent-nums">
-                  <span class="sent-line-num" title="Estimated line number across the whole script">L${startLine}</span>
-                  <span class="sent-para-num" title="Sentence position within this scene">${sceneNum}</span>
+                  <span class="sent-line-num" data-vstart="${vStart}" title="L — overall line number across the whole script">L${vStart}</span>
+                  <span class="sent-video-num" title="V — line number within this video">V${vStart}</span>
+                  <span class="sent-para-num" title="S — line number within this scene">S${sStart}</span>
                 </div>
                 <div class="sent-badges">
                   <span class="sent-badge ${esc2(s.sentence_type)}">${esc2(s.sentence_type)}</span>
@@ -1255,11 +1260,26 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
         </div>` : '';
 
       return `${metaBadges ? `<div class="script-meta-badges">${metaBadges}</div>` : ''}
-        <details class="sentences-panel" open>
+        <details class="sentences-panel" open data-est-lines="${vLine - 1}">
           <summary>📋 Script Paragraphs <span style="font-weight:400;opacity:0.6;">(${sentences.length})</span></summary>
           ${groupHtml}
           ${addForm}
         </details>`;
+    }
+
+    // Fix up the overall "L" line numbers across every video panel in document order.
+    // Each panel only knows its own video-local line (V); L = lines in all preceding videos + V.
+    // Runs after any panel (re)hydrates so the count converges once all panels have loaded.
+    function renumberOverallLines() {
+      let offset = 0;
+      document.querySelectorAll('div[id^="sentences-"]').forEach(panel => {
+        const details = panel.querySelector('details.sentences-panel');
+        panel.querySelectorAll('.sent-line-num[data-vstart]').forEach(span => {
+          const vStart = parseInt(span.getAttribute('data-vstart'), 10) || 1;
+          span.textContent = 'L' + (offset + vStart);
+        });
+        offset += details ? (parseInt(details.dataset.estLines, 10) || 0) : 0;
+      });
     }
 
     async function hydrateSentences(elementId, scriptId, format, duration) {
@@ -1275,6 +1295,7 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
       const sentences = await fetchSentences(sid);
       container.innerHTML = renderSentencesPanel(sentences, fmt, dur, elementId, Number(sid) || null);
       if (wasOpen) { const d = container.querySelector('details.sentences-panel'); if (d) d.open = true; }
+      renumberOverallLines();
       loadSentImages(elementId, sentences);
 
       // Handle scrolling to sentence hash if targeted
