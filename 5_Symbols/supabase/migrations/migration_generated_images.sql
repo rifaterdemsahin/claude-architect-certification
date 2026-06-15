@@ -8,8 +8,14 @@ CREATE TABLE IF NOT EXISTS public.generated_images (
     refined_prompt TEXT,
     image_url TEXT,
     azure_blob_name TEXT,
+    thumbnail_url TEXT,
+    thumbnail_blob_name TEXT,
     status TEXT DEFAULT 'generated' -- 'generated', 'saved_to_azure'
 );
+
+-- ── Schema fix: thumbnail columns (idempotent for existing tables) ──
+ALTER TABLE public.generated_images ADD COLUMN IF NOT EXISTS thumbnail_url TEXT;
+ALTER TABLE public.generated_images ADD COLUMN IF NOT EXISTS thumbnail_blob_name TEXT;
 
 -- Enable RLS
 ALTER TABLE public.generated_images ENABLE ROW LEVEL SECURITY;

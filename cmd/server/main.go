@@ -10,6 +10,10 @@ import (
 	"encoding/xml"
 	"fmt"
 	"html/template"
+	"image"
+	"image/color"
+	"image/jpeg"
+	_ "image/png"
 	"io"
 	"log"
 	"net/http"
@@ -22,19 +26,19 @@ import (
 // ── Config ────────────────────────────────────────────────────────────────────
 
 type config struct {
-	supabaseURL        string
-	supabaseAnon       string
-	axiomToken         string
-	axiomDataset       string
-	axiomAPIURL        string
-	axiomQueryURL      string
-	port               string
-	azureAccountName   string
-	azureAccountKey    string
-	azureKeyVaultName  string
-	azureTenantID      string
-	azureClientID      string
-	azureClientSecret  string
+	supabaseURL       string
+	supabaseAnon      string
+	axiomToken        string
+	axiomDataset      string
+	axiomAPIURL       string
+	axiomQueryURL     string
+	port              string
+	azureAccountName  string
+	azureAccountKey   string
+	azureKeyVaultName string
+	azureTenantID     string
+	azureClientID     string
+	azureClientSecret string
 }
 
 func loadDotEnv(path string) {
@@ -339,6 +343,18 @@ func supabasePost(ctx context.Context, cfg config, table string, body any) error
 	return nil
 }
 
+func supabasePatch(ctx context.Context, cfg config, table, query string, body any) error {
+	resp, err := supabaseReq(ctx, cfg, http.MethodPatch, table, query, body)
+	if err != nil {
+		return err
+	}
+	resp.Body.Close()
+	if resp.StatusCode >= 400 {
+		return fmt.Errorf("supabase PATCH %s: %s", table, resp.Status)
+	}
+	return nil
+}
+
 func supabaseDelete(ctx context.Context, cfg config, table, query string) error {
 	resp, err := supabaseReq(ctx, cfg, http.MethodDelete, table, query, nil)
 	if err != nil {
@@ -496,13 +512,27 @@ func axiomErrorsHandler(tmpl *template.Template, cfg config, navConfigJS templat
 						} else {
 							for _, m := range qr.Matches {
 								ev := axiomEvent{Time: m.Time}
-								if v, ok := m.Data["level"].(string); ok { ev.Level = v }
-								if v, ok := m.Data["method"].(string); ok { ev.Method = v }
-								if v, ok := m.Data["path"].(string); ok { ev.Path = v }
-								if v, ok := m.Data["status"].(float64); ok { ev.Status = int(v) }
-								if v, ok := m.Data["duration_ms"].(float64); ok { ev.Duration = int64(v) }
-								if v, ok := m.Data["err"].(string); ok { ev.Err = v }
-								if v, ok := m.Data["panic"].(string); ok { ev.Panic = v }
+								if v, ok := m.Data["level"].(string); ok {
+									ev.Level = v
+								}
+								if v, ok := m.Data["method"].(string); ok {
+									ev.Method = v
+								}
+								if v, ok := m.Data["path"].(string); ok {
+									ev.Path = v
+								}
+								if v, ok := m.Data["status"].(float64); ok {
+									ev.Status = int(v)
+								}
+								if v, ok := m.Data["duration_ms"].(float64); ok {
+									ev.Duration = int64(v)
+								}
+								if v, ok := m.Data["err"].(string); ok {
+									ev.Err = v
+								}
+								if v, ok := m.Data["panic"].(string); ok {
+									ev.Panic = v
+								}
 								data.Events = append(data.Events, ev)
 							}
 							log.Printf("axiom query returned %d events", len(data.Events))
@@ -689,6 +719,113 @@ func blobURL(accountName, container, name, sasQuery string) string {
 		base += "/" + url.PathEscape(name)
 	}
 	return base + "?" + sasQuery
+}
+
+// uploadBlobToAzure PUTs a block blob into the given container. Used for both
+// originals and thumbnails so the upload logic lives in one place.
+func uploadBlobToAzure(ctx context.Context, cfg config, container, blobName, contentType string, data []byte) error {
+	expiry := time.Now().UTC().Add(10 * time.Minute)
+	sasQuery, err := generateContainerSAS(cfg.azureAccountName, cfg.azureAccountKey, container, "rcwl", expiry)
+	if err != nil {
+		return fmt.Errorf("sas: %w", err)
+	}
+	putURL := blobURL(cfg.azureAccountName, container, blobName, sasQuery)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPut, putURL, bytes.NewReader(data))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("x-ms-blob-type", "BlockBlob")
+	req.Header.Set("Content-Type", contentType)
+	req.ContentLength = int64(len(data))
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode >= 400 {
+		b, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("azure upload %d: %s", resp.StatusCode, strings.TrimSpace(string(b)))
+	}
+	return nil
+}
+
+// thumbBlobName derives the thumbnail blob name from an original blob name,
+// e.g. "m1_v2_123.png" → "m1_v2_123_thumb.jpg".
+func thumbBlobName(original string) string {
+	base := original
+	if i := strings.LastIndexByte(original, '.'); i >= 0 {
+		base = original[:i]
+	}
+	return base + "_thumb.jpg"
+}
+
+// generateThumbnail decodes a PNG/JPEG image and produces a downscaled JPEG
+// thumbnail whose longest edge is capped at maxEdge px, preserving aspect
+// ratio. Uses a box-average downscale — stdlib only, no external deps.
+func generateThumbnail(data []byte, maxEdge int) ([]byte, error) {
+	src, _, err := image.Decode(bytes.NewReader(data))
+	if err != nil {
+		return nil, fmt.Errorf("decode: %w", err)
+	}
+	b := src.Bounds()
+	sw, sh := b.Dx(), b.Dy()
+	if sw == 0 || sh == 0 {
+		return nil, fmt.Errorf("empty image")
+	}
+	tw, th := sw, sh
+	if sw > maxEdge || sh > maxEdge {
+		if sw >= sh {
+			tw, th = maxEdge, int(float64(sh)*float64(maxEdge)/float64(sw))
+		} else {
+			th, tw = maxEdge, int(float64(sw)*float64(maxEdge)/float64(sh))
+		}
+	}
+	if tw < 1 {
+		tw = 1
+	}
+	if th < 1 {
+		th = 1
+	}
+	dst := image.NewRGBA(image.Rect(0, 0, tw, th))
+	for y := 0; y < th; y++ {
+		sy0 := b.Min.Y + y*sh/th
+		sy1 := b.Min.Y + (y+1)*sh/th
+		if sy1 <= sy0 {
+			sy1 = sy0 + 1
+		}
+		for x := 0; x < tw; x++ {
+			sx0 := b.Min.X + x*sw/tw
+			sx1 := b.Min.X + (x+1)*sw/tw
+			if sx1 <= sx0 {
+				sx1 = sx0 + 1
+			}
+			var rs, gs, bs, as, n uint64
+			for sy := sy0; sy < sy1; sy++ {
+				for sx := sx0; sx < sx1; sx++ {
+					r, g, bb, a := src.At(sx, sy).RGBA()
+					rs += uint64(r)
+					gs += uint64(g)
+					bs += uint64(bb)
+					as += uint64(a)
+					n++
+				}
+			}
+			if n == 0 {
+				n = 1
+			}
+			dst.Set(x, y, color.RGBA{
+				R: uint8((rs / n) >> 8),
+				G: uint8((gs / n) >> 8),
+				B: uint8((bs / n) >> 8),
+				A: uint8((as / n) >> 8),
+			})
+		}
+	}
+	var buf bytes.Buffer
+	if err := jpeg.Encode(&buf, dst, &jpeg.Options{Quality: 80}); err != nil {
+		return nil, fmt.Errorf("encode: %w", err)
+	}
+	return buf.Bytes(), nil
 }
 
 func researchUploadHandler(cfg config) http.HandlerFunc {
@@ -891,12 +1028,12 @@ func researchFileHandler(cfg config) http.HandlerFunc {
 // ── Explanations ──────────────────────────────────────────────────────────────
 
 type Explanation struct {
-	ID              int       `json:"id,omitempty"`
-	EntityType      string    `json:"entity_type"`
-	EntityID        string    `json:"entity_id"`
-	ExplanationText string    `json:"explanation_text"`
-	GeneratedBy     string    `json:"generated_by"`
-	CreatedAt       string    `json:"created_at,omitempty"`
+	ID              int    `json:"id,omitempty"`
+	EntityType      string `json:"entity_type"`
+	EntityID        string `json:"entity_id"`
+	ExplanationText string `json:"explanation_text"`
+	GeneratedBy     string `json:"generated_by"`
+	CreatedAt       string `json:"created_at,omitempty"`
 }
 
 func fetchEntityContent(ctx context.Context, cfg config, entityType, entityID string) (string, error) {
@@ -1424,53 +1561,159 @@ func imageSaveHandler(cfg config) http.HandlerFunc {
 			}
 		}
 
+		ctx := r.Context()
 		blobName := fmt.Sprintf("m%d_v%d_%d.png", req.ModuleNumber, req.VideoNumber, time.Now().Unix())
 		container := "research-images"
 
-		expiry := time.Now().UTC().Add(10 * time.Minute)
-		sasQuery, err := generateContainerSAS(cfg.azureAccountName, cfg.azureAccountKey, container, "rcwl", expiry)
-		if err != nil {
-			http.Error(w, `{"error":"sas error"}`, http.StatusInternalServerError)
-			return
-		}
-
-		putURL := blobURL(cfg.azureAccountName, container, blobName, sasQuery)
-		ureq, _ := http.NewRequest(http.MethodPut, putURL, bytes.NewReader(imageData))
-		ureq.Header.Set("x-ms-blob-type", "BlockBlob")
-		ureq.Header.Set("Content-Type", contentType)
-		ureq.ContentLength = int64(len(imageData))
-
-		uresp, err := http.DefaultClient.Do(ureq)
-		if err != nil {
+		// ── Upload the original ──
+		if err := uploadBlobToAzure(ctx, cfg, container, blobName, contentType, imageData); err != nil {
 			http.Error(w, fmt.Sprintf(`{"error":"azure upload failed: %s"}`, err.Error()), http.StatusBadGateway)
 			return
 		}
-		defer uresp.Body.Close()
-		if uresp.StatusCode >= 400 {
-			b, _ := io.ReadAll(uresp.Body)
-			http.Error(w, fmt.Sprintf(`{"error":"azure upload %d: %s"}`, uresp.StatusCode, strings.TrimSpace(string(b))), http.StatusBadGateway)
-			return
+
+		// ── Generate + upload the thumbnail (best-effort; original still saved if this fails) ──
+		var thumbName string
+		if thumbData, terr := generateThumbnail(imageData, 320); terr != nil {
+			log.Printf("thumbnail generation failed for %s: %v", blobName, terr)
+		} else {
+			thumbName = thumbBlobName(blobName)
+			if uerr := uploadBlobToAzure(ctx, cfg, container, thumbName, "image/jpeg", thumbData); uerr != nil {
+				log.Printf("thumbnail upload failed for %s: %v", thumbName, uerr)
+				thumbName = ""
+			}
 		}
 
-		// Save to Supabase
-		ctx := r.Context()
-		dbEntry := map[string]any{
-			"module_number":   req.ModuleNumber,
-			"video_number":    req.VideoNumber,
-			"prompt":          req.Prompt,
-			"azure_blob_name": blobName,
-			"status":          "saved_to_azure",
-			"image_url":       blobURL(cfg.azureAccountName, container, blobName, ""), // URL without SAS for DB
+		imageURL := blobURL(cfg.azureAccountName, container, blobName, "") // URL without SAS for DB
+		var thumbURL string
+		if thumbName != "" {
+			thumbURL = blobURL(cfg.azureAccountName, container, thumbName, "")
 		}
-		
+
+		// ── Save both references to Supabase ──
+		dbEntry := map[string]any{
+			"module_number":       req.ModuleNumber,
+			"video_number":        req.VideoNumber,
+			"prompt":              req.Prompt,
+			"azure_blob_name":     blobName,
+			"image_url":           imageURL,
+			"thumbnail_blob_name": thumbName,
+			"thumbnail_url":       thumbURL,
+			"status":              "saved_to_azure",
+		}
 		if err := supabasePost(ctx, cfg, "generated_images", dbEntry); err != nil {
 			log.Printf("supabase save generated image error: %v", err)
 		}
 
 		json.NewEncoder(w).Encode(map[string]any{
-			"ok":        true,
-			"blob_name": blobName,
-			"url":       blobURL(cfg.azureAccountName, container, blobName, ""),
+			"ok":            true,
+			"blob_name":     blobName,
+			"url":           imageURL,
+			"thumbnail":     thumbName,
+			"thumbnail_url": thumbURL,
+		})
+	}
+}
+
+// generatedImageRow is a minimal view of generated_images for the backfill job.
+type generatedImageRow struct {
+	ID            int64  `json:"id"`
+	AzureBlobName string `json:"azure_blob_name"`
+	ImageURL      string `json:"image_url"`
+	ThumbnailURL  string `json:"thumbnail_url"`
+}
+
+// imageThumbnailBackfillHandler walks every generated_images row that has an
+// original blob but no thumbnail, downloads the original from Azure, builds a
+// thumbnail, uploads it, and patches the row with thumbnail_url/thumbnail_blob_name.
+// POST /api/images/backfill-thumbnails
+func imageThumbnailBackfillHandler(cfg config) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		if r.Method != http.MethodPost {
+			http.Error(w, `{"error":"method not allowed"}`, http.StatusMethodNotAllowed)
+			return
+		}
+		if cfg.azureAccountName == "" {
+			http.Error(w, `{"error":"Azure Storage not configured"}`, http.StatusServiceUnavailable)
+			return
+		}
+		ctx := r.Context()
+		container := "research-images"
+
+		var rows []generatedImageRow
+		// Rows missing a thumbnail but having an original blob.
+		q := "select=id,azure_blob_name,image_url,thumbnail_url&thumbnail_url=is.null&azure_blob_name=not.is.null&limit=500"
+		if err := supabaseGet(ctx, cfg, "generated_images", q, &rows); err != nil {
+			http.Error(w, fmt.Sprintf(`{"error":"supabase read: %s"}`, err.Error()), http.StatusBadGateway)
+			return
+		}
+
+		processed, failed := 0, 0
+		var errs []string
+		for _, row := range rows {
+			if row.AzureBlobName == "" {
+				continue
+			}
+			// Download the original via a short-lived read SAS.
+			expiry := time.Now().UTC().Add(10 * time.Minute)
+			sasQuery, err := generateContainerSAS(cfg.azureAccountName, cfg.azureAccountKey, container, "r", expiry)
+			if err != nil {
+				failed++
+				errs = append(errs, fmt.Sprintf("%d: sas %v", row.ID, err))
+				continue
+			}
+			getURL := blobURL(cfg.azureAccountName, container, row.AzureBlobName, sasQuery)
+			dresp, err := http.Get(getURL)
+			if err != nil || dresp.StatusCode >= 400 {
+				failed++
+				code := 0
+				if dresp != nil {
+					code = dresp.StatusCode
+					dresp.Body.Close()
+				}
+				errs = append(errs, fmt.Sprintf("%d: download (%d) %v", row.ID, code, err))
+				continue
+			}
+			orig, rerr := io.ReadAll(dresp.Body)
+			dresp.Body.Close()
+			if rerr != nil {
+				failed++
+				errs = append(errs, fmt.Sprintf("%d: read %v", row.ID, rerr))
+				continue
+			}
+			thumbData, terr := generateThumbnail(orig, 320)
+			if terr != nil {
+				failed++
+				errs = append(errs, fmt.Sprintf("%d: thumb %v", row.ID, terr))
+				continue
+			}
+			tName := thumbBlobName(row.AzureBlobName)
+			if uerr := uploadBlobToAzure(ctx, cfg, container, tName, "image/jpeg", thumbData); uerr != nil {
+				failed++
+				errs = append(errs, fmt.Sprintf("%d: upload %v", row.ID, uerr))
+				continue
+			}
+			patch := map[string]any{
+				"thumbnail_blob_name": tName,
+				"thumbnail_url":       blobURL(cfg.azureAccountName, container, tName, ""),
+			}
+			if perr := supabasePatch(ctx, cfg, "generated_images", fmt.Sprintf("id=eq.%d", row.ID), patch); perr != nil {
+				failed++
+				errs = append(errs, fmt.Sprintf("%d: patch %v", row.ID, perr))
+				continue
+			}
+			processed++
+		}
+
+		if len(errs) > 5 {
+			errs = errs[:5]
+		}
+		json.NewEncoder(w).Encode(map[string]any{
+			"ok":         true,
+			"candidates": len(rows),
+			"processed":  processed,
+			"failed":     failed,
+			"errors":     errs,
 		})
 	}
 }
@@ -1544,12 +1787,17 @@ func imageTestGeminiHandler(cfg config) http.HandlerFunc {
 		}
 
 		json.NewEncoder(w).Encode(map[string]any{
-			"status":       "ok",
-			"message":      "Gemini API is reachable and key is valid",
-			"key_set":      true,
-			"model":        "gemini-2.5-flash",
-			"ping_reply":   reply,
-			"finishReason": func() string { if len(gResp.Candidates) > 0 { return gResp.Candidates[0].FinishReason }; return "" }(),
+			"status":     "ok",
+			"message":    "Gemini API is reachable and key is valid",
+			"key_set":    true,
+			"model":      "gemini-2.5-flash",
+			"ping_reply": reply,
+			"finishReason": func() string {
+				if len(gResp.Candidates) > 0 {
+					return gResp.Candidates[0].FinishReason
+				}
+				return ""
+			}(),
 		})
 	}
 }
@@ -1669,7 +1917,7 @@ func infographicSaveHandler(cfg config) http.HandlerFunc {
 			if err == nil {
 				putURL := blobURL(cfg.azureAccountName, container, blobName, sasQuery)
 				layoutBytes, _ := json.Marshal(req.LayoutJSON)
-				
+
 				ureq, _ := http.NewRequest(http.MethodPut, putURL, bytes.NewReader(layoutBytes))
 				ureq.Header.Set("x-ms-blob-type", "BlockBlob")
 				ureq.Header.Set("Content-Type", "application/json")
@@ -1688,14 +1936,14 @@ func infographicSaveHandler(cfg config) http.HandlerFunc {
 		// 2. Save to Supabase
 		ctx := r.Context()
 		dbEntry := map[string]any{
-			"module_number":  req.ModuleNumber,
-			"video_number":   req.VideoNumber,
-			"sentence_id":    req.SentenceID,
-			"topic":          req.Topic,
-			"style":          req.Style,
-			"layout_json":    req.LayoutJSON,
+			"module_number":   req.ModuleNumber,
+			"video_number":    req.VideoNumber,
+			"sentence_id":     req.SentenceID,
+			"topic":           req.Topic,
+			"style":           req.Style,
+			"layout_json":     req.LayoutJSON,
 			"azure_blob_name": blobName,
-			"status":         "saved_to_azure",
+			"status":          "saved_to_azure",
 		}
 
 		if err := supabasePost(ctx, cfg, "infographics", dbEntry); err != nil {
@@ -2071,6 +2319,7 @@ func main() {
 	mux.Handle("/api/images/generate", observe(cfg, imageGenerateHandler(cfg)))
 	mux.Handle("/api/images/enhance-prompt", observe(cfg, imageEnhancePromptHandler(cfg)))
 	mux.Handle("/api/images/save", observe(cfg, imageSaveHandler(cfg)))
+	mux.Handle("/api/images/backfill-thumbnails", observe(cfg, imageThumbnailBackfillHandler(cfg)))
 	mux.Handle("/api/images/test-gemini", observe(cfg, imageTestGeminiHandler(cfg)))
 	mux.Handle("/api/infographics/generate", observe(cfg, infographicGenerateHandler(cfg)))
 	mux.Handle("/api/infographics/save", observe(cfg, infographicSaveHandler(cfg)))

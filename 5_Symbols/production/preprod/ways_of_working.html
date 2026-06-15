@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ways of Working | Claude AI Certification</title>
+  <meta name="description" content="Ways of working for content planning, table reading, and real-time AI image generation.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #030712; --bg-card: rgba(17,24,39,0.8); --text-main: #f3f4f6; --text-muted: #9ca3af;
+      --primary: #8b5cf6; --secondary: #3b82f6; --accent: #f59e0b; --good: #10b981;
+      --font-title: 'Outfit', sans-serif; --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-dark);
+      background-image: radial-gradient(circle at 10% 20%, rgba(139,92,246,0.08) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(59,130,246,0.08) 0%, transparent 40%);
+      color: var(--text-main); font-family: var(--font-body); line-height: 1.6; padding-bottom: 80px;
+    }
+    .container { max-width: 900px; margin: 0 auto; padding: 0 24px; }
+    header { text-align: center; padding: 48px 0 24px; }
+    .badge { display: inline-block; padding: 6px 16px; background: rgba(139,92,246,0.1); border: 1px solid rgba(139,92,246,0.2); border-radius: 100px; font-size: 0.8rem; font-weight: 600; color: var(--primary); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 14px; }
+    h1 { font-family: var(--font-title); font-size: 2.4rem; font-weight: 800; margin-bottom: 10px; }
+    header p { color: var(--text-muted); max-width: 600px; margin: 0 auto; }
+    
+    .card {
+      background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px;
+      padding: 32px; margin-bottom: 24px; backdrop-filter: blur(12px);
+    }
+    
+    .image-container {
+      margin-top: 24px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: #000;
+    }
+    .image-container img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    
+    .process-steps {
+      margin-top: 24px;
+      display: grid;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .step-item {
+      display: flex;
+      gap: 16px;
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-radius: 12px;
+    }
+    .step-number {
+      font-family: var(--font-title);
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--primary);
+    }
+    .step-text h3 {
+      font-family: var(--font-title);
+      font-size: 1.1rem;
+      margin-bottom: 4px;
+    }
+    .step-text p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+    
+    footer { text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 48px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
+    footer a { color: var(--secondary); text-decoration: none; }
+  </style>
+  <script src="../../../shared/nav.js"></script>
+  <script src="../../../shared/seo.js" defer></script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="badge">Ways of Working</div>
+      <h1>🎨 Visual Script Table Read Method</h1>
+      <p>How we design and validate content simultaneously through real-time asset generation and active reading.</p>
+    </header>
+
+    <div class="card">
+      <h2 style="font-family: var(--font-title); margin-bottom: 16px;">📖 The "Create Right, Paste Left, Read Out Loud" Loop</h2>
+      <p style="margin-bottom: 16px;">
+        During initial script table reads, we don't just review text — we actively visualize the final video. By generating context-specific images side-by-side with the narration text, we immediately understand if the script works visually and structurally.
+      </p>
+      
+      <div class="process-steps">
+        <div class="step-item">
+          <div class="step-number">01</div>
+          <div class="step-text">
+            <h3>Read Out Loud</h3>
+            <p>Perform verbal run-throughs of the script to check natural timing, vocal pacing, and flow.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-number">02</div>
+          <div class="step-text">
+            <h3>Create on Right</h3>
+            <p>Generate high-fidelity research images and visual assets on the right-hand panel using AI models.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-number">03</div>
+          <div class="step-text">
+            <h3>Paste on Left</h3>
+            <p>Immediately map and paste those generated images into the script cues on the left-hand panel, tying them to exact sentences.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="image-container">
+        <img src="../../../3_Simulation/waysOfWorking/gemini_imagecreate.png" alt="Gemini Image Creation Flow">
+      </div>
+    </div>
+
+    <footer>
+      <p>
+        <a href="planning.html">← Back to Planning Hub</a>
+      </p>
+    </footer>
+  </div>
+  <script src="../../../shared/debug-panel.js"></script>
+</body>
+</html>

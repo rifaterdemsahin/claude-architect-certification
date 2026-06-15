@@ -357,7 +357,7 @@ function renderRelationsMarkup(container, fileName) {
 
       <div style="margin-top:6px; padding-top:5px; border-top:1px solid rgba(255,255,255,0.04); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:4px;">
         <span style="font-size:0.7rem; font-weight:bold; color:var(--muted);">📋 Link to Sentence:</span>
-        <select id="${sentDropId}" onchange="linkAssetToSentence('${container}', '${safeFile}', this)" style="background:rgba(255,255,255,0.08); border:1px solid rgba(59,130,246,0.3); border-radius:4px; color:var(--text); font-size:0.65rem; padding:1px 3px; outline:none; max-width: 140px; cursor:pointer;">
+        <select id="${sentDropId}" data-container="${container}" data-name="${fileName}" onchange="linkAssetToSentence('${container}', '${safeFile}', this)" style="background:rgba(255,255,255,0.08); border:1px solid rgba(59,130,246,0.3); border-radius:4px; color:var(--text); font-size:0.65rem; padding:1px 3px; outline:none; max-width: 140px; cursor:pointer;">
           <option value="">-- choose sentence --</option>
         </select>
       </div>

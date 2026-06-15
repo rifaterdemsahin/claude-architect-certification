@@ -544,7 +544,7 @@
             <div class="sentence-text" id="${s.id}-text">${escHtml(s.text)}</div>
           </div>
           <div class="sentence-actions">
-            ${s.imageUrl ? `<img class="sentence-img-preview" src="${s.imageUrl}" onclick="openModal('${s.imageUrl}', '${escHtml(s.text)}')">` : ''}
+            ${s.imageUrl ? `<img class="sentence-img-preview" src="${s.thumbUrl || s.imageUrl}" onclick="openModal('${s.imageUrl}', '${escHtml(s.text)}')">` : ''}
             <span class="sentence-status-icon">${s.status === 'done' ? '✅' : s.status === 'error' ? '❌' : s.status === 'processing' ? '⏳' : '⏺️'}</span>
             <button class="btn btn-sm btn-secondary" onclick="editSentence('${s.id}')">✏️</button>
             <button class="btn btn-sm btn-secondary" onclick="enhanceSentence('${s.id}')">✨</button>
@@ -660,10 +660,39 @@
 
           const data = await res.json();
           s.imageUrl = data.image_url;
+          // Inline data URL displays immediately; thumbnail falls back to it
+          // until the server returns a persisted thumbnail reference.
+          s.thumbUrl = data.image_url;
           s.status = 'done';
           s.error = null;
 
-          results.push({ sentenceId: s.id, prompt: s.text, imageUrl: data.image_url, module: modNum, video: vidNum });
+          // Persist original + thumbnail to Azure & Supabase (best-effort).
+          try {
+            const saveRes = await fetch('/api/images/save', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                image_url: data.image_url,
+                module_number: modNum,
+                video_number: vidNum,
+                prompt: s.text
+              })
+            });
+            if (saveRes.ok) {
+              const saved = await saveRes.json();
+              s.azureUrl = saved.url || null;
+              s.thumbnailUrl = saved.thumbnail_url || null;
+            }
+          } catch (saveErr) {
+            console.warn('save to azure/supabase failed:', saveErr);
+          }
+
+          results.push({
+            sentenceId: s.id, prompt: s.text,
+            imageUrl: data.image_url, thumbUrl: s.thumbUrl,
+            azureUrl: s.azureUrl || null, thumbnailUrl: s.thumbnailUrl || null,
+            module: modNum, video: vidNum
+          });
         } catch (err) {
           s.status = 'error';
           s.error = err.message;
@@ -698,9 +727,9 @@
       card.style.display = 'block';
       container.innerHTML = results.map(r => `
         <div class="result-card">
-          <img src="${r.imageUrl}" onclick="openModal('${r.imageUrl}', '${escHtml(r.prompt)}')">
+          <img src="${r.thumbUrl || r.imageUrl}" loading="lazy" onclick="openModal('${r.imageUrl}', '${escHtml(r.prompt)}')">
           <div class="label">
-            <span>M${r.module}·V${r.video}</span>
+            <span>M${r.module}·V${r.video}${r.thumbnailUrl ? ' 🖼️' : ''}</span>
             <span style="cursor:pointer;color:var(--secondary);" onclick="downloadImage('${r.imageUrl}', 'm${r.module}_v${r.video}_${Date.now()}')">💾</span>
           </div>
         </div>
