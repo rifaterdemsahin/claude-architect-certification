@@ -343,3 +343,42 @@ Add dynamic linking/filtering between the Video and Sentence dropdown fields on 
 
 
 
+
+
+## 2026-06-14 — 🖼 Auto-Thumbnails on Upload + Supabase Asset Records
+
+### 🎯 Objective
+When uploading research images (`images.html`), automatically generate a small thumbnail, store it alongside the original in Azure Blob Storage, show the thumbnail in the gallery (cheaper than proxying full images), and record an asset reference row in Supabase.
+
+### 📐 Design & Implementation Plan
+1. **Client-side thumbnail generation** (`makeThumbnail`): draw each raster image onto a canvas resized to max 320px, export as JPEG (quality 0.82). SVG / non-raster or any failure → skip thumbnail and fall back to the full image.
+2. **Upload flow**: upload the original blob as today, then upload the thumbnail as a second blob named `__thumb__<originalName>` to the same container. The Go upload handler already accepts arbitrary blob names within allowed containers, so no backend change is needed.
+3. **Gallery display**: hide `__thumb__*` blobs from the main list; for each image, use `__thumb__<name>` as the `<img>` src when present, else the full image. Lightbox always opens the full-resolution original.
+4. **Supabase record**: new `research_assets` table (container, item_name, thumb_name, content_type, size_bytes, UNIQUE(container,item_name)). After a successful upload, upsert a row from the frontend via the supabase client. Recording is non-fatal — a failure only logs a warning so uploads still work before the migration is applied.
+
+### 📐 Validation
+- `go build ./...` for backend stability (no backend change, sanity only).
+- Manually upload an image and confirm: thumbnail blob created, gallery shows thumbnail, `research_assets` row inserted.
+
+## 2026-06-14 — ⚠️ Risk: Scaffolding Risk Analysis & Menu Integration
+
+### 🎯 Objective
+Identify scaffolding risk in pre-production, specifically highlighting video pipeline and delivery pilot pipeline delays, and document "table read" style methods for reversals and artifact generation as mitigations. Add the new Risk menu to the navigation menu structure.
+
+### 📐 Design & Implementation Plan
+1. **Create Document**: Create `5_Symbols/production/preprod/scaffolding_risk.md` with structured details on scaffolding risk and mitigations.
+2. **Navigation Config**: Add `8. ⚠️ Risk` as a category dropdown in `navigation_config.json` and a debug menu link for the new file.
+3. **Fallback Sync**: Update fallback arrays inside `index.html`, `markdown_renderer.html`, `home.html`, and `5_Symbols/course_src/templates/markdown_renderer.html` to reflect the new menu structures and prevent menu drift.
+
+### ✅ Outcome
+Created scaffolding risk document and successfully synchronized navigation config and all fallbacks. Verified Go compilation.
+
+## 2026-06-14 — 🚀 Tools Package Restructure & Research Deployment
+
+### 🎯 Objective
+Deploy the latest research page edits (video filtering logic, images page, and Supabase relationships) and fix the Go compilation issue caused by redeclared `main` functions in `5_Symbols/tools`.
+
+### 📐 Design & Implementation Plan
+1. **Move Main Utilities**: Move `sync_secrets.go` and `generate_pipeline_images.go` into their own subdirectories under `5_Symbols/tools/` to avoid conflicts during `go build ./...`.
+2. **Commit and Deploy**: Commit the uncommitted research files and migrations, then push to GitHub to trigger the Fly.io deployment.
+3. **Database Migration**: Ensure the foreign key repoint migration is documented for execution on Supabase.
