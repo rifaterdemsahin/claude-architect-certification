@@ -70,6 +70,47 @@
     }
     .framework-caption { color: var(--text-muted); font-size: 0.9rem; margin-top: 16px; }
 
+    .iterations {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+      gap: 24px;
+      margin: 0 auto 48px;
+      max-width: 1100px;
+    }
+    @media (max-width: 768px) {
+      .iterations { grid-template-columns: 1fr; }
+    }
+    .iteration-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+    }
+    .iteration-card img {
+      width: 100%;
+      height: auto;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .iteration-label {
+      display: inline-block;
+      align-self: flex-start;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--primary);
+      background: rgba(139, 92, 246, 0.12);
+      border: 1px solid rgba(139, 92, 246, 0.25);
+      padding: 4px 12px;
+      border-radius: 100px;
+      margin-bottom: 16px;
+    }
+    .iteration-card .framework-caption { margin-top: 14px; }
+
     .grid-2 {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
@@ -172,9 +213,17 @@
       <p>A step-by-step roadmap for building the AI Certification Course audience, validation loops, and company framework.</p>
     </header>
 
-    <div class="framework-visual">
-      <img src="../../../3_Simulation/customer_discovery/customer_development.png" alt="Customer Development Process Map">
-      <p class="framework-caption"><strong>Core Concept:</strong> Translating personal brand authority into product-market validation and company building.</p>
+    <div class="iterations">
+      <div class="iteration-card">
+        <span class="iteration-label">🔁 Iteration v1</span>
+        <img src="../../../3_Simulation/customer_discovery/customer_development_v1.png" alt="Customer Development Process Map — Version 1">
+        <p class="framework-caption"><strong>v1:</strong> First-pass map translating personal brand authority into product-market validation and company building.</p>
+      </div>
+      <div class="iteration-card">
+        <span class="iteration-label">🔁 Iteration v2</span>
+        <img src="../../../3_Simulation/customer_discovery/customer_development_v2.jpeg" alt="Customer Development Process Map — Version 2">
+        <p class="framework-caption"><strong>v2:</strong> Refined iteration sharpening the validation loops and company-building flow.</p>
+      </div>
     </div>
 
     <!-- 4 Stages Grid -->
