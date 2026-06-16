@@ -27,9 +27,22 @@ generate/upload image
                      (box-average downscale, longest edge ≤ 320px, JPEG q80)
 ```
 
-### 🔩 Naming rule
-`thumbBlobName(original)` → strip extension, append `_thumb.jpg`.
-`m1_v2_1718000000.png` → `m1_v2_1718000000_thumb.jpg`
+### 🔩 Naming rule — `__thumb__` prefix (app-wide convention)
+The gallery pages (`research/images.html`, `scripts/index.html`) discover a
+thumbnail by listing the container and checking for `__thumb__` + the original
+name (**same extension kept**). The backend MUST match this or the UI never
+finds the thumbnail.
+
+`thumbBlobName(original)` → `"__thumb__" + original`
+`m1_v2_1718000000.png` → `__thumb__m1_v2_1718000000.png` (JPEG bytes inside)
+
+### 🌐 URL rule — serve via proxy, not raw blob
+The `research-images` container is **private** → raw blob URLs return HTTP 404
+in the browser. Every page loads blobs through the same-origin proxy
+`/api/research/file?container=research-images&name=<blob>` (signs a short-lived
+read SAS). So Supabase stores **proxy URLs** in `image_url`/`thumbnail_url`
+(`researchFileProxyURL()`), while `azure_blob_name`/`thumbnail_blob_name` hold
+the canonical blob names.
 
 ### 📐 Thumbnail spec
 | Param | Value | Why |
@@ -48,7 +61,8 @@ generate/upload image
 
 ### New helpers
 - `uploadBlobToAzure(ctx, cfg, container, blobName, contentType, data)` — single PUT-block-blob path reused by original **and** thumbnail (kills duplicated SAS/PUT code).
-- `thumbBlobName(original)` — derives the `_thumb.jpg` name.
+- `thumbBlobName(original)` — derives the `__thumb__<name>` name (app convention).
+- `researchFileProxyURL(container, name)` — builds the same-origin `/api/research/file` URL that actually loads (private container).
 - `generateThumbnail(data, maxEdge)` — decode → box-average downscale → JPEG encode.
 - `supabasePatch(ctx, cfg, table, query, body)` — `PATCH` helper for backfill row updates.
 

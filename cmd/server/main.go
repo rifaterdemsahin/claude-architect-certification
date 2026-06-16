@@ -718,7 +718,17 @@ func blobURL(accountName, container, name, sasQuery string) string {
 	if name != "" {
 		base += "/" + url.PathEscape(name)
 	}
+	if sasQuery == "" {
+		return base
+	}
 	return base + "?" + sasQuery
+}
+
+// researchFileProxyURL builds the same-origin proxy path the pages use to load
+// a blob. The research-images container is private, so raw blob URLs 404 — blobs
+// must be served through /api/research/file, which signs a short-lived SAS.
+func researchFileProxyURL(container, name string) string {
+	return "/api/research/file?container=" + container + "&name=" + url.QueryEscape(name)
 }
 
 // uploadBlobToAzure PUTs a block blob into the given container. Used for both
@@ -749,14 +759,16 @@ func uploadBlobToAzure(ctx context.Context, cfg config, container, blobName, con
 	return nil
 }
 
+// thumbPrefix matches the convention used by the image gallery pages
+// (research/images.html, scripts/index.html): a thumbnail for blob "X" is the
+// blob "__thumb__X" in the same container. Keeping the original extension in
+// the name lets those pages discover thumbnails by listing the container.
+const thumbPrefix = "__thumb__"
+
 // thumbBlobName derives the thumbnail blob name from an original blob name,
-// e.g. "m1_v2_123.png" → "m1_v2_123_thumb.jpg".
+// e.g. "m1_v2_123.png" → "__thumb__m1_v2_123.png".
 func thumbBlobName(original string) string {
-	base := original
-	if i := strings.LastIndexByte(original, '.'); i >= 0 {
-		base = original[:i]
-	}
-	return base + "_thumb.jpg"
+	return thumbPrefix + original
 }
 
 // generateThumbnail decodes a PNG/JPEG image and produces a downscaled JPEG
@@ -1583,10 +1595,12 @@ func imageSaveHandler(cfg config) http.HandlerFunc {
 			}
 		}
 
-		imageURL := blobURL(cfg.azureAccountName, container, blobName, "") // URL without SAS for DB
+		// Store loadable same-origin proxy URLs (the container is private, so
+		// raw blob URLs 404 in the browser). Blob names remain the canonical ref.
+		imageURL := researchFileProxyURL(container, blobName)
 		var thumbURL string
 		if thumbName != "" {
-			thumbURL = blobURL(cfg.azureAccountName, container, thumbName, "")
+			thumbURL = researchFileProxyURL(container, thumbName)
 		}
 
 		// ── Save both references to Supabase ──
@@ -1695,7 +1709,7 @@ func imageThumbnailBackfillHandler(cfg config) http.HandlerFunc {
 			}
 			patch := map[string]any{
 				"thumbnail_blob_name": tName,
-				"thumbnail_url":       blobURL(cfg.azureAccountName, container, tName, ""),
+				"thumbnail_url":       researchFileProxyURL(container, tName),
 			}
 			if perr := supabasePatch(ctx, cfg, "generated_images", fmt.Sprintf("id=eq.%d", row.ID), patch); perr != nil {
 				failed++

@@ -178,6 +178,11 @@
               "url": "https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/"
             },
             {
+              "label": "🧪 Supabase SQL Queries",
+              "url": "https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/sql/05ea76ba-cb44-44c6-b83a-f85a226bc315",
+              "description": "Execute and manage Supabase SQL queries."
+            },
+            {
               "label": "🗄 Database Schema",
               "url": "https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/database/schemas"
             },
@@ -782,6 +787,10 @@
     {
       "label": "   └─ ✅ todos.md",
       "url": "markdown_renderer.html?file=todos.md"
+    },
+    {
+      "label": "🌐 Live Site",
+      "url": "https://claude-architect-certification.fly.dev"
     }
   ]
 }
