@@ -26,6 +26,15 @@ This document defines how AI agents interact with the **Claude AI Certification 
 
 ## 📅 Agent Activity Log
 
+### 2026-06-16
+- **Task:** 🏷️ Add release version and deployed commit link to the homepage footer.
+- **Action:**
+    - Added a release line to the `<footer>` in `index.html`: `🚀 Release v0.9 · deployed commit <hash>`.
+    - The commit hash links to the exact deployed commit on GitHub (`/commit/<full-sha>`); version `v0.9` sourced from the Project Intent in `claude.md` (no git tags / VERSION file exist yet).
+    - Note: the commit hash is currently hardcoded. To auto-update per deploy, inject `${{ github.sha }}` into the footer at build time via `.github/workflows/static.yml`.
+    - Verified the footer renders live at the GitHub Pages URL after deploy (Actions `static.yml` ✅).
+- **Status:** IMPLEMENTED, COMMITTED, PUSHED, DEPLOYED.
+
 ### 2026-06-09
 - **Task:** 🛠️ Fix GitHub Actions npm dependency caching and workspace path reference failures.
 - **Action:**
