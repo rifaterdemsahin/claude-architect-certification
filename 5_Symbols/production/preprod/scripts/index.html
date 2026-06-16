@@ -2230,7 +2230,15 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
       try {
         const fileUrl = `/api/research/file?container=${container}&name=${encodeURIComponent(name)}`;
         const r = await fetch(fileUrl);
-        const text = r.ok ? await r.text() : 'Error loading note contents.';
+        let text;
+        if (r.ok) {
+          text = await r.text();
+        } else if (r.status === 404) {
+          text = `⚠️ Note file not found in storage.\n\n"${name}" is linked to this item but the file does not exist in the "${container}" container. It may have been a mock/seed entry or the upload was removed.\n\nFix: upload the note via the Research › Notes page, then re-link it — or unlink this stale reference.`;
+        } else {
+          const detail = (await r.text().catch(() => '')).trim();
+          text = `Error loading note contents (HTTP ${r.status}).${detail ? '\n\n' + detail : ''}`;
+        }
         document.getElementById('rnote-modal-text').value = text;
       } catch (err) {
         document.getElementById('rnote-modal-text').value = 'Error: ' + err.message;
