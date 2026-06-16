@@ -508,6 +508,8 @@
     .btn-sent-img:hover { background: rgba(16,185,129,0.18); color: #6ee7b7; }
     .btn-sent-ext-link { background: rgba(59,130,246,0.08); color: #60a5fa; border: 1px solid rgba(59,130,246,0.18); padding: 3px 7px; border-radius: 5px; font-size: 0.68rem; cursor: pointer; font-family: var(--font-body); line-height: 1.4; }
     .btn-sent-ext-link:hover { background: rgba(59,130,246,0.18); color: #93c5fd; }
+    .btn-sent-imgprompt { background: rgba(245,158,11,0.08); color: #fbbf24; border: 1px solid rgba(245,158,11,0.18); padding: 3px 7px; border-radius: 5px; font-size: 0.68rem; cursor: pointer; font-family: var(--font-body); line-height: 1.4; }
+    .btn-sent-imgprompt:hover { background: rgba(245,158,11,0.18); color: #fcd34d; }
     .sent-imgs { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 2px; padding-left: 100px; }
     .sent-imgs:empty { display: none; }
     .sent-links { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 2px; padding-left: 100px; }
@@ -1273,6 +1275,7 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
                   <button class="btn-sent-edit" onclick="sentEdit('${rid}')">✏️</button>
                   <button class="btn-sent-link" onclick="copySentenceLink('${rid}', ${s.id})" title="Copy link to this sentence">📌</button>
                   <button class="btn-sent-img" onclick="openSentImageModal(${s.id},'${rid}')" title="Link an image to this sentence">🖼</button>
+                  <button class="btn-sent-imgprompt" onclick="copyImagePrompt('${rid}')" title="Copy an image-generation prompt for this sentence to the clipboard">🎨</button>
                   <button class="btn-sent-ext-link" onclick="openSentLinkModal(${s.id},'${rid}')" title="Manage links for this sentence">🌐</button>
                   <button class="btn-sent-delete" onclick="sentDelete('${elementId}',${s.id})">🗑</button>
                 </div>
@@ -1521,6 +1524,40 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
         })
         .catch(err => {
           console.error('Failed to copy link: ', err);
+        });
+    };
+
+    // Copy an image-generation prompt for a sentence to the clipboard.
+    // The prompt asks for a PNG + infographic rendered in the course's visual style.
+    window.copyImagePrompt = function(rid) {
+      const view = document.getElementById('sent-view-' + rid);
+      const sentenceText = view ? (view.getAttribute('data-text') || '') : '';
+      const typeEl = view ? view.querySelector('.sent-badge') : null;
+      const sentenceType = typeEl ? typeEl.textContent.trim() : '';
+
+      const prompt = [
+        `Create a high-resolution PNG infographic that visually illustrates the following script ${sentenceType ? `(${sentenceType}) ` : ''}sentence from the Claude AI Certification course:`,
+        ``,
+        `"${sentenceText}"`,
+        ``,
+        `Requirements:`,
+        `- Output a PNG image and design it as a clear, self-explanatory infographic (not just a decorative picture).`,
+        `- Use the same visual style as the rest of the course: a dark background (#030712) with subtle purple (#8b5cf6) and blue (#3b82f6) radial glows, amber (#f59e0b) accents, clean modern sans-serif typography (Outfit for headings, Plus Jakarta Sans for body), rounded cards, and a polished tech/AI aesthetic.`,
+        `- Keep it minimal, legible, and on-brand — high contrast, generous spacing, and a single clear focal idea.`,
+        `- Include short labels or callouts where they aid understanding; avoid clutter.`
+      ].join('\n');
+
+      navigator.clipboard.writeText(prompt)
+        .then(() => {
+          const btn = document.querySelector(`#sent-view-${rid} .btn-sent-imgprompt`);
+          if (btn) {
+            const orig = btn.textContent;
+            btn.textContent = '✅';
+            setTimeout(() => { btn.textContent = orig; }, 1500);
+          }
+        })
+        .catch(err => {
+          console.error('Failed to copy image prompt: ', err);
         });
     };
 
