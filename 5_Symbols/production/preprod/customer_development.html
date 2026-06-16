@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Development Process | Claude AI Certification</title>
+  <meta name="description" content="Detailed explanation of the Customer Development Process for the Personal Brand & AI Certification Course.">
+  <link rel="icon" type="image/png" href="../../../favicon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #030712;
+      --bg-card: rgba(17, 24, 39, 0.85);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --primary: #8b5cf6;
+      --secondary: #3b82f6;
+      --accent: #f59e0b;
+      --success: #10b981;
+      --teal: #14b8a6;
+      --font-title: 'Outfit', sans-serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-dark);
+      background-image: radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.08) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(20, 184, 166, 0.06) 0%, transparent 40%);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      line-height: 1.6;
+      padding-top: 70px;
+      padding-bottom: 80px;
+    }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+    header { text-align: center; margin-bottom: 36px; }
+    .badge {
+      display: inline-block;
+      padding: 6px 16px;
+      background: linear-gradient(135deg, rgba(20, 184, 166, 0.2), rgba(139, 92, 246, 0.2));
+      border: 1px solid rgba(20, 184, 166, 0.3);
+      border-radius: 100px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--teal);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 14px;
+    }
+    h1 { font-family: var(--font-title); font-size: 2.8rem; font-weight: 900; margin-bottom: 10px; }
+    header p { color: var(--text-muted); max-width: 720px; margin: 0 auto; font-size: 1.1rem; }
+
+    .framework-visual {
+      text-align: center;
+      margin: 0 auto 48px;
+      max-width: 920px;
+      background: var(--bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 24px;
+      padding: 28px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    }
+    .framework-visual img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .framework-caption { color: var(--text-muted); font-size: 0.9rem; margin-top: 16px; }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+    @media (max-width: 768px) {
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+
+    .content-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 24px;
+      padding: 32px;
+      height: 100%;
+    }
+    .content-card h2 {
+      font-family: var(--font-title);
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+      color: var(--teal);
+      border-bottom: 1px solid rgba(20, 184, 166, 0.2);
+      padding-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .step-number {
+      background: var(--primary);
+      color: white;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      font-weight: bold;
+    }
+
+    .details-list {
+      list-style: none;
+      padding-left: 0;
+    }
+    .details-list li {
+      margin-bottom: 16px;
+      position: relative;
+      padding-left: 28px;
+    }
+    .details-list li::before {
+      content: '⚡';
+      position: absolute;
+      left: 0;
+      top: 2px;
+      font-size: 0.9rem;
+    }
+    .details-list strong {
+      color: var(--text-main);
+      display: block;
+      margin-bottom: 4px;
+    }
+    .details-list p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .badge-tag {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--accent);
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.2);
+      padding: 2px 8px;
+      border-radius: 4px;
+      display: inline-block;
+      margin-bottom: 6px;
+    }
+
+    footer {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+    footer a { color: var(--secondary); text-decoration: none; }
+  </style>
+  <script src="../../../shared/nav.js"></script>
+<script src="../../../shared/seo.js" defer></script></head>
+<body>
+  <div class="container">
+    <header>
+      <div class="badge">📈 Customer Development</div>
+      <h1>Personal Brand Customer Development</h1>
+      <p>A step-by-step roadmap for building the AI Certification Course audience, validation loops, and company framework.</p>
+    </header>
+
+    <div class="framework-visual">
+      <img src="../../../3_Simulation/customer_discovery/customer_development.png" alt="Customer Development Process Map">
+      <p class="framework-caption"><strong>Core Concept:</strong> Translating personal brand authority into product-market validation and company building.</p>
+    </div>
+
+    <!-- 4 Stages Grid -->
+    <div class="grid-2">
+      <!-- Stage 1 -->
+      <div class="content-card">
+        <h2><span class="step-number">1</span> Customer Discovery</h2>
+        <span class="badge-tag">Mindset: Jab, Jab...</span>
+        <ul class="details-list">
+          <li>
+            <strong>Consolidate to Core Tasks</strong>
+            <p>Identify the primary problem and outline persona development. Who is the system architect needing AI validation?</p>
+          </li>
+          <li>
+            <strong>Test MVP (Video Series)</strong>
+            <p>Build and distribute a high-value YouTube series as a fast MVP to gauge audience resonance and engagement.</p>
+          </li>
+          <li>
+            <strong>Initial Funnel Setup</strong>
+            <p>Direct viewers towards organic traffic systems and initial signup paths.</p>
+          </li>
+          <li>
+            <strong>Pivot Check</strong>
+            <p>Continuously review incoming responses. If the audience does not connect, pivot organic traffic strategies.</p>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Stage 2 -->
+      <div class="content-card">
+        <h2><span class="step-number">2</span> Customer Validation</h2>
+        <span class="badge-tag">Mindset: Jab, Jab...</span>
+        <ul class="details-list">
+          <li>
+            <strong>Prosumer Input</strong>
+            <p>Gather explicit input from highly engaged user-advocates (prosumers) who participate in pilot tests.</p>
+          </li>
+          <li>
+            <strong>Define Persona & PMF (Pilot)</strong>
+            <p>Prove Product-Market Fit with a targeted pilot group. Deepen understanding of persona pain points.</p>
+          </li>
+          <li>
+            <strong>Map Business Model</strong>
+            <p>Clarify how pricing, memberships, and content scaling interact to create a sustainable cycle.</p>
+          </li>
+          <li>
+            <strong>Scale Sales & Marketing</strong>
+            <p>Utilize paid memberships (LinkedIn, Subscribes) to fuel ongoing outreach, validating financial commitment.</p>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Stage 3 -->
+      <div class="content-card">
+        <h2><span class="step-number">3</span> Customer Creation</h2>
+        <span class="badge-tag">Mindset: Right Hook</span>
+        <ul class="details-list">
+          <li>
+            <strong>Value Delivery</strong>
+            <p>Deliver the core value proposition of self-learning recorded models over standard paper certificates.</p>
+          </li>
+          <li>
+            <strong>Maximize Value & Scale Operations</strong>
+            <p>Standardize operational flows to increase productivity and maintain high-fidelity output.</p>
+          </li>
+          <li>
+            <strong>Increase Content Output</strong>
+            <p>Double down on content generation to build awareness at scale and secure the "Right Hook" monetization.</p>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Stage 4 -->
+      <div class="content-card">
+        <h2><span class="step-number">4</span> Company Building</h2>
+        <span class="badge-tag">Mindset: Long-Term Growth</span>
+        <ul class="details-list">
+          <li>
+            <strong>Scale Infrastructure</strong>
+            <p>Transition from lightweight tools to durable infrastructure (Supabase, Fly.io, Azure Key Vault).</p>
+          </li>
+          <li>
+            <strong>Systemize Operations</strong>
+            <p>Document playbooks and establish standard operating procedures for continuous delivery.</p>
+          </li>
+          <li>
+            <strong>HIRE (Team & Contractors)</strong>
+            <p>Establish a core team and trusted contractors to handle logistics, support, and administrative overhead.</p>
+          </li>
+          <li>
+            <strong>Support deliverypilot.net</strong>
+            <p>Establish robust support for customers and logistics, closing the feedback loop.</p>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <footer>
+      <p style="margin-bottom: 8px;">
+        <a href="planning.html">← Back to Planning Hub</a>
+        &nbsp;&nbsp;·&nbsp;&nbsp;
+        <a href="../../../index.html">Go to Home</a>
+      </p>
+      <p style="font-size: 0.85rem; opacity: 0.8;">
+        Instructor: <a href="https://www.linkedin.com/in/rifaterdemsahin" target="_blank" style="color: #93c5fd; text-decoration: underline;">Rifat Erdem Sahin</a>
+      </p>
+    </footer>
+  </div>
+
+  <script src="../../../shared/debug-panel.js"></script>
+</body>
+</html>
