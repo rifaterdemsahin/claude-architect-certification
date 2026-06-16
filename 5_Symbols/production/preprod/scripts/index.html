@@ -506,8 +506,29 @@
     /* Sentence image link button + thumbnails */
     .btn-sent-img { background: rgba(16,185,129,0.08); color: #34d399; border: 1px solid rgba(16,185,129,0.18); padding: 3px 7px; border-radius: 5px; font-size: 0.68rem; cursor: pointer; font-family: var(--font-body); line-height: 1.4; }
     .btn-sent-img:hover { background: rgba(16,185,129,0.18); color: #6ee7b7; }
+    .btn-sent-ext-link { background: rgba(59,130,246,0.08); color: #60a5fa; border: 1px solid rgba(59,130,246,0.18); padding: 3px 7px; border-radius: 5px; font-size: 0.68rem; cursor: pointer; font-family: var(--font-body); line-height: 1.4; }
+    .btn-sent-ext-link:hover { background: rgba(59,130,246,0.18); color: #93c5fd; }
     .sent-imgs { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 2px; padding-left: 100px; }
     .sent-imgs:empty { display: none; }
+    .sent-links { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 2px; padding-left: 100px; }
+    .sent-links:empty { display: none; }
+    .sent-link-tag {
+      background: rgba(59, 130, 246, 0.08);
+      border: 1px solid rgba(59, 130, 246, 0.18);
+      padding: 3px 8px;
+      border-radius: 5px;
+      font-size: 0.72rem;
+      color: #60a5fa;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s;
+    }
+    .sent-link-tag:hover {
+      background: rgba(59, 130, 246, 0.18);
+      color: white;
+    }
     .sent-img-thumb { position: relative; width: 56px; height: 56px; border-radius: 7px; overflow: hidden; border: 1px solid rgba(255,255,255,0.12); background: rgba(0,0,0,0.3); cursor: pointer; flex-shrink: 0; }
     .sent-img-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .sent-img-thumb .img-del { position: absolute; top: 1px; right: 1px; width: 16px; height: 16px; line-height: 14px; text-align: center; border-radius: 4px; background: rgba(0,0,0,0.7); color: #f87171; font-size: 0.7rem; border: none; cursor: pointer; padding: 0; opacity: 0; transition: opacity 0.15s; }
@@ -1223,11 +1244,14 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
                 <div class="sent-text">${esc2(s.sentence_text)}</div>
                 <div class="sent-row-btns">
                   <button class="btn-sent-edit" onclick="sentEdit('${rid}')">✏️</button>
+                  <button class="btn-sent-link" onclick="copySentenceLink('${rid}', ${s.id})" title="Copy link to this sentence">📌</button>
                   <button class="btn-sent-img" onclick="openSentImageModal(${s.id},'${rid}')" title="Link an image to this sentence">🖼</button>
+                  <button class="btn-sent-ext-link" onclick="openSentLinkModal(${s.id},'${rid}')" title="Manage links for this sentence">🌐</button>
                   <button class="btn-sent-delete" onclick="sentDelete('${elementId}',${s.id})">🗑</button>
                 </div>
               </div>
               <div class="sent-imgs" id="sent-imgs-${rid}" data-sent-id="${s.id}"></div>
+              <div class="sent-links" id="sent-links-${rid}" data-sent-id="${s.id}"></div>
               <div class="sent-edit-form" id="sent-edit-${rid}" style="display:none;">
                 <div class="sent-edit-row">
                   ${sentSelect(`sent-type-${rid}`, TYPE_OPTIONS, s.sentence_type)}
@@ -1296,7 +1320,7 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
       container.innerHTML = renderSentencesPanel(sentences, fmt, dur, elementId, Number(sid) || null);
       if (wasOpen) { const d = container.querySelector('details.sentences-panel'); if (d) d.open = true; }
       renumberOverallLines();
-      loadSentImages(elementId, sentences);
+      loadSentAssets(elementId, sentences);
 
       // Handle scrolling to sentence hash if targeted
       if (location.hash && location.hash.startsWith('#sent-row-')) {
@@ -1397,12 +1421,13 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
     // image via onerror when an image predates thumbnail generation.
     const imgThumbUrl = (name) => `/api/research/file?container=${IMG_CONTAINER}&name=${encodeURIComponent(THUMB_PREFIX + name)}`;
 
-    // Fetch all image relationships for the given sentences in one query and
-    // render the thumbnails inline under each sentence row.
-    async function loadSentImages(elementId, sentences) {
+    // Fetch all image relationships and external links for the given sentences and render them inline.
+    async function loadSentAssets(elementId, sentences) {
       if (!SUPABASE_URL.includes('supabase.co') || !sentences || !sentences.length) return;
       const ids = sentences.map(s => s.id).filter(Boolean);
       if (!ids.length) return;
+      
+      // Fetch images
       let rels = [];
       try {
         const res = await fetch(
@@ -1411,12 +1436,37 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
         );
         rels = res.ok ? await res.json() : [];
       } catch { rels = []; }
-      const bySent = {};
-      rels.forEach(r => { (bySent[r.sentence_id] = bySent[r.sentence_id] || []).push(r.item_name); });
+      
+      // Fetch external links
+      let links = [];
+      try {
+        const res = await fetch(
+          `${SUPABASE_URL}/rest/v1/sentence_links?sentence_id=in.(${ids.join(',')})`,
+          { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
+        );
+        links = res.ok ? await res.json() : [];
+      } catch { links = []; }
+      
+      const bySentImgs = {};
+      rels.forEach(r => { (bySentImgs[r.sentence_id] = bySentImgs[r.sentence_id] || []).push(r.item_name); });
+      
+      const bySentLinks = {};
+      links.forEach(l => { (bySentLinks[l.sentence_id] = bySentLinks[l.sentence_id] || []).push(l); });
+      
       sentences.forEach(s => {
         const rid = `${elementId}-${s.id}`;
-        renderSentThumbs(rid, s.id, bySent[s.id] || []);
+        renderSentThumbs(rid, s.id, bySentImgs[s.id] || []);
+        renderSentLinksInline(rid, s.id, bySentLinks[s.id] || []);
       });
+    }
+
+    function renderSentLinksInline(rid, sentId, links) {
+      const box = document.getElementById('sent-links-' + rid);
+      if (!box) return;
+      box.innerHTML = links.map(l => `
+        <a class="sent-link-tag" href="${esc2(l.url)}" target="_blank" rel="noopener" title="${esc2(l.url)}">
+          🔗 ${esc2(l.description)}
+        </a>`).join('');
     }
 
     function renderSentThumbs(rid, sentId, names) {
@@ -1666,6 +1716,7 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
       });
       document.addEventListener('keydown', e => {
         if (e.key === 'Escape' && document.getElementById('img-modal').classList.contains('open')) closeSentImageModal();
+        if (e.key === 'Escape' && document.getElementById('link-modal').classList.contains('open')) closeSentLinkModal();
       });
     });
 
@@ -1866,6 +1917,123 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
           '<div class="error"><h2>❌ Failed to Load</h2><p>Could not load from Supabase or local JSON.</p></div>';
       }
     })();
+
+    // ── Sentence ⇄ Link management ─────────────────────────────────────────────
+    let linkModalSentId = null;
+    let linkModalRid = null;
+
+    window.openSentLinkModal = function(sentId, rid) {
+      linkModalSentId = sentId;
+      linkModalRid = rid;
+      const row = document.getElementById('sent-view-' + rid);
+      const text = row ? (row.getAttribute('data-text') || '') : '';
+      document.getElementById('link-modal-sent').textContent = text;
+      document.getElementById('link-url-input').value = '';
+      document.getElementById('link-desc-input').value = '';
+      setLinkStatus('', '');
+      document.getElementById('link-modal').classList.add('open');
+      refreshModalLinks();
+    };
+
+    window.closeSentLinkModal = function() {
+      document.getElementById('link-modal').classList.remove('open');
+      linkModalSentId = null; linkModalRid = null;
+    };
+
+    function setLinkStatus(type, text) {
+      const el = document.getElementById('link-modal-status');
+      if (el) {
+        el.className = 'img-modal-status' + (type ? ' ' + type : '');
+        el.textContent = text;
+      }
+    }
+
+    async function fetchSentLinks(sentId) {
+      try {
+        const res = await fetch(
+          `${SUPABASE_URL}/rest/v1/sentence_links?sentence_id=eq.${sentId}`,
+          { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
+        );
+        return res.ok ? await res.json() : [];
+      } catch { return []; }
+    }
+
+    async function refreshModalLinks() {
+      const listEl = document.getElementById('link-modal-linked-list');
+      const wrap = document.getElementById('link-modal-linked');
+      if (!listEl || !wrap) return;
+      listEl.innerHTML = '<span style="color:var(--text-muted);font-size:0.78rem;">Loading…</span>';
+      
+      const links = await fetchSentLinks(linkModalSentId);
+      if (!links.length) { wrap.style.display = 'none'; return; }
+      wrap.style.display = 'block';
+      
+      listEl.innerHTML = links.map(l => `
+        <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); padding:8px 12px; border-radius:8px; margin-bottom: 6px;">
+          <div style="display:flex; flex-direction:column; gap:2px; min-width:0; flex:1; text-align:left;">
+            <span style="font-weight:600; font-size:0.82rem; color:var(--text-main); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${esc2(l.description)}</span>
+            <a href="${esc2(l.url)}" target="_blank" rel="noopener" style="font-size:0.72rem; color:#60a5fa; text-decoration:none; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${esc2(l.url)}</a>
+          </div>
+          <button class="btn btn-danger btn-sm" onclick="deleteSentLink(${l.id})" style="padding:4px 8px; font-size:0.75rem; margin-left:10px; flex-shrink: 0;">🗑 Delete</button>
+        </div>`).join('');
+    }
+
+    window.addSentLinkUI = async function() {
+      const urlInput = document.getElementById('link-url-input');
+      const descInput = document.getElementById('link-desc-input');
+      const url = urlInput.value.trim();
+      const description = descInput.value.trim();
+      
+      if (!url || !description) {
+        alert('Please fill out both URL and Description.');
+        return;
+      }
+      
+      setLinkStatus('busy', 'Adding link…');
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/sentence_links`, {
+          method: 'POST',
+          headers: sentAuthHeaders(),
+          body: JSON.stringify({ sentence_id: linkModalSentId, url, description })
+        });
+        
+        if (!res.ok) throw new Error(await res.text());
+        
+        setLinkStatus('ok', '✅ Link added');
+        urlInput.value = '';
+        descInput.value = '';
+        await refreshModalLinks();
+        await refreshSentLinksInline(linkModalSentId, linkModalRid);
+      } catch (err) {
+        console.error(err);
+        setLinkStatus('err', '❌ ' + err.message);
+      }
+    };
+
+    window.deleteSentLink = async function(linkId) {
+      if (!confirm('Are you sure you want to delete this link?')) return;
+      setLinkStatus('busy', 'Deleting link…');
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/sentence_links?id=eq.${linkId}`, {
+          method: 'DELETE',
+          headers: sentAuthHeaders()
+        });
+        
+        if (!res.ok) throw new Error(await res.text());
+        
+        setLinkStatus('ok', '✅ Link deleted');
+        await refreshModalLinks();
+        await refreshSentLinksInline(linkModalSentId, linkModalRid);
+      } catch (err) {
+        console.error(err);
+        setLinkStatus('err', '❌ ' + err.message);
+      }
+    };
+
+    async function refreshSentLinksInline(sentId, rid) {
+      const links = await fetchSentLinks(sentId);
+      renderSentLinksInline(rid, sentId, links);
+    }
 
     // ── Related Research helpers ──────────────────────────────────────────────
     let allResearchItems = [];
@@ -2133,6 +2301,34 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
       <div class="img-modal-linked" id="img-modal-unlinked" style="display:none; margin-top: 18px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.08);">
         <div class="img-modal-linked-label">🖼 Available Images (Unlinked)</div>
         <div class="img-modal-linked-grid" id="img-modal-unlinked-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sentence External Link Modal -->
+  <div class="img-modal-overlay" id="link-modal" onclick="if(event.target===this)closeSentLinkModal()">
+    <div class="img-modal-box">
+      <h3>🌐 Link URLs to this sentence</h3>
+      <div class="img-modal-sent" id="link-modal-sent"></div>
+      
+      <div class="modal-field" style="margin-bottom: 12px; text-align: left;">
+        <label for="link-url-input" style="display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-bottom: 4px;">URL</label>
+        <input type="text" id="link-url-input" placeholder="https://example.com" style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.12); background: rgba(0,0,0,0.3); color: white; font-family: var(--font-body); font-size: 0.9rem;">
+      </div>
+      <div class="modal-field" style="margin-bottom: 16px; text-align: left;">
+        <label for="link-desc-input" style="display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-bottom: 4px;">Description</label>
+        <input type="text" id="link-desc-input" placeholder="e.g. AWS Documentation" style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.12); background: rgba(0,0,0,0.3); color: white; font-family: var(--font-body); font-size: 0.9rem;">
+      </div>
+      
+      <p class="img-modal-status" id="link-modal-status"></p>
+      <div class="img-modal-actions">
+        <button class="btn-img-upload" id="btn-link-add" onclick="addSentLinkUI()" style="background: var(--primary);">➕ Add Link</button>
+        <button class="btn-img-close" onclick="closeSentLinkModal()">Close</button>
+      </div>
+      
+      <div class="img-modal-linked" id="link-modal-linked" style="display:none; margin-top: 18px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.08);">
+        <div class="img-modal-linked-label">🔗 Linked URLs</div>
+        <div id="link-modal-linked-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
       </div>
     </div>
   </div>

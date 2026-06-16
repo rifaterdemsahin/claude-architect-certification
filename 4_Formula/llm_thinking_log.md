@@ -1,5 +1,25 @@
 # LLM Thinking Log
 
+## 2026-06-16 — 🔗 Sentence Links and Modal Popup
+
+### 🎯 Objective
+For the sentences in the script editor (`5_Symbols/production/preprod/scripts/index.html`), add the ability to associate multiple external hyperlinks (URLs) with descriptions. Provide an emoji button (e.g. `🌐`) in the sentence row that opens a modal popup to add, view, or remove links. Render these links inline under each sentence row.
+
+### 📐 Design & Implementation Plan
+1. **Database Schema**:
+   - Create `5_Symbols/supabase/schema/10_sentence_links.sql` containing the definition for the `sentence_links` table with public RLS policies.
+2. **HTML & CSS Updates**:
+   - Add styles for `.sent-links` container and `.sent-link-tag` inline links.
+   - Create the HTML structure for the link manager modal (`#link-modal`).
+3. **Sentence Row Button**:
+   - Add an emoji button (e.g., `🌐` or `🔗`) to `sent-row-btns` that triggers `openSentLinkModal(s.id, rid)`.
+   - Add a container `<div class="sent-links" id="sent-links-${rid}"></div>` under each sentence view.
+4. **JavaScript/Fetch Integration**:
+   - Fetch links for all sentences on `loadSentImages` (renaming/augmenting to `loadSentAssets` to load both images and links in parallel).
+   - Implement link modal functions: `openSentLinkModal`, `closeSentLinkModal`, `fetchSentLinks`, `addSentLink`, `deleteSentLink`, `renderSentLinks`.
+5. **Post-Completion Validation**:
+   - Run `go build` to verify integrity, run server, and open pages for verification.
+
 ## 2026-06-16 — ⚠️ Add Risks & Mitigations Page (Audience Bias & Scaffolding Risks)
 
 ### 🎯 Objective
