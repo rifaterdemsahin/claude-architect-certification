@@ -510,6 +510,10 @@
     .btn-sent-ext-link:hover { background: rgba(59,130,246,0.18); color: #93c5fd; }
     .btn-sent-imgprompt { background: rgba(245,158,11,0.08); color: #fbbf24; border: 1px solid rgba(245,158,11,0.18); padding: 3px 7px; border-radius: 5px; font-size: 0.68rem; cursor: pointer; font-family: var(--font-body); line-height: 1.4; }
     .btn-sent-imgprompt:hover { background: rgba(245,158,11,0.18); color: #fcd34d; }
+    .btn-sent-sfx { background: rgba(236,72,153,0.08); color: #f472b6; border: 1px solid rgba(236,72,153,0.18); padding: 3px 7px; border-radius: 5px; font-size: 0.68rem; cursor: pointer; font-family: var(--font-body); line-height: 1.4; }
+    .btn-sent-sfx:hover { background: rgba(236,72,153,0.18); color: #f9a8d4; }
+    .btn-sent-music { background: rgba(20,184,166,0.08); color: #2dd4bf; border: 1px solid rgba(20,184,166,0.18); padding: 3px 7px; border-radius: 5px; font-size: 0.68rem; cursor: pointer; font-family: var(--font-body); line-height: 1.4; }
+    .btn-sent-music:hover { background: rgba(20,184,166,0.18); color: #5eead4; }
     .sent-imgs { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 2px; padding-left: 100px; }
     .sent-imgs:empty { display: none; }
     .sent-links { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 2px; padding-left: 100px; }
@@ -1280,6 +1284,8 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
                   <button class="btn-sent-link" onclick="copySentenceLink('${rid}', ${s.id})" title="Copy link to this sentence">📌</button>
                   <button class="btn-sent-img" onclick="openSentImageModal(${s.id},'${rid}')" title="Link an image to this sentence">🖼</button>
                   <button class="btn-sent-imgprompt" onclick="copyImagePrompt('${rid}')" title="Copy an image-generation prompt for this sentence to the clipboard">🎨</button>
+                  <button class="btn-sent-sfx" onclick="copySfxPrompt('${rid}')" title="Copy a sound-effect generation prompt for this sentence to the clipboard">🔊</button>
+                  <button class="btn-sent-music" onclick="copyMusicPrompt('${rid}')" title="Copy a background-music generation prompt for this sentence to the clipboard">🎵</button>
                   <button class="btn-sent-ext-link" onclick="openSentLinkModal(${s.id},'${rid}')" title="Manage links for this sentence">🌐</button>
                   <button class="btn-sent-delete" onclick="sentDelete('${elementId}',${s.id})">🗑</button>
                 </div>
@@ -1563,6 +1569,59 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
         .catch(err => {
           console.error('Failed to copy image prompt: ', err);
         });
+    };
+
+    // Small helper: copy a generated prompt and flash the originating button.
+    function copyPromptToClipboard(prompt, rid, btnClass) {
+      navigator.clipboard.writeText(prompt)
+        .then(() => {
+          const btn = document.querySelector(`#sent-view-${rid} .${btnClass}`);
+          if (btn) {
+            const orig = btn.textContent;
+            btn.textContent = '✅';
+            setTimeout(() => { btn.textContent = orig; }, 1500);
+          }
+        })
+        .catch(err => {
+          console.error('Failed to copy prompt: ', err);
+        });
+    }
+
+    function getSentenceText(rid) {
+      const view = document.getElementById('sent-view-' + rid);
+      return view ? (view.getAttribute('data-text') || '') : '';
+    }
+
+    // Copy a sound-effect (SFX) generation prompt for a sentence to the clipboard.
+    window.copySfxPrompt = function(rid) {
+      const sentenceText = getSentenceText(rid);
+      const prompt = [
+        `Generate a short, high-quality sound effect (SFX) to accompany the following sentence from a technology learning video:`,
+        ``,
+        `"${sentenceText}"`,
+        ``,
+        `Requirements:`,
+        `- Produce a single, clean SFX clip (1–3 seconds) that punctuates or reinforces the moment in the sentence.`,
+        `- Modern, crisp, digital/UI feel — subtle whooshes, soft clicks, gentle chimes or transitions. No vocals.`,
+        `- Keep it tasteful and non-distracting so it layers cleanly under narration and background music.`
+      ].join('\n');
+      copyPromptToClipboard(prompt, rid, 'btn-sent-sfx');
+    };
+
+    // Copy a background-music generation prompt for a sentence to the clipboard.
+    window.copyMusicPrompt = function(rid) {
+      const sentenceText = getSentenceText(rid);
+      const prompt = [
+        `Create a cinematic inspirational soundtrack for a technology learning video. Uplifting piano, subtle synths, modern electronic percussion, hopeful and energetic, 90 BPM, no vocals.`,
+        ``,
+        `Tailor the mood to accompany this sentence:`,
+        `"${sentenceText}"`,
+        ``,
+        `Requirements:`,
+        `- Loopable, seamless background bed that sits low under narration.`,
+        `- Keep dynamics gentle and consistent so the voiceover stays clear. No vocals.`
+      ].join('\n');
+      copyPromptToClipboard(prompt, rid, 'btn-sent-music');
     };
 
     // Modal state
