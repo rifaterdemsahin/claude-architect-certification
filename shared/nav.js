@@ -139,6 +139,10 @@
       { label: '2. 🏠 Product (Solution)', url: 'index.html' },
       { label: '4. 📋 Outline', url: '5_Symbols/production/preprod/course_outline.html' },
       { label: '5. 🎬 Script', url: '5_Symbols/production/preprod/scripts/index.html' },
+      { label: '8. ⚠️ Risk', children: [
+        { label: '⚠️ Risks & Mitigations', url: '5_Symbols/production/preprod/risks.html', description: 'Risk Registry: Scaffolding delays and audience representation risks.' },
+        { label: '🏗️ Scaffolding Risk', url: '5_Symbols/production/preprod/scaffolding_risk.md', description: 'Scaffolding risk: Video pipeline and delivery pilot pipeline delays and mitigations.' }
+      ]},
       {
         label: '🛠️ Tools',
         children: [

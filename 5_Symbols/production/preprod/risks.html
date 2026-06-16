@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Risks & Mitigations — Claude AI Certification</title>
+<meta name="description" content="Risk Registry & Mitigation Plans: Audience targeting biases, developer over-indexing, and scaffolding deadlocks.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --stage: #0b0f19;
+    --panel: rgba(22, 28, 45, 0.7);
+    --panel-glass: rgba(15, 23, 42, 0.6);
+    --line: rgba(255, 255, 255, 0.08);
+    --chalk: #f8fafc;
+    --slate: #94a3b8;
+    --rec: #ef4444;
+    --tungsten: #e8b04b;
+    --accent-violet: #8b5cf6;
+    --accent-cyan: #06b6d4;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--stage);
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.15) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.15) 0px, transparent 50%);
+    color: var(--chalk);
+    font-family: "Inter", system-ui, sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    padding-top: 80px; /* Space for site-nav */
+    padding-bottom: 80px;
+  }
+
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 28px; }
+
+  /* Eyebrows & Display Type */
+  .eyebrow {
+    font-family: "Space Mono", monospace;
+    font-size: .75rem;
+    letter-spacing: .25em;
+    text-transform: uppercase;
+    color: var(--accent-cyan);
+    margin-bottom: 12px;
+    display: inline-block;
+  }
+  .display-title {
+    font-family: "Anton", sans-serif;
+    text-transform: uppercase;
+    line-height: 1.0;
+    letter-spacing: .01em;
+    font-weight: 400;
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    margin-bottom: 20px;
+    background: linear-gradient(135deg, var(--accent-violet), var(--accent-cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .lede {
+    font-size: 1.15rem;
+    color: var(--slate);
+    max-width: 65ch;
+    margin-bottom: 48px;
+  }
+
+  /* Grid & Risk Cards */
+  .risks-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 32px;
+    margin-bottom: 56px;
+  }
+
+  .risk-card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 32px;
+    backdrop-filter: blur(12px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .risk-card:hover {
+    border-color: rgba(139, 92, 246, 0.4);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+    transform: translateY(-2px);
+  }
+
+  .risk-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 16px;
+  }
+  .risk-badge {
+    font-family: "Space Mono", monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 4px 10px;
+    border-radius: 100px;
+  }
+  .risk-badge.high {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--rec);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+  }
+  .risk-badge.medium {
+    background: rgba(232, 176, 75, 0.15);
+    color: var(--tungsten);
+    border: 1px solid rgba(232, 176, 75, 0.3);
+  }
+  .risk-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--chalk);
+  }
+
+  .risk-body p {
+    color: var(--slate);
+    margin-bottom: 16px;
+  }
+  .risk-body strong {
+    color: var(--chalk);
+  }
+
+  /* Mitigation Callout Box */
+  .mitigation-box {
+    background: rgba(139, 92, 246, 0.05);
+    border-left: 4px solid var(--accent-violet);
+    border-radius: 4px 12px 12px 4px;
+    padding: 20px;
+    margin-top: 24px;
+  }
+  .mitigation-box h4 {
+    font-family: "Space Mono", monospace;
+    font-size: 0.85rem;
+    color: var(--accent-violet);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+  }
+  .mitigation-box p {
+    margin: 0;
+    color: var(--chalk);
+    font-size: 0.95rem;
+  }
+
+  /* Video Section */
+  .video-container {
+    margin-top: 32px;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+    height: 0;
+    border: 1px solid var(--line);
+  }
+  .video-container iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  footer {
+    border-top: 1px solid var(--line);
+    padding-top: 32px;
+    text-align: center;
+    color: var(--slate);
+    font-family: "Space Mono", monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+  }
+  footer a {
+    color: var(--accent-cyan);
+    text-decoration: none;
+  }
+  footer a:hover {
+    text-decoration: underline;
+  }
+</style>
+<script src="../../../shared/nav.js"></script>
+<script src="../../../shared/seo.js" defer></script>
+</head>
+<body>
+
+<main class="wrap">
+  <div class="eyebrow">📋 Pre-Production · Risk Registry</div>
+  <h1 class="display-title">⚠️ Risks & Mitigations</h1>
+  <p class="lede">
+    Identified strategic and operational risks that challenge the delivery framework of the Claude AI Certification. High impact items are mitigated before development gates.
+  </p>
+
+  <div class="risks-grid">
+    <!-- Risk 1: Narrow Coder Targeting -->
+    <div class="risk-card">
+      <div class="risk-header">
+        <span class="risk-badge high">High Impact</span>
+        <h2 class="risk-title">🎯 Over-Indexing on Coder-Only Target Audience</h2>
+      </div>
+      <div class="risk-body">
+        <p>
+          <strong>The Risk:</strong> Designating software coders or developers as the exclusive target audience for the architect certification. This narrow focus alienates system design leaders, enterprise architects, and engineering managers who are responsible for architecture, but do not write day-to-day implementation code.
+        </p>
+        <p>
+          If the course demands heavy syntax knowledge or developer-level tooling without demonstrating the strategic system design, patterns, trade-offs, and communication strategies, it loses its enterprise validity.
+        </p>
+
+        <div class="mitigation-box">
+          <h4>💡 Mitigation Strategy: Inclusive Architecture Strategy</h4>
+          <p>
+            Shift content representation to be highly inclusive of hybrid and non-coding architectural roles. Ensure explanations emphasize design principles, VPC topologies, multi-agent frameworks, and cost-benefit trade-offs. Coding segments must serve as concrete illustrations of these concepts, rather than the end goal.
+          </p>
+        </div>
+
+        <h3 style="margin-top: 28px; margin-bottom: 12px; font-size: 1.1rem; color: var(--accent-cyan);">🎥 Industry Reference</h3>
+        <p>
+          Learn more about setting correct boundaries and target inclusion structures in system designs:
+        </p>
+        <div class="video-container">
+          <iframe 
+            src="https://www.youtube.com/embed/yB1FMipyTeI?start=469" 
+            title="Inclusive Architecture & Target Audience Video" 
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+            allowfullscreen>
+          </iframe>
+        </div>
+      </div>
+    </div>
+
+    <!-- Risk 2: Scaffolding Deadlock -->
+    <div class="risk-card">
+      <div class="risk-header">
+        <span class="risk-badge medium">Medium Impact</span>
+        <h2 class="risk-title">🏗️ Tooling Scaffolding Deadlock</h2>
+      </div>
+      <div class="risk-body">
+        <p>
+          <strong>The Risk:</strong> Developers and automation scripts becoming stuck in a perpetual cycle of building complex, automated pre-production workflows, navigation mirrors, and review platforms rather than actually producing and publishing the course videos.
+        </p>
+        <p>
+          This is mitigated by enforcing structured table-read workflows, immediate recordings, and post-production Edit Decision Lists (EDLs).
+        </p>
+        <div class="mitigation-box">
+          <h4>💡 Mitigation Strategy: Table-Reads & Reversals</h4>
+          <p>
+            Prioritize the recording process over pre-production tooling. Use simplified recording loops (via <code>shared/reversal-recorder.js</code>) and direct documentation checks.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <span>Return to the <a href="planning.html">Planning Hub</a> or read the <a href="production_doctrine.html">Production Doctrine</a>.</span>
+  </footer>
+</main>
+
+<script src="../../../shared/debug-panel.js"></script>
+</body>
+</html>

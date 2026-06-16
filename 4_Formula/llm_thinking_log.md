@@ -1,5 +1,16 @@
 # LLM Thinking Log
 
+## 2026-06-16 — ⚠️ Add Risks & Mitigations Page (Audience Bias & Scaffolding Risks)
+
+### 🎯 Objective
+Create a highly polished risks page (`5_Symbols/production/preprod/risks.html`) addressing target audience selection bias (over-indexing on coding rather than design and communication inclusive of system architects) and incorporating the YouTube reference (https://youtu.be/yB1FMipyTeI?t=469). Place it in the `🎬 Preprod` dropdown navigation menu.
+
+### 📐 Design & Implementation Plan
+1. **Create HTML**: Write a modern, responsive, and aesthetically stunning file `5_Symbols/production/preprod/risks.html`. Use CSS variables for color scheme, glassmorphism containers, responsive embedded video layout, and clean typography.
+2. **Embed Video**: Integrate the YouTube iframe targeting `https://www.youtube.com/embed/yB1FMipyTeI?start=469`.
+3. **Register/Update Navigation**: Add the risks page under Preprod dropdown in `navigation_config.json`, fallback configurations inside `shared/nav.js`, `index.html`, and `markdown_renderer.html`.
+4. **Log the Task**: Follow rules for commit/push and post-task validation.
+
 ## 2026-06-15 — 🔍 Add Search to Top Menu and Autocomplete/Intellisense Features
 
 ### 🎯 Objective
