@@ -536,6 +536,10 @@
     .sent-img-thumb .img-del { position: absolute; top: 1px; right: 1px; width: 16px; height: 16px; line-height: 14px; text-align: center; border-radius: 4px; background: rgba(0,0,0,0.7); color: #f87171; font-size: 0.7rem; border: none; cursor: pointer; padding: 0; opacity: 0; transition: opacity 0.15s; }
     .sent-img-thumb .img-add { position: absolute; top: 1px; right: 1px; width: 16px; height: 16px; line-height: 14px; text-align: center; border-radius: 4px; background: rgba(0,0,0,0.7); color: #34d399; font-size: 0.7rem; border: none; cursor: pointer; padding: 0; opacity: 0; transition: opacity 0.15s; }
     .sent-img-thumb:hover .img-del, .sent-img-thumb:hover .img-add { opacity: 1; }
+    /* Larger thumbnails in the "Available Images (Unlinked)" picker to aid selection. */
+    #img-modal-unlinked-grid { gap: 12px; }
+    #img-modal-unlinked-grid .sent-img-thumb { width: 132px; height: 132px; border-radius: 10px; }
+    #img-modal-unlinked-grid .sent-img-thumb .img-add { width: 24px; height: 24px; line-height: 22px; font-size: 0.95rem; top: 4px; right: 4px; }
 
     /* Image Preview Modal */
     .img-preview-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 10001; backdrop-filter: blur(6px); cursor: zoom-out; }
@@ -1728,8 +1732,15 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
         const linkedNames = await fetchSentImageNames(imgModalSentId);
         const linkedSet = new Set(linkedNames);
         
-        const unlinkedImages = imagesOnly.filter(f => !linkedSet.has(f.name));
-        
+        const unlinkedImages = imagesOnly
+          .filter(f => !linkedSet.has(f.name))
+          // Sort by creation date — first created on the top (oldest → newest).
+          .sort((a, b) => {
+            const ta = a.lastModified ? Date.parse(a.lastModified) : 0;
+            const tb = b.lastModified ? Date.parse(b.lastModified) : 0;
+            return ta - tb;
+          });
+
         if (!unlinkedImages.length) {
           wrap.style.display = 'none';
           return;
