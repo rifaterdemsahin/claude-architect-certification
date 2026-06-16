@@ -81,6 +81,19 @@ The 404s persist for the four mock relationships until the data is reconciled. T
    Run in the Supabase SQL Editor:
    https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/sql/new
 
+## 🗓 Remediation log
+
+- **2026-06-16** — Ran the DELETE above. **Partial success**: terminal line-wrapping
+  inserted stray spaces into two filenames (`prompt-caching-benc hmarks.md`,
+  `orchestration-patt erns.md`), so only `claude-ecosystem-flows.md` and
+  `tool-use-best-practices.md` were removed. Rows id 26 (`prompt-caching-benchmarks.md`,
+  video 1) and id 31 (`orchestration-patterns.md`, video 3) still remain. Re-run the
+  DELETE from a single unwrapped line (or by id) to finish:
+
+  ```sql
+  DELETE FROM research_relationships WHERE id IN (26, 31);
+  ```
+
 ## 📚 Lesson
 
 Seed data that references external blob storage (Azure containers) must either ship the
