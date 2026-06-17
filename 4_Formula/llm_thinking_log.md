@@ -595,3 +595,36 @@ On `5_Symbols/production/postprod/audio_scoring.html`, persist the **scene chang
 4. Integrate the new card into the Post-Production dashboard (`5_Symbols/production/postprod/index.html`).
 5. Update `5_Symbols/production/postprod/README.md`.
 6. Run validation checks (verification/build).
+
+---
+
+## 🧠 2026-06-17 — AI Production Objects: Tables + Postprod Pages
+
+**Trigger:** Add 5 AI-assisted production capabilities to post-production, each tied to the existing video module + sentence model, with Supabase tables + relationships and corresponding pages.
+
+### 🎯 The 5 objects
+1. 🎙️ AI Voiceover / TTS (ElevenLabs, OpenAI TTS)
+2. 🧑‍💼 AI Avatar / Talking-Head (HeyGen, Synthesia)
+3. 🎞️ AI Video B-Roll / Text-to-Video (Runway, Pika, Sora)
+4. ✍️ AI Script & Prompt Engineering Generation (LLM expands blueprints → structured sentences)
+5. 🌍 AI Localization & Multi-Language Dubbing (translate + voice-clone per language)
+
+### 🔗 Relationship model
+Existing chain: `modules → videos → scripts → sentences`. Each AI object hangs off `sentences(id)`
+(FK `ON DELETE CASCADE`) exactly like `sentence_graphics`, with denormalized
+`module_number` / `video_number` / `script_id` for cheap filtering.
+- 4 tables are **one-row-per-sentence** (unique index on `sentence_id`): ai_voiceovers, ai_avatars, ai_broll, ai_script_generations.
+- `ai_localizations` is **many-per-sentence** keyed by `(sentence_id, language_code)` — one dub per language.
+
+### 🛠 Decision (asked the user)
+- **5 separate pages** (not one unified studio): ai_voiceover / ai_avatar / ai_broll / ai_script_gen / ai_localization.
+- **Tracking + manual URLs only** (no AI generation backend yet): Supabase REST CRUD — pick module/video, list sentences, set `generation_status`, paste asset URLs, edit metadata + rationale.
+- To avoid 5× duplicated code, extract a shared `shared/ai-sentence-tracker.js` component; each page is a thin config (table name, field list, optional global selector for language).
+
+### 📋 Steps
+1. `migration_ai_production_objects.sql` — 5 tables + RLS + indexes.
+2. `shared/ai-sentence-tracker.js` — config-driven per-sentence tracker.
+3. 5 postprod HTML pages configuring the tracker.
+4. New "🤖 AI Production" group + cards + file rows in `postprod/index.html`.
+5. Register pages in `navigation_config.json`; update postprod `README.md`.
+6. Commit + push per Conventional Commits.

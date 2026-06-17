@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="../../../shared/redirect-to-live-site.js"></script>
+  <title>AI Voiceover (TTS) | Claude AI Certification</title>
+  <meta name="description" content="Track AI text-to-speech voiceover per sentence — provider, voice, audio URL, and status, saved to Supabase.">
+  <link rel="icon" type="image/png" href="../../../favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark:#030712; --bg-card:rgba(17,24,39,0.9); --text-main:#f3f4f6; --text-muted:#9ca3af;
+      --font-title:'Outfit',sans-serif; --font-body:'Plus Jakarta Sans',sans-serif;
+    }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body {
+      background-color:var(--bg-dark);
+      background-image: radial-gradient(circle at 12% 18%, #10b98114 0%, transparent 42%),
+                        radial-gradient(circle at 88% 82%, rgba(139,92,246,0.08) 0%, transparent 42%);
+      color:var(--text-main); font-family:var(--font-body); line-height:1.6; padding:100px 24px 60px;
+    }
+    .container { max-width:1100px; margin:0 auto; }
+    header { text-align:center; margin-bottom:40px; }
+    .badge { display:inline-block; padding:5px 14px; background:#10b98122; border:1px solid #10b98144;
+      border-radius:100px; font-size:0.75rem; font-weight:700; color:#10b981; text-transform:uppercase;
+      letter-spacing:0.08em; margin-bottom:14px; }
+    header h1 { font-family:var(--font-title); font-size:2.4rem; font-weight:900; margin-bottom:10px; }
+    header p { color:var(--text-muted); max-width:700px; margin:0 auto; font-size:1.02rem; }
+    footer { text-align:center; margin-top:48px; padding-top:20px; border-top:1px solid rgba(255,255,255,0.05); }
+    footer a { color:#3b82f6; text-decoration:none; }
+  </style>
+  <script src="../../../shared/nav.js"></script>
+  <script src="../../../shared/debug-panel.js"></script>
+  <script src="../../../shared/seo.js" defer></script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="badge">AI Production · TTS</div>
+      <h1>🎙️ AI Voiceover / Text-to-Speech</h1>
+      <p>Synthesize clear instructional audio per sentence (ElevenLabs, OpenAI TTS, Azure). Track the chosen voice, paste the rendered audio URL, and mark generation status — all stored against each script sentence.</p>
+    </header>
+
+    <div id="aiTracker"></div>
+
+    <footer>
+      <p><a href="index.html">← Back to Post-Production</a></p>
+    </footer>
+  </div>
+
+  <script src="../../../shared/ai-sentence-tracker.js"></script>
+  <script>
+    AISentenceTracker.init({
+      mount:'#aiTracker', table:'ai_voiceovers', conflictKeys:['sentence_id'], accent:'#10b981',
+      fields:[
+        { key:'generation_status', label:'Status', type:'select', options:['pending','generating','completed','skipped','failed'] },
+        { key:'voice_provider', label:'Provider', type:'select', options:['elevenlabs','openai_tts','azure_tts','google_tts','playht','other'] },
+        { key:'voice_name', label:'Voice', type:'text', placeholder:'e.g. Rachel' },
+        { key:'audio_url', label:'Audio URL', type:'url', placeholder:'https://….mp3' },
+        { key:'duration_seconds', label:'Duration (s)', type:'number' },
+        { key:'rationale', label:'Rationale (why this choice / why skipped)', type:'textarea', full:true, placeholder:'Notes for the editor' },
+      ],
+    });
+  </script>
+</body>
+</html>

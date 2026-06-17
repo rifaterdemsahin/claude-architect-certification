@@ -339,6 +339,36 @@
               "label": "11. 🎨 Graphics Generator",
               "url": "5_Symbols/production/postprod/graphics_generator.html",
               "description": "Per-sentence graphics generation with bulk mode, status tracking, and rationale for skipped assets."
+            },
+            {
+              "label": "12. 💰 Cost Calculator",
+              "url": "5_Symbols/production/postprod/cost_calculator.html",
+              "description": "Compare TikTok vs. Architect generation strategies — Gemini image/SFX/music cost estimation."
+            },
+            {
+              "label": "13. 🎙️ AI Voiceover (TTS)",
+              "url": "5_Symbols/production/postprod/ai_voiceover.html",
+              "description": "Per-sentence text-to-speech tracking — provider, voice, audio URL, and status (ElevenLabs / OpenAI TTS / Azure)."
+            },
+            {
+              "label": "14. 🧑‍💼 AI Avatar / Talking-Head",
+              "url": "5_Symbols/production/postprod/ai_avatar.html",
+              "description": "Track photorealistic presenter clips (HeyGen / Synthesia) per sentence — persona, video URL, and status."
+            },
+            {
+              "label": "15. 🎞️ AI Video B-Roll",
+              "url": "5_Symbols/production/postprod/ai_broll.html",
+              "description": "Text-to-video B-roll (Runway / Pika / Sora) per sentence — prompt, clip URL, and status."
+            },
+            {
+              "label": "16. ✍️ AI Script & Prompt Gen",
+              "url": "5_Symbols/production/postprod/ai_script_gen.html",
+              "description": "Capture each sentence's provenance — source blueprint, LLM, prompt used, and generated text."
+            },
+            {
+              "label": "17. 🌍 AI Localization & Dubbing",
+              "url": "5_Symbols/production/postprod/ai_localization.html",
+              "description": "Multi-language translation and voice-cloned dubbing per sentence and target language."
             }
           ]
         },

@@ -12,6 +12,11 @@
 | `memory_palace.html` | 🏛️ Memory Palace Builder — generates a method-of-loci memory palace per module from its full script (vivid mnemonic rooms + SVG sketch); Generate + Save to the `memory_palaces` Supabase table |
 | `gdrive_sync.html` | 📁 Google Drive Sync — idempotent course footage and asset sync pipeline utilizing Google GIS and Google Drive REST API to recursively build structured directories |
 | `audio_scoring.html` | 🎵 Audio scoring board with royalty-free resource links |
+| `ai_voiceover.html` | 🎙️ AI Voiceover (TTS) — per-sentence text-to-speech tracking (provider, voice, audio URL, status) → `ai_voiceovers` Supabase table |
+| `ai_avatar.html` | 🧑‍💼 AI Avatar / Talking-Head — per-sentence presenter clips (HeyGen / Synthesia) → `ai_avatars` table |
+| `ai_broll.html` | 🎞️ AI Video B-Roll — per-sentence text-to-video clips (Runway / Pika / Sora) → `ai_broll` table |
+| `ai_script_gen.html` | ✍️ AI Script & Prompt Generation — per-sentence provenance (blueprint, LLM, prompt, output) → `ai_script_generations` table |
+| `ai_localization.html` | 🌍 AI Localization & Dubbing — per-sentence, per-language translation + voice-cloned dub → `ai_localizations` table |
 | `business_plan.md` | Business plan, audience acquisition, and certification pipeline |
 | `module_1_plan.md` | Module 1 post-production plan |
 | `module-1/` through `module-5/` | Per-module post-production assets (scene lists, overlays, EDLs) |
