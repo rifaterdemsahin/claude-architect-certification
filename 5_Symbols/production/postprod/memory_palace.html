@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="../../../shared/redirect-to-live-site.js"></script>
+  <title>Memory Palace Builder | Post-Production</title>
+  <meta name="description" content="Build a method-of-loci memory palace for each module, generated from the full module script, so the audience can remember every concept. Generate and save one palace per module.">
+  <meta name="keywords" content="memory palace, method of loci, mnemonic, retention, post-production, learning design, Claude AI Certification">
+  <meta name="author" content="Rifat Erdem Sahin">
+  <link rel="icon" type="image/png" href="../../../favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --bg-dark: #030712; --bg-card: rgba(17,24,39,0.8); --text-main: #f3f4f6; --text-muted: #9ca3af;
+      --primary: #8b5cf6; --secondary: #3b82f6; --accent: #10b981;
+      --font-title: 'Outfit', sans-serif; --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-dark);
+      background-image: radial-gradient(circle at 10% 20%, rgba(139,92,246,0.07) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(59,130,246,0.06) 0%, transparent 40%);
+      color: var(--text-main); font-family: var(--font-body); line-height: 1.6; padding-bottom: 80px;
+    }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+    .badge { display: inline-block; padding: 6px 16px; background: linear-gradient(135deg, rgba(139,92,246,0.2), rgba(59,130,246,0.2)); border: 1px solid rgba(139,92,246,0.3); border-radius: 100px; font-size: 0.8rem; font-weight: 600; color: #c4b5fd; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 14px; }
+    h1 { font-family: var(--font-title); font-size: 2.4rem; font-weight: 800; margin-bottom: 10px; }
+    header p { color: var(--text-muted); max-width: 700px; margin: 0 auto 8px; }
+
+    .workflow-note {
+      max-width: 780px; margin: 24px auto 0; background: rgba(139,92,246,0.08); border: 1px solid rgba(139,92,246,0.25);
+      border-radius: 14px; padding: 16px 20px; text-align: left; color: #ddd6fe; font-size: 0.9rem;
+    }
+    .workflow-note strong { color: #c4b5fd; }
+
+    .module-nav { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin: 28px 0 8px; }
+    .module-btn { background: rgba(139,92,246,0.1); border: 1px solid rgba(139,92,246,0.2); color: #c084fc; padding: 10px 18px; border-radius: 10px; font-size: 0.85rem; font-weight: 700; cursor: pointer; transition: all 0.2s; font-family: var(--font-body); }
+    .module-btn:hover { background: rgba(139,92,246,0.2); color: white; }
+    .module-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+    .toolbar { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; align-items: center; margin: 18px 0 6px; }
+    .btn { font-family: var(--font-body); font-weight: 700; font-size: 0.9rem; border: none; border-radius: 12px; padding: 12px 22px; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+    .btn-generate { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; }
+    .btn-generate:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(139,92,246,0.35); }
+    .btn-save { background: rgba(16,185,129,0.15); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.35); }
+    .btn-save:hover { background: rgba(16,185,129,0.28); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+    .save-state { font-size: 0.8rem; color: var(--text-muted); min-height: 1.2em; }
+
+    .palace-meta { text-align: center; margin: 10px 0 4px; }
+    .palace-theme { font-family: var(--font-title); font-size: 1.4rem; font-weight: 800; color: #c4b5fd; }
+    .palace-sub { color: var(--text-muted); font-size: 0.88rem; }
+
+    .empty-state { text-align: center; color: var(--text-muted); background: var(--bg-card); border: 1px dashed rgba(255,255,255,0.12); border-radius: 18px; padding: 48px 24px; margin: 24px 0; }
+    .empty-state .big { font-size: 2.4rem; margin-bottom: 10px; }
+
+    .sketch-wrap { background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 18px; padding: 18px; margin: 18px 0; overflow-x: auto; }
+    .sketch-wrap svg { width: 100%; height: auto; display: block; min-width: 640px; }
+
+    .rooms { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; margin: 18px 0; }
+    .room { background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 20px; }
+    .room-head { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+    .room-num { width: 30px; height: 30px; flex-shrink: 0; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; font-weight: 800; font-family: var(--font-title); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; }
+    .room-name { font-family: var(--font-title); font-weight: 700; font-size: 1.05rem; }
+    .room-video { color: var(--text-muted); font-size: 0.78rem; margin: 0 0 12px 40px; }
+    .locus { padding: 10px 0; border-top: 1px solid rgba(255,255,255,0.05); }
+    .locus:first-of-type { border-top: none; }
+    .locus-peg { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: #93c5fd; font-weight: 700; }
+    .locus-image { font-size: 0.92rem; color: var(--text-main); margin: 2px 0; }
+    .locus-concept { font-size: 0.8rem; color: var(--text-muted); font-style: italic; }
+
+    .notes-card { background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 20px; margin: 18px 0; }
+    .notes-card label { display: block; font-family: var(--font-title); font-weight: 700; margin-bottom: 8px; }
+    .notes-card textarea { width: 100%; min-height: 90px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: var(--text-main); font-family: var(--font-body); font-size: 0.9rem; padding: 12px; resize: vertical; }
+
+    .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 18px 0; }
+    .info-card { background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 16px; }
+    .info-card h3 { font-family: var(--font-title); font-size: 0.95rem; margin-bottom: 6px; display: flex; gap: 8px; align-items: center; }
+    .info-card p { font-size: 0.83rem; color: var(--text-muted); }
+
+    #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(120%); background: #10b981; color: #04130c; font-weight: 700; padding: 12px 22px; border-radius: 12px; box-shadow: 0 12px 32px rgba(0,0,0,0.4); transition: transform 0.3s; z-index: 9999; font-size: 0.9rem; }
+    #toast.show { transform: translateX(-50%) translateY(0); }
+    #toast.error-toast { background: #ef4444; color: #fff; }
+
+    footer { text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
+  </style>
+  <script src="../../../shared/nav.js"></script>
+  <script src="../../../shared/debug-panel.js"></script>
+  <script src="../../../shared/seo.js" defer></script>
+</head>
+<body>
+
+<div class="container">
+  <header style="padding: 60px 0 20px; text-align: center;">
+    <div class="badge">Post-Production · Retention Design</div>
+    <h1>🏛️ Memory Palace Builder</h1>
+    <p>Turn each module's full script into a <strong>method-of-loci memory palace</strong> — a themed location whose rooms hold vivid mnemonic images, so the audience can mentally walk the lesson and remember every concept.</p>
+    <div class="workflow-note">
+      🧠 <strong>How it works.</strong> Pick a module → press <strong>Generate Memory Palace</strong>. The builder reads every video script in that module, extracts its hooks, objectives, key insights and quiz points, and places each one as a vivid image inside a room of a themed palace. Walk the rooms in order to recall the whole module. Press <strong>Save</strong> to store the palace for that module in Supabase.
+    </div>
+  </header>
+
+  <div id="module-nav" class="module-nav"><!-- module buttons --></div>
+
+  <div class="palace-meta">
+    <div class="palace-theme" id="palaceTheme">Select a module</div>
+    <div class="palace-sub" id="palaceSub">Each module gets its own palace, built from its scripts.</div>
+  </div>
+
+  <div class="toolbar">
+    <button class="btn btn-generate" id="btnGenerate" disabled>🏛️ Generate Memory Palace</button>
+    <button class="btn btn-save" id="btnSave" disabled>💾 Save Memory Palace</button>
+    <div class="save-state" id="saveState"></div>
+  </div>
+
+  <div id="sketchHost"></div>
+
+  <div id="palaceHost">
+    <div class="empty-state">
+      <div class="big">🗝️</div>
+      <div>Choose a module above, then generate its memory palace.</div>
+    </div>
+  </div>
+
+  <div class="notes-card" id="notesCard" style="display:none;">
+    <label for="palaceNotes">📝 Walk-through notes (rehearsal cues, tweaks, narration)</label>
+    <textarea id="palaceNotes" placeholder="e.g. Slow down at the vault door — that's the hardest concept. Say the image out loud twice."></textarea>
+  </div>
+
+  <div class="info-grid">
+    <div class="info-card"><h3>🚶 Method of Loci</h3><p>An ancient memory technique: attach each idea to a place along a familiar route. Recall the route, recall the ideas — in order.</p></div>
+    <div class="info-card"><h3>🎨 Make it vivid</h3><p>The stranger and more exaggerated the image, the stickier it is. Giant, on fire, talking, out of place — that's the point.</p></div>
+    <div class="info-card"><h3>🎬 Use on camera</h3><p>Narrate the walk in the recap segment, or hand the audience the palace as a downloadable revision aid for the module.</p></div>
+  </div>
+
+  <footer>
+    <p style="margin-bottom: 8px;">
+      <a href="index.html" style="color: var(--secondary); text-decoration: none;">← Back to Post-Production</a>
+      &nbsp;·&nbsp;
+      <a href="../preprod/scripts/index.html" style="color: var(--secondary); text-decoration: none;">Master Script →</a>
+      &nbsp;·&nbsp;
+      <a href="music_sfx_score.html" style="color: var(--secondary); text-decoration: none;">Sound &amp; Music Score →</a>
+    </p>
+    <p style="margin-bottom: 12px; font-size: 0.85rem; opacity: 0.8;">
+      Instructor: <a href="https://www.linkedin.com/in/rifaterdemsahin" target="_blank" style="color: #93c5fd; text-decoration: underline; margin-right: 16px;">Rifat Erdem Sahin LinkedIn</a>
+      GitHub Project: <a href="https://github.com/rifaterdemsahin/claude-architect-certification" target="_blank" style="color: #93c5fd; text-decoration: underline;">Project Repository</a>
+    </p>
+    <div style="margin-top: 12px; display: flex; justify-content: center; gap: 16px; align-items: center;">
+      <a href="https://github.com/rifaterdemsahin/claude-architect-certification/actions/workflows/static.yml" target="_blank">
+        <img src="https://github.com/rifaterdemsahin/claude-architect-certification/actions/workflows/static.yml/badge.svg" alt="Deploy Status" style="vertical-align: middle;">
+      </a>
+    </div>
+  </footer>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── Backend config (mirrors customer_discovery.html / scripts/index.html) ──────
+const SUPABASE_URL  = 'https://rmekfsdhglyiralxvkwc.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZWtmc2RoZ2x5aXJhbHh2a3djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NzYzODgsImV4cCI6MjA5NjM1MjM4OH0.ay6HsmO_CbMGDXL_Dv4DT-paAIAOqlQPfmqqx_mexSU';
+const USER_ID = 'default';
+const db = (window.supabase && SUPABASE_URL.includes('supabase.co')) ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON) : null;
+
+// ── Palace themes per module (the familiar "place" the loci hang on) ───────────
+const THEMES = {
+  1: { name: 'The Glass Observatory', emoji: '🔭', vibe: 'a towering glass dome full of instruments that watch the data flow',
+       pegs: ['brass telescope', 'glowing star-map', 'spinning globe', 'great glass dome', 'brass telegraph', 'orrery of planets', 'astrolabe'] },
+  2: { name: "The Bridge-Keeper's Lodge", emoji: '🌉', vibe: 'a lodge guarding a rope bridge between two cliffs',
+       pegs: ['swaying rope bridge', 'storm lantern', 'iron toll-gate', "ferryman's oar", 'signal flag', 'ring of keys', 'speaking-tube'] },
+  3: { name: 'The Vault Fortress', emoji: '🏰', vibe: 'a stone fortress wrapped around a sealed vault',
+       pegs: ['iron vault door', 'heavy padlock', 'watchtower', 'deep moat', 'wax-sealed scroll', 'guard dog', 'portcullis'] },
+  4: { name: 'The Clockwork Station', emoji: '⚙️', vibe: 'a railway signal box driven by giant clockwork',
+       pegs: ['giant gear', 'swinging pendulum', 'signal lever', 'conveyor belt', 'switchboard', 'stopwatch', 'brass whistle'] },
+  5: { name: 'The Treasury Mint', emoji: '💰', vibe: 'a gleaming mint where the savings are stamped into coins',
+       pegs: ['gold coin-press', 'overflowing vault', 'leather ledger', 'cash register', 'golden scales', 'piggy bank', 'stack of bullion'] },
+};
+
+// Vivid mnemonic image templates — the weirder, the stickier.
+const IMAGE_TEMPLATES = [
+  (peg, c) => `A giant ${peg} bursts into purple flames, spelling out “${c}”.`,
+  (peg, c) => `The ${peg} grows ten times its size and bellows “${c}” at you.`,
+  (peg, c) => `A ${peg} tips over and pours out the glowing words “${c}”.`,
+  (peg, c) => `You trip over a ${peg} and “${c}” echoes off every wall.`,
+  (peg, c) => `A parrot perched on the ${peg} screeches “${c}” over and over.`,
+  (peg, c) => `The ${peg} cracks open like an egg, and out floats “${c}”.`,
+  (peg, c) => `A ${peg} spins wildly, flinging the phrase “${c}” across the room.`,
+];
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let loadedModules = [];      // [{ id, title, videos:[{id,title,script,cues}] }]
+let currentModuleId = null;
+let currentPalace = null;    // { module_id, theme, title, rooms:[...] }
+let genSeed = 0;
+let dirty = false;
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg = '✅ Saved', isError = false) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.toggle('error-toast', isError);
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
+}
+function setSaveState(t) { document.getElementById('saveState').textContent = t; }
+
+function esc(s) { return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+
+// ── Load the master script (uses ALL the module script) ───────────────────────
+async function loadScripts() {
+  try {
+    const res = await fetch('../preprod/scripts/master_script.json', { cache: 'no-store' });
+    const data = await res.json();
+    loadedModules = (data.modules || []).map(m => ({
+      id: m.id,
+      title: m.title,
+      description: m.description || '',
+      videos: (m.videos || []).map(v => ({ id: v.id, title: v.title, script: v.script || '', cues: v.cues || [] }))
+    }));
+  } catch (err) {
+    console.error('Failed to load master script', err);
+    loadedModules = [];
+  }
+}
+
+// ── Concept extraction from a video's full script ─────────────────────────────
+function extractConcepts(video) {
+  const out = [];
+  const s = video.script || '';
+  const seen = new Set();
+  const add = (kind, text) => {
+    text = (text || '').replace(/\s+/g, ' ').trim();
+    if (!text) return;
+    if (text.length > 90) text = text.slice(0, 87).trim() + '…';
+    const key = text.toLowerCase();
+    if (seen.has(key)) return;
+    seen.add(key);
+    out.push({ kind, concept: text });
+  };
+
+  // 1. Hook — the first long quoted line.
+  const hook = s.match(/"([^"]{14,140})"/);
+  if (hook) add('Hook', hook[1]);
+
+  // 2. Objectives — bullet lines after "Objectives:".
+  const objBlock = s.match(/Objectives:\s*([\s\S]*?)\n\n/);
+  if (objBlock) {
+    objBlock[1].split('\n').forEach(line => {
+      const m = line.match(/^\s*-\s*(.+)$/);
+      if (m) add('Objective', m[1]);
+    });
+  }
+
+  // 3. Key insight / takeaway / rule lines.
+  const insightRe = /(?:Key (?:insight|implementation|rule|takeaway)|takeaway|Remember)\s*[:\-]?\s*([^\n.]{12,140})/gi;
+  let im;
+  while ((im = insightRe.exec(s)) !== null) add('Key insight', im[1]);
+
+  // 4. The IVQ question — the comprehension checkpoint.
+  const ivq = s.match(/IVQ:\s*([^\n]{10,140})/);
+  if (ivq) add('Quiz point', ivq[1]);
+
+  // 5. Top on-screen cues — the visual anchors the audience actually sees.
+  (video.cues || []).slice(0, 2).forEach(c => add('On-screen', c.replace(/^[^:]+:\s*/, '')));
+
+  return out.slice(0, 6);   // keep a room memorable
+}
+
+// ── Build the palace for a module ─────────────────────────────────────────────
+function buildPalace(module, seed) {
+  const theme = THEMES[module.id] || THEMES[1];
+  let pegIdx = 0;
+  const nextPeg = () => theme.pegs[(pegIdx++) % theme.pegs.length];
+
+  const rooms = [];
+
+  // Entrance room — the module promise.
+  rooms.push({
+    name: 'Entrance Hall',
+    emoji: '🚪',
+    video: `Module ${module.id} — ${module.title}`,
+    loci: [{
+      kind: 'Module', peg: nextPeg(),
+      concept: module.title,
+      image: IMAGE_TEMPLATES[seed % IMAGE_TEMPLATES.length](theme.pegs[0], `Module ${module.id}: ${module.title}`)
+    }]
+  });
+
+  // One room per video.
+  module.videos.forEach((v, vi) => {
+    const concepts = extractConcepts(v);
+    const loci = concepts.map((c, ci) => {
+      const peg = nextPeg();
+      const tpl = IMAGE_TEMPLATES[(ci + vi + seed) % IMAGE_TEMPLATES.length];
+      return { kind: c.kind, peg, concept: c.concept, image: tpl(peg, c.concept) };
+    });
+    rooms.push({
+      name: v.title,
+      emoji: ['📺', '🛠️', '🚀', '🔬', '📊'][vi % 5],
+      video: `M${module.id}·V${v.id} — ${v.title}`,
+      loci: loci.length ? loci : [{ kind: 'Note', peg: nextPeg(), concept: 'No script text found for this video yet.', image: 'An empty room — write this video’s script first.' }]
+    });
+  });
+
+  // Recap room — the exit walk.
+  rooms.push({
+    name: 'Recap Gallery',
+    emoji: '🔁',
+    video: 'Walk back through every room out loud',
+    loci: [{
+      kind: 'Recap', peg: nextPeg(),
+      concept: 'Re-walk all rooms in order',
+      image: 'On the way out, glance into each room once more — the images should fire instantly.'
+    }]
+  });
+
+  return { module_id: module.id, theme: theme.name, theme_emoji: theme.emoji, title: module.title, rooms };
+}
+
+// ── SVG sketch of the palace (serpentine walking route) ───────────────────────
+function renderSketch(palace) {
+  const host = document.getElementById('sketchHost');
+  if (!palace) { host.innerHTML = ''; return; }
+  const rooms = palace.rooms;
+  const cols = 3, cellW = 320, cellH = 200, boxW = 280, boxH = 150, mx = 20, my = 24;
+  const rows = Math.ceil(rooms.length / cols);
+  const W = cols * cellW, H = rows * cellH;
+  const centers = [];
+  let boxes = '';
+
+  rooms.forEach((room, i) => {
+    const row = Math.floor(i / cols);
+    const colRaw = i % cols;
+    const col = (row % 2 === 0) ? colRaw : (cols - 1 - colRaw);   // serpentine
+    const x = col * cellW + mx, y = row * cellH + my;
+    centers.push({ x: x + boxW / 2, y: y + boxH / 2, order: i });
+    const dots = room.loci.map((_, di) =>
+      `<circle cx="${x + 24 + di * 26}" cy="${y + boxH - 26}" r="9" fill="#8b5cf6"/>` +
+      `<text x="${x + 24 + di * 26}" y="${y + boxH - 22}" text-anchor="middle" font-size="11" fill="#fff" font-family="Outfit, sans-serif" font-weight="700">${di + 1}</text>`
+    ).join('');
+    boxes += `
+      <g>
+        <rect x="${x}" y="${y}" width="${boxW}" height="${boxH}" rx="16" fill="rgba(17,24,39,0.92)" stroke="rgba(139,92,246,0.5)" stroke-width="2"/>
+        <text x="${x + 18}" y="${y + 34}" font-size="20" font-family="Outfit, sans-serif">${room.emoji}</text>
+        <text x="${x + 46}" y="${y + 34}" font-size="16" fill="#f3f4f6" font-family="Outfit, sans-serif" font-weight="700">${esc(room.name).slice(0, 22)}</text>
+        <text x="${x + 18}" y="${y + 58}" font-size="11" fill="#9ca3af" font-family="Plus Jakarta Sans, sans-serif">${esc(room.video).slice(0, 34)}</text>
+        <text x="${x + 18}" y="${y + 88}" font-size="11" fill="#93c5fd" font-family="Plus Jakarta Sans, sans-serif">${room.loci.length} locus${room.loci.length === 1 ? '' : 'es'} →</text>
+        ${dots}
+      </g>`;
+  });
+
+  // Walking route connectors.
+  let path = '';
+  for (let i = 0; i < centers.length - 1; i++) {
+    const a = centers[i], b = centers[i + 1];
+    path += `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="#10b981" stroke-width="2.5" stroke-dasharray="6 7" marker-end="url(#arrow)"/>`;
+  }
+
+  host.innerHTML = `
+    <div class="sketch-wrap">
+      <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Memory palace floor plan">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#10b981"/>
+          </marker>
+        </defs>
+        ${path}
+        ${boxes}
+      </svg>
+    </div>`;
+}
+
+// ── Render the detailed room walkthrough ──────────────────────────────────────
+function renderPalace(palace) {
+  const host = document.getElementById('palaceHost');
+  const theme = document.getElementById('palaceTheme');
+  const sub = document.getElementById('palaceSub');
+  if (!palace) {
+    host.innerHTML = '<div class="empty-state"><div class="big">🗝️</div><div>Choose a module above, then generate its memory palace.</div></div>';
+    document.getElementById('notesCard').style.display = 'none';
+    return;
+  }
+  theme.textContent = `${palace.theme_emoji || '🏛️'} ${palace.theme}`;
+  sub.textContent = `Module ${palace.module_id} — ${palace.title} · ${palace.rooms.length} rooms · walk them in order`;
+
+  host.innerHTML = `<div class="rooms">` + palace.rooms.map((room, i) => `
+    <div class="room">
+      <div class="room-head">
+        <div class="room-num">${i + 1}</div>
+        <div class="room-name">${room.emoji} ${esc(room.name)}</div>
+      </div>
+      <div class="room-video">${esc(room.video)}</div>
+      ${room.loci.map(l => `
+        <div class="locus">
+          <div class="locus-peg">📍 ${esc(l.peg)} · ${esc(l.kind)}</div>
+          <div class="locus-image">${esc(l.image)}</div>
+          <div class="locus-concept">↳ remembers: ${esc(l.concept)}</div>
+        </div>`).join('')}
+    </div>`).join('') + `</div>`;
+
+  document.getElementById('notesCard').style.display = 'block';
+  renderSketch(palace);
+}
+
+// ── Supabase load / save ──────────────────────────────────────────────────────
+async function loadSavedPalace(moduleId) {
+  if (!db) return null;
+  try {
+    const { data, error } = await db.from('memory_palaces')
+      .select('*').eq('module_id', moduleId).eq('user_id', USER_ID).maybeSingle();
+    if (error) throw error;
+    return data;
+  } catch (err) { console.error('Load palace failed', err); return null; }
+}
+
+async function savePalace() {
+  if (!currentPalace) return;
+  if (!db) { showToast('⚠️ Supabase not configured', true); return; }
+  setSaveState('Saving…');
+  document.getElementById('btnSave').disabled = true;
+  try {
+    const row = {
+      module_id: currentPalace.module_id,
+      user_id: USER_ID,
+      theme: currentPalace.theme,
+      title: currentPalace.title,
+      palace: currentPalace,
+      notes: document.getElementById('palaceNotes').value,
+      updated_at: new Date().toISOString()
+    };
+    const { error } = await db.from('memory_palaces').upsert(row, { onConflict: 'module_id,user_id' });
+    if (error) throw error;
+    dirty = false;
+    setSaveState('✅ Saved for Module ' + currentPalace.module_id);
+    showToast('🏛️ Memory palace saved');
+  } catch (err) {
+    console.error('Save failed', err);
+    setSaveState('❌ Save failed');
+    showToast('❌ Save failed — ' + (err.message || 'unknown error'), true);
+  } finally {
+    document.getElementById('btnSave').disabled = false;
+  }
+}
+
+// ── Module selection ──────────────────────────────────────────────────────────
+async function selectModule(moduleId) {
+  currentModuleId = moduleId;
+  document.querySelectorAll('.module-btn').forEach(b => b.classList.toggle('active', +b.dataset.module === moduleId));
+  document.getElementById('btnGenerate').disabled = false;
+  document.getElementById('btnSave').disabled = true;
+  genSeed = 0;
+  setSaveState('Loading…');
+
+  const saved = await loadSavedPalace(moduleId);
+  if (saved && saved.palace && saved.palace.rooms) {
+    currentPalace = saved.palace;
+    renderPalace(currentPalace);
+    document.getElementById('palaceNotes').value = saved.notes || '';
+    document.getElementById('btnSave').disabled = false;
+    setSaveState('💾 Loaded saved palace (updated ' + new Date(saved.updated_at).toLocaleString() + ')');
+  } else {
+    currentPalace = null;
+    renderPalace(null);
+    document.getElementById('palaceTheme').textContent = (THEMES[moduleId] ? THEMES[moduleId].emoji + ' ' + THEMES[moduleId].name : 'Ready');
+    const mod = loadedModules.find(m => m.id === moduleId);
+    document.getElementById('palaceSub').textContent = mod
+      ? `Module ${moduleId} — ${mod.title} · press Generate to build from ${mod.videos.length} video scripts`
+      : 'Press Generate to build the palace.';
+    setSaveState('No saved palace yet — generate one.');
+  }
+}
+
+function generate() {
+  const mod = loadedModules.find(m => m.id === currentModuleId);
+  if (!mod) { showToast('Load a module first', true); return; }
+  genSeed++;
+  currentPalace = buildPalace(mod, genSeed);
+  renderPalace(currentPalace);
+  dirty = true;
+  document.getElementById('btnSave').disabled = false;
+  setSaveState('Generated — not saved yet. Press 💾 Save.');
+  showToast('🏛️ Palace generated for Module ' + mod.id);
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+(async function init() {
+  await loadScripts();
+  const nav = document.getElementById('module-nav');
+  const list = loadedModules.length ? loadedModules : [1, 2, 3, 4, 5].map(id => ({ id, title: (THEMES[id] || {}).name || ('Module ' + id) }));
+  nav.innerHTML = list.map(m =>
+    `<button class="module-btn" data-module="${m.id}">M${m.id} · ${esc((m.title || '').slice(0, 26))}</button>`
+  ).join('');
+  nav.querySelectorAll('.module-btn').forEach(b => b.addEventListener('click', () => selectModule(+b.dataset.module)));
+
+  document.getElementById('btnGenerate').addEventListener('click', generate);
+  document.getElementById('btnSave').addEventListener('click', savePalace);
+  document.getElementById('palaceNotes').addEventListener('input', () => { dirty = true; });
+
+  // Deep-link: ?module=2
+  const qp = new URLSearchParams(location.search);
+  const qm = parseInt(qp.get('module'), 10);
+  if (qm >= 1 && qm <= 5) selectModule(qm);
+
+  window.addEventListener('beforeunload', e => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
+})();
+</script>
+</body>
+</html>

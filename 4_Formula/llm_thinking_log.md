@@ -540,3 +540,37 @@ Filter the sentences dropdown on all research pages (`index.html`, `images.html`
    - If a video is linked or selected, show only sentences from that video. Else, keep the dropdown empty and show a placeholder (`-- link video first --`).
 4. **Validation**:
    - Verify `go build ./cmd/...` passes.
+
+## 2026-06-17 — 🎵 Audio Scoring: persist scene change + SFX/Music rationale to Supabase + prompt generators
+
+### 🎯 Objective
+On `5_Symbols/production/postprod/audio_scoring.html`, persist the **scene change** (transition) and the **SFX & music rationale** to Supabase per scene, and add **AI prompt-generator buttons** for sound effects and for background music to each table row.
+
+### 📐 Design & Implementation Plan
+1. **Migration** `migration_scene_audio_scoring.sql` — add columns to `scenes`:
+   - `sfx_needed`, `bg_music`, `scene_change`, `audio_rationale` (TEXT), `audio_status` (TEXT default `pending`).
+2. **audio_scoring.html** — wire to Supabase using the established bootstrap (`/api/config` → cookie → localStorage → public anon-key default), matching `production_shotlist.html`.
+   - Load scenes ordered by module/section/scene; render an editable row per scene.
+   - New columns: Scene Change + Rationale; inline-editable SFX, Music, Scene Change, Rationale with a per-row **💾 Save** (PATCH to `scenes`).
+   - Two prompt-generator buttons per row — **🎚️ SFX Prompt** and **🎵 Music Prompt** — build an AI-generation prompt from the scene fields, copy to clipboard, and show it in a modal.
+   - Graceful fallback: if DB is empty/unreachable, render the hardcoded `SCENES` as a read-only preview (prompt buttons still work; Save disabled).
+3. **Validation**: load page locally, confirm rows render, Save persists, prompt modal copies text.
+
+---
+
+## 🧠 2026-06-17 — Memory Palace Builder (per module) — `claude-opus-4-8`
+
+**🎯 Goal:** Add a post-production Memory Palace Builder so the audience can remember each module's content via the method of loci. One palace per module, derived from the module's full script, with a **Generate** button and a **Save** button (Supabase-backed).
+
+**🤔 Approach / Decision drivers:**
+- **Reuse the existing patterns** — mirror `music_sfx_score.html` for styling/nav/footer and `customer_discovery.html` for the Supabase anon-key client + toast + `apiBase()` fallback (GitHub Pages → Fly.io).
+- **Data source = the actual module scripts.** Load `loadFromSupabase()` (modules/videos/scripts) first, fall back to `../preprod/scripts/master_script.json`. Extract loci anchors from each video's title, hook (first quoted line), objectives, key insight/takeaway, IVQ, and cues — so the palace genuinely "uses all the module script".
+- **Generation is deterministic client-side** (no API dependency) so it works on static GitHub Pages: each module gets a themed palace; each video becomes a room; each extracted concept becomes a vivid mnemonic locus (peg object + action + concept). A "sketch" is rendered as an SVG floor-plan walking route plus a textual room-by-room walkthrough.
+- **Persistence:** new `memory_palaces` table keyed unique on `(module_id, user_id)`; upsert on Save, auto-load saved palace on module switch. RLS public read + public all (matches `dsl_entries` convention).
+
+**🛠 Build steps:**
+1. `migration_memory_palaces.sql` — table + RLS.
+2. `memory_palace.html` — module selector, 🏛️ Generate, 💾 Save, SVG sketch + walkthrough, notes field.
+3. Wire postprod `index.html` (card + file row), `navigation_config.json`, postprod `README.md`.
+
+**Post-execution summary:** Implemented as planned; deterministic generator keeps the page functional with or without the Go backend; Save/Load upserts to `memory_palaces` via the Supabase REST/anon client.

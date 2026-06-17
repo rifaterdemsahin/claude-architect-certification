@@ -324,6 +324,11 @@
               "label": "8. 🎼 Sound & Music Score (Pre-Edit)",
               "url": "5_Symbols/production/postprod/music_sfx_score.html",
               "description": "Pre-edit spotting score mapping SFX hits and music beds scene-by-scene from the rendered master script across all 5 modules."
+            },
+            {
+              "label": "9. 🏛️ Memory Palace Builder",
+              "url": "5_Symbols/production/postprod/memory_palace.html",
+              "description": "Generate and save a method-of-loci memory palace per module from its full script, so the audience can remember every concept."
             }
           ]
         },
