@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gemini Generation Cost Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #030712;
+    color: #e2e8f0;
+    font-family: 'Inter', system-ui, sans-serif;
+    padding: 2rem;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .container { max-width: 860px; width: 100%; }
+  h1 {
+    font-size: 1.75rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #a78bfa, #60a5fa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.25rem;
+  }
+  .subtitle { color: #94a3b8; font-size: 0.9rem; margin-bottom: 2rem; }
+  .card {
+    background: #111827;
+    border: 1px solid #1f2937;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
+  }
+  .card h2 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #f1f5f9;
+  }
+  .param-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  .param { display: flex; flex-direction: column; gap: 0.3rem; }
+  .param label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .param input {
+    background: #1f2937;
+    border: 1px solid #374151;
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    color: #e2e8f0;
+    font-size: 0.95rem;
+    font-family: 'Inter', monospace;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .param input:focus { border-color: #6366f1; }
+  .param input[type="number"] { -moz-appearance: textfield; }
+  .param .hint { font-size: 0.75rem; color: #64748b; }
+  .summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  .summary-item {
+    background: #1e293b;
+    border-radius: 8px;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .summary-item .label { font-size: 0.85rem; color: #94a3b8; }
+  .summary-item .value { font-size: 1.15rem; font-weight: 700; color: #f1f5f9; }
+  .total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem;
+    background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(139,92,246,0.12));
+    border: 1px solid #6366f1;
+    border-radius: 10px;
+    margin-top: 1rem;
+  }
+  .total-row .label { font-size: 1.1rem; font-weight: 700; color: #e2e8f0; }
+  .total-row .value { font-size: 1.6rem; font-weight: 800; color: #a78bfa; }
+  .per-unit {
+    border-top: 1px solid #1f2937;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
+    text-align: center;
+  }
+  .per-unit-item { background: #1e293b; border-radius: 6px; padding: 0.5rem; }
+  .per-unit-item .val { font-size: 1rem; font-weight: 700; color: #60a5fa; }
+  .per-unit-item .lbl { font-size: 0.7rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.3px; }
+  .breakdown-table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
+  .breakdown-table th {
+    text-align: left;
+    font-size: 0.8rem;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid #1f2937;
+  }
+  .breakdown-table td {
+    padding: 0.6rem 0.75rem;
+    border-bottom: 1px solid #1a1f2e;
+    font-size: 0.9rem;
+  }
+  .breakdown-table td:last-child,
+  .breakdown-table th:last-child { text-align: right; font-weight: 600; }
+  .breakdown-table tr:last-child td { border-bottom: none; }
+  @media (max-width: 640px) {
+    .param-grid { grid-template-columns: 1fr; }
+    .summary-grid { grid-template-columns: 1fr; }
+    .per-unit { grid-template-columns: repeat(2, 1fr); }
+  }
+  .footer-note { font-size: 0.75rem; color: #475569; margin-top: 2rem; text-align: center; }
+  .warn-banner {
+    background: rgba(251,191,36,0.1);
+    border: 1px solid rgba(251,191,36,0.3);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-size: 0.8rem;
+    color: #fbbf24;
+    margin-bottom: 1.25rem;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Gemini Generation Cost Calculator</h1>
+  <p class="subtitle">Estimated cost to generate all images, lower thirds, sound effects &amp; music via Gemini API and Google Cloud AI</p>
+
+  <div class="warn-banner">
+    ⚠️ Pricing shown is estimated based on publicly available Gemini API and Google Cloud Vertex AI rates (Jun 2026).
+    All per-unit costs are editable. Actual cost depends on model version, image size, audio duration, and region.
+  </div>
+
+  <div class="card">
+    <h2>📐 Course Dimensions</h2>
+    <div class="param-grid">
+      <div class="param">
+        <label>Total sentences</label>
+        <input type="number" id="totalSentences" value="222" min="1" oninput="calc()">
+        <span class="hint">Across all 25 videos (15 core + 10 intro/recap)</span>
+      </div>
+      <div class="param">
+        <label>Lower thirds</label>
+        <input type="number" id="totalLowerThirds" value="15" min="0" oninput="calc()">
+        <span class="hint">One per core video (M1V1–M5V3)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>💰 Per-Unit Costs</h2>
+    <div class="param-grid">
+      <div class="param">
+        <label>Image generation (per sentence)</label>
+        <input type="number" id="costImage" value="0.04" min="0" step="0.001" oninput="calc()">
+        <span class="hint">Imagen 3 / Gemini 2.0 Flash — 1024×1024</span>
+      </div>
+      <div class="param">
+        <label>Lower third graphic</label>
+        <input type="number" id="costLower" value="0.05" min="0" step="0.001" oninput="calc()">
+        <span class="hint">Gemini — branded overlay design</span>
+      </div>
+      <div class="param">
+        <label>Sound effect (per sentence)</label>
+        <input type="number" id="costSfx" value="0.03" min="0" step="0.001" oninput="calc()">
+        <span class="hint">AudioFX / Gemini — 1–3s clip</span>
+      </div>
+      <div class="param">
+        <label>Music track (per sentence)</label>
+        <input type="number" id="costMusic" value="0.10" min="0" step="0.001" oninput="calc()">
+        <span class="hint">MusicLM / Gemini — 15–30s background loop</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📊 Cost Breakdown</h2>
+    <table class="breakdown-table">
+      <thead>
+        <tr><th>Asset</th><th>Qty</th><th>Unit</th><th>Total</th></tr>
+      </thead>
+      <tbody id="breakdownBody"></tbody>
+    </table>
+    <div class="total-row">
+      <span class="label">💰 Total generation cost</span>
+      <span class="value" id="totalCost">$0.00</span>
+    </div>
+    <div class="per-unit">
+      <div class="per-unit-item"><div class="val" id="puImage">$0.00</div><div class="lbl">Per image</div></div>
+      <div class="per-unit-item"><div class="val" id="puLower">$0.00</div><div class="lbl">Per lower third</div></div>
+      <div class="per-unit-item"><div class="val" id="puSfx">$0.00</div><div class="lbl">Per SFX</div></div>
+      <div class="per-unit-item"><div class="val" id="puMusic">$0.00</div><div class="lbl">Per music track</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📈 Module-Level Estimate</h2>
+    <div class="param-grid">
+      <div class="param">
+        <label>Sentences per module</label>
+        <input type="number" id="sentPerModule" value="44" min="1" oninput="calc()">
+        <span class="hint">222 ÷ 5 ≈ 44 sentences/module</span>
+      </div>
+      <div class="param">
+        <label>Lower thirds per module</label>
+        <input type="number" id="lowerPerModule" value="3" min="0" oninput="calc()">
+        <span class="hint">3 core videos × 1 per module</span>
+      </div>
+    </div>
+    <div style="margin-top: 1rem;">
+      <table class="breakdown-table">
+        <thead><tr><th>Module</th><th>Sentences</th><th>Lower thirds</th><th>Cost</th></tr></thead>
+        <tbody id="moduleBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📝 Additional Notes</h2>
+    <table class="breakdown-table">
+      <tbody>
+        <tr><td>🎬 Total videos</td><td>25</td></tr>
+        <tr><td>📖 Total sentences</td><td id="noteSentences">222</td></tr>
+        <tr><td>🖼 Images needed</td><td id="noteImages">222</td></tr>
+        <tr><td>🎧 SFX needed</td><td id="noteSfx">222</td></tr>
+        <tr><td>🎵 Music tracks needed</td><td id="noteMusic">222</td></tr>
+        <tr><td>🏷 Lower thirds needed</td><td id="noteLower">15</td></tr>
+      </tbody>
+    </table>
+    <div class="footer-note" style="margin-top:1rem;">
+      Prices based on Gemini API &amp; Google Cloud Vertex AI published rates (June 2026).
+      Actual costs may vary. All fields above are adjustable.
+    </div>
+  </div>
+</div>
+
+<script>
+function fmt(n) { return '$' + n.toFixed(2); }
+
+function calc() {
+  const s  = parseFloat(document.getElementById('totalSentences').value) || 0;
+  const lt = parseFloat(document.getElementById('totalLowerThirds').value) || 0;
+  const cImg  = parseFloat(document.getElementById('costImage').value) || 0;
+  const cLow  = parseFloat(document.getElementById('costLower').value) || 0;
+  const cSfx  = parseFloat(document.getElementById('costSfx').value) || 0;
+  const cMus  = parseFloat(document.getElementById('costMusic').value) || 0;
+
+  const spm = parseFloat(document.getElementById('sentPerModule').value) || 0;
+  const lpm = parseFloat(document.getElementById('lowerPerModule').value) || 0;
+
+  const tImg  = s * cImg;
+  const tLow  = lt * cLow;
+  const tSfx  = s * cSfx;
+  const tMus  = s * cMus;
+  const total = tImg + tLow + tSfx + tMus;
+
+  document.getElementById('breakdownBody').innerHTML = `
+    <tr><td>🖼 Images</td><td>${s}</td><td>${fmt(cImg)}</td><td>${fmt(tImg)}</td></tr>
+    <tr><td>🏷 Lower thirds</td><td>${lt}</td><td>${fmt(cLow)}</td><td>${fmt(tLow)}</td></tr>
+    <tr><td>🎧 Sound effects</td><td>${s}</td><td>${fmt(cSfx)}</td><td>${fmt(tSfx)}</td></tr>
+    <tr><td>🎵 Music tracks</td><td>${s}</td><td>${fmt(cMus)}</td><td>${fmt(tMus)}</td></tr>
+  `;
+
+  document.getElementById('totalCost').textContent = fmt(total);
+  document.getElementById('puImage').textContent = fmt(cImg);
+  document.getElementById('puLower').textContent  = fmt(cLow);
+  document.getElementById('puSfx').textContent    = fmt(cSfx);
+  document.getElementById('puMusic').textContent  = fmt(cMus);
+
+  document.getElementById('noteSentences').textContent = s;
+  document.getElementById('noteImages').textContent = s;
+  document.getElementById('noteSfx').textContent = s;
+  document.getElementById('noteMusic').textContent = s;
+  document.getElementById('noteLower').textContent = lt;
+
+  let moduleHtml = '';
+  const modules = ['M1 — Claude Ecosystem', 'M2 — MCP', 'M3 — ZDR', 'M4 — Routers', 'M5 — Financial Eng'];
+  const modCost = (spm * (cImg + cSfx + cMus)) + (lpm * cLow);
+  modules.forEach((m, i) => {
+    moduleHtml += `<tr><td>${m}</td><td>${spm}</td><td>${lpm}</td><td>${fmt(modCost)}</td></tr>`;
+  });
+  document.getElementById('moduleBody').innerHTML = moduleHtml;
+}
+
+calc();
+</script>
+</body>
+</html>

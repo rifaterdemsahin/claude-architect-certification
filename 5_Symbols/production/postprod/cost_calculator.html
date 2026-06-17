@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="../../../shared/redirect-to-live-site.js"></script>
+  <title>AI Generation Cost Calculator | Claude AI Certification</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #030712;
+      --bg-card: rgba(17, 24, 39, 0.9);
+      --border-glow: rgba(139, 92, 246, 0.3);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --primary: #8b5cf6;
+      --primary-glow: rgba(139, 92, 246, 0.6);
+      --secondary: #3b82f6;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --font-title: 'Outfit', sans-serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-dark);
+      background-image: radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.12) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.12) 0%, transparent 40%);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      line-height: 1.6;
+      padding: 100px 24px 60px;
+    }
+    .container { max-width: 1100px; margin: 0 auto; }
+    header { margin-bottom: 40px; text-align: center; }
+    header h1 { font-family: var(--font-title); font-size: 2.8rem; font-weight: 900; letter-spacing: -0.02em; margin-bottom: 8px; }
+    header p { font-size: 1.1rem; color: var(--text-muted); }
+    .glass-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-glow);
+      border-radius: 16px;
+      padding: 28px 32px;
+      margin-bottom: 24px;
+      backdrop-filter: blur(6px);
+    }
+    .glass-card h2 { font-family: var(--font-title); font-size: 1.4rem; font-weight: 700; margin-bottom: 16px; }
+    .glass-card h3 { font-family: var(--font-title); font-size: 1.1rem; font-weight: 600; margin-bottom: 12px; color: var(--text-muted); }
+    .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 768px) { .mode-grid { grid-template-columns: 1fr; } }
+    .mode-card {
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid #1f2937;
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .mode-card.tiktok { border-color: rgba(239, 68, 68, 0.3); }
+    .mode-card.architect { border-color: rgba(16, 185, 129, 0.3); }
+    .mode-card h3 { font-family: var(--font-title); font-size: 1.15rem; font-weight: 700; margin-bottom: 4px; }
+    .mode-card .tagline { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px; }
+    .mode-total {
+      font-size: 2rem;
+      font-weight: 800;
+      margin: 12px 0 4px;
+    }
+    .mode-total.tiktok { color: #ef4444; }
+    .mode-total.architect { color: #10b981; }
+    .savings-badge {
+      display: inline-block;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      border-radius: 999px;
+      padding: 4px 14px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #34d399;
+    }
+    .param-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .param { display: flex; flex-direction: column; gap: 4px; }
+    .param label { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.4px; }
+    .param input {
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 6px;
+      padding: 8px 12px;
+      color: var(--text-main);
+      font-size: 0.95rem;
+      font-family: var(--font-body);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .param input:focus { border-color: var(--primary); }
+    .param .hint { font-size: 0.72rem; color: #475569; }
+    .row-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .row-item:last-child { border-bottom: none; }
+    .row-item .label { font-size: 0.9rem; }
+    .row-item .value { font-weight: 600; }
+    .comparison-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+    .comparison-table th {
+      text-align: left;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 10px 12px;
+      border-bottom: 1px solid #1e293b;
+    }
+    .comparison-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      font-size: 0.88rem;
+    }
+    .comparison-table td:last-child,
+    .comparison-table th:last-child { text-align: right; }
+    .comparison-table tr:last-child td { border-bottom: none; }
+    .comparison-table .saving { color: #34d399; font-weight: 600; }
+    .comparison-table .cost-up { color: #ef4444; font-weight: 600; }
+    .warn-banner {
+      background: rgba(251,191,36,0.1);
+      border: 1px solid rgba(251,191,36,0.25);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 0.82rem;
+      color: #fbbf24;
+      margin-bottom: 20px;
+    }
+    .ref-link { font-size: 0.85rem; color: var(--secondary); text-decoration: none; }
+    .ref-link:hover { text-decoration: underline; }
+    .unit-cost-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 12px; }
+    .unit-cost-item { background: #0f172a; border-radius: 8px; padding: 10px; text-align: center; }
+    .unit-cost-item .val { font-size: 1.1rem; font-weight: 700; color: var(--secondary); }
+    .unit-cost-item .lbl { font-size: 0.68rem; color: #475569; text-transform: uppercase; letter-spacing: 0.3px; margin-top: 2px; }
+    .reason-text { font-size: 0.82rem; color: var(--text-muted); font-style: italic; margin-top: 2px; }
+    @media (max-width: 640px) {
+      body { padding: 80px 12px 40px; }
+      .glass-card { padding: 20px 16px; }
+      .param-grid { grid-template-columns: 1fr; }
+      .unit-cost-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>AI Generation Cost Calculator</h1>
+    <p>Compare per-sentence vs. per-concept generation strategies for Gemini-powered assets</p>
+  </header>
+
+  <div class="warn-banner">
+    ⚠️ Pricing based on Gemini API &amp; Google Cloud Vertex AI rates (Jun 2026). All values are editable.
+    Actual cost depends on model version, image size, audio duration, and region.
+  </div>
+
+  <div class="glass-card">
+    <h2>💰 Per-Unit Costs (shared)</h2>
+    <div class="unit-cost-grid">
+      <div class="unit-cost-item"><div class="val" id="dispImageCost">$0.04</div><div class="lbl">Per image</div></div>
+      <div class="unit-cost-item"><div class="val" id="dispLowerCost">$0.05</div><div class="lbl">Per lower third</div></div>
+      <div class="unit-cost-item"><div class="val" id="dispSfxCost">$0.03</div><div class="lbl">Per SFX</div></div>
+      <div class="unit-cost-item"><div class="val" id="dispMusicCost">$0.10</div><div class="lbl">Per track / min</div></div>
+    </div>
+    <div class="param-grid" style="margin-top:12px;">
+      <div class="param">
+        <label>Cost per image</label>
+        <input type="number" id="costImage" value="0.04" min="0" step="0.001" oninput="calc()">
+        <span class="hint">Imagen 3 / Gemini 2.0 Flash — 1024×1024</span>
+      </div>
+      <div class="param">
+        <label>Cost per lower third</label>
+        <input type="number" id="costLower" value="0.05" min="0" step="0.001" oninput="calc()">
+        <span class="hint">Gemini — branded overlay design</span>
+      </div>
+      <div class="param">
+        <label>Cost per SFX</label>
+        <input type="number" id="costSfx" value="0.03" min="0" step="0.001" oninput="calc()">
+        <span class="hint">AudioFX / Gemini — 1–3s clip</span>
+      </div>
+      <div class="param">
+        <label>Cost per music minute</label>
+        <input type="number" id="costMusic" value="0.10" min="0" step="0.001" oninput="calc()">
+        <span class="hint">MusicLM / Gemini — continuous background loop per minute</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="mode-grid">
+    <div class="mode-card tiktok">
+      <h3>🎬 "TikTok" Style</h3>
+      <div class="tagline">Per-sentence generation — high frequency, high cost</div>
+      <div class="param-grid">
+        <div class="param">
+          <label>Images</label>
+          <input type="number" id="tikImages" value="222" min="0" oninput="calc()">
+          <span class="hint">One per sentence</span>
+        </div>
+        <div class="param">
+          <label>Lower thirds</label>
+          <input type="number" id="tikLower" value="15" min="0" oninput="calc()">
+        </div>
+        <div class="param">
+          <label>SFX hits</label>
+          <input type="number" id="tikSfx" value="222" min="0" oninput="calc()">
+          <span class="hint">One per sentence</span>
+        </div>
+        <div class="param">
+          <label>Music tracks</label>
+          <input type="number" id="tikMusic" value="222" min="0" oninput="calc()">
+          <span class="hint">Per-sentence music changes</span>
+        </div>
+      </div>
+      <div class="mode-total tiktok" id="tikTotal">$38.49</div>
+      <div style="font-size:0.82rem;color:var(--text-muted);">Total generation cost</div>
+    </div>
+
+    <div class="mode-card architect">
+      <h3>🏛 "Architect" Style <span class="savings-badge" id="savingsBadge">−86%</span></h3>
+      <div class="tagline">Per-concept generation — efficient, professional pacing</div>
+      <div class="param-grid">
+        <div class="param">
+          <label>Images / diagrams</label>
+          <input type="number" id="arcImages" value="45" min="0" oninput="calc()">
+          <span class="hint">Held for 3–4 sentences — architectural diagrams</span>
+        </div>
+        <div class="param">
+          <label>Lower thirds</label>
+          <input type="number" id="arcLower" value="15" min="0" oninput="calc()">
+        </div>
+        <div class="param">
+          <label>SFX hits</label>
+          <input type="number" id="arcSfx" value="20" min="0" oninput="calc()">
+          <span class="hint">Major transitions only</span>
+        </div>
+        <div class="param">
+          <label>Music (minutes)</label>
+          <input type="number" id="arcMusic" value="20" min="0" oninput="calc()">
+          <span class="hint">Continuous ambient loop ~20 min video</span>
+        </div>
+      </div>
+      <div class="mode-total architect" id="arcTotal">$5.15</div>
+      <div style="font-size:0.82rem;color:var(--text-muted);">Total generation cost</div>
+    </div>
+  </div>
+
+  <div class="glass-card">
+    <h2>📊 Budget Comparison</h2>
+    <table class="comparison-table">
+      <thead>
+        <tr><th>Asset Type</th><th>TikTok Style</th><th>Architect Style</th><th>Savings</th><th>Reasoning</th></tr>
+      </thead>
+      <tbody id="comparisonBody"></tbody>
+    </table>
+  </div>
+
+  <div class="glass-card">
+    <h2>📈 Module-Level Estimate (Architect Style)</h2>
+    <div class="param-grid">
+      <div class="param">
+        <label>Images per module</label>
+        <input type="number" id="modImages" value="9" min="0" oninput="calc()">
+        <span class="hint">45 ÷ 5</span>
+      </div>
+      <div class="param">
+        <label>Lower thirds per module</label>
+        <input type="number" id="modLower" value="3" min="0" oninput="calc()">
+      </div>
+      <div class="param">
+        <label>SFX per module</label>
+        <input type="number" id="modSfx" value="4" min="0" oninput="calc()">
+        <span class="hint">20 ÷ 5</span>
+      </div>
+      <div class="param">
+        <label>Music minutes per module</label>
+        <input type="number" id="modMusic" value="4" min="0" oninput="calc()">
+        <span class="hint">20 ÷ 5</span>
+      </div>
+    </div>
+    <div style="margin-top:16px;">
+      <table class="comparison-table">
+        <thead><tr><th>Module</th><th>Images</th><th>Lower</th><th>SFX</th><th>Music</th><th>Cost</th></tr></thead>
+        <tbody id="moduleBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="glass-card">
+    <h2>📝 Notes</h2>
+    <p style="font-size:0.88rem;color:var(--text-muted);">
+      <strong>TikTok Style:</strong> One unique image, SFX, and music track per sentence (222 of each).<br>
+      <strong>Architect Style:</strong> Diagrams held for 3–4 sentences so viewers absorb complex system designs.
+      SFX reserved for major visual transitions. Continuous ambient music loop instead of per-sentence changes.
+      This reduces auditory clutter and improves the professional viewing experience.<br><br>
+      <a href="../../../4_Formula/cost_calculator_gemini_generation.html" class="ref-link">🔗 Reference: Detailed per-unit calculator in 4_Formula</a>
+    </p>
+  </div>
+</div>
+
+<script>
+function fmt(n) { return '$' + n.toFixed(2); }
+
+function calc() {
+  const cImg = parseFloat(document.getElementById('costImage').value) || 0;
+  const cLow = parseFloat(document.getElementById('costLower').value) || 0;
+  const cSfx = parseFloat(document.getElementById('costSfx').value) || 0;
+  const cMus = parseFloat(document.getElementById('costMusic').value) || 0;
+
+  document.getElementById('dispImageCost').textContent = fmt(cImg);
+  document.getElementById('dispLowerCost').textContent = fmt(cLow);
+  document.getElementById('dispSfxCost').textContent = fmt(cSfx);
+  document.getElementById('dispMusicCost').textContent = fmt(cMus);
+
+  const tikImg = parseFloat(document.getElementById('tikImages').value) || 0;
+  const tikLow = parseFloat(document.getElementById('tikLower').value) || 0;
+  const tikSfx = parseFloat(document.getElementById('tikSfx').value) || 0;
+  const tikMus = parseFloat(document.getElementById('tikMusic').value) || 0;
+
+  const arcImg = parseFloat(document.getElementById('arcImages').value) || 0;
+  const arcLow = parseFloat(document.getElementById('arcLower').value) || 0;
+  const arcSfx = parseFloat(document.getElementById('arcSfx').value) || 0;
+  const arcMus = parseFloat(document.getElementById('arcMusic').value) || 0;
+
+  const tikTot = (tikImg * cImg) + (tikLow * cLow) + (tikSfx * cSfx) + (tikMus * cMus);
+  const arcTot = (arcImg * cImg) + (arcLow * cLow) + (arcSfx * cSfx) + (arcMus * cMus);
+
+  document.getElementById('tikTotal').textContent = fmt(tikTot);
+  document.getElementById('arcTotal').textContent = fmt(arcTot);
+
+  const pct = tikTot > 0 ? Math.round((1 - arcTot / tikTot) * 100) : 0;
+  document.getElementById('savingsBadge').textContent = '−' + pct + '%';
+
+  const reasons = [
+    'Holding on diagrams for 3–4 sentences allows viewers to absorb complex system designs.',
+    'Spot on. Perfect for introducing new frameworks, terms, or modules every 60–90 seconds.',
+    'Reserved strictly for major visual transitions to avoid auditory clutter.',
+    'Continuous looping ambient tracks maintain focus; per-sentence changes create chaos.'
+  ];
+
+  const rows = [
+    { label: '🖼 Images', tik: tikImg, tikC: tikImg * cImg, arc: arcImg, arcC: arcImg * cImg, r: reasons[0] },
+    { label: '🏷 Lower Thirds', tik: tikLow, tikC: tikLow * cLow, arc: arcLow, arcC: arcLow * cLow, r: reasons[1] },
+    { label: '🎧 Sound Effects', tik: tikSfx, tikC: tikSfx * cSfx, arc: arcSfx, arcC: arcSfx * cSfx, r: reasons[2] },
+    { label: '🎵 Music', tik: tikMus, tikC: tikMus * cMus, arc: arcMus, arcC: arcMus * cMus, r: reasons[3] }
+  ];
+
+  let compHtml = '';
+  rows.forEach(r => {
+    const saving = r.tikC - r.arcC;
+    const label = saving > 0 ? 'saving' : '';
+    compHtml += `<tr>
+      <td>${r.label}</td>
+      <td>${fmt(r.tikC)} (${r.tik} assets)</td>
+      <td>${fmt(r.arcC)} (${r.arc} assets)</td>
+      <td class="${saving > 0 ? 'saving' : 'cost-up'}">${saving > 0 ? '−' : '+'}${fmt(Math.abs(saving))}</td>
+      <td><span class="reason-text">${r.r}</span></td>
+    </tr>`;
+  });
+  compHtml += `<tr style="border-top:2px solid #1e293b;font-weight:700;">
+    <td>💰 Total</td>
+    <td class="cost-up">${fmt(tikTot)}</td>
+    <td class="saving">${fmt(arcTot)}</td>
+    <td class="saving">−${fmt(tikTot - arcTot)}</td>
+    <td><span class="reason-text">${pct}% cost reduction</span></td>
+  </tr>`;
+  document.getElementById('comparisonBody').innerHTML = compHtml;
+
+  const mi = parseFloat(document.getElementById('modImages').value) || 0;
+  const ml = parseFloat(document.getElementById('modLower').value) || 0;
+  const ms = parseFloat(document.getElementById('modSfx').value) || 0;
+  const mm = parseFloat(document.getElementById('modMusic').value) || 0;
+  const mods = ['M1 Claude Ecosystem', 'M2 MCP', 'M3 ZDR', 'M4 Routers', 'M5 Financial Eng'];
+  const modCost = (mi * cImg) + (ml * cLow) + (ms * cSfx) + (mm * cMus);
+  let modHtml = '';
+  mods.forEach(m => {
+    modHtml += `<tr><td>${m}</td><td>${mi}</td><td>${ml}</td><td>${ms}</td><td>${mm}</td><td>${fmt(modCost)}</td></tr>`;
+  });
+  document.getElementById('moduleBody').innerHTML = modHtml;
+}
+
+calc();
+</script>
+</body>
+</html>
