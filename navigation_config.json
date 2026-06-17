@@ -319,6 +319,11 @@
               "label": "7. 🎵 Audio Scoring",
               "url": "5_Symbols/production/postprod/audio_scoring.html",
               "description": "Find sound effects and background music for every script scene in post-production."
+            },
+            {
+              "label": "8. 🎼 Sound & Music Score (Pre-Edit)",
+              "url": "5_Symbols/production/postprod/music_sfx_score.html",
+              "description": "Pre-edit spotting score mapping SFX hits and music beds scene-by-scene from the rendered master script across all 5 modules."
             }
           ]
         },

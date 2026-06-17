@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="../../../shared/redirect-to-live-site.js"></script>
+  <title>Sound &amp; Music Score | Post-Production</title>
+  <meta name="description" content="Pre-edit sound effects and background music score, derived scene-by-scene from the rendered master script for all five modules.">
+  <meta name="keywords" content="sound design, music score, SFX, background music, post-production, spotting, pre-edit, Claude AI Certification">
+  <meta name="author" content="Rifat Erdem Sahin">
+  <link rel="icon" type="image/png" href="../../../favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #030712; --bg-card: rgba(17,24,39,0.8); --text-main: #f3f4f6; --text-muted: #9ca3af;
+      --primary: #8b5cf6; --secondary: #3b82f6; --accent: #10b981;
+      --font-title: 'Outfit', sans-serif; --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-dark);
+      background-image: radial-gradient(circle at 10% 20%, rgba(16,185,129,0.06) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(139,92,246,0.06) 0%, transparent 40%);
+      color: var(--text-main); font-family: var(--font-body); line-height: 1.6; padding-bottom: 80px;
+    }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+    .badge { display: inline-block; padding: 6px 16px; background: linear-gradient(135deg, rgba(139,92,246,0.2), rgba(16,185,129,0.2)); border: 1px solid rgba(139,92,246,0.3); border-radius: 100px; font-size: 0.8rem; font-weight: 600; color: #c4b5fd; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 14px; }
+    h1 { font-family: var(--font-title); font-size: 2.4rem; font-weight: 800; margin-bottom: 10px; }
+    header p { color: var(--text-muted); max-width: 680px; margin: 0 auto 8px; }
+
+    .workflow-note {
+      max-width: 760px; margin: 24px auto 0; background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.25);
+      border-radius: 14px; padding: 16px 20px; text-align: left; color: #fde68a; font-size: 0.9rem;
+    }
+    .workflow-note strong { color: #fcd34d; }
+
+    .summary { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; margin: 28px 0 8px; }
+    .stat { background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 16px 24px; text-align: center; min-width: 130px; }
+    .stat-num { font-family: var(--font-title); font-size: 1.8rem; font-weight: 800; color: var(--accent); }
+    .stat-label { font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+
+    .group { margin-bottom: 48px; }
+    .group-heading {
+      font-family: var(--font-title); font-size: 1.3rem; font-weight: 700; margin-bottom: 6px;
+      display: flex; align-items: center; gap: 10px; color: var(--text-main);
+    }
+    .group-sub { color: var(--text-muted); font-size: 0.88rem; margin-bottom: 16px; }
+
+    .module { margin-bottom: 36px; }
+    .module-title {
+      font-family: var(--font-title); font-size: 1.1rem; font-weight: 700; color: #c4b5fd;
+      margin-bottom: 4px; display: flex; align-items: center; gap: 10px;
+    }
+    .module-theme { color: var(--text-muted); font-size: 0.82rem; margin-bottom: 14px; }
+    .module-theme .pill { display: inline-block; background: rgba(139,92,246,0.15); border: 1px solid rgba(139,92,246,0.25); color: #c4b5fd; border-radius: 100px; padding: 2px 10px; font-size: 0.72rem; font-weight: 600; margin-left: 6px; }
+
+    .score-table { background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 18px; overflow: hidden; }
+    .score-table table { width: 100%; border-collapse: collapse; }
+    .score-table th {
+      text-align: left; padding: 14px 18px; font-family: var(--font-title); font-weight: 700;
+      font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em;
+      border-bottom: 1px solid rgba(255,255,255,0.06); background: rgba(0,0,0,0.25);
+    }
+    .score-table td { padding: 14px 18px; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.88rem; vertical-align: top; }
+    .score-table tr:last-child td { border-bottom: none; }
+    .score-table tr:hover td { background: rgba(139,92,246,0.04); }
+    .vid-id { font-weight: 700; color: var(--accent); white-space: nowrap; }
+    .vid-title { font-weight: 600; }
+    .vid-format { color: var(--text-muted); font-size: 0.78rem; display: block; margin-top: 2px; }
+    .hook { color: var(--text-muted); font-style: italic; font-size: 0.82rem; }
+    .cue-list { margin: 0; padding-left: 0; list-style: none; }
+    .cue-list li { padding: 2px 0; }
+    .music-mood { font-weight: 600; color: #93c5fd; }
+    .music-bpm { color: var(--text-muted); font-size: 0.8rem; }
+
+    .palette-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .palette-card { background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 20px; }
+    .palette-card h3 { font-family: var(--font-title); font-size: 1rem; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+    .palette-card ul { list-style: none; padding: 0; }
+    .palette-card li { font-size: 0.85rem; color: var(--text-muted); padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .palette-card li:last-child { border-bottom: none; }
+    .palette-card li strong { color: var(--text-main); }
+
+    .legend { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+    .legend .tag { display: inline-block; padding: 4px 12px; border-radius: 100px; font-size: 0.75rem; font-weight: 600; background: rgba(139,92,246,0.15); color: #c4b5fd; border: 1px solid rgba(139,92,246,0.2); }
+
+    .resources-list { display: flex; flex-direction: column; gap: 12px; }
+    .resource-card { background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 18px; display: flex; align-items: flex-start; gap: 16px; transition: all 0.2s; text-decoration: none; color: inherit; }
+    .resource-card:hover { border-color: var(--secondary); transform: translateY(-2px); }
+    .resource-icon { font-size: 1.6rem; flex-shrink: 0; }
+    .resource-name { font-weight: 700; margin-bottom: 2px; }
+    .resource-desc { font-size: 0.83rem; color: var(--text-muted); }
+
+    footer { text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
+
+    @media (max-width: 820px) {
+      .score-table table, .score-table thead, .score-table tbody, .score-table th, .score-table td, .score-table tr { display: block; }
+      .score-table thead { display: none; }
+      .score-table td { padding: 10px 16px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+      .score-table td::before { content: attr(data-label); display: block; font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+      .score-table tr { margin-bottom: 14px; border-bottom: 2px solid rgba(255,255,255,0.06); }
+    }
+  </style>
+  <script src="../../../shared/nav.js"></script>
+  <script src="../../../shared/debug-panel.js"></script>
+  <script src="../../../shared/seo.js" defer></script>
+</head>
+<body>
+
+<div class="container">
+  <header style="padding: 60px 0 20px; text-align: center;">
+    <div class="badge">Post-Production · Pre-Edit</div>
+    <h1>🎵 Sound &amp; Music Score</h1>
+    <p>Scene-by-scene SFX and background-music spotting, derived directly from the rendered master script. Lock this score <strong>before</strong> the timeline edit begins so every cut already knows its sound.</p>
+    <div class="workflow-note">
+      ⚠️ <strong>Do this before the edit.</strong> A spotting score is decided up front — pick the mood, tempo, and SFX hits for each scene from the script, then edit picture <em>to</em> the sound. Walking into the timeline with the score already locked is faster than scrubbing for music mid-edit.
+    </div>
+    <div class="summary">
+      <div class="stat"><div class="stat-num">5</div><div class="stat-label">Modules</div></div>
+      <div class="stat"><div class="stat-num">15</div><div class="stat-label">Videos Scored</div></div>
+      <div class="stat"><div class="stat-num">~3.9h</div><div class="stat-label">Total Runtime</div></div>
+      <div class="stat"><div class="stat-num">5</div><div class="stat-label">Music Beds</div></div>
+    </div>
+  </header>
+
+  <!-- Global Audio Palette -->
+  <div class="group">
+    <div class="group-heading">🎚️ Global Audio Palette</div>
+    <div class="group-sub">Recurring elements used across every module — score these once, reuse everywhere for a consistent sonic identity.</div>
+    <div class="palette-grid">
+      <div class="palette-card">
+        <h3>🎬 Show Bumpers</h3>
+        <ul>
+          <li><strong>Intro sting</strong> — 3s branded logo whoosh + tonal hit</li>
+          <li><strong>Section transition</strong> — short whoosh between cues</li>
+          <li><strong>Outro / CTA bed</strong> — warm pad under subscribe card</li>
+        </ul>
+      </div>
+      <div class="palette-card">
+        <h3>❓ IVQ Sound Kit</h3>
+        <ul>
+          <li><strong>Question sting</strong> — curious rising 2-note motif</li>
+          <li><strong>Correct answer</strong> — bright confirm ding</li>
+          <li><strong>Incorrect</strong> — soft low buzz (non-punitive)</li>
+        </ul>
+      </div>
+      <div class="palette-card">
+        <h3>🪧 Overlay &amp; Lower Third</h3>
+        <ul>
+          <li><strong>Lower-third reveal</strong> — subtle slide + tick (every video)</li>
+          <li><strong>Highlight pop</strong> — soft UI pop on emphasis</li>
+          <li><strong>Diagram draw</strong> — pen/swish as elements appear</li>
+        </ul>
+      </div>
+      <div class="palette-card">
+        <h3>⌨️ Screen-Share Foley</h3>
+        <ul>
+          <li><strong>Keyboard typing</strong> — light mechanical, low in mix</li>
+          <li><strong>Code execute</strong> — soft enter/run tone</li>
+          <li><strong>Success ding</strong> / <strong>error buzz</strong> for pass/fail</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Per-Module Score -->
+  <div class="group">
+    <div class="group-heading">🗂️ Scene Audio Map by Module</div>
+    <div class="group-sub">Each row maps a video's script content to a music bed and the specific SFX hits cued by its on-screen moments.</div>
+    <div id="moduleScores"><!-- populated by JS --></div>
+  </div>
+
+  <!-- Resources -->
+  <div class="group">
+    <div class="group-heading">🔍 Where to Source the Audio</div>
+    <div class="group-sub">Royalty-free / Creative-Commons libraries for pulling the beds and SFX listed above.</div>
+    <div class="resources-list">
+      <a class="resource-card" href="https://pixabay.com/music/" target="_blank">
+        <div class="resource-icon">🎵</div>
+        <div><div class="resource-name">Pixabay Music</div><div class="resource-desc">Royalty-free beds, no attribution. Search by mood/tempo to match each module's bed.</div></div>
+      </a>
+      <a class="resource-card" href="https://freesound.org/" target="_blank">
+        <div class="resource-icon">🔊</div>
+        <div><div class="resource-name">Freesound.org</div><div class="resource-desc">CC0 / CC SFX and field recordings — whooshes, dings, locks, data blips.</div></div>
+      </a>
+      <a class="resource-card" href="https://mixkit.co/free-sound-effects/" target="_blank">
+        <div class="resource-icon">🎛️</div>
+        <div><div class="resource-name">Mixkit</div><div class="resource-desc">Free UI sounds, transitions, and ambient SFX. No attribution needed.</div></div>
+      </a>
+      <a class="resource-card" href="https://www.epidemicsound.com/" target="_blank">
+        <div class="resource-icon">🎼</div>
+        <div><div class="resource-name">Epidemic Sound (Paid)</div><div class="resource-desc">Industry-standard music + SFX catalogue with full YouTube monetisation.</div></div>
+      </a>
+    </div>
+  </div>
+
+  <footer>
+    <p style="margin-bottom: 8px;">
+      <a href="index.html" style="color: var(--secondary); text-decoration: none;">← Back to Post-Production</a>
+      &nbsp;·&nbsp;
+      <a href="audio_scoring.html" style="color: var(--secondary); text-decoration: none;">Audio Scoring Board →</a>
+      &nbsp;·&nbsp;
+      <a href="../preprod/scripts/index.html" style="color: var(--secondary); text-decoration: none;">Master Script →</a>
+    </p>
+    <p style="margin-bottom: 12px; font-size: 0.85rem; opacity: 0.8;">
+      Instructor: <a href="https://www.linkedin.com/in/rifaterdemsahin" target="_blank" style="color: #93c5fd; text-decoration: underline; margin-right: 16px;">Rifat Erdem Sahin LinkedIn</a>
+      GitHub Project: <a href="https://github.com/rifaterdemsahin/claude-architect-certification" target="_blank" style="color: #93c5fd; text-decoration: underline;">Project Repository</a>
+    </p>
+    <div style="margin-top: 12px; display: flex; justify-content: center; gap: 16px; align-items: center;">
+      <a href="https://github.com/rifaterdemsahin/claude-architect-certification/actions/workflows/static.yml" target="_blank">
+        <img src="https://github.com/rifaterdemsahin/claude-architect-certification/actions/workflows/static.yml/badge.svg" alt="Deploy Status" style="vertical-align: middle;">
+      </a>
+    </div>
+  </footer>
+</div>
+
+<script>
+// Score derived scene-by-scene from 5_Symbols/production/preprod/scripts/master_script.json
+const MODULES = [
+  {
+    id: 1, title: 'Claude Ecosystem & Flows', emoji: '🧠',
+    bed: 'Minimal ambient electronic — clean, curious, tech', bpm: '80–95 bpm',
+    videos: [
+      { id: 'M1·V1', title: 'Architecture Overview', dur: '15:00', format: 'Talking Head + Screen Share',
+        hook: '“Your API call travels through three distinct layers before Claude ever sees it.”',
+        mood: 'Calm, curious build', tempo: '80 bpm',
+        sfx: ['Intro whoosh into 3-layer diagram', 'Data-packet blips as request hops each layer', 'Ticking SSE token-stream as chunks stream in', 'Lower-third reveal', 'IVQ sting'] },
+      { id: 'M1·V2', title: 'Stateful Orchestration', dur: '18:00', format: 'Talking Head + Screen Share',
+        hook: '“Your multi-agent system is only as reliable as its router.”',
+        mood: 'Tense → resolved', tempo: '95 bpm',
+        sfx: ['Glitch/alert on “one rogue loop”', 'Depth-counter tick rising per hop', 'Circuit-breaker trip snap', 'Routing swooshes between agents A→B→C', 'IVQ sting'] },
+      { id: 'M1·V3', title: 'Production Wiring', dur: '12:00', format: 'Talking Head + Screen Share',
+        hook: '“Theory meets reality — and reality has VPCs, IAM roles, and audit logs.”',
+        mood: 'Serious, enterprise', tempo: '90 bpm',
+        sfx: ['Vault/lock cue on Secrets Manager', 'Light keyboard on config example', 'Toggle clicks for IAM least-privilege', 'CloudWatch log ping', 'IVQ sting'] },
+    ]
+  },
+  {
+    id: 2, title: 'Model Context Protocol (MCP)', emoji: '🔌',
+    bed: 'Connection / bridge theme — exploratory, then lo-fi for the code build', bpm: '75–95 bpm',
+    videos: [
+      { id: 'M2·V1', title: 'MCP Fundamentals', dur: '14:00', format: 'Talking Head + Screen Share',
+        hook: '“Your AI is only as useful as the data it can reach behind your firewall.”',
+        mood: 'Exploratory build', tempo: '85 bpm',
+        sfx: ['Handshake/connection chime (host↔client↔server)', 'Transport toggle for stdio vs SSE', 'JSON-schema pop on tool definition', 'Lower-third reveal', 'IVQ sting'] },
+      { id: 'M2·V2', title: 'Building an MCP Server', dur: '22:00', format: 'Screen Share + Code Walkthrough',
+        hook: '“I’ll show you exactly how to build a read-only SQL bridge in under 100 lines of Python.”',
+        mood: 'Focused lo-fi coding', tempo: '75 bpm',
+        sfx: ['Keyboard typing under code', 'Run/execute tone', 'Rejection buzz when non-SELECT is blocked', 'Deploy whoosh on Fly.io', 'Success ding · IVQ sting'] },
+      { id: 'M2·V3', title: 'Enterprise MCP', dur: '16:00', format: 'Talking Head + Screen Share',
+        hook: '“One MCP server is a prototype. Five coordinated servers — that’s production.”',
+        mood: 'Scaling, confident', tempo: '95 bpm',
+        sfx: ['Gateway auth-gate cue', 'JWT validate beep', 'Metrics dashboard ticks (req/s, p99)', 'Multi-server ambient hum', 'IVQ sting'] },
+    ]
+  },
+  {
+    id: 3, title: 'Zero-Data Retention (ZDR)', emoji: '🔐',
+    bed: 'Cinematic tension — secure, high-stakes, restrained', bpm: '60–80 bpm',
+    videos: [
+      { id: 'M3·V1', title: 'ZDR Principles', dur: '13:00', format: 'Talking Head + Diagram',
+        hook: '“Where does the data go after Claude answers? If you can’t answer, you fail the audit.”',
+        mood: 'Cautionary, cinematic', tempo: '60–70 bpm',
+        sfx: ['Data-path trace whoosh along the diagram', 'Warning tone on “retained by default”', 'PrivateLink seal/lock as traffic stays in-VPC', 'Lower-third reveal', 'IVQ sting'] },
+      { id: 'M3·V2', title: 'Implementing ZDR', dur: '20:00', format: 'Screen Share + Code Walkthrough',
+        hook: '“A Terraform blueprint is worth a thousand click-ops sessions.”',
+        mood: 'Methodical minimal techno', tempo: '80 bpm',
+        sfx: ['Keyboard under HCL', 'Terraform apply rumble', 'Security-group lock engage', 'Port-block thud (443 restricted)', 'IVQ sting'] },
+      { id: 'M3·V3', title: 'ZDR in Production', dur: '14:00', format: 'Talking Head + Dashboard',
+        hook: '“Prove it works — or the auditors will prove it doesn’t.”',
+        mood: 'Suspense → relief', tempo: '70 bpm',
+        sfx: ['Pen-test FAIL buzz (blocked tests)', 'PASS ding (200 response)', 'Incident alert ping', 'Isolate/shield snap on remediation', 'IVQ sting'] },
+    ]
+  },
+  {
+    id: 4, title: 'Deterministic Routers', emoji: '🧭',
+    bed: 'Precise, mechanical, clean logic — driving for the stress test', bpm: '80–100 bpm',
+    videos: [
+      { id: 'M4·V1', title: 'Router Architecture', dur: '14:00', format: 'Talking Head + Diagram',
+        hook: '“Your AI system is only as deterministic as its routing layer.”',
+        mood: 'Clean logic', tempo: '85 bpm',
+        sfx: ['Decision-tree branch clicks', 'Classifier sort beep on intent match', 'Route swoosh to dispatched agent', 'Lower-third reveal', 'IVQ sting'] },
+      { id: 'M4·V2', title: 'Building the Router', dur: '19:00', format: 'Screen Share + Code Walkthrough',
+        hook: '“The router that decides which agent handles each request — and when to shut it all down.”',
+        mood: 'Focused build', tempo: '80 bpm',
+        sfx: ['Keyboard under router.py', 'Depth-counter tick rising', 'Circuit-breaker trip snap', '429 error tone', 'IVQ sting'] },
+      { id: 'M4·V3', title: 'Router in Production', dur: '15:00', format: 'Talking Head + Dashboard',
+        hook: '“Can it handle a recursion attack from a malicious prompt?”',
+        mood: 'Stress-test tension', tempo: '100 bpm',
+        sfx: ['Load-ramp rising tone (1k→5k req/s)', 'Rapid “blocked” thuds on recursion attack', 'Malformed-input reject buzz', 'Graph plot ticks', 'IVQ sting'] },
+    ]
+  },
+  {
+    id: 5, title: 'Financial Engineering', emoji: '💰',
+    bed: 'Upbeat corporate / win theme — uplifting payoff on ROI', bpm: '85–105 bpm',
+    videos: [
+      { id: 'M5·V1', title: 'Cost Optimization Fundamentals', dur: '13:00', format: 'Talking Head + Graph',
+        hook: '“Your monthly Claude bill is $50,000. 90% of that is repeating the same system prompt.”',
+        mood: 'Revealing, money', tempo: '100 bpm',
+        sfx: ['Cash/coin accent on the $50k reveal', 'Graph-bar grow swoosh', 'Cache-hit positive ping (90% discount)', 'Lower-third reveal', 'IVQ sting'] },
+      { id: 'M5·V2', title: 'Implementing Caching', dur: '18:00', format: 'Screen Share + Code Walkthrough',
+        hook: '“Cache point placement is an art. Wrong: 10% hit rate. Right: 90%.”',
+        mood: 'Optimizing, satisfying', tempo: '85 bpm',
+        sfx: ['Keyboard under cache_layer.py', 'Cache-hit ding vs cache-miss buzz', 'Eviction pop (LRU)', 'Prefix-match snap', 'IVQ sting'] },
+      { id: 'M5·V3', title: 'Enterprise ROI', dur: '16:00', format: 'Talking Head + Dashboard',
+        hook: '“From $50,000/month to $5,000/month — that’s the difference caching made.”',
+        mood: 'Triumphant payoff', tempo: '105 bpm',
+        sfx: ['Descending-cost whoosh down the chart', 'Milestone chime per month of savings', 'Win sting/fanfare at the 90% milestone', 'Dashboard ticks', 'IVQ sting (final)'] },
+    ]
+  },
+];
+
+function renderModules() {
+  const root = document.getElementById('moduleScores');
+  root.innerHTML = MODULES.map(m => {
+    const rows = m.videos.map(v => `
+      <tr>
+        <td data-label="Video"><span class="vid-id">${v.id}</span><div class="vid-title">${v.title}</div><span class="vid-format">${v.format} · ${v.dur}</span></td>
+        <td data-label="Script Hook"><span class="hook">${v.hook}</span></td>
+        <td data-label="Music"><span class="music-mood">${v.mood}</span><div class="music-bpm">${v.tempo}</div></td>
+        <td data-label="SFX Hits"><ul class="cue-list">${v.sfx.map(s => `<li>• ${s}</li>`).join('')}</ul></td>
+      </tr>`).join('');
+    return `
+      <div class="module">
+        <div class="module-title">${m.emoji} Module ${m.id} — ${m.title}</div>
+        <div class="module-theme">Music bed: ${m.bed} <span class="pill">${m.bpm}</span></div>
+        <div class="score-table">
+          <table>
+            <thead><tr><th>Video</th><th>Script Hook</th><th>Music</th><th>SFX Hits</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      </div>`;
+  }).join('');
+}
+renderModules();
+</script>
+</body>
+</html>
