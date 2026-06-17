@@ -112,9 +112,9 @@
               "description": "Visual script table read method with real-time image creation."
             },
             {
-              "label": "🎯 Tell · Show · Apply",
-              "url": "5_Symbols/production/preprod/tell_show_apply.html",
-              "description": "Three-beat teaching loop: Tell the subject with Gemini images, Show the hands-on build, Apply by turning the camera 180°."
+              "label": "🎯 Tell · Show · Do · Apply",
+              "url": "5_Symbols/production/preprod/tell_show_do_apply.html",
+              "description": "Four-beat instructional design loop: Tell the script, Show it with Gemini images, Do the hands-on screen-share build, Apply by turning the camera 180°."
             },
             {
               "label": "📈 Customer Development",

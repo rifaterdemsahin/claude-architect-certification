@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tell · Show · Apply | Claude AI Certification</title>
-  <meta name="description" content="The Tell-Show-Apply method: read the script and generate images with Gemini, screen-share the hands-on implementation, then motivate the audience to turn the camera 180° on themselves.">
-  <meta name="keywords" content="Claude AI, Tell Show Apply, Delivery Pilot, Gemini, Screen Share, AI Certification">
+  <title>Tell · Show · Do · Apply | Claude AI Certification</title>
+  <meta name="description" content="The Tell-Show-Do-Apply instructional design loop: read the script, use Gemini images to understand and remember the subject, screen-share and record the hands-on build, then motivate the audience to turn the camera 180° on themselves.">
+  <meta name="keywords" content="Claude AI, Tell Show Do Apply, Instructional Design, Delivery Pilot, Gemini, Screen Share, AI Certification">
   <meta name="author" content="Rifat Erdem Sahin">
   <link rel="icon" type="image/png" href="../../../favicon.png">
 
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://rifaterdemsahin.github.io/claude-architect-certification/production/preprod/tell_show_apply.html">
-  <meta property="og:title" content="Tell · Show · Apply | Claude AI Certification">
-  <meta property="og:description" content="A three-beat teaching loop: Tell the subject, Show the hands-on build, Apply by turning the camera on yourself.">
+  <meta property="og:url" content="https://rifaterdemsahin.github.io/claude-architect-certification/production/preprod/tell_show_do_apply.html">
+  <meta property="og:title" content="Tell · Show · Do · Apply | Claude AI Certification">
+  <meta property="og:description" content="A four-beat instructional design loop: Tell the script, Show it with Gemini, Do the hands-on build, Apply by turning the camera on yourself.">
   <meta property="og:image" content="https://rifaterdemsahin.github.io/claude-architect-certification/favicon.png">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -35,18 +35,19 @@
     h1 { font-family: var(--font-title); font-size: 2.4rem; font-weight: 800; margin-bottom: 10px; }
     header p { color: var(--text-muted); max-width: 640px; margin: 0 auto; }
 
-    /* ── Three-beat flow ── */
+    /* ── Four-beat flow ── */
     .beats { display: flex; align-items: stretch; gap: 0; flex-wrap: wrap; margin: 8px 0 32px; }
     .beat {
-      flex: 1; min-width: 200px; background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06);
+      flex: 1; min-width: 170px; background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06);
       border-radius: 18px; padding: 22px; transition: all 0.3s; text-align: center;
     }
     .beat-tell { border-color: rgba(59,130,246,0.35); }
     .beat-show { border-color: rgba(139,92,246,0.35); }
+    .beat-do { border-color: rgba(16,185,129,0.35); }
     .beat-apply { border-color: rgba(245,158,11,0.4); background: linear-gradient(160deg, rgba(245,158,11,0.07), var(--bg-card)); }
     .beat-icon { font-size: 1.9rem; margin-bottom: 8px; }
-    .beat-name { font-family: var(--font-title); font-weight: 800; font-size: 1.25rem; margin-bottom: 6px; }
-    .beat-sub { color: var(--text-muted); font-size: 0.82rem; }
+    .beat-name { font-family: var(--font-title); font-weight: 800; font-size: 1.2rem; margin-bottom: 6px; }
+    .beat-sub { color: var(--text-muted); font-size: 0.8rem; }
     .beat-arrow { display: flex; align-items: center; justify-content: center; font-size: 1.6rem; color: var(--primary); padding: 0 6px; }
     @media (max-width: 760px) { .beat-arrow { transform: rotate(90deg); padding: 6px 0; width: 100%; } }
 
@@ -84,29 +85,35 @@
 <body>
   <div class="container">
     <header>
-      <div class="badge">Ways of Working · Teaching Loop</div>
-      <h1>🎯 Tell · Show · Apply</h1>
-      <p>A three-beat teaching loop that turns a raw script into a course module: understand the subject, build it live on screen, then hand the camera to the audience.</p>
+      <div class="badge">Ways of Working · Instructional Design</div>
+      <h1>🎯 Tell · Show · Do · Apply</h1>
+      <p>A four-beat instructional design loop that turns a raw script into a course module: tell the subject, show it visually, do it live on screen, then hand the camera to the audience.</p>
     </header>
 
-    <!-- ── The three beats ── -->
+    <!-- ── The four beats ── -->
     <div class="beats">
       <div class="beat beat-tell">
         <div class="beat-icon">📖</div>
         <div class="beat-name">Tell</div>
-        <div class="beat-sub">Read the script &amp; generate images with Gemini, sentence by sentence.</div>
+        <div class="beat-sub">Read the script.</div>
       </div>
       <div class="beat-arrow">→</div>
       <div class="beat beat-show">
-        <div class="beat-icon">🖥️</div>
+        <div class="beat-icon">🖼️</div>
         <div class="beat-name">Show</div>
-        <div class="beat-sub">Screen-share the hands-on implementation and record it.</div>
+        <div class="beat-sub">Gemini images to understand &amp; remember the subject.</div>
+      </div>
+      <div class="beat-arrow">→</div>
+      <div class="beat beat-do">
+        <div class="beat-icon">🖥️</div>
+        <div class="beat-name">Do</div>
+        <div class="beat-sub">Screen-share the hands-on implementation &amp; record it.</div>
       </div>
       <div class="beat-arrow">→</div>
       <div class="beat beat-apply">
         <div class="beat-icon">🎥</div>
         <div class="beat-name">Apply</div>
-        <div class="beat-sub">Turn the camera 180° on yourself and do it.</div>
+        <div class="beat-sub">Turn the camera 180° on yourself and implement.</div>
       </div>
     </div>
 
@@ -115,31 +122,17 @@
       <div class="card-head">
         <span class="num">01</span>
         <h2>📖 Tell</h2>
-        <span class="tag">Understand</span>
+        <span class="tag">Narrate</span>
       </div>
       <p>
-        Read the script out loud and work through it <strong>sentence by sentence</strong>. As each line is read, generate a context-specific image with <strong>Gemini</strong> so the subject is visualized the moment it is spoken. The goal of this beat is comprehension and recall — by the end you understand and <em>remember</em> what the subject is all about.
+        Read the script out loud, working through it <strong>sentence by sentence</strong>. This is the narration beat — checking timing, pacing, and flow while laying out what the subject is and why it matters.
       </p>
       <div class="process-steps">
         <div class="step-item">
           <div class="step-number">1</div>
           <div class="step-text">
             <h3>Read the script</h3>
-            <p>Go line by line, reading out loud to check timing, pacing, and flow.</p>
-          </div>
-        </div>
-        <div class="step-item">
-          <div class="step-number">2</div>
-          <div class="step-text">
-            <h3>Generate images with Gemini</h3>
-            <p>For each sentence, create a matching visual so the idea is anchored to a concrete image.</p>
-          </div>
-        </div>
-        <div class="step-item">
-          <div class="step-number">3</div>
-          <div class="step-text">
-            <h3>Understand &amp; remember</h3>
-            <p>Process the subject one sentence at a time until the topic is fully internalized.</p>
+            <p>Perform a verbal run-through line by line to check natural timing and flow.</p>
           </div>
         </div>
       </div>
@@ -149,11 +142,39 @@
     <div class="card">
       <div class="card-head">
         <span class="num">02</span>
-        <h2>🖥️ Show</h2>
+        <h2>🖼️ Show</h2>
+        <span class="tag">Understand</span>
+      </div>
+      <p>
+        As each sentence is read, generate a context-specific image with <strong>Gemini</strong> so the subject is visualized the moment it is spoken. The goal of this beat is comprehension and recall — by the end you understand and <em>remember</em> what the subject is all about.
+      </p>
+      <div class="process-steps">
+        <div class="step-item">
+          <div class="step-number">1</div>
+          <div class="step-text">
+            <h3>Generate images with Gemini</h3>
+            <p>For each sentence, create a matching visual so the idea is anchored to a concrete image.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-number">2</div>
+          <div class="step-text">
+            <h3>Understand &amp; remember</h3>
+            <p>Process the subject one sentence at a time until the topic is fully internalized.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 3. DO ── -->
+    <div class="card">
+      <div class="card-head">
+        <span class="num">03</span>
+        <h2>🖥️ Do</h2>
         <span class="tag">Demonstrate</span>
       </div>
       <p>
-        With the subject understood, switch to the <strong>screen share</strong> and perform the hands-on implementation. This is the demonstration beat: build the thing live and <strong>record the screen shares</strong> so every step is captured exactly as it happens — the recording is the process.
+        With the subject understood, switch to the <strong>screen share</strong> and perform the hands-on implementation. Build the thing live and <strong>record the screen shares</strong> so every step is captured exactly as it happens — the recording is the process.
       </p>
       <div class="process-steps">
         <div class="step-item">
@@ -173,10 +194,10 @@
       </div>
     </div>
 
-    <!-- ── 3. APPLY ── -->
+    <!-- ── 4. APPLY ── -->
     <div class="card">
       <div class="card-head">
-        <span class="num">03</span>
+        <span class="num">04</span>
         <h2>🎥 Apply</h2>
         <span class="tag">Activate</span>
       </div>
@@ -214,7 +235,7 @@
       <ul class="value-points">
         <li>Learn a new certificate fast using the Delivery Pilot method.</li>
         <li>Produce courses at a very fast pace without sacrificing quality.</li>
-        <li>The Tell-Show-Apply loop makes the subject stick — the audience remembers.</li>
+        <li>The Tell-Show-Do-Apply loop makes the subject stick — the audience remembers.</li>
         <li>Built for the AI certification niche, from script to recorded build to learner action.</li>
       </ul>
     </div>
