@@ -876,35 +876,37 @@ func researchUploadHandler(cfg config) http.HandlerFunc {
 			contentType = "application/octet-stream"
 		}
 
-		expiry := time.Now().UTC().Add(5 * time.Minute)
-		sasQuery, err := generateContainerSAS(cfg.azureAccountName, cfg.azureAccountKey, container, "rcwl", expiry)
+		// Read the upload into memory so we can both store the original and
+		// derive a thumbnail from the same bytes.
+		data, err := io.ReadAll(file)
 		if err != nil {
-			http.Error(w, "sas error", http.StatusInternalServerError)
+			http.Error(w, "read upload: "+err.Error(), http.StatusBadRequest)
 			return
 		}
-		putURL := blobURL(cfg.azureAccountName, container, blobName, sasQuery)
-		req, err := http.NewRequestWithContext(r.Context(), http.MethodPut, putURL, file)
-		if err != nil {
-			http.Error(w, "request build", http.StatusInternalServerError)
-			return
-		}
-		req.Header.Set("x-ms-blob-type", "BlockBlob")
-		req.Header.Set("Content-Type", contentType)
-		req.ContentLength = header.Size
 
-		resp, err := http.DefaultClient.Do(req)
-		if err != nil {
+		ctx := r.Context()
+		// ── Upload the original ──
+		if err := uploadBlobToAzure(ctx, cfg, container, blobName, contentType, data); err != nil {
 			http.Error(w, "azure upload: "+err.Error(), http.StatusBadGateway)
 			return
 		}
-		defer resp.Body.Close()
-		if resp.StatusCode >= 400 {
-			b, _ := io.ReadAll(resp.Body)
-			http.Error(w, fmt.Sprintf("azure %d: %s", resp.StatusCode, b), http.StatusBadGateway)
-			return
+
+		// ── Generate + upload a thumbnail so gallery grids load small images,
+		//    not full-resolution originals (best-effort; original still saved). ──
+		var thumbName string
+		if thumbData, terr := generateThumbnail(data, 320); terr != nil {
+			log.Printf("research thumbnail generation skipped for %s: %v", blobName, terr)
+		} else {
+			tName := thumbBlobName(blobName)
+			if uerr := uploadBlobToAzure(ctx, cfg, container, tName, "image/jpeg", thumbData); uerr != nil {
+				log.Printf("research thumbnail upload failed for %s: %v", tName, uerr)
+			} else {
+				thumbName = tName
+			}
 		}
+
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]string{"ok": "true", "name": blobName})
+		json.NewEncoder(w).Encode(map[string]string{"ok": "true", "name": blobName, "thumbnail": thumbName})
 	}
 }
 
