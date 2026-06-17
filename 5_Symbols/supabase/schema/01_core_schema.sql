@@ -340,6 +340,9 @@ CREATE POLICY anon_insert_outline ON outline FOR INSERT WITH CHECK (true);
 CREATE POLICY anon_insert_milestones ON milestones FOR INSERT WITH CHECK (true);
 CREATE POLICY anon_insert_milestone_progress ON milestone_progress FOR INSERT WITH CHECK (true);
 CREATE POLICY anon_update_milestone_progress ON milestone_progress FOR UPDATE USING (true);
+CREATE POLICY anon_insert_lower_thirds ON lower_thirds FOR INSERT WITH CHECK (true);
+CREATE POLICY anon_update_lower_thirds ON lower_thirds FOR UPDATE USING (true);
+CREATE POLICY anon_delete_lower_thirds ON lower_thirds FOR DELETE USING (true);
 
 -- =============================================================================
 -- Relationship FK Columns

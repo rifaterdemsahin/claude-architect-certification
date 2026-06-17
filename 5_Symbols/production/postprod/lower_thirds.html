@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="../../../shared/redirect-to-live-site.js"></script>
   <title>Lower Thirds Manager | Claude AI Certification</title>
-  <meta name="description" content="Create, edit, and preview lower thirds for every module and video scene.">
+  <meta name="description" content="Generate, save, and preview lower third candidates via Gemini. Auto-deduplicated and stored in Supabase with learning rationale.">
   <link rel="icon" type="image/png" href="../../../favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -24,10 +24,10 @@
       color: var(--text-main); font-family: var(--font-body); line-height: 1.6;
       padding: 100px 24px 60px;
     }
-    .container { max-width: 1100px; margin: 0 auto; }
+    .container { max-width: 1200px; margin: 0 auto; }
     header { text-align: center; margin-bottom: 48px; }
     header h1 { font-family: var(--font-title); font-size: 2.6rem; font-weight: 900; letter-spacing: -0.02em; margin-bottom: 10px; }
-    header p { color: var(--text-muted); font-size: 1.1rem; }
+    header p { color: var(--text-muted); font-size: 1.05rem; }
     .selector-bar { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-bottom: 40px; }
     .selector-bar select {
       background: var(--bg-card); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px;
@@ -97,6 +97,32 @@
     .suggestion-card .sug-apply { display: inline-block; margin-top: 10px; font-size: 0.8rem; color: var(--primary); font-weight: 600; }
     .script-preview { background: rgba(0,0,0,0.3); border-radius: 12px; padding: 20px; max-height: 300px; overflow-y: auto; white-space: pre-wrap; font-size: 0.9rem; color: var(--text-muted); line-height: 1.7; }
     canvas { display: none; }
+    .badge {
+      display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 0.7rem;
+      font-weight: 700; letter-spacing: 0.03em; margin-left: 6px;
+    }
+    .badge-cached { background: rgba(59,130,246,0.2); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); }
+    .badge-fresh { background: rgba(16,185,129,0.2); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+    .lt-table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
+    .lt-table th { text-align: left; color: var(--text-muted); font-size: 0.8rem; font-weight: 600; padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .lt-table td { padding: 12px; background: rgba(0,0,0,0.15); vertical-align: top; }
+    .lt-table tr td:first-child { border-radius: 12px 0 0 12px; }
+    .lt-table tr td:last-child { border-radius: 0 12px 12px 0; }
+    .lt-table .num-col { width: 50px; text-align: center; font-weight: 700; color: var(--accent); }
+    .lt-table .main-col { width: 22%; }
+    .lt-table .sub-col { width: 22%; }
+    .lt-table .rationale-col { width: 38%; }
+    .lt-table .action-col { width: 18%; text-align: center; }
+    .lt-table .rationale-text { color: var(--text-muted); font-size: 0.85rem; line-height: 1.5; }
+    .module-video-tag { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; background: rgba(139,92,246,0.15); color: var(--primary); margin-bottom: 4px; }
+    .gen-progress { background: rgba(0,0,0,0.2); border-radius: 16px; padding: 20px 24px; display: none; }
+    .gen-progress .progress-step { display: flex; align-items: center; gap: 12px; padding: 8px 0; font-size: 0.9rem; }
+    .gen-progress .progress-step .step-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--text-muted); flex-shrink: 0; }
+    .gen-progress .progress-step.done .step-dot { background: var(--success); }
+    .gen-progress .progress-step.active .step-dot { background: var(--primary); animation: pulse 1s infinite; }
+    .gen-progress .progress-step .step-status { color: var(--text-muted); font-size: 0.8rem; margin-left: auto; }
+    .gen-progress .progress-step.done .step-status { color: var(--success); }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
   </style>
   <script src="../../../shared/nav.js"></script>
   <script src="../../../shared/debug-panel.js"></script>
@@ -105,11 +131,12 @@
   <div class="container">
     <header>
       <h1>🎬 Lower Thirds Manager</h1>
-      <p>Create, edit, and preview lower thirds for every module and video scene. Images are rendered and uploaded to Azure Blob Storage.</p>
+      <p>Gemini generates lower third candidates with <strong>learning rationale</strong> per video. Results are saved to Supabase and <strong>auto-deduplicated</strong> — running Generate again returns cached results.</p>
     </header>
     <div class="selector-bar">
       <select id="moduleSelect"><option value="">— Select Module —</option></select>
       <select id="videoSelect"><option value="">— Select Video —</option></select>
+      <button class="btn btn-secondary" id="generateAllBtn" style="display:none;">⚡ Generate All Videos</button>
     </div>
     <div id="editorSection" style="display:none;">
       <div class="glass-card">
@@ -148,28 +175,39 @@
           </div>
         </div>
       </div>
+
       <div class="glass-card">
-        <h2>📋 Existing Lower Thirds for This Video</h2>
-        <div id="scenesList">
+        <h2>📋 Lower Third Candidates <span id="cacheInfo" style="font-size:0.8rem;color:var(--text-muted);font-weight:400;"></span></h2>
+        <div id="candidatesTableWrap">
           <div class="empty-state">
-            <div class="empty-icon">🎬</div>
-            <p>Select a module and video to view existing lower thirds.</p>
+            <div class="empty-icon">💡</div>
+            <p>Click <strong>"Generate with Gemini"</strong> to create lower third candidates. Results are saved to Supabase and won't be re-created unless you force-regenerate.</p>
           </div>
         </div>
+        <div id="genLoading" style="display:none;text-align:center;padding:24px;">
+          <div style="font-size:2rem;margin-bottom:12px;">🤖</div>
+          <p>Gemini is generating lower third candidates from the video script...</p>
+        </div>
       </div>
+
       <div class="glass-card" id="scriptPanel" style="display:none;">
         <h2>📜 Video Script</h2>
         <div class="script-preview" id="scriptContent"></div>
       </div>
-      <div class="glass-card" id="suggestionsPanel" style="display:none;">
-        <h2>🤖 Gemini Suggestions</h2>
-        <div id="suggestionsList"></div>
-        <div id="genLoading" style="display:none;text-align:center;padding:24px;">
-          <div style="font-size:2rem;margin-bottom:12px;">🤖</div>
-          <p>Gemini is generating lower third suggestions from the video script...</p>
+
+      <div class="glass-card">
+        <h2>📋 Existing Scene Lower Thirds</h2>
+        <div id="scenesList">
+          <div class="empty-state">
+            <div class="empty-icon">🎬</div>
+            <p>Select a module and video to view existing scene lower thirds.</p>
+          </div>
         </div>
       </div>
     </div>
+
+    <div id="genProgressPanel" class="glass-card gen-progress"></div>
+
     <div id="emptyState" class="glass-card empty-state">
       <div class="empty-icon">🎬</div>
       <h2 style="font-family:var(--font-title);margin-bottom:8px;">Select a Module & Video</h2>
@@ -195,15 +233,18 @@
     let azureAccountName = '';
 
     const $ = id => document.getElementById(id);
-    const canvas = $('ltCanvas');
-    const ctx = canvas.getContext('2d');
+    const canvasEl = $('ltCanvas');
+    const ctx2d = canvasEl.getContext('2d');
 
-    function showToast(msg, isError) {
+    function showToast(msg, isError, ms) {
       const t = $('toast');
       t.textContent = msg; t.className = 'toast' + (isError ? ' error' : '');
       setTimeout(() => t.classList.add('show'), 10);
-      setTimeout(() => t.classList.remove('show'), 3500);
+      setTimeout(() => t.classList.remove('show'), ms || 3500);
     }
+
+    function escHtml(s) { if (!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    function escJs(s) { if (!s) return ''; return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,'\\n'); }
 
     async function loadConfig() {
       try {
@@ -216,9 +257,9 @@
     }
 
     async function api(path, opts) {
-      const url = `${SUPABASE_URL}/rest/v1/${path}`;
+      const url = SUPABASE_URL + '/rest/v1/' + path;
       const res = await fetch(url, { ...opts, headers: { ...HEADERS, ...(opts?.headers || {}) } });
-      if (!res.ok) { const err = await res.text().catch(() => ''); throw new Error(`${res.status}: ${err}`); }
+      if (!res.ok) { const err = await res.text().catch(() => ''); throw new Error(res.status + ': ' + err); }
       const ct = res.headers.get('content-type') || '';
       return ct.includes('json') ? res.json() : res.text();
     }
@@ -242,6 +283,50 @@
       } catch (e) { showToast('Failed to load videos: ' + e.message, true); }
     }
 
+    async function loadLowerThirds(moduleNumber, videoNumber) {
+      const wrap = $('candidatesTableWrap');
+      const cacheInfo = $('cacheInfo');
+      if (!moduleNumber || !videoNumber) {
+        wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">💡</div><p>Select a video to load candidates.</p></div>';
+        cacheInfo.textContent = '';
+        return;
+      }
+      try {
+        const rows = await api(
+          'lower_thirds?select=id,module_number,video_number,main_text,sub_text,rationale,sort_order,created_at&module_number=eq.' + moduleNumber + '&video_number=eq.' + videoNumber + '&order=sort_order.asc'
+        );
+        if (!rows.length) {
+          wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">🤖</div><p>No candidates yet. Click <strong>"Generate with Gemini"</strong> to create them.</p></div>';
+          cacheInfo.textContent = '';
+          return;
+        }
+        cacheInfo.textContent = '(' + rows.length + ' saved · auto-deduplicated)';
+        const modLabel = 'M' + moduleNumber;
+        const vidLabel = 'V' + videoNumber;
+        wrap.innerHTML =
+          '<table class="lt-table"><thead><tr>' +
+            '<th class="num-col">#</th>' +
+            '<th class="main-col">Main Text</th>' +
+            '<th class="sub-col">Sub Text</th>' +
+            '<th class="rationale-col">Rationale (Why It Matters for Learning)</th>' +
+            '<th class="action-col">Apply</th>' +
+          '</tr></thead><tbody>' +
+          rows.map(r =>
+            '<tr>' +
+              '<td class="num-col">' + (r.sort_order || r.id) + '</td>' +
+              '<td class="main-col"><span class="module-video-tag">' + modLabel + ' / ' + vidLabel + '</span><br><strong>' + escHtml(r.main_text) + '</strong></td>' +
+              '<td class="sub-col">' + escHtml(r.sub_text) + '</td>' +
+              '<td class="rationale-col"><div class="rationale-text">' + escHtml(r.rationale || '—') + '</div></td>' +
+              '<td class="action-col"><button class="btn btn-sm btn-secondary" onclick="applySuggestion(\'' + escJs(r.main_text) + '\', \'' + escJs(r.sub_text) + '\')">✏️ Load</button></td>' +
+            '</tr>'
+          ).join('') +
+          '</tbody></table>';
+      } catch (e) {
+        wrap.innerHTML = '<div class="empty-state"><p>Error loading candidates: ' + escHtml(e.message) + '</p></div>';
+        cacheInfo.textContent = '';
+      }
+    }
+
     async function loadScenes(videoId) {
       const container = $('scenesList');
       if (!videoId) {
@@ -252,70 +337,77 @@
         const moduleNum = dbModules.find(m => m.id === currentModuleId)?.module_number || 0;
         const videoNum = dbVideos.find(v => v.id === currentVideoId)?.video_number || 0;
         const scenes = await api(
-          `scenes?module_number=eq.${moduleNum}&section_number=eq.${videoNum}&select=id,scene_number,lt_main,lt_sub,lt_image&order=scene_number.asc`
+          'scenes?module_number=eq.' + moduleNum + '&section_number=eq.' + videoNum + '&select=id,scene_number,lt_main,lt_sub,lt_image&order=scene_number.asc'
         );
         if (!scenes.length) {
-          container.innerHTML = '<div class="empty-state"><div class="empty-icon">➕</div><p>No scenes yet. Fill in the form above and click Save to create the first lower third.</p></div>';
+          container.innerHTML = '<div class="empty-state"><div class="empty-icon">➕</div><p>No scene-specific lower thirds yet. Use the form above to create one.</p></div>';
           return;
         }
-        container.innerHTML = scenes.map(s => `
-          <div class="scene-card" data-id="${s.id}">
-            ${s.lt_image ? `<img class="scene-thumb" src="${s.lt_image}" alt="LT" onerror="this.style.display='none'">` : ''}
-            <div class="scene-info">
-              <div class="scene-label">Scene ${s.scene_number}</div>
-              <div class="scene-desc">${s.lt_main || '(no main text)'}${s.lt_sub ? ' — ' + s.lt_sub : ''}</div>
-            </div>
-            <div class="scene-actions">
-              <button class="btn btn-sm btn-secondary" onclick="editScene(${s.id}, ${s.scene_number}, '${(s.lt_main||'').replace(/'/g,"\\'")}', '${(s.lt_sub||'').replace(/'/g,"\\'")}', '${(s.lt_image||'').replace(/'/g,"\\'")}')">✏️ Edit</button>
-              <button class="btn btn-sm btn-danger" onclick="deleteScene(${s.id})">🗑️</button>
-            </div>
-          </div>
-        `).join('');
+        container.innerHTML = scenes.map(s =>
+          '<div class="scene-card" data-id="' + s.id + '">' +
+            (s.lt_image ? '<img class="scene-thumb" src="' + s.lt_image + '" alt="LT" onerror="this.style.display=\'none\'">' : '') +
+            '<div class="scene-info">' +
+              '<div class="scene-label">Scene ' + s.scene_number + '</div>' +
+              '<div class="scene-desc">' + (s.lt_main || '(no main text)') + (s.lt_sub ? ' — ' + s.lt_sub : '') + '</div>' +
+            '</div>' +
+            '<div class="scene-actions">' +
+              '<button class="btn btn-sm btn-secondary" onclick="editScene(' + s.id + ',' + s.scene_number + ',\'' + escJs(s.lt_main) + '\',\'' + escJs(s.lt_sub) + '\',\'' + escJs(s.lt_image) + '\')">✏️ Edit</button>' +
+              '<button class="btn btn-sm btn-danger" onclick="deleteScene(' + s.id + ')">🗑️</button>' +
+            '</div>' +
+          '</div>'
+        ).join('');
       } catch (e) { showToast('Failed to load scenes: ' + e.message, true); }
     }
 
-    function renderLowerThirdToCanvas(main, sub) {
-      const w = canvas.width, h = canvas.height;
-      ctx.clearRect(0, 0, w, h);
+    function applySuggestion(main, sub) {
+      $('ltMain').value = main;
+      $('ltSub').value = sub;
+      updatePreview();
+      $('saveBtn').textContent = '💾 Save & Upload';
+      editingSceneId = null;
+      $('saveStatus').textContent = 'Loaded from candidate';
+      $('sceneNumber').value = '1';
+      $('ltImage').value = '';
+      $('scriptPanel').style.display = 'none';
+      showToast('Candidate loaded into editor');
+    }
 
+    function renderLowerThirdToCanvas(main, sub) {
+      const w = canvasEl.width, h = canvasEl.height;
+      ctx2d.clearRect(0, 0, w, h);
       const barHeight = 80;
       const barY = h - barHeight - 20;
-
-      const grad = ctx.createLinearGradient(0, barY, w, barY);
+      const grad = ctx2d.createLinearGradient(0, barY, w, barY);
       grad.addColorStop(0, '#8b5cf6');
       grad.addColorStop(1, '#3b82f6');
-      ctx.fillStyle = grad;
-      ctx.beginPath();
-      ctx.roundRect(0, barY, w, barHeight, 0);
-      ctx.fill();
-
-      ctx.fillStyle = 'white';
-      ctx.fillRect(0, barY, 8, barHeight);
-
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 28px Outfit, sans-serif';
-      ctx.textBaseline = 'middle';
-      ctx.shadowColor = 'rgba(0,0,0,0.4)';
-      ctx.shadowBlur = 4;
-      ctx.fillText(main || 'Main Text', 24, barY + 28);
-      ctx.font = '18px "Plus Jakarta Sans", sans-serif';
-      ctx.fillStyle = 'rgba(255,255,255,0.85)';
-      ctx.shadowBlur = 2;
-      ctx.fillText(sub || 'Sub Text', 24, barY + 58);
-      ctx.shadowBlur = 0;
+      ctx2d.fillStyle = grad;
+      ctx2d.beginPath();
+      ctx2d.roundRect(0, barY, w, barHeight, 0);
+      ctx2d.fill();
+      ctx2d.fillStyle = 'white';
+      ctx2d.fillRect(0, barY, 8, barHeight);
+      ctx2d.fillStyle = '#ffffff';
+      ctx2d.font = 'bold 28px Outfit, sans-serif';
+      ctx2d.textBaseline = 'middle';
+      ctx2d.shadowColor = 'rgba(0,0,0,0.4)';
+      ctx2d.shadowBlur = 4;
+      ctx2d.fillText(main || 'Main Text', 24, barY + 28);
+      ctx2d.font = '18px "Plus Jakarta Sans", sans-serif';
+      ctx2d.fillStyle = 'rgba(255,255,255,0.85)';
+      ctx2d.shadowBlur = 2;
+      ctx2d.fillText(sub || 'Sub Text', 24, barY + 58);
+      ctx2d.shadowBlur = 0;
     }
 
     async function uploadToAzure(blob, moduleNum, videoNum, sceneNum) {
       const form = new FormData();
-      const fileName = `lt_m${moduleNum}_v${videoNum}_s${sceneNum}_${Date.now()}.png`;
+      const fileName = 'lt_m' + moduleNum + '_v' + videoNum + '_s' + sceneNum + '_' + Date.now() + '.png';
       form.append('file', blob, fileName);
-
       const res = await fetch('/api/research/upload?container=research-images', { method: 'POST', body: form });
       if (!res.ok) { const err = await res.text(); throw new Error('Azure upload: ' + err); }
       const data = await res.json();
-
       if (azureAccountName && data.name) {
-        return `https://${azureAccountName}.blob.core.windows.net/research-images/${data.name}`;
+        return 'https://' + azureAccountName + '.blob.core.windows.net/research-images/' + data.name;
       }
       return data.name || '';
     }
@@ -324,49 +416,36 @@
       const sceneNum = parseInt($('sceneNumber').value);
       const ltMain = $('ltMain').value.trim();
       const ltSub = $('ltSub').value.trim();
-
       if (!sceneNum || sceneNum < 1) { showToast('Enter a valid scene number.', true); return; }
       if (!ltMain && !ltSub) { showToast('Enter at least main or sub text.', true); return; }
       if (!currentModuleId || !currentVideoId) { showToast('Select a module and video first.', true); return; }
-
       const moduleNum = dbModules.find(m => m.id === currentModuleId)?.module_number || 0;
       const videoNum = dbVideos.find(v => v.id === currentVideoId)?.video_number || 0;
       const btn = $('saveBtn');
       btn.disabled = true;
-      btn.textContent = '⏳ Uploading & Saving...';
-
+      btn.textContent = 'Uploading & Saving...';
       try {
         renderLowerThirdToCanvas(ltMain, ltSub);
-
-        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+        const blob = await new Promise(resolve => canvasEl.toBlob(resolve, 'image/png'));
         if (!blob) throw new Error('Canvas render failed');
-
         const ltImageUrl = await uploadToAzure(blob, moduleNum, videoNum, sceneNum);
-
         const body = { lt_main: ltMain, lt_sub: ltSub, lt_image: ltImageUrl };
-
         if (editingSceneId) {
-          await api(`scenes?id=eq.${editingSceneId}`, { method: 'PATCH', body: JSON.stringify(body) });
-          showToast('✅ Lower third updated & image uploaded to Azure');
+          await api('scenes?id=eq.' + editingSceneId, { method: 'PATCH', body: JSON.stringify(body) });
+          showToast('Lower third updated & image uploaded');
         } else {
-          const existing = await api(
-            `scenes?module_number=eq.${moduleNum}&section_number=eq.${sceneNum}&select=id&limit=1`
-          );
+          const existing = await api('scenes?module_number=eq.' + moduleNum + '&section_number=eq.' + sceneNum + '&select=id&limit=1');
           if (existing.length) {
-            await api(`scenes?id=eq.${existing[0].id}`, { method: 'PATCH', body: JSON.stringify(body) });
-            showToast('✅ Lower third updated for existing scene');
+            await api('scenes?id=eq.' + existing[0].id, { method: 'PATCH', body: JSON.stringify(body) });
+            showToast('Lower third updated for existing scene');
           } else {
             await api('scenes', {
               method: 'POST',
-              body: JSON.stringify({
-                module_number: moduleNum, section_number: videoNum, scene_number: sceneNum,
-                ...body
-              })
+              body: JSON.stringify({ module_number: moduleNum, section_number: videoNum, scene_number: sceneNum, ...body })
             });
-            showToast('✅ Lower third created & image uploaded to Azure');
+            showToast('Lower third created & image uploaded');
           }
         }
-
         $('ltImage').value = ltImageUrl;
         clearForm();
         await loadScenes(currentVideoId);
@@ -374,15 +453,15 @@
         showToast('Failed to save: ' + e.message, true);
       } finally {
         btn.disabled = false;
-        btn.textContent = '💾 Save & Upload';
+        btn.textContent = 'Save & Upload';
       }
     }
 
     async function deleteScene(id) {
       if (!confirm('Delete this lower third?')) return;
       try {
-        await api(`scenes?id=eq.${id}`, { method: 'DELETE' });
-        showToast('🗑️ Lower third deleted.');
+        await api('scenes?id=eq.' + id, { method: 'DELETE' });
+        showToast('Lower third deleted.');
         if (editingSceneId === id) clearForm();
         await loadScenes(currentVideoId);
       } catch (e) { showToast('Failed to delete: ' + e.message, true); }
@@ -400,7 +479,7 @@
       $('ltSub').value = sub;
       $('ltImage').value = image || '';
       updatePreview();
-      $('saveBtn').textContent = '🔄 Update & Upload';
+      $('saveBtn').textContent = 'Update & Upload';
       $('saveStatus').textContent = 'Editing Scene ' + sceneNum;
     }
 
@@ -410,23 +489,9 @@
       $('ltMain').value = '';
       $('ltSub').value = '';
       $('ltImage').value = '';
-      $('saveBtn').textContent = '💾 Save & Upload';
+      $('saveBtn').textContent = 'Save & Upload';
       $('saveStatus').textContent = '';
       updatePreview();
-    }
-
-    function applySuggestion(main, sub) {
-      $('ltMain').value = main;
-      $('ltSub').value = sub;
-      updatePreview();
-      $('saveBtn').textContent = '💾 Save & Upload';
-      editingSceneId = null;
-      $('saveStatus').textContent = 'Loaded from Gemini suggestion';
-      $('sceneNumber').value = '1';
-      $('ltImage').value = '';
-      $('scriptPanel').style.display = 'none';
-      $('suggestionsPanel').style.display = 'none';
-      showToast('✅ Suggestion loaded into editor');
     }
 
     async function generateWithGemini() {
@@ -435,11 +500,8 @@
       const videoNum = dbVideos.find(v => v.id === currentVideoId)?.video_number || 0;
 
       $('genLoading').style.display = 'block';
-      $('suggestionsList').innerHTML = '';
-      $('suggestionsPanel').style.display = 'block';
-      $('scriptPanel').style.display = 'none';
       $('generateBtn').disabled = true;
-      $('generateBtn').textContent = '⏳ Generating...';
+      $('generateBtn').textContent = 'Generating...';
 
       try {
         const res = await fetch('/api/lowerthirds/generate', {
@@ -452,50 +514,104 @@
 
         $('genLoading').style.display = 'none';
         $('generateBtn').disabled = false;
-        $('generateBtn').textContent = '🤖 Generate with Gemini';
+        $('generateBtn').textContent = 'Generate with Gemini';
 
         if (data.script_text) {
           $('scriptContent').textContent = data.script_text;
           $('scriptPanel').style.display = 'block';
         }
 
-        const suggestions = typeof data.suggestions === 'string' ? JSON.parse(data.suggestions) : data.suggestions;
-        if (suggestions && suggestions.length) {
-          $('suggestionsList').innerHTML = suggestions.map(s => `
-            <div class="suggestion-card" onclick="applySuggestion('${(s.main||'').replace(/'/g,"\\'")}', '${(s.sub||'').replace(/'/g,"\\'")}')">
-              <div class="sug-main">${s.main}</div>
-              <div class="sug-sub">${s.sub}</div>
-              <div class="sug-rationale">${s.rationale || ''}</div>
-              <div class="sug-apply">✏️ Click to apply →</div>
-            </div>
-          `).join('');
-        } else {
-          $('suggestionsList').innerHTML = '<div class="empty-state"><p>No suggestions returned. Try a different video.</p></div>';
+        if (data.from_cache) {
+          showToast('Using cached candidates from Supabase (already generated)', false, 2500);
+        } else if (data.suggestions && data.suggestions.length) {
+          showToast('Generated ' + data.suggestions.length + ' candidates and saved to Supabase');
         }
+
+        // Reload the candidates table to show persisted results
+        await loadLowerThirds(moduleNum, videoNum);
       } catch (e) {
         $('genLoading').style.display = 'none';
         $('generateBtn').disabled = false;
-        $('generateBtn').textContent = '🤖 Generate with Gemini';
+        $('generateBtn').textContent = 'Generate with Gemini';
         showToast('Generation failed: ' + e.message, true);
       }
     }
 
-    $('moduleSelect').addEventListener('change', () => {
-      const val = parseInt($('moduleSelect').value);
+    async function generateAllVideos() {
+      if (!currentModuleId) { showToast('Select a module first.', true); return; }
+      const moduleNum = dbModules.find(m => m.id === currentModuleId)?.module_number || 0;
+      const videos = dbVideos;
+      if (!videos.length) { showToast('No videos in this module.', true); return; }
+
+      const panel = $('genProgressPanel');
+      panel.style.display = 'block';
+      $('generateAllBtn').disabled = true;
+
+      let html = '<h2>Bulk Generation Progress</h2>';
+      const stepEls = {};
+      for (const v of videos) {
+        const id = 'step_' + v.id;
+        stepEls[v.id] = id;
+        html += '<div class="progress-step" id="' + id + '"><span class="step-dot"></span> V' + v.video_number + ': ' + escHtml(v.title) + ' <span class="step-status">Pending</span></div>';
+      }
+      panel.innerHTML = html;
+
+      let completed = 0;
+      let errors = 0;
+      for (const v of videos) {
+        const step = $(stepEls[v.id]);
+        if (step) { step.className = 'progress-step active'; step.querySelector('.step-status').textContent = 'Generating...'; }
+        try {
+          const res = await fetch('/api/lowerthirds/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ module_number: moduleNum, video_number: v.video_number })
+          });
+          if (!res.ok) throw new Error(await res.text());
+          const data = await res.json();
+          if (step) {
+            step.className = 'progress-step done';
+            step.querySelector('.step-status').textContent = (data.from_cache ? 'Cached' : 'Saved') + ' (' + (data.suggestions?.length || 0) + ' candidates)';
+          }
+          completed++;
+        } catch (e) {
+          errors++;
+          if (step) {
+            step.className = 'progress-step';
+            step.querySelector('.step-status').textContent = 'Error: ' + e.message;
+          }
+        }
+      }
+
+      $('generateAllBtn').disabled = false;
+      showToast('Bulk generate complete: ' + completed + ' done, ' + errors + ' errors');
+
+      // Reload current view if video is selected
+      if (currentVideoId) {
+        await loadLowerThirds(moduleNum, dbVideos.find(v => v.id === currentVideoId)?.video_number || 0);
+      }
+    }
+
+    $('moduleSelect').addEventListener('change', function() {
+      const val = parseInt(this.value);
       currentModuleId = val || null;
       currentVideoId = null;
       clearForm();
       $('editorSection').style.display = 'none';
       $('emptyState').style.display = 'block';
+      $('generateAllBtn').style.display = val ? 'inline-block' : 'none';
       loadVideos(currentModuleId);
     });
 
-    $('videoSelect').addEventListener('change', () => {
-      currentVideoId = parseInt($('videoSelect').value) || null;
+    $('videoSelect').addEventListener('change', function() {
+      currentVideoId = parseInt(this.value) || null;
       clearForm();
       if (currentVideoId) {
         $('editorSection').style.display = 'block';
         $('emptyState').style.display = 'none';
+        const moduleNum = dbModules.find(m => m.id === currentModuleId)?.module_number || 0;
+        const videoNum = dbVideos.find(v => v.id === currentVideoId)?.video_number || 0;
+        loadLowerThirds(moduleNum, videoNum);
         loadScenes(currentVideoId);
       } else {
         $('editorSection').style.display = 'none';
@@ -508,6 +624,7 @@
     $('saveBtn').addEventListener('click', saveLowerThird);
     $('clearBtn').addEventListener('click', clearForm);
     $('generateBtn').addEventListener('click', generateWithGemini);
+    $('generateAllBtn').addEventListener('click', generateAllVideos);
 
     loadConfig();
     loadModules();

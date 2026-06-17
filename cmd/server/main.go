@@ -1979,8 +1979,9 @@ func infographicSaveHandler(cfg config) http.HandlerFunc {
 
 func lowerThirdGenerateHandler(cfg config) http.HandlerFunc {
 	type LTRequest struct {
-		ModuleNumber int `json:"module_number"`
-		VideoNumber  int `json:"video_number"`
+		ModuleNumber int  `json:"module_number"`
+		VideoNumber  int  `json:"video_number"`
+		Force        bool `json:"force"`
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -1996,13 +1997,7 @@ func lowerThirdGenerateHandler(cfg config) http.HandlerFunc {
 			return
 		}
 
-		geminiKey := cfg.getSecret("GEMINI_API_KEY")
-		if geminiKey == "" {
-			http.Error(w, `{"error":"GEMINI_API_KEY missing"}`, http.StatusServiceUnavailable)
-			return
-		}
-
-		ctx, cancel := context.WithTimeout(r.Context(), 30*time.Second)
+		ctx, cancel := context.WithTimeout(r.Context(), 40*time.Second)
 		defer cancel()
 
 		// Fetch module ID first
@@ -2028,6 +2023,52 @@ func lowerThirdGenerateHandler(cfg config) http.HandlerFunc {
 		videoID := videos[0].ID
 		videoTitle := videos[0].Title
 
+		// Check existing lower thirds for this video
+		var existingLTs []struct {
+			ID        int    `json:"id"`
+			MainText  string `json:"main_text"`
+			SubText   string `json:"sub_text"`
+			Rationale string `json:"rationale"`
+			SortOrder int    `json:"sort_order"`
+		}
+		ltQ := fmt.Sprintf("select=id,main_text,sub_text,rationale,sort_order&module_number=eq.%d&video_number=eq.%d&order=sort_order.asc", req.ModuleNumber, req.VideoNumber)
+		_ = supabaseGet(ctx, cfg, "lower_thirds", ltQ, &existingLTs)
+
+		if len(existingLTs) > 0 && !req.Force {
+			var suggestions []map[string]any
+			for _, lt := range existingLTs {
+				suggestions = append(suggestions, map[string]any{
+					"main":       lt.MainText,
+					"sub":        lt.SubText,
+					"rationale":  lt.Rationale,
+					"db_id":      lt.ID,
+					"sort_order": lt.SortOrder,
+					"from_cache": true,
+				})
+			}
+
+			var scripts []struct {
+				ScriptText string `json:"script_text"`
+			}
+			scriptQ := fmt.Sprintf("select=script_text&video_id=eq.%d&limit=1", videoID)
+			scriptContent := ""
+			_ = supabaseGet(ctx, cfg, "scripts", scriptQ, &scripts)
+			if len(scripts) > 0 {
+				scriptContent = scripts[0].ScriptText
+			}
+
+			json.NewEncoder(w).Encode(map[string]any{
+				"suggestions":   suggestions,
+				"script_text":   scriptContent,
+				"video_title":   videoTitle,
+				"module_number": req.ModuleNumber,
+				"video_number":  req.VideoNumber,
+				"from_cache":    true,
+			})
+			return
+		}
+
+		// Fetch script for Gemini context
 		var scripts []struct {
 			ScriptText string `json:"script_text"`
 		}
@@ -2037,6 +2078,12 @@ func lowerThirdGenerateHandler(cfg config) http.HandlerFunc {
 		scriptContent := ""
 		if len(scripts) > 0 {
 			scriptContent = scripts[0].ScriptText
+		}
+
+		geminiKey := cfg.getSecret("GEMINI_API_KEY")
+		if geminiKey == "" {
+			http.Error(w, `{"error":"GEMINI_API_KEY missing"}`, http.StatusServiceUnavailable)
+			return
 		}
 
 		// Build Gemini prompt
@@ -2049,9 +2096,9 @@ Module %d, Video %d: "%s"
 Generate 3 lower third overlay suggestions for this video. For each suggestion provide:
 1. Main text (short, punchy, max 40 chars)
 2. Sub text (descriptive, max 60 chars)
-3. Brief rationale (why this fits the content)
+3. Rationale — why this lower third is important for the audience to learn (1-2 sentences)
 
-Return JSON array:
+Return a JSON array ONLY:
 [{"main":"...","sub":"...","rationale":"..."}]
 
 Focus on professional, certification-quality overlays. Use the module/video theme.`, req.ModuleNumber, req.VideoNumber, videoTitle,
@@ -2090,17 +2137,62 @@ Focus on professional, certification-quality overlays. Use the module/video them
 		}
 		json.NewDecoder(hresp.Body).Decode(&gResp)
 
-		responseText := "[]"
+		type Suggestion struct {
+			Main      string `json:"main"`
+			Sub       string `json:"sub"`
+			Rationale string `json:"rationale"`
+		}
+
+		var suggestions []Suggestion
 		if len(gResp.Candidates) > 0 && len(gResp.Candidates[0].Content.Parts) > 0 {
-			responseText = gResp.Candidates[0].Content.Parts[0].Text
+			raw := gResp.Candidates[0].Content.Parts[0].Text
+			if err := json.Unmarshal([]byte(raw), &suggestions); err != nil {
+				// Try wrapping if it's a single object
+				var single Suggestion
+				if json.Unmarshal([]byte(raw), &single) == nil {
+					suggestions = []Suggestion{single}
+				}
+			}
+		}
+
+		if suggestions == nil {
+			suggestions = []Suggestion{}
+		}
+
+		// Save each suggestion to lower_thirds table (insert, conflicts are ignored)
+		for i, s := range suggestions {
+			body := map[string]any{
+				"module_number": req.ModuleNumber,
+				"video_number":  req.VideoNumber,
+				"module_id":     modules[0].ID,
+				"video_id":      videoID,
+				"main_text":     s.Main,
+				"sub_text":      s.Sub,
+				"rationale":     s.Rationale,
+				"sort_order":    i + 1,
+			}
+			_ = supabasePost(ctx, cfg, "lower_thirds", body)
+		}
+
+		// Convert to response format
+		var respSuggestions []map[string]any
+		for i, s := range suggestions {
+			respSuggestions = append(respSuggestions, map[string]any{
+				"main":       s.Main,
+				"sub":        s.Sub,
+				"rationale":  s.Rationale,
+				"sort_order": i + 1,
+				"from_cache": false,
+			})
 		}
 
 		json.NewEncoder(w).Encode(map[string]any{
-			"suggestions":   json.RawMessage(responseText),
+			"suggestions":   respSuggestions,
 			"script_text":   scriptContent,
 			"video_title":   videoTitle,
 			"module_number": req.ModuleNumber,
 			"video_number":  req.VideoNumber,
+			"from_cache":    false,
 		})
 	}
 }
