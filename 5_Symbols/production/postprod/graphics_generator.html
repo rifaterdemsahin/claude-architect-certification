@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="../../../shared/redirect-to-live-site.js"></script>
+  <title>Sentence Graphics Generator | Claude AI Certification</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #030712;
+      --bg-card: rgba(17, 24, 39, 0.9);
+      --border-glow: rgba(139, 92, 246, 0.3);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --primary: #8b5cf6;
+      --primary-glow: rgba(139, 92, 246, 0.6);
+      --secondary: #3b82f6;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --font-title: 'Outfit', sans-serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-dark);
+      background-image: radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.12) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.12) 0%, transparent 40%);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      line-height: 1.6;
+      padding: 100px 24px 60px;
+    }
+    .container { max-width: 1200px; margin: 0 auto; }
+    header { margin-bottom: 40px; text-align: center; }
+    header h1 { font-family: var(--font-title); font-size: 2.8rem; font-weight: 900; letter-spacing: -0.02em; margin-bottom: 8px; }
+    header p { font-size: 1.1rem; color: var(--text-muted); }
+    .glass-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 28px;
+      margin-bottom: 32px;
+      box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(12px);
+    }
+    .btn {
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.95rem;
+    }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-secondary { background: var(--secondary); color: white; }
+    .btn-success { background: var(--success); color: white; }
+    .btn-warning { background: var(--warning); color: #000; }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-sm { padding: 6px 12px; font-size: 0.8rem; }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .btn-group { display: flex; gap: 10px; flex-wrap: wrap; margin: 16px 0; }
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; margin-bottom: 6px; font-weight: 600; color: var(--text-muted); font-size: 0.9rem; }
+    .form-group input, .form-group textarea, .form-group select {
+      width: 100%;
+      padding: 10px 14px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      color: white;
+      font-family: inherit;
+      font-size: 0.95rem;
+    }
+    .form-group input:focus, .form-group select:focus { border-color: var(--primary); outline: none; }
+
+    .stats-row {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .stat-badge {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 8px 16px;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .stat-badge .count { font-weight: 800; font-size: 1.1rem; }
+    .stat-badge.pending .count { color: var(--text-muted); }
+    .stat-badge.completed .count { color: var(--success); }
+    .stat-badge.skipped .count { color: var(--warning); }
+    .stat-badge.failed .count { color: var(--danger); }
+    .stat-badge.generating .count { color: var(--secondary); }
+
+    .sentence-table { width: 100%; border-collapse: separate; border-spacing: 0 6px; }
+    .sentence-table th {
+      text-align: left;
+      padding: 10px 12px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .sentence-table td {
+      padding: 12px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 8px;
+      vertical-align: top;
+      font-size: 0.9rem;
+    }
+    .sentence-table tr td:first-child { border-radius: 8px 0 0 8px; }
+    .sentence-table tr td:last-child { border-radius: 0 8px 8px 0; }
+    .sentence-table .num-col { width: 40px; text-align: center; color: var(--text-muted); font-size: 0.8rem; }
+    .sentence-table .sentence-col { min-width: 300px; }
+    .sentence-table .type-col { width: 100px; }
+    .sentence-table .graphics-col { width: 140px; }
+    .sentence-table .status-col { width: 120px; }
+    .sentence-table .rationale-col { width: 180px; }
+    .sentence-table .action-col { width: 160px; text-align: center; }
+
+    .type-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: rgba(139, 92, 246, 0.15);
+      color: var(--primary);
+    }
+    .type-tag.hook { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+    .type-tag.objective { background: rgba(59, 130, 246, 0.15); color: var(--secondary); }
+    .type-tag.takeaway { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+    .type-tag.heading { background: rgba(139, 92, 246, 0.15); color: var(--primary); }
+    .type-tag.transition { background: rgba(156, 163, 175, 0.15); color: var(--text-muted); }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    .status-badge.pending { background: rgba(156,163,175,0.15); color: var(--text-muted); }
+    .status-badge.generating { background: rgba(59,130,246,0.15); color: var(--secondary); }
+    .status-badge.completed { background: rgba(16,185,129,0.15); color: var(--success); }
+    .status-badge.skipped { background: rgba(245,158,11,0.15); color: var(--warning); }
+    .status-badge.failed { background: rgba(239,68,68,0.15); color: var(--danger); }
+
+    .rationale-input {
+      width: 100%;
+      padding: 6px 10px;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      color: white;
+      font-family: inherit;
+      font-size: 0.8rem;
+    }
+    .graphics-select {
+      width: 100%;
+      padding: 5px 8px;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      color: white;
+      font-family: inherit;
+      font-size: 0.8rem;
+    }
+
+    .progress-panel { display: none; }
+    .progress-bar-wrap {
+      width: 100%;
+      height: 8px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 12px 0;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      border-radius: 4px;
+      transition: width 0.4s ease;
+      width: 0%;
+    }
+    .progress-text { font-size: 0.85rem; color: var(--text-muted); }
+    .progress-log {
+      max-height: 200px;
+      overflow-y: auto;
+      margin-top: 12px;
+      font-size: 0.8rem;
+      font-family: monospace;
+    }
+    .progress-log .log-entry { padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .progress-log .log-entry.success { color: var(--success); }
+    .progress-log .log-entry.fail { color: var(--danger); }
+    .progress-log .log-entry.skip { color: var(--warning); }
+
+    .empty-state { text-align: center; padding: 60px 20px; }
+    .empty-state .empty-icon { font-size: 3rem; margin-bottom: 16px; }
+    .empty-state p { color: var(--text-muted); font-size: 1.1rem; }
+
+    .modal {
+      display: none;
+      position: fixed; z-index: 1000; inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(4px);
+      align-items: center; justify-content: center;
+    }
+    .modal.visible { display: flex; }
+    .modal-content {
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 24px;
+      padding: 32px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .modal-header { font-family: var(--font-title); font-size: 1.5rem; font-weight: 700; margin-bottom: 16px; }
+    .modal-body { margin-bottom: 20px; }
+    .modal-footer { display: flex; gap: 10px; justify-content: flex-end; }
+
+    .toast {
+      position: fixed;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--bg-card);
+      border: 1px solid var(--success);
+      color: var(--text-main);
+      padding: 14px 28px;
+      border-radius: 16px font-weight 600;
+      opacity: 0;
+      transition: opacity 0.3s, transform 0.3s;
+      z-index:2000 pointer-events:none font-size 0.95rem; backdrop-filter blur(12px)
+    }
+    .toast.show { opacity:1; transform translateX(-50%) translateY(0); pointer-events: auto; }
+
+    .scene-refresh-note { margin-top:8px; font-size:0.8rem; color:var(--text-muted); }
+    .sentence-text { line-height:1.5; }
+    .sentence-text .section-tag {
+      display: inline-block; padding:1px 6px; border-radius:4px;
+      font-size:0.7rem; font-weight:600; background:rgba(59,130,246,0.1); color:var(--secondary);
+      margin-right:6px;
+    }
+    .bulk-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 12px;
+      flex-wrap: wrap;
+    }
+    .bulk-bar label { font-size: 0.85rem; color: var(--text-muted); }
+    .bulk-rationale-input {
+      flex: 1;
+      min-width: 200px;
+      padding: 8px 12px;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      color: white;
+      font-family: inherit;
+      font-size: 0.85rem;
+    }
+    .skip-selected-btn { background: rgba(245,158,11,0.15); color: var(--warning); border: 1px solid rgba(245,158,11,0.3); }
+    .skip-selected-btn:hover { background: rgba(245,158,11,0.25); }
+
+    @media (max-width: 900px) {
+      .sentence-table { font-size: 0.8rem; }
+      .sentence-table .sentence-col { min-width: 150px; }
+      .form-grid { grid-template-columns: 1fr; }
+      header h1 { font-size: 2rem; }
+      .bulk-bar { flex-direction: column; align-items: stretch; }
+    }
+  </style>
+  <script src="../../../shared/nav.js"></script>
+  <script src="../../../shared/debug-panel.js"></script>
+  <script src="../../../shared/seo.js" defer></script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🎨 Sentence Graphics Generator</h1>
+      <p>Per-sentence graphics generation, tracking, and rationale for skipped assets</p>
+    </header>
+
+    <div class="glass-card">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="moduleSelect">📦 Module</label>
+          <select id="moduleSelect"><option value="">— Select Module —</option></select>
+        </div>
+        <div class="form-group">
+          <label for="videoSelect">🎬 Video</label>
+          <select id="videoSelect"><option value="">— Select Video —</option></select>
+        </div>
+      </div>
+    </div>
+
+    <div id="statsRow" class="stats-row" style="display:none"></div>
+
+    <div class="glass-card" id="bulkBarCard" style="display:none">
+      <div class="bulk-bar">
+        <label>⚡ Bulk Actions:</label>
+        <button class="btn btn-success btn-sm" id="bulkGenerateBtn" disabled>🖼️ Generate All Pending</button>
+        <button class="btn btn-warning btn-sm" id="bulkSkipBtn" disabled>⏭️ Skip Selected</button>
+        <button class="btn btn-sm btn-secondary" id="bulkResetBtn" disabled>🔄 Reset All</button>
+        <input type="text" class="bulk-rationale-input" id="bulkRationaleInput" placeholder="Rationale for skipped sentences...">
+      </div>
+    </div>
+
+    <div id="progressPanel" class="glass-card progress-panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <strong>⏳ Generation Progress</strong>
+        <span class="progress-text" id="progressText">0 / 0</span>
+      </div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progressBarFill"></div>
+      </div>
+      <div class="progress-log" id="progressLog"></div>
+    </div>
+
+    <div class="glass-card" id="sentencesPanel" style="display:none;overflow-x:auto;">
+      <table class="sentence-table">
+        <thead>
+          <tr>
+            <th class="num-col">#</th>
+            <th class="sentence-col">Sentence</th>
+            <th class="type-col">Type</th>
+            <th class="graphics-col">Graphics Type</th>
+            <th class="status-col">Status</th>
+            <th class="rationale-col">Rationale</th>
+            <th class="action-col">Generate</th>
+          </tr>
+        </thead>
+        <tbody id="sentencesBody"></tbody>
+      </table>
+    </div>
+
+    <div id="emptyState" class="glass-card empty-state">
+      <div class="empty-icon">🎨</div>
+      <h2 style="font-family:var(--font-title);margin-bottom:8px;">Select a Module & Video</h2>
+      <p>Choose a module and video to load sentences and manage graphics generation.</p>
+    </div>
+
+    <footer>
+      <p><a href="index.html" style="color:var(--secondary);text-decoration:none;">← Back to Post-Production</a></p>
+    </footer>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const SUPABASE_URL = localStorage.getItem('supabase_url') || 'https://rmekfsdhglyiralxvkwc.supabase.co';
+    const SUPABASE_ANON_KEY = localStorage.getItem('supabase_anon_key') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZWtmc2RoZ2x5aXJhbHh2a3djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NzYzODgsImV4cCI6MjA5NjM1MjM4OH0.ay6HsmO_CbMGDXL_Dv4DT-paAIAOqlQPfmqqx_mexSU';
+    const HEADERS = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
+
+    const GRAPHICS_TYPES = ['explain','infographic','diagram','screenshot','b_roll','talking_head','lower_third','icon','thumbnail','title_card','callout','comparison','timeline','architecture','code_terminal','standalone_graphic','background_asset','analogy','table_matrix','transparent_png','icon_badge','none'];
+
+    let dbModules = [];
+    let dbVideos = [];
+    let currentSentences = [];
+    let currentGraphicsMap = {};
+    let currentModuleNumber = null;
+    let currentVideoNumber = null;
+    let currentScriptId = null;
+    let isGenerating = false;
+
+    const $ = id => document.getElementById(id);
+
+    function showToast(msg, isError, ms) {
+      const t = $('toast');
+      t.textContent = msg; t.className = 'toast' + (isError ? ' error' : '');
+      setTimeout(() => t.classList.add('show'), 10);
+      setTimeout(() => t.classList.remove('show'), ms || 3500);
+    }
+
+    function escHtml(s) { if (!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+    async function api(path, opts) {
+      const url = SUPABASE_URL + '/rest/v1/' + path;
+      const res = await fetch(url, { ...opts, headers: { ...HEADERS, ...(opts?.headers || {}) } });
+      if (!res.ok) { const err = await res.text().catch(() => ''); throw new Error(res.status + ': ' + err); }
+      const ct = res.headers.get('content-type') || '';
+      return ct.includes('json') ? res.json() : res.text();
+    }
+
+    async function loadModules() {
+      try {
+        dbModules = await api('modules?select=id,module_number,title&order=module_number.asc');
+        const sel = $('moduleSelect');
+        sel.innerHTML = '<option value="">— Select Module —</option>' +
+          dbModules.map(m => `<option value="${m.id}">M${m.module_number}: ${m.title}</option>`).join('');
+      } catch (e) { showToast('Failed to load modules: ' + e.message, true); }
+    }
+
+    async function loadVideos(moduleId) {
+      if (!moduleId) { $('videoSelect').innerHTML = '<option value="">— Select Video —</option>'; return; }
+      try {
+        dbVideos = await api(`videos?select=id,video_number,title&module_id=eq.${moduleId}&order=video_number.asc`);
+        const sel = $('videoSelect');
+        sel.innerHTML = '<option value="">— Select Video —</option>' +
+          dbVideos.map(v => `<option value="${v.id}">V${v.video_number}: ${v.title}</option>`).join('');
+      } catch (e) { showToast('Failed to load videos: ' + e.message, true); }
+    }
+
+    async function loadSentences(moduleNumber, videoNumber) {
+      if (!moduleNumber || !videoNumber) {
+        $('sentencesPanel').style.display = 'none';
+        $('emptyState').style.display = 'block';
+        $('statsRow').style.display = 'none';
+        $('bulkBarCard').style.display = 'none';
+        return;
+      }
+      try {
+        const videoId = dbVideos.find(v => v.video_number === videoNumber)?.id;
+        if (!videoId) { showToast('Video not found', true); return; }
+        const scripts = await api(`scripts?select=id,script_text&video_id=eq.${videoId}`);
+        if (!scripts.length) {
+          $('sentencesBody').innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-muted);">No script found for this video.</td></tr>';
+          $('sentencesPanel').style.display = 'block';
+          $('emptyState').style.display = 'none';
+          return;
+        }
+        currentScriptId = scripts[0].id;
+        const sents = await api(`sentences?select=id,sentence_text,sentence_type,section,visual_mode,sort_order,script_id&script_id=eq.${scripts[0].id}&order=sort_order.asc`);
+        currentSentences = sents;
+
+        const sids = sents.map(s => s.id);
+        let graphics = [];
+        if (sids.length) {
+          const idsClause = sids.map(id => 'id=eq.' + id).join(',');
+          graphics = await api(`sentence_graphics?select=id,sentence_id,generation_status,rationale,graphics_type,graphics_url,prompt_used,error_message&sentence_id=in.(${sids.join(',')})`);
+        }
+        currentGraphicsMap = {};
+        for (const g of graphics) {
+          currentGraphicsMap[g.sentence_id] = g;
+        }
+        renderSentences();
+        updateStats();
+        $('bulkBarCard').style.display = 'block';
+        updateBulkButtons();
+      } catch (e) { showToast('Failed to load sentences: ' + e.message, true); }
+    }
+
+    function renderSentences() {
+      const body = $('sentencesBody');
+      if (!currentSentences.length) {
+        body.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-muted);">No sentences in this script.</td></tr>';
+        $('sentencesPanel').style.display = 'block';
+        $('emptyState').style.display = 'none';
+        return;
+      }
+      body.innerHTML = currentSentences.map((s, i) => {
+        const g = currentGraphicsMap[s.id] || {};
+        const status = g.generation_status || 'pending';
+        const rationale = g.rationale || '';
+        const graphicsType = g.graphics_type || 'explain';
+        const typeClass = s.sentence_type || 'body';
+        const typeLabel = (s.sentence_type || 'body').replace(/_/g, ' ');
+        const sectionLabel = (s.section || '').replace(/_/g, ' ');
+        return `<tr data-sentence-id="${s.id}">
+          <td class="num-col">${i + 1}</td>
+          <td class="sentence-col">
+            <div class="sentence-text">
+              ${s.section ? `<span class="section-tag">${escHtml(sectionLabel)}</span>` : ''}
+              ${escHtml(s.sentence_text || '')}
+            </div>
+          </td>
+          <td class="type-col"><span class="type-tag ${typeClass}">${escHtml(typeLabel)}</span></td>
+          <td class="graphics-col">
+            <select class="graphics-select" data-sentence-id="${s.id}" ${status === 'completed' ? 'disabled' : ''}>
+              ${GRAPHICS_TYPES.map(t => `<option value="${t}" ${t === graphicsType ? 'selected' : ''}>${t.replace(/_/g, ' ')}</option>`).join('')}
+            </select>
+          </td>
+          <td class="status-col">
+            <span class="status-badge ${status}">${status === 'generating' ? '⏳' : status === 'completed' ? '✅' : status === 'skipped' ? '⏭️' : status === 'failed' ? '❌' : '⏸️'} ${status}</span>
+            ${g.error_message ? `<br><small style="color:var(--danger);font-size:0.7rem;">${escHtml(g.error_message)}</small>` : ''}
+          </td>
+          <td class="rationale-col">
+            <input type="text" class="rationale-input" data-sentence-id="${s.id}" placeholder="Why skip? (optional)" value="${escHtml(rationale)}" ${status === 'completed' ? 'disabled' : ''}>
+          </td>
+          <td class="action-col">
+            ${status === 'completed'
+              ? (g.graphics_url ? `<a href="${escHtml(g.graphics_url)}" target="_blank" class="btn btn-success btn-sm">👁️ View</a>` : `<span style="color:var(--success);font-size:0.8rem;">✅ Done</span>`)
+              : `<button class="btn btn-primary btn-sm gen-single-btn" data-sentence-id="${s.id}" ${isGenerating || status === 'generating' ? 'disabled' : ''}>${status === 'failed' ? '🔄 Retry' : status === 'generating' ? '⏳...' : '🖼️ Gen'}</button>`
+            }
+          </td>
+        </tr>`;
+      }).join('');
+      $('sentencesPanel').style.display = 'block';
+      $('emptyState').style.display = 'none';
+
+      document.querySelectorAll('.gen-single-btn').forEach(btn => {
+        btn.addEventListener('click', () => generateSingle(parseInt(btn.dataset.sentenceId)));
+      });
+      document.querySelectorAll('.graphics-select').forEach(sel => {
+        sel.addEventListener('change', () => updateGraphicsType(parseInt(sel.dataset.sentenceId), sel.value));
+      });
+      document.querySelectorAll('.rationale-input').forEach(inp => {
+        inp.addEventListener('change', () => updateRationale(parseInt(inp.dataset.sentenceId), inp.value));
+      });
+    }
+
+    function updateStats() {
+      const total = currentSentences.length;
+      const completed = currentSentences.filter(s => (currentGraphicsMap[s.id]?.generation_status) === 'completed').length;
+      const skipped = currentSentences.filter(s => (currentGraphicsMap[s.id]?.generation_status) === 'skipped').length;
+      const failed = currentSentences.filter(s => (currentGraphicsMap[s.id]?.generation_status) === 'failed').length;
+      const generating = currentSentences.filter(s => (currentGraphicsMap[s.id]?.generation_status) === 'generating').length;
+      const pending = total - completed - skipped - failed - generating;
+      $('statsRow').innerHTML = `
+        <div class="stat-badge"><span>📊 Total</span><span class="count">${total}</span></div>
+        <div class="stat-badge pending"><span>⏸️ Pending</span><span class="count">${pending}</span></div>
+        <div class="stat-badge completed"><span>✅ Completed</span><span class="count">${completed}</span></div>
+        <div class="stat-badge skipped"><span>⏭️ Skipped</span><span class="count">${skipped}</span></div>
+        <div class="stat-badge failed"><span>❌ Failed</span><span class="count">${failed}</span></div>
+        <div class="stat-badge generating"><span>⏳ Generating</span><span class="count">${generating}</span></div>`;
+      $('statsRow').style.display = 'flex';
+    }
+
+    function updateBulkButtons() {
+      const pendingCount = currentSentences.filter(s => (currentGraphicsMap[s.id]?.generation_status || 'pending') === 'pending').length;
+      const failedCount = currentSentences.filter(s => (currentGraphicsMap[s.id]?.generation_status) === 'failed').length;
+      $('bulkGenerateBtn').disabled = isGenerating || (pendingCount === 0 && failedCount === 0);
+      $('bulkGenerateBtn').textContent = `🖼️ Generate All (${pendingCount + failedCount})`;
+      const skipCandidateCount = currentSentences.filter(s => (currentGraphicsMap[s.id]?.generation_status || 'pending') === 'pending').length;
+      $('bulkSkipBtn').disabled = isGenerating || skipCandidateCount === 0;
+      $('bulkSkipBtn').textContent = `⏭️ Skip Pending (${skipCandidateCount})`;
+      const hasEntries = currentSentences.some(s => currentGraphicsMap[s.id]);
+      $('bulkResetBtn').disabled = isGenerating || !hasEntries;
+    }
+
+    async function upsertGraphics(sentenceId, data) {
+      const existing = currentGraphicsMap[sentenceId];
+      if (existing) {
+        const res = await api(`sentence_graphics?id=eq.${existing.id}`, {
+          method: 'PATCH',
+          headers: { ...HEADERS, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...data, updated_at: new Date().toISOString() })
+        });
+      } else {
+        const res = await api('sentence_graphics', {
+          method: 'POST',
+          headers: { ...HEADERS, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sentence_id: sentenceId,
+            module_number: currentModuleNumber,
+            video_number: currentVideoNumber,
+            script_id: currentScriptId,
+            ...data
+          })
+        });
+        currentGraphicsMap[sentenceId] = res;
+      }
+    }
+
+    async function updateGraphicsType(sentenceId, graphicsType) {
+      try {
+        await upsertGraphics(sentenceId, { graphics_type: graphicsType });
+      } catch (e) { showToast('Failed to update graphics type: ' + e.message, true); }
+    }
+
+    async function updateRationale(sentenceId, rationale) {
+      try {
+        await upsertGraphics(sentenceId, { rationale, generation_status: 'skipped' });
+        currentGraphicsMap[sentenceId] = { ...(currentGraphicsMap[sentenceId] || {}), rationale, generation_status: 'skipped' };
+        renderSentences();
+        updateStats();
+        updateBulkButtons();
+      } catch (e) { showToast('Failed to update rationale: ' + e.message, true); }
+    }
+
+    async function generateSingle(sentenceId) {
+      if (isGenerating) return;
+      isGenerating = true;
+      updateBulkButtons();
+      const s = currentSentences.find(s => s.id === sentenceId);
+      if (!s) { isGenerating = false; updateBulkButtons(); return; }
+      try {
+        const g = currentGraphicsMap[sentenceId] || {};
+        await upsertGraphics(sentenceId, { generation_status: 'generating' });
+        currentGraphicsMap[sentenceId] = { ...currentGraphicsMap[sentenceId], generation_status: 'generating' };
+        renderSentences(); updateStats(); updateBulkButtons();
+
+        const prompt = s.sentence_text;
+        const graphicsType = g.graphics_type || 'explain';
+
+        const res = await fetch('/api/images/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            prompt,
+            module_number: currentModuleNumber,
+            video_number: currentVideoNumber,
+            asset_types: [graphicsType]
+          })
+        });
+
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || 'Generation failed');
+        }
+
+        const data = await res.json();
+        let savedUrl = '';
+        try {
+          const saveRes = await fetch('/api/images/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              image_url: data.image_url,
+              module_number: currentModuleNumber,
+              video_number: currentVideoNumber,
+              prompt: s.sentence_text
+            })
+          });
+          if (saveRes.ok) { const sd = await saveRes.json(); savedUrl = `/api/research/file?container=research-images&name=${encodeURIComponent(sd.blob_name)}`; }
+        } catch (_) {}
+
+        await upsertGraphics(sentenceId, {
+          generation_status: 'completed',
+          graphics_url: savedUrl || data.image_url,
+          prompt_used: data.refined_prompt || data.original_prompt || prompt,
+          error_message: ''
+        });
+        currentGraphicsMap[sentenceId] = { ...currentGraphicsMap[sentenceId], generation_status: 'completed', graphics_url: savedUrl || data.image_url, prompt_used: data.refined_prompt || prompt };
+        addLogEntry('✅ Sentence #' + sentenceId + ' generated successfully', 'success');
+      } catch (err) {
+        await upsertGraphics(sentenceId, { generation_status: 'failed', error_message: err.message });
+        currentGraphicsMap[sentenceId] = { ...currentGraphicsMap[sentenceId], generation_status: 'failed', error_message: err.message };
+        addLogEntry('❌ Sentence #' + sentenceId + ' failed: ' + err.message, 'fail');
+      } finally {
+        isGenerating = false;
+        renderSentences(); updateStats(); updateBulkButtons();
+      }
+    }
+
+    async function bulkGenerate() {
+      if (isGenerating) return;
+      const candidates = currentSentences.filter(s => {
+        const st = currentGraphicsMap[s.id]?.generation_status || 'pending';
+        return st === 'pending' || st === 'failed';
+      });
+      if (!candidates.length) { showToast('No pending or failed sentences to generate.'); return; }
+      isGenerating = true;
+      $('progressPanel').style.display = 'block';
+      setProgress(0, candidates.length);
+      clearLog();
+
+      for (let i = 0; i < candidates.length; i++) {
+        if (!isGenerating) { addLogEntry('⏹️ Bulk generation cancelled', 'skip'); break; }
+        const s = candidates[i];
+        addLogEntry(`⏳ (${i+1}/${candidates.length}) Generating sentence #${s.id}...`, '');
+        try {
+          const g = currentGraphicsMap[s.id] || {};
+          await upsertGraphics(s.id, { generation_status: 'generating' });
+          currentGraphicsMap[s.id] = { ...currentGraphicsMap[s.id], generation_status: 'generating' };
+          renderSentences(); updateStats(); updateBulkButtons();
+
+          const prompt = s.sentence_text;
+          const graphicsType = g.graphics_type || 'explain';
+          const res = await fetch('/api/images/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt, module_number: currentModuleNumber, video_number: currentVideoNumber, asset_types: [graphicsType] })
+          });
+
+          if (!res.ok) { const ed = await res.json().catch(() => ({})); throw new Error(ed.error || 'Generation failed'); }
+          const data = await res.json();
+          let savedUrl = '';
+          try {
+            const sr = await fetch('/api/images/save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image_url: data.image_url, module_number: currentModuleNumber, video_number: currentVideoNumber, prompt: s.sentence_text }) });
+            if (sr.ok) { const sd = await sr.json(); savedUrl = `/api/research/file?container=research-images&name=${encodeURIComponent(sd.blob_name)}`; }
+          } catch (_) {}
+          await upsertGraphics(s.id, { generation_status: 'completed', graphics_url: savedUrl || data.image_url, prompt_used: data.refined_prompt || prompt, error_message: '' });
+          currentGraphicsMap[s.id] = { ...currentGraphicsMap[s.id], generation_status: 'completed', graphics_url: savedUrl || data.image_url, prompt_used: data.refined_prompt || prompt };
+          addLogEntry(`✅ Sentence #${s.id} completed`, 'success');
+        } catch (err) {
+          await upsertGraphics(s.id, { generation_status: 'failed', error_message: err.message });
+          currentGraphicsMap[s.id] = { ...currentGraphicsMap[s.id], generation_status: 'failed', error_message: err.message };
+          addLogEntry(`❌ Sentence #${s.id} failed: ${err.message}`, 'fail');
+        }
+        setProgress(i + 1, candidates.length);
+        renderSentences(); updateStats(); updateBulkButtons();
+      }
+      isGenerating = false;
+      renderSentences(); updateStats(); updateBulkButtons();
+      showToast('✅ Bulk generation complete!');
+    }
+
+    async function bulkSkip() {
+      if (isGenerating) return;
+      const rationale = $('bulkRationaleInput').value.trim() || 'Not needed for video flow';
+      const candidates = currentSentences.filter(s => {
+        const st = currentGraphicsMap[s.id]?.generation_status || 'pending';
+        return st === 'pending';
+      });
+      if (!candidates.length) { showToast('No pending sentences to skip.'); return; }
+      for (const s of candidates) {
+        await upsertGraphics(s.id, { generation_status: 'skipped', rationale });
+        currentGraphicsMap[s.id] = { ...currentGraphicsMap[s.id], generation_status: 'skipped', rationale };
+      }
+      renderSentences(); updateStats(); updateBulkButtons();
+      showToast(`⏭️ Skipped ${candidates.length} sentences with rationale: "${rationale}"`);
+    }
+
+    async function bulkReset() {
+      if (isGenerating) return;
+      const graphicsIds = Object.values(currentGraphicsMap).filter(g => g.id).map(g => g.id);
+      if (!graphicsIds.length) { showToast('Nothing to reset.'); return; }
+      for (const gid of graphicsIds) {
+        try { await api(`sentence_graphics?id=eq.${gid}`, { method: 'DELETE' }); } catch (_) {}
+      }
+      currentGraphicsMap = {};
+      renderSentences(); updateStats(); updateBulkButtons();
+      showToast('🔄 All graphics entries reset to pending');
+    }
+
+    function setProgress(current, total) {
+      const pct = total > 0 ? Math.round((current / total) * 100) : 0;
+      $('progressBarFill').style.width = pct + '%';
+      $('progressText').textContent = `${current} / ${total}`;
+    }
+
+    function clearLog() { $('progressLog').innerHTML = ''; }
+    function addLogEntry(msg, cls) {
+      const el = document.createElement('div');
+      el.className = 'log-entry ' + (cls || '');
+      el.textContent = msg;
+      $('progressLog').appendChild(el);
+      $('progressLog').scrollTop = $('progressLog').scrollHeight;
+    }
+
+    $('moduleSelect').addEventListener('change', () => {
+      const mid = parseInt($('moduleSelect').value);
+      const mod = dbModules.find(m => m.id === mid);
+      currentModuleNumber = mod ? mod.module_number : null;
+      loadVideos(mid);
+      if (!mid) { $('sentencesPanel').style.display = 'none'; $('emptyState').style.display = 'block'; $('statsRow').style.display = 'none'; $('bulkBarCard').style.display = 'none'; }
+    });
+
+    $('videoSelect').addEventListener('change', () => {
+      const vid = $('videoSelect').value;
+      const video = dbVideos.find(v => v.id === parseInt(vid));
+      currentVideoNumber = video ? video.video_number : null;
+      if (currentModuleNumber && currentVideoNumber) {
+        loadSentences(currentModuleNumber, currentVideoNumber);
+      } else {
+        $('sentencesPanel').style.display = 'none';
+        $('emptyState').style.display = 'block';
+        $('statsRow').style.display = 'none';
+        $('bulkBarCard').style.display = 'none';
+      }
+    });
+
+    $('bulkGenerateBtn').addEventListener('click', bulkGenerate);
+    $('bulkSkipBtn').addEventListener('click', bulkSkip);
+    $('bulkResetBtn').addEventListener('click', bulkReset);
+
+    loadModules();
+  </script>
+</body>
+</html>
