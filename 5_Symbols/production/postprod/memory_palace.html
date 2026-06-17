@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="../../../shared/redirect-to-live-site.js"></script>
+  <title>Memory Palace | Post-Production</title>
+  <meta name="description" content="How the course Memory Palace is stitched together with audio and sound design in post-production — then closed by turning the camera 180° on the viewer.">
+  <meta name="keywords" content="memory palace, method of loci, sound design, audio scoring, post-production, turn the camera around, Claude AI Certification">
+  <meta name="author" content="Rifat Erdem Sahin">
+  <link rel="icon" type="image/png" href="../../../favicon.png">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://rifaterdemsahin.github.io/claude-architect-certification/production/postprod/memory_palace.html">
+  <meta property="og:title" content="Memory Palace | Post-Production">
+  <meta property="og:description" content="Audio and sound design stitch each module's rooms into one continuous walk — then we turn the camera 180° on the viewer.">
+  <meta property="og:image" content="https://rifaterdemsahin.github.io/claude-architect-certification/favicon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #030712; --bg-card: rgba(17,24,39,0.8); --text-main: #f3f4f6; --text-muted: #9ca3af;
+      --primary: #8b5cf6; --secondary: #3b82f6; --accent: #10b981;
+      --font-title: 'Outfit', sans-serif; --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-dark);
+      background-image: radial-gradient(circle at 10% 20%, rgba(16,185,129,0.06) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(139,92,246,0.06) 0%, transparent 40%);
+      color: var(--text-main); font-family: var(--font-body); line-height: 1.6; padding-bottom: 80px;
+    }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+    .badge { display: inline-block; padding: 6px 16px; background: linear-gradient(135deg, rgba(139,92,246,0.2), rgba(16,185,129,0.2)); border: 1px solid rgba(139,92,246,0.3); border-radius: 100px; font-size: 0.8rem; font-weight: 600; color: #c4b5fd; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 14px; }
+    h1 { font-family: var(--font-title); font-size: 2.4rem; font-weight: 800; margin-bottom: 10px; }
+    header p { color: var(--text-muted); max-width: 640px; margin: 0 auto 32px; }
+
+    .lede {
+      background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-left: 3px solid var(--primary);
+      border-radius: 16px; padding: 24px 28px; margin-bottom: 40px; color: var(--text-muted); font-size: 1.02rem;
+    }
+    .lede strong { color: var(--text-main); }
+
+    .group { margin-bottom: 48px; }
+    .group-heading {
+      font-family: var(--font-title); font-size: 1.3rem; font-weight: 700; margin-bottom: 16px;
+      display: flex; align-items: center; gap: 10px; color: var(--text-main);
+    }
+    .group-heading::after {
+      content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(255,255,255,0.1), transparent);
+    }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+    .card {
+      background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px;
+      padding: 28px; transition: all 0.3s;
+    }
+    .card:hover { border-color: var(--accent); transform: translateY(-4px); box-shadow: 0 16px 32px rgba(0,0,0,0.3); }
+    .card-icon { font-size: 2rem; margin-bottom: 12px; }
+    .card-title { font-family: var(--font-title); font-weight: 700; font-size: 1.15rem; margin-bottom: 8px; }
+    .card-desc { color: var(--text-muted); font-size: 0.92rem; }
+
+    /* Memory palace room walk */
+    .rooms { display: flex; flex-direction: column; gap: 0; margin-bottom: 16px; }
+    .room {
+      display: flex; gap: 18px; align-items: flex-start; padding: 20px;
+      background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px;
+      margin-bottom: 14px; position: relative;
+    }
+    .room-num {
+      flex-shrink: 0; width: 42px; height: 42px; border-radius: 12px;
+      display: grid; place-items: center; font-family: var(--font-title); font-weight: 800; font-size: 1.1rem;
+      background: linear-gradient(135deg, rgba(139,92,246,0.25), rgba(16,185,129,0.25)); color: #fff;
+      border: 1px solid rgba(139,92,246,0.3);
+    }
+    .room-body { flex: 1; }
+    .room-title { font-family: var(--font-title); font-weight: 700; font-size: 1.05rem; margin-bottom: 4px; }
+    .room-anchor { color: #6ee7b7; font-size: 0.82rem; font-weight: 600; margin-bottom: 6px; }
+    .room-sound { color: var(--text-muted); font-size: 0.88rem; }
+    .room-sound .label { color: #93c5fd; font-weight: 600; }
+
+    .pipeline { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 8px 0 20px; }
+    .pipe-step { padding: 8px 16px; border-radius: 100px; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2); color: #6ee7b7; font-size: 0.85rem; font-weight: 600; }
+    .pipe-arrow { color: var(--text-muted); }
+
+    .callout {
+      background: linear-gradient(135deg, rgba(139,92,246,0.12), rgba(59,130,246,0.08));
+      border: 1px solid rgba(139,92,246,0.25); border-radius: 20px; padding: 32px; margin-bottom: 40px; text-align: center;
+    }
+    .callout h2 { font-family: var(--font-title); font-size: 1.6rem; margin-bottom: 10px; }
+    .callout p { color: var(--text-muted); max-width: 620px; margin: 0 auto; }
+    .camera { font-size: 2.6rem; display: inline-block; margin-bottom: 8px; }
+
+    .check-list { list-style: none; }
+    .check-list li { padding: 10px 0 10px 32px; position: relative; color: var(--text-muted); border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .check-list li:last-child { border-bottom: none; }
+    .check-list li::before { content: '🎚️'; position: absolute; left: 0; }
+    .check-list li strong { color: var(--text-main); }
+
+    footer { text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
+    footer a { color: var(--secondary); text-decoration: none; }
+  </style>
+  <script src="../../../shared/nav.js"></script>
+  <script src="../../../shared/debug-panel.js"></script>
+  <script src="../../../shared/seo.js" defer></script>
+</head>
+<body>
+
+<div class="container">
+  <header style="padding: 60px 0 24px; text-align: center;">
+    <div class="badge">Post-Production</div>
+    <h1>The Memory Palace</h1>
+    <p>Every module is a <strong>room</strong>. Post-production is where audio and sound design stitch those rooms into one continuous walk — and then we turn the camera 180° on the viewer.</p>
+  </header>
+
+  <div class="lede">
+    A <strong>Memory Palace</strong> (the classical <em>method of loci</em>) stores ideas in places you can walk
+    through. This course is built that way on purpose: each module is a room with a vivid visual anchor, so an
+    architect can mentally walk from <em>Ecosystem</em> to <em>MCP</em> to <em>ZDR</em> to <em>Routers</em> to
+    <em>Financial Engineering</em> and retrieve the whole curriculum on demand. But a palace full of silent rooms
+    is forgettable. <strong>Sound is the corridor.</strong> In post-production we score, layer, and crossfade audio
+    so the rooms connect — the viewer never feels a cut, only a journey.
+  </div>
+
+  <!-- The Rooms -->
+  <div class="group">
+    <div class="group-heading">🏛️ The Five Rooms &amp; Their Sound Anchors</div>
+    <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.92rem;">
+      Each module-room carries a visual anchor (what you see) and a signature sound (what you hear). The signature
+      sound is the recall trigger — replay it and the room comes back.
+    </p>
+    <div class="rooms">
+      <div class="room">
+        <div class="room-num">1</div>
+        <div class="room-body">
+          <div class="room-title">Claude Ecosystem &amp; Flows</div>
+          <div class="room-anchor">🔭 Anchor: a glass control room with three glowing request layers</div>
+          <div class="room-sound"><span class="label">Signature sound:</span> a rising three-note synth as each API layer lights up — the "request travels" motif.</div>
+        </div>
+      </div>
+      <div class="room">
+        <div class="room-num">2</div>
+        <div class="room-body">
+          <div class="room-title">Model Context Protocol (MCP)</div>
+          <div class="room-anchor">🔌 Anchor: a switchboard of pipes connecting servers</div>
+          <div class="room-sound"><span class="label">Signature sound:</span> a soft mechanical "click-latch" on every connection — the handshake foley.</div>
+        </div>
+      </div>
+      <div class="room">
+        <div class="room-num">3</div>
+        <div class="room-body">
+          <div class="room-title">Zero-Data Retention (ZDR)</div>
+          <div class="room-anchor">🔒 Anchor: a sealed vault inside a private VPC</div>
+          <div class="room-sound"><span class="label">Signature sound:</span> a low vault-door thud followed by silence — absence of sound <em>is</em> the design.</div>
+        </div>
+      </div>
+      <div class="room">
+        <div class="room-num">4</div>
+        <div class="room-body">
+          <div class="room-title">Deterministic Routers</div>
+          <div class="room-anchor">🚦 Anchor: a calm dispatcher routing identical trains every time</div>
+          <div class="room-sound"><span class="label">Signature sound:</span> a steady metronome tick — "boring on purpose" reliability rhythm.</div>
+        </div>
+      </div>
+      <div class="room">
+        <div class="room-num">5</div>
+        <div class="room-body">
+          <div class="room-title">Financial Engineering</div>
+          <div class="room-anchor">💰 Anchor: a falling cost meter dropping from $50k to $5k</div>
+          <div class="room-sound"><span class="label">Signature sound:</span> a descending coin-cascade that resolves into a warm major chord — the "savings landed" sting.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stitch pipeline -->
+  <div class="group">
+    <div class="group-heading">🎚️ How Sound Stitches the Palace Together</div>
+    <div class="pipeline">
+      <span class="pipe-step">Scene VO</span>
+      <span class="pipe-arrow">→</span>
+      <span class="pipe-step">Signature sound (recall trigger)</span>
+      <span class="pipe-arrow">→</span>
+      <span class="pipe-step">Ambient bed (room tone)</span>
+      <span class="pipe-arrow">→</span>
+      <span class="pipe-step">Transition whoosh (corridor)</span>
+      <span class="pipe-arrow">→</span>
+      <span class="pipe-step">Next room</span>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <div class="card-icon">🎵</div>
+        <div class="card-title">A continuous score</div>
+        <div class="card-desc">One musical key runs across all five modules. The bed never fully stops — it ducks under narration and swells in transitions, so the palace feels like a single building, not five files.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔊</div>
+        <div class="card-title">Foley as wayfinding</div>
+        <div class="card-desc">Clicks, latches, vault thuds and metronome ticks are placed where the viewer needs an anchor. The ear learns the map before the brain does.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🌬️</div>
+        <div class="card-title">Transitions are corridors</div>
+        <div class="card-desc">Every cut between rooms gets a designed crossfade — a whoosh, a riser, a breath. The transition <em>is</em> the corridor that links one locus to the next.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mix checklist -->
+  <div class="group">
+    <div class="group-heading">✅ Post-Production Sound Pass</div>
+    <ul class="check-list">
+      <li><strong>Place the anchor:</strong> drop each module's signature sound on its first key visual.</li>
+      <li><strong>Lay the bed:</strong> one continuous ambient/music key across the module, ducked −18&nbsp;dB under VO.</li>
+      <li><strong>Build the corridors:</strong> design a transition whoosh/riser on every scene change.</li>
+      <li><strong>Stitch module-to-module:</strong> carry the bed across module boundaries so the walk never breaks.</li>
+      <li><strong>Normalize &amp; master:</strong> target −14&nbsp;LUFS integrated for consistent loudness across the palace.</li>
+      <li><strong>Stitch the outro:</strong> reprise all five signature sounds in the closing recap, then drop to a single tone for the turnaround.</li>
+    </ul>
+    <p style="color: var(--text-muted); margin-top: 16px; font-size: 0.9rem;">
+      Source SFX and music selections on the <a href="audio_scoring.html" style="color:#93c5fd;">Audio Scoring Board</a>,
+      then verify generation status on the <a href="asset_checklist.html" style="color:#93c5fd;">Asset Checklist</a>.
+    </p>
+  </div>
+
+  <!-- Turn the camera -->
+  <div class="callout">
+    <span class="camera">🎥↩️</span>
+    <h2>Then We Turn the Camera Around</h2>
+    <p>
+      A memory palace is only useful if you <em>live</em> in it. So the final beat reprises every room's signature
+      sound — one last walk through the palace — and then the music drops to a single held tone. We turn the camera
+      <strong>180°</strong> off the instructor and onto <strong>you</strong>: stop watching, open your terminal, and
+      build the room you just visited. The palace was never the video. The palace is what you can rebuild from memory.
+    </p>
+  </div>
+
+  <footer>
+    <p style="margin-bottom: 8px;"><a href="index.html">← Back to Post-Production Hub</a></p>
+    <p style="margin-bottom: 12px; font-size: 0.85rem; opacity: 0.8;">
+      Instructor: <a href="https://www.linkedin.com/in/rifaterdemsahin" target="_blank" style="color: #93c5fd; text-decoration: underline; margin-right: 16px;">Rifat Erdem Sahin LinkedIn</a>
+      GitHub Project: <a href="https://github.com/rifaterdemsahin/claude-architect-certification" target="_blank" style="color: #93c5fd; text-decoration: underline;">Project Repository</a>
+    </p>
+  </footer>
+</div>
+</body>
+</html>

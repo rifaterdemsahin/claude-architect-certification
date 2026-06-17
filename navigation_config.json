@@ -319,6 +319,11 @@
               "label": "7. 🎵 Audio Scoring",
               "url": "5_Symbols/production/postprod/audio_scoring.html",
               "description": "Find sound effects and background music for every script scene in post-production."
+            },
+            {
+              "label": "8. 🏛️ Memory Palace",
+              "url": "5_Symbols/production/postprod/memory_palace.html",
+              "description": "How audio and sound design stitch each module-room together, then turn the camera 180° on the viewer."
             }
           ]
         },
