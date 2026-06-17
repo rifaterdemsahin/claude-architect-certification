@@ -188,7 +188,12 @@
         { label: '2. 📺 Course Playlist', url: 'https://www.youtube.com/watch?v=F8IBooe3bXY&list=PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy/' },
         { label: '3. 🔍 Customer Discovery', url: '5_Symbols/production/postprod/customer_discovery.html' },
         { label: '4. 🖼️ Image Generator', url: '5_Symbols/production/postprod/image_generator.html' },
-        { label: '5. 🎬 Lower Thirds Manager', url: '5_Symbols/production/postprod/lower_thirds.html' }
+        { label: '5. 🎬 Lower Thirds Manager', url: '5_Symbols/production/postprod/lower_thirds.html' },
+        { label: '6. ✅ Post Production Checklist', url: '5_Symbols/production/postprod/post_production_checklist.html' },
+        { label: '7. 🎵 Audio Scoring', url: '5_Symbols/production/postprod/audio_scoring.html' },
+        { label: '8. 🎼 Sound & Music Score (Pre-Edit)', url: '5_Symbols/production/postprod/music_sfx_score.html' },
+        { label: '9. 🏛️ Memory Palace Builder', url: '5_Symbols/production/postprod/memory_palace.html' },
+        { label: '10. 📁 Google Drive Sync', url: '5_Symbols/production/postprod/gdrive_sync.html' }
       ]},
       { label: '🎓 Certification & Proof', children: [
         { label: '5. 📜 Erdem\'s Certification', url: 'markdown_renderer.html?file=4_Formula/certification/erdems_certification.md' },

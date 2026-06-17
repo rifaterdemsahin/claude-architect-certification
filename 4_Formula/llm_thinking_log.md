@@ -574,3 +574,24 @@ On `5_Symbols/production/postprod/audio_scoring.html`, persist the **scene chang
 3. Wire postprod `index.html` (card + file row), `navigation_config.json`, postprod `README.md`.
 
 **Post-execution summary:** Implemented as planned; deterministic generator keeps the page functional with or without the Go backend; Save/Load upserts to `memory_palaces` via the Supabase REST/anon client.
+
+---
+
+## 🧠 2026-06-17 — Google Drive Footage Sync Page — `gemini-3-5-flash`
+
+**🎯 Goal:** Add a page to sync course footage and assets to Google Drive. It must be added to the post-production prepare stages (Content Assembly), pull assets (images, video, audio, script), generate the folder/subfolder structure, allow multi-run execution without duplicating folders, and sync to Google Drive.
+
+**🤔 Approach / Decision drivers:**
+- **Visual & Premium Design:** Match the existing premium glassmorphism template. Use dynamic interactive tree visualization to show the folder structure before and during sync.
+- **Client-Side Google Drive API Integration:** Integrate the official Google Identity Services (GIS) and Google Drive API v3. Provide an interactive OAuth2 client-side login.
+- **Asset Gathering:** Pull images (scene backgrounds, self-learning value cards), audio (music, SFX, generated voiceovers), script (master script data), and video mappings.
+- **Idempotent Multi-Run Capability:** Use `q` query in Google Drive API (`mimeType = 'application/vnd.google-apps.folder' and name = '...' and 'parent' in parents`) to search for existing folders before creating new ones. If folders exist, reuse them rather than duplicating.
+- **Progress Tracking:** Interactive progress indicators, real-time log terminal, and visual state mapping.
+
+**🛠 Build steps:**
+1. Document plan in `4_Formula/llm_thinking_log.md` (this file).
+2. Create `5_Symbols/production/postprod/gdrive_sync.html` with full client-side Drive API, OAuth login, structure preview, asset pull, and idempotent sync logic.
+3. Update `navigation_config.json` and fallback configurations inside `index.html` and `shared/nav.js` to include the sync page.
+4. Integrate the new card into the Post-Production dashboard (`5_Symbols/production/postprod/index.html`).
+5. Update `5_Symbols/production/postprod/README.md`.
+6. Run validation checks (verification/build).

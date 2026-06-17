@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google Drive Footage Sync | Claude AI Certification</title>
+  <meta name="description" content="Sync course footage, scripts, audio, and visual assets to Google Drive with automated folder and subfolder creation.">
+  <meta name="keywords" content="Google Drive Sync, Claude AI Certification, Systems Architect, Media Prep, Asset Pipeline">
+  <meta name="author" content="Rifat Erdem Sahin">
+  <link rel="icon" type="image/png" href="../../../favicon.png">
+
+  <script src="../../../shared/redirect-to-live-site.js"></script>
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://rifaterdemsahin.github.io/claude-architect-certification/production/postprod/gdrive_sync.html">
+  <meta property="og:title" content="Google Drive Footage Sync | Claude AI Certification">
+  <meta property="og:description" content="Automated course assets sync to Google Drive.">
+  <meta property="og:image" content="https://rifaterdemsahin.github.io/claude-architect-certification/favicon.png">
+
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Google Fonts & Style -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-dark: #030712;
+      --bg-card: rgba(17, 24, 39, 0.85);
+      --bg-toast: #1f2937;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --primary: #8b5cf6;
+      --secondary: #3b82f6;
+      --accent: #10b981;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --font-title: 'Outfit', sans-serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(16, 185, 129, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.05) 0%, transparent 40%);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      line-height: 1.6;
+      padding-bottom: 80px;
+    }
+
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+    
+    header {
+      padding: 40px 0 20px 0;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      margin-bottom: 30px;
+    }
+    
+    .badge {
+      display: inline-block;
+      padding: 6px 16px;
+      background: linear-gradient(135deg, rgba(16,185,129,0.2), rgba(139,92,246,0.2));
+      border: 1px solid rgba(16,185,129,0.3);
+      border-radius: 100px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #6ee7b7;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      font-family: var(--font-title);
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+      background: linear-gradient(to right, #f3f4f6, #9ca3af);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    header p { color: var(--text-muted); max-width: 800px; }
+
+    /* Layout structure */
+    .sync-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 30px;
+    }
+    
+    @media (min-width: 992px) {
+      .sync-grid {
+        grid-template-columns: 350px 1fr;
+      }
+    }
+
+    /* Cards */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 24px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      margin-bottom: 24px;
+    }
+
+    .card-title {
+      font-family: var(--font-title);
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Forms & Controls */
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--text-muted);
+    }
+
+    input, select {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.25);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+      text-decoration: none;
+      width: 100%;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+    }
+    .btn-primary:hover {
+      box-shadow: 0 0 15px rgba(139, 92, 246, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .btn-accent {
+      background: var(--accent);
+      color: #030712;
+    }
+    .btn-accent:hover {
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+    }
+
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.04);
+      font-size: 0.85rem;
+      margin-bottom: 16px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .dot-offline { background: var(--error); }
+    .dot-online { background: var(--accent); }
+    .dot-warning { background: var(--warning); }
+
+    /* Interactive Tree Visualizer */
+    .tree {
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      user-select: none;
+    }
+
+    .tree-node {
+      margin-left: 16px;
+      border-left: 1px dashed rgba(255, 255, 255, 0.15);
+      padding-left: 12px;
+      position: relative;
+    }
+    .tree-node::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 14px;
+      width: 10px;
+      height: 1px;
+      border-bottom: 1px dashed rgba(255, 255, 255, 0.15);
+    }
+
+    .tree-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 4px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .tree-header:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .tree-icon {
+      font-size: 1rem;
+    }
+
+    .tree-label {
+      font-weight: 500;
+      flex-grow: 1;
+    }
+
+    .tree-status {
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 100px;
+      font-weight: 600;
+    }
+
+    .status-pending { background: rgba(156, 163, 175, 0.15); color: var(--text-muted); }
+    .status-syncing { background: rgba(59, 130, 246, 0.2); color: #93c5fd; animation: pulse 1.5s infinite; }
+    .status-success { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; }
+    .status-skipped { background: rgba(245, 158, 11, 0.2); color: #fcd34d; }
+
+    @keyframes pulse {
+      0% { opacity: 0.6; }
+      50% { opacity: 1; }
+      100% { opacity: 0.6; }
+    }
+
+    /* Logs Console */
+    .console-wrapper {
+      background: #090d16;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-top: 20px;
+    }
+
+    .console-titlebar {
+      background: #111827;
+      padding: 10px 16px;
+      font-family: var(--font-title);
+      font-weight: 600;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+    }
+
+    .console-logs {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      padding: 16px;
+      height: 250px;
+      overflow-y: auto;
+      color: #929ba7;
+      line-height: 1.5;
+    }
+
+    .log-line {
+      margin-bottom: 6px;
+      word-break: break-all;
+    }
+
+    .log-info { color: #93c5fd; }
+    .log-success { color: #6ee7b7; }
+    .log-warn { color: #fcd34d; }
+    .log-error { color: #fca5a5; }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--bg-toast);
+      color: var(--text-main);
+      padding: 12px 24px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 1000;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  </style>
+
+  <!-- Google Auth & Drive API Scripts -->
+  <script src="https://accounts.google.com/gsi/client" onload="gisLoaded()" async defer></script>
+  <script src="https://apis.google.com/js/api.js" onload="gapiLoaded()" async defer></script>
+
+  <script src="../../../shared/nav.js"></script>
+  <script src="../../../shared/debug-panel.js"></script>
+  <script src="../../../shared/seo.js" defer></script>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div class="badge">Phase 3 of 3</div>
+      <h1>Google Drive Footage Sync</h1>
+      <p>Gather scripts, backgrounds, SFX, and video mappings, organize them into a canonical folder hierarchy, and push them directly to Google Drive. Supports multiple runs with merge-safe folder reuse.</p>
+    </header>
+
+    <div class="sync-grid">
+      <!-- Sidebar Control Panel -->
+      <div class="sidebar">
+        <!-- Google Drive Authorization -->
+        <div class="card">
+          <div class="card-title">🔑 Authorization</div>
+          <div id="auth-status" class="status-indicator">
+            <span class="dot dot-offline" id="auth-dot"></span>
+            <span id="auth-text">Initializing Google API...</span>
+          </div>
+
+          <button id="btn-login" class="btn btn-primary" style="display:none;" onclick="handleAuthClick()">
+            🔗 Link Google Drive
+          </button>
+          <button id="btn-logout" class="btn btn-secondary" style="display:none;" onclick="handleSignoutClick()">
+            🚪 Unlink Account
+          </button>
+        </div>
+
+        <!-- Parameters & Credentials -->
+        <div class="card">
+          <div class="card-title">⚙️ Credentials API Config</div>
+          <div class="form-group">
+            <label for="client-id">Google Client ID</label>
+            <input type="text" id="client-id" placeholder="Enter Client ID...">
+          </div>
+          <div class="form-group">
+            <label for="api-key">Google API Key</label>
+            <input type="password" id="api-key" placeholder="Enter API Key...">
+          </div>
+          <button class="btn btn-secondary" onclick="saveCredentials()" style="font-size: 0.8rem; padding: 6px 12px; margin-bottom: 12px;">
+            💾 Save API Credentials
+          </button>
+          <p style="font-size: 0.75rem; color: var(--text-muted);">
+            🔐 Saved to local storage. Credentials are used entirely client-side to query the Google Drive API.
+          </p>
+        </div>
+      </div>
+
+      <!-- Sync Main Content -->
+      <div class="main-content">
+        <!-- Asset Gathering & Tree Viewer -->
+        <div class="card">
+          <div class="card-title" style="justify-content: space-between;">
+            <span>📂 Directory Structure Preview & Status</span>
+            <button class="btn btn-secondary" onclick="loadCourseAssets()" style="width: auto; font-size: 0.8rem; padding: 6px 14px;">
+              🔄 Pull Assets Context
+            </button>
+          </div>
+          
+          <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 18px;">
+            The list below represents the folder structure to build. During the sync, existing folders are reused (idempotent run) rather than recreated.
+          </p>
+
+          <!-- Interactive Tree Diagram -->
+          <div class="tree" id="dir-tree">
+            <!-- Populated dynamically -->
+            <div style="text-align: center; padding: 24px; color: var(--text-muted); font-style: italic;">
+              Click 'Pull Assets Context' or sign in to build structure mapping.
+            </div>
+          </div>
+
+          <div style="margin-top: 24px;">
+            <button id="btn-sync" class="btn btn-accent" disabled onclick="startDriveSync()">
+              🚀 Sync to Google Drive
+            </button>
+          </div>
+        </div>
+
+        <!-- Real-Time Logging console -->
+        <div class="console-wrapper">
+          <div class="console-titlebar">
+            <span>⚙️ SYSTEM LOG TERMINAL</span>
+            <button onclick="clearLogs()" style="background: none; border: none; color: var(--text-muted); cursor: pointer; text-decoration: underline; font-size: 0.75rem;">Clear Terminal</button>
+          </div>
+          <div class="console-logs" id="console-logs">
+            <div class="log-line log-info">[info] Waiting for Google APIs initialization...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <p style="margin-bottom: 8px;"><a href="index.html" style="color: var(--secondary); text-decoration: none;">← Back to Post-Production Hub</a></p>
+      <p style="margin-bottom: 12px; font-size: 0.85rem; opacity: 0.8;">
+        Instructor: <a href="https://www.linkedin.com/in/rifaterdemsahin" target="_blank" style="color: #93c5fd; text-decoration: underline; margin-right: 16px;">Rifat Erdem Sahin LinkedIn</a>
+        GitHub Project: <a href="https://github.com/rifaterdemsahin/claude-architect-certification" target="_blank" style="color: #93c5fd; text-decoration: underline;">Project Repository</a>
+      </p>
+    </footer>
+  </div>
+
+  <div class="toast" id="toast-notif"></div>
+
+  <script>
+    // ── CONFIG ──
+    const DEFAULT_CLIENT_ID = ''; // Developers can pre-populate if they want
+    const DEFAULT_API_KEY = '';
+    const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
+    const SCOPES = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive';
+
+    let gapiInited = false;
+    let ginit = false;
+    let tokenClient;
+    let accessToken = null;
+
+    // Course structure node storage
+    let courseTree = null;
+    let rootDriveFolderId = null;
+
+    // Initialize Credentials input fields
+    document.addEventListener("DOMContentLoaded", () => {
+      const savedClientId = localStorage.getItem("gdrive_client_id") || DEFAULT_CLIENT_ID;
+      const savedApiKey = localStorage.getItem("gdrive_api_key") || DEFAULT_API_KEY;
+      document.getElementById("client-id").value = savedClientId;
+      document.getElementById("api-key").value = savedApiKey;
+      
+      // Auto-load mockup tree
+      loadCourseAssets();
+    });
+
+    function saveCredentials() {
+      const clientId = document.getElementById("client-id").value.trim();
+      const apiKey = document.getElementById("api-key").value.trim();
+      localStorage.setItem("gdrive_client_id", clientId);
+      localStorage.setItem("gdrive_api_key", apiKey);
+      showToast("Credentials saved to localStorage!");
+      log('info', 'Google Credentials saved. Reloading clients...');
+      // Re-trigger load
+      if (clientId && apiKey) {
+        initGapi();
+      }
+    }
+
+    // ── GOOGLE GIS & GAPI INITIALIZATION ──
+    function gapiLoaded() {
+      gapi.load('client', initGapi);
+    }
+
+    async function initGapi() {
+      const apiKey = document.getElementById("api-key").value || DEFAULT_API_KEY;
+      if (!apiKey) {
+        log('warn', 'API Key is missing. Enter API Key in settings and save to authenticate.');
+        updateAuthUI(false, 'Missing API Key');
+        return;
+      }
+      try {
+        await gapi.client.init({
+          apiKey: apiKey,
+          discoveryDocs: [DISCOVERY_DOC],
+        });
+        gapiInited = true;
+        log('info', 'Google GAPI Client successfully initialized.');
+        checkAuthInits();
+      } catch (err) {
+        log('error', 'GAPI initialization error: ' + JSON.stringify(err));
+        updateAuthUI(false, 'GAPI init failed');
+      }
+    }
+
+    function gisLoaded() {
+      ginit = true;
+      checkAuthInits();
+    }
+
+    function checkAuthInits() {
+      if (gapiInited && ginit) {
+        const clientId = document.getElementById("client-id").value || DEFAULT_CLIENT_ID;
+        if (!clientId) {
+          log('warn', 'Google Client ID is missing. Enter Client ID to enable Drive linking.');
+          updateAuthUI(false, 'Missing Client ID');
+          return;
+        }
+        try {
+          tokenClient = google.accounts.oauth2.initTokenClient({
+            client_id: clientId,
+            scope: SCOPES,
+            callback: (resp) => {
+              if (resp.error !== undefined) {
+                log('error', 'Auth callback error: ' + resp.error);
+                return;
+              }
+              accessToken = resp.access_token;
+              log('success', 'Successfully linked Google Drive with access token.');
+              updateAuthUI(true, 'Google Account Linked');
+              document.getElementById('btn-sync').disabled = false;
+            },
+          });
+          updateAuthUI(false, 'Google APIs loaded. Ready to Link.');
+          document.getElementById('btn-login').style.display = 'block';
+        } catch (err) {
+          log('error', 'Token client init failed: ' + err.message);
+          updateAuthUI(false, 'OAuth Client error');
+        }
+      }
+    }
+
+    function handleAuthClick() {
+      if (!tokenClient) {
+        log('error', 'Google API not fully ready. Check credentials.');
+        return;
+      }
+      // Request consent if token expired/unset
+      tokenClient.requestAccessToken({ prompt: 'consent' });
+    }
+
+    function handleSignoutClick() {
+      const token = gapi.client.getToken();
+      if (token !== null) {
+        google.accounts.oauth2.revokeToken(token.access_token);
+        gapi.client.setToken(null);
+        accessToken = null;
+        log('info', 'Google Drive access unlinked.');
+        updateAuthUI(false, 'Disconnected');
+        document.getElementById('btn-sync').disabled = true;
+      }
+    }
+
+    function updateAuthUI(connected, text) {
+      const dot = document.getElementById('auth-dot');
+      const label = document.getElementById('auth-text');
+      const loginBtn = document.getElementById('btn-login');
+      const logoutBtn = document.getElementById('btn-logout');
+
+      label.innerText = text;
+      if (connected) {
+        dot.className = 'dot dot-online';
+        loginBtn.style.display = 'none';
+        logoutBtn.style.display = 'block';
+      } else {
+        dot.className = 'dot dot-offline';
+        loginBtn.style.display = 'block';
+        logoutBtn.style.display = 'none';
+      }
+    }
+
+    // ── ASSET GATHERING & TREE BUILDER ──
+    async function loadCourseAssets() {
+      log('info', 'Pulling asset metadata and master scripts...');
+      try {
+        let masterScript = null;
+        // Fetch master script
+        const res = await fetch('../preprod/scripts/master_script.json', { cache: 'no-store' });
+        if (res.ok) {
+          masterScript = await res.json();
+          log('success', 'Master script data successfully parsed.');
+        } else {
+          log('warn', 'Could not locate master_script.json. Using structural template fallbacks.');
+        }
+
+        // Build course tree structure representing modules & files
+        courseTree = buildCourseStructure(masterScript);
+        renderTree(courseTree);
+      } catch (err) {
+        log('error', 'Asset gathering failed: ' + err.message);
+        // Build empty default tree
+        courseTree = buildCourseStructure(null);
+        renderTree(courseTree);
+      }
+    }
+
+    function buildCourseStructure(scriptData) {
+      // Create root node
+      const root = {
+        name: 'Claude AI Architect Certification',
+        type: 'folder',
+        status: 'pending',
+        children: []
+      };
+
+      // Define default modules if script data is missing
+      const modules = scriptData?.modules || [
+        { id: 1, module_number: 1, title: 'Architecture Overview' },
+        { id: 2, module_number: 2, title: 'Visual Systems Layout' },
+        { id: 3, module_number: 3, title: 'State & Persistence Flow' },
+        { id: 4, module_number: 4, title: 'Error Logging & Telemetry' },
+        { id: 5, module_number: 5, title: 'Post-Prod Assembly & Output' }
+      ];
+
+      modules.forEach(mod => {
+        const modFolderName = `Module ${mod.module_number} - ${mod.title}`;
+        const modFolder = {
+          name: modFolderName,
+          type: 'folder',
+          status: 'pending',
+          children: [
+            {
+              name: '01_Preprod',
+              type: 'folder',
+              status: 'pending',
+              children: [
+                { name: `module_${mod.module_number}_script_draft.txt`, type: 'file', content: `Master script script for ${mod.title}`, status: 'pending' },
+                { name: `module_${mod.module_number}_outline.json`, type: 'file', content: JSON.stringify(mod, null, 2), status: 'pending' }
+              ]
+            },
+            {
+              name: '02_Assets',
+              type: 'folder',
+              status: 'pending',
+              children: [
+                { name: `module_${mod.module_number}_scene1_background.png`, type: 'file', content: 'Mock image metadata', status: 'pending' },
+                { name: `module_${mod.module_number}_scene1_voiceover.mp3`, type: 'file', content: 'Voiceover audio reference metadata', status: 'pending' }
+              ]
+            },
+            {
+              name: '03_Footage',
+              type: 'folder',
+              status: 'pending',
+              children: [
+                { name: `module_${mod.module_number}_take1_raw.mp4`, type: 'file', content: 'Raw video reference info', status: 'pending' }
+              ]
+            },
+            {
+              name: '04_Postprod',
+              type: 'folder',
+              status: 'pending',
+              children: [
+                { name: `module_${mod.module_number}_edl_table.json`, type: 'file', content: 'Edit Decision List placeholder', status: 'pending' }
+              ]
+            }
+          ]
+        };
+
+        // Attach actual script lines if scriptData is parsed
+        if (scriptData && scriptData.videos) {
+          const videos = scriptData.videos.filter(v => v.module_id === mod.id);
+          if (videos.length > 0) {
+            // Include video outlines under preprod folder
+            modFolder.children[0].children.push({
+              name: `module_${mod.module_number}_videos_summary.json`,
+              type: 'file',
+              content: JSON.stringify(videos, null, 2),
+              status: 'pending'
+            });
+          }
+        }
+
+        root.children.push(modFolder);
+      });
+
+      return root;
+    }
+
+    function renderTree(node, containerId = 'dir-tree', isRoot = true) {
+      const container = document.getElementById(containerId);
+      if (isRoot) {
+        container.innerHTML = '';
+      }
+
+      const nodeEl = document.createElement('div');
+      nodeEl.className = 'tree-node';
+      if (isRoot) {
+        nodeEl.style.marginLeft = '0';
+        nodeEl.style.borderLeft = 'none';
+      }
+
+      const headerEl = document.createElement('div');
+      headerEl.className = 'tree-header';
+
+      const iconEl = document.createElement('span');
+      iconEl.className = 'tree-icon';
+      iconEl.innerText = node.type === 'folder' ? '📁' : '📄';
+
+      const labelEl = document.createElement('span');
+      labelEl.className = 'tree-label';
+      labelEl.innerText = node.name;
+
+      const statusEl = document.createElement('span');
+      statusEl.className = `tree-status status-${node.status}`;
+      statusEl.innerText = node.status;
+      node.statusElement = statusEl; // reference to update live
+
+      headerEl.appendChild(iconEl);
+      headerEl.appendChild(labelEl);
+      headerEl.appendChild(statusEl);
+      nodeEl.appendChild(headerEl);
+
+      if (node.children && node.children.length > 0) {
+        const childrenContainer = document.createElement('div');
+        node.children.forEach(child => {
+          renderTree(child, childrenContainer, false);
+        });
+        nodeEl.appendChild(childrenContainer);
+      }
+
+      container.appendChild(nodeEl);
+    }
+
+    // ── GOOGLE DRIVE SYNC CORE EXECUTION ──
+    async function startDriveSync() {
+      if (!accessToken || !gapiInited) {
+        log('error', 'Not signed in. Link Google Drive account first.');
+        return;
+      }
+
+      document.getElementById('btn-sync').disabled = true;
+      log('info', '🚀 Starting sync loop...');
+
+      try {
+        // Step 1: Query or Create root "Claude AI Certification" folder
+        log('info', `Looking for folder: "${courseTree.name}"`);
+        courseTree.status = 'syncing';
+        updateNodeStatus(courseTree, 'syncing');
+        
+        rootDriveFolderId = await getOrCreateFolder(courseTree.name, null);
+        courseTree.status = 'success';
+        updateNodeStatus(courseTree, 'success');
+        
+        // Step 2: Iterate recursively through modules and sub-folders
+        for (let child of courseTree.children) {
+          await syncNode(child, rootDriveFolderId);
+        }
+
+        log('success', '🏆 Sync cycle completed successfully.');
+        showToast('Google Drive footage sync finished!');
+      } catch (err) {
+        log('error', 'Sync encountered failure: ' + err.message);
+        showToast('Sync error occurred.');
+      } finally {
+        document.getElementById('btn-sync').disabled = false;
+      }
+    }
+
+    async function syncNode(node, parentId) {
+      node.status = 'syncing';
+      updateNodeStatus(node, 'syncing');
+
+      try {
+        if (node.type === 'folder') {
+          // Check/Create subfolder
+          log('info', `Checking/Creating subfolder: "${node.name}"`);
+          const folderId = await getOrCreateFolder(node.name, parentId);
+          node.status = 'success';
+          updateNodeStatus(node, 'success');
+
+          // Process children recursively
+          if (node.children) {
+            for (let child of node.children) {
+              await syncNode(child, folderId);
+            }
+          }
+        } else {
+          // Upload file
+          log('info', `Syncing file: "${node.name}"`);
+          await getOrCreateFile(node.name, node.content, parentId);
+          node.status = 'success';
+          updateNodeStatus(node, 'success');
+        }
+      } catch (err) {
+        node.status = 'pending';
+        updateNodeStatus(node, 'pending');
+        log('error', `Error syncing node "${node.name}": ${err.message}`);
+        throw err;
+      }
+    }
+
+    // ── GOOGLE DRIVE API UTILITIES (IDEMPOTENT RUNS) ──
+    async function getOrCreateFolder(folderName, parentId) {
+      let query = `mimeType = 'application/vnd.google-apps.folder' and name = '${folderName}' and trashed = false`;
+      if (parentId) {
+        query += ` and '${parentId}' in parents`;
+      } else {
+        query += ` and 'root' in parents`;
+      }
+
+      // Check if folder exists
+      const response = await gapi.client.drive.files.list({
+        q: query,
+        fields: 'files(id, name)',
+        spaces: 'drive'
+      });
+
+      const files = response.result.files;
+      if (files && files.length > 0) {
+        log('info', `Found existing folder: "${folderName}" (ID: ${files[0].id}). Reusing folder...`);
+        return files[0].id;
+      }
+
+      // Create new folder
+      log('info', `Folder "${folderName}" not found. Creating new folder...`);
+      const folderMetadata = {
+        name: folderName,
+        mimeType: 'application/vnd.google-apps.folder'
+      };
+      if (parentId) {
+        folderMetadata.parents = [parentId];
+      }
+
+      const folderResponse = await gapi.client.drive.files.create({
+        resource: folderMetadata,
+        fields: 'id'
+      });
+
+      log('success', `Created folder "${folderName}" (ID: ${folderResponse.result.id})`);
+      return folderResponse.result.id;
+    }
+
+    async function getOrCreateFile(fileName, content, parentId) {
+      let query = `name = '${fileName}' and trashed = false`;
+      if (parentId) {
+        query += ` and '${parentId}' in parents`;
+      }
+
+      // Check if file exists
+      const response = await gapi.client.drive.files.list({
+        q: query,
+        fields: 'files(id, name)',
+        spaces: 'drive'
+      });
+
+      const files = response.result.files;
+      if (files && files.length > 0) {
+        log('info', `File "${fileName}" already exists (ID: ${files[0].id}). Skipping duplicate upload...`);
+        return files[0].id;
+      }
+
+      // Create & upload file
+      log('info', `Uploading new file "${fileName}"...`);
+      const fileMetadata = {
+        name: fileName,
+        parents: parentId ? [parentId] : []
+      };
+
+      // Standard multi-part body creation for text/json content upload
+      const boundary = 'foo_bar_boundary';
+      const delimiter = "\r\n--" + boundary + "\r\n";
+      const close_delim = "\r\n--" + boundary + "--";
+
+      const contentType = fileName.endsWith('.json') ? 'application/json' : 'text/plain';
+      const multipartRequestBody =
+          delimiter +
+          'Content-Type: application/json\r\n\r\n' +
+          JSON.stringify(fileMetadata) +
+          delimiter +
+          'Content-Type: ' + contentType + '\r\n\r\n' +
+          content +
+          close_delim;
+
+      const fileResponse = await gapi.client.request({
+        'path': '/upload/drive/v3/files',
+        'method': 'POST',
+        'params': {'uploadType': 'multipart'},
+        'headers': {
+          'Content-Type': 'multipart/related; boundary="' + boundary + '"'
+        },
+        'body': multipartRequestBody
+      });
+
+      log('success', `Uploaded file "${fileName}" (ID: ${fileResponse.result.id})`);
+      return fileResponse.result.id;
+    }
+
+    function updateNodeStatus(node, newStatus) {
+      if (node.statusElement) {
+        node.statusElement.className = `tree-status status-${newStatus}`;
+        node.statusElement.innerText = newStatus;
+      }
+    }
+
+    // ── SYSTEM LOGGER ──
+    function log(type, msg) {
+      const logs = document.getElementById('console-logs');
+      const time = new Date().toLocaleTimeString();
+      const div = document.createElement('div');
+      div.className = `log-line log-${type}`;
+      div.innerText = `[${time}] [${type}] ${msg}`;
+      logs.appendChild(div);
+      logs.scrollTop = logs.scrollHeight;
+    }
+
+    function clearLogs() {
+      document.getElementById('console-logs').innerHTML = '';
+      log('info', 'Terminal cleared.');
+    }
+
+    // ── TOAST MESSAGES ──
+    function showToast(message) {
+      const toast = document.getElementById('toast-notif');
+      toast.innerText = message;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+  </script>
+</body>
+</html>

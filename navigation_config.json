@@ -329,6 +329,11 @@
               "label": "9. 🏛️ Memory Palace Builder",
               "url": "5_Symbols/production/postprod/memory_palace.html",
               "description": "Generate and save a method-of-loci memory palace per module from its full script, so the audience can remember every concept."
+            },
+            {
+              "label": "10. 📁 Google Drive Sync",
+              "url": "5_Symbols/production/postprod/gdrive_sync.html",
+              "description": "Idempotent course footage and asset synchronization to Google Drive."
             }
           ]
         },

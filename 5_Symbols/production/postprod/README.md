@@ -10,6 +10,7 @@
 | `edit_list.html` | 🎬 Editing tracker with Canva embeds and integrated research/artifact checklists |
 | `music_sfx_score.html` | 🎼 Pre-edit Sound & Music Score — SFX/music spotting mapped scene-by-scene from the rendered master script (all 5 modules) |
 | `memory_palace.html` | 🏛️ Memory Palace Builder — generates a method-of-loci memory palace per module from its full script (vivid mnemonic rooms + SVG sketch); Generate + Save to the `memory_palaces` Supabase table |
+| `gdrive_sync.html` | 📁 Google Drive Sync — idempotent course footage and asset sync pipeline utilizing Google GIS and Google Drive REST API to recursively build structured directories |
 | `audio_scoring.html` | 🎵 Audio scoring board with royalty-free resource links |
 | `business_plan.md` | Business plan, audience acquisition, and certification pipeline |
 | `module_1_plan.md` | Module 1 post-production plan |
