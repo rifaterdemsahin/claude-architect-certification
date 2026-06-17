@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tell · Show · Do · Apply | Claude AI Certification</title>
+  <meta name="description" content="The Tell-Show-Do-Apply instructional design loop: read the script, use Gemini images to understand and remember the subject, screen-share and record the hands-on build, then motivate the audience to turn the camera 180° on themselves.">
+  <meta name="keywords" content="Claude AI, Tell Show Do Apply, Instructional Design, Delivery Pilot, Gemini, Screen Share, AI Certification">
+  <meta name="author" content="Rifat Erdem Sahin">
+  <link rel="icon" type="image/png" href="../../../favicon.png">
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://rifaterdemsahin.github.io/claude-architect-certification/production/preprod/tell_show_do_apply.html">
+  <meta property="og:title" content="Tell · Show · Do · Apply | Claude AI Certification">
+  <meta property="og:description" content="A four-beat instructional design loop: Tell the script, Show it with Gemini, Do the hands-on build, Apply by turning the camera on yourself.">
+  <meta property="og:image" content="https://rifaterdemsahin.github.io/claude-architect-certification/favicon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #030712; --bg-card: rgba(17,24,39,0.8); --text-main: #f3f4f6; --text-muted: #9ca3af;
+      --primary: #8b5cf6; --secondary: #3b82f6; --accent: #f59e0b; --good: #10b981;
+      --font-title: 'Outfit', sans-serif; --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-dark);
+      background-image: radial-gradient(circle at 10% 20%, rgba(139,92,246,0.08) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(59,130,246,0.08) 0%, transparent 40%);
+      color: var(--text-main); font-family: var(--font-body); line-height: 1.6; padding-bottom: 80px;
+    }
+    .container { max-width: 980px; margin: 0 auto; padding: 0 24px; }
+    header { text-align: center; padding: 48px 0 24px; }
+    .badge { display: inline-block; padding: 6px 16px; background: rgba(139,92,246,0.1); border: 1px solid rgba(139,92,246,0.2); border-radius: 100px; font-size: 0.8rem; font-weight: 600; color: var(--primary); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 14px; }
+    h1 { font-family: var(--font-title); font-size: 2.4rem; font-weight: 800; margin-bottom: 10px; }
+    header p { color: var(--text-muted); max-width: 640px; margin: 0 auto; }
+
+    /* ── Four-beat flow ── */
+    .beats { display: flex; align-items: stretch; gap: 0; flex-wrap: wrap; margin: 8px 0 32px; }
+    .beat {
+      flex: 1; min-width: 170px; background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 18px; padding: 22px; transition: all 0.3s; text-align: center;
+    }
+    .beat-tell { border-color: rgba(59,130,246,0.35); }
+    .beat-show { border-color: rgba(139,92,246,0.35); }
+    .beat-do { border-color: rgba(16,185,129,0.35); }
+    .beat-apply { border-color: rgba(245,158,11,0.4); background: linear-gradient(160deg, rgba(245,158,11,0.07), var(--bg-card)); }
+    .beat-icon { font-size: 1.9rem; margin-bottom: 8px; }
+    .beat-name { font-family: var(--font-title); font-weight: 800; font-size: 1.2rem; margin-bottom: 6px; }
+    .beat-sub { color: var(--text-muted); font-size: 0.8rem; }
+    .beat-arrow { display: flex; align-items: center; justify-content: center; font-size: 1.6rem; color: var(--primary); padding: 0 6px; }
+    @media (max-width: 760px) { .beat-arrow { transform: rotate(90deg); padding: 6px 0; width: 100%; } }
+
+    .card {
+      background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px;
+      padding: 32px; margin-bottom: 24px; backdrop-filter: blur(12px);
+    }
+    .card-head { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+    .card-head .num { font-family: var(--font-title); font-size: 1.4rem; font-weight: 800; color: var(--primary); }
+    .card-head h2 { font-family: var(--font-title); font-size: 1.5rem; font-weight: 800; }
+    .card-head .tag { margin-left: auto; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); border: 1px solid rgba(255,255,255,0.12); padding: 3px 10px; border-radius: 100px; }
+    .card p { color: var(--text-main); margin-bottom: 14px; }
+
+    .process-steps { margin-top: 18px; display: grid; gap: 14px; }
+    .step-item {
+      display: flex; gap: 16px; padding: 16px;
+      background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.04); border-radius: 12px;
+    }
+    .step-number { font-family: var(--font-title); font-size: 1.4rem; font-weight: 800; color: var(--primary); min-width: 30px; }
+    .step-text h3 { font-family: var(--font-title); font-size: 1.05rem; margin-bottom: 4px; }
+    .step-text p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0; }
+
+    .receipt-note {
+      margin-top: 20px; padding: 16px 18px; font-size: 0.95rem; color: var(--text-main);
+      background: rgba(245,158,11,0.07); border: 1px solid rgba(245,158,11,0.25);
+      border-left: 4px solid var(--accent); border-radius: 12px;
+    }
+    .receipt-note strong { color: var(--accent); }
+
+    .value-card { background: linear-gradient(160deg, rgba(16,185,129,0.08), var(--bg-card)); border-color: rgba(16,185,129,0.25); }
+    .value-card .num, .value-card .step-number { color: var(--good); }
+    .value-points { list-style: none; display: grid; gap: 12px; margin-top: 16px; }
+    .value-points li { display: flex; gap: 12px; align-items: flex-start; color: var(--text-main); font-size: 0.95rem; }
+    .value-points li::before { content: "✓"; color: var(--good); font-weight: 800; }
+
+    footer { text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 48px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
+    footer a { color: var(--secondary); text-decoration: none; }
+  </style>
+  <script src="../../../shared/nav.js"></script>
+  <script src="../../../shared/seo.js" defer></script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="badge">Ways of Working · Instructional Design</div>
+      <h1>🎯 Tell · Show · Do · Apply</h1>
+      <p>A four-beat instructional design loop that turns a raw script into a course module: tell the subject, show it visually, do it live on screen, then hand the camera to the audience.</p>
+    </header>
+
+    <!-- ── The four beats ── -->
+    <div class="beats">
+      <div class="beat beat-tell">
+        <div class="beat-icon">📖</div>
+        <div class="beat-name">Tell</div>
+        <div class="beat-sub">Read the script.</div>
+      </div>
+      <div class="beat-arrow">→</div>
+      <div class="beat beat-show">
+        <div class="beat-icon">🖼️</div>
+        <div class="beat-name">Show</div>
+        <div class="beat-sub">Gemini images to understand &amp; remember the subject.</div>
+      </div>
+      <div class="beat-arrow">→</div>
+      <div class="beat beat-do">
+        <div class="beat-icon">🖥️</div>
+        <div class="beat-name">Do</div>
+        <div class="beat-sub">Screen-share the hands-on implementation &amp; record it.</div>
+      </div>
+      <div class="beat-arrow">→</div>
+      <div class="beat beat-apply">
+        <div class="beat-icon">🎥</div>
+        <div class="beat-name">Apply</div>
+        <div class="beat-sub">Turn the camera 180° on yourself and implement.</div>
+      </div>
+    </div>
+
+    <!-- ── 1. TELL ── -->
+    <div class="card">
+      <div class="card-head">
+        <span class="num">01</span>
+        <h2>📖 Tell</h2>
+        <span class="tag">Narrate</span>
+      </div>
+      <p>
+        Read the script out loud, working through it <strong>sentence by sentence</strong>. This is the narration beat — checking timing, pacing, and flow while laying out what the subject is and why it matters.
+      </p>
+      <div class="process-steps">
+        <div class="step-item">
+          <div class="step-number">1</div>
+          <div class="step-text">
+            <h3>Read the script</h3>
+            <p>Perform a verbal run-through line by line to check natural timing and flow.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 2. SHOW ── -->
+    <div class="card">
+      <div class="card-head">
+        <span class="num">02</span>
+        <h2>🖼️ Show</h2>
+        <span class="tag">Understand</span>
+      </div>
+      <p>
+        As each sentence is read, generate a context-specific image with <strong>Gemini</strong> so the subject is visualized the moment it is spoken. The goal of this beat is comprehension and recall — by the end you understand and <em>remember</em> what the subject is all about.
+      </p>
+      <div class="process-steps">
+        <div class="step-item">
+          <div class="step-number">1</div>
+          <div class="step-text">
+            <h3>Generate images with Gemini</h3>
+            <p>For each sentence, create a matching visual so the idea is anchored to a concrete image.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-number">2</div>
+          <div class="step-text">
+            <h3>Understand &amp; remember</h3>
+            <p>Process the subject one sentence at a time until the topic is fully internalized.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 3. DO ── -->
+    <div class="card">
+      <div class="card-head">
+        <span class="num">03</span>
+        <h2>🖥️ Do</h2>
+        <span class="tag">Demonstrate</span>
+      </div>
+      <p>
+        With the subject understood, switch to the <strong>screen share</strong> and perform the hands-on implementation. Build the thing live and <strong>record the screen shares</strong> so every step is captured exactly as it happens — the recording is the process.
+      </p>
+      <div class="process-steps">
+        <div class="step-item">
+          <div class="step-number">1</div>
+          <div class="step-text">
+            <h3>Screen-share the implementation</h3>
+            <p>Walk through the hands-on build live, in the real tools, end to end.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-number">2</div>
+          <div class="step-text">
+            <h3>Record the screen shares</h3>
+            <p>Capture every step on screen so the demonstration becomes reusable course footage.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 4. APPLY ── -->
+    <div class="card">
+      <div class="card-head">
+        <span class="num">04</span>
+        <h2>🎥 Apply</h2>
+        <span class="tag">Activate</span>
+      </div>
+      <p>
+        Close the loop by motivating the audience to act. The call to action is to <strong>turn the camera 180° onto themselves</strong> and implement what was just demonstrated. They stop watching and start doing — applying the subject in their own environment.
+      </p>
+      <div class="process-steps">
+        <div class="step-item">
+          <div class="step-number">1</div>
+          <div class="step-text">
+            <h3>Motivate the audience</h3>
+            <p>Make it obvious they can do this themselves — the bar is reachable.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-number">2</div>
+          <div class="step-text">
+            <h3>Turn the camera 180°</h3>
+            <p>Point the camera back at themselves and implement what was shown, hands-on.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── The role of the human ── -->
+    <div class="card">
+      <div class="card-head">
+        <span class="num">🧑‍🚀</span>
+        <h2>The Role of the Human</h2>
+        <span class="tag">Transformation</span>
+      </div>
+      <p>
+        AI runs the loop, but the human carries the <strong>pain and the joy</strong> of the process. They take the exam, <strong>overcome the fears</strong>, pass it, and then <strong>share the journey</strong> — documenting the steps so the next person gets onboarded with ease.
+      </p>
+      <div class="process-steps">
+        <div class="step-item">
+          <div class="step-number">1</div>
+          <div class="step-text">
+            <h3>Feel the pain &amp; the joy</h3>
+            <p>The human lives the real struggle and reward of the process — not a passive viewer.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-number">2</div>
+          <div class="step-text">
+            <h3>Take the exam &amp; overcome the fears</h3>
+            <p>Face the test, push through the fear, and pass it for real.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-number">3</div>
+          <div class="step-text">
+            <h3>Share the journey &amp; help others</h3>
+            <p>Document the steps so others get onboarded with ease, following the path already walked.</p>
+          </div>
+        </div>
+      </div>
+      <div class="receipt-note">
+        🧾 <strong>The certificate is a receipt.</strong> It is not proof of plain watching — it is evidence of a transformational change that actually happened.
+      </div>
+    </div>
+
+    <!-- ── Value proposition ── -->
+    <div class="card value-card">
+      <div class="card-head">
+        <span class="num">★</span>
+        <h2>💎 Value Proposition</h2>
+        <span class="tag">Why it works</span>
+      </div>
+      <p>
+        <strong>Rifat's Delivery Pilot</strong> method runs the whole loop with AI assistance: AI builds the script and outline, AI generates the images, AI builds the hands-on implementation, and AI publishes the Apply section for the audience. It is an <strong>AI-assisted self-learning process</strong> — the learner gets certified, with the instructor used at the start to check the work against reality — and it targets the audience with <strong>popular AI certifications</strong>.
+      </p>
+      <ul class="value-points">
+        <li>AI builds the script and outline (Tell).</li>
+        <li>AI generates the images (Show).</li>
+        <li>AI builds the hands-on implementation (Do).</li>
+        <li>AI publishes the Apply section for the audience (Apply).</li>
+        <li>An AI-assisted self-learning process that ends in certification.</li>
+        <li>Reality-checked with the instructor at the start, then audience-led.</li>
+        <li>Targets the audience with popular AI certifications.</li>
+      </ul>
+    </div>
+
+    <footer>
+      <p style="display:flex; justify-content:space-between; gap:20px; flex-wrap:wrap;">
+        <a href="planning.html">← Back to Planning Hub</a>
+        <a href="ways_of_working.html" style="color:var(--accent); font-weight:700;">Ways of Working →</a>
+      </p>
+      <p style="font-size: 0.85rem; opacity: 0.8; margin-top: 10px;">
+        Instructor: <a href="https://www.linkedin.com/in/rifaterdemsahin" target="_blank" style="color: #93c5fd; text-decoration: underline;">Rifat Erdem Sahin</a>
+      </p>
+    </footer>
+  </div>
+  <script src="../../../shared/debug-panel.js"></script>
+</body>
+</html>

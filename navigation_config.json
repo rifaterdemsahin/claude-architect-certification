@@ -112,6 +112,11 @@
               "description": "Visual script table read method with real-time image creation."
             },
             {
+              "label": "🎯 Tell · Show · Do · Apply",
+              "url": "5_Symbols/production/preprod/tell_show_do_apply.html",
+              "description": "Four-beat instructional design loop: Tell the script, Show it with Gemini images, Do the hands-on screen-share build, Apply by turning the camera 180°."
+            },
+            {
               "label": "📈 Customer Development",
               "url": "5_Symbols/production/preprod/customer_development.html",
               "description": "Validation framework from macro brand authority to micro-execution loops."
