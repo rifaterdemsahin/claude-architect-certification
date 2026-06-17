@@ -37,7 +37,7 @@
           "id": 3,
           "title": "Production Wiring",
           "duration": "12:00",
-          "script": "Format: Talking Head + Screen Share | Duration: 12:00\n\n\"Enterprise production is where theory meets reality — and reality has VPCs, IAM roles, and audit logs.\"\n\nOverview & Objectives:\n- Configure API keys, VPC, and IAM for production Claude deployments\n- Connect Claude to enterprise data sources securely\n- Implement monitoring, logging, and error handling\n\nLet's walk through the production wiring checklist.\n\n[Screenshare Starts]\nScreenshot: Environment config example\n- ANTHROPIC_API_KEY stored in AWS Secrets Manager, not .env files\n- VPC endpoints for private API access (no internet gateway)\n- IAM role with least-privilege policy: only invoke, no list/delete\n- CloudWatch logs capture every request/response pair with latency metrics\nKey rule: never log the API key or message payload contents — log only metadata.\n[Screenshare Ends]\n\nRemember: production-grade wiring is invisible when done right. Your users never see the VPC config, but they feel the difference in reliability.\n\nQuestion incoming — ready?\n\nIVQ: What is the recommended practice for storing Claude API keys in production?\na) Plaintext in application config files\nb) Environment variables committed to the repository\nc) AWS Secrets Manager or equivalent secrets vault\nd) Encrypted cookies on the client side\nCorrect Answer: c\nExplanation: API keys must be stored in a secrets management service (Secrets Manager, Parameter Store, Vault) with automatic rotation and audit logging. Never commit keys to repos or store them in app config files.\nIncorrect: Plaintext (a) is insecure; committed env vars (b) leak through git history; client cookies (d) expose keys to the browser.",
+          "script": "Format: Talking Head + Screen Share | Duration: 12:00\n\n\"Enterprise production is where theory meets reality — and reality has VPCs, IAM roles, and audit logs.\"\n\nOverview & Objectives:\n- Configure API keys, VPC, and IAM for production Claude deployments\n- Connect Claude to enterprise data sources securely\n- Implement monitoring, logging, and error handling\n\nLet's walk through the production wiring checklist.\n\n[Screenshare Starts]\nScreenshot: Environment config example\n- ANTHROPIC_API_KEY stored in AWS Secrets Manager, not .env files\n- VPC endpoints for private API access (no internet gateway)\n- IAM role with least-privilege policy: only invoke, no list/delete\n- CloudWatch logs capture every request/response pair with latency metrics\nKey rule: never log the API key or message payload contents — log only metadata.\n[Screenshare Ends]\n\nRemember: production-grade wiring is invisible when done right. Your users never see the VPC config, but they feel the difference in reliability.\n\nQuestion incoming — ready?\n\nIVQ: What is the recommended practice for storing Claude API keys in production?\na) Plaintext in application config files\nb) Environment variables committed to the repository\nc) AWS Secrets Manager or equivalent secrets vault\nd) Encrypted cookies on the client side\nCorrect Answer: c\nExplanation: API keys must be stored in a secrets management service (Secrets Manager, Parameter Store, Vault) with automatic rotation and audit logging. Never commit keys to repos or store them in app config files.\nIncorrect: Plaintext (a) is insecure; committed env vars (b) leak through git history; client cookies (d) expose keys to the browser.\n\n[Memory Palace Outro]\nBefore you leave, walk the room. This is Room 1 of your palace: a glass control room with three glowing request layers. Hear that rising three-note synth as each API layer lights up? That's your recall trigger — next time you debug a request, the room comes back. Anchor: client → gateway → router, stateless by design.\nNow turn the camera 180°. Stop watching. Open your terminal and send your first POST /v1/messages — build the room you just visited.",
           "cues": [
             "Screenshot: Environment config example",
             "Highlight: IAM role permissions",
@@ -47,7 +47,10 @@
         }
       ],
       "links": [
-        { "label": "Topology Guide", "url": "../../docs/topologies/multi_agent_flow.md" }
+        {
+          "label": "Topology Guide",
+          "url": "../../docs/topologies/multi_agent_flow.md"
+        }
       ]
     },
     {
@@ -83,7 +86,7 @@
           "id": 3,
           "title": "Enterprise MCP",
           "duration": "16:00",
-          "script": "Format: Talking Head + Screen Share | Duration: 16:00\n\n\"One MCP server is a prototype. Five coordinated servers with auth boundaries — that's production.\"\n\nOverview & Objectives:\n- Implement authentication and authorization for MCP servers\n- Orchestrate multiple MCP servers with message routing\n- Monitor MCP traffic, latency, and error rates\n\nLet's scale from single-server prototype to multi-server production topology.\n\n[Screenshare Starts]\nDiagram: Multi-server MCP topology\n- Gateway MCP Server (auth boundary) → routes to → Data MCP (SQL) → Logging MCP (audit)\n- Each server has its own API key; the gateway validates JWT tokens before forwarding\n- Prometheus metrics track: requests/sec, p50/p99 latency, error rate per server\n- Datadog dashboard shows real-time topology health\nKey insight: each MCP server is independently deployable and scalable.\n[Screenshare Ends]\n\nThe takeaway: enterprise MCP means each server owns one responsibility. The gateway is the only public-facing endpoint.\n\nFinal check before we move on.\n\nIVQ: In a multi-server MCP deployment, where should authentication be enforced?\na) At each individual MCP server independently\nb) At the gateway MCP server that receives external requests\nc) At the transport layer (TLS certificates only)\nd) Authentication is not needed for internal MCP servers\nCorrect Answer: b\nExplanation: The gateway MCP server validates all incoming JWTs and API keys before routing to internal servers. Internal servers trust the gateway's network (VPC), eliminating redundant auth checks.\nIncorrect: Per-server auth (a) duplicates logic; TLS-only (c) lacks identity; no auth (d) is a security risk.",
+          "script": "Format: Talking Head + Screen Share | Duration: 16:00\n\n\"One MCP server is a prototype. Five coordinated servers with auth boundaries — that's production.\"\n\nOverview & Objectives:\n- Implement authentication and authorization for MCP servers\n- Orchestrate multiple MCP servers with message routing\n- Monitor MCP traffic, latency, and error rates\n\nLet's scale from single-server prototype to multi-server production topology.\n\n[Screenshare Starts]\nDiagram: Multi-server MCP topology\n- Gateway MCP Server (auth boundary) → routes to → Data MCP (SQL) → Logging MCP (audit)\n- Each server has its own API key; the gateway validates JWT tokens before forwarding\n- Prometheus metrics track: requests/sec, p50/p99 latency, error rate per server\n- Datadog dashboard shows real-time topology health\nKey insight: each MCP server is independently deployable and scalable.\n[Screenshare Ends]\n\nThe takeaway: enterprise MCP means each server owns one responsibility. The gateway is the only public-facing endpoint.\n\nFinal check before we move on.\n\nIVQ: In a multi-server MCP deployment, where should authentication be enforced?\na) At each individual MCP server independently\nb) At the gateway MCP server that receives external requests\nc) At the transport layer (TLS certificates only)\nd) Authentication is not needed for internal MCP servers\nCorrect Answer: b\nExplanation: The gateway MCP server validates all incoming JWTs and API keys before routing to internal servers. Internal servers trust the gateway's network (VPC), eliminating redundant auth checks.\nIncorrect: Per-server auth (a) duplicates logic; TLS-only (c) lacks identity; no auth (d) is a security risk.\n\n[Memory Palace Outro]\nWalk into Room 2: a switchboard of pipes connecting servers, with a soft click-latch on every handshake. That latch is your recall trigger — one gateway, many servers, auth at the boundary. Anchor: the gateway is the only door; everything behind it trusts the VPC.\nTurn the camera 180°. Stop watching and wire up your own MCP server — make that click-latch real in your stack.",
           "cues": [
             "Diagram: Multi-server MCP topology",
             "Highlight: Auth boundary enforcement",
@@ -93,9 +96,18 @@
         }
       ],
       "links": [
-        { "label": "MCP Codebase", "url": "../../course_src/mcp-server/" },
-        { "label": "Setup & Deploy Guide", "url": "../../course_src/mcp-server/README.md" },
-        { "label": "fly.toml", "url": "../../course_src/mcp-server/fly.toml" }
+        {
+          "label": "MCP Codebase",
+          "url": "../../course_src/mcp-server/"
+        },
+        {
+          "label": "Setup & Deploy Guide",
+          "url": "../../course_src/mcp-server/README.md"
+        },
+        {
+          "label": "fly.toml",
+          "url": "../../course_src/mcp-server/fly.toml"
+        }
       ]
     },
     {
@@ -131,7 +143,7 @@
           "id": 3,
           "title": "ZDR in Production",
           "duration": "14:00",
-          "script": "Format: Talking Head + Dashboard Walkthrough | Duration: 14:00\n\n\"Your ZDR config is deployed. Now prove it works — or the auditors will prove it doesn't.\"\n\nOverview & Objectives:\n- Test and verify data retention boundaries with penetration tests\n- Execute incident response procedures for data leaks\n- Walk through SOC 2 and HIPAA compliance certification\n\nLet's review a real penetration test result.\n\n[Screenshare Starts]\nScreenshot: Compliance test results\n- Test 1: Direct internet access to Bedrock → FAIL (blocked by VPC endpoint)\n- Test 2: Cross-VPC access without endpoint → FAIL (routing doesn't exist)\n- Test 3: Internal VPC resource via PrivateLink → PASS (200 response)\n- Incident response flow: Alert → Isolate → Analyze → Remediate → Report\nLogs show every invocation: timestamp, source IP (within VPC), request size, response code\n[Screenshare Ends]\n\nRemember: compliance is continuous, not a one-time checkbox. Automate your penetration tests.\n\nFinal question on ZDR.\n\nIVQ: What is the first step in the ZDR incident response procedure when a data leak is detected?\na) Delete all logs to hide evidence\nb) Isolate the affected VPC endpoint by updating security group rules\nc) Immediately notify all customers\nd) Rewrite the Terraform configuration\nCorrect Answer: b\nExplanation: Isolate first — update the security group to deny all traffic to the affected endpoint, preventing further data exfiltration. Then analyze, remediate, and report.\nIncorrect: Deleting logs (a) destroys forensic evidence; notifying customers (c) without diagnosis causes panic; rewriting config (d) is remediation, not first response.",
+          "script": "Format: Talking Head + Dashboard Walkthrough | Duration: 14:00\n\n\"Your ZDR config is deployed. Now prove it works — or the auditors will prove it doesn't.\"\n\nOverview & Objectives:\n- Test and verify data retention boundaries with penetration tests\n- Execute incident response procedures for data leaks\n- Walk through SOC 2 and HIPAA compliance certification\n\nLet's review a real penetration test result.\n\n[Screenshare Starts]\nScreenshot: Compliance test results\n- Test 1: Direct internet access to Bedrock → FAIL (blocked by VPC endpoint)\n- Test 2: Cross-VPC access without endpoint → FAIL (routing doesn't exist)\n- Test 3: Internal VPC resource via PrivateLink → PASS (200 response)\n- Incident response flow: Alert → Isolate → Analyze → Remediate → Report\nLogs show every invocation: timestamp, source IP (within VPC), request size, response code\n[Screenshare Ends]\n\nRemember: compliance is continuous, not a one-time checkbox. Automate your penetration tests.\n\nFinal question on ZDR.\n\nIVQ: What is the first step in the ZDR incident response procedure when a data leak is detected?\na) Delete all logs to hide evidence\nb) Isolate the affected VPC endpoint by updating security group rules\nc) Immediately notify all customers\nd) Rewrite the Terraform configuration\nCorrect Answer: b\nExplanation: Isolate first — update the security group to deny all traffic to the affected endpoint, preventing further data exfiltration. Then analyze, remediate, and report.\nIncorrect: Deleting logs (a) destroys forensic evidence; notifying customers (c) without diagnosis causes panic; rewriting config (d) is remediation, not first response.\n\n[Memory Palace Outro]\nStep into Room 3: a sealed vault inside a private VPC. The vault door thuds shut — and then silence. That silence is the design; the absence of data leaving is the absence of sound. Anchor: Isolate → Analyze → Remediate → Report, continuously, never a one-time checkbox.\nTurn the camera 180°. Stop watching and run your own penetration test — prove the vault holds before the auditors do.",
           "cues": [
             "Screenshot: Compliance test results",
             "Highlight: Incident response flow",
@@ -141,8 +153,14 @@
         }
       ],
       "links": [
-        { "label": "ZDR Protocol", "url": "../../course_src/security/ZDR_COMPLIANCE.md" },
-        { "label": "Terraform Blueprint", "url": "../../templates/aws-bedrock-private-link.tf" }
+        {
+          "label": "ZDR Protocol",
+          "url": "../../course_src/security/ZDR_COMPLIANCE.md"
+        },
+        {
+          "label": "Terraform Blueprint",
+          "url": "../../templates/aws-bedrock-private-link.tf"
+        }
       ]
     },
     {
@@ -178,7 +196,7 @@
           "id": 3,
           "title": "Router in Production",
           "duration": "15:00",
-          "script": "Format: Talking Head + Dashboard Walkthrough | Duration: 15:00\n\n\"Your router passes unit tests. But can it handle a recursion attack from a malicious prompt?\"\n\nOverview & Objectives:\n- Review load testing results and performance benchmarks\n- Handle edge cases: malformed input, recursion attacks, timeouts\n- Integrate router with MCP and caching layers\n\nLet's look at the load test graph.\n\n[Screenshare Starts]\nGraph: Load test performance\n- 1000 req/s: p50 latency 45ms, p99 latency 120ms, 0 errors\n- 5000 req/s: p50 latency 82ms, p99 latency 240ms, 0.1% circuit breaker activations\n- Recursion attack test: 1000 requests with nested agent calls → 100% blocked by depth counter\n- Malformed input: 500 requests with invalid JSON payloads → 100% rejected by classifier\nKey insight: the router handles attack traffic with zero false positives.\n[Screenshare Ends]\n\nProduction routers need to be boring — they should do the same thing every time, reliably, without surprises.\n\nFinal question.\n\nIVQ: During a load test at 5000 req/s, why did 0.1% of requests trigger the circuit breaker?\na) The router has a bug in the depth counter\nb) The requests contained legitimate deep agent chains exceeding max_depth\nc) The server ran out of memory\nd) The test harness sent duplicate requests\nCorrect Answer: b\nExplanation: At high throughput, some legitimate multi-agent workflows naturally exceed the depth limit (e.g., a complex validation chain). This is expected behavior — the circuit breaker protects the system even during legitimate deep chains.\nIncorrect: A bug (a) would show a pattern; memory (c) would show latency spikes; duplicates (d) would show identical request IDs.",
+          "script": "Format: Talking Head + Dashboard Walkthrough | Duration: 15:00\n\n\"Your router passes unit tests. But can it handle a recursion attack from a malicious prompt?\"\n\nOverview & Objectives:\n- Review load testing results and performance benchmarks\n- Handle edge cases: malformed input, recursion attacks, timeouts\n- Integrate router with MCP and caching layers\n\nLet's look at the load test graph.\n\n[Screenshare Starts]\nGraph: Load test performance\n- 1000 req/s: p50 latency 45ms, p99 latency 120ms, 0 errors\n- 5000 req/s: p50 latency 82ms, p99 latency 240ms, 0.1% circuit breaker activations\n- Recursion attack test: 1000 requests with nested agent calls → 100% blocked by depth counter\n- Malformed input: 500 requests with invalid JSON payloads → 100% rejected by classifier\nKey insight: the router handles attack traffic with zero false positives.\n[Screenshare Ends]\n\nProduction routers need to be boring — they should do the same thing every time, reliably, without surprises.\n\nFinal question.\n\nIVQ: During a load test at 5000 req/s, why did 0.1% of requests trigger the circuit breaker?\na) The router has a bug in the depth counter\nb) The requests contained legitimate deep agent chains exceeding max_depth\nc) The server ran out of memory\nd) The test harness sent duplicate requests\nCorrect Answer: b\nExplanation: At high throughput, some legitimate multi-agent workflows naturally exceed the depth limit (e.g., a complex validation chain). This is expected behavior — the circuit breaker protects the system even during legitimate deep chains.\nIncorrect: A bug (a) would show a pattern; memory (c) would show latency spikes; duplicates (d) would show identical request IDs.\n\n[Memory Palace Outro]\nEnter Room 4: a calm dispatcher routing identical trains every time, to a steady metronome tick. That tick is your recall trigger — deterministic means boring on purpose. Anchor: same input, same path, every time; depth counters and classifiers guard the doors.\nTurn the camera 180°. Stop watching and build a router that does the same thing every time — then throw a recursion attack at it.",
           "cues": [
             "Graph: Load test performance",
             "Highlight: Edge case handling",
@@ -188,7 +206,10 @@
         }
       ],
       "links": [
-        { "label": "router.py", "url": "../../course_src/multi-agent/router.py" }
+        {
+          "label": "router.py",
+          "url": "../../course_src/multi-agent/router.py"
+        }
       ]
     },
     {
@@ -224,7 +245,7 @@
           "id": 3,
           "title": "Enterprise ROI",
           "duration": "16:00",
-          "script": "Format: Talking Head + Dashboard Walkthrough | Duration: 16:00\n\n\n\"From $50,000/month to $5,000/month — that's the difference caching made for a real enterprise customer.\"\n\nOverview & Objectives:\n- Review a real-world cost reduction case study (90% savings)\n- Monitor cache performance with dashboards\n- Scale optimization across multiple enterprise workloads\n\nLet's walk through the ROI dashboard.\n\n[Screenshare Starts]\nGraph: Cost reduction over time\n- Month 1 (no caching): $52,300 total cost\n- Month 2 (caching deployed): $12,100 → 77% reduction\n- Month 3 (optimized cache points): $5,800 → 89% reduction\n- Month 4 (mature caching): $4,200 → 92% reduction\n- Dashboard metrics: cache hit rate 87%, average cache age 142s, top cached prefix 'system_prompt_v3'\nKey insight: the first deployment captures 77% savings immediately. The remaining optimization is fine-tuning prefix placement.\n[Screenshare Ends]\n\nThe lesson: deploy caching first, optimize later. The first 80% is easy — the last 10% takes iteration.\n\nFinal course question.\n\nIVQ: In the enterprise case study, what percentage of cost reduction was achieved in the first month after deploying caching?\na) 92%\nb) 89%\nc) 77%\nd) 50%\nCorrect Answer: c\nExplanation: Month 2 shows $52,300 → $12,100, a 77% reduction achieved simply by deploying prompt caching without any optimization. Subsequent months improved to 89% and 92% through cache point refinement.\nIncorrect: 92% (a) and 89% (b) were achieved in later months after optimization; 50% (d) underestimates the immediate impact of caching.",
+          "script": "Format: Talking Head + Dashboard Walkthrough | Duration: 16:00\n\n\n\"From $50,000/month to $5,000/month — that's the difference caching made for a real enterprise customer.\"\n\nOverview & Objectives:\n- Review a real-world cost reduction case study (90% savings)\n- Monitor cache performance with dashboards\n- Scale optimization across multiple enterprise workloads\n\nLet's walk through the ROI dashboard.\n\n[Screenshare Starts]\nGraph: Cost reduction over time\n- Month 1 (no caching): $52,300 total cost\n- Month 2 (caching deployed): $12,100 → 77% reduction\n- Month 3 (optimized cache points): $5,800 → 89% reduction\n- Month 4 (mature caching): $4,200 → 92% reduction\n- Dashboard metrics: cache hit rate 87%, average cache age 142s, top cached prefix 'system_prompt_v3'\nKey insight: the first deployment captures 77% savings immediately. The remaining optimization is fine-tuning prefix placement.\n[Screenshare Ends]\n\nThe lesson: deploy caching first, optimize later. The first 80% is easy — the last 10% takes iteration.\n\nFinal course question.\n\nIVQ: In the enterprise case study, what percentage of cost reduction was achieved in the first month after deploying caching?\na) 92%\nb) 89%\nc) 77%\nd) 50%\nCorrect Answer: c\nExplanation: Month 2 shows $52,300 → $12,100, a 77% reduction achieved simply by deploying prompt caching without any optimization. Subsequent months improved to 89% and 92% through cache point refinement.\nIncorrect: 92% (a) and 89% (b) were achieved in later months after optimization; 50% (d) underestimates the immediate impact of caching.\n\n[Memory Palace Outro]\nNow the last room — Room 5: a falling cost meter dropping from $50k to $5k, with a descending coin-cascade that resolves into a warm major chord. That 'savings landed' sting is your recall trigger. Anchor: deploy caching first for 77%, optimize prefixes later for the last 10%.\nAnd here we walk the whole palace one last time — the three-note synth, the click-latch, the vault thud, the metronome tick, the coin-cascade — five rooms, one continuous score.\nNow turn the camera 180° for good. The palace was never the video. The palace is what you can rebuild from memory. Close the tab and go build it.",
           "cues": [
             "Graph: Cost reduction over time",
             "Highlight: 90% savings milestone",
@@ -234,7 +255,10 @@
         }
       ],
       "links": [
-        { "label": "cache_layer.py", "url": "../../course_src/optimization/cache_layer.py" }
+        {
+          "label": "cache_layer.py",
+          "url": "../../course_src/optimization/cache_layer.py"
+        }
       ]
     }
   ],
