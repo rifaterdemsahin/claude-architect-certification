@@ -547,7 +547,14 @@
 
     /* Image Preview Modal */
     .img-preview-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 10001; backdrop-filter: blur(6px); cursor: zoom-out; }
-    .img-preview-overlay.open { display: flex; }
+    .img-preview-overlay.open { display: flex; animation: imgPrevFade 0.25s ease; }
+    .img-preview-overlay.open .img-preview-box { animation: imgPrevZoom 0.3s cubic-bezier(0.34,1.56,0.64,1); }
+    @keyframes imgPrevFade { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes imgPrevZoom { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+    /* Hover-to-preview: a countdown bar fills over 2s while the mouse rests on a thumbnail. */
+    .thumb-hover-bar { position: absolute; left: 0; bottom: 0; height: 3px; width: 0; background: linear-gradient(90deg, #8b5cf6, #3b82f6); border-radius: 0 2px 2px 0; box-shadow: 0 0 6px rgba(139,92,246,0.7); z-index: 4; pointer-events: none; }
+    .thumb-hover-bar.run { width: 100%; transition: width 2s linear; }
+    .sent-img-thumb.hover-loading { box-shadow: 0 0 0 2px rgba(139,92,246,0.5); }
     .img-preview-box { max-width: 90vw; max-height: 90vh; border-radius: 14px; overflow: hidden; box-shadow: 0 24px 80px rgba(0,0,0,0.7); cursor: default; position: relative; }
     .img-preview-box img { display: block; max-width: 90vw; max-height: 90vh; object-fit: contain; border-radius: 14px; }
     .img-preview-close { position: fixed; top: 20px; right: 28px; width: 40px; height: 40px; border-radius: 50%; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.15); color: #fff; font-size: 1.4rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; z-index: 10002; }
@@ -2433,6 +2440,53 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
         closeImagePreview();
       }
     });
+
+    // ── Hover-to-preview: rest the mouse on a thumbnail for 2s to auto-open the original ──
+    (function() {
+      const HOVER_DELAY = 2000;
+      let hoverTimer = null, activeThumb = null;
+
+      function cancelHover() {
+        if (hoverTimer) { clearTimeout(hoverTimer); hoverTimer = null; }
+        if (activeThumb) {
+          const bar = activeThumb.querySelector('.thumb-hover-bar');
+          if (bar) bar.remove();
+          activeThumb.classList.remove('hover-loading');
+          activeThumb = null;
+        }
+      }
+
+      function startHover(thumb) {
+        if (activeThumb === thumb) return;
+        cancelHover();
+        // Don't fire while the full-screen preview is already open.
+        if (document.getElementById('img-preview-overlay').classList.contains('open')) return;
+        activeThumb = thumb;
+        thumb.classList.add('hover-loading');
+        const bar = document.createElement('div');
+        bar.className = 'thumb-hover-bar';
+        thumb.appendChild(bar);
+        requestAnimationFrame(() => bar.classList.add('run'));
+        hoverTimer = setTimeout(() => {
+          const img = thumb.querySelector('img');
+          if (img && img.alt) openImagePreview(imgFileUrl(img.alt), img.alt);
+          cancelHover();
+        }, HOVER_DELAY);
+      }
+
+      document.addEventListener('mouseover', function(e) {
+        const thumb = e.target.closest && e.target.closest('.sent-img-thumb');
+        if (thumb) startHover(thumb);
+      });
+      document.addEventListener('mouseout', function(e) {
+        if (!activeThumb) return;
+        const thumb = e.target.closest && e.target.closest('.sent-img-thumb');
+        if (thumb !== activeThumb) return;
+        // Ignore moves between children of the same thumbnail.
+        if (e.relatedTarget && activeThumb.contains(e.relatedTarget)) return;
+        cancelHover();
+      });
+    })();
 
     // ── Sentence-to-Object Progress Bars ────────────────────────────────────────
     async function computeAndRenderProgress() {
