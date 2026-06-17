@@ -1063,13 +1063,25 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
       html += `<a class="exam-link" href="../../../course_src/utils/markdown_viewer.html?md=${data.exam.link}">📝 Start Exam Walkthrough</a></div>`;
 
       area.innerHTML = html;
-      window.showModule = function(idx) {
+      window.showModule = function(idx, updateUrl = true) {
         document.querySelectorAll('.module-card').forEach(c => c.classList.remove('active'));
         document.querySelectorAll('.module-btn').forEach(b => b.classList.remove('active'));
         document.getElementById('mod-' + idx).classList.add('active');
         document.querySelectorAll('.module-btn')[idx].classList.add('active');
+        // Reflect the active module in the query string (1-indexed, matching ?module=N load)
+        if (updateUrl) {
+          const url = new URL(location.href);
+          url.searchParams.set('module', idx + 1);
+          history.replaceState(null, '', url);
+        }
         setTimeout(() => computeAndRenderProgress(), 100);
       };
+
+      // Keep page in sync when the user navigates via browser back/forward
+      window.addEventListener('popstate', () => {
+        const m = parseInt(new URLSearchParams(location.search).get('module'), 10);
+        if (!isNaN(m) && m >= 1 && m <= data.modules.length) showModule(m - 1, false);
+      });
 
       // Jump to module from ?module=N (1-indexed, matching course_outline.html link)
       const urlMod = parseInt(new URLSearchParams(location.search).get('module'), 10);
