@@ -594,6 +594,30 @@
     .progress-stat { font-size: 0.82rem; font-weight: 600; color: var(--accent); }
     .progress-track { height: 8px; background: rgba(255,255,255,0.06); border-radius: 100px; overflow: hidden; }
     .progress-fill { height: 100%; border-radius: 100px; background: linear-gradient(90deg, var(--primary), var(--secondary)); transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+    /* ── Search Bar ─────────────────────────────────────────────────── */
+    .search-bar { display: flex; align-items: center; gap: 8px; background: var(--bg-card); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 8px 14px; margin-bottom: 20px; }
+    .search-bar input { flex: 1; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 8px 12px; color: var(--text-main); font-family: var(--font-body); font-size: 0.9rem; outline: none; }
+    .search-bar input:focus { border-color: var(--primary); }
+    .search-bar input::placeholder { color: var(--text-muted); }
+    #search-match-count { font-size: 0.8rem; color: var(--text-muted); white-space: nowrap; min-width: 80px; text-align: center; }
+    .search-nav-btn { background: rgba(139,92,246,0.1); border: 1px solid rgba(139,92,246,0.2); color: #c084fc; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; line-height: 1; }
+    .search-nav-btn:hover { background: rgba(139,92,246,0.2); }
+    .search-nav-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .search-clear-btn { background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 1rem; padding: 4px 8px; border-radius: 6px; }
+    .search-clear-btn:hover { background: rgba(255,255,255,0.08); color: var(--text-main); }
+    mark.search-highlight { background: rgba(245,158,11,0.35); color: inherit; padding: 0 2px; border-radius: 2px; }
+    mark.search-highlight.active { background: rgba(245,158,11,0.7); box-shadow: 0 0 0 2px rgba(245,158,11,0.5); }
+
+    /* ── Collapse / Hide ─────────────────────────────────────────────── */
+    .video-collapsible { transition: all 0.2s ease; }
+    .video-card.collapsed .video-collapsible { display: none; }
+    .btn-collapse { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: var(--text-muted); width: 28px; height: 28px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; line-height: 1; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s; }
+    .btn-collapse:hover { background: rgba(255,255,255,0.1); color: var(--text-main); }
+    .video-card.collapsed .btn-collapse { color: var(--accent); }
+    .module-card.collapsed .video-list, .module-card.collapsed .objectives-kr-container, .module-card.collapsed .module-desc, .module-card.collapsed .links-section { display: none; }
+    .btn-module-collapse { background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 0.9rem; padding: 2px 6px; border-radius: 4px; vertical-align: middle; transition: all 0.2s; }
+    .btn-module-collapse:hover { background: rgba(255,255,255,0.06); color: var(--text-main); }
   </style>
   <script src="../../../../shared/nav.js"></script>
 <script src="../../../../shared/seo.js" defer></script></head>
@@ -608,6 +632,14 @@
       <h1>Master Script</h1>
       <p>Course-wide script outline with video breakdowns, timing cues, and production notes for all 5 modules.</p>
     </header>
+
+    <div class="search-bar">
+      <input type="text" id="page-search-input" placeholder="🔍 Search all page content..." oninput="searchPage(this.value)">
+      <span id="search-match-count"></span>
+      <button class="search-nav-btn" id="search-prev" onclick="searchPrev()" title="Previous match">▲</button>
+      <button class="search-nav-btn" id="search-next" onclick="searchNext()" title="Next match">▼</button>
+      <button class="search-clear-btn" id="search-clear" onclick="clearSearch()" title="Clear search">✕</button>
+    </div>
 
     <div class="progress-container" id="progress-container" style="display:none;">
       <div class="progress-card">
@@ -960,7 +992,7 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
 
       data.modules.forEach((m, mi) => {
         html += `<div class="module-card${mi === 0 ? ' active' : ''}" id="mod-${mi}">`;
-        html += `<h2><a class="module-title-link" href="${getModuleUrl(m.id)}">Module ${m.id}: ${m.title}</a><a class="module-title-arrow" href="${getModuleUrl(m.id)}">↗</a></h2>`;
+        html += `<h2><button class="btn-module-collapse" title="Toggle module">−</button><a class="module-title-link" href="${getModuleUrl(m.id)}">Module ${m.id}: ${m.title}</a><a class="module-title-arrow" href="${getModuleUrl(m.id)}">↗</a></h2>`;
         html += `<div class="module-desc">${m.description}</div>`;
 
         // Render Objectives & Key Results
@@ -990,7 +1022,8 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
         m.videos.forEach((v, vi) => {
           const elementId = v.videoId || `local-${mi}-${v.id}`;
           html += `<div class="video-card">`;
-          html += `<div class="video-header"><span class="video-title">🎬 <a class="scene-title-link" href="${getSceneUrl(m.id)}">Video ${v.id}: ${v.title}</a></span><span class="video-duration">${v.duration}</span></div>`;
+          html += `<div class="video-header"><button class="btn-collapse" title="Collapse/expand">−</button><span class="video-title">🎬 <a class="scene-title-link" href="${getSceneUrl(m.id)}">Video ${v.id}: ${v.title}</a></span><span class="video-duration">${v.duration}</span></div>`;
+          html += `<div class="video-collapsible">`;
           html += `<div class="video-action-bar">`;
           html += `<a class="action-chip shotlist" href="${getShotlistUrl(m.id)}" title="Shot List — Module ${m.id}, Video ${v.id}">🎬</a>`;
           html += `<a class="action-chip outline" href="${getOutlineUrl(m.id, v.id)}" title="Jump to Module ${m.id} in Course Outline">🗺</a>`;
@@ -1050,6 +1083,7 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
           </div>`;
           html += `</div>`; // end code-refs-section
 
+          html += `</div>`; // end video-collapsible
           html += `</div>`; // end video-card
         });
         html += `</div>`;
@@ -2590,6 +2624,78 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
     }
 
     window.recomputeProgress = computeAndRenderProgress;
+
+    // ── Page Search ────────────────────────────────────────────────────
+    window._searchMarks = [];
+    let _searchIdx = 0;
+    let _searchTotal = 0;
+
+    window.searchPage = function(term) {
+      document.querySelectorAll('mark.search-highlight').forEach(m => {
+        const p = m.parentNode; p.replaceChild(document.createTextNode(m.textContent), m); p.normalize();
+      });
+      window._searchMarks = []; _searchIdx = 0; _searchTotal = 0;
+      const el = document.getElementById('search-match-count'); if (!el) return;
+      document.getElementById('search-prev').disabled = true;
+      document.getElementById('search-next').disabled = true;
+      if (!term || term.length < 2) { el.textContent = ''; return; }
+      const area = document.getElementById('content-area'); if (!area) return;
+      const nodes = []; const w = document.createTreeWalker(area, NodeFilter.SHOW_TEXT, {
+        acceptNode: n => (n.parentElement.closest('script,style,textarea,select,input') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT)
+      }); while (w.nextNode()) nodes.push(w.currentNode);
+      const re = new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+      const marks = [];
+      nodes.forEach(node => {
+        const t = node.textContent; if (!re.test(t)) return; re.lastIndex = 0;
+        const f = document.createDocumentFragment(); let li = 0, m;
+        while ((m = re.exec(t)) !== null) {
+          if (m.index > li) f.appendChild(document.createTextNode(t.slice(li, m.index)));
+          const mk = document.createElement('mark'); mk.className = 'search-highlight'; mk.textContent = m[0]; f.appendChild(mk); marks.push(mk);
+          li = re.lastIndex;
+        }
+        if (li < t.length) f.appendChild(document.createTextNode(t.slice(li)));
+        node.parentNode.replaceChild(f, node);
+      });
+      window._searchMarks = marks; _searchTotal = marks.length;
+      if (marks.length) { _searchIdx = 0; marks[0].classList.add('active'); marks[0].scrollIntoView({ behavior: 'smooth', block: 'center' }); document.getElementById('search-prev').disabled = false; document.getElementById('search-next').disabled = false; el.textContent = `1 of ${marks.length}`; }
+      else { el.textContent = 'No matches'; }
+    };
+
+    window.searchNext = function() {
+      const marks = window._searchMarks; if (!marks || !marks.length) return;
+      marks[_searchIdx].classList.remove('active'); _searchIdx = (_searchIdx + 1) % marks.length;
+      marks[_searchIdx].classList.add('active'); marks[_searchIdx].scrollIntoView({ behavior: 'smooth', block: 'center' });
+      document.getElementById('search-match-count').textContent = `${_searchIdx + 1} of ${_searchTotal}`;
+    };
+
+    window.searchPrev = function() {
+      const marks = window._searchMarks; if (!marks || !marks.length) return;
+      marks[_searchIdx].classList.remove('active'); _searchIdx = (_searchIdx - 1 + marks.length) % marks.length;
+      marks[_searchIdx].classList.add('active'); marks[_searchIdx].scrollIntoView({ behavior: 'smooth', block: 'center' });
+      document.getElementById('search-match-count').textContent = `${_searchIdx + 1} of ${_searchTotal}`;
+    };
+
+    window.clearSearch = function() {
+      document.getElementById('page-search-input').value = ''; searchPage('');
+    };
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'f' && (e.ctrlKey || e.metaKey)) {
+        const input = document.getElementById('page-search-input');
+        if (input) { e.preventDefault(); input.focus(); input.select(); }
+      }
+    });
+
+    // ── Collapse / Hide ────────────────────────────────────────────────
+    document.addEventListener('click', function(e) {
+      const btn = e.target.closest('.btn-collapse');
+      if (btn) { e.stopPropagation(); const card = btn.closest('.video-card'); if (card) card.classList.toggle('collapsed'); }
+    });
+
+    document.addEventListener('click', function(e) {
+      const btn = e.target.closest('.btn-module-collapse');
+      if (btn) { e.stopPropagation(); const card = btn.closest('.module-card'); if (card) card.classList.toggle('collapsed'); }
+    });
   </script>
 
   <!-- Research Note Modal -->
