@@ -1758,6 +1758,19 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
       } catch { return []; }
     }
 
+    // Names of every image already linked to ANY sentence — used to hide
+    // already-used ("linked-in") images from the Unlinked picker.
+    async function fetchAllLinkedImageNames() {
+      try {
+        const res = await fetch(
+          `${SUPABASE_URL}/rest/v1/research_relationships?container=eq.${IMG_CONTAINER}&select=item_name`,
+          { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
+        );
+        const rels = res.ok ? await res.json() : [];
+        return rels.map(r => r.item_name);
+      } catch { return []; }
+    }
+
     async function refreshSentThumbs(sentId, rid) {
       const names = await fetchSentImageNames(sentId);
       renderSentThumbs(rid, sentId, names);
@@ -1788,9 +1801,11 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
         const allFiles = filesRes.ok ? await filesRes.json() : [];
         const imagesOnly = (allFiles || []).filter(f => !f.name.startsWith('__thumb__'));
         
-        const linkedNames = await fetchSentImageNames(imgModalSentId);
+        // Exclude images linked to ANY sentence, not just the current one —
+        // an image used elsewhere is not "available/unlinked".
+        const linkedNames = await fetchAllLinkedImageNames();
         const linkedSet = new Set(linkedNames);
-        
+
         const unlinkedImages = imagesOnly
           .filter(f => !linkedSet.has(f.name))
           // Sort by creation date — first created on the top (oldest → newest).
