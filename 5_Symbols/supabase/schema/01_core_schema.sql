@@ -57,6 +57,11 @@ CREATE TABLE IF NOT EXISTS scenes (
   overlay_text TEXT,
   bundle_url TEXT,
   scene_type TEXT DEFAULT 'standard',
+  sfx_needed TEXT DEFAULT '',
+  bg_music TEXT DEFAULT '',
+  scene_change TEXT DEFAULT '',
+  audio_rationale TEXT DEFAULT '',
+  audio_status TEXT DEFAULT 'pending',
   created_at TIMESTAMPTZ DEFAULT NOW(),
   UNIQUE(module_number, section_number, scene_number)
 );
@@ -211,6 +216,27 @@ CREATE TABLE IF NOT EXISTS courses (
   sort_order INTEGER DEFAULT 0
 );
 
+-- 19. LOWER THIRDS (Gemini-generated lower third candidates per module/video)
+CREATE TABLE IF NOT EXISTS lower_thirds (
+  id SERIAL PRIMARY KEY,
+  module_number INTEGER NOT NULL,
+  video_number INTEGER NOT NULL,
+  module_id INTEGER REFERENCES modules(id) ON DELETE CASCADE,
+  video_id INTEGER REFERENCES videos(id) ON DELETE CASCADE,
+  main_text TEXT NOT NULL,
+  sub_text TEXT NOT NULL,
+  rationale TEXT DEFAULT '',
+  sort_order INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_lower_thirds_module_video ON lower_thirds(module_number, video_number);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_lower_thirds_content
+  ON lower_thirds(module_number, video_number, main_text, sub_text);
+
+ALTER TABLE lower_thirds ENABLE ROW LEVEL SECURITY;
+
 -- =============================================================================
 -- Row-Level Security (RLS) Configuration
 -- =============================================================================
@@ -234,6 +260,7 @@ ALTER TABLE milestones ENABLE ROW LEVEL SECURITY;
 ALTER TABLE milestone_progress ENABLE ROW LEVEL SECURITY;
 ALTER TABLE pricing ENABLE ROW LEVEL SECURITY;
 ALTER TABLE courses ENABLE ROW LEVEL SECURITY;
+ALTER TABLE lower_thirds ENABLE ROW LEVEL SECURITY;
 
 -- Drop existing policies to allow clean re-runs
 DROP POLICY IF EXISTS anon_select_modules ON modules;
@@ -269,6 +296,10 @@ DROP POLICY IF EXISTS anon_insert_milestone_progress ON milestone_progress;
 DROP POLICY IF EXISTS anon_update_milestone_progress ON milestone_progress;
 DROP POLICY IF EXISTS anon_select_pricing ON pricing;
 DROP POLICY IF EXISTS anon_select_courses ON courses;
+DROP POLICY IF EXISTS anon_select_lower_thirds ON lower_thirds;
+DROP POLICY IF EXISTS anon_insert_lower_thirds ON lower_thirds;
+DROP POLICY IF EXISTS anon_update_lower_thirds ON lower_thirds;
+DROP POLICY IF EXISTS anon_delete_lower_thirds ON lower_thirds;
 
 -- Public read access policies (SELECT)
 CREATE POLICY anon_select_modules ON modules FOR SELECT USING (true);
@@ -294,6 +325,7 @@ CREATE POLICY anon_select_milestones ON milestones FOR SELECT USING (true);
 CREATE POLICY anon_select_milestone_progress ON milestone_progress FOR SELECT USING (true);
 CREATE POLICY anon_select_pricing ON pricing FOR SELECT USING (true);
 CREATE POLICY anon_select_courses ON courses FOR SELECT USING (true);
+CREATE POLICY anon_select_lower_thirds ON lower_thirds FOR SELECT USING (true);
 
 -- Public write/update access policies
 CREATE POLICY anon_insert_checklist_progress ON checklist_progress FOR INSERT WITH CHECK (true);

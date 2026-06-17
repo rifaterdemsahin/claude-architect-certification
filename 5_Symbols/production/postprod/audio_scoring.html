@@ -72,6 +72,61 @@
     .status-search { background: rgba(59,130,246,0.15); color: #93c5fd; }
     .audio-player { width: 100%; height: 36px; accent-color: var(--primary); border-radius: 6px; }
     .inline-audio { display: flex; align-items: center; gap: 10px; }
+    .cell-edit {
+      width: 100%; min-width: 130px; background: rgba(0,0,0,0.25); color: var(--text-main);
+      border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 8px 10px;
+      font-family: var(--font-body); font-size: 0.85rem; resize: vertical; line-height: 1.4;
+    }
+    textarea.cell-edit { min-height: 52px; }
+    .cell-edit:focus { outline: none; border-color: var(--primary); background: rgba(139,92,246,0.08); }
+    .status-select { cursor: pointer; }
+    .row-actions { display: flex; flex-direction: column; gap: 8px; min-width: 132px; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 7px 12px; border-radius: 8px; font-family: var(--font-body); font-weight: 600;
+      font-size: 0.78rem; cursor: pointer; border: 1px solid transparent; transition: all 0.2s;
+      white-space: nowrap; color: #fff;
+    }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-save { background: rgba(16,185,129,0.18); border-color: rgba(16,185,129,0.4); color: #6ee7b7; }
+    .btn-save:not(:disabled):hover { background: rgba(16,185,129,0.3); }
+    .btn-sfx { background: rgba(59,130,246,0.18); border-color: rgba(59,130,246,0.4); color: #93c5fd; }
+    .btn-sfx:hover { background: rgba(59,130,246,0.3); }
+    .btn-music { background: rgba(139,92,246,0.18); border-color: rgba(139,92,246,0.4); color: #c4b5fd; }
+    .btn-music:hover { background: rgba(139,92,246,0.3); }
+    .conn-indicator { font-size: 0.78rem; color: var(--text-muted); margin-top: 8px; }
+    /* Prompt modal */
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(3,7,18,0.78); backdrop-filter: blur(4px);
+      display: none; align-items: center; justify-content: center; z-index: 1000; padding: 24px;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal {
+      background: #0b1120; border: 1px solid rgba(139,92,246,0.3); border-radius: 18px;
+      max-width: 640px; width: 100%; padding: 28px; box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+    }
+    .modal h3 { font-family: var(--font-title); font-size: 1.2rem; margin-bottom: 6px; }
+    .modal .modal-sub { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px; }
+    .modal textarea {
+      width: 100%; min-height: 200px; background: rgba(0,0,0,0.3); color: var(--text-main);
+      border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 14px; font-size: 0.88rem;
+      font-family: 'SF Mono', ui-monospace, monospace; line-height: 1.5; resize: vertical;
+    }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; flex-wrap: wrap; }
+    .btn-lg { padding: 10px 18px; font-size: 0.85rem; }
+    .btn-ghost { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.12); color: var(--text-main); }
+    .btn-ghost:hover { background: rgba(255,255,255,0.12); }
+    .btn-primary { background: linear-gradient(135deg, var(--primary), var(--secondary)); }
+    .btn-primary:hover { filter: brightness(1.1); }
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: #111827; border: 1px solid rgba(16,185,129,0.4); color: #6ee7b7;
+      padding: 12px 22px; border-radius: 100px; font-size: 0.85rem; font-weight: 600;
+      opacity: 0; pointer-events: none; transition: all 0.3s; z-index: 1100;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.error { border-color: rgba(239,68,68,0.5); color: #fca5a5; }
     .resource-card {
       background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px;
       padding: 20px; display: flex; align-items: flex-start; gap: 16px; transition: all 0.2s; text-decoration: none; color: inherit;
@@ -106,19 +161,24 @@
   <!-- Scoring Table -->
   <div class="group">
     <div class="group-heading">🎬 Scene Audio Map</div>
-    <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.9rem;">
-      For each scene, identify the required SFX and background music. Use the resources below to find suitable tracks, then log your selections.
+    <p style="color: var(--text-muted); margin-bottom: 8px; font-size: 0.9rem;">
+      For each scene, log the <strong>scene change</strong> (transition in), the required SFX and background music, and the
+      <strong>rationale</strong> for why they fit. Edits save to Supabase. Use the 🎚️ / 🎵 buttons to generate an AI prompt
+      for sound-effect and music creation tools.
     </p>
-    <div class="scoring-table">
+    <div class="conn-indicator" id="connStatus">⏳ Connecting to Supabase…</div>
+    <div class="scoring-table" style="margin-top: 14px;">
       <table>
         <thead>
           <tr>
             <th>Scene</th>
             <th>Description</th>
+            <th>Scene Change</th>
             <th>SFX Needed</th>
             <th>Background Music</th>
+            <th>Rationale</th>
             <th>Status</th>
-            <th>Preview</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody id="scoreTableBody">
@@ -250,8 +310,73 @@
   </footer>
 </div>
 
+<!-- Prompt Generator Modal -->
+<div class="modal-backdrop" id="promptModal">
+  <div class="modal">
+    <h3 id="promptTitle">🎚️ SFX Prompt</h3>
+    <div class="modal-sub" id="promptSub">Generated prompt — copy it into your AI sound-effect / music generator.</div>
+    <textarea id="promptText" spellcheck="false"></textarea>
+    <div class="modal-actions">
+      <button class="btn btn-lg btn-ghost" onclick="closePromptModal()">Close</button>
+      <button class="btn btn-lg btn-primary" onclick="copyPromptText()">📋 Copy Prompt</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
 <script>
-const SCENES = [
+// ── Supabase credential bootstrap (matches production_shotlist.html) ──────────
+const CRED_DEFAULTS = {
+  supabase_url: 'https://rmekfsdhglyiralxvkwc.supabase.co',
+  supabase_anon_key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZWtmc2RoZ2x5aXJhbHh2a3djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NzYzODgsImV4cCI6MjA5NjM1MjM4OH0.ay6HsmO_CbMGDXL_Dv4DT-paAIAOqlQPfmqqx_mexSU'
+};
+
+function getCookie(name) {
+  return document.cookie.split('; ').find(r => r.startsWith(name + '='))?.split('=')[1] || '';
+}
+function setCookie(name, val, days) {
+  const d = new Date(); d.setTime(d.getTime() + days * 864e5);
+  document.cookie = `${name}=${val}; expires=${d.toUTCString()}; path=/; SameSite=Lax`;
+}
+
+let SUPABASE_URL = '';
+let SUPABASE_ANON_KEY = '';
+
+async function bootstrapCreds() {
+  try {
+    const res = await fetch('/api/config');
+    if (res.ok) {
+      const cfg = await res.json();
+      if (cfg.supabaseUrl) localStorage.setItem('supabase_url', cfg.supabaseUrl);
+      if (cfg.supabaseAnon) localStorage.setItem('supabase_anon_key', cfg.supabaseAnon);
+    }
+  } catch (_) { /* static host — fall through to defaults */ }
+  for (const [k, def] of Object.entries(CRED_DEFAULTS)) {
+    const resolved = decodeURIComponent(getCookie(k)) || localStorage.getItem(k) || def;
+    if (resolved) { localStorage.setItem(k, resolved); setCookie(k, encodeURIComponent(resolved), 365); }
+  }
+  SUPABASE_URL = localStorage.getItem('supabase_url') || CRED_DEFAULTS.supabase_url;
+  SUPABASE_ANON_KEY = localStorage.getItem('supabase_anon_key') || CRED_DEFAULTS.supabase_anon_key;
+}
+
+function headers() {
+  return {
+    'apikey': SUPABASE_ANON_KEY,
+    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+    'Content-Type': 'application/json',
+    'Prefer': 'return=representation'
+  };
+}
+async function api(path, opts) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, { ...opts, headers: { ...headers(), ...(opts?.headers || {}) } });
+  if (!res.ok) { throw new Error(`${res.status}: ${await res.text().catch(() => '')}`); }
+  const ct = res.headers.get('content-type') || '';
+  return ct.includes('json') ? res.json() : res.text();
+}
+
+// ── Fallback seed (rendered read-only when Supabase has no scored scenes) ─────
+const SEED_SCENES = [
   { scene: 'M1 S1 S1', desc: 'Neural Network — Systems Architecture Intro',   sfx: 'Whoosh transition, click pop',   music: 'Ambient electronic, 80 bpm',   status: 'search' },
   { scene: 'M1 S1 S2', desc: 'MCP Server — Client-Server Handshake',           sfx: 'Connection chime, data blip',     music: 'Tech groove, 90 bpm',           status: 'pending' },
   { scene: 'M1 S1 S3', desc: 'GitHub Ecosystem — CI/CD Pipeline',              sfx: 'Git merge swoosh, success ding',  music: 'Upbeat coding, 100 bpm',        status: 'pending' },
@@ -263,28 +388,187 @@ const SCENES = [
   { scene: 'M1 S3 S3', desc: 'Axiom — Observability & Logging',               sfx: 'Data stream, alert ping',         music: 'Data pulse, 100 bpm',           status: 'pending' },
 ];
 
-const STATUS_MAP = {
-  done:    { label: '✅ Done',       cls: 'status-done' },
-  pending: { label: '⏳ Pending',    cls: 'status-pending' },
-  search:  { label: '🔍 Searching', cls: 'status-search' },
-};
+const STATUS_OPTS = [
+  { v: 'pending', label: '⏳ Pending' },
+  { v: 'search',  label: '🔍 Searching' },
+  { v: 'done',    label: '✅ Done' },
+];
 
-function renderScoreTable() {
+let SCENE_ROWS = [];     // DB-backed scene objects
+const esc = s => (s ?? '').toString().replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const attr = s => (s ?? '').toString().replace(/"/g, '&quot;');
+
+function setConn(msg, ok) {
+  const el = document.getElementById('connStatus');
+  if (el) { el.innerHTML = msg; el.style.color = ok ? '#6ee7b7' : 'var(--text-muted)'; }
+}
+
+function showToast(msg, isError) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast' + (isError ? ' error' : '');
+  setTimeout(() => t.classList.add('show'), 10);
+  setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+// ── Load & render ─────────────────────────────────────────────────────────────
+async function loadScenes() {
+  try {
+    const rows = await api('scenes?select=id,module_number,section_number,scene_number,script,scene_change,sfx_needed,bg_music,audio_rationale,audio_status&order=module_number.asc,section_number.asc,scene_number.asc');
+    SCENE_ROWS = rows || [];
+    if (SCENE_ROWS.length) {
+      setConn(`💚 Connected — ${SCENE_ROWS.length} scene${SCENE_ROWS.length === 1 ? '' : 's'} loaded. Edits save to Supabase.`, true);
+      renderDbTable();
+    } else {
+      setConn('💚 Connected — no scenes scored yet. Showing the Module 1 starter template below (read-only until scenes exist in the DB).', true);
+      renderSeedTable();
+    }
+  } catch (e) {
+    setConn('🔴 Could not reach Supabase — showing the read-only starter template. Prompt generators still work.', false);
+    renderSeedTable();
+  }
+}
+
+function sceneLabel(s) {
+  return `M${s.module_number} S${s.section_number} S${s.scene_number}`;
+}
+
+function renderDbTable() {
   const tbody = document.getElementById('scoreTableBody');
-  tbody.innerHTML = SCENES.map(s => {
-    const st = STATUS_MAP[s.status] || STATUS_MAP.pending;
-    return `<tr>
-      <td data-label="Scene"><strong>${s.scene}</strong></td>
-      <td data-label="Description">${s.desc}</td>
-      <td data-label="SFX">${s.sfx}</td>
-      <td data-label="Music">${s.music}</td>
-      <td data-label="Status"><span class="score-status ${st.cls}">${st.label}</span></td>
-      <td data-label="Preview"><span style="color: var(--text-muted); font-size: 0.85rem;">—</span></td>
+  tbody.innerHTML = SCENE_ROWS.map(s => {
+    const label = sceneLabel(s);
+    const desc = s.script ? esc(s.script.slice(0, 120)) + (s.script.length > 120 ? '…' : '') : '<span style="color:var(--text-muted)">—</span>';
+    const statusOpts = STATUS_OPTS.map(o => `<option value="${o.v}" ${s.audio_status === o.v ? 'selected' : ''}>${o.label}</option>`).join('');
+    return `<tr data-id="${s.id}">
+      <td data-label="Scene"><strong>${label}</strong></td>
+      <td data-label="Description">${desc}</td>
+      <td data-label="Scene Change"><textarea class="cell-edit" data-f="scene_change" placeholder="e.g. Whoosh cut from intro">${esc(s.scene_change)}</textarea></td>
+      <td data-label="SFX Needed"><textarea class="cell-edit" data-f="sfx_needed" placeholder="e.g. Connection chime, data blip">${esc(s.sfx_needed)}</textarea></td>
+      <td data-label="Background Music"><textarea class="cell-edit" data-f="bg_music" placeholder="e.g. Tech groove, 90 bpm">${esc(s.bg_music)}</textarea></td>
+      <td data-label="Rationale"><textarea class="cell-edit" data-f="audio_rationale" placeholder="Why these choices fit the scene">${esc(s.audio_rationale)}</textarea></td>
+      <td data-label="Status"><select class="cell-edit status-select" data-f="audio_status">${statusOpts}</select></td>
+      <td data-label="Actions"><div class="row-actions">
+        <button class="btn btn-save" onclick="saveRow(${s.id}, this)">💾 Save</button>
+        <button class="btn btn-sfx" onclick="genPrompt(${s.id}, 'sfx')">🎚️ SFX Prompt</button>
+        <button class="btn btn-music" onclick="genPrompt(${s.id}, 'music')">🎵 Music Prompt</button>
+      </div></td>
     </tr>`;
   }).join('');
 }
 
-renderScoreTable();
+function renderSeedTable() {
+  const tbody = document.getElementById('scoreTableBody');
+  tbody.innerHTML = SEED_SCENES.map((s, i) => {
+    const st = STATUS_OPTS.find(o => o.v === s.status) || STATUS_OPTS[0];
+    return `<tr data-seed="${i}">
+      <td data-label="Scene"><strong>${s.scene}</strong></td>
+      <td data-label="Description">${esc(s.desc)}</td>
+      <td data-label="Scene Change"><span style="color:var(--text-muted);font-size:0.85rem">—</span></td>
+      <td data-label="SFX Needed">${esc(s.sfx)}</td>
+      <td data-label="Background Music">${esc(s.music)}</td>
+      <td data-label="Rationale"><span style="color:var(--text-muted);font-size:0.85rem">—</span></td>
+      <td data-label="Status"><span class="score-status status-${st.v === 'search' ? 'search' : st.v}">${st.label}</span></td>
+      <td data-label="Actions"><div class="row-actions">
+        <button class="btn btn-save" disabled title="Create scenes in Supabase to enable saving">💾 Save</button>
+        <button class="btn btn-sfx" onclick="genSeedPrompt(${i}, 'sfx')">🎚️ SFX Prompt</button>
+        <button class="btn btn-music" onclick="genSeedPrompt(${i}, 'music')">🎵 Music Prompt</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Save a row's edits back to Supabase ───────────────────────────────────────
+async function saveRow(id, btn) {
+  const tr = btn.closest('tr');
+  const payload = {};
+  tr.querySelectorAll('[data-f]').forEach(el => { payload[el.dataset.f] = el.value; });
+  const orig = btn.textContent;
+  btn.disabled = true; btn.textContent = '⏳ Saving…';
+  try {
+    const [updated] = await api(`scenes?id=eq.${id}`, { method: 'PATCH', body: JSON.stringify(payload) });
+    const row = SCENE_ROWS.find(r => r.id === id);
+    if (row && updated) Object.assign(row, updated);
+    btn.textContent = '✅ Saved';
+    showToast(`Saved scoring for scene ${sceneLabel(row || updated)}`);
+    setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 1400);
+  } catch (e) {
+    btn.textContent = orig; btn.disabled = false;
+    showToast('Save failed: ' + e.message, true);
+  }
+}
+
+// ── Prompt generators ─────────────────────────────────────────────────────────
+function buildPrompt(kind, { label, desc, sceneChange, sfx, music, rationale }) {
+  if (kind === 'sfx') {
+    return [
+      `You are a sound designer creating royalty-free sound effects for a tech tutorial video.`,
+      ``,
+      `Scene: ${label}`,
+      `On-screen action: ${desc || '(see scene script)'}`,
+      sceneChange ? `Transition into scene: ${sceneChange}` : null,
+      `SFX needed: ${sfx || '(decide based on the action above)'}`,
+      rationale ? `Why it should sound this way: ${rationale}` : null,
+      ``,
+      `Produce a tight, generator-ready description for each distinct SFX hit: name it, give the sonic character (texture, length in ms, pitch/tone), and the on-screen moment it lands on. Keep it clean, modern, and non-distracting — these sit under narration. Output one bullet per SFX.`
+    ].filter(Boolean).join('\n');
+  }
+  return [
+    `You are a composer scoring a background music bed for a tech tutorial video.`,
+    ``,
+    `Scene: ${label}`,
+    `On-screen action: ${desc || '(see scene script)'}`,
+    `Desired music (mood / tempo): ${music || '(decide based on the action above)'}`,
+    rationale ? `Why it should feel this way: ${rationale}` : null,
+    ``,
+    `Produce a generator-ready music prompt: genre, mood, instrumentation, BPM, key/energy arc, and how it should support (not overpower) the narration. Specify a loopable structure and a clean intro/outro. Keep it royalty-free and YouTube-safe in style. Output a single paragraph plus a short comma-separated tag list.`
+  ].filter(Boolean).join('\n');
+}
+
+function openPromptModal(kind, label, text) {
+  document.getElementById('promptTitle').textContent = (kind === 'sfx' ? '🎚️ SFX Prompt' : '🎵 Music Prompt') + ' — ' + label;
+  document.getElementById('promptText').value = text;
+  document.getElementById('promptModal').classList.add('open');
+  // Best-effort clipboard copy on open
+  copyText(text).then(ok => { if (ok) showToast('Prompt copied to clipboard'); });
+}
+function closePromptModal() { document.getElementById('promptModal').classList.remove('open'); }
+async function copyText(text) {
+  try { await navigator.clipboard.writeText(text); return true; } catch (_) { return false; }
+}
+async function copyPromptText() {
+  const ok = await copyText(document.getElementById('promptText').value);
+  showToast(ok ? 'Prompt copied to clipboard' : 'Press ⌘/Ctrl+C to copy', !ok);
+}
+
+function genPrompt(id, kind) {
+  const tr = document.querySelector(`tr[data-id="${id}"]`);
+  const row = SCENE_ROWS.find(r => r.id === id) || {};
+  const get = f => tr?.querySelector(`[data-f="${f}"]`)?.value ?? '';
+  const label = sceneLabel(row);
+  const text = buildPrompt(kind, {
+    label, desc: row.script || '',
+    sceneChange: get('scene_change'), sfx: get('sfx_needed'),
+    music: get('bg_music'), rationale: get('audio_rationale')
+  });
+  openPromptModal(kind, label, text);
+}
+
+function genSeedPrompt(i, kind) {
+  const s = SEED_SCENES[i];
+  const text = buildPrompt(kind, {
+    label: s.scene, desc: s.desc, sceneChange: '',
+    sfx: s.sfx, music: s.music, rationale: ''
+  });
+  openPromptModal(kind, s.scene, text);
+}
+
+// Close modal on backdrop click / Esc
+document.getElementById('promptModal').addEventListener('click', e => {
+  if (e.target.id === 'promptModal') closePromptModal();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePromptModal(); });
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+(async () => { await bootstrapCreds(); await loadScenes(); })();
 </script>
 </body>
 </html>
