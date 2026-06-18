@@ -141,7 +141,11 @@
       { label: '5. 🎬 Script', url: '5_Symbols/production/preprod/scripts/index.html' },
       { label: '8. ⚠️ Risk', children: [
         { label: '⚠️ Risks & Mitigations', url: '5_Symbols/production/preprod/risks.html', description: 'Risk Registry: Scaffolding delays and audience representation risks.' },
-        { label: '🏗️ Scaffolding Risk', url: '5_Symbols/production/preprod/scaffolding_risk.md', description: 'Scaffolding risk: Video pipeline and delivery pilot pipeline delays and mitigations.' }
+        { label: '🏗️ Scaffolding Risk', url: 'markdown_renderer.html?file=5_Symbols/production/preprod/scaffolding_risk.md', description: 'Scaffolding risk: Video pipeline and delivery pilot pipeline delays and mitigations.' }
+      ]},
+      { label: '9. 🧠 Self Learning', children: [
+        { label: '🧠 Self Learning Concept', url: '5_Symbols/production/preprod/self_learning.html', description: 'Feynman technique, Lacanian visual review, and Semblance error solving.' },
+        { label: '📼 Multimedia Learning', url: '5_Symbols/production/preprod/multimedia_learning.html', description: 'Mayer\'s multimedia learning principles and Erdem\'s video-based transformation.' }
       ]},
       {
         label: '🛠️ Tools',

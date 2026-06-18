@@ -179,6 +179,11 @@
               "label": "🧠 Self Learning Concept",
               "url": "5_Symbols/production/preprod/self_learning.html",
               "description": "Feynman technique, Lacanian visual review, and Semblance error solving."
+            },
+            {
+              "label": "📼 Multimedia Learning",
+              "url": "5_Symbols/production/preprod/multimedia_learning.html",
+              "description": "Mayer's multimedia learning principles and Erdem's video-based transformation."
             }
           ]
         },
