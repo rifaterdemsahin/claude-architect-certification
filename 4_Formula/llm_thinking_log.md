@@ -628,3 +628,16 @@ Existing chain: `modules → videos → scripts → sentences`. Each AI object h
 4. New "🤖 AI Production" group + cards + file rows in `postprod/index.html`.
 5. Register pages in `navigation_config.json`; update postprod `README.md`.
 6. Commit + push per Conventional Commits.
+
+---
+
+## 🧠 2026-06-18 — Distinct Emojis for Visual Modes in Script Presenter — `gemini-3-5-flash`
+
+**🎯 Goal:** Add different emojis representing visual modes (talking head, screenshare, b-roll) in both the sentence row badges and selection dropdown lists for better visual differentiation.
+
+**🤔 Approach / Decision drivers:**
+- Add emoji mappings for the visual modes (`talking_head` -> 🗣️, `screenshare` -> 🖥️, `b_roll` -> 🎞️).
+- Update the `sentSelect` helper function to apply these emojis inside the options.
+- Update the `renderSentencesPanel` function to map `s.visual_mode` and display the emoji in the sentence badge.
+- This provides an instant visual signature for each sentence's production type.
+
