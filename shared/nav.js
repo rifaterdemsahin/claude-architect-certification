@@ -224,7 +224,8 @@
           { label: '📺 YouTube Studio', url: 'https://studio.youtube.com/' },
           { label: '🎬 Channel Playlist', url: 'https://www.youtube.com/watch?v=F8IBooe3bXY&list=PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy/' },
           { label: '🎬 Studio Playlist Editor', url: 'https://studio.youtube.com/playlist/PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy/edit' },
-          { label: '✨ Gemini Guide', url: 'gemini.md' }
+          { label: '✨ Gemini Guide', url: 'gemini.md' },
+          { label: '🗂️ Video Production Repos', url: '5_Symbols/production/postprod/github_repos.html', description: 'All rifaterdemsahin GitHub repos related to video production — kokoro, fal.ai, remotion, greenscreen, etc.' }
         ]
       }
     ]}

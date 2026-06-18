@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="../../../shared/redirect-to-live-site.js"></script>
+  <title>🎬 Video Production Repos | Claude AI Certification</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #030712;
+      --bg-card: rgba(17, 24, 39, 0.9);
+      --border-glow: rgba(139, 92, 246, 0.3);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --primary: #8b5cf6;
+      --primary-glow: rgba(139, 92, 246, 0.6);
+      --secondary: #3b82f6;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --font-title: 'Outfit', sans-serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-dark);
+      background-image: radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.12) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.12) 0%, transparent 40%);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      line-height: 1.6;
+      padding: 100px 24px 60px;
+    }
+    .container { max-width: 1100px; margin: 0 auto; }
+    header { margin-bottom: 40px; text-align: center; }
+    header h1 { font-family: var(--font-title); font-size: 2.8rem; font-weight: 900; letter-spacing: -0.02em; margin-bottom: 8px; }
+    header p { font-size: 1.1rem; color: var(--text-muted); }
+    header .count { font-size: 0.95rem; color: var(--primary); font-weight: 600; margin-top: 6px; }
+    .glass-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-glow);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 28px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .glass-card:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(139, 92, 246, 0.25); }
+    .category-title { font-family: var(--font-title); font-size: 1.5rem; font-weight: 600; margin-bottom: 16px; color: var(--primary); }
+    .repo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+    .repo-item {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: 12px;
+      padding: 14px 16px;
+      transition: border-color 0.2s;
+    }
+    .repo-item:hover { border-color: var(--primary); }
+    .repo-item a { color: var(--text-main); text-decoration: none; display: flex; align-items: center; gap: 10px; font-weight: 500; }
+    .repo-item a:hover { color: var(--primary); }
+    .repo-item .desc { font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; margin-left: 30px; }
+    .repo-item .repo-icon { font-size: 1.3rem; flex-shrink: 0; }
+    .search-bar {
+      width: 100%; max-width: 500px; margin: 0 auto 32px;
+      display: block;
+      padding: 12px 18px;
+      border-radius: 12px;
+      border: 1px solid var(--border-glow);
+      background: rgba(0,0,0,0.4);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      font-size: 1rem;
+      outline: none;
+    }
+    .search-bar:focus { border-color: var(--primary); box-shadow: 0 0 20px rgba(139, 92, 246, 0.3); }
+    .search-bar::placeholder { color: var(--text-muted); }
+  </style>
+</head>
+<body>
+  <script src="../../../shared/nav.js"></script>
+  <div class="container">
+    <header>
+      <h1>🎬 Video Production Repos</h1>
+      <p>rifaterdemsahin GitHub repositories related to video production</p>
+      <div class="count" id="repo-count">Loading...</div>
+    </header>
+
+    <input type="text" class="search-bar" id="repo-search" placeholder="Filter repos..." oninput="filterRepos()">
+
+    <div id="repo-container"></div>
+  </div>
+
+  <script>
+    const CATEGORIES = [
+      { label: '🔊 Audio & Voiceover', icon: '🔊', repos: [
+        { name: 'kokoro', url: 'https://github.com/rifaterdemsahin/kokoro', desc: 'Kokoro TTS system for AI voiceover generation' },
+        { name: 'tts-mix', url: 'https://github.com/rifaterdemsahin/tts-mix', desc: 'Local TTS mixed with elevenlabs for voiceovers' },
+        { name: 'beats-scorer', url: 'https://github.com/rifaterdemsahin/beats-scorer', desc: 'Scoring beats and sound bites for YouTube videos' },
+        { name: 'sound-effect-music-generator', url: 'https://github.com/rifaterdemsahin/sound-effect-music-generator', desc: 'AI generated sound effects and music' },
+        { name: 'Freesound', url: 'https://github.com/rifaterdemsahin/Freesound', desc: 'Freesound automation to score music' },
+        { name: 'whisper', url: 'https://github.com/rifaterdemsahin/whisper', desc: 'Whisper transcribe b-roll for video production' }
+      ]},
+      { label: '🎨 Image & Visual Generation', icon: '🎨', repos: [
+        { name: 'fal.ai', url: 'https://github.com/rifaterdemsahin/fal.ai', desc: 'Generate video artifacts via fal.ai API' },
+        { name: 'flicker-image-with-text', url: 'https://github.com/rifaterdemsahin/flicker-image-with-text', desc: 'Flicker image with text generation' },
+        { name: 'diagram-animations', url: 'https://github.com/rifaterdemsahin/diagram-animations', desc: 'Practical diagram animations for video production' },
+        { name: 'transparent-lowerthird', url: 'https://github.com/rifaterdemsahin/transparent-lowerthird', desc: 'Practical lower third generation for videos' },
+        { name: 'Manim', url: 'https://github.com/rifaterdemsahin/Manim', desc: 'Manim animations for video production' },
+        { name: 'PrismHighlight', url: 'https://github.com/rifaterdemsahin/PrismHighlight', desc: 'Highlight code for presentation in YouTube videos' },
+        { name: 'pexels', url: 'https://github.com/rifaterdemsahin/pexels', desc: 'Stock footage generation for videos over API' },
+        { name: 'local_ocr', url: 'https://github.com/rifaterdemsahin/local_ocr', desc: 'Docker integrated local OCR for screenshot reading' }
+      ]},
+      { label: '🎬 Video Editing & Assembly', icon: '🎬', repos: [
+        { name: 'remotion', url: 'https://github.com/rifaterdemsahin/remotion', desc: 'Create videos over MCP using AI CLI (Remotion)' },
+        { name: 'remotion-with-a-prompt', url: 'https://github.com/rifaterdemsahin/remotion-with-a-prompt', desc: 'Create Remotion outputs with a prompt' },
+        { name: 'digital-scene-editor-post-production', url: 'https://github.com/rifaterdemsahin/digital-scene-editor-post-production', desc: 'DaVinci Resolve + Remotion digital post production editor' },
+        { name: 'blur-tool', url: 'https://github.com/rifaterdemsahin/blur-tool', desc: 'Video production helper to blur the screen' },
+        { name: 'chapter-markers', url: 'https://github.com/rifaterdemsahin/chapter-markers', desc: 'Create chapter markers for video production' },
+        { name: 'timeline-spotter', url: 'https://github.com/rifaterdemsahin/timeline-spotter', desc: 'Find artifacts on a non-linear video editor timeline' },
+        { name: 'lua', url: 'https://github.com/rifaterdemsahin/lua', desc: 'Lua scripts for DaVinci Resolve video production pipelines' },
+        { name: 'previz-ai-asisted-storyboard', url: 'https://github.com/rifaterdemsahin/previz-ai-asisted-storyboard', desc: 'AI-assisted storyboard creation with Kilo' },
+        { name: 'prompt-builder', url: 'https://github.com/rifaterdemsahin/prompt-builder', desc: 'Create prompts from Elgato Stream Deck for AI generators' },
+        { name: 'screenshot', url: 'https://github.com/rifaterdemsahin/screenshot', desc: 'Screenshot helper tools for video production' }
+      ]},
+      { label: '🎥 Studio & Hardware', icon: '🎥', repos: [
+        { name: 'studio', url: 'https://github.com/rifaterdemsahin/studio', desc: 'Studio setup for video production (infra as code)' },
+        { name: 'obs', url: 'https://github.com/rifaterdemsahin/obs', desc: 'OBS setup for workstation infrastructure as code' },
+        { name: 'streamdeck', url: 'https://github.com/rifaterdemsahin/streamdeck', desc: 'Stream Deck video producer layout' }
+      ]},
+      { label: '📋 Planning & Process', icon: '📋', repos: [
+        { name: 'post-production-planning', url: 'https://github.com/rifaterdemsahin/post-production-planning', desc: 'Post production planning flow' },
+        { name: 'video-production-maturity-matrix', url: 'https://github.com/rifaterdemsahin/video-production-maturity-matrix', desc: 'Assess and evolve the video production process' },
+        { name: 'CreateCourseandPublishPlatform', url: 'https://github.com/rifaterdemsahin/CreateCourseandPublishPlatform', desc: 'Create course and publish platform' },
+        { name: 'march_1_video', url: 'https://github.com/rifaterdemsahin/march_1_video', desc: 'March 1 video production planning' },
+        { name: 'claude-architect-certification', url: 'https://github.com/rifaterdemsahin/claude-architect-certification', desc: 'This course — Claude AI Certification for Architects' }
+      ]}
+    ];
+
+    function renderAll() {
+      const container = document.getElementById('repo-container');
+      let total = 0;
+      let html = '';
+      CATEGORIES.forEach(function(cat) {
+        total += cat.repos.length;
+        html += '<div class="glass-card repo-category" data-category="' + cat.label + '">';
+        html += '<div class="category-title">' + cat.label + '</div>';
+        html += '<div class="repo-grid">';
+        cat.repos.forEach(function(repo) {
+          const icon = repo.name === 'fal.ai' ? '⚡' :
+                       repo.name === 'kokoro' ? '🔊' :
+                       repo.name === 'remotion' ? '🎞️' :
+                       repo.name === 'lua' ? '📜' :
+                       repo.name === 'whisper' ? '🎙️' :
+                       repo.name === 'beats-scorer' ? '🥁' : '📦';
+          html += '<div class="repo-item">';
+          html += '<a href="' + repo.url + '" target="_blank" rel="noopener">';
+          html += '<span class="repo-icon">' + icon + '</span>';
+          html += '<span>' + repo.name + '</span>';
+          html += '</a>';
+          html += '<div class="desc">' + repo.desc + '</div>';
+          html += '</div>';
+        });
+        html += '</div></div>';
+      });
+      container.innerHTML = html;
+      document.getElementById('repo-count').textContent = total + ' repos across ' + CATEGORIES.length + ' categories';
+    }
+
+    function filterRepos() {
+      const q = document.getElementById('repo-search').value.trim().toLowerCase();
+      const cards = document.querySelectorAll('.repo-category');
+      if (!q) {
+        cards.forEach(function(c) { c.style.display = ''; });
+        const items = document.querySelectorAll('.repo-item');
+        items.forEach(function(i) { i.style.display = ''; });
+        document.getElementById('repo-count').textContent =
+          CATEGORIES.reduce(function(s, c) { return s + c.repos.length; }, 0) + ' repos across ' + CATEGORIES.length + ' categories';
+        return;
+      }
+      let visible = 0;
+      cards.forEach(function(card) {
+        const items = card.querySelectorAll('.repo-item');
+        let cardHas = false;
+        items.forEach(function(item) {
+          const text = item.textContent.toLowerCase();
+          if (text.includes(q)) { item.style.display = ''; cardHas = true; }
+          else { item.style.display = 'none'; }
+        });
+        card.style.display = cardHas ? '' : 'none';
+        if (cardHas) visible += card.querySelectorAll('.repo-item[style*="display: none"]').length === 0
+          ? card.querySelectorAll('.repo-item').length
+          : card.querySelectorAll('.repo-item:not([style*="display: none"])').length;
+      });
+      document.getElementById('repo-count').textContent = visible + ' repos matching "' + q + '"';
+    }
+
+    renderAll();
+  </script>
+</body>
+</html>

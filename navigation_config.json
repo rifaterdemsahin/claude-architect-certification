@@ -480,6 +480,11 @@
             {
               "label": "📜 Commit History",
               "url": "https://github.com/rifaterdemsahin/claude-architect-certification/commits/main"
+            },
+            {
+              "label": "🗂️ Video Production Repos",
+              "url": "5_Symbols/production/postprod/github_repos.html",
+              "description": "All rifaterdemsahin GitHub repos related to video production — kokoro, fal.ai, remotion, greenscreen, etc."
             }
           ]
         }
