@@ -1344,7 +1344,7 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
                   <button class="btn-sent-edit" onclick="sentEdit('${rid}')" title="Edit this sentence">✏️</button>
                   <button class="btn-sent-link" onclick="copySentenceLink('${rid}', ${s.id})" title="Copy link to this sentence">📌</button>
                   <button class="btn-sent-img" onclick="openSentImageModal(${s.id},'${rid}')" title="Link an image to this sentence">🖼</button>
-                  <button class="btn-sent-imgprompt" onclick="copyImagePrompt('${rid}')" title="Copy an image-generation prompt for this sentence to the clipboard">🎨</button>
+                  <button class="btn-sent-imgprompt" onclick="copyImagePrompt('${rid}')" title="Copy an image-generation prompt for this sentence — reshaped for talking-head / screen-capture mode with hook & transition framing">🎨</button>
                   <button class="btn-sent-sfx" onclick="copySfxPrompt('${rid}')" title="Copy a sound-effect generation prompt for this sentence to the clipboard">🔊</button>
                   <button class="btn-sent-music" onclick="copyMusicPrompt('${rid}')" title="Copy a background-music generation prompt for this sentence to the clipboard">🎵</button>
                   <button class="btn-sent-ext-link" onclick="openSentLinkModal(${s.id},'${rid}')" title="Manage links for this sentence">🌐</button>
@@ -1599,23 +1599,56 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
     };
 
     // Copy an image-generation prompt for a sentence to the clipboard.
-    // The prompt asks for a PNG + infographic rendered in the course's visual style.
+    // The prompt asks for a PNG + infographic rendered in the course's visual style,
+    // and is reshaped per recording mode (talking head / screen capture) with
+    // hook and transition framing so the visual works in the actual edit.
     window.copyImagePrompt = function(rid) {
       const view = document.getElementById('sent-view-' + rid);
       const sentenceText = view ? (view.getAttribute('data-text') || '') : '';
       const typeEl = view ? view.querySelector('.sent-badge') : null;
       const sentenceType = typeEl ? typeEl.textContent.trim() : '';
+      // Normalise the badge text to a known recording mode / role keyword.
+      const t = (typeEl ? (typeEl.className || '') : '').toLowerCase();
+      const isHook       = /\bhook\b/.test(t);
+      const isTransition = /\btransition\b/.test(t);
+      const isTalkingHead = /talking_head/.test(t);
+      const isScreenshare = /screenshare/.test(t);
+
+      // Per-role framing: how the rendered visual should function in the edit.
+      const framing = [];
+      if (isHook) {
+        framing.push(`- ROLE: HOOK frame — this is the first thing the viewer sees. Make it a bold, attention-grabbing title card with one punchy headline pulled from the sentence, designed to stop the scroll in the opening seconds.`);
+      }
+      if (isTransition) {
+        framing.push(`- ROLE: TRANSITION card — a clean bridge/segment-divider graphic with a short signpost label (e.g. the topic or "Next:"). Leave calm negative space so it reads instantly as a beat between sections.`);
+      }
+      if (isTalkingHead) {
+        framing.push(`- RECORDING MODE: TALKING HEAD — design this to sit alongside a presenter on camera. Keep the busy/important content on ONE side (leave the opposite ~40% as clean space for the speaker), and treat it as a supporting graphic or lower-third/background, not a full-screen takeover.`);
+      }
+      if (isScreenshare) {
+        framing.push(`- RECORDING MODE: SCREEN CAPTURE — design this as a clean overlay/callout that can sit on top of a screen recording: high-contrast annotations, arrows, numbered steps, or a focused highlight box. Keep the center clear so the underlying screen stays visible.`);
+      }
+      if (!framing.length) {
+        framing.push(`- ROLE: supporting infographic — illustrate the single core idea of the sentence as a self-explanatory graphic.`);
+      }
+      // Always remind the model the asset must work for both talking-head and
+      // screen-capture cuts and as a hook/transition where relevant.
+      framing.push(`- Make the composition flexible enough to drop into either a talking-head segment or over a screen capture, and to double as a hook or transition beat in the edit.`);
 
       const prompt = [
         `Create a high-resolution PNG infographic that visually illustrates the following script ${sentenceType ? `(${sentenceType}) ` : ''}sentence from the Claude AI Certification course:`,
         ``,
         `"${sentenceText}"`,
         ``,
+        `Production framing:`,
+        ...framing,
+        ``,
         `Requirements:`,
         `- Output a PNG image and design it as a clear, self-explanatory infographic (not just a decorative picture).`,
         `- Use the same visual style as the rest of the course: a dark background (#030712) with subtle purple (#8b5cf6) and blue (#3b82f6) radial glows, amber (#f59e0b) accents, clean modern sans-serif typography (Outfit for headings, Plus Jakarta Sans for body), rounded cards, and a polished tech/AI aesthetic.`,
         `- Keep it minimal, legible, and on-brand — high contrast, generous spacing, and a single clear focal idea.`,
-        `- Include short labels or callouts where they aid understanding; avoid clutter.`
+        `- Include short labels or callouts where they aid understanding; avoid clutter.`,
+        `- Use a 16:9 aspect ratio so it drops cleanly into the video timeline.`
       ].join('\n');
 
       navigator.clipboard.writeText(prompt)
