@@ -26,6 +26,13 @@ This document defines how AI agents interact with the **Claude AI Certification 
 
 ## 📅 Agent Activity Log
 
+### 2026-06-18
+- **Task:** 🏷️ Add visual mode emojis to script presenter page.
+- **Action:**
+    - Modified `5_Symbols/production/preprod/scripts/index.html` to add emojis to talking head (🗣️), screenshare (🖥️), and b-roll (🎞️) visual modes in both selection inputs and display badges.
+    - Updated `4_Formula/llm_thinking_log.md` detailing the design decisions.
+- **Status:** IMPLEMENTED, COMMITTED, PUSHED.
+
 ### 2026-06-16
 - **Task:** 🏷️ Add release version and deployed commit link to the homepage footer.
 - **Action:**

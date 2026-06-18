@@ -173,6 +173,16 @@
           ]
         },
         {
+          "label": "9. 🧠 Self Learning",
+          "children": [
+            {
+              "label": "🧠 Self Learning Concept",
+              "url": "5_Symbols/production/preprod/self_learning.html",
+              "description": "Feynman technique, Lacanian visual review, and Semblance error solving."
+            }
+          ]
+        },
+        {
           "label": "🛠️ Tools",
           "children": [
             {
@@ -398,11 +408,16 @@
               "url": "markdown_renderer.html?file=4_Formula/certification/business_plan.md"
             },
             {
-              "label": "8. 💼 Membership / Business",
+              "label": "8. 🎓 Paid vs Unpaid Certificates",
+              "url": "5_Symbols/production/postprod/paid_vs_unpaid_certificates.html",
+              "description": "Why paid vendor certifications carry real weight, why the audience deserves to see the exam receipt, and how to avoid low-quality courses from instructors who never passed the exam."
+            },
+            {
+              "label": "9. 💼 Membership / Business",
               "url": "5_Symbols/production/publish/membership.html"
             },
             {
-              "label": "9. 🔄 Flywheel System",
+              "label": "10. 🔄 Flywheel System",
               "url": "5_Symbols/production/postprod/flywheel.html"
             }
           ]
@@ -411,7 +426,7 @@
           "label": "🤝 Outreach",
           "children": [
             {
-              "label": "10. 🤝 LinkedIn Outreach",
+              "label": "11. 🤝 LinkedIn Outreach",
               "children": [
                 {
                   "label": "Journey Post (pre-exam)",

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Self-Learning System — The Pedagogical Engine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --stage: #0d1117;        /* dark soundstage */
+    --panel: #151b24;        /* glassmorphic card */
+    --panel-border: rgba(255, 255, 255, 0.08);
+    --glow-purple: rgba(147, 51, 234, 0.15);
+    --glow-cyan: rgba(6, 182, 212, 0.15);
+    --text-primary: #ECE7DD;  /* warm chalk */
+    --text-muted: #8A93A0;    /* slate */
+    --accent-purple: #a855f7;
+    --accent-cyan: #06b6d4;
+    --accent-gold: #eab308;
+    --accent-rose: #f43f5e;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--stage);
+    color: var(--text-primary);
+    font-family: "Inter", system-ui, sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    padding-top: 80px; /* site-nav space */
+  }
+
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+  /* Typography */
+  .mono { font-family: "Space Mono", monospace; }
+  .eyebrow {
+    font-family: "Space Mono", monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent-cyan);
+    margin-bottom: 12px;
+  }
+  .display {
+    font-family: "Anton", sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    font-weight: 400;
+  }
+
+  /* Hero Section */
+  .hero {
+    min-height: 55vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    padding: 60px 0;
+    background:
+      radial-gradient(100% 70% at 80% -10%, var(--glow-purple), transparent 50%),
+      radial-gradient(80% 60% at -10% 10%, var(--glow-cyan), transparent 45%);
+    border-bottom: 1px solid var(--panel-border);
+  }
+  .hero h1 {
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    line-height: 1.05;
+    margin-bottom: 16px;
+  }
+  .hero h1 span.purple { color: var(--accent-purple); }
+  .hero h1 span.cyan { color: var(--accent-cyan); }
+  .hero .lede {
+    font-size: clamp(1rem, 1.8vw, 1.25rem);
+    color: var(--text-muted);
+    max-width: 65ch;
+  }
+
+  /* Grid Layout */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 32px;
+    margin: 60px 0;
+  }
+
+  /* Glass Card styling */
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 16px;
+    padding: 36px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, transparent, var(--card-glow, var(--accent-purple)), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(255, 255, 255, 0.15);
+  }
+  .card:hover::before {
+    opacity: 1;
+  }
+
+  .card-icon {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    display: inline-block;
+  }
+  .card-title {
+    font-size: 1.5rem;
+    margin-bottom: 12px;
+    font-weight: 700;
+  }
+  .card-content {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    margin-bottom: 20px;
+  }
+  .card-meta {
+    font-family: "Space Mono", monospace;
+    font-size: 0.75rem;
+    color: var(--text-primary);
+    background: rgba(255,255,255,0.04);
+    padding: 8px 12px;
+    border-radius: 6px;
+    display: inline-block;
+  }
+
+  /* Detailed explanation section */
+  .explanation-section {
+    background: rgba(21, 27, 36, 0.4);
+    border-radius: 20px;
+    border: 1px solid var(--panel-border);
+    padding: 48px;
+    margin-bottom: 80px;
+  }
+  .explanation-title {
+    font-size: 2rem;
+    margin-bottom: 24px;
+    font-weight: 700;
+  }
+  .explanation-text {
+    color: var(--text-muted);
+    margin-bottom: 20px;
+    font-size: 1.05rem;
+  }
+
+  /* Specific color customization overrides */
+  .card-feynman { --card-glow: var(--accent-gold); }
+  .card-lacanian { --card-glow: var(--accent-purple); }
+  .card-semblance { --card-glow: var(--accent-rose); }
+  .card-video { --card-glow: var(--accent-cyan); }
+
+</style>
+</head>
+<body>
+
+<!-- Unified site header/navigation loaded by shared/nav.js -->
+<div id="site-nav-container"></div>
+
+<div class="hero">
+  <div class="wrap">
+    <div class="eyebrow">Pedagogical Framework</div>
+    <h1 class="display">The Video <span class="cyan">Self-Learning</span> <span class="purple">Engine</span></h1>
+    <p class="lede">How the architectural certification process leverages video production, Lacanian psychoanalysis, and the Feynman technique to transition from abstract theory to validated real-world execution.</p>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="grid">
+    <!-- Card 1: Video Production as Self-Learning -->
+    <div class="card card-video">
+      <span class="card-icon">📹</span>
+      <h3 class="card-title">Video Production as Learning Vehicle</h3>
+      <p class="card-content">Filming, scripting, and structuring media is not just about producing content. It is the primary cognitive engine for self-learning. By planning visual screenshares and explaining layouts, the developer codifies architectural details into permanent mental schemas.</p>
+      <div class="card-meta">PROCESS &rarr; ACTIVE PRODUCTION</div>
+    </div>
+
+    <!-- Card 2: Feynman Technique (Course Creation) -->
+    <div class="card card-feynman">
+      <span class="card-icon">💡</span>
+      <h3 class="card-title">Feynman Technique</h3>
+      <p class="card-content">Creating the certification course forces the presenter to teach complex architectural topics in their simplest terms. Whenever a concept cannot be explained cleanly or visualized in under two minutes, it exposes a gap in understanding—compelling immediate research and resolution.</p>
+      <div class="card-meta">PEDAGOGY &rarr; SIMPLIFICATION</div>
+    </div>
+
+    <!-- Card 3: Lacanian Process (Visual Review) -->
+    <div class="card card-lacanian">
+      <span class="card-icon">👥</span>
+      <h3 class="card-title">Lacanian Visual Review</h3>
+      <p class="card-content">Reviewing recorded videos, checking voice tone, and assessing graphics is a Lacanian process. The presenter confronts their own professional mirror image, identifying discrepancies between their "Imaginary" expert persona and the "Symbolic" reality of what is captured on screen.</p>
+      <div class="card-meta">PSYCHOANALYSIS &rarr; MIRROR CONFRONTATION</div>
+    </div>
+
+    <!-- Card 4: Semblance (Error Resolution) -->
+    <div class="card card-semblance">
+      <span class="card-icon">🩹</span>
+      <h3 class="card-title">Solving Errors as Semblance</h3>
+      <p class="card-content">The unavoidable errors, configuration bugs, and environment conflicts encountered during recording represent the "Semblance" of Lacan. Solving them is not a distraction, but the exact mechanism that punctures the fantasy of abstract design and grounds it in structural truth.</p>
+      <div class="card-meta">REALITY &rarr; SCAR LOGGING</div>
+    </div>
+  </div>
+
+  <div class="explanation-section">
+    <h2 class="explanation-title">🧠 Bridging Theory & Symbol</h2>
+    <p class="explanation-text">The architecture training methodology shifts the learning posture from passive consumption to aggressive outward expression. By building a production-grade template, recording the live build, writing detail-oriented tests, and exposing configuration errors, the developer is forced to move beyond theoretical diagrams.</p>
+    <p class="explanation-text">Under this paradigm, the video recording is a ruthless testing suite for human competence. A diagram can hide gaps; a live-coded deployment with telemetry verification cannot. Each error logged in the <strong>6_Semblance</strong> folder is a trace of this confrontation with real systems.</p>
+  </div>
+</div>
+
+<!-- Unified scripts -->
+<script src="../../../../shared/nav.js"></script>
+<script src="../../../../shared/debug-panel.js"></script>
+</body>
+</html>

@@ -641,3 +641,19 @@ Existing chain: `modules → videos → scripts → sentences`. Each AI object h
 - Update the `renderSentencesPanel` function to map `s.visual_mode` and display the emoji in the sentence badge.
 - This provides an instant visual signature for each sentence's production type.
 
+---
+
+## 🧠 2026-06-18 — Self-Learning & Multimedia Learning Transformation — `gemini-3-5-flash`
+
+**🎯 Goal:** Add a new "Self Learning" section to the Pre-production stage, featuring:
+1. A page explaining how the video production process acts as a core vehicle for self-learning (incorporating the Feynman technique for course creation, Lacanian processes for visual review, and Semblance/Lacan for error-solving).
+2. A page detailing multimedia learning and how Erdem transformed himself through video.
+3. Update navigation config and fallback menus, commit/push after each section.
+
+**🤔 Approach / Decision drivers:**
+- Create two HTML pages: `5_Symbols/production/preprod/self_learning.html` and `5_Symbols/production/preprod/multimedia_learning.html`.
+- Style them with the premium glassmorphic UI matching the template (dark mode, responsive, high aesthetics).
+- Register the new category "9. 🧠 Self Learning" and its children in `navigation_config.json`, fallback configurations inside `index.html`, `5_Symbols/markdown_renderer.html`, and `shared/nav.js`.
+- Perform the required verification steps.
+
+
