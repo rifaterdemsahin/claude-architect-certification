@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Talking Heads — Recording Guide | Claude AI Certification</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #030712; --bg-card: rgba(17,24,39,0.85);
+      --text-main: #f3f4f6; --text-muted: #9ca3af;
+      --primary: #8b5cf6; --secondary: #3b82f6; --success: #10b981;
+      --warning: #f59e0b; --danger: #ef4444;
+      --font-title: 'Outfit', sans-serif; --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg-dark);
+      background-image: radial-gradient(circle at 10% 20%, rgba(139,92,246,0.08) 0%, transparent 40%);
+      color: var(--text-main); font-family: var(--font-body); line-height: 1.6; padding-bottom: 80px; padding-top: 70px;
+    }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+    header { padding: 40px 0 24px; text-align: center; }
+    .badge { display: inline-block; padding: 6px 16px; background: linear-gradient(135deg, rgba(139,92,246,0.2), rgba(245,158,11,0.2)); border: 1px solid rgba(139,92,246,0.3); border-radius: 100px; font-size: 0.8rem; font-weight: 600; color: var(--warning); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 14px; }
+    h1 { font-family: var(--font-title); font-size: 2.4rem; font-weight: 800; margin-bottom: 6px; }
+    header p { color: var(--text-muted); font-size: 0.95rem; max-width: 600px; margin: 0 auto; }
+
+    .guide-card { background: linear-gradient(135deg, rgba(139,92,246,0.12), rgba(59,130,246,0.08)); border: 1px solid rgba(139,92,246,0.25); border-radius: 18px; padding: 28px; margin-bottom: 32px; }
+    .guide-card h2 { font-family: var(--font-title); font-size: 1.3rem; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+    .guide-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 768px) { .guide-grid { grid-template-columns: 1fr; } }
+    .guide-item { background: rgba(0,0,0,0.25); border-radius: 12px; padding: 16px; border: 1px solid rgba(255,255,255,0.06); }
+    .guide-item h3 { font-size: 0.9rem; font-weight: 700; color: #c084fc; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+    .guide-item ul { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+    .guide-item li { font-size: 0.82rem; color: var(--text-muted); padding-left: 14px; position: relative; }
+    .guide-item li::before { content: '•'; position: absolute; left: 0; color: var(--primary); }
+
+    .stats { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
+    .stat-card { background: var(--bg-card); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 16px 24px; flex: 1; min-width: 120px; text-align: center; }
+    .stat-num { font-family: var(--font-title); font-size: 1.8rem; font-weight: 800; color: #c084fc; }
+    .stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
+
+    .module-section { margin-bottom: 28px; }
+    .module-section h2 { font-family: var(--font-title); font-size: 1.3rem; font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 10px; }
+    .module-desc { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 14px; }
+
+    .sent-list { display: flex; flex-direction: column; gap: 6px; }
+    .sent-item { background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 14px 18px; }
+    .sent-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .sent-video { font-weight: 700; font-size: 0.88rem; color: #c084fc; }
+    .sent-type-badge { font-size: 0.68rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; background: rgba(139,92,246,0.15); color: #c084fc; }
+    .sent-text { font-size: 0.88rem; color: var(--text-main); line-height: 1.55; margin-bottom: 6px; }
+    .sent-meta { display: flex; gap: 10px; flex-wrap: wrap; }
+    .sent-meta span { font-size: 0.72rem; color: var(--text-muted); background: rgba(255,255,255,0.04); padding: 2px 8px; border-radius: 4px; }
+
+    .loading { text-align: center; padding: 80px; color: var(--text-muted); font-size: 1.2rem; }
+    .error { text-align: center; padding: 80px; color: #ef4444; }
+
+    .mod-filter { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 28px; }
+    .mod-btn { background: rgba(139,92,246,0.1); border: 1px solid rgba(139,92,246,0.2); color: #c084fc; padding: 8px 16px; border-radius: 10px; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: all 0.2s; font-family: var(--font-body); }
+    .mod-btn:hover { background: rgba(139,92,246,0.2); color: white; }
+    .mod-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+    footer { text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
+  </style>
+  <script src="../../../shared/nav.js"></script>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div class="badge">Production</div>
+    <h1>🗣️ Talking Heads Recording Guide</h1>
+    <p>All on-camera presenter scenes extracted from the master script — with greenscreen setup and recording tips.</p>
+  </header>
+
+  <div class="guide-card">
+    <h2>🟢 Greenscreen Recording Guide</h2>
+    <div class="guide-grid">
+      <div class="guide-item">
+        <h3>💡 Lighting</h3>
+        <ul>
+          <li>Use a 3-point lighting setup: key (45°), fill (opposite 45°), back/hair light</li>
+          <li>Softboxes or diffused LEDs — avoid hard shadows on face</li>
+          <li>Keep green screen evenly lit — no hot spots or shadows</li>
+          <li>Subject at least 1.5m away from the green screen to avoid spill</li>
+        </ul>
+      </div>
+      <div class="guide-item">
+        <h3>👕 Wardrobe</h3>
+        <ul>
+          <li>No green, neon, or reflective clothing (will key out)</li>
+          <li>Solid colours preferred — avoid busy patterns or thin stripes</li>
+          <li>Dark tops (navy, charcoal, black) work best for keying</li>
+          <li>No shiny jewellery or glasses with anti-reflective coating</li>
+        </ul>
+      </div>
+      <div class="guide-item">
+        <h3>📷 Camera Setup</h3>
+        <ul>
+          <li>Resolution: 4K (3840×2160) at 24fps or 30fps</li>
+          <li>Eye level with camera — not looking up or down</li>
+          <li>Frame: head and shoulders (rule of thirds)</li>
+          <li>Manual white balance — do not use auto</li>
+        </ul>
+      </div>
+      <div class="guide-item">
+        <h3>🎤 Audio</h3>
+        <ul>
+          <li>Lavalier mic preferred (Rode Wireless Go II or similar)</li>
+          <li>Microphone 15–20cm from mouth, off-centre to avoid plosives</li>
+          <li>Record room tone for 30 seconds (noise floor sample)</li>
+          <li>Monitor levels — keep peaks at -6dB to -3dB</li>
+        </ul>
+      </div>
+      <div class="guide-item">
+        <h3>🎬 Delivery</h3>
+        <ul>
+          <li>Speak at conversation pace — not rushed, not too slow</li>
+          <li>Pause between sentences for easier editing</li>
+          <li>Look into the lens — not at the screen or prompter</li>
+          <li>Reset and re-record flubs — don't try to edit around them</li>
+        </ul>
+      </div>
+      <div class="guide-item">
+        <h3>🎞️ Post Keying</h3>
+        <ul>
+          <li>Use OBS Key Filter (built-in) or DaVinci Resolve 3D Keyer</li>
+          <li>Add Spill Suppression to remove green reflection on skin</li>
+          <li>Apply slight blur (0.5–1px) to key edges for natural blend</li>
+          <li>Place background image at correct aspect ratio (16:9)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats" id="stats-area">
+    <div class="stat-card"><div class="stat-num" id="total-count">—</div><div class="stat-label">Talking Head Sentences</div></div>
+    <div class="stat-card"><div class="stat-num" id="module-count">—</div><div class="stat-label">Modules</div></div>
+  </div>
+
+  <div class="mod-filter" id="mod-filter"></div>
+  <div id="content-area"><div class="loading">Loading talking head scenes from master script...</div></div>
+
+  <footer>
+    <p><a href="checklist.html" style="color: var(--secondary); text-decoration: none;">← Back to Production</a></p>
+  </footer>
+</div>
+
+<script>
+  const SUPABASE_URL = localStorage.getItem('supabase_url') || 'https://rmekfsdhglyiralxvkwc.supabase.co';
+  const SUPABASE_ANON_KEY = localStorage.getItem('supabase_anon_key') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZWtmc2RoZ2x5aXJhbHh2a3djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NzYzODgsImV4cCI6MjA5NjM1MjM4OH0.ay6HsmO_CbMGDXL_Dv4DT-paAIAOqlQPfmqqx_mexSU';
+
+  let allSentences = [];
+  let activeModule = null;
+
+  async function fetchAll() {
+    try {
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/sentences?select=id,script_id,sentence_text,sentence_type,section,visual_mode,sort_order,script_id`,
+        { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
+      );
+      return res.ok ? res.json() : [];
+    } catch { return []; }
+  }
+
+  async function fetchModules() {
+    try {
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/course_scripts?select=id,module_id,title,video_title`,
+        { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
+      );
+      if (res.ok) return res.json();
+    } catch {}
+    return [];
+  }
+
+  function esc(s) {
+    const d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  function render(filterModule) {
+    const filtered = filterModule
+      ? allSentences.filter(s => s.script_id && String(s.script_id).startsWith(String(filterModule)))
+      : allSentences;
+
+    document.getElementById('total-count').textContent = filtered.length;
+
+    const area = document.getElementById('content-area');
+    if (!filtered.length) {
+      area.innerHTML = '<div style="text-align:center;padding:60px;color:var(--text-muted);">No talking head sentences found for this module.</div>';
+      return;
+    }
+
+    const grouped = {};
+    filtered.forEach(s => {
+      const key = s.script_id || 'unknown';
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push(s);
+    });
+
+    let html = '';
+    Object.entries(grouped).forEach(([scriptId, sents]) => {
+      const sentences = sents.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+      const moduleId = scriptId.length >= 1 ? scriptId[0] : '?';
+      html += `<div class="module-section">`;
+      html += `<h2>📦 Script #${esc(scriptId)} <span style="font-size:0.8rem;font-weight:400;color:var(--text-muted);">(${sentences.length} sentence${sentences.length !== 1 ? 's' : ''})</span></h2>`;
+      html += `<div class="sent-list">`;
+      sentences.forEach(s => {
+        const typeLabel = (s.sentence_type || 'body').replace(/_/g, ' ');
+        html += `<div class="sent-item">`;
+        html += `<div class="sent-header"><span class="sent-video">🎬 ${esc(s.video_title || `Script ${scriptId}`)}</span><span class="sent-type-badge">${esc(typeLabel)}</span></div>`;
+        html += `<div class="sent-text">${esc(s.sentence_text)}</div>`;
+        html += `<div class="sent-meta">`;
+        html += `<span>📄 ${esc(s.section || 'body')}</span>`;
+        html += `<span>🎬 Talking Head</span>`;
+        if (s.sort_order) html += `<span>#${s.sort_order}</span>`;
+        html += `</div></div>`;
+      });
+      html += `</div></div>`;
+    });
+
+    area.innerHTML = html;
+  }
+
+  function buildFilter() {
+    const modules = [...new Set(allSentences
+      .filter(s => s.script_id)
+      .map(s => String(s.script_id)[0])
+    )].sort();
+
+    const container = document.getElementById('mod-filter');
+    container.innerHTML = '<button class="mod-btn active" data-mod="">All Modules</button>' +
+      modules.map(m => `<button class="mod-btn" data-mod="${esc(m)}">Module ${esc(m)}</button>`).join('');
+
+    document.getElementById('module-count').textContent = modules.length || 0;
+
+    container.addEventListener('click', (e) => {
+      const btn = e.target.closest('.mod-btn');
+      if (!btn) return;
+      container.querySelectorAll('.mod-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeModule = btn.dataset.mod || null;
+      render(activeModule);
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    const [sentences, modules] = await Promise.all([fetchAll(), fetchModules()]);
+    allSentences = (sentences || []).filter(s => s.visual_mode === 'talking_head');
+
+    const modMap = {};
+    (modules || []).forEach(m => { modMap[m.id] = m; });
+    allSentences.forEach(s => {
+      if (modMap[s.script_id]) {
+        s.video_title = modMap[s.script_id].video_title || modMap[s.script_id].title;
+      }
+    });
+
+    buildFilter();
+    render(null);
+  });
+</script>
+</body>
+</html>

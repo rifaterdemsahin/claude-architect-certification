@@ -170,7 +170,9 @@
     ]},
     { label: '🎥 Production', children: [
       { label: '7. 📸 Shot List & Assets', url: '5_Symbols/production/postprod/production_shotlist.html?module=1&section=1' },
-      { label: '8. ✅ Production Checklist', url: '5_Symbols/production/prod/checklist.html' },
+      { label: '8. 🗣️ Talking Heads', url: '5_Symbols/production/prod/talking-heads.html', description: 'All on-camera presenter scenes with greenscreen recording guide.' },
+      { label: '9. 🖥️ Screenshare', url: '5_Symbols/production/prod/screenshare.html', description: 'All screenshare scenes with screen recording setup guide.' },
+      { label: '10. ✅ Production Checklist', url: '5_Symbols/production/prod/checklist.html' },
       {
         label: '🛠️ Tools',
         children: [
