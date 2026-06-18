@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🖼 Image Link Report | Claude AI Certification</title>
+  <link rel="icon" type="image/png" href="../../../favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #030712; --bg-card: rgba(17,24,39,0.8); --text-main: #f3f4f6; --text-muted: #9ca3af;
+      --primary: #8b5cf6; --secondary: #3b82f6; --accent: #f59e0b; --success: #10b981; --danger: #ef4444;
+      --font-title: 'Outfit', sans-serif; --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-dark);
+      background-image: radial-gradient(circle at 10% 20%, rgba(139,92,246,0.08) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(59,130,246,0.08) 0%, transparent 40%);
+      color: var(--text-main); font-family: var(--font-body); line-height: 1.6; min-height: 100vh; padding: 40px 20px;
+    }
+    .container { max-width: 1000px; margin: 0 auto; }
+    header { text-align: center; margin-bottom: 36px; }
+    h1 { font-family: var(--font-title); font-size: 2.4rem; font-weight: 800; margin-bottom: 8px; }
+    h2 { font-family: var(--font-title); font-size: 1.3rem; font-weight: 700; margin: 36px 0 16px; }
+    .subtitle { color: var(--text-muted); font-size: 1rem; }
+
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 18px; margin-bottom: 12px; }
+    .stat-card {
+      background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 18px;
+      padding: 22px; text-align: center; transition: transform 0.3s;
+    }
+    .stat-card:hover { transform: translateY(-4px); border-color: var(--primary); }
+    .stat-value { font-family: var(--font-title); font-size: 2.3rem; font-weight: 800; color: white; line-height: 1.2; }
+    .stat-value.good { color: var(--success); }
+    .stat-value.warn { color: var(--accent); }
+    .stat-value.bad { color: var(--danger); }
+    .stat-label { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; }
+
+    .verdict { text-align: center; padding: 18px 22px; border-radius: 16px; margin: 8px 0 8px; font-size: 1.05rem; font-weight: 600; }
+    .verdict.incomplete { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); color: #fbbf24; }
+    .verdict.complete { background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3); color: #34d399; }
+
+    .bigbar-track { height: 14px; background: rgba(255,255,255,0.06); border-radius: 100px; overflow: hidden; margin: 14px 0 8px; }
+    .bigbar-fill { height: 100%; border-radius: 100px; background: linear-gradient(90deg, var(--primary), var(--secondary)); transition: width 0.8s cubic-bezier(0.34,1.56,0.64,1); }
+
+    .table-container {
+      background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 18px;
+      overflow: hidden; margin-bottom: 28px;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    th { background: rgba(255,255,255,0.03); color: var(--text-muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; padding: 14px 16px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    td { padding: 12px 16px; font-size: 0.88rem; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: rgba(255,255,255,0.02); }
+    .row-name { font-weight: 600; color: #e5e7eb; }
+    .row-sub { color: var(--text-muted); font-size: 0.78rem; }
+    .num { font-family: monospace; font-weight: 700; text-align: right; }
+    .num.img { color: var(--secondary); }
+    .num.url { color: var(--accent); }
+    .num.tot { color: #e5e7eb; }
+
+    .minibar-wrap { display: flex; align-items: center; gap: 10px; min-width: 160px; }
+    .minibar-track { flex: 1; height: 8px; background: rgba(255,255,255,0.06); border-radius: 100px; overflow: hidden; }
+    .minibar-fill { height: 100%; border-radius: 100px; }
+    .minibar-pct { font-family: monospace; font-size: 0.8rem; font-weight: 700; min-width: 38px; text-align: right; }
+
+    .badge { display: inline-block; padding: 2px 9px; border-radius: 100px; font-size: 0.72rem; font-weight: 700; }
+    .badge.complete { background: rgba(16,185,129,0.15); color: #34d399; }
+    .badge.partial { background: rgba(245,158,11,0.15); color: #fbbf24; }
+    .badge.empty { background: rgba(239,68,68,0.15); color: #f87171; }
+
+    .loading-overlay { position: fixed; inset: 0; background: var(--bg-dark); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; transition: opacity 0.5s; }
+    .spinner { width: 40px; height: 40px; border: 3px solid rgba(139,92,246,0.1); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 16px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .error-msg { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); color: #f87171; padding: 20px; border-radius: 12px; margin-bottom: 20px; display: none; }
+    .meta { text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 6px; }
+    .legend { display: flex; gap: 18px; flex-wrap: wrap; justify-content: center; color: var(--text-muted); font-size: 0.82rem; margin: 6px 0 18px; }
+    .legend span::before { content: ''; display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: middle; }
+    .legend .l-img::before { background: var(--secondary); }
+    .legend .l-url::before { background: var(--accent); }
+
+    footer { text-align: center; margin-top: 40px; }
+    .back-link { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+    .back-link:hover { color: white; }
+  </style>
+  <script src="../../../shared/nav.js"></script>
+<script src="../../../shared/seo.js" defer></script></head>
+<body>
+  <div id="loading" class="loading-overlay">
+    <div class="spinner"></div>
+    <p>Analysing sentence → image links…</p>
+  </div>
+
+  <div class="container">
+    <header>
+      <h1>🖼 Image Link Report</h1>
+      <p class="subtitle">Per-sentence image &amp; URL link coverage — live from Supabase</p>
+    </header>
+
+    <div id="error" class="error-msg"></div>
+
+    <div id="verdict" class="verdict"></div>
+
+    <div class="stats-grid">
+      <div class="stat-card"><div id="s-total" class="stat-value">0</div><div class="stat-label">Total Sentences</div></div>
+      <div class="stat-card"><div id="s-img" class="stat-value">0</div><div class="stat-label">🖼 Image-Linked</div></div>
+      <div class="stat-card"><div id="s-url" class="stat-value">0</div><div class="stat-label">🔗 URL-Linked</div></div>
+      <div class="stat-card"><div id="s-any" class="stat-value">0</div><div class="stat-label">Linked (img or url)</div></div>
+      <div class="stat-card"><div id="s-missing" class="stat-value">0</div><div class="stat-label">❌ Unlinked</div></div>
+    </div>
+
+    <div class="bigbar-track"><div id="bigbar" class="bigbar-fill" style="width:0%"></div></div>
+    <div class="meta" id="bigbar-meta"></div>
+
+    <h2>📊 Per-Video Breakdown</h2>
+    <div class="legend">
+      <span class="l-img">🖼 Image coverage</span>
+      <span class="l-url">🔗 URL links</span>
+    </div>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Video / Script</th>
+            <th class="num">🖼 Img</th>
+            <th class="num">🔗 Url</th>
+            <th class="num">Total</th>
+            <th>Image Coverage</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="report-body"></tbody>
+      </table>
+    </div>
+
+    <p class="meta" id="generated"></p>
+
+    <footer>
+      <a href="scripts/index.html" class="back-link">← Back to Master Script</a>
+    </footer>
+  </div>
+
+  <script>
+    const SUPABASE_URL = localStorage.getItem('supabase_url') || 'https://rmekfsdhglyiralxvkwc.supabase.co';
+    const SUPABASE_ANON_KEY = localStorage.getItem('supabase_anon_key') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZWtmc2RoZ2x5aXJhbHh2a3djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NzYzODgsImV4cCI6MjA5NjM1MjM4OH0.ay6HsmO_CbMGDXL_Dv4DT-paAIAOqlQPfmqqx_mexSU';
+    const IMG_CONTAINER = 'research-images';
+    const H = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` };
+
+    async function getJson(path) {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, { headers: H });
+      if (!res.ok) throw new Error(`${path} → HTTP ${res.status}`);
+      return res.json();
+    }
+
+    function pct(n, d) { return d ? Math.round((n / d) * 100) : 0; }
+    function barColor(p) { return p === 100 ? 'var(--success)' : (p === 0 ? 'var(--danger)' : 'var(--accent)'); }
+
+    async function run() {
+      try {
+        const [sentences, imgRels, urlLinks, scripts, videos, modules] = await Promise.all([
+          getJson('sentences?select=id,script_id'),
+          getJson(`research_relationships?container=eq.${IMG_CONTAINER}&select=sentence_id`),
+          getJson('sentence_links?select=sentence_id'),
+          getJson('scripts?select=id,video_id'),
+          getJson('videos?select=id,module_id,video_number,title'),
+          getJson('modules?select=id,module_number,title')
+        ]);
+
+        const imgSet = new Set(imgRels.map(r => r.sentence_id).filter(Boolean));
+        const urlSet = new Set(urlLinks.map(r => r.sentence_id).filter(Boolean));
+
+        // Lookups
+        const scriptToVideo = {}; scripts.forEach(s => scriptToVideo[s.id] = s.video_id);
+        const videoById = {}; videos.forEach(v => videoById[v.id] = v);
+        const moduleById = {}; modules.forEach(m => moduleById[m.id] = m);
+
+        // Totals
+        const total = sentences.length;
+        const imgCount = sentences.filter(s => imgSet.has(s.id)).length;
+        const urlCount = sentences.filter(s => urlSet.has(s.id)).length;
+        const anyCount = sentences.filter(s => imgSet.has(s.id) || urlSet.has(s.id)).length;
+        const missing = total - imgCount;
+
+        const imgPct = pct(imgCount, total);
+        document.getElementById('s-total').textContent = total;
+        const imgEl = document.getElementById('s-img'); imgEl.textContent = imgCount;
+        imgEl.classList.add(imgPct === 100 ? 'good' : (imgPct === 0 ? 'bad' : 'warn'));
+        document.getElementById('s-url').textContent = urlCount;
+        document.getElementById('s-any').textContent = anyCount;
+        const missEl = document.getElementById('s-missing'); missEl.textContent = missing;
+        missEl.classList.add(missing === 0 ? 'good' : 'bad');
+
+        document.getElementById('bigbar').style.width = imgPct + '%';
+        document.getElementById('bigbar-meta').textContent =
+          `${imgCount} of ${total} sentences have at least one image linked (${imgPct}%)`;
+
+        const verdict = document.getElementById('verdict');
+        if (missing === 0) {
+          verdict.className = 'verdict complete';
+          verdict.textContent = '✅ All sentences are linked to an image — coverage is complete!';
+        } else {
+          verdict.className = 'verdict incomplete';
+          verdict.textContent = `⏳ Not all linked — ${missing} sentence${missing === 1 ? '' : 's'} still need an image (${imgPct}% image coverage).`;
+        }
+
+        // Group by script -> video
+        const byScript = {};
+        sentences.forEach(s => {
+          const k = s.script_id;
+          if (!byScript[k]) byScript[k] = { total: 0, img: 0, url: 0 };
+          byScript[k].total++;
+          if (imgSet.has(s.id)) byScript[k].img++;
+          if (urlSet.has(s.id)) byScript[k].url++;
+        });
+
+        // Build rows, sorted by module/video number
+        const rows = Object.keys(byScript).map(scriptId => {
+          const vid = scriptToVideo[scriptId];
+          const v = videoById[vid] || {};
+          const m = moduleById[v.module_id] || {};
+          return {
+            scriptId: +scriptId,
+            label: v.title || `Script ${scriptId}`,
+            sub: (m.module_number != null ? `M${m.module_number}` : '?') +
+                 (v.video_number != null ? ` · V${v.video_number}` : '') +
+                 ` · ${m.title || ''}`.replace(/ · $/, ''),
+            modNum: m.module_number != null ? m.module_number : 999,
+            vidNum: v.video_number != null ? v.video_number : 999,
+            ...byScript[scriptId]
+          };
+        }).sort((a, b) => a.modNum - b.modNum || a.vidNum - b.vidNum || a.scriptId - b.scriptId);
+
+        const body = document.getElementById('report-body');
+        body.innerHTML = rows.map(r => {
+          const p = pct(r.img, r.total);
+          const status = p === 100
+            ? '<span class="badge complete">✅ Complete</span>'
+            : (r.img === 0 ? '<span class="badge empty">❌ Empty</span>' : '<span class="badge partial">⏳ Partial</span>');
+          return `<tr>
+            <td><div class="row-name">${esc(r.label)}</div><div class="row-sub">${esc(r.sub)}</div></td>
+            <td class="num img">${r.img}</td>
+            <td class="num url">${r.url || '–'}</td>
+            <td class="num tot">${r.total}</td>
+            <td>
+              <div class="minibar-wrap">
+                <div class="minibar-track"><div class="minibar-fill" style="width:${p}%;background:${barColor(p)}"></div></div>
+                <span class="minibar-pct" style="color:${barColor(p)}">${p}%</span>
+              </div>
+            </td>
+            <td>${status}</td>
+          </tr>`;
+        }).join('');
+
+        document.getElementById('generated').textContent =
+          `Generated ${new Date().toLocaleString()} · ${rows.length} videos · source: Supabase (sentences, research_relationships, sentence_links)`;
+
+      } catch (err) {
+        showError('Failed to build report: ' + err.message);
+      } finally {
+        const l = document.getElementById('loading');
+        l.style.opacity = '0';
+        setTimeout(() => l.style.display = 'none', 500);
+      }
+    }
+
+    function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+
+    function showError(msg) {
+      const e = document.getElementById('error');
+      e.textContent = msg; e.style.display = 'block';
+    }
+
+    document.addEventListener('DOMContentLoaded', run);
+  </script>
+<script src="../../../shared/debug-panel.js"></script>
+</body>
+</html>

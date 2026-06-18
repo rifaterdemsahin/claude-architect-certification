@@ -95,6 +95,11 @@
             {
               "label": "✨ Script Generator",
               "url": "5_Symbols/production/preprod/scripts/generator.html"
+            },
+            {
+              "label": "🖼 Image Link Report",
+              "url": "5_Symbols/production/preprod/image_link_report.html",
+              "description": "Per-sentence image & URL link coverage analytics, live from Supabase."
             }
           ]
         },
