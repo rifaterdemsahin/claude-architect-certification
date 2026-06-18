@@ -670,7 +670,7 @@
     <details class="sql-setup-panel">
       <summary>📝 SQL Setup for code_references (run once in Supabase)</summary>
       <pre id="code-refs-sql-block"></pre>
-      <button class="btn btn-ghost btn-sm" style="margin-top:10px;" onclick="navigator.clipboard.writeText(document.getElementById('code-refs-sql-block').textContent).then(()=>alert('📋 Copied!'))">📋 Copy SQL</button>
+      <button class="btn btn-ghost btn-sm" style="margin-top:10px;" onclick="navigator.clipboard.writeText(document.getElementById('code-refs-sql-block').textContent).then(()=>alert('📋 Copied!'))" title="Copy SQL setup script to clipboard">📋 Copy SQL</button>
     </details>
   </div>
 
@@ -987,12 +987,12 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
       let html = '';
 
       nav.innerHTML = data.modules.map((m, i) =>
-        `<button class="module-btn${i === 0 ? ' active' : ''}" onclick="showModule(${i})">M${m.id}: ${m.title}</button>`
+        `<button class="module-btn${i === 0 ? ' active' : ''}" onclick="showModule(${i})" title="Switch to this module">M${m.id}: ${m.title}</button>`
       ).join('');
 
       data.modules.forEach((m, mi) => {
         html += `<div class="module-card${mi === 0 ? ' active' : ''}" id="mod-${mi}">`;
-        html += `<h2><button class="btn-module-collapse" title="Toggle module">−</button><a class="module-title-link" href="${getModuleUrl(m.id)}">Module ${m.id}: ${m.title}</a><a class="module-title-arrow" href="${getModuleUrl(m.id)}">↗</a></h2>`;
+        html += `<h2><button class="btn-module-collapse" title="Toggle module">−</button><a class="module-title-link" href="${getModuleUrl(m.id)}">Module ${m.id}: ${m.title}</a><a class="module-title-arrow" href="${getModuleUrl(m.id)}" title="Open Module ${m.id} page">↗</a></h2>`;
         html += `<div class="module-desc">${m.description}</div>`;
 
         // Render Objectives & Key Results
@@ -1036,10 +1036,10 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
           // Audio generation row
           const hasAudio = !!v.audioUrl;
           html += `<div class="audio-action-row">`;
-          html += `<button class="btn-gen-audio" id="btn-audio-${elementId}" onclick="generateAudio('${v.videoId || ''}', ${mi}, ${v.id})">🎙 Generate Audio</button>`;
-          html += `<button class="btn-save-audio" id="btn-save-audio-${elementId}" onclick="saveAudio('${v.videoId || ''}', ${mi}, ${v.id})">💾 Save Audio</button>`;
+          html += `<button class="btn-gen-audio" id="btn-audio-${elementId}" onclick="generateAudio('${v.videoId || ''}', ${mi}, ${v.id})" title="Generate AI voiceover audio for this video">🎙 Generate Audio</button>`;
+          html += `<button class="btn-save-audio" id="btn-save-audio-${elementId}" onclick="saveAudio('${v.videoId || ''}', ${mi}, ${v.id})" title="Save generated audio to database">💾 Save Audio</button>`;
           html += `<span class="audio-status" id="audio-status-${elementId}"></span>`;
-          html += `<a class="btn-listen" id="listen-link-${elementId}" href="${v.audioUrl || '#'}" target="_blank"${hasAudio ? '' : ' style="display:none;"'}>🎧 Listen</a>`;
+          html += `<a class="btn-listen" id="listen-link-${elementId}" href="${v.audioUrl || '#'}" target="_blank" title="Listen to generated audio"${hasAudio ? '' : ' style="display:none;"'}>🎧 Listen</a>`;
           html += `</div>`;
           html += `<div class="audio-player-container" id="audio-player-${elementId}"></div>`;
 
@@ -1055,7 +1055,7 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
           html += `<select id="research-select-${elementId}" style="flex: 1; min-width: 200px; padding: 7px 11px; border-radius: 8px; border: 1px dashed rgba(139,92,246,0.3); background: rgba(139,92,246,0.03); color: var(--text-main); font-size: 0.82rem; font-family: var(--font-body); outline: none; cursor: pointer;">`;
           html += `<option value="">-- select research item --</option>`;
           html += `</select>`;
-          html += `<button class="btn btn-sm btn-primary" onclick="linkResearchUI('${elementId}', ${v.videoId || 'null'})">+ Link</button>`;
+          html += `<button class="btn btn-sm btn-primary" onclick="linkResearchUI('${elementId}', ${v.videoId || 'null'})" title="Link selected research item to this video">+ Link</button>`;
           html += `</div>`;
           html += `</div>`;
 
@@ -1079,7 +1079,7 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
           html += `<div class="code-ref-add">
             <input id="cref-new-label-${elementId}" placeholder="Label (e.g. src/my_file.py)">
             <input id="cref-new-url-${elementId}" placeholder="GitHub URL" onkeydown="if(event.key==='Enter')addCodeRefUI('${elementId}')">
-            <button class="btn btn-sm btn-primary" onclick="addCodeRefUI('${elementId}')">+ Add Ref</button>
+            <button class="btn btn-sm btn-primary" onclick="addCodeRefUI('${elementId}')" title="Add a new code reference link">+ Add Ref</button>
           </div>`;
           html += `</div>`; // end code-refs-section
 
@@ -1101,7 +1101,7 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
       html += `<div class="exam-section"><h3>🎓 ${data.exam.title}</h3>`;
       html += `<p>${data.exam.description}</p>`;
       html += `<ul class="exam-scenarios">${data.exam.scenarios.map(s => `<li>${s}</li>`).join('')}</ul>`;
-      html += `<a class="exam-link" href="../../../course_src/utils/markdown_viewer.html?md=${data.exam.link}">📝 Start Exam Walkthrough</a></div>`;
+      html += `<a class="exam-link" href="../../../course_src/utils/markdown_viewer.html?md=${data.exam.link}" title="Open the exam walkthrough document">📝 Start Exam Walkthrough</a></div>`;
 
       area.innerHTML = html;
       window.showModule = function(idx, updateUrl = true) {
@@ -1285,9 +1285,13 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
     const VISUAL_OPTIONS  = ['talking_head','screenshare','b_roll'];
 
     function sentSelect(id, options, current) {
-      return `<select id="${id}" class="sent-select">${options.map(o =>
-        `<option value="${o}"${o === current ? ' selected' : ''}>${o.replace(/_/g,' ')}</option>`
-      ).join('')}</select>`;
+      return `<select id="${id}" class="sent-select">${options.map(o => {
+        let label = o.replace(/_/g,' ');
+        if (o === 'talking_head') label = '🗣️ talking head';
+        else if (o === 'screenshare') label = '🖥️ screenshare';
+        else if (o === 'b_roll') label = '🎞️ b roll';
+        return `<option value="${o}"${o === current ? ' selected' : ''}>${label}</option>`;
+      }).join('')}</select>`;
     }
 
     function renderSentencesPanel(sentences, format, duration, elementId, scriptId) {
@@ -1319,6 +1323,10 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
             vLine += estLines;
             sLine += estLines;
             const rid = `${elementId}-${s.id}`;
+            let visualLabel = esc2(s.visual_mode).replace(/_/g,' ');
+            if (s.visual_mode === 'talking_head') visualLabel = '🗣️ talking head';
+            else if (s.visual_mode === 'screenshare') visualLabel = '🖥️ screenshare';
+            else if (s.visual_mode === 'b_roll') visualLabel = '🎞️ b roll';
             return `
             <div class="sent-row" id="sent-row-${rid}">
               <div class="sent-view" id="sent-view-${rid}" data-text="${esc2(s.sentence_text)}">
@@ -1329,18 +1337,18 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
                 </div>
                 <div class="sent-badges">
                   <span class="sent-badge ${esc2(s.sentence_type)}">${esc2(s.sentence_type)}</span>
-                  <span class="sent-badge ${esc2(s.visual_mode)}">${esc2(s.visual_mode).replace(/_/g,' ')}</span>
+                  <span class="sent-badge ${esc2(s.visual_mode)}">${visualLabel}</span>
                 </div>
                 <div class="sent-text">${esc2(s.sentence_text)}</div>
                 <div class="sent-row-btns">
-                  <button class="btn-sent-edit" onclick="sentEdit('${rid}')">✏️</button>
+                  <button class="btn-sent-edit" onclick="sentEdit('${rid}')" title="Edit this sentence">✏️</button>
                   <button class="btn-sent-link" onclick="copySentenceLink('${rid}', ${s.id})" title="Copy link to this sentence">📌</button>
                   <button class="btn-sent-img" onclick="openSentImageModal(${s.id},'${rid}')" title="Link an image to this sentence">🖼</button>
                   <button class="btn-sent-imgprompt" onclick="copyImagePrompt('${rid}')" title="Copy an image-generation prompt for this sentence to the clipboard">🎨</button>
                   <button class="btn-sent-sfx" onclick="copySfxPrompt('${rid}')" title="Copy a sound-effect generation prompt for this sentence to the clipboard">🔊</button>
                   <button class="btn-sent-music" onclick="copyMusicPrompt('${rid}')" title="Copy a background-music generation prompt for this sentence to the clipboard">🎵</button>
                   <button class="btn-sent-ext-link" onclick="openSentLinkModal(${s.id},'${rid}')" title="Manage links for this sentence">🌐</button>
-                  <button class="btn-sent-delete" onclick="sentDelete('${elementId}',${s.id})">🗑</button>
+                  <button class="btn-sent-delete" onclick="sentDelete('${elementId}',${s.id})" title="Delete this sentence">🗑</button>
                 </div>
               </div>
               <div class="sent-imgs" id="sent-imgs-${rid}" data-sent-id="${s.id}"></div>
@@ -1353,8 +1361,8 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
                 </div>
                 <textarea class="sent-textarea" id="sent-text-${rid}">${esc2(s.sentence_text)}</textarea>
                 <div class="sent-edit-actions">
-                  <button class="btn-sent-save" onclick="sentSave('${elementId}',${s.id},'${rid}')">💾 Save</button>
-                  <button class="btn-sent-cancel" onclick="sentCancel('${rid}')">Cancel</button>
+                  <button class="btn-sent-save" onclick="sentSave('${elementId}',${s.id},'${rid}')" title="Save changes to this sentence">💾 Save</button>
+                  <button class="btn-sent-cancel" onclick="sentCancel('${rid}')" title="Discard changes">Cancel</button>
                 </div>
               </div>
             </div>`;
@@ -1373,7 +1381,7 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
             ${sentSelect(`sent-add-visual-${elementId}`, VISUAL_OPTIONS, 'talking_head')}
           </div>
           <textarea class="sent-textarea" id="sent-add-text-${elementId}" placeholder="New sentence text…" style="min-height:50px;"></textarea>
-          <button class="btn-sent-add" onclick="sentAdd('${elementId}',${scriptId})">+ Add Sentence</button>
+          <button class="btn-sent-add" onclick="sentAdd('${elementId}',${scriptId})" title="Add a new sentence to this video script">+ Add Sentence</button>
         </div>` : '';
 
       return `${metaBadges ? `<div class="script-meta-badges">${metaBadges}</div>` : ''}
@@ -2025,8 +2033,8 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
             <input id="cref-eurl-${id}" value="${esc2(ref.url)}" placeholder="GitHub URL">
             <textarea id="cref-enote-${id}" placeholder="Note (optional)">${esc2(ref.note || '')}</textarea>
             <div class="edit-row">
-              <button class="btn btn-primary btn-sm" onclick="saveCodeRefUI(${id})">💾 Save</button>
-              <button class="btn btn-ghost btn-sm" onclick="closeCodeRefEdit(${id})">Cancel</button>
+              <button class="btn btn-primary btn-sm" onclick="saveCodeRefUI(${id})" title="Save code reference changes">💾 Save</button>
+              <button class="btn btn-ghost btn-sm" onclick="closeCodeRefEdit(${id})" title="Cancel editing code reference">Cancel</button>
             </div>
           </div>
         </div>
@@ -2178,7 +2186,7 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
             <span style="font-weight:600; font-size:0.82rem; color:var(--text-main); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${esc2(l.description)}</span>
             <a href="${esc2(l.url)}" target="_blank" rel="noopener" style="font-size:0.72rem; color:#60a5fa; text-decoration:none; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${esc2(l.url)}</a>
           </div>
-          <button class="btn btn-danger btn-sm" onclick="deleteSentLink(${l.id})" style="padding:4px 8px; font-size:0.75rem; margin-left:10px; flex-shrink: 0;">🗑 Delete</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteSentLink(${l.id})" style="padding:4px 8px; font-size:0.75rem; margin-left:10px; flex-shrink: 0;" title="Delete this URL link">🗑 Delete</button>
         </div>`).join('');
     }
 
@@ -2707,7 +2715,7 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
         <textarea id="rnote-modal-text" readonly style="width:100%; height: 350px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; padding: 12px; color: var(--text-main); font-family: var(--font-body); font-size: 0.9rem; line-height: 1.6; resize: none; outline: none;"></textarea>
       </div>
       <div class="modal-actions">
-        <button class="btn-cancel" onclick="closeResearchNoteModal()">Close</button>
+        <button class="btn-cancel" onclick="closeResearchNoteModal()" title="Close research note">Close</button>
       </div>
     </div>
   </div>
@@ -2725,8 +2733,8 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
       <div class="img-paste-preview" id="img-paste-preview"></div>
       <p class="img-modal-status" id="img-modal-status"></p>
       <div class="img-modal-actions">
-        <button class="btn-img-upload" id="btn-img-upload" onclick="uploadAndLinkSentImage()" disabled>⬆️ Upload &amp; Link</button>
-        <button class="btn-img-close" onclick="closeSentImageModal()">Close</button>
+        <button class="btn-img-upload" id="btn-img-upload" onclick="uploadAndLinkSentImage()" disabled title="Upload image and link to this sentence">⬆️ Upload &amp; Link</button>
+        <button class="btn-img-close" onclick="closeSentImageModal()" title="Close image modal">Close</button>
       </div>
       <div class="img-modal-linked" id="img-modal-linked" style="display:none;">
         <div class="img-modal-linked-label">🔗 Linked images</div>
@@ -2756,8 +2764,8 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
       
       <p class="img-modal-status" id="link-modal-status"></p>
       <div class="img-modal-actions">
-        <button class="btn-img-upload" id="btn-link-add" onclick="addSentLinkUI()" style="background: var(--primary);">➕ Add Link</button>
-        <button class="btn-img-close" onclick="closeSentLinkModal()">Close</button>
+        <button class="btn-img-upload" id="btn-link-add" onclick="addSentLinkUI()" style="background: var(--primary);" title="Add URL link to this sentence">➕ Add Link</button>
+        <button class="btn-img-close" onclick="closeSentLinkModal()" title="Close URL link modal">Close</button>
       </div>
       
       <div class="img-modal-linked" id="link-modal-linked" style="display:none; margin-top: 18px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.08);">
@@ -2769,7 +2777,7 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
 
 <!-- Image Preview Modal -->
   <div class="img-preview-overlay" id="img-preview-overlay" onclick="closeImagePreview()">
-    <button class="img-preview-close" onclick="event.stopPropagation();closeImagePreview()">✕</button>
+    <button class="img-preview-close" onclick="event.stopPropagation();closeImagePreview()" title="Close image preview">✕</button>
     <div class="img-preview-box" onclick="event.stopPropagation()">
       <img src="" alt="Preview">
     </div>
