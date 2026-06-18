@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="../../../shared/redirect-to-live-site.js"></script>
+  <title>AWS Certified Generative AI Developer — Professional | Similar Certification</title>
+  <meta name="description" content="What is the AWS Certified Generative AI Developer - Professional, why it matters for AI practitioners, and the total cost breakdown including exam fee, prep materials, and retake risks.">
+  <meta name="keywords" content="AWS Generative AI Developer, AWS AI certification, AWS Bedrock, generative AI certification, exam cost, professional certification, AI developer">
+  <meta name="author" content="Rifat Erdem Sahin">
+  <link rel="icon" type="image/png" href="../../../favicon.png">
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://rifaterdemsahin.github.io/claude-architect-certification/5_Symbols/production/postprod/aws_genai_cert.html">
+  <meta property="og:title" content="AWS Certified Generative AI Developer — Professional | Similar Certification">
+  <meta property="og:description" content="What is the AWS Certified Generative AI Developer - Professional, why it matters, and the total cost breakdown.">
+  <meta property="og:image" content="https://rifaterdemsahin.github.io/claude-architect-certification/favicon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg-dark: #030712; --bg-card: rgba(17,24,39,0.85); --text-main: #f3f4f6; --text-muted: #9ca3af; --primary: #8b5cf6; --secondary: #3b82f6; --accent: #f59e0b; --success: #10b981; --danger: #ef4444; --teal: #14b8a6; --orange: #f97316; --aws: #FF9900; --font-title: 'Outfit', sans-serif; --font-body: 'Plus Jakarta Sans', sans-serif; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background-color: var(--bg-dark); background-image: radial-gradient(circle at 10% 20%, rgba(255,153,0,0.06) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(59,130,246,0.06) 0%, transparent 40%); color: var(--text-main); font-family: var(--font-body); line-height: 1.6; padding-top: 70px; padding-bottom: 80px; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+    header { text-align: center; margin-bottom: 36px; }
+    .badge { display: inline-block; padding: 6px 16px; background: linear-gradient(135deg, rgba(255,153,0,0.2), rgba(139,92,246,0.2)); border: 1px solid rgba(255,153,0,0.3); border-radius: 100px; font-size: 0.8rem; font-weight: 600; color: var(--aws); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 14px; }
+    h1 { font-family: var(--font-title); font-size: 2.4rem; font-weight: 900; margin-bottom: 10px; }
+    header p { color: var(--text-muted); max-width: 680px; margin: 0 auto; font-size: 1.05rem; }
+
+    .section-title { font-family: var(--font-title); font-size: 1.6rem; font-weight: 800; margin: 0 0 8px; text-align: center; }
+    .section-sub { color: var(--text-muted); text-align: center; max-width: 640px; margin: 0 auto 28px; font-size: 0.95rem; }
+
+    .hero { background: var(--bg-card); border: 1px solid rgba(255,153,0,0.15); border-radius: 24px; padding: 36px; margin-bottom: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: center; }
+    .hero-left h2 { font-family: var(--font-title); font-size: 1.5rem; font-weight: 800; margin-bottom: 12px; }
+    .hero-left p { color: var(--text-muted); font-size: 0.92rem; margin-bottom: 12px; }
+    .hero-left p strong { color: var(--text-main); }
+    .hero-left .stats { display: flex; gap: 24px; margin-top: 16px; }
+    .hero-left .stat { text-align: center; }
+    .hero-left .stat-num { font-family: var(--font-title); font-size: 1.8rem; font-weight: 900; color: var(--aws); }
+    .hero-left .stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .hero-right { background: linear-gradient(135deg, rgba(255,153,0,0.05), rgba(59,130,246,0.05)); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px; padding: 28px; text-align: center; }
+    .hero-right .aws-icon { font-size: 3rem; margin-bottom: 12px; }
+    .hero-right h3 { font-family: var(--font-title); font-weight: 700; margin-bottom: 8px; }
+    .hero-right p { color: var(--text-muted); font-size: 0.9rem; }
+    .hero-right .action-link { display: inline-block; margin-top: 16px; background: var(--aws); color: black; padding: 10px 24px; border-radius: 12px; font-weight: 700; text-decoration: none; transition: all 0.3s; }
+    .hero-right .action-link:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,153,0,0.3); }
+    @media (max-width: 768px) { .hero { grid-template-columns: 1fr; } }
+
+    .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 40px; }
+    .info-card { background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-left: 3px solid var(--aws); border-radius: 16px; padding: 22px; }
+    .info-card h4 { font-family: var(--font-title); font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+    .info-card p { color: var(--text-muted); font-size: 0.9rem; }
+    .info-card p strong { color: var(--text-main); }
+
+    .why-matters { display: grid; gap: 18px; margin-bottom: 40px; }
+    .why-item { background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px; padding: 24px 28px; display: grid; grid-template-columns: 56px 1fr; gap: 18px; align-items: start; transition: all 0.3s; }
+    .why-item:hover { border-color: rgba(255,153,0,0.3); transform: translateX(4px); }
+    .why-icon { width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; background: linear-gradient(135deg, rgba(255,153,0,0.12), rgba(139,92,246,0.12)); border: 1px solid rgba(255,255,255,0.08); }
+    .why-item h3 { font-family: var(--font-title); font-weight: 700; font-size: 1.1rem; margin-bottom: 6px; }
+    .why-item p { color: var(--text-muted); font-size: 0.92rem; }
+    .why-item p strong { color: var(--text-main); font-weight: 600; }
+
+    .cost-breakdown { background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 24px; padding: 32px; margin-bottom: 40px; }
+    .cost-breakdown h2 { font-family: var(--font-title); font-size: 1.5rem; font-weight: 800; margin-bottom: 8px; text-align: center; }
+    .cost-breakdown .section-sub { margin-bottom: 24px; }
+    .cost-table { width: 100%; border-collapse: collapse; }
+    .cost-table th { text-align: left; padding: 14px 16px; font-family: var(--font-title); font-weight: 700; color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .cost-table td { padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.9rem; color: var(--text-muted); }
+    .cost-table td strong { color: var(--text-main); }
+    .cost-table td:last-child { text-align: right; font-weight: 700; color: var(--text-main); font-family: monospace; }
+    .cost-table tr:last-child td { border-bottom: none; }
+    .cost-table .total td { border-top: 2px solid var(--aws); font-weight: 800; color: var(--text-main); font-size: 1rem; }
+    .cost-table .total td:last-child { color: var(--aws); font-size: 1.1rem; }
+    .cost-note { margin-top: 16px; padding: 16px; background: rgba(255,153,0,0.06); border: 1px solid rgba(255,153,0,0.15); border-radius: 12px; font-size: 0.85rem; color: var(--text-muted); }
+    .cost-note strong { color: var(--text-main); }
+
+    .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 40px; }
+    .comp-card { background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px; padding: 28px; text-align: center; }
+    .comp-card .comp-icon { font-size: 2.8rem; margin-bottom: 12px; }
+    .comp-card h3 { font-family: var(--font-title); font-weight: 700; margin-bottom: 8px; }
+    .comp-card p { color: var(--text-muted); font-size: 0.92rem; margin-bottom: 12px; }
+    .comp-card ul { list-style: none; text-align: left; }
+    .comp-card ul li { padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.9rem; display: flex; align-items: flex-start; gap: 8px; color: var(--text-muted); }
+    .comp-card ul li:last-child { border-bottom: none; }
+    .comp-card ul li .check { color: var(--success); }
+    .comp-card ul li strong { color: var(--text-main); }
+    @media (max-width: 768px) { .comparison { grid-template-columns: 1fr; } }
+
+    .verdict { background: linear-gradient(135deg, rgba(255,153,0,0.05), rgba(139,92,246,0.05)); border: 1px solid rgba(255,153,0,0.2); border-radius: 24px; padding: 36px; margin-bottom: 40px; text-align: center; }
+    .verdict h2 { font-family: var(--font-title); font-size: 1.5rem; font-weight: 800; margin-bottom: 12px; }
+    .verdict p { color: var(--text-muted); max-width: 720px; margin: 0 auto; font-size: 0.95rem; }
+    .verdict p strong { color: var(--text-main); }
+
+    footer { text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
+
+    @media (max-width: 768px) {
+      h1 { font-size: 1.9rem; }
+      .hero-left .stats { flex-direction: column; gap: 12px; }
+      .why-item { grid-template-columns: 1fr; }
+      .why-icon { width: 48px; height: 48px; font-size: 1.3rem; }
+    }
+  </style>
+  <script src="../../../shared/nav.js"></script>
+<script src="../../../shared/seo.js" defer></script></head>
+<body>
+  <div class="container">
+    <header>
+      <div class="badge">☁️ Similar Certification</div>
+      <h1>AWS Certified Generative AI Developer — Professional</h1>
+      <p>What this certification is, why it matters for AI practitioners, and the full cost breakdown — plus how it compares to the Claude Certified Architect path.</p>
+    </header>
+
+    <div class="hero">
+      <div class="hero-left">
+        <h2>🔷 What Is It?</h2>
+        <p>The <strong>AWS Certified Generative AI Developer - Professional</strong> (exam code <strong>AIP-C01</strong>) validates advanced technical expertise in building and deploying production-ready generative AI solutions using AWS services, including <strong>Amazon Bedrock</strong>, <strong>Amazon SageMaker</strong>, and the broader AWS AI/ML stack.</p>
+        <p>This is a <strong>Professional-level</strong> exam — AWS's highest tier — designed for developers with <strong>2+ years of cloud experience</strong> and at least <strong>1 year of hands-on generative AI implementation</strong>. It tests the ability to design secure, cost-efficient, production-grade AI systems that go beyond proof-of-concept.</p>
+        <div class="stats">
+          <div class="stat"><div class="stat-num">75</div><div class="stat-label">Questions</div></div>
+          <div class="stat"><div class="stat-num">180</div><div class="stat-label">Minutes</div></div>
+          <div class="stat"><div class="stat-num">$300</div><div class="stat-label">Exam Fee</div></div>
+          <div class="stat"><div class="stat-num">Professional</div><div class="stat-label">Tier</div></div>
+        </div>
+      </div>
+      <div class="hero-right">
+        <div class="aws-icon">☁️</div>
+        <h3>AWS Certification Badge</h3>
+        <p>Issued directly by Amazon Web Services. Verifiable via <strong>Credly</strong>. Recognised globally by enterprises, cloud consultancies, and AI teams.</p>
+        <a class="action-link" href="https://aws.amazon.com/tr/certification/certified-generative-ai-developer-professional/" target="_blank">View Official Page →</a>
+      </div>
+    </div>
+
+    <h2 class="section-title">📋 Exam Details</h2>
+    <p class="section-sub">Everything you need to know about the exam structure, requirements, and logistics.</p>
+
+    <div class="info-grid">
+      <div class="info-card">
+        <h4>📝 Format</h4>
+        <p><strong>75 questions</strong> — multiple choice and multiple response. Proctored via Pearson VUE or online proctoring.</p>
+      </div>
+      <div class="info-card">
+        <h4>⏱ Duration</h4>
+        <p><strong>180 minutes</strong> (3 hours). Plan for ~2.5 minutes per question. Time management is critical at this level.</p>
+      </div>
+      <div class="info-card">
+        <h4>🌐 Languages</h4>
+        <p>Available in <strong>English, Japanese, Korean, and Simplified Chinese</strong>. Exam delivery in Pearson VUE test centres or online.</p>
+      </div>
+      <div class="info-card">
+        <h4>🎯 Target Audience</h4>
+        <p>Developers with <strong>2+ years</strong> AWS cloud experience and <strong>1+ year</strong> hands-on generative AI. No prerequisite certifications required.</p>
+      </div>
+      <div class="info-card">
+        <h4>📚 Core Domains</h4>
+        <p><strong>Foundation models, prompt engineering, RAG architectures</strong>, agentic AI workflows, model evaluation, security, and cost optimisation on Bedrock and SageMaker.</p>
+      </div>
+      <div class="info-card">
+        <h4>🔄 Recertification</h4>
+        <p>AWS Professional-level certifications are valid for <strong>3 years</strong>. Recertify by passing the current version of the exam.</p>
+      </div>
+    </div>
+
+    <h2 class="section-title">🔑 Why It Matters</h2>
+    <p class="section-sub">Five reasons this certification carries genuine weight in the AI industry — and why you should consider adding it to your portfolio alongside the Claude Certified Architect path.</p>
+
+    <div class="why-matters">
+      <div class="why-item">
+        <div class="why-icon">🏢</div>
+        <div>
+          <h3>Enterprise Credibility</h3>
+          <p>AWS is the <strong>largest cloud provider</strong> by market share. An AWS Professional-level certification is <strong>instantly recognised</strong> by enterprise IT departments, consultancy partners, and government procurement teams. It signals you can operate at cloud scale, not just prototype on a laptop.</p>
+        </div>
+      </div>
+      <div class="why-item">
+        <div class="why-icon">🛠️</div>
+        <div>
+          <h3>Production-Ready Skills</h3>
+          <p>The exam tests <strong>real production concerns</strong>: cost governance, security guardrails, latency optimisation, observability, and disaster recovery. These are the skills that separate <strong>demo builders from production engineers</strong> — and they map directly to what enterprises pay for.</p>
+        </div>
+      </div>
+      <div class="why-item">
+        <div class="why-icon">🤖</div>
+        <div>
+          <h3>Vendor-Neutral AI Depth</h3>
+          <p>While the exam is AWS-specific, the concepts are foundational: <strong>foundation model selection, RAG pipelines, agent orchestration, prompt engineering patterns, model evaluation</strong>. These transfer across all AI platforms, including Anthropic's Claude ecosystem on Bedrock.</p>
+        </div>
+      </div>
+      <div class="why-item">
+        <div class="why-icon">💰</div>
+        <div>
+          <h3>Salary & Role Impact</h3>
+          <p>AWS Professional-level certifications correlate with <strong>25-40% higher compensation</strong> in cloud/AI roles. According to AWS and industry surveys, certified professionals report faster promotions, greater project ownership, and preferential access to AI/ML engineering roles.</p>
+        </div>
+      </div>
+      <div class="why-item">
+        <div class="why-icon">🔗</div>
+        <div>
+          <h3>Complements Claude Certification</h3>
+          <p>The AWS GenAI cert covers <strong>Bedrock deeply</strong>, which is the native deployment target for Anthropic's Claude models in AWS. Taking both certifications gives you <strong>end-to-end coverage</strong>: Claude architecture from Anthropic + production deployment at cloud scale from AWS. This dual-certification profile is rare and valuable.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="cost-breakdown">
+      <h2>💰 Total Cost Breakdown</h2>
+      <p class="section-sub">The real cost of earning this certification goes well beyond the exam fee. Here is what a serious candidate should budget for.</p>
+
+      <table class="cost-table">
+        <thead>
+          <tr><th>Item</th><th>Details</th><th>Estimated Cost</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>📝 Exam Fee</strong></td>
+            <td>Official AWS exam registration fee. Non-refundable if cancelled within 24 hours.</td>
+            <td>$300</td>
+          </tr>
+          <tr>
+            <td><strong>📚 AWS Skill Builder (Digital)</strong></td>
+            <td>Official exam prep plan, digital courses, and practice questions on the AWS Skill Builder platform.</td>
+            <td>$0-50/mo</td>
+          </tr>
+          <tr>
+            <td><strong>🧪 Official Practice Test</strong></td>
+            <td>AWS Certification Official Practice Test — simulates the real exam environment and question style.</td>
+            <td>$40</td>
+          </tr>
+          <tr>
+            <td><strong>📖 Third-Party Courses</strong></td>
+            <td>Udemy, A Cloud Guru, or similar platforms for structured exam prep. Optional but recommended.</td>
+            <td>$20-100</td>
+          </tr>
+          <tr>
+            <td><strong>☁️ AWS Hands-On Practice</strong></td>
+            <td>AWS account usage for Bedrock, SageMaker, Lambda, and other services. Budget for ~50 hours of lab work.</td>
+            <td>$50-200</td>
+          </tr>
+          <tr>
+            <td><strong>🔁 Retake Buffer</strong></td>
+            <td>Statistical reality: many candidates do not pass on the first attempt. Budgeting for one retake is prudent.</td>
+            <td>$300</td>
+          </tr>
+          <tr class="total">
+            <td><strong>💰 Total Range (First Attempt Pass)</strong></td>
+            <td>Exam + prep materials + AWS lab costs. Assumes passing on first attempt.</td>
+            <td>$410-690</td>
+          </tr>
+          <tr class="total">
+            <td><strong>💰 Total Range (With Retake)</strong></td>
+            <td>Includes one exam retake. More realistic budget for most candidates.</td>
+            <td>$710-990</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="cost-note">
+        <strong>💡 Smart Budgeting Tip:</strong> Use the <strong>AWS Skill Builder free tier</strong> for self-paced learning, and only purchase the official practice test ($40) once you are scoring 80%+ in your own mock exams. Reserve AWS lab costs by using the <strong>AWS Free Tier</strong> for Bedrock (50+ models, 50k text prompts/month free) and SageMaker (2 months, 250 hours free). If you pass on the first attempt, the total cost can be as low as <strong>$340</strong> (exam + AWS Skill Builder free tier + minimal lab costs).
+      </div>
+    </div>
+
+    <h2 class="section-title">⚖️ How It Compares: AWS GenAI vs Claude Certified Architect</h2>
+    <p class="section-sub">Both certifications target AI builders, but from different angles. Understanding the overlap helps you decide whether one, both, or neither fits your career plan.</p>
+
+    <div class="comparison">
+      <div class="comp-card">
+        <div class="comp-icon">📜</div>
+        <h3>AWS Certified GenAI Developer</h3>
+        <p><strong>Professional</strong> level — vendor certification from AWS</p>
+        <ul>
+          <li><span class="check">✓</span> <strong>Cloud-first:</strong> Deep focus on AWS infrastructure (Bedrock, SageMaker, Lambda)</li>
+          <li><span class="check">✓</span> <strong>Enterprise scale:</strong> Cost, security, governance at cloud scale</li>
+          <li><span class="check">✓</span> <strong>Multi-model:</strong> Covers all foundation models on Bedrock, not just one vendor</li>
+          <li><span class="check">✓</span> <strong>Production ops:</strong> Observability, CI/CD for AI, disaster recovery</li>
+          <li><span class="check">✓</span> <strong>Higher cost:</strong> $300+ exam fee, broader scope requires more prep</li>
+        </ul>
+      </div>
+      <div class="comp-card">
+        <div class="comp-icon">🤖</div>
+        <h3>Claude Certified Architect</h3>
+        <p><strong>Specialist</strong> level — vendor certification from Anthropic</p>
+        <ul>
+          <li><span class="check">✓</span> <strong>AI-first:</strong> Deep focus on Claude's architecture, capabilities, and limitations</li>
+          <li><span class="check">✓</span> <strong>Prompt & alignment:</strong> Prompt engineering, safety, jailbreak prevention, context window mastery</li>
+          <li><span class="check">✓</span> <strong>Single model depth:</strong> Exhaustive understanding of one frontier model family</li>
+          <li><span class="check">✓</span> <strong>Architecture patterns:</strong> Multi-agent, tool use, RAG with Claude specifically</li>
+          <li><span class="check">✓</span> <strong>Lower cost:</strong> More focused scope, narrower but deeper</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="verdict">
+      <h2>🎯 The Verdict</h2>
+      <p>The <strong>AWS Certified Generative AI Developer - Professional</strong> is the natural companion certification for the <strong>Claude Certified Architect</strong> path. One gives you <strong>deep cloud infrastructure + multi-model deployment skills</strong>; the other gives you <strong>deep frontier-model architecture expertise</strong>. Together, they form a complete profile: you understand both the model <em>and</em> the infrastructure it runs on. For architects serious about production AI careers, holding both is a powerful differentiator.</p>
+    </div>
+
+    <footer>
+      <p style="margin-bottom: 8px;"><a href="paid_vs_unpaid_certificates.html" style="color: var(--secondary); text-decoration: none;">← Back to Paid vs Unpaid Certificates</a> &nbsp;·&nbsp; <a href="../../../index.html" style="color: var(--secondary); text-decoration: none;">🏠 Home</a></p>
+      <p style="margin-bottom: 12px; font-size: 0.85rem; opacity: 0.8;">
+        Instructor: <a href="https://www.linkedin.com/in/rifaterdemsahin" target="_blank" style="color: #93c5fd; text-decoration: underline; margin-right: 16px;">Rifat Erdem Sahin LinkedIn</a>
+        YouTube: <a href="https://www.youtube.com/@RifatErdemSahin" target="_blank" style="color: #93c5fd; text-decoration: underline;">@RifatErdemSahin</a>
+      </p>
+    </footer>
+  </div>
+  <script src="../../../shared/debug-panel.js"></script>
+</body>
+</html>
