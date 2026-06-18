@@ -50,6 +50,22 @@
     </footer>
   </div>
 
+  <script src="../../../shared/postprod-guide.js"></script>
+  <script>
+    PostprodGuide.render({
+      title: 'AI Localization & Dubbing',
+      accent: '#ec4899',
+      intro: 'This page produces a translated line and a voice-cloned dub per script sentence, per target language.',
+      steps: [
+        'Pick a target Language from the top selector, then select a Module and Video.',
+        'For each sentence, generate the translation and paste it into Translated Text (keep it timecode-matched).',
+        'Create the dubbed audio with a cloned voice, paste the MP3 into Dubbed Audio URL, and record the Voice Clone ID and Duration.',
+        'Mark Status "completed"/"skipped" with a Rationale. Rows are keyed by sentence + language, so each language is tracked separately.',
+        'Switch the Language selector to localize the same script into another locale.'
+      ],
+      note: 'The conflict key is sentence + language, so the same sentence can hold one row per language.'
+    });
+  </script>
   <script src="../../../shared/ai-sentence-tracker.js"></script>
   <script>
     AISentenceTracker.init({

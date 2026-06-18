@@ -50,6 +50,22 @@
     </footer>
   </div>
 
+  <script src="../../../shared/postprod-guide.js"></script>
+  <script>
+    PostprodGuide.render({
+      title: 'AI Video B-Roll (Text-to-Video)',
+      accent: '#3b82f6',
+      intro: 'This page tracks one text-to-video B-roll clip per sentence to illustrate concepts — clips are generated in Runway/Pika/Sora and logged here.',
+      steps: [
+        'Choose a Module and Video to load the script sentences.',
+        'For each sentence that needs B-roll, set Status to "generating" and pick a Provider (Runway, Pika, Sora, Luma…).',
+        'Write a vivid Text-to-Video Prompt (e.g. "abstract cloud servers scaling, cinematic, slow zoom") and generate the clip in that tool.',
+        'Paste the .mp4 link into Clip URL, set Duration, and mark Status "completed"/"skipped" with a Rationale.',
+        'Changes autosave per sentence to the ai_broll Supabase table.'
+      ],
+      note: 'Skip sentences that do not need B-roll and note why in Rationale — the editor reads it.'
+    });
+  </script>
   <script src="../../../shared/ai-sentence-tracker.js"></script>
   <script>
     AISentenceTracker.init({

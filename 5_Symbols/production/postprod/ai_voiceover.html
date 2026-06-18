@@ -50,6 +50,22 @@
     </footer>
   </div>
 
+  <script src="../../../shared/postprod-guide.js"></script>
+  <script>
+    PostprodGuide.render({
+      title: 'AI Voiceover (TTS)',
+      accent: '#10b981',
+      intro: 'This page tracks one text-to-speech clip per script sentence — the audio itself is generated in your TTS provider and logged here.',
+      steps: [
+        'Pick a Module, then a Video — the page loads every sentence of that script from Supabase.',
+        'For each sentence, set Status to "generating" and choose a Provider (ElevenLabs, OpenAI TTS, Azure…) and a Voice (e.g. Rachel).',
+        'Generate the voice line in that provider\'s tool, then paste the resulting MP3 link into Audio URL and enter the clip Duration.',
+        'Set Status to "completed" (or "skipped"/"failed" with a Rationale). Every change autosaves to the ai_voiceovers Supabase table.',
+        'Work down the list — progress is tracked per sentence so you can stop and resume anytime.'
+      ],
+      note: 'No audio is synthesised on this page; it is a tracker. Generate in the provider, then record the link and status here.'
+    });
+  </script>
   <script src="../../../shared/ai-sentence-tracker.js"></script>
   <script>
     AISentenceTracker.init({

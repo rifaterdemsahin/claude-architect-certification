@@ -50,6 +50,22 @@
     </footer>
   </div>
 
+  <script src="../../../shared/postprod-guide.js"></script>
+  <script>
+    PostprodGuide.render({
+      title: 'AI Avatar / Talking-Head',
+      accent: '#8b5cf6',
+      intro: 'This page tracks one photorealistic presenter clip per script sentence — the clip is generated in HeyGen/Synthesia and logged here.',
+      steps: [
+        'Select a Module and Video to load that script\'s sentences from Supabase.',
+        'For each sentence, set Status to "generating", pick a Provider (HeyGen, Synthesia, D-ID…) and an Avatar / Persona.',
+        'Render the talking-head clip in that tool, then paste the video link into Video URL and record the Duration.',
+        'Mark Status "completed" (or "skipped"/"failed") and add a Rationale. Every change autosaves to the ai_avatars table.',
+        'Move through every sentence — per-sentence status lets you resume mid-module.'
+      ],
+      note: 'The avatar video is produced in the provider; this page only captures the choice, link, and status.'
+    });
+  </script>
   <script src="../../../shared/ai-sentence-tracker.js"></script>
   <script>
     AISentenceTracker.init({

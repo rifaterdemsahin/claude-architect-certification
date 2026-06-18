@@ -50,6 +50,22 @@
     </footer>
   </div>
 
+  <script src="../../../shared/postprod-guide.js"></script>
+  <script>
+    PostprodGuide.render({
+      title: 'AI Script & Prompt Generation',
+      accent: '#f59e0b',
+      intro: 'This page captures the provenance of each script sentence — which LLM, which prompt, and which source produced it.',
+      steps: [
+        'Select a Module and Video to load its sentences.',
+        'For each sentence, record the LLM Model used (e.g. claude-opus-4-8) and the Source Blueprint / Docs it was expanded from.',
+        'Paste the exact Prompt Used and the Generated / Refined Text that resulted.',
+        'Set Status to "completed" and add a Rationale for any rewrite or skip.',
+        'Every field autosaves to ai_script_generations — giving you a reproducible audit trail per sentence.'
+      ],
+      note: 'This is the provenance log behind the script — fill it as you draft so each line is reproducible.'
+    });
+  </script>
   <script src="../../../shared/ai-sentence-tracker.js"></script>
   <script>
     AISentenceTracker.init({
