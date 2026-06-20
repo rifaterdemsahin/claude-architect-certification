@@ -685,6 +685,8 @@ let carouselData = [];
     const overlay = document.getElementById('carousel-modal');
     if (overlay) overlay.classList.remove('active');
   };
+
+  function buildFilter() {
     const modules = [...new Set(allSentences
       .filter(s => s.module_id !== undefined && s.module_id !== null)
       .map(s => s.module_id)
