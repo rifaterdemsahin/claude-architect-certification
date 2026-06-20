@@ -326,6 +326,123 @@
       text-decoration: none;
       font-weight: 700;
     }
+
+    /* Thumbnail preview & hover styles */
+    .asset-thumb-container {
+      width: 56px;
+      height: 56px;
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .asset-thumb {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s;
+    }
+    .asset-thumb-container:hover .asset-thumb {
+      transform: scale(1.1);
+    }
+    .thumb-progress {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 4px;
+      width: 0%;
+      background: var(--primary);
+    }
+    .thumb-timer-badge {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    /* Lightbox Modal */
+    .lightbox-bg {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.9);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      cursor: zoom-out;
+      animation: fadeIn 0.2s ease-out;
+    }
+    .lightbox-bg.open { display: flex; }
+    .lightbox-inner {
+      position: relative;
+      cursor: default;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      max-width: 90%;
+      max-height: 90%;
+    }
+    .lightbox-inner img {
+      max-width: 85vw;
+      max-height: 75vh;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      object-fit: contain;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(139, 92, 246, 0.15);
+    }
+    .lightbox-close {
+      position: absolute;
+      top: -16px;
+      right: -16px;
+      background: var(--primary);
+      border: none;
+      color: white;
+      font-size: 1rem;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      transition: all 0.2s;
+    }
+    .lightbox-close:hover {
+      background: white;
+      color: var(--bg-dark);
+      transform: scale(1.1);
+    }
+    .lightbox-caption {
+      text-align: center;
+      color: var(--text-main);
+      font-family: var(--font-title);
+      font-weight: 600;
+      font-size: 1rem;
+      margin-top: 16px;
+      background: rgba(0, 0, 0, 0.6);
+      padding: 6px 16px;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
   </style>
   <script src="../../../shared/nav.js"></script>
   <script src="../../../shared/debug-panel.js"></script>
@@ -457,7 +574,10 @@
       try {
         const res = await fetch(`/api/research/files?container=${azureContainer}`);
         if (!res.ok) throw new Error('API unavailable');
-        const files = await res.json();
+        const allFiles = await res.json();
+        
+        // Filter out thumbnails from list
+        const files = (allFiles || []).filter(f => !f.name.startsWith('__thumb__'));
         loadedAssets = files;
 
         if (files.length === 0) {
@@ -473,8 +593,41 @@
           let sizeStr = (file.size / 1024).toFixed(1) + ' KB';
           if (file.size > 1024 * 1024) sizeStr = (file.size / (1024 * 1024)).toFixed(1) + ' MB';
 
+          let thumbHtml = '';
+          if (activeTab === 'images') {
+            const fileUrl = `/api/research/file?container=${azureContainer}&name=${encodeURIComponent(file.name)}`;
+            const thumbName = '__thumb__' + file.name;
+            const hasThumb = allFiles.some(f => f.name === thumbName);
+            const thumbUrl = hasThumb
+              ? `/api/research/file?container=${azureContainer}&name=${encodeURIComponent(thumbName)}`
+              : fileUrl;
+            
+            // Map fallback references
+            let fallbackSrc = '';
+            if (file.name.includes('self_learning_value') || file.name.includes('architecture')) {
+              fallbackSrc = '../../../3_Simulation/generated/self_learning_value.png';
+            } else if (file.name.includes('landing') || file.name.includes('ui_mockup')) {
+              fallbackSrc = '../../../3_Simulation/generated/user_screen1_landing.png';
+            } else if (file.name.includes('debug_menu') || file.name.includes('topology') || file.name.includes('zdr')) {
+              fallbackSrc = '../../../3_Simulation/generated/user_screen2_debug_menu.png';
+            } else {
+              fallbackSrc = '../../../3_Simulation/generated/self_learning_value.png';
+            }
+
+            thumbHtml = `
+              <div class="asset-thumb-container" 
+                   onmouseenter="startHoverPreview(this, '${fileUrl.replace(/'/g, "\\'")}', '${fallbackSrc.replace(/'/g, "\\'")}', '${file.name.replace(/'/g, "\\'")}')" 
+                   onmouseleave="cancelHoverPreview(this)">
+                <img class="asset-thumb" src="${thumbUrl}" onerror="this.onerror=null; this.src='${fallbackSrc}';" alt="${file.name}">
+                <div class="thumb-progress"></div>
+                <div class="thumb-timer-badge">3s</div>
+              </div>
+            `;
+          }
+
           item.innerHTML = `
-            <div class="asset-details">
+            ${thumbHtml}
+            <div class="asset-details" style="flex: 1; min-width: 0;">
               <span class="asset-name" title="${file.name}">${file.name}</span>
               <span class="asset-meta">${iconMap[activeTab]} ${activeTab.toUpperCase()} • ${sizeStr}</span>
             </div>
@@ -505,8 +658,30 @@
         mockList.forEach(name => {
           const item = document.createElement('div');
           item.className = 'asset-item';
+          
+          let thumbHtml = '';
+          if (activeTab === 'images') {
+            const fileUrl = `/api/research/file?container=${azureContainer}&name=${encodeURIComponent(name)}`;
+            let fallbackSrc = '';
+            if (name === 'architecture_diagram_v1.png') fallbackSrc = '../../../3_Simulation/generated/self_learning_value.png';
+            else if (name === 'ui_mockup_v2.png') fallbackSrc = '../../../3_Simulation/generated/user_screen1_landing.png';
+            else if (name === 'zdr_topology.png') fallbackSrc = '../../../3_Simulation/generated/user_screen2_debug_menu.png';
+            else fallbackSrc = '../../../3_Simulation/generated/self_learning_value.png';
+
+            thumbHtml = `
+              <div class="asset-thumb-container" 
+                   onmouseenter="startHoverPreview(this, '${fileUrl.replace(/'/g, "\\'")}', '${fallbackSrc.replace(/'/g, "\\'")}', '${name.replace(/'/g, "\\'")}')" 
+                   onmouseleave="cancelHoverPreview(this)">
+                <img class="asset-thumb" src="${fallbackSrc}" alt="${name}">
+                <div class="thumb-progress"></div>
+                <div class="thumb-timer-badge">3s</div>
+              </div>
+            `;
+          }
+
           item.innerHTML = `
-            <div class="asset-details">
+            ${thumbHtml}
+            <div class="asset-details" style="flex: 1; min-width: 0;">
               <span class="asset-name">${name}</span>
               <span class="asset-meta">${iconMap[activeTab]} ${activeTab.toUpperCase()} • Fallback Asset</span>
             </div>
@@ -590,10 +765,113 @@
         container.appendChild(card);
       });
     }
+    // Image Hover Preview & Lightbox logic
+    let hoverTimeout = null;
+    let hoverInterval = null;
+
+    function startHoverPreview(element, url, fallbackUrl, name) {
+      cancelHoverPreview(element);
+
+      const progressEl = element.querySelector('.thumb-progress');
+      const badgeEl = element.querySelector('.thumb-timer-badge');
+      
+      if (progressEl) {
+        progressEl.style.transition = 'none';
+        progressEl.style.width = '0%';
+        // Force reflow
+        progressEl.offsetHeight;
+        progressEl.style.transition = 'width 3s linear';
+        progressEl.style.width = '100%';
+      }
+
+      if (badgeEl) {
+        badgeEl.style.opacity = '1';
+        badgeEl.textContent = '3s';
+        let timeLeft = 3;
+        hoverInterval = setInterval(() => {
+          timeLeft--;
+          if (timeLeft >= 0) {
+            badgeEl.textContent = timeLeft + 's';
+          }
+          if (timeLeft <= 0) {
+            clearInterval(hoverInterval);
+          }
+        }, 1000);
+      }
+
+      hoverTimeout = setTimeout(() => {
+        openLightbox(url, fallbackUrl, name);
+        cancelHoverPreview(element);
+      }, 3000);
+    }
+
+    function cancelHoverPreview(element) {
+      if (hoverTimeout) {
+        clearTimeout(hoverTimeout);
+        hoverTimeout = null;
+      }
+      if (hoverInterval) {
+        clearInterval(hoverInterval);
+        hoverInterval = null;
+      }
+      
+      const progressEl = element.querySelector('.thumb-progress');
+      const badgeEl = element.querySelector('.thumb-timer-badge');
+      if (progressEl) {
+        progressEl.style.transition = 'none';
+        progressEl.style.width = '0%';
+      }
+      if (badgeEl) {
+        badgeEl.style.opacity = '0';
+      }
+    }
+
+    function openLightbox(url, fallbackUrl, name) {
+      const modalImg = document.getElementById('lightbox-img');
+      const modalCaption = document.getElementById('lightbox-caption');
+      
+      modalImg.onload = null;
+      modalImg.onerror = function() {
+        this.onerror = null;
+        this.src = fallbackUrl || '../../../3_Simulation/generated/self_learning_value.png';
+      };
+      modalImg.src = url;
+      modalCaption.textContent = name;
+      
+      const modal = document.getElementById('lightbox-bg');
+      modal.classList.add('open');
+    }
+
+    function closeLightbox(e) {
+      if (!e || e.target === document.getElementById('lightbox-bg') || e.target.id === 'lightbox-close-btn') {
+        document.getElementById('lightbox-bg').classList.remove('open');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const closeBtn = document.getElementById('lightbox-close-btn');
+      if (closeBtn) {
+        closeBtn.addEventListener('click', () => closeLightbox());
+      }
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+          closeLightbox();
+        }
+      });
+    });
 
     // Init
     onModuleChange();
     switchTab('images');
   </script>
+
+  <!-- Image lightbox/modal popup -->
+  <div class="lightbox-bg" id="lightbox-bg" onclick="closeLightbox(event)">
+    <div class="lightbox-inner">
+      <button class="lightbox-close" id="lightbox-close-btn">✕</button>
+      <img id="lightbox-img" src="" alt="">
+      <div class="lightbox-caption" id="lightbox-caption"></div>
+    </div>
+  </div>
 </body>
 </html>

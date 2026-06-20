@@ -253,10 +253,26 @@
           This is mitigated by enforcing structured table-read workflows, immediate recordings, and post-production Edit Decision Lists (EDLs).
         </p>
         <div class="mitigation-box">
-          <h4>💡 Mitigation Strategy: Table-Reads & Reversals</h4>
-          <p>
-            Prioritize the recording process over pre-production tooling. Use simplified recording loops (via <code>shared/reversal-recorder.js</code>) and direct documentation checks.
+          <h4>💡 Mitigation Strategy: Tell ➔ Do ➔ Apply Loop 🔄</h4>
+          <p style="margin-bottom: 12px;">
+            To resolve scaffolding deadlock, we implement a strict 3-stage lifecycle that converts preparation into physical content output and final application:
           </p>
+          <ul style="margin-left: 20px; margin-bottom: 16px; color: var(--slate); list-style-type: disc;">
+            <li style="margin-bottom: 8px;">
+              <strong>📢 Pre-Production (TELL):</strong> Leverage AI-assisted script generation, then read scripts aloud to verify conversational flow. Generate visual templates/mockups to establish the visual model and ensure high recall of target information.
+            </li>
+            <li style="margin-bottom: 8px;">
+              <strong>🎥 Production (DO):</strong> Once the table read is complete and the intro is ready, freeze any further tooling changes. Turn on the recording device and create a shot list to capture the direct actions (demonstrating exactly how to use the architectural knowledge).
+            </li>
+            <li style="margin-bottom: 8px;">
+              <strong>🚀 Post-Production (APPLY):</strong> Move recorded captures into content assembly. Deliver all implementation artifacts to the audience, giving them ready-to-use templates to motivate and guide them in their own self-learning journey.
+            </li>
+          </ul>
+          
+          <h3 style="margin-top: 24px; margin-bottom: 12px; font-size: 1.1rem; color: var(--accent-cyan); font-family: 'Space Mono', monospace; text-transform: uppercase;">📊 Deadlock Mitigation Loop</h3>
+          <div style="border-radius: 12px; overflow: hidden; border: 1px solid var(--line); margin-top: 12px;">
+            <img src="../../../3_Simulation/generated/deadlock_mitigation.png" alt="Scaffolding Deadlock Mitigation Loop" style="width: 100%; display: block; height: auto;">
+          </div>
         </div>
       </div>
     </div>

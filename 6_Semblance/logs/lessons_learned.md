@@ -271,4 +271,20 @@ Axiom's query endpoints (both dataset-specific and general APL) require a `start
 ## Lessons Learned - 2026-06-13
 
 - **API Route Propagation:** When adding new API endpoints to a Go server, a full rebuild and restart of the binary is required for the changes to take effect. If the server is running in the background, existing processes must be terminated first.
-\n### [2026-06-14] 🔐 AppleScript & Accessibility\n- **Issue:** Automation of VS Code terminals via `osascript` fails if Accessibility permissions are not granted to the calling app (Terminal/Gemini CLI).\n- **Lesson:** Always provide a clear visual guide for permission escalation when using system-level automation. Screenshot verification from the user is a reliable way to confirm environment state.
+
+### [2026-06-14] 🔐 AppleScript & Accessibility
+- **Issue:** Automation of VS Code terminals via `osascript` fails if Accessibility permissions are not granted to the calling app (Terminal/Gemini CLI).
+- **Lesson:** Always provide a clear visual guide for permission escalation when using system-level automation. Screenshot verification from the user is a reliable way to confirm environment state.
+
+## 📅 2026-06-20: Scaffolding Deadlock Mitigation Page & Visual Infographic
+
+### What went well
+- Generated a high-fidelity, visually rich infographic `deadlock_mitigation.jpg` illustrating the Scaffolding Deadlock Mitigation path: Pre-Prod (Tell) ➔ Production (Do) ➔ Post-Prod (Apply).
+- Enhanced `risks.html` by embedding the 3-step mitigation strategy and linking the generated diagram inside the Tooling Scaffolding Deadlock risk card.
+- Documented our planning log in `llm_thinking_log.md` and prompts in `prompts.md`.
+
+### Gaps & Challenges
+- Encountered a git push conflict because another agent had already created and committed `risks.html` on origin/main. Aborting the rebase, resetting local branch to origin/main, and applying the changes on top of the remote version successfully resolved the conflict.
+
+### Takeaway for Future AI Agents
+- Always fetch and check if a file already exists on the remote branch (`origin/main`) before assuming it does not exist, to avoid unnecessary push rejections and conflict overhead.

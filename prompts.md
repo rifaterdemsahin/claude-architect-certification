@@ -262,3 +262,12 @@ Record every prompt given to AI agents below. Include the date, agent, and purpo
 - **Agent:** Gemini CLI
 - **Purpose:** Add a specific Canva design link for "thumbnail assembly" to the Production Tools navigation menu.
 - **Outcome:** Updated `navigation_config.json`, `shared/nav.js`, `index.html`, `markdown_renderer.html`, `home.html`, `5_Symbols/course_src/templates/markdown_renderer.html`, and `5_Symbols/tools/sitemap.html`.
+
+---
+
+## 2026-06-20 — Risks & Scaffolding Deadlock Mitigation Page
+
+**Agent:** Antigravity (Gemini 3.5 Flash)
+**Purpose:** Integrate scaffolding deadlock mitigation strategy (Tell -> Do -> Apply) and its visual diagram into risks.html.
+**Prompt:** "add mitifgation stratgey to the scaffolding deadlock > https://claude-architect-certification.fly.dev/5_Symbols/production/preprod/risks.html > use the preprod the tell with the ai created scripts and read them outloud when you do the image generation see and attach them to complete the images so u can recall and move on the do action stage in the production recording which i would record what i can do with what i learned and the do section is straight forward as i have done the table read and the intro is ready it is time to turn on and create a shot list > when the captures are there we move on to the post prod and give the implementation as apply with all the artifacts to the audience so they can remember and get motivated > add these use emojis and acommit push"
+**Outcome:** Enhanced the medium-risk card "Tooling Scaffolding Deadlock" in `5_Symbols/production/preprod/risks.html` with a detailed mitigation plan and the generated diagram `deadlock_mitigation.jpg` from `3_Simulation/generated/`. Recorded logs in `llm_thinking_log.md`, `lessons_learned.md`, and `fix.log`.

@@ -1,5 +1,24 @@
 # LLM Thinking Log
 
+## 2026-06-20 — 🖼️ Footage Mapping Image Hover Modal Preview
+
+### 🎯 Objective
+Add image preview capabilities on hover with a 3-second delay to the Footage & Research Mapping tool (`5_Symbols/production/prod/footage_mapping.html`). When the user hovers over an image asset in the research elements list:
+1. Trigger a 3-second delay timer.
+2. Provide visual feedback (e.g. countdown or loading ring).
+3. If they continue hovering for 3 seconds, show the image in a modal popup overlay.
+4. Allow closing the modal popup easily (close button, clicking outside, escape key).
+
+### 📐 Design & Implementation Plan
+1. **Identify elements to hover over**: When the "Images" tab is active in the Research Elements panel, render a thumbnail/image icon for each image file.
+2. **Add Modal Popup HTML/CSS**: Add a clean glassmorphic modal overlay (`#hover-preview-modal`) to the body of `footage_mapping.html`.
+3. **Hover & Delay Logic**:
+   - Implement event listeners on the thumbnail element: `mouseenter`/`mouseover` to start a 3-second `setTimeout`.
+   - Show a micro-animation or message indicating that the hover preview is loading.
+   - Implement `mouseleave`/`mouseout` to clear the `setTimeout` and hide the loading state if the user moves their mouse away before 3 seconds.
+   - After 3 seconds, open the modal popup with the image URL.
+4. **Validation**: Test locally, compile, verify links and styling.
+
 ## 2026-06-18 — 📖 Rifat Erdem Sahin's Personal Story & Motivation Integration
 
 ### 🎯 Objective
@@ -683,5 +702,24 @@ Existing chain: `modules → videos → scripts → sentences`. Each AI object h
 - Style them with the premium glassmorphic UI matching the template (dark mode, responsive, high aesthetics).
 - Register the new category "9. 🧠 Self Learning" and its children in `navigation_config.json`, fallback configurations inside `index.html`, `5_Symbols/markdown_renderer.html`, and `shared/nav.js`.
 - Perform the required verification steps.
+
+---
+
+## 2026-06-20 — ⚡ Scaffolding Deadlock Mitigation & Risks Page
+
+### 🎯 Objective
+Update the existing risks.html page in `5_Symbols/production/preprod/` to detail the scaffolding deadlock mitigation strategy (Tell -> Do -> Apply), display the custom visual diagram (`deadlock_mitigation.jpg`), and ensure that all menus and fallbacks are correctly synchronized.
+
+### 📐 Design & Implementation Plan
+1. **Risks Page Enhancement (`5_Symbols/production/preprod/risks.html`)**:
+   - Update the "Tooling Scaffolding Deadlock" card.
+   - Explain the 3-step mitigation loop (Pre-Prod/Tell, Production/Do, Post-Prod/Apply).
+   - Display the visual diagram `deadlock_mitigation.jpg` inside the card.
+2. **Commit and Push**:
+   - Save all files, stage, commit, and push.
+
+### 🗺 Files to Create/Modify
+- MODIFY: `5_Symbols/production/preprod/risks.html`
+- MODIFY: `4_Formula/llm_thinking_log.md` (this entry)
 
 
