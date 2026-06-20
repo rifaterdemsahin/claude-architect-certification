@@ -1,5 +1,28 @@
 # LLM Thinking Log
 
+## 2026-06-20 — 🎞️ Talking Heads "Video Images" Carousel Player
+
+### 🎯 Objective
+Update `5_Symbols/production/prod/talking-heads.html` so the per-video image carousel is clearly labelled "Video Images", only shows images that are actually linked to the current video, and can auto-rotate with a Play/Pause button.
+
+### 📐 Implementation
+1. **Button label**: Changed per-video "🖼 Images" button to "🎞 Video Images".
+2. **Modal title**: Updated carousel modal header and dynamic title to "🎞 Video Images — {video label}".
+3. **Strict video-scoped image loading**: Replaced the fuzzy-match + fallback-to-all-files logic with an exact lookup of `research_relationships.item_name` values for the current `video_id` and `container=research-images`. Thumbnails are still used when present, but unrelated container files are no longer shown.
+4. **Empty state**: When no images are linked to the video, the modal now shows "🎞 No video images linked to this video yet." instead of every file in the container.
+5. **Play/Pause rotation**: Added a `▶ Play / ⏸ Pause` button to the carousel footer. Clicking Play starts a 2.5s interval that loops through images; Prev/Next/GoTo/Close all pause playback and update the button state.
+
+### ✅ Verification
+- Local HTML syntax verified.
+- Link checker run on the production folder; no new broken links introduced by this file.
+- `go` is not available in this environment, so the Go build gate could not be executed locally.
+
+### 📦 Files Changed
+- `5_Symbols/production/prod/talking-heads.html`
+- `4_Formula/llm_thinking_log.md` — this entry
+
+---
+
 ## 2026-06-20 — 🗣️ Talking Heads Search, Collapsible Panels, Video Count & Sort
 
 ### 🎯 Objective

@@ -559,7 +559,7 @@
       html += `    </div>`;
       html += `    <div class="video-actions">`;
       html += `      <button class="video-btn btn-prompter-trigger" onclick="event.stopPropagation();generatePrompterMD(${scriptId})">📝 Prompter MD</button>`;
-      html += `      <button class="video-btn secondary" onclick="event.stopPropagation();showImageCarousel(${videoId}, '${labelSafe}')">🖼 Images</button>`;
+      html += `      <button class="video-btn secondary" onclick="event.stopPropagation();showImageCarousel(${videoId}, '${labelSafe}')">🎞 Video Images</button>`;
       html += `      <a href="footage_mapping.html?module=${modNum}&video=${videoNum}" class="video-btn secondary" onclick="event.stopPropagation();">🎥 Footage Mapping</a>`;
       html += `    </div>`;
       html += `  </div>`;
@@ -635,6 +635,8 @@
 
 let carouselData = [];
   let carouselIndex = 0;
+  let carouselInterval = null;
+  const CAROUSEL_PLAY_INTERVAL_MS = 2500;
 
   window.showImageCarousel = async function(videoId, videoLabel) {
     let overlay = document.getElementById('carousel-modal');
@@ -645,7 +647,7 @@ let carouselData = [];
       overlay.innerHTML = `
         <div class="modal-container" style="max-width: 900px;">
           <div class="modal-header">
-            <h3 id="carousel-title">🖼 Images</h3>
+            <h3 id="carousel-title">🎞 Video Images</h3>
             <button class="modal-close" onclick="closeCarouselModal()">&times;</button>
           </div>
           <div class="modal-body" id="carousel-body">
@@ -653,6 +655,7 @@ let carouselData = [];
           </div>
           <div class="modal-footer" id="carousel-footer" style="display:none;">
             <div class="carousel-nav">
+              <button class="mod-btn" id="carousel-play" onclick="toggleCarouselPlay()" title="Play/pause video image rotation">▶ Play</button>
               <button class="mod-btn" id="carousel-prev" onclick="carouselPrev()">◀ Prev</button>
               <span class="carousel-counter" id="carousel-counter"></span>
               <button class="mod-btn" id="carousel-next" onclick="carouselNext()">Next ▶</button>
@@ -663,7 +666,7 @@ let carouselData = [];
       document.body.appendChild(overlay);
     }
 
-    document.getElementById('carousel-title').textContent = `🖼 Images — ${videoLabel}`;
+    document.getElementById('carousel-title').textContent = `🎞 Video Images — ${videoLabel}`;
     const body = document.getElementById('carousel-body');
     body.innerHTML = '<div style="text-align:center; padding:60px; color:var(--text-muted);">Loading images...</div>';
     document.getElementById('carousel-footer').style.display = 'none';
@@ -684,23 +687,14 @@ let carouselData = [];
       const thumbMap = {};
       (allFiles || []).forEach(f => { thumbMap[f.name] = true; });
 
-      const azureNames = (allFiles || []).map(f => f.name).filter(n => !n.startsWith('__thumb__'));
-
-      let matchedNames = [];
-      if (relatedNames.length > 0) {
-        const relKeywords = relatedNames.map(n => n.replace(/\.(png|jpg|jpeg|gif)$/i, '').toLowerCase());
-        matchedNames = azureNames.filter(az => {
-          const azBase = az.replace(/\.(png|jpg|jpeg|gif)$/i, '').toLowerCase();
-          return relKeywords.some(kw => azBase.includes(kw) || kw.includes(azBase));
-        });
-      }
+      // Only show images actually linked to this video; no fallback to all container files.
+      const relatedSet = new Set(relatedNames.map(n => n.toLowerCase()));
+      const matchedNames = (allFiles || [])
+        .map(f => f.name)
+        .filter(n => !n.startsWith('__thumb__') && relatedSet.has(n.toLowerCase()));
 
       if (matchedNames.length === 0) {
-        matchedNames = azureNames;
-      }
-
-      if (matchedNames.length === 0) {
-        body.innerHTML = '<div class="carousel-empty">🖼 No images found in research-images container.</div>';
+        body.innerHTML = '<div class="carousel-empty">🎞 No video images linked to this video yet.</div>';
         return;
       }
 
@@ -715,6 +709,8 @@ let carouselData = [];
         };
       });
       carouselIndex = 0;
+      stopCarouselPlay();
+      updateCarouselPlayBtn();
       renderCarousel();
       document.getElementById('carousel-footer').style.display = 'flex';
     } catch (e) {
@@ -747,18 +743,65 @@ let carouselData = [];
   }
 
   window.carouselPrev = function() {
+    stopCarouselPlay();
+    updateCarouselPlayBtn();
     if (carouselIndex > 0) { carouselIndex--; renderCarousel(); }
   };
   window.carouselNext = function() {
+    stopCarouselPlay();
+    updateCarouselPlayBtn();
     if (carouselIndex < carouselData.length - 1) { carouselIndex++; renderCarousel(); }
   };
   window.carouselGoTo = function(idx) {
+    stopCarouselPlay();
+    updateCarouselPlayBtn();
     carouselIndex = idx;
     renderCarousel();
   };
   window.closeCarouselModal = function() {
+    stopCarouselPlay();
+    updateCarouselPlayBtn();
     const overlay = document.getElementById('carousel-modal');
     if (overlay) overlay.classList.remove('active');
+  };
+
+  function updateCarouselPlayBtn() {
+    const btn = document.getElementById('carousel-play');
+    if (!btn) return;
+    if (carouselInterval) {
+      btn.innerHTML = '⏸ Pause';
+      btn.title = 'Pause video image rotation';
+    } else {
+      btn.innerHTML = '▶ Play';
+      btn.title = 'Play video image rotation';
+    }
+  }
+
+  function stopCarouselPlay() {
+    if (carouselInterval) {
+      clearInterval(carouselInterval);
+      carouselInterval = null;
+    }
+  }
+
+  function startCarouselPlay() {
+    stopCarouselPlay();
+    if (!carouselData.length) return;
+    carouselInterval = setInterval(() => {
+      if (carouselData.length) {
+        carouselIndex = (carouselIndex + 1) % carouselData.length;
+        renderCarousel();
+      }
+    }, CAROUSEL_PLAY_INTERVAL_MS);
+  }
+
+  window.toggleCarouselPlay = function() {
+    if (carouselInterval) {
+      stopCarouselPlay();
+    } else {
+      startCarouselPlay();
+    }
+    updateCarouselPlayBtn();
   };
 
   function buildFilter() {
