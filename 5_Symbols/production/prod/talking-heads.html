@@ -167,6 +167,18 @@
     }
 
     footer { text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.05); }
+
+    /* Image Carousel Styles */
+    .carousel-img { max-width: 100%; max-height: 55vh; object-fit: contain; border-radius: 12px; }
+    .carousel-nav { display: flex; justify-content: center; align-items: center; gap: 16px; margin-top: 16px; }
+    .carousel-counter { font-size: 0.8rem; color: var(--text-muted); }
+    .carousel-empty { text-align: center; padding: 60px; color: var(--text-muted); }
+    .carousel-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+    .carousel-grid-item { background: rgba(0,0,0,0.3); border-radius: 10px; overflow: hidden; cursor: pointer; border: 2px solid transparent; transition: border-color 0.2s; }
+    .carousel-grid-item:hover { border-color: var(--primary); }
+    .carousel-grid-item img { width: 100%; height: 120px; object-fit: cover; display: block; }
+    .carousel-grid-item .carousel-grid-name { padding: 6px 8px; font-size: 0.7rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .carousel-grid-item.active-thumb { border-color: var(--primary); background: rgba(139,92,246,0.15); }
   </style>
   <script src="../../../shared/nav.js"></script>
 </head>
@@ -512,6 +524,7 @@
       html += `    </div>`;
       html += `    <div class="video-actions">`;
       html += `      <button class="video-btn btn-prompter-trigger" onclick="event.stopPropagation();generatePrompterMD(${scriptId})">📝 Prompter MD</button>`;
+      html += `      <button class="video-btn secondary" onclick="event.stopPropagation();showImageCarousel(${videoId}, '${esc(groupLabel)}')">🖼 Images</button>`;
       html += `      <a href="footage_mapping.html?module=${modNum}&video=${videoNum}" class="video-btn secondary" onclick="event.stopPropagation();">🎥 Footage Mapping</a>`;
       html += `    </div>`;
       html += `  </div>`;
@@ -548,7 +561,117 @@
     }
   };
 
-  function buildFilter() {
+let carouselData = [];
+  let carouselIndex = 0;
+
+  window.showImageCarousel = async function(videoId, videoLabel) {
+    let overlay = document.getElementById('carousel-modal');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'carousel-modal';
+      overlay.className = 'modal-overlay';
+      overlay.innerHTML = `
+        <div class="modal-container" style="max-width: 900px;">
+          <div class="modal-header">
+            <h3 id="carousel-title">🖼 Images</h3>
+            <button class="modal-close" onclick="closeCarouselModal()">&times;</button>
+          </div>
+          <div class="modal-body" id="carousel-body">
+            <div style="text-align:center; padding:60px; color:var(--text-muted);">Loading images...</div>
+          </div>
+          <div class="modal-footer" id="carousel-footer" style="display:none;">
+            <div class="carousel-nav">
+              <button class="mod-btn" id="carousel-prev" onclick="carouselPrev()">◀ Prev</button>
+              <span class="carousel-counter" id="carousel-counter"></span>
+              <button class="mod-btn" id="carousel-next" onclick="carouselNext()">Next ▶</button>
+            </div>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+    }
+
+    document.getElementById('carousel-title').textContent = `🖼 Images — ${videoLabel}`;
+    const body = document.getElementById('carousel-body');
+    body.innerHTML = '<div style="text-align:center; padding:60px; color:var(--text-muted);">Loading images...</div>';
+    document.getElementById('carousel-footer').style.display = 'none';
+
+    setTimeout(() => overlay.classList.add('active'), 10);
+
+    try {
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/research_relationships?container=eq.research-images&video_id=eq.${videoId}&select=item_name,container`,
+        { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
+      );
+      const rows = res.ok ? await res.json() : [];
+      const names = [...new Set((rows || []).map(r => r.item_name))].sort();
+
+      if (names.length === 0) {
+        body.innerHTML = '<div class="carousel-empty">🖼 No images linked to this video yet.</div>';
+        return;
+      }
+
+      const allFilesRes = await fetch(`/api/research/files?container=research-images`);
+      const allFiles = allFilesRes.ok ? await allFilesRes.json() : [];
+      const thumbMap = {};
+      (allFiles || []).forEach(f => { thumbMap[f.name] = true; });
+
+      carouselData = names.map(name => {
+        const thumbName = '__thumb__' + name;
+        return {
+          name,
+          url: `/api/research/file?container=research-images&name=${encodeURIComponent(name)}`,
+          thumbUrl: thumbMap[thumbName]
+            ? `/api/research/file?container=research-images&name=${encodeURIComponent(thumbName)}`
+            : `/api/research/file?container=research-images&name=${encodeURIComponent(name)}`
+        };
+      });
+      carouselIndex = 0;
+      renderCarousel();
+      document.getElementById('carousel-footer').style.display = 'flex';
+    } catch (e) {
+      body.innerHTML = `<div class="carousel-empty">🔴 Error loading images: ${esc(e.message || e)}</div>`;
+    }
+  };
+
+  function renderCarousel() {
+    const body = document.getElementById('carousel-body');
+    if (!carouselData.length) return;
+
+    const item = carouselData[carouselIndex];
+    let html = `<div style="text-align:center; margin-bottom: 16px;">`;
+    html += `<img class="carousel-img" src="${item.url}" alt="${esc(item.name)}" onerror="this.style.display='none'">`;
+    html += `</div>`;
+    html += `<p style="text-align:center; font-size:0.85rem; color:var(--text-muted); margin-bottom: 16px;">${esc(item.name)}</p>`;
+    html += `<div class="carousel-grid">`;
+    carouselData.forEach((img, i) => {
+      html += `<div class="carousel-grid-item ${i === carouselIndex ? 'active-thumb' : ''}" onclick="carouselGoTo(${i})">`;
+      html += `  <img src="${img.thumbUrl}" alt="${esc(img.name)}" loading="lazy" onerror="this.src='${img.url}'">`;
+      html += `  <div class="carousel-grid-name">${esc(img.name)}</div>`;
+      html += `</div>`;
+    });
+    html += `</div>`;
+
+    body.innerHTML = html;
+    document.getElementById('carousel-counter').textContent = `${carouselIndex + 1} / ${carouselData.length}`;
+    document.getElementById('carousel-prev').style.opacity = carouselIndex === 0 ? '0.4' : '1';
+    document.getElementById('carousel-next').style.opacity = carouselIndex === carouselData.length - 1 ? '0.4' : '1';
+  }
+
+  window.carouselPrev = function() {
+    if (carouselIndex > 0) { carouselIndex--; renderCarousel(); }
+  };
+  window.carouselNext = function() {
+    if (carouselIndex < carouselData.length - 1) { carouselIndex++; renderCarousel(); }
+  };
+  window.carouselGoTo = function(idx) {
+    carouselIndex = idx;
+    renderCarousel();
+  };
+  window.closeCarouselModal = function() {
+    const overlay = document.getElementById('carousel-modal');
+    if (overlay) overlay.classList.remove('active');
+  };
     const modules = [...new Set(allSentences
       .filter(s => s.module_id !== undefined && s.module_id !== null)
       .map(s => s.module_id)
