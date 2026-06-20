@@ -42,7 +42,6 @@
     .stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
 
     .module-section { margin-bottom: 28px; }
-    .module-section h2 { font-family: var(--font-title); font-size: 1.3rem; font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 10px; }
     .module-desc { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 14px; }
 
     .sent-list { display: flex; flex-direction: column; gap: 6px; }
@@ -62,42 +61,102 @@
     .mod-btn:hover { background: rgba(139,92,246,0.2); color: white; }
     .mod-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
 
-    footer { text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
-    
-    .action-row { display: flex; flex-direction: column; align-items: center; gap: 16px; margin-bottom: 32px; }
-    
     .video-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px; }
     .video-actions { display: flex; gap: 10px; }
     .video-btn { background: rgba(139,92,246,0.15); border: 1px solid rgba(139,92,246,0.3); color: #c084fc; padding: 6px 14px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-body); text-decoration: none; }
     .video-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
     .video-btn.secondary { background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.3); color: #93c5fd; }
     .video-btn.secondary:hover { background: var(--secondary); color: white; border-color: var(--secondary); }
-    .prompter-btn { background: linear-gradient(135deg, var(--primary), var(--secondary)); border: 1px solid rgba(255,255,255,0.15); color: white; padding: 10px 22px; border-radius: 10px; font-size: 0.85rem; font-weight: 700; cursor: pointer; transition: all 0.25s ease; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(139,92,246,0.25); font-family: var(--font-body); }
-    .prompter-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(139,92,246,0.4); border-color: rgba(255,255,255,0.3); }
-    .prompter-btn:active { transform: translateY(0); }
 
-    /* Modal Styling */
-    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(3, 7, 18, 0.85); backdrop-filter: blur(12px); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-    .modal-overlay.open { opacity: 1; pointer-events: auto; }
-    .modal-content { background: linear-gradient(135deg, #0f172a, #1e1b4b); border: 1px solid rgba(139,92,246,0.35); border-radius: 20px; width: 90%; max-width: 720px; max-height: 85vh; display: flex; flex-direction: column; position: relative; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); overflow: hidden; animation: modalSlideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-    @keyframes modalSlideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    .modal-header { padding: 24px 30px; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center; }
-    .modal-title { font-family: var(--font-title); font-size: 1.4rem; font-weight: 800; color: white; display: flex; align-items: center; gap: 10px; }
-    .modal-close { background: transparent; border: none; color: var(--text-muted); font-size: 1.6rem; cursor: pointer; transition: color 0.2s; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; }
-    .modal-close:hover { color: white; background: rgba(255,255,255,0.08); }
-    .modal-body { padding: 30px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 16px; }
-    
-    .modal-toggle-row { display: flex; gap: 10px; margin-bottom: 8px; }
-    .toggle-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-muted); padding: 8px 16px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-    .toggle-btn.active { background: rgba(139,92,246,0.2); border-color: rgba(139,92,246,0.4); color: white; }
-    
-    .prompter-output-container { position: relative; width: 100%; margin-top: 10px; }
-    .prompter-output { background: #090d16; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 20px; font-family: 'Space Mono', monospace, Courier; font-size: 0.85rem; color: #34d399; white-space: pre-wrap; height: 350px; overflow-y: auto; text-align: left; }
-    
-    .modal-footer { padding: 20px 30px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: flex-end; gap: 12px; }
-    .copy-btn { background: var(--success); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 10px 20px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-body); }
-    .copy-btn:hover { background: #059669; }
-    .copy-btn.copied { background: #3b82f6; }
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(3, 7, 18, 0.85);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .modal-container {
+      background: linear-gradient(135deg, rgba(17, 24, 39, 0.95), rgba(31, 41, 55, 0.95));
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      border-radius: 20px;
+      width: 90%;
+      max-width: 700px;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+      transform: scale(0.95);
+      transition: transform 0.3s ease;
+    }
+    .modal-overlay.active .modal-container {
+      transform: scale(1);
+    }
+    .modal-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-header h3 {
+      font-family: var(--font-title);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.5rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+    .modal-close:hover {
+      color: var(--text-main);
+    }
+    .modal-body {
+      padding: 24px;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .prompter-textarea {
+      width: 100%;
+      height: 350px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      color: #34d399; /* readable green for teleprompter viewing */
+      font-family: monospace;
+      font-size: 0.95rem;
+      padding: 16px;
+      resize: vertical;
+      line-height: 1.6;
+    }
+    .prompter-textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+
+    footer { text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.05); }
   </style>
   <script src="../../../shared/nav.js"></script>
 </head>
@@ -175,9 +234,7 @@
     <div class="stat-card"><div class="stat-num" id="module-count">—</div><div class="stat-label">Modules</div></div>
   </div>
 
-  <div class="action-row">
-    <div class="mod-filter" id="mod-filter"></div>
-  </div>
+  <div class="mod-filter" id="mod-filter"></div>
   <div id="content-area"><div class="loading">Loading talking head scenes from master script...</div></div>
 
   <footer>
@@ -195,7 +252,7 @@
   async function fetchAll() {
     try {
       const res = await fetch(
-        `${SUPABASE_URL}/rest/v1/sentences?select=id,script_id,sentence_text,sentence_type,section,visual_mode,sort_order,script_id`,
+        `${SUPABASE_URL}/rest/v1/sentences?select=id,script_id,sentence_text,sentence_type,section,visual_mode,sort_order`,
         { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
       );
       return res.ok ? res.json() : [];
@@ -205,11 +262,28 @@
   async function fetchModules() {
     try {
       const res = await fetch(
-        `${SUPABASE_URL}/rest/v1/course_scripts?select=id,module_id,title,video_title`,
+        `${SUPABASE_URL}/rest/v1/scripts?select=id,video_id,videos(id,module_id,video_number,title,modules(id,module_number,title))`,
         { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
       );
-      if (res.ok) return res.json();
-    } catch {}
+      if (res.ok) {
+        const raw = await res.json();
+        return raw.map(item => {
+          const video = item.videos || {};
+          const module = video.modules || {};
+          return {
+            id: item.id, // script_id
+            video_id: video.id,
+            module_id: module.module_number || video.module_id,
+            video_number: video.video_number,
+            title: video.title,
+            video_title: video.title,
+            module_title: module.title
+          };
+        });
+      }
+    } catch (e) {
+      console.error("Error fetching modules metadata:", e);
+    }
     return [];
   }
 
@@ -219,9 +293,118 @@
     return d.innerHTML;
   }
 
+  function formatPrompterMD(title, sents) {
+    const sorted = [...sents].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+    let md = `# ${title}\n\n`;
+    sorted.forEach((s) => {
+      md += `${s.sentence_text.trim()}\n\n`;
+    });
+    return md;
+  }
+
+  window.generatePrompterMD = function(scriptId) {
+    const sents = allSentences.filter(s => s.script_id === scriptId);
+    if (!sents.length) return alert('No sentences found for this script.');
+    
+    const first = sents[0];
+    const title = `M${first.module_id || '?'} V${first.video_number !== undefined ? first.video_number : '?'} - ${first.video_title || `Script ${scriptId}`}`;
+    const markdown = formatPrompterMD(title, sents);
+    showPrompterModal(title, markdown);
+  };
+
+  window.generateFilterPrompterMD = function() {
+    const filtered = activeModule
+      ? allSentences.filter(s => s.module_id && String(s.module_id) === String(activeModule))
+      : allSentences;
+      
+    if (!filtered.length) return alert('No talking head sentences found in current filter.');
+    
+    const title = activeModule ? `Module ${activeModule} Talking Heads` : 'All Modules Talking Heads';
+    
+    const grouped = {};
+    filtered.forEach(s => {
+      const key = s.script_id || 'unknown';
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push(s);
+    });
+    
+    let markdown = '';
+    Object.entries(grouped).forEach(([scriptId, sents]) => {
+      const first = sents[0];
+      const scriptTitle = `M${first.module_id || '?'} V${first.video_number !== undefined ? first.video_number : '?'} - ${first.video_title || `Script ${scriptId}`}`;
+      markdown += formatPrompterMD(scriptTitle, sents) + '\n\n---\n\n';
+    });
+    
+    markdown = markdown.trim().replace(/\n\n---\n\n$/, '');
+    showPrompterModal(title, markdown);
+  };
+
+  function showPrompterModal(title, markdownContent) {
+    let overlay = document.getElementById('prompter-modal');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'prompter-modal';
+      overlay.className = 'modal-overlay';
+      overlay.innerHTML = `
+        <div class="modal-container">
+          <div class="modal-header">
+            <h3 id="modal-title">Prompter Markdown</h3>
+            <button class="modal-close" onclick="closePrompterModal()">&times;</button>
+          </div>
+          <div class="modal-body">
+            <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:12px;">Copy this markdown or download the file to load into your Elgato Prompter (Camera Hub).</p>
+            <textarea id="modal-text" class="prompter-textarea" readonly></textarea>
+          </div>
+          <div class="modal-footer">
+            <button class="mod-btn" id="btn-copy-md" style="background:var(--secondary); border-color:var(--secondary); color:white;">📋 Copy Clipboard</button>
+            <button class="mod-btn" id="btn-download-md" style="background:var(--success); border-color:var(--success); color:white;">📥 Download .md</button>
+            <button class="mod-btn" onclick="closePrompterModal()">Close</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+    }
+    
+    document.getElementById('modal-title').textContent = `Elgato Prompter Markdown: ${title}`;
+    const txt = document.getElementById('modal-text');
+    txt.value = markdownContent;
+    
+    const copyBtn = document.getElementById('btn-copy-md');
+    copyBtn.onclick = () => {
+      txt.select();
+      navigator.clipboard.writeText(markdownContent);
+      const originalText = copyBtn.innerHTML;
+      copyBtn.innerHTML = '✅ Copied!';
+      setTimeout(() => { copyBtn.innerHTML = originalText; }, 2000);
+    };
+    
+    const downloadBtn = document.getElementById('btn-download-md');
+    downloadBtn.onclick = () => {
+      const blob = new Blob([markdownContent], { type: 'text/markdown;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      const safeTitle = title.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+      link.setAttribute('download', `prompter_${safeTitle}.md`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    };
+    
+    setTimeout(() => overlay.classList.add('active'), 10);
+  }
+
+  window.closePrompterModal = function() {
+    const overlay = document.getElementById('prompter-modal');
+    if (overlay) {
+      overlay.classList.remove('active');
+    }
+  };
+
   function render(filterModule) {
     const filtered = filterModule
-      ? allSentences.filter(s => s.script_id && String(s.script_id).startsWith(String(filterModule)))
+      ? allSentences.filter(s => s.module_id && String(s.module_id) === String(filterModule))
       : allSentences;
 
     document.getElementById('total-count').textContent = filtered.length;
@@ -232,48 +415,39 @@
       return;
     }
 
-    // Group sentences by video (do not repeat video title per sentence)
     const grouped = {};
     filtered.forEach(s => {
-      const key = s.video_title || `Script ${s.script_id || 'unknown'}`;
+      const key = s.script_id || 'unknown';
       if (!grouped[key]) grouped[key] = [];
       grouped[key].push(s);
     });
 
     let html = '';
-    Object.entries(grouped).forEach(([videoTitle, sentences]) => {
-      const sortedSents = sentences.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
-      const sampleSent = sortedSents[0] || {};
-      const scriptId = sampleSent.script_id || 'unknown';
-      const moduleId = scriptId.length >= 1 ? scriptId[0] : '1';
-      
-      // Determine scene/video number for link relation
-      let sceneNum = 1;
-      const match = String(scriptId).match(/_(\d+)/) || String(scriptId).match(/\.(\d+)/);
-      if (match) {
-        sceneNum = parseInt(match[1], 10);
-      } else {
-        const digits = String(scriptId).match(/\d+/g);
-        if (digits && digits.length > 1) {
-          sceneNum = parseInt(digits[1], 10);
-        }
-      }
+    Object.entries(grouped).forEach(([scriptId, sents]) => {
+      const sentences = sents.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+      const firstSent = sentences[0] || {};
+      const videoId = firstSent.video_id || '?';
+      const videoNum = firstSent.video_number !== undefined ? firstSent.video_number : '?';
+      const modNum = firstSent.module_id || '?';
+      const videoTitle = firstSent.video_title || `Script ${scriptId}`;
+      const groupLabel = `🎬 Module ${modNum} Video ${videoNum} (Video ID: ${videoId}) — ${videoTitle}`;
 
       html += `<div class="module-section" style="background: rgba(17,24,39,0.4); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 24px; margin-bottom: 24px;">`;
       html += `  <div class="video-header">`;
-      html += `    <h2 style="font-family: var(--font-title); font-size: 1.25rem; font-weight: 700; margin: 0; color: white;">🎬 Video: ${esc(videoTitle)}</h2>`;
+      html += `    <h2 style="font-family: var(--font-title); font-size: 1.25rem; font-weight: 700; margin: 0; color: white;">${esc(groupLabel)}</h2>`;
       html += `    <div class="video-actions">`;
-      html += `      <button class="video-btn btn-prompter-trigger" data-video="${esc(videoTitle)}">📋 Prompter</button>`;
-      html += `      <a href="footage_mapping.html?module=${moduleId}&video=${sceneNum}" class="video-btn secondary">🎥 Footage Mapping</a>`;
+      html += `      <button class="video-btn btn-prompter-trigger" onclick="generatePrompterMD(${scriptId})">📝 Prompter MD</button>`;
+      html += `      <a href="footage_mapping.html?module=${modNum}&video=${videoNum}" class="video-btn secondary">🎥 Footage Mapping</a>`;
       html += `    </div>`;
       html += `  </div>`;
       html += `  <div class="sent-list">`;
       
-      sortedSents.forEach(s => {
+      sentences.forEach(s => {
         const typeLabel = (s.sentence_type || 'body').replace(/_/g, ' ');
         html += `    <div class="sent-item" style="background: rgba(0,0,0,0.15); margin-bottom: 8px;">`;
         html += `      <div class="sent-text" style="font-size: 0.88rem; color: var(--text-main); margin-bottom: 8px; line-height: 1.6;">${esc(s.sentence_text)}</div>`;
         html += `      <div class="sent-meta" style="display: flex; gap: 8px;">`;
+        html += `        <span style="font-size: 0.7rem; color: var(--text-muted); background: rgba(255,255,255,0.03); padding: 2px 6px; border-radius: 4px;">🎬 Video ID: ${esc(s.video_id || '?')}</span>`;
         html += `        <span style="font-size: 0.7rem; color: var(--text-muted); background: rgba(255,255,255,0.03); padding: 2px 6px; border-radius: 4px;">📄 Section: ${esc(s.section || 'body')}</span>`;
         html += `        <span style="font-size: 0.7rem; color: var(--text-muted); background: rgba(255,255,255,0.03); padding: 2px 6px; border-radius: 4px;">🎬 Type: Talking Head</span>`;
         if (s.sort_order) {
@@ -292,23 +466,26 @@
 
   function buildFilter() {
     const modules = [...new Set(allSentences
-      .filter(s => s.script_id)
-      .map(s => String(s.script_id)[0])
-    )].sort();
+      .filter(s => s.module_id !== undefined && s.module_id !== null)
+      .map(s => s.module_id)
+    )].sort((a, b) => a - b);
 
     const container = document.getElementById('mod-filter');
     container.innerHTML = `<button class="mod-btn ${!activeModule ? 'active' : ''}" data-mod="">All Modules</button>` +
-      modules.map(m => `<button class="mod-btn ${activeModule === String(m) ? 'active' : ''}" data-mod="${esc(m)}">Module ${esc(m)}</button>`).join('');
+      modules.map(m => `<button class="mod-btn ${activeModule === String(m) ? 'active' : ''}" data-mod="${esc(m)}">Module ${esc(m)}</button>`).join('') +
+      `<button class="mod-btn" style="background:rgba(16, 185, 129, 0.15); border-color:rgba(16, 185, 129, 0.3); color:#34d399; margin-left: 12px;" onclick="generateFilterPrompterMD()">📝 Export Prompter MD</button>`;
 
     document.getElementById('module-count').textContent = modules.length || 0;
 
     container.addEventListener('click', (e) => {
       const btn = e.target.closest('.mod-btn');
-      if (!btn) return;
-      container.querySelectorAll('.mod-btn').forEach(b => b.classList.remove('active'));
+      if (!btn || btn.onclick) return; 
+      container.querySelectorAll('.mod-btn').forEach(b => {
+        if (!b.style.color || b.style.color !== '#34d399') b.classList.remove('active');
+      });
       btn.classList.add('active');
       activeModule = btn.dataset.mod || null;
-      
+
       const url = new URL(window.location);
       if (activeModule) {
         url.searchParams.set('module', activeModule);
@@ -321,164 +498,6 @@
     });
   }
 
-  const SAMPLE_SCRIPT_M1 = `🎬 Teleprompter Script: Module 1 Intro
-(LOOK DIRECTLY AT CAMERA - STRONG, CONFIDENT)
-
-Enterprise AI isn't about prompts.
-
-It's about architecture.
-
-Welcome to Module 1.
-
-(SMILE - WARM, WELCOMING)
-
-Welcome to Module 1: Claude Ecosystem and Flows...
-
-the foundation every production AI system is built on.
-
-(ENGAGING TONE)
-
-What You'll Learn in Module 1:
-
-(PAUSE - EMPOWERING TONE)
-
-First... Master Claude's API anatomy...
-
-and understand exactly how requests flow from client to completion...
-
-at the token level.
-
-(PACING UP SLIGHTLY)
-
-Second... Implement stateful orchestration loops...
-
-that maintain context across multi-turn agentic workflows.
-
-(AUTHORITATIVE TONE)
-
-And third... Wire production-grade routing topologies...
-
-with security guards and circuit breakers.
-
-(LEAN IN - INSIGHTFUL)
-
-Most developers treat Claude as a black box.
-
-By the end of this module...
-
-you'll treat it as a deterministic state machine.
-
-(FORWARD MOMENTUM - TRANSITION TO NEXT SLIDE)
-
-Let's begin with how Claude processes your request...
-
-at the token level.`;
-
-  function generateLiveScriptForVideo(videoTitle, sentences) {
-    const sorted = [...sentences].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
-    let scriptText = `🎬 Teleprompter Script: ${videoTitle}\n\n`;
-    scriptText += `(LOOK DIRECTLY AT CAMERA - STRONG, CONFIDENT)\n\n`;
-
-    sorted.forEach((s) => {
-      scriptText += `${s.sentence_text}\n\n`;
-    });
-
-    return scriptText.trim();
-  }
-
-  function initPrompterModal() {
-    const modal = document.getElementById('prompter-modal');
-    const closeBtn = document.getElementById('close-modal-btn');
-    const toggleSample = document.getElementById('toggle-sample-btn');
-    const toggleLive = document.getElementById('toggle-live-btn');
-    const outputText = document.getElementById('prompter-output-text');
-    const copyBtn = document.getElementById('copy-prompter-btn');
-
-    let currentModalVideoTitle = '';
-    let currentModalSentences = [];
-    let currentView = 'live'; // 'sample' or 'live'
-
-    function updateOutput() {
-      if (currentView === 'sample') {
-        outputText.textContent = SAMPLE_SCRIPT_M1;
-      } else {
-        outputText.textContent = generateLiveScriptForVideo(currentModalVideoTitle, currentModalSentences);
-      }
-    }
-
-    // Modal Trigger Delegation
-    document.getElementById('content-area').addEventListener('click', (e) => {
-      const btn = e.target.closest('.btn-prompter-trigger');
-      if (!btn) return;
-      
-      const videoTitle = btn.dataset.video;
-      currentModalVideoTitle = videoTitle;
-      
-      currentModalSentences = allSentences.filter(s => {
-        const key = s.video_title || `Script ${s.script_id || 'unknown'}`;
-        return key === videoTitle;
-      });
-
-      // Default to Sample if this is the Module 1 Intro video, else default to Live
-      if (videoTitle.toLowerCase().includes('intro') && activeModule === '1') {
-        currentView = 'sample';
-        toggleSample.classList.add('active');
-        toggleLive.classList.remove('active');
-      } else {
-        currentView = 'live';
-        toggleSample.classList.remove('active');
-        toggleLive.classList.add('active');
-      }
-      
-      updateOutput();
-      modal.classList.add('open');
-    });
-
-    closeBtn.addEventListener('click', () => {
-      modal.classList.remove('open');
-    });
-
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) {
-        modal.classList.remove('open');
-      }
-    });
-
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && modal.classList.contains('open')) {
-        modal.classList.remove('open');
-      }
-    });
-
-    toggleSample.addEventListener('click', () => {
-      currentView = 'sample';
-      toggleSample.classList.add('active');
-      toggleLive.classList.remove('active');
-      updateOutput();
-    });
-
-    toggleLive.addEventListener('click', () => {
-      currentView = 'live';
-      toggleSample.classList.remove('active');
-      toggleLive.classList.add('active');
-      updateOutput();
-    });
-
-    copyBtn.addEventListener('click', async () => {
-      try {
-        await navigator.clipboard.writeText(outputText.textContent);
-        copyBtn.textContent = '✅ Copied!';
-        copyBtn.classList.add('copied');
-        setTimeout(() => {
-          copyBtn.textContent = '📋 Copy Script';
-          copyBtn.classList.remove('copied');
-        }, 2000);
-      } catch (err) {
-        console.error('Failed to copy text: ', err);
-      }
-    });
-  }
-
   document.addEventListener('DOMContentLoaded', async () => {
     const [sentences, modules] = await Promise.all([fetchAll(), fetchModules()]);
     allSentences = (sentences || []).filter(s => s.visual_mode === 'talking_head');
@@ -488,6 +507,10 @@ at the token level.`;
     allSentences.forEach(s => {
       if (modMap[s.script_id]) {
         s.video_title = modMap[s.script_id].video_title || modMap[s.script_id].title;
+        s.video_id = modMap[s.script_id].video_id;
+        s.video_number = modMap[s.script_id].video_number;
+        s.module_id = modMap[s.script_id].module_id;
+        s.module_title = modMap[s.script_id].module_title;
       }
     });
 
@@ -499,33 +522,7 @@ at the token level.`;
 
     buildFilter();
     render(activeModule);
-    initPrompterModal();
   });
 </script>
-
-  <!-- Teleprompter Modal -->
-  <div class="modal-overlay" id="prompter-modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="modal-title">🎬 Teleprompter Script Creator</h3>
-        <button class="modal-close" id="close-modal-btn">✕</button>
-      </div>
-      <div class="modal-body">
-        <p style="font-size: 0.85rem; color: var(--text-muted);">Configure script output format below. Select whether to use the pre-packaged Module 1 intro sample or dynamically generate a script based on your active filter.</p>
-        
-        <div class="modal-toggle-row">
-          <button class="toggle-btn active" id="toggle-sample-btn">🎬 Sample: Module 1 Intro</button>
-          <button class="toggle-btn" id="toggle-live-btn">⚡ Live Dynamic Script</button>
-        </div>
-        
-        <div class="prompter-output-container">
-          <div class="prompter-output" id="prompter-output-text"></div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="copy-btn" id="copy-prompter-btn">📋 Copy Script</button>
-      </div>
-    </div>
-  </div>
 </body>
 </html>
