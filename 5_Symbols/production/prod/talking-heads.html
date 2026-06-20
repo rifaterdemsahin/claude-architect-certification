@@ -45,6 +45,7 @@
     .module-desc { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 14px; }
 
     .sent-list { display: flex; flex-direction: column; gap: 6px; }
+    .sent-list.collapsed { display: none; }
     .sent-item { background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 14px 18px; }
     .sent-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
     .sent-video { font-weight: 700; font-size: 0.88rem; color: #c084fc; }
@@ -61,7 +62,16 @@
     .mod-btn:hover { background: rgba(139,92,246,0.2); color: white; }
     .mod-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
 
-    .video-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px; }
+    .search-bar { margin-bottom: 24px; }
+    .search-input { width: 100%; background: var(--bg-card); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; color: var(--text-main); font-family: var(--font-body); font-size: 0.9rem; padding: 12px 16px; outline: none; transition: border-color 0.2s; }
+    .search-input:focus { border-color: var(--primary); }
+    .search-input::placeholder { color: var(--text-muted); }
+
+    .video-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px; cursor: pointer; user-select: none; }
+    .video-header-left { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+    .video-toggle { background: none; border: none; color: var(--text-muted); font-size: 1rem; cursor: pointer; padding: 2px 6px; border-radius: 4px; transition: transform 0.2s, color 0.2s; flex-shrink: 0; }
+    .video-toggle:hover { color: var(--text-main); }
+    .video-toggle.collapsed { transform: rotate(-90deg); }
     .video-actions { display: flex; gap: 10px; }
     .video-btn { background: rgba(139,92,246,0.15); border: 1px solid rgba(139,92,246,0.3); color: #c084fc; padding: 6px 14px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-body); text-decoration: none; }
     .video-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
@@ -231,10 +241,14 @@
 
   <div class="stats" id="stats-area">
     <div class="stat-card"><div class="stat-num" id="total-count">—</div><div class="stat-label">Talking Head Sentences</div></div>
+    <div class="stat-card"><div class="stat-num" id="video-count">—</div><div class="stat-label">Videos</div></div>
     <div class="stat-card"><div class="stat-num" id="module-count">—</div><div class="stat-label">Modules</div></div>
   </div>
 
   <div class="mod-filter" id="mod-filter"></div>
+  <div class="search-bar">
+    <input type="text" class="search-input" id="search-input" placeholder="🔍 Search across all talking head sentences... (e.g. token, routing, API)" oninput="onSearchInput()">
+  </div>
   <div id="content-area"><div class="loading">Loading talking head scenes from master script...</div></div>
 
   <footer>
@@ -334,9 +348,12 @@
   };
 
   window.generateFilterPrompterMD = function() {
-    const filtered = activeModule
+    const base = activeModule
       ? allSentences.filter(s => s.module_id && String(s.module_id) === String(activeModule))
       : allSentences;
+    const filtered = searchQuery
+      ? base.filter(s => s.sentence_text && s.sentence_text.toLowerCase().includes(searchQuery))
+      : base;
       
     if (!filtered.length) return alert('No talking head sentences found in current filter.');
     
@@ -349,8 +366,16 @@
       grouped[key].push(s);
     });
     
+    const sortedGroups = Object.entries(grouped).sort((a, b) => {
+      const a1 = a[1][0];
+      const b1 = b[1][0];
+      const modDiff = (a1.module_id || 0) - (b1.module_id || 0);
+      if (modDiff !== 0) return modDiff;
+      return (a1.video_number || 0) - (b1.video_number || 0);
+    });
+    
     let markdown = '';
-    Object.entries(grouped).forEach(([scriptId, sents]) => {
+    sortedGroups.forEach(([scriptId, sents]) => {
       const first = sents[0];
       const scriptTitle = `Module ${first.module_id || '?'} Video ${first.video_number !== undefined ? first.video_number : '?'} (Video ID: ${first.video_id || '?'}) — ${first.video_title || `Script ${scriptId}`}`;
       markdown += formatPrompterMD(scriptTitle, sents) + '\n\n---\n\n';
@@ -423,46 +448,74 @@
     }
   };
 
+  let searchQuery = '';
+
+  function onSearchInput() {
+    searchQuery = document.getElementById('search-input').value.trim().toLowerCase();
+    render(activeModule);
+  }
+
   function render(filterModule) {
     const filtered = filterModule
       ? allSentences.filter(s => s.module_id && String(s.module_id) === String(filterModule))
       : allSentences;
 
-    document.getElementById('total-count').textContent = filtered.length;
+    const queryFiltered = searchQuery
+      ? filtered.filter(s => s.sentence_text && s.sentence_text.toLowerCase().includes(searchQuery))
+      : filtered;
+
+    document.getElementById('total-count').textContent = queryFiltered.length;
 
     const area = document.getElementById('content-area');
-    if (!filtered.length) {
-      area.innerHTML = '<div style="text-align:center;padding:60px;color:var(--text-muted);">No talking head sentences found for this module.</div>';
+    if (!queryFiltered.length) {
+      const msg = searchQuery
+        ? `No talking head sentences match "<strong>${esc(searchQuery)}</strong>".`
+        : 'No talking head sentences found for this module.';
+      area.innerHTML = `<div style="text-align:center;padding:60px;color:var(--text-muted);">${msg}</div>`;
       return;
     }
 
     const grouped = {};
-    filtered.forEach(s => {
+    queryFiltered.forEach(s => {
       const key = s.script_id || 'unknown';
       if (!grouped[key]) grouped[key] = [];
       grouped[key].push(s);
     });
 
+    const sortedGroups = Object.entries(grouped).sort((a, b) => {
+      const a1 = a[1][0];
+      const b1 = b[1][0];
+      const modDiff = (a1.module_id || 0) - (b1.module_id || 0);
+      if (modDiff !== 0) return modDiff;
+      return (a1.video_number || 0) - (b1.video_number || 0);
+    });
+
+    document.getElementById('video-count').textContent = sortedGroups.length;
+
     let html = '';
-    Object.entries(grouped).forEach(([scriptId, sents]) => {
-      const sentences = sents.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+    sortedGroups.forEach(([scriptId, sents]) => {
+      const sentences = [...sents].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
       const firstSent = sentences[0] || {};
       const videoId = firstSent.video_id || '?';
       const videoNum = firstSent.video_number !== undefined ? firstSent.video_number : '?';
       const modNum = firstSent.module_id || '?';
       const videoTitle = firstSent.video_title || `Script ${scriptId}`;
       const groupLabel = `🎬 Module ${modNum} Video ${videoNum} (Video ID: ${videoId}) — ${videoTitle}`;
+      const groupId = `panel-${scriptId}`;
 
       html += `<div class="module-section" style="background: rgba(17,24,39,0.4); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 24px; margin-bottom: 24px;">`;
-      html += `  <div class="video-header">`;
-      html += `    <h2 style="font-family: var(--font-title); font-size: 1.25rem; font-weight: 700; margin: 0; color: white;">${esc(groupLabel)}</h2>`;
+      html += `  <div class="video-header" onclick="togglePanel('${groupId}')">`;
+      html += `    <div class="video-header-left">`;
+      html += `      <span class="video-toggle" id="${groupId}-toggle">▼</span>`;
+      html += `      <h2 style="font-family: var(--font-title); font-size: 1.25rem; font-weight: 700; margin: 0; color: white;">${esc(groupLabel)}</h2>`;
+      html += `    </div>`;
       html += `    <div class="video-actions">`;
-      html += `      <button class="video-btn btn-prompter-trigger" onclick="generatePrompterMD(${scriptId})">📝 Prompter MD</button>`;
-      html += `      <a href="footage_mapping.html?module=${modNum}&video=${videoNum}" class="video-btn secondary">🎥 Footage Mapping</a>`;
+      html += `      <button class="video-btn btn-prompter-trigger" onclick="event.stopPropagation();generatePrompterMD(${scriptId})">📝 Prompter MD</button>`;
+      html += `      <a href="footage_mapping.html?module=${modNum}&video=${videoNum}" class="video-btn secondary" onclick="event.stopPropagation();">🎥 Footage Mapping</a>`;
       html += `    </div>`;
       html += `  </div>`;
-      html += `  <div class="sent-list">`;
-      
+      html += `  <div class="sent-list" id="${groupId}">`;
+
       sentences.forEach(s => {
         const typeLabel = (s.sentence_type || 'body').replace(/_/g, ' ');
         html += `    <div class="sent-item" style="background: rgba(0,0,0,0.15); margin-bottom: 8px;">`;
@@ -472,18 +525,27 @@
         html += `        <span style="font-size: 0.7rem; color: var(--text-muted); background: rgba(255,255,255,0.03); padding: 2px 6px; border-radius: 4px;">📄 Section: ${esc(s.section || 'body')}</span>`;
         html += `        <span style="font-size: 0.7rem; color: var(--text-muted); background: rgba(255,255,255,0.03); padding: 2px 6px; border-radius: 4px;">🎬 Type: Talking Head</span>`;
         if (s.sort_order) {
-          html += `      <span style="font-size: 0.7rem; color: var(--text-muted); background: rgba(255,255,255,0.03); padding: 2px 6px; border-radius: 4px;">🔢 Line Number: #${s.sort_order}</span>`;
+          html += `      <span style="font-size: 0.7rem; color: var(--text-muted); background: rgba(255,255,255,0.03); padding: 2px 6px; border-radius: 4px;">🔢 Line: #${s.sort_order}</span>`;
         }
         html += `      </div>`;
         html += `    </div>`;
       });
-      
+
       html += `  </div>`;
       html += `</div>`;
     });
 
     area.innerHTML = html;
   }
+
+  window.togglePanel = function(groupId) {
+    const list = document.getElementById(groupId);
+    const toggle = document.getElementById(`${groupId}-toggle`);
+    if (list) {
+      list.classList.toggle('collapsed');
+      toggle.classList.toggle('collapsed');
+    }
+  };
 
   function buildFilter() {
     const modules = [...new Set(allSentences
@@ -525,6 +587,8 @@
       }
       window.history.pushState({}, '', url);
 
+      document.getElementById('search-input').value = '';
+      searchQuery = '';
       render(activeModule);
     });
   }
