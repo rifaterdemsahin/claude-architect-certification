@@ -537,7 +537,7 @@
       html += `    </div>`;
       html += `    <div class="video-actions">`;
       html += `      <button class="video-btn btn-prompter-trigger" onclick="event.stopPropagation();generatePrompterMD(${scriptId})">📝 Prompter MD</button>`;
-      html += `      <button class="video-btn secondary" onclick="event.stopPropagation();showImageCarousel(${videoId}, '${esc(groupLabel)}')">🖼 Images</button>`;
+      html += `      <button class="video-btn secondary" onclick="event.stopPropagation();showImageCarousel(${videoId}, '${labelSafe}')">🖼 Images</button>`;
       html += `      <a href="footage_mapping.html?module=${modNum}&video=${videoNum}" class="video-btn secondary" onclick="event.stopPropagation();">🎥 Footage Mapping</a>`;
       html += `    </div>`;
       html += `  </div>`;
@@ -617,19 +617,35 @@ let carouselData = [];
         { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
       );
       const rows = res.ok ? await res.json() : [];
-      const names = [...new Set((rows || []).map(r => r.item_name))].sort();
-
-      if (names.length === 0) {
-        body.innerHTML = '<div class="carousel-empty">🖼 No images linked to this video yet.</div>';
-        return;
-      }
+      const relatedNames = [...new Set((rows || []).map(r => r.item_name))];
 
       const allFilesRes = await fetch(`/api/research/files?container=research-images`);
       const allFiles = allFilesRes.ok ? await allFilesRes.json() : [];
+
       const thumbMap = {};
       (allFiles || []).forEach(f => { thumbMap[f.name] = true; });
 
-      carouselData = names.map(name => {
+      const azureNames = (allFiles || []).map(f => f.name).filter(n => !n.startsWith('__thumb__'));
+
+      let matchedNames = [];
+      if (relatedNames.length > 0) {
+        const relKeywords = relatedNames.map(n => n.replace(/\.(png|jpg|jpeg|gif)$/i, '').toLowerCase());
+        matchedNames = azureNames.filter(az => {
+          const azBase = az.replace(/\.(png|jpg|jpeg|gif)$/i, '').toLowerCase();
+          return relKeywords.some(kw => azBase.includes(kw) || kw.includes(azBase));
+        });
+      }
+
+      if (matchedNames.length === 0) {
+        matchedNames = azureNames;
+      }
+
+      if (matchedNames.length === 0) {
+        body.innerHTML = '<div class="carousel-empty">🖼 No images found in research-images container.</div>';
+        return;
+      }
+
+      carouselData = matchedNames.map(name => {
         const thumbName = '__thumb__' + name;
         return {
           name,
