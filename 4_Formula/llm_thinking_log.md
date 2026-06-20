@@ -1,5 +1,31 @@
 # LLM Thinking Log
 
+## 2026-06-20 — 🗣️ Talking Heads Search, Collapsible Panels, Video Count & Sort
+
+### 🎯 Objective
+Enhance `5_Symbols/production/prod/talking-heads.html` with:
+- **Video count** stat card showing number of videos in current view
+- **Text search** input to filter sentences in real-time
+- **Collapsible video panels** with ▼ toggle to expand/collapse each video's sentences
+- **Proper sorting** — videos ordered by module_id then video_number (Module 1 V1 → Module 1 V2 → Module 2 V1)
+- **Search-aware filters** — prompter export and stats respect active search query
+
+### 📐 Implementation
+1. **Video Count**: Added `#video-count` stat card, populated from grouped entries length
+2. **Search Input**: `.search-bar` with oninput handler filtering `allSentences` by `sentence_text` lowercase match; "no results" message shows the active query
+3. **Collapsible Panels**: Each video panel's `.video-header` is clickable, toggling `.collapsed` class on `.sent-list` and rotating the ▼ toggle
+4. **Sorted Groups**: `sortedGroups` sorts by `(module_id, video_number)` before rendering, ensuring Module 1 V1 → V2 → V3 order
+5. **Search in Prompter Export**: `generateFilterPrompterMD` respects `searchQuery` for filtered export
+6. **Module switch clears search**: switching modules resets the search input to avoid stale state
+
+### ✅ Verification
+- Search "token" filters to only sentences containing "token"
+- Video count shows "3" for Module 1, "0" for empty modules
+- Clicking ▼ collapses sentence list, rotates toggle icon
+- Groups render Module 1 Video 1 → Module 1 Video 2 → ... regardless of data fetch order
+
+---
+
 ## 2026-06-20 — 🗣️ Talking Heads Emotion Emojis & Module Scoping
 
 ### 🎯 Objective
