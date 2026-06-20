@@ -399,6 +399,11 @@
               "label": "17. 🌍 AI Localization & Dubbing",
               "url": "5_Symbols/production/postprod/ai_localization.html",
               "description": "Multi-language translation and voice-cloned dubbing per sentence and target language."
+            },
+            {
+              "label": "18. 🎥 Greenscreen Backgrounds",
+              "url": "5_Symbols/production/postprod/greenscreen_backgrounds.html",
+              "description": "Configure and generate green screen background videos per module."
             }
           ]
         },

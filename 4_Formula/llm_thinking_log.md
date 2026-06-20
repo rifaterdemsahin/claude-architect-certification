@@ -28,12 +28,13 @@ Add a personal story of Rifat Erdem Sahin to `5_Symbols/production/publish/membe
 3. How paid certifications serve as actual receipts to test whether his self-learning multi-media system is working.
 4. Transitioning from contracting SRE to working from home and creating video content, which requires audience credibility for teaching vital AI-age skill gaps.
 5. Sharing his journey on YouTube to ultimately service and help others who are mentally affected by the white-collar work shift.
+6. Incorporate the immigrant journey: the immense pressure of moving from a high-earner, high-taxpayer status to struggling to make ends meet at the end of the month.
 
 ### 📐 Design & Implementation Plan
 1. **Locate Target Section**: Open `5_Symbols/production/publish/membership.html`.
 2. **Revise Core Philosophy & Card**:
-   - Update the `.value-text` paragraph to incorporate the full narrative.
-   - Refactor or add a new comparison card specifically detailing "Rifat's Personal Story & Trauma" to highlight the sister's university issues, SAT fears, and the transition from SRE contracting to YouTube video creation.
+   - Update the `.value-text` paragraph to incorporate the full narrative, including the immigrant struggle of going from high-earner to failing to make ends meet at the end of the month.
+   - Refactor comparison cards to represent this transition.
 3. **Validate & Build**: Run Go build, verify visual look, and run git commands to commit and push.
 
 ## 2026-06-18 — 💳 Membership Value Menu & Philosophy Update
@@ -779,6 +780,29 @@ Update the existing risks.html page in `5_Symbols/production/preprod/` to detail
 - MODIFY: `5_Symbols/production/prod/footage_mapping.html`
 - MODIFY: `4_Formula/llm_thinking_log.md` (this entry)
 
+---
+
+## 🧠 2026-06-20 — Greenscreen Background Video Builder — `gemini-3-5-flash`
+
+**🎯 Goal:** Add a page to build/generate background videos for green screen talking heads, customized per video module.
+
+**🤔 Approach / Decision drivers:**
+- **Visual & Premium Design:** Match the existing premium glassmorphism template. Create an interactive cockpit that previews animated background simulations.
+- **Module-Specific Processes:**
+  - **Module 1 (Claude Ecosystem & Flows):** Token flow networks, data streaming grids, stateful orchestration flow loops. Style: Cyan & Purple neon nodes.
+  - **Module 2 (Model Context Protocol):** SQL databridges, StdIO SSE transports, SQLite schema portals. Style: Emerald & Tech-Gray.
+  - **Module 3 (Zero-Data Retention):** VPC Interface Endpoints, AWS Bedrock lock/key, PrivateLink security tunnels. Style: Amber & Shield-Blue.
+  - **Module 4 (Deterministic Routers):** Code flow logic decision trees, loops & depth counter monitors, python execution logs. Style: Ruby & Electric-Orange.
+  - **Module 5 (Financial Engineering):** ROI percentage growth graphs, prompt cache point matches, input vs output token cost scales. Style: Gold & Neon-Green.
+- **Interactive Controls:** Customize provider (Runway, Pika, Sora, Luma, Kling), camera movement (Slow pan right, Zoom in, Orbit left, Tilt down), preset styles (Glassmorphic, Tech-Noir, Clean Minimal, Cyberpunk), and parameters.
+- **Supabase Integration:** Create `greenscreen_backgrounds` table to store metadata, generation status, prompts, style selections, and URLs.
+
+**🛠 Build steps:**
+1. Create `5_Symbols/supabase/migrations/migration_greenscreen_backgrounds.sql`.
+2. Create `5_Symbols/production/postprod/greenscreen_backgrounds.html` with module selection, custom video prompt builder, camera motion configs, animated background canvas simulator, and Supabase integration.
+3. Update navigation config and fallback menus, register the page under Content Assembly.
+4. Add the card to `postprod/index.html`.
+5. Perform validation and verify the page runs correctly.
 
 
 

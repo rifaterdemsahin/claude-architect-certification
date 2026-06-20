@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="../../../shared/redirect-to-live-site.js"></script>
+  <title>Greenscreen Background Generator | Claude AI Certification</title>
+  <meta name="description" content="Build and track high-fidelity background videos for green screen talking heads, customized per module.">
+  <link rel="icon" type="image/png" href="../../../favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #030712;
+      --bg-card: rgba(17, 24, 39, 0.85);
+      --border-glow: rgba(139, 92, 246, 0.2);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --primary: #8b5cf6;
+      --primary-glow: rgba(139, 92, 246, 0.4);
+      --secondary: #3b82f6;
+      --accent: #10b981;
+      --danger: #ef4444;
+      --font-title: 'Outfit', sans-serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 40%);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      line-height: 1.6;
+      padding: 100px 24px 60px;
+    }
+
+    .container { max-width: 1100px; margin: 0 auto; }
+
+    header { text-align: center; margin-bottom: 50px; }
+    .badge { 
+      display: inline-block; 
+      padding: 6px 16px; 
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(139, 92, 246, 0.15));
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      border-radius: 100px; 
+      font-size: 0.8rem; 
+      font-weight: 700; 
+      color: #a78bfa; 
+      text-transform: uppercase;
+      letter-spacing: 0.1em; 
+      margin-bottom: 16px; 
+    }
+    header h1 { font-family: var(--font-title); font-size: 2.8rem; font-weight: 900; margin-bottom: 12px; }
+    header p { color: var(--text-muted); max-width: 750px; margin: 0 auto; font-size: 1.05rem; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 32px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    .glass-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 24px;
+      padding: 32px;
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(12px);
+    }
+
+    .section-title {
+      font-family: var(--font-title);
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Simulation Preview Card */
+    .preview-box {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16/9;
+      background: #000;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    #preview-canvas {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 1;
+    }
+
+    .preview-overlay {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 16px;
+      background: linear-gradient(180deg, rgba(0,0,0,0.5) 0%, transparent 30%, rgba(0,0,0,0.8) 100%);
+      pointer-events: none;
+    }
+
+    .preview-badge {
+      align-self: flex-start;
+      background: rgba(0, 0, 0, 0.65);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-family: monospace;
+      font-size: 0.75rem;
+      color: var(--accent);
+    }
+
+    .subject-silhouette {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 45%;
+      height: 75%;
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.05) 0%, rgba(16, 185, 129, 0.35) 60%, rgba(16, 185, 129, 0.75) 100%);
+      border: 2px solid rgba(16, 185, 129, 0.6);
+      border-bottom: none;
+      border-radius: 50% 50% 0 0 / 40% 40% 0 0;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #6ee7b7;
+      font-weight: 700;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      text-shadow: 0 0 10px rgba(0,0,0,0.8);
+      backdrop-filter: blur(2px);
+    }
+
+    .subject-silhouette::before {
+      content: '';
+      position: absolute;
+      top: 10px;
+      width: 40px; height: 40px;
+      background: rgba(16, 185, 129, 0.2);
+      border-radius: 50%;
+      border: 1.5px solid rgba(16,185,129,0.5);
+    }
+
+    /* Process description area */
+    .process-card {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .process-card h4 {
+      font-family: var(--font-title);
+      font-size: 1.1rem;
+      margin-bottom: 8px;
+      color: var(--secondary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .process-card p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+    .process-card .bullet-point {
+      font-size: 0.85rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 6px;
+      color: var(--text-main);
+    }
+
+    /* Forms & inputs */
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .form-group select, .form-group input, .form-group textarea {
+      width: 100%;
+      padding: 12px 16px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      color: white;
+      font-family: inherit;
+      font-size: 0.95rem;
+      transition: all 0.2s;
+    }
+    .form-group select:focus, .form-group input:focus, .form-group textarea:focus {
+      border-color: var(--primary);
+      outline: none;
+      box-shadow: 0 0 10px rgba(139, 92, 246, 0.15);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-size: 1rem;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(139, 92, 246, 0.35);
+    }
+    .btn-secondary {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: white;
+    }
+    .btn-secondary:hover {
+      background: rgba(255,255,255,0.12);
+    }
+    
+    .status-toast {
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      margin-top: 15px;
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    footer {
+      text-align: center;
+      margin-top: 60px;
+      padding-top: 30px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    footer a {
+      color: var(--secondary);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .preset-chip-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+    .preset-chip {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.15);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all 0.2s;
+    }
+    .preset-chip.active {
+      background: rgba(139, 92, 246, 0.2);
+      border-color: var(--primary);
+      color: white;
+    }
+  </style>
+  <script src="../../../shared/nav.js"></script>
+  <script src="../../../shared/debug-panel.js"></script>
+  <script src="../../../shared/seo.js" defer></script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="badge">🎬 Post-Production Engine</div>
+      <h1>🎥 Greenscreen Background Video Builder</h1>
+      <p>Configure dynamic green screen backgrounds for key talking head scenes. Select any module to preview its dedicated backdrop generation process, configure visual parameters, and log assets directly to Supabase.</p>
+    </header>
+
+    <div class="grid">
+      <!-- Left: Interactive Simulator & Process Guide -->
+      <div class="glass-card">
+        <div class="section-title">📺 Live Background Simulator</div>
+        
+        <div class="preview-box">
+          <canvas id="preview-canvas"></canvas>
+          <div class="subject-silhouette">👤 Presenter Area</div>
+          <div class="preview-overlay">
+            <span class="preview-badge" id="canvas-preset-badge">GLASSMORPHIC SIMULATION</span>
+            <span class="preview-badge" id="canvas-movement-badge">CAMERA: ZOOM IN</span>
+          </div>
+        </div>
+
+        <div class="preset-chip-group" style="margin-bottom: 24px;">
+          <span style="font-size: 0.85rem; display: flex; align-items: center; color: var(--text-muted);">Simulate Style:</span>
+          <button type="button" class="preset-chip active" onclick="setPreset('glassmorphic')">Glassmorphic</button>
+          <button type="button" class="preset-chip" onclick="setPreset('cyberpunk')">Cyberpunk</button>
+          <button type="button" class="preset-chip" onclick="setPreset('clean_minimal')">Clean Minimal</button>
+          <button type="button" class="preset-chip" onclick="setPreset('tech_noir')">Tech Noir</button>
+          <button type="button" class="preset-chip" onclick="setPreset('blueprint')">Blueprint</button>
+        </div>
+
+        <div class="section-title">⚙️ Process Description & Recipe</div>
+        <div class="process-card" id="process-info-box">
+          <!-- Populated dynamically based on selected module -->
+        </div>
+
+        <div class="btn btn-secondary" onclick="generateRecipePrompt()">
+          🪄 Autofill Standard Prompt Recipe
+        </div>
+      </div>
+
+      <!-- Right: Settings & Metadata Form -->
+      <div class="glass-card">
+        <div class="section-title">🔧 Generation Settings</div>
+
+        <form id="greenscreen-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="module-select">Module Target</label>
+              <select id="module-select" required onchange="handleModuleChange()">
+                <option value="1">Module 1: Claude Ecosystem</option>
+                <option value="2">Module 2: MCP Bridges</option>
+                <option value="3">Module 3: ZDR Compliance</option>
+                <option value="4">Module 4: Python Routers</option>
+                <option value="5">Module 5: Caching ROI</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="video-select">Video Section</label>
+              <select id="video-select" required>
+                <option value="1">Video 1: Overview</option>
+                <option value="2">Video 2: Implementation</option>
+                <option value="3">Video 3: Production Wiring</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="status-select">Status</label>
+              <select id="status-select" required>
+                <option value="pending">⏳ Pending</option>
+                <option value="generating">🔄 Generating</option>
+                <option value="completed">✅ Completed</option>
+                <option value="skipped">🚫 Skipped</option>
+                <option value="failed">❌ Failed</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="provider-select">Video Model Provider</label>
+              <select id="provider-select" required>
+                <option value="runway">Runway Gen-3</option>
+                <option value="pika">Pika Labs</option>
+                <option value="sora">OpenAI Sora</option>
+                <option value="luma">Luma Dream Machine</option>
+                <option value="kling">Kling AI</option>
+                <option value="other">Other/Custom</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="preset-select">Aesthetic Preset</label>
+              <select id="preset-select" required onchange="syncPresetSelectToChips()">
+                <option value="glassmorphic">Glassmorphic</option>
+                <option value="cyberpunk">Cyberpunk</option>
+                <option value="clean_minimal">Clean Minimal</option>
+                <option value="tech_noir">Tech Noir</option>
+                <option value="blueprint">Blueprint</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="camera-select">Camera Motion</label>
+              <select id="camera-select" required onchange="handleCameraChange()">
+                <option value="slow_zoom_in">Slow Zoom In</option>
+                <option value="slow_pan_right">Slow Pan Right</option>
+                <option value="orbit_left">Orbit Left</option>
+                <option value="tilt_down">Tilt Down</option>
+                <option value="static">Static Backdrop</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="prompt-input">Background Prompt Recipe</label>
+            <textarea id="prompt-input" rows="3" placeholder="Explain the visual background composition..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="refined-prompt-input">Refined Model Prompt (with camera movements)</label>
+            <textarea id="refined-prompt-input" rows="3" placeholder="Refined prompt for generator (e.g., Runway, Sora)..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="video-url-input">Background Video URL (.mp4 / Azure / Drive)</label>
+            <input type="url" id="video-url-input" placeholder="https://..." />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="duration-input">Duration (Seconds)</label>
+              <input type="number" id="duration-input" min="0" value="0" />
+            </div>
+            <div class="form-group">
+              <label for="rationale-input">Production Rationale / Notes</label>
+              <input type="text" id="rationale-input" placeholder="Ambient loops, loopable seam, etc." />
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary">
+            💾 Save Generation Status to Supabase
+          </button>
+          
+          <div class="status-toast" id="toast-message"></div>
+        </form>
+      </div>
+    </div>
+
+    <footer>
+      <p><a href="index.html">← Back to Post-Production</a></p>
+    </footer>
+  </div>
+
+  <script>
+    // Module Background Config Matrix using the official prompt formula
+    const MODULE_PROCESSES = {
+      "1": {
+        title: "⚡ Module 1: Abstract Token Streams & Grid Nodes",
+        description: "Focuses on Claude API anatomy, context windows, and message flows. Represents tokens and routing topologies.",
+        color: "#fb923c", // Warm orange/coral
+        secondaryColor: "#f87171",
+        bullets: [
+          "🌌 Visualise luminous data tokens flowing and streaming along branching filaments.",
+          "✨ Pathway routing: node-and-line path networks with smooth flowing pulses.",
+          "🎓 Arc position: Foundational — welcoming motion & possible momentum."
+        ],
+        metaphorClause: "luminous data tokens flowing and streaming, fine branching filaments, along elegant node-and-line routing topologies where packets travel smoothly between glowing nodes",
+        toneClause: "Slow, expansive, welcoming motion with a quiet undercurrent of momentum and possibility"
+      },
+      "2": {
+        title: "🔌 Module 2: Modular MCP Bridges & Transports",
+        description: "Models Model Context Protocol (MCP) data bridges. Emphasizes modular tool design and stdio/SSE socket connections.",
+        color: "#f59e0b", // Amber
+        secondaryColor: "#ea580c",
+        bullets: [
+          "🗃 Modular blocks docking and connecting with branching connector arms.",
+          "🔌 Plug-in nodes lighting up along transport pathways representing stdio/SSE.",
+          "🎓 Arc position: Core — focused, precise progress."
+        ],
+        metaphorClause: "modular blocks docking and connecting, branching connector arms, plug-in nodes lighting up along transport pathways representing secure socket interfaces",
+        toneClause: "Slow, focused, precise motion with a confident, structured sense of progress"
+      },
+      "3": {
+        title: "🛡 Module 3: Security Gates & PrivateLink Endpoints",
+        description: "Visualizes AWS Bedrock and PrivateLink endpoints securing zero-data retention architecture (ZDR). Features protective vault gates.",
+        color: "#ea580c", // Clay-orange
+        secondaryColor: "#d97706",
+        bullets: [
+          "🔒 Glowing gates and vault doors with key-light passing through.",
+          "🛡 Abstract protective shields establishing secure, zero-retention boundaries.",
+          "🎓 Arc position: Core — focused, precise progress."
+        ],
+        metaphorClause: "glowing gates and vault doors with key-light passing through abstract protective shields, establishing secure zero-data retention boundaries",
+        toneClause: "Slow, focused, precise motion with a confident, structured sense of progress"
+      },
+      "4": {
+        title: "🌳 Module 4: Orchestration Loops & Decision Trees",
+        description: "Details Python deterministic routers, loop detection depth counters, and circuit breakers.",
+        color: "#f87171", // Glowing coral
+        secondaryColor: "#ea580c",
+        bullets: [
+          "🌳 Repeating organized cycles and circular coordinated flows.",
+          "⚡ Multi-node choreography representing Python deterministic routers and loop circuit breakers.",
+          "🎓 Arc position: Advanced — powerful culminating mastery."
+        ],
+        metaphorClause: "repeating organized cycles, circular coordinated flows, multi-node choreography representing deterministic router logic paths",
+        toneClause: "Slow but intricate, powerful motion with a culminating, luminous sense of mastery"
+      },
+      "5": {
+        title: "💰 Module 5: Prompt Caching Strata & Memory",
+        description: "Focuses on prompt caching ROI and financial optimization. Visualizes context accumulation and layered memory.",
+        color: "#fbbf24", // Warm gold
+        secondaryColor: "#f59e0b",
+        bullets: [
+          "📈 Translucent layered strata accumulating slowly around glowing persistence cores.",
+          "💾 Concentric memory rings holding and releasing light representing cache matches.",
+          "🎓 Arc position: Advanced — powerful culminating mastery."
+        ],
+        metaphorClause: "translucent layered strata slowly accumulating around glowing persistence cores, concentric memory rings holding and releasing light to represent explicit cache points",
+        toneClause: "Slow but intricate, powerful motion with a culminating, luminous sense of mastery"
+      }
+    };
+
+    // Canvas Simulator Logic
+    const canvas = document.getElementById('preview-canvas');
+    const ctx = canvas.getContext('2d');
+    let animationId;
+    let particles = [];
+    let currentPreset = 'glassmorphic';
+    let moduleColors = { main: '#8b5cf6', sec: '#3b82f6' };
+
+    function resizeCanvas() {
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = rect.height;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    // Particle template
+    class Particle {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 2 + 1;
+        this.speedX = (Math.random() - 0.5) * 1.5;
+        this.speedY = (Math.random() - 0.5) * 1.5;
+        this.alpha = Math.random() * 0.5 + 0.25;
+      }
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+
+        // Wrap boundaries
+        if (this.x < 0) this.x = canvas.width;
+        if (this.x > canvas.width) this.x = 0;
+        if (this.y < 0) this.y = canvas.height;
+        if (this.y > canvas.height) this.y = 0;
+      }
+      draw() {
+        ctx.save();
+        ctx.globalAlpha = this.alpha;
+        ctx.fillStyle = moduleColors.main;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    // Initialize particles
+    for (let i = 0; i < 40; i++) {
+      particles.push(new Particle());
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw background base color
+      ctx.fillStyle = '#020617';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Preset specific rendering logic
+      if (currentPreset === 'glassmorphic') {
+        // Soft glowing blurs
+        const grad = ctx.createRadialGradient(canvas.width*0.2, canvas.height*0.3, 20, canvas.width*0.2, canvas.height*0.3, 150);
+        grad.addColorStop(0, moduleColors.main + '33');
+        grad.addColorStop(1, 'transparent');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const grad2 = ctx.createRadialGradient(canvas.width*0.8, canvas.height*0.7, 20, canvas.width*0.8, canvas.height*0.7, 150);
+        grad2.addColorStop(0, moduleColors.sec + '33');
+        grad2.addColorStop(1, 'transparent');
+        ctx.fillStyle = grad2;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Slow connections
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        for (let i = 0; i < particles.length; i++) {
+          for (let j = i + 1; j < particles.length; j++) {
+            const dist = Math.hypot(particles[i].x - particles[j].x, particles[i].y - particles[j].y);
+            if (dist < 80) {
+              ctx.moveTo(particles[i].x, particles[i].y);
+              ctx.lineTo(particles[j].x, particles[j].y);
+            }
+          }
+        }
+        ctx.stroke();
+
+      } else if (currentPreset === 'cyberpunk') {
+        // Tech grid lines
+        ctx.strokeStyle = 'rgba(255, 0, 128, 0.08)';
+        ctx.lineWidth = 0.5;
+        for (let i = 0; i < canvas.width; i += 30) {
+          ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke();
+        }
+        for (let j = 0; j < canvas.height; j += 30) {
+          ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(canvas.width, j); ctx.stroke();
+        }
+
+        // Fast digital pulses
+        ctx.fillStyle = moduleColors.main;
+        particles.forEach(p => {
+          ctx.fillRect(p.x, p.y, p.size * 2, p.size * 2);
+        });
+
+      } else if (currentPreset === 'clean_minimal') {
+        // Minimal subtle curves
+        ctx.strokeStyle = moduleColors.sec + '11';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(0, canvas.height * 0.5);
+        ctx.bezierCurveTo(canvas.width * 0.3, canvas.height * 0.2, canvas.width * 0.7, canvas.height * 0.8, canvas.width, canvas.height * 0.5);
+        ctx.stroke();
+
+      } else if (currentPreset === 'tech_noir') {
+        // Moody dark ambiance, occasional bright code sparks
+        ctx.fillStyle = 'rgba(0,0,0,0.8)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.strokeStyle = moduleColors.sec + '22';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(canvas.width*0.1, canvas.height*0.1, canvas.width*0.8, canvas.height*0.8);
+
+      } else if (currentPreset === 'blueprint') {
+        // Architectural cyan grids
+        ctx.strokeStyle = 'rgba(0, 191, 255, 0.15)';
+        ctx.lineWidth = 1;
+        for (let i = 0; i < canvas.width; i += 15) {
+          ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke();
+        }
+        for (let j = 0; j < canvas.height; j += 15) {
+          ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(canvas.width, j); ctx.stroke();
+        }
+      }
+
+      // Draw all particles
+      particles.forEach(p => {
+        p.update();
+        p.draw();
+      });
+
+      animationId = requestAnimationFrame(animate);
+    }
+
+    function setPreset(preset) {
+      currentPreset = preset;
+      document.querySelectorAll('.preset-chip').forEach(c => {
+        c.classList.remove('active');
+        if (c.innerText.toLowerCase().replace(' ', '_') === preset) {
+          c.classList.add('active');
+        }
+      });
+      document.getElementById('preset-select').value = preset;
+      document.getElementById('canvas-preset-badge').innerText = preset.toUpperCase().replace('_', ' ') + ' SIMULATION';
+    }
+
+    function syncPresetSelectToChips() {
+      const selected = document.getElementById('preset-select').value;
+      setPreset(selected);
+    }
+
+    function handleCameraChange() {
+      const camera = document.getElementById('camera-select').value;
+      document.getElementById('canvas-movement-badge').innerText = 'CAMERA: ' + camera.toUpperCase().replace('_', ' ');
+    }
+
+    // Populate process instructions automatically
+    function handleModuleChange() {
+      const mod = document.getElementById('module-select').value;
+      const process = MODULE_PROCESSES[mod];
+      
+      moduleColors = { main: process.color, sec: process.secondaryColor };
+
+      const infoBox = document.getElementById('process-info-box');
+      infoBox.innerHTML = `
+        <h4>${process.title}</h4>
+        <p>${process.description}</p>
+        ${process.bullets.map(b => `<div class="bullet-point"><span>${b.slice(0, 2)}</span><span>${b.slice(2)}</span></div>`).join('')}
+      `;
+      
+      // Auto fill suggestions for visual context
+      generateRecipePrompt();
+    }
+
+    function generateRecipePrompt() {
+      const mod = document.getElementById('module-select').value;
+      const process = MODULE_PROCESSES[mod];
+      
+      const formulaPrompt = `Seamlessly looping abstract motion background for a Claude AI architect course, designed for green-screen compositing behind a presenter. Warm sophisticated palette: soft cream and off-white base with glowing coral, amber, and clay-orange accents — no cold blue sci-fi tones. ${process.metaphorClause}, with gentle continuous upward-and-forward drift as if a system is being thoughtfully constructed. ${process.toneClause}. Soft depth-of-field, gentle bloom, dark-to-light gradient suggesting dawn or emergence. Composition weighted toward the edges with open uncluttered negative space in the center for the presenter. Static camera, no camera movement, no hard cuts, perfectly loopable. Cinematic, premium, enterprise-grade. No text, no logos, no human figures, no flickering.`;
+      
+      document.getElementById('prompt-input').value = formulaPrompt;
+      enhanceWithCamera();
+    }
+
+    function enhanceWithCamera() {
+      const prompt = document.getElementById('prompt-input').value;
+      const camera = document.getElementById('camera-select').value.replace(/_/g, ' ');
+      
+      let enhanced = prompt;
+      if (camera !== 'static') {
+        enhanced = enhanced.replace("Static camera, no camera movement", `Subtle dynamic camera movement simulating ${camera}`);
+      }
+      document.getElementById('refined-prompt-input').value = enhanced;
+    }
+
+    // Connect to Supabase
+    const SUPABASE_URL = localStorage.getItem('supabase_url') || 'https://rmekfsdhglyiralxvkwc.supabase.co';
+    const SUPABASE_ANON_KEY = localStorage.getItem('supabase_anon_key') || '';
+    const HEADERS = {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: 'Bearer ' + SUPABASE_ANON_KEY,
+      'Content-Type': 'application/json',
+      Prefer: 'return=representation',
+    };
+
+    async function loadStatus() {
+      const mod = document.getElementById('module-select').value;
+      const vid = document.getElementById('video-select').value;
+
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/greenscreen_backgrounds?module_number=eq.${mod}&video_number=eq.${vid}`, {
+          headers: HEADERS
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.length > 0) {
+            const entry = data[0];
+            document.getElementById('status-select').value = entry.generation_status || 'pending';
+            document.getElementById('provider-select').value = entry.video_provider || 'runway';
+            document.getElementById('preset-select').value = entry.preset_style || 'glassmorphic';
+            document.getElementById('camera-select').value = entry.camera_movement || 'slow_zoom_in';
+            document.getElementById('prompt-input').value = entry.prompt || '';
+            document.getElementById('refined-prompt-input').value = entry.refined_prompt || '';
+            document.getElementById('video-url-input').value = entry.video_url || '';
+            document.getElementById('duration-input').value = entry.duration_seconds || 0;
+            document.getElementById('rationale-input').value = entry.rationale || '';
+            
+            setPreset(entry.preset_style || 'glassmorphic');
+            handleCameraChange();
+          } else {
+            // Reset to defaults
+            document.getElementById('status-select').value = 'pending';
+            document.getElementById('video-url-input').value = '';
+            document.getElementById('duration-input').value = 0;
+            document.getElementById('rationale-input').value = '';
+            generateRecipePrompt();
+          }
+        }
+      } catch (err) {
+        console.error("Supabase load error: ", err);
+      }
+    }
+
+    document.getElementById('video-select').addEventListener('change', loadStatus);
+    document.getElementById('module-select').addEventListener('change', loadStatus);
+
+    document.getElementById('greenscreen-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const mod = parseInt(document.getElementById('module-select').value);
+      const vid = parseInt(document.getElementById('video-select').value);
+      const status = document.getElementById('status-select').value;
+      const provider = document.getElementById('provider-select').value;
+      const preset = document.getElementById('preset-select').value;
+      const camera = document.getElementById('camera-select').value;
+      const prompt = document.getElementById('prompt-input').value;
+      const refinedPrompt = document.getElementById('refined-prompt-input').value;
+      const videoUrl = document.getElementById('video-url-input').value;
+      const duration = parseFloat(document.getElementById('duration-input').value) || 0;
+      const rationale = document.getElementById('rationale-input').value;
+
+      const toast = document.getElementById('toast-message');
+      toast.style.display = 'block';
+      toast.style.background = 'rgba(139,92,246,0.15)';
+      toast.style.color = '#a78bfa';
+      toast.innerText = 'Saving background record...';
+
+      try {
+        // Upsert logic using Supabase REST API
+        const payload = {
+          module_number: mod,
+          video_number: vid,
+          generation_status: status,
+          video_provider: provider,
+          preset_style: preset,
+          camera_movement: camera,
+          prompt: prompt,
+          refined_prompt: refinedPrompt,
+          video_url: videoUrl,
+          duration_seconds: duration,
+          rationale: rationale
+        };
+
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/greenscreen_backgrounds`, {
+          method: 'POST',
+          headers: {
+            ...HEADERS,
+            'Prefer': 'resolution=merge-duplicates'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const errMsg = await res.text();
+          throw new Error(errMsg);
+        }
+
+        toast.style.background = 'rgba(16,185,129,0.15)';
+        toast.style.color = '#6ee7b7';
+        toast.innerText = `✅ Successfully saved background configuration for Module ${mod} Video ${vid}!`;
+      } catch (err) {
+        toast.style.background = 'rgba(239,68,68,0.15)';
+        toast.style.color = '#f87171';
+        toast.innerText = `❌ Error saving: ${err.message}`;
+      }
+    });
+
+    // Handle interactive parameter connections
+    document.getElementById('prompt-input').addEventListener('input', enhanceWithCamera);
+    document.getElementById('camera-select').addEventListener('change', () => {
+      handleCameraChange();
+      enhanceWithCamera();
+    });
+    document.getElementById('preset-select').addEventListener('change', () => {
+      syncPresetSelectToChips();
+      enhanceWithCamera();
+    });
+
+    // Start everything
+    handleModuleChange();
+    animate();
+    loadStatus();
+  </script>
+</body>
+</html>
