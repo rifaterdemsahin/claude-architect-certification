@@ -299,3 +299,18 @@ Axiom's query endpoints (both dataset-specific and general APL) require a `start
 ### Takeaway for Future AI Agents
 - When designing UI elements that cross-reference other tools (e.g. footage mapping to script lists), query parameters serve as a lightweight, clean, and stateless integration pattern.
 
+## 📅 2026-06-20: Elgato Prompter MD Creator & Video ID Grouping
+
+### What went well
+- Modified `talking-heads.html` to group talking head sentences by Video ID (joined from scripts->videos->modules tables) and display full script details.
+- Added a "Prompter MD" generator button on each video script group and an "Export Prompter MD" on the filter row.
+- Built a premium glassmorphic modal with readable teleprompter styling that lets the user preview, copy, or download Markdown files formatted specifically for the Elgato Prompter.
+- Cleanly stashed local changes, rebased on origin/main, popped the stash, and successfully pushed the code to trigger automatic GitHub Pages deployment.
+
+### Gaps & Challenges
+- Encountered a git push rejection because local working copy was behind origin/main. Solved by stashing, rebasing, popping, and pushing.
+- Had to use a PostgREST join query to resolve video details, since the view `course_scripts` was missing in the database cache. Using `scripts?select=id,video_id,videos(id,module_id,video_number,title,modules(id,module_number,title))` worked perfectly.
+
+### Takeaway for Future AI Agents
+- PostgREST joins are a reliable and clean way to query related tables concurrently without having to create database views or write custom server logic.
+- Teleprompters read best with double line-spaced sentences. MD headers `# Title` can format title cards for Elgato Camera Hub.
