@@ -258,6 +258,15 @@
   </div>
 
   <div class="mod-filter" id="mod-filter"></div>
+  <div class="progress-bar-container" id="progress-bar-container" style="display:none; margin-bottom: 20px; background: var(--bg-card); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 16px 24px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+      <span style="font-size:0.85rem; font-weight:700; color:var(--text-main);">🎬 Recording Progress</span>
+      <span style="font-size:0.8rem; color:var(--text-muted);" id="progress-text">0 / 0 shot</span>
+    </div>
+    <div style="width:100%; height:10px; background:rgba(255,255,255,0.08); border-radius:100px; overflow:hidden;">
+      <div id="progress-fill" style="height:100%; width:0%; background:linear-gradient(90deg, var(--success), var(--secondary)); border-radius:100px; transition: width 0.4s ease;"></div>
+    </div>
+  </div>
   <div class="search-bar">
     <input type="text" class="search-input" id="search-input" placeholder="🔍 Search across all talking head sentences... (e.g. token, routing, API)" oninput="onSearchInput()">
   </div>
@@ -288,7 +297,7 @@
   async function fetchModules() {
     try {
       const res = await fetch(
-        `${SUPABASE_URL}/rest/v1/scripts?select=id,video_id,videos(id,module_id,video_number,title,modules(id,module_number,title))`,
+        `${SUPABASE_URL}/rest/v1/scripts?select=id,video_id,videos(id,module_id,video_number,title,recorded,modules(id,module_number,title))`,
         { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
       );
       if (res.ok) {
@@ -303,7 +312,8 @@
             video_number: video.video_number,
             title: video.title,
             video_title: video.title,
-            module_title: module.title
+            module_title: module.title,
+            recorded: video.recorded === true
           };
         });
       }
@@ -516,6 +526,16 @@
 
     document.getElementById('video-count').textContent = sortedGroups.length;
 
+    // Track recorded state per script_id
+    window._recordedMap = {};
+    sortedGroups.forEach(([, sents]) => {
+      const first = sents[0];
+      if (first && first.video_id && first.recorded !== undefined) {
+        window._recordedMap[first.script_id] = first.recorded;
+      }
+    });
+    updateProgressBar();
+
     let html = '';
     sortedGroups.forEach(([scriptId, sents]) => {
       const sentences = [...sents].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
@@ -531,6 +551,8 @@
       html += `  <div class="video-header" onclick="togglePanel('${groupId}')">`;
       html += `    <div class="video-header-left">`;
       html += `      <span class="video-toggle" id="${groupId}-toggle">▼</span>`;
+      const isRecorded = firstSent.recorded === true;
+      html += `      <input type="checkbox" ${isRecorded ? 'checked' : ''} style="width:18px;height:18px;accent-color:var(--success);cursor:pointer;flex-shrink:0;" onclick="event.stopPropagation();toggleRecorded(${scriptId}, ${firstSent.video_id || 0}, this.checked)" title="Mark as shot">`;
       html += `      <h2 style="font-family: var(--font-title); font-size: 1.25rem; font-weight: 700; margin: 0; color: white;">${esc(groupLabel)}</h2>`;
       const labelSafe = groupLabel.replace(/'/g, "\\'");
       html += `      <button class="video-btn" style="font-size:0.7rem; padding:2px 8px;" onclick="event.stopPropagation();copyToClipboard('${labelSafe}')" title="Copy video label to clipboard">📋</button>`;
@@ -573,6 +595,43 @@
       toggle.classList.toggle('collapsed');
     }
   };
+
+  window.toggleRecorded = async function(scriptId, videoId, checked) {
+    try {
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/videos?id=eq.${videoId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({ recorded: checked })
+        }
+      );
+      if (res.ok || res.status === 204) {
+        if (window._recordedMap) window._recordedMap[scriptId] = checked;
+        updateProgressBar();
+      }
+    } catch (e) {
+      console.error('Failed to update recorded status:', e);
+    }
+  };
+
+  function updateProgressBar() {
+    const container = document.getElementById('progress-bar-container');
+    const map = window._recordedMap || {};
+    const entries = Object.entries(map);
+    if (entries.length === 0) { container.style.display = 'none'; return; }
+    container.style.display = 'block';
+    const total = entries.length;
+    const recorded = entries.filter(([, v]) => v).length;
+    const pct = total > 0 ? Math.round((recorded / total) * 100) : 0;
+    document.getElementById('progress-text').textContent = `${recorded} / ${total} shot (${pct}%)`;
+    document.getElementById('progress-fill').style.width = pct + '%';
+  }
 
 let carouselData = [];
   let carouselIndex = 0;
@@ -761,6 +820,7 @@ let carouselData = [];
         s.video_number = modMap[s.script_id].video_number;
         s.module_id = modMap[s.script_id].module_id;
         s.module_title = modMap[s.script_id].module_title;
+        s.recorded = modMap[s.script_id].recorded === true;
       }
     });
 
