@@ -280,3 +280,11 @@ Record every prompt given to AI agents below. Include the date, agent, and purpo
 **Purpose:** Restructure script list to group sentences by video, add per-video prompter/footage buttons with parameter relations, and support auto-filtering on page load.
 **Prompt:** "group videos > do not repeat > https://rifaterdemsahin.github.io/claude-architect-certification/5_Symbols/production/prod/talking-heads.html?module=1 > filter and load with the filter > for each video have one prompter create prompter script button. > also add a footage button here and relate to module and video > commit and push > publish to fly.io"
 **Outcome:** Modified `5_Symbols/production/prod/talking-heads.html` to group sentences by video, render per-video custom prompter modal actions, and dynamic footage mapping links. Modified `5_Symbols/production/prod/footage_mapping.html` to read `module` and `video` query parameters on load. Committed and pushed to `main`.
+---
+
+## 2026-06-20 — Elgato Prompter MD Creator & Video ID Grouping
+
+**Agent:** Antigravity (Gemini 3.5 Flash)
+**Purpose:** Group sentences by Video ID in talking-heads.html and add markdown prompter generator support with copying and file downloads.
+**Prompt:** "https://rifaterdemsahin.github.io/claude-architect-certification/5_Symbols/production/prod/talking-heads.html > mention and group with video id > and add a button to create a prompter output in markdown that i would use in the elgato prompter > commit push > deploy"
+**Outcome:** Modified `5_Symbols/production/prod/talking-heads.html` to query joined script metadata, group and mention talking head sentences with Video ID, add interactive Prompter MD generator action modal, and allow copy/downloading of teleprompter Markdown files. Committed and pushed to `main`.
