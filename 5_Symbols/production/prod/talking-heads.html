@@ -319,6 +319,17 @@
     return d.innerHTML;
   }
 
+  window.copyToClipboard = function(text) {
+    navigator.clipboard.writeText(text).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    });
+  };
+
   function getEmotionEmoji(type) {
     const map = {
       'hook': '🔥 [Hook - Engage & Dynamic]',
@@ -521,6 +532,8 @@
       html += `    <div class="video-header-left">`;
       html += `      <span class="video-toggle" id="${groupId}-toggle">▼</span>`;
       html += `      <h2 style="font-family: var(--font-title); font-size: 1.25rem; font-weight: 700; margin: 0; color: white;">${esc(groupLabel)}</h2>`;
+      const labelSafe = groupLabel.replace(/'/g, "\\'");
+      html += `      <button class="video-btn" style="font-size:0.7rem; padding:2px 8px;" onclick="event.stopPropagation();copyToClipboard('${labelSafe}')" title="Copy video label to clipboard">📋</button>`;
       html += `    </div>`;
       html += `    <div class="video-actions">`;
       html += `      <button class="video-btn btn-prompter-trigger" onclick="event.stopPropagation();generatePrompterMD(${scriptId})">📝 Prompter MD</button>`;
