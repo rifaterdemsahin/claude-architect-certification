@@ -723,3 +723,31 @@ Update the existing risks.html page in `5_Symbols/production/preprod/` to detail
 - MODIFY: `4_Formula/llm_thinking_log.md` (this entry)
 
 
+---
+
+## 2026-06-20 — 🗣️ Talking Heads Teleprompter Integration & Module Query String
+
+### 🎯 Objective
+1. Modify `5_Symbols/production/prod/talking-heads.html` to support URL query string routing (e.g. `?module=1`).
+2. Sync module button selection changes with the query string using `history.pushState`.
+3. Load the corresponding module automatically on page load if the query parameter is present.
+4. Enhance the sentence card rendering to explicitly display the associated video and line number.
+5. Create a "Create Prompter Script" button that displays a beautifully styled, glassmorphic modal containing the markdown teleprompter script. Include the specific "🎬 Teleprompter Script: Module 1 Intro" sample provided by the user, as well as a dynamic generator.
+
+### 📐 Design & Implementation Plan
+- **Query Routing**:
+  - Update `buildFilter()` and add URL query string parsing using `URLSearchParams` on `DOMContentLoaded`.
+  - Use `window.history.pushState` on filter click.
+- **Rendering Enhancement**:
+  - Label the video title and line number clearly inside `render()`.
+- **Teleprompter Modal**:
+  - Insert a "📋 Create Prompter Script" action button next to the filter buttons.
+  - Create a glassmorphic overlay modal containing a copy-to-clipboard button and a `<pre>` block displaying the markdown prompter script.
+  - Implement a toggle to switch between the custom static sample (Module 1 Intro) and a dynamically compiled script from active database sentences.
+
+### 🗺 Files to Create/Modify
+- MODIFY: `5_Symbols/production/prod/talking-heads.html`
+- MODIFY: `4_Formula/llm_thinking_log.md` (this entry)
+
+
+
