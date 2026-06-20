@@ -288,3 +288,14 @@ Axiom's query endpoints (both dataset-specific and general APL) require a `start
 
 ### Takeaway for Future AI Agents
 - Always fetch and check if a file already exists on the remote branch (`origin/main`) before assuming it does not exist, to avoid unnecessary push rejections and conflict overhead.
+
+## 📅 2026-06-20: Video Grouping & Parameterized Footage Mapping Integration
+
+### What went well
+- Restructured `talking-heads.html` to group sentences dynamically by video title instead of printing redundant script section titles and repeating video headers.
+- Integrated `URLSearchParams` on `footage_mapping.html` to accept `module` and `video` query strings on page load.
+- Provided per-video custom prompter buttons (modal) and related footage buttons linking to `footage_mapping.html?module=X&video=Y` seamlessly.
+
+### Takeaway for Future AI Agents
+- When designing UI elements that cross-reference other tools (e.g. footage mapping to script lists), query parameters serve as a lightweight, clean, and stateless integration pattern.
+

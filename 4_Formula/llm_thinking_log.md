@@ -750,4 +750,35 @@ Update the existing risks.html page in `5_Symbols/production/preprod/` to detail
 - MODIFY: `4_Formula/llm_thinking_log.md` (this entry)
 
 
+---
+
+## 2026-06-20 — 🎥 Talking Heads Video Grouping & Footage Mapping Integration
+
+### 🎯 Objective
+1. Modify `5_Symbols/production/prod/talking-heads.html` to group sentences by video (no repeated video titles per sentence).
+2. For each video section, render:
+   - One "📋 Prompter" script creation button that opens the teleprompter creator modal configured for that specific video.
+   - One "🎥 Footage Mapping" button linking to `footage_mapping.html?module=X&video=Y` matching the specific video.
+3. Modify `5_Symbols/production/prod/footage_mapping.html` to parse `module` and `video` query parameters on load and auto-select the corresponding dropdown option.
+
+### 📐 Design & Implementation Plan
+- **Footage Mapping Parameter Support**:
+  - In `5_Symbols/production/prod/footage_mapping.html`, parse `?module=X&video=Y` using `URLSearchParams` on `DOMContentLoaded`.
+  - Auto-select `#module-select` and invoke `onModuleChange()`.
+  - Auto-select `#video-select` with `m{module}_scene_{video}` value.
+- **Talking Heads Layout Grouping**:
+  - In `5_Symbols/production/prod/talking-heads.html`, change the grouping inside `render()` to group by video key (`s.video_title` or fallback).
+  - Loop over grouped videos and render one section container per video containing a header with action buttons and a nested list of sentences (omitting repeating headers).
+  - Extract the module ID and video scene index from `script_id` to build the `footage_mapping.html?module=X&video=Y` link dynamically.
+- **Teleprompter Modal Routing**:
+  - Update modal trigger logic to listen for click events on the per-video prompter buttons.
+  - Dynamically generate the teleprompter script for the clicked video's sentence list.
+
+### 🗺 Files to Create/Modify
+- MODIFY: `5_Symbols/production/prod/talking-heads.html`
+- MODIFY: `5_Symbols/production/prod/footage_mapping.html`
+- MODIFY: `4_Formula/llm_thinking_log.md` (this entry)
+
+
+
 

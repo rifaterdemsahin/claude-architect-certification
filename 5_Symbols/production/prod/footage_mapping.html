@@ -858,11 +858,32 @@
           closeLightbox();
         }
       });
-    });
 
-    // Init
-    onModuleChange();
-    switchTab('images');
+      // Parse query string parameters on load
+      const urlParams = new URLSearchParams(window.location.search);
+      const modParam = urlParams.get('module');
+      if (modParam) {
+        const modSelect = document.getElementById('module-select');
+        if (modSelect) {
+          modSelect.value = modParam;
+        }
+      }
+      onModuleChange();
+
+      const videoParam = urlParams.get('video');
+      if (videoParam) {
+        const videoSelect = document.getElementById('video-select');
+        if (videoSelect) {
+          const mod = modParam || '1';
+          videoSelect.value = `m${mod}_scene_${videoParam}`;
+          if (!videoSelect.value) {
+            videoSelect.value = videoParam;
+          }
+        }
+      }
+
+      switchTab('images');
+    });
   </script>
 
   <!-- Image lightbox/modal popup -->

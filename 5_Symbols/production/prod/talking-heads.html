@@ -65,6 +65,13 @@
     footer { text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
     
     .action-row { display: flex; flex-direction: column; align-items: center; gap: 16px; margin-bottom: 32px; }
+    
+    .video-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px; }
+    .video-actions { display: flex; gap: 10px; }
+    .video-btn { background: rgba(139,92,246,0.15); border: 1px solid rgba(139,92,246,0.3); color: #c084fc; padding: 6px 14px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-body); text-decoration: none; }
+    .video-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
+    .video-btn.secondary { background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.3); color: #93c5fd; }
+    .video-btn.secondary:hover { background: var(--secondary); color: white; border-color: var(--secondary); }
     .prompter-btn { background: linear-gradient(135deg, var(--primary), var(--secondary)); border: 1px solid rgba(255,255,255,0.15); color: white; padding: 10px 22px; border-radius: 10px; font-size: 0.85rem; font-weight: 700; cursor: pointer; transition: all 0.25s ease; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(139,92,246,0.25); font-family: var(--font-body); }
     .prompter-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(139,92,246,0.4); border-color: rgba(255,255,255,0.3); }
     .prompter-btn:active { transform: translateY(0); }
@@ -170,7 +177,6 @@
 
   <div class="action-row">
     <div class="mod-filter" id="mod-filter"></div>
-    <button class="prompter-btn" id="create-prompter-btn">📋 Create Prompter Script</button>
   </div>
   <div id="content-area"><div class="loading">Loading talking head scenes from master script...</div></div>
 
@@ -226,32 +232,59 @@
       return;
     }
 
+    // Group sentences by video (do not repeat video title per sentence)
     const grouped = {};
     filtered.forEach(s => {
-      const key = s.script_id || 'unknown';
+      const key = s.video_title || `Script ${s.script_id || 'unknown'}`;
       if (!grouped[key]) grouped[key] = [];
       grouped[key].push(s);
     });
 
     let html = '';
-    Object.entries(grouped).forEach(([scriptId, sents]) => {
-      const sentences = sents.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
-      const moduleId = scriptId.length >= 1 ? scriptId[0] : '?';
-      html += `<div class="module-section">`;
-      html += `<h2>📦 Script #${esc(scriptId)} <span style="font-size:0.8rem;font-weight:400;color:var(--text-muted);">(${sentences.length} sentence${sentences.length !== 1 ? 's' : ''})</span></h2>`;
-      html += `<div class="sent-list">`;
-      sentences.forEach(s => {
+    Object.entries(grouped).forEach(([videoTitle, sentences]) => {
+      const sortedSents = sentences.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+      const sampleSent = sortedSents[0] || {};
+      const scriptId = sampleSent.script_id || 'unknown';
+      const moduleId = scriptId.length >= 1 ? scriptId[0] : '1';
+      
+      // Determine scene/video number for link relation
+      let sceneNum = 1;
+      const match = String(scriptId).match(/_(\d+)/) || String(scriptId).match(/\.(\d+)/);
+      if (match) {
+        sceneNum = parseInt(match[1], 10);
+      } else {
+        const digits = String(scriptId).match(/\d+/g);
+        if (digits && digits.length > 1) {
+          sceneNum = parseInt(digits[1], 10);
+        }
+      }
+
+      html += `<div class="module-section" style="background: rgba(17,24,39,0.4); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 24px; margin-bottom: 24px;">`;
+      html += `  <div class="video-header">`;
+      html += `    <h2 style="font-family: var(--font-title); font-size: 1.25rem; font-weight: 700; margin: 0; color: white;">🎬 Video: ${esc(videoTitle)}</h2>`;
+      html += `    <div class="video-actions">`;
+      html += `      <button class="video-btn btn-prompter-trigger" data-video="${esc(videoTitle)}">📋 Prompter</button>`;
+      html += `      <a href="footage_mapping.html?module=${moduleId}&video=${sceneNum}" class="video-btn secondary">🎥 Footage Mapping</a>`;
+      html += `    </div>`;
+      html += `  </div>`;
+      html += `  <div class="sent-list">`;
+      
+      sortedSents.forEach(s => {
         const typeLabel = (s.sentence_type || 'body').replace(/_/g, ' ');
-        html += `<div class="sent-item">`;
-        html += `<div class="sent-header"><span class="sent-video">🎬 Video: ${esc(s.video_title || `Script ${scriptId}`)}</span><span class="sent-type-badge">${esc(typeLabel)}</span></div>`;
-        html += `<div class="sent-text">${esc(s.sentence_text)}</div>`;
-        html += `<div class="sent-meta">`;
-        html += `<span>📄 Section: ${esc(s.section || 'body')}</span>`;
-        html += `<span>🎬 Type: Talking Head</span>`;
-        if (s.sort_order) html += `<span>🔢 Line Number: #${s.sort_order}</span>`;
-        html += `</div></div>`;
+        html += `    <div class="sent-item" style="background: rgba(0,0,0,0.15); margin-bottom: 8px;">`;
+        html += `      <div class="sent-text" style="font-size: 0.88rem; color: var(--text-main); margin-bottom: 8px; line-height: 1.6;">${esc(s.sentence_text)}</div>`;
+        html += `      <div class="sent-meta" style="display: flex; gap: 8px;">`;
+        html += `        <span style="font-size: 0.7rem; color: var(--text-muted); background: rgba(255,255,255,0.03); padding: 2px 6px; border-radius: 4px;">📄 Section: ${esc(s.section || 'body')}</span>`;
+        html += `        <span style="font-size: 0.7rem; color: var(--text-muted); background: rgba(255,255,255,0.03); padding: 2px 6px; border-radius: 4px;">🎬 Type: Talking Head</span>`;
+        if (s.sort_order) {
+          html += `      <span style="font-size: 0.7rem; color: var(--text-muted); background: rgba(255,255,255,0.03); padding: 2px 6px; border-radius: 4px;">🔢 Line Number: #${s.sort_order}</span>`;
+        }
+        html += `      </div>`;
+        html += `    </div>`;
       });
-      html += `</div></div>`;
+      
+      html += `  </div>`;
+      html += `</div>`;
     });
 
     area.innerHTML = html;
@@ -341,35 +374,12 @@ Let's begin with how Claude processes your request...
 
 at the token level.`;
 
-  function generateLiveScript() {
-    const filtered = activeModule
-      ? allSentences.filter(s => s.script_id && String(s.script_id).startsWith(String(activeModule)))
-      : allSentences;
-
-    if (filtered.length === 0) {
-      return `🎬 Teleprompter Script: Live Dynamic Script\n\n(No sentences loaded for the selected filter)`;
-    }
-
-    const sorted = [...filtered].sort((a, b) => {
-      if (a.script_id !== b.script_id) {
-        return String(a.script_id).localeCompare(String(b.script_id));
-      }
-      return (a.sort_order || 0) - (b.sort_order || 0);
-    });
-
-    const title = activeModule ? `Module ${activeModule} Script` : `All Filtered Scripts`;
-    let scriptText = `🎬 Teleprompter Script: ${title}\n\n`;
+  function generateLiveScriptForVideo(videoTitle, sentences) {
+    const sorted = [...sentences].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+    let scriptText = `🎬 Teleprompter Script: ${videoTitle}\n\n`;
     scriptText += `(LOOK DIRECTLY AT CAMERA - STRONG, CONFIDENT)\n\n`;
 
-    let currentScriptId = null;
-    sorted.forEach((s, idx) => {
-      if (s.script_id !== currentScriptId) {
-        currentScriptId = s.script_id;
-        if (idx > 0) {
-          scriptText += `\n(PAUSE - TRANSITION TO NEXT SCRIPT)\n\n`;
-        }
-        scriptText += `--- Script #${currentScriptId} ---\n\n`;
-      }
+    sorted.forEach((s) => {
       scriptText += `${s.sentence_text}\n\n`;
     });
 
@@ -378,25 +388,39 @@ at the token level.`;
 
   function initPrompterModal() {
     const modal = document.getElementById('prompter-modal');
-    const openBtn = document.getElementById('create-prompter-btn');
     const closeBtn = document.getElementById('close-modal-btn');
     const toggleSample = document.getElementById('toggle-sample-btn');
     const toggleLive = document.getElementById('toggle-live-btn');
     const outputText = document.getElementById('prompter-output-text');
     const copyBtn = document.getElementById('copy-prompter-btn');
 
-    let currentView = 'sample'; // 'sample' or 'live'
+    let currentModalVideoTitle = '';
+    let currentModalSentences = [];
+    let currentView = 'live'; // 'sample' or 'live'
 
     function updateOutput() {
       if (currentView === 'sample') {
         outputText.textContent = SAMPLE_SCRIPT_M1;
       } else {
-        outputText.textContent = generateLiveScript();
+        outputText.textContent = generateLiveScriptForVideo(currentModalVideoTitle, currentModalSentences);
       }
     }
 
-    openBtn.addEventListener('click', () => {
-      if (activeModule === '1') {
+    // Modal Trigger Delegation
+    document.getElementById('content-area').addEventListener('click', (e) => {
+      const btn = e.target.closest('.btn-prompter-trigger');
+      if (!btn) return;
+      
+      const videoTitle = btn.dataset.video;
+      currentModalVideoTitle = videoTitle;
+      
+      currentModalSentences = allSentences.filter(s => {
+        const key = s.video_title || `Script ${s.script_id || 'unknown'}`;
+        return key === videoTitle;
+      });
+
+      // Default to Sample if this is the Module 1 Intro video, else default to Live
+      if (videoTitle.toLowerCase().includes('intro') && activeModule === '1') {
         currentView = 'sample';
         toggleSample.classList.add('active');
         toggleLive.classList.remove('active');
@@ -405,6 +429,7 @@ at the token level.`;
         toggleSample.classList.remove('active');
         toggleLive.classList.add('active');
       }
+      
       updateOutput();
       modal.classList.add('open');
     });

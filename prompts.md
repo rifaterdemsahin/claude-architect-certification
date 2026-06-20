@@ -271,3 +271,12 @@ Record every prompt given to AI agents below. Include the date, agent, and purpo
 **Purpose:** Integrate scaffolding deadlock mitigation strategy (Tell -> Do -> Apply) and its visual diagram into risks.html.
 **Prompt:** "add mitifgation stratgey to the scaffolding deadlock > https://claude-architect-certification.fly.dev/5_Symbols/production/preprod/risks.html > use the preprod the tell with the ai created scripts and read them outloud when you do the image generation see and attach them to complete the images so u can recall and move on the do action stage in the production recording which i would record what i can do with what i learned and the do section is straight forward as i have done the table read and the intro is ready it is time to turn on and create a shot list > when the captures are there we move on to the post prod and give the implementation as apply with all the artifacts to the audience so they can remember and get motivated > add these use emojis and acommit push"
 **Outcome:** Enhanced the medium-risk card "Tooling Scaffolding Deadlock" in `5_Symbols/production/preprod/risks.html` with a detailed mitigation plan and the generated diagram `deadlock_mitigation.jpg` from `3_Simulation/generated/`. Recorded logs in `llm_thinking_log.md`, `lessons_learned.md`, and `fix.log`.
+
+---
+
+## 2026-06-20 — Video Grouping & Footage Mapping Query Params
+
+**Agent:** Antigravity (Gemini 3.5 Flash)
+**Purpose:** Restructure script list to group sentences by video, add per-video prompter/footage buttons with parameter relations, and support auto-filtering on page load.
+**Prompt:** "group videos > do not repeat > https://rifaterdemsahin.github.io/claude-architect-certification/5_Symbols/production/prod/talking-heads.html?module=1 > filter and load with the filter > for each video have one prompter create prompter script button. > also add a footage button here and relate to module and video > commit and push > publish to fly.io"
+**Outcome:** Modified `5_Symbols/production/prod/talking-heads.html` to group sentences by video, render per-video custom prompter modal actions, and dynamic footage mapping links. Modified `5_Symbols/production/prod/footage_mapping.html` to read `module` and `video` query parameters on load. Committed and pushed to `main`.
