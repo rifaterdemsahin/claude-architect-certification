@@ -971,6 +971,40 @@ The user wants to add an `explanations` datastructure that links explanations to
 - Updated `antigravity.md` with the "Thinking & Planning Gate" rule.
 - Updated `4_Formula/delivery_pilot/README.md` and `navigation_config.json`.
 - Verified all agent files now explicitly mandate the use of the thinking log.
-- **Key Files Modified**: `antigravity.md`, `4_Formula/delivery_pilot/llm_thinking_formula.md`, `4_Formula/delivery_pilot/README.md`, `navigation_config.json`, `4_Formula/delivery_pilot/llm_thinking_log.md`.
+- Key Files Modified: `antigravity.md`, `4_Formula/delivery_pilot/llm_thinking_formula.md`, `4_Formula/delivery_pilot/README.md`, `navigation_config.json`, `4_Formula/delivery_pilot/llm_thinking_log.md`.
+
+---
+
+## 📅 Date: 2026-06-20
+## 🧠 Stage: Stage 4 (Formula - Thinking & Planning) - Google Drive Course Folders Creator Page
+
+### ❓ Problem Statement
+The user requested:
+1. Create a page in production (`5_Symbols/production/prod/gdrive_folders.html`) that creates the course module and video folders in Google Drive.
+2. The folder names should use the module and video names as a suffix (e.g. `Module 01 - [Module Title]` and `Video 01 - [Video Title]`) to make them easier to find.
+
+### 📐 Approach & Strategy
+1. **📂 File Location**: Create the HTML page at `5_Symbols/production/prod/gdrive_folders.html` to respect the HTML containment rule.
+2. **🔌 Google Integration**: Reuse Google Client ID and API Key from `localStorage` (set in settings or the page) and authenticate with Google Drive API v3 (OAuth2 flow) like `gdrive_sync.html`.
+3. **🗄️ Supabase Integration**: Retrieve the list of modules and videos from `course_modules` and `course_videos` tables in Supabase.
+4. **🎨 UI Design & Structure**:
+   - Modern dark mode matching the rest of the application.
+   - Glassmorphic panels, gradient badges, and interactive animations.
+   - UI layout showing:
+     - Google OAuth authentication status.
+     - Configuration panel for parent/root folder (create new root or enter existing folder ID).
+     - Tree representation showing modules and videos fetched from Supabase.
+     - Suffix naming preview:
+       - Root: `Claude AI Certification`
+       - Module: `Module 01 - Architecture Overview`
+       - Video: `Video 01 - Course Introduction`
+     - Action button "Create Folders in Google Drive" with detailed progress logging.
+     - Folder creation logic will check if a folder with that name already exists in the parent to avoid duplicate creation (idempotent design).
+5. **⚙️ Navigation**:
+   - Add the new page to `"projectMenu"` under `"🎥 Production"` inside the `"🛠️ Tools"` list in `navigation_config.json`.
+   - Update fallback project menus in `index.html` and `5_Symbols/markdown_renderer.html`.
+6. **🌿 Git Workflow**:
+   - Commit files incrementally and push.
+
 
 
