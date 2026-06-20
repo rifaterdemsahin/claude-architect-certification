@@ -293,11 +293,32 @@
     return d.innerHTML;
   }
 
+  function getEmotionEmoji(type) {
+    const map = {
+      'hook': '🔥 [Hook - Engage & Dynamic]',
+      'objective': '🎯 [Objective - Clear & Focused]',
+      'transition': '🔄 [Transition - Smooth]',
+      'insight': '💡 [Insight - Thoughtful & Leaned In]',
+      'takeaway': '🏆 [Takeaway - Strong & Memorable]',
+      'step': '🚶 [Step - Explaining Process]',
+      'cue': '🎬 [Stage Direction]',
+      'heading': '📌 [Heading]',
+      'body': ''
+    };
+    return map[type] || '';
+  }
+
   function formatPrompterMD(title, sents) {
     const sorted = [...sents].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
     let md = `# ${title}\n\n`;
     sorted.forEach((s) => {
-      md += `${s.sentence_text.trim()}\n\n`;
+      const cue = getEmotionEmoji(s.sentence_type);
+      const text = s.sentence_text.trim();
+      if (cue) {
+        md += `(${cue})\n${text}\n\n`;
+      } else {
+        md += `${text}\n\n`;
+      }
     });
     return md;
   }
@@ -307,7 +328,7 @@
     if (!sents.length) return alert('No sentences found for this script.');
     
     const first = sents[0];
-    const title = `M${first.module_id || '?'} V${first.video_number !== undefined ? first.video_number : '?'} - ${first.video_title || `Script ${scriptId}`}`;
+    const title = `Module ${first.module_id || '?'} Video ${first.video_number !== undefined ? first.video_number : '?'} (Video ID: ${first.video_id || '?'}) — ${first.video_title || `Script ${scriptId}`}`;
     const markdown = formatPrompterMD(title, sents);
     showPrompterModal(title, markdown);
   };
@@ -331,7 +352,7 @@
     let markdown = '';
     Object.entries(grouped).forEach(([scriptId, sents]) => {
       const first = sents[0];
-      const scriptTitle = `M${first.module_id || '?'} V${first.video_number !== undefined ? first.video_number : '?'} - ${first.video_title || `Script ${scriptId}`}`;
+      const scriptTitle = `Module ${first.module_id || '?'} Video ${first.video_number !== undefined ? first.video_number : '?'} (Video ID: ${first.video_id || '?'}) — ${first.video_title || `Script ${scriptId}`}`;
       markdown += formatPrompterMD(scriptTitle, sents) + '\n\n---\n\n';
     });
     
@@ -471,9 +492,19 @@
     )].sort((a, b) => a - b);
 
     const container = document.getElementById('mod-filter');
-    container.innerHTML = `<button class="mod-btn ${!activeModule ? 'active' : ''}" data-mod="">All Modules</button>` +
-      modules.map(m => `<button class="mod-btn ${activeModule === String(m) ? 'active' : ''}" data-mod="${esc(m)}">Module ${esc(m)}</button>`).join('') +
-      `<button class="mod-btn" style="background:rgba(16, 185, 129, 0.15); border-color:rgba(16, 185, 129, 0.3); color:#34d399; margin-left: 12px;" onclick="generateFilterPrompterMD()">📝 Export Prompter MD</button>`;
+    
+    // Hide filter buttons if a module is explicitly selected in the URL params to prevent context escape
+    const urlParams = new URLSearchParams(window.location.search);
+    const hasModuleParam = urlParams.has('module');
+    
+    if (hasModuleParam && activeModule) {
+      container.innerHTML = `<button class="mod-btn active" data-mod="${esc(activeModule)}">Module ${esc(activeModule)} Only</button>` +
+        `<button class="mod-btn" style="background:rgba(16, 185, 129, 0.15); border-color:rgba(16, 185, 129, 0.3); color:#34d399; margin-left: 12px;" onclick="generateFilterPrompterMD()">📝 Export Prompter MD</button>`;
+    } else {
+      container.innerHTML = `<button class="mod-btn ${!activeModule ? 'active' : ''}" data-mod="">All Modules</button>` +
+        modules.map(m => `<button class="mod-btn ${activeModule === String(m) ? 'active' : ''}" data-mod="${esc(m)}">Module ${esc(m)}</button>`).join('') +
+        `<button class="mod-btn" style="background:rgba(16, 185, 129, 0.15); border-color:rgba(16, 185, 129, 0.3); color:#34d399; margin-left: 12px;" onclick="generateFilterPrompterMD()">📝 Export Prompter MD</button>`;
+    }
 
     document.getElementById('module-count').textContent = modules.length || 0;
 
@@ -500,11 +531,11 @@
 
   document.addEventListener('DOMContentLoaded', async () => {
     const [sentences, modules] = await Promise.all([fetchAll(), fetchModules()]);
-    allSentences = (sentences || []).filter(s => s.visual_mode === 'talking_head');
+    let rawSentences = (sentences || []).filter(s => s.visual_mode === 'talking_head');
 
     const modMap = {};
     (modules || []).forEach(m => { modMap[m.id] = m; });
-    allSentences.forEach(s => {
+    rawSentences.forEach(s => {
       if (modMap[s.script_id]) {
         s.video_title = modMap[s.script_id].video_title || modMap[s.script_id].title;
         s.video_id = modMap[s.script_id].video_id;
@@ -518,6 +549,10 @@
     const initialMod = urlParams.get('module');
     if (initialMod) {
       activeModule = initialMod;
+      // Restrict allSentences strictly to the selected module when module query param is active
+      allSentences = rawSentences.filter(s => s.module_id && String(s.module_id) === String(initialMod));
+    } else {
+      allSentences = rawSentences;
     }
 
     buildFilter();

@@ -1,5 +1,30 @@
 # LLM Thinking Log
 
+## 2026-06-20 — 🗣️ Talking Heads Emotion Emojis & Module Scoping
+
+### 🎯 Objective
+Update `5_Symbols/production/prod/talking-heads.html` to:
+- Restrict data to only the selected module script when `?module=N` URL param is present
+- Show explicit video ID and full title format: "Module 1 Video 1 (Video ID: X) — Architecture Overview"
+- Add emotion-based emoji delivery cues (🔥 Hook, 🎯 Objective, 💡 Insight, etc.) to the prompter markdown output so the actor reading from the prompter gets visual tone hints
+- Hide the "All Modules" filter buttons when module is locked via URL to prevent context escape
+
+### 📐 Implementation
+1. **Emotion Emoji Map**: Added `getEmotionEmoji(sentence_type)` mapping `hook→🔥, objective→🎯, transition→🔄, insight→💡, takeaway→🏆, step→🚶, cue→🎬, heading→📌` with parenthetical delivery cues in prompter MD output
+2. **Title Format**: Changed prompter title from `M1 V1 - Title` to `Module 1 Video 1 (Video ID: X) — Architecture Overview` for both single-script and filtered export
+3. **Module Scoping**: When `?module=N` is in URL, `allSentences` is strictly filtered at load time; filter bar shows only "Module N Only" badge + Export button (no "All Modules" escape)
+4. **Filter Buttons**: `buildFilter()` now detects URL param and renders minimal locked-state UI
+
+### ✅ Verification
+- Local file: `5_Symbols/production/prod/talking-heads.html` — emotion cues render in prompter modal textarea
+- Prompter output sample: `(🔥 [Hook - Engage & Dynamic])\n"Most developers think they're building with Claude..."`
+
+### 📦 Files Changed
+- `5_Symbols/production/prod/talking-heads.html` — all logic changes
+- `4_Formula/llm_thinking_log.md` — this entry
+
+---
+
 ## 2026-06-20 — 🟢 Green Screen Calculator Link in Post Prod Tools Menu
 
 ### 🎯 Objective
