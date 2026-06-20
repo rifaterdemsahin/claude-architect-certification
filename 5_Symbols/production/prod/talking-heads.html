@@ -325,6 +325,7 @@
   function formatPrompterMD(title, sents) {
     const sorted = [...sents].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
     let md = `# ${title}\n\n`;
+    md += `(🎥 [Get Ready — 3... 2... 1...])\n\n\n`;
     sorted.forEach((s) => {
       const cue = getEmotionEmoji(s.sentence_type);
       const text = s.sentence_text.trim();
