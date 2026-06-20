@@ -1,5 +1,19 @@
 # LLM Thinking Log
 
+## 2026-06-20 — 🟢 Green Screen Calculator Link in Post Prod Tools Menu
+
+### 🎯 Objective
+Add `https://rifaterdemsahin.github.io/green-screen-helper/calculator.html` as "🟢 Green Screen Calculator" to the Tools submenu under "📦 Post Prod" inside all navigation configurations and static fallback structures.
+
+### 📐 Design & Implementation Plan
+1. **Target Files**:
+   - `navigation_config.json`: Add link to the list of `🛠️ Tools` inside the `📦 Post Prod` category.
+   - `shared/nav.js`: Add matching element to the static fallback array inside `shared/nav.js`.
+   - `index.html`: Update fallback array in the root sitemap/homepage navigation.
+   - `markdown_renderer.html`: Update fallback array in the markdown rendering helper page.
+   - `5_Symbols/course_src/templates/markdown_renderer.html`: Update fallback array in the templates configuration.
+2. **Commit and Push**: Perform atomic updates, verifying each modification.
+
 ## 2026-06-20 — 🖼️ Footage Mapping Image Hover Modal Preview
 
 ### 🎯 Objective
@@ -805,4 +819,53 @@ Update the existing risks.html page in `5_Symbols/production/preprod/` to detail
 5. Perform validation and verify the page runs correctly.
 
 
+
+
+---
+
+## 2026-06-20 — 🔬 Footage Mapping Description Support & Database Schema Update
+
+### 🎯 Objective
+1. Modify `5_Symbols/production/prod/footage_mapping.html` to support loading, adding, and editing descriptions for research elements.
+2. Initialize the Supabase client inside `footage_mapping.html` to fetch and upsert description metadata directly.
+3. Add a description text field to each asset item in the left panel.
+4. Add a migration file `5_Symbols/supabase/migrations/migration_research_assets_description.sql` that adds the `description` column to `public.research_assets` in Supabase.
+5. Update `5_Symbols/supabase/schema/09_research_assets.sql` to include the `description` column.
+
+### 📐 Design & Implementation Plan
+- **Supabase Integration**:
+  - Add Supabase script dependency inside `footage_mapping.html`.
+  - Initialize the Supabase client using the same URL and anon key used throughout the application.
+  - Query descriptions from `research_assets` in `loadResearchElements` and map them to their corresponding items by name.
+  - Implement `updateDescription` which upserts the `description` (with container and name as primary keys) into the `research_assets` table on change.
+- **UI Enhancements**:
+  - Render an input field for each asset card to display the description and allow editing.
+- **Migration & Schema Update**:
+  - Create the migration SQL to add the `description` column if it's missing in `research_assets`.
+  - Modify `09_research_assets.sql` to include the field.
+
+### 🗺 Files to Create/Modify
+- MODIFY: `4_Formula/llm_thinking_log.md` (this entry)
+- CREATE: `5_Symbols/supabase/migrations/migration_research_assets_description.sql`
+- MODIFY: `5_Symbols/supabase/schema/09_research_assets.sql`
+
+---
+
+## 2026-06-20 — 🗣️ Talking Heads Emotion-Guided Teleprompter & Casing-Safe Filtering
+
+### 🎯 Objective
+Update the Talking Heads Guide (`5_Symbols/production/prod/talking-heads.html`) to:
+1. Support specific emotion cues (emojis + descriptors) corresponding to sentence types in the Markdown Prompter outputs.
+2. Explicitly format script titles with full video identifiers (e.g. `Module 1 Video 1` / `Module 1 Video 2`).
+3. Ensure the initial client load only loads and renders the module matching the `?module=X` URL search parameter if present.
+
+### 📐 Design & Implementation Plan
+1. **Emotion Cues Map**: Introduce `getEmotionEmoji(type)` mapping `hook`, `objective`, `transition`, `insight`, `takeaway`, etc. to corresponding emotion instruction emojis.
+2. **Prompter Markdown Customization**: Inject parenthesized emotion cues before each sentence in the Elgato prompter output.
+3. **Explicit Video Titles**: Format the teleprompter heading to spell out module and video numbers and display database IDs clearly.
+4. **Validation**: Test the query parameter `?module=1` to verify it displays and exports only scripts belonging to Module 1.
+
+### 🗺 Files to Modify
+- MODIFY: `5_Symbols/production/prod/talking-heads.html`
+- MODIFY: `4_Formula/llm_thinking_log.md` (this entry)
 
