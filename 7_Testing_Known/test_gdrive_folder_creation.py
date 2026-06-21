@@ -91,6 +91,12 @@ def run_generation_pipeline(outline, drive_api, db):
             vid_url = f"https://drive.google.com/drive/folders/{vid_id}"
             db.update_record("course_videos", vid["id"], [{"name": "Google Drive Folder", "url": vid_url}])
 
+            # Create subfolders: raw, export, research
+            for sub in ["raw", "export", "research"]:
+                sub_id = drive_api.list_files(sub, vid_id)
+                if not sub_id:
+                    drive_api.create_folder(sub, vid_id)
+
 def run_tests():
     log_info("Starting Google Drive folder creation CLI unit test suite...")
     
@@ -140,6 +146,25 @@ def run_tests():
         log_success("Assert 4: Drive API folder creation requests sent for all videos, nested correctly")
     else:
         log_error("Assert 4: Video folder creation requests missing or parented incorrectly")
+        tests_failed += 1
+
+    # 4b. Verify video subfolder creation (raw, export, research)
+    subfolders_expected = [
+        {"name": "raw", "parent": "mock-folder-id-video-1---mock-setup-verification"},
+        {"name": "export", "parent": "mock-folder-id-video-1---mock-setup-verification"},
+        {"name": "research", "parent": "mock-folder-id-video-1---mock-setup-verification"},
+        {"name": "raw", "parent": "mock-folder-id-video-2---mock-integration-testing"},
+        {"name": "export", "parent": "mock-folder-id-video-2---mock-integration-testing"},
+        {"name": "research", "parent": "mock-folder-id-video-2---mock-integration-testing"},
+        {"name": "raw", "parent": "mock-folder-id-video-1---mock-delivery-release"},
+        {"name": "export", "parent": "mock-folder-id-video-1---mock-delivery-release"},
+        {"name": "research", "parent": "mock-folder-id-video-1---mock-delivery-release"}
+    ]
+    assert_4b = all(any(c["name"] == sf["name"] and c["parent_id"] == sf["parent"] for c in mock_drive.create_calls) for sf in subfolders_expected)
+    if assert_4b:
+        log_success("Assert 4b: Video subfolders (raw, export, research) created under all videos")
+    else:
+        log_error("Assert 4b: Video subfolder creation requests missing or parented incorrectly")
         tests_failed += 1
 
     # 5. Verify database updates count (2 modules + 3 videos = 5 records)
@@ -195,7 +220,7 @@ def run_tests():
 
     print("\n" + "="*50)
     if tests_failed == 0:
-        print("\033[92m🎉 CLI TEST SUITE COMPLETED SUCCESSFULLY: 7/7 unit assertions passed.\033[0m")
+        print("\033[92m🎉 CLI TEST SUITE COMPLETED SUCCESSFULLY: 8/8 unit assertions passed.\033[0m")
         sys.exit(0)
     else:
         print(f"\033[91m🚨 CLI TEST SUITE FAILED: {tests_failed} assertions failed.\033[0m")

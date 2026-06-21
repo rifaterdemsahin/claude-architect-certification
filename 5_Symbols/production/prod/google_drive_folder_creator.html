@@ -959,6 +959,13 @@
             // Record video folder link in Supabase
             log('info', `Updating Supabase video ID ${vidNode.dbId} with folder link...`);
             await saveFolderLinkToSupabase('course_videos', vidNode.dbId, vidFolderUrl);
+
+            // Create subfolders: raw, export, research
+            log('info', `Creating subfolders 'raw', 'export', 'research' under video: "${vidNode.name}"`);
+            await getOrCreateDriveFolder('raw', vidFolderId);
+            await getOrCreateDriveFolder('export', vidFolderId);
+            await getOrCreateDriveFolder('research', vidFolderId);
+
             updateNodeStatus(vidNode, 'success');
           }
         }
@@ -1216,12 +1223,12 @@
           detail: "All missing video folders must be created on Google Drive."
         });
 
-        // Assert 5: Total drive creation calls matches count of modules and videos (5 calls)
-        const driveCallsCount = createCalls.length === 5;
+        // Assert 5: Total drive creation calls matches count of modules and videos and their subfolders (14 calls)
+        const driveCallsCount = createCalls.length === 14;
         assertions.push({
           name: "Total Drive folder creation calls count",
           passed: driveCallsCount,
-          detail: `Expected 5 folder creations, got ${createCalls.length}`
+          detail: `Expected 14 folder creations (2 modules, 3 videos, and 9 subfolders), got ${createCalls.length}`
         });
 
         // Assert 6: Supabase database update calls executed for modules and videos (5 calls)
