@@ -65,7 +65,7 @@ def fetch_token_from_supabase():
         log_warn(f"Failed to fetch shared access token from Supabase: {e}")
     return None
 
-def authenticate_google_drive():
+def authenticate_google_drive(poll_only=False):
     creds = None
     token_path = "token.json"
     
@@ -88,6 +88,9 @@ def authenticate_google_drive():
         except Exception as e:
             log_warn(f"Failed to load cached token.json: {e}")
             
+    if poll_only:
+        return creds
+        
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             try:
@@ -269,12 +272,36 @@ def main():
         is_mock = True
     else:
         creds = authenticate_google_drive()
+        if not creds:
+            import time
+            log_info("\n" + "="*70)
+            log_info("🔑 ACTION REQUIRED: WAITING FOR BROWSER AUTHENTICATION")
+            log_info("="*70)
+            log_info("Please follow these steps to proceed with real Google Drive folder creation:")
+            log_info("  1. Open http://localhost:8080/5_Symbols/production/prod/google_drive_folder_creator.html")
+            log_info("  2. Click the 'Connect Google Account' button and authorize access.")
+            log_info("\nThis script will automatically detect the token and proceed once done.")
+            log_info("Polling Supabase settings for gdrive_access_token (timeout in 5 mins)...")
+            log_info("="*70 + "\n")
+            
+            start_time = time.time()
+            while time.time() - start_time < 300:
+                sys.stdout.write(".")
+                sys.stdout.flush()
+                time.sleep(3)
+                creds = authenticate_google_drive(poll_only=True)
+                if creds:
+                    print("\n")
+                    break
+            else:
+                print("\n")
+                
         if creds:
             log_success("Google Drive Authorized: RUNNING IN PRODUCTION MODE.")
             drive_service = RealDriveService(creds)
             is_mock = False
         else:
-            log_warn("Google Drive authorization not active or skipped. RUNNING IN SIMULATION MODE.")
+            log_warn("Google Drive authorization timed out or was skipped. RUNNING IN SIMULATION MODE.")
             drive_service = MockDriveService()
             is_mock = True
         
