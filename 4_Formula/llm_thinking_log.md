@@ -1108,3 +1108,19 @@ Python suite green; Python + HTML JS syntax validated. Browser auto-run still un
 
 ### ✅ Outcome
 Real folders require: open WITHOUT `?test=true` → Connect Google Account → Generate. Python suite green; HTML JS syntax validated.
+
+---
+
+## 2026-06-21 — 🎛️ GDrive Creator: explicit Simulate (dry run) vs Create Real Folders buttons
+
+### 🎯 Request
+Two buttons: Simulation = dry run (no Supabase writes, no Drive changes); Real = create folders in Google Drive AND save links to Supabase.
+
+### 🛠 Implementation
+- **HTML:** replaced the single generate button with `🧪 Simulate (Dry Run)` → `startGeneration('simulation')` and `🚀 Create Real Folders & Save` → `startGeneration('real')`, plus a one-line explainer.
+- **startGeneration(mode):** sets `window.__DRY_RUN__`. Dry run skips the Google-auth requirement (never touches Drive), requires a loaded outline, and finishes with a "preview only" message. Real run keeps the auth gate.
+- **Dry-run guards:** `getOrCreateDriveFolder` returns a synthetic id + "[DRY RUN] Would create…"; `getOrCreateReadme`, `saveFolderLinkToSupabase`, and `upsertSetting` all no-op with a "[DRY RUN]" log; `checkFolderExists` returns false so the full tree previews.
+- **Python parity:** `create_gdrive_folders.py --simulate` now skips `update_supabase_link` (logs "[DRY RUN] Would record…") so simulation never writes to Supabase.
+
+### ✅ Outcome
+Simulate = safe preview, zero side effects. Real = Drive + Supabase. Python suite green; HTML JS syntax validated.

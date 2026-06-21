@@ -449,11 +449,18 @@
             </div>
           </div>
 
-          <div style="margin-top: 24px;">
-            <button id="btn-sync" class="btn btn-accent" disabled onclick="startGeneration()">
-              <i class="fa-solid fa-folder-plus"></i> Generate Folders & Record Links
+          <div style="margin-top: 24px; display: flex; flex-wrap: wrap; gap: 12px;">
+            <button id="btn-simulate" class="btn btn-secondary" onclick="startGeneration('simulation')" style="flex: 1; min-width: 200px; border: 1px dashed var(--primary);">
+              <i class="fa-solid fa-flask"></i> Simulate (Dry Run)
+            </button>
+            <button id="btn-sync" class="btn btn-accent" disabled onclick="startGeneration('real')" style="flex: 1; min-width: 200px;">
+              <i class="fa-solid fa-folder-plus"></i> Create Real Folders & Save
             </button>
           </div>
+          <p style="margin-top: 8px; font-size: 0.78rem; color: var(--text-muted);">
+            🧪 <strong>Simulate</strong> previews the structure — no Google Drive folders, no Supabase writes.
+            🚀 <strong>Create Real Folders</strong> creates everything in Google Drive and records links in Supabase (requires Google sign-in).
+          </p>
         </div>
 
         <!-- Terminal Logs -->
@@ -780,8 +787,8 @@
     // The supabase-js client's .from().upsert() builder is not reliably available from the CDN
     // bundle in this page, so we hit the REST endpoint the same way the Python CLI tools do.
     async function upsertSetting(key, value) {
-      if (window.__MOCK_TEST__) {
-        log('info', `[MOCK] Skipped Supabase upsert for '${key}'.`);
+      if (window.__MOCK_TEST__ || window.__DRY_RUN__) {
+        log('info', `${window.__DRY_RUN__ ? '[DRY RUN]' : '[MOCK]'} Skipped Supabase upsert for '${key}'.`);
         return;
       }
       const res = await fetch(`${SUPABASE_URL}/rest/v1/project_settings`, {
@@ -1103,6 +1110,8 @@
 
     async function checkFolderExists(folderId) {
       if (!folderId) return false;
+      // Dry run never queries Drive; report "not existing" so the full tree is previewed
+      if (window.__DRY_RUN__) return false;
       try {
         const response = await gapi.client.drive.files.get({
           fileId: folderId,
@@ -1116,18 +1125,37 @@
     }
 
     // ── GOOGLE DRIVE & DATABASE MAPPING RUNNER ──
-    async function startGeneration() {
-      if (!accessToken || !gapiInited) {
+    // mode: 'real' → create folders in Google Drive + save links to Supabase
+    //       'simulation' → dry run: log what WOULD be created, touch neither Drive nor Supabase
+    async function startGeneration(mode = 'real') {
+      const isDryRun = mode === 'simulation';
+      window.__DRY_RUN__ = isDryRun;
+
+      // A real run needs Google auth; a dry run does not (it never touches Drive)
+      if (!isDryRun && (!accessToken || !gapiInited)) {
         log('error', '🔒 Connect your Google account first (click "Connect Google Account") to create REAL folders.');
+        window.__DRY_RUN__ = false;
         return;
       }
       if (!db) {
         log('error', 'Supabase Client not active.');
+        window.__DRY_RUN__ = false;
+        return;
+      }
+      if (!courseTree) {
+        log('error', 'Load the course outline first (click "Pull Supabase Outline").');
+        window.__DRY_RUN__ = false;
         return;
       }
 
+      const simBtn = document.getElementById('btn-simulate');
       document.getElementById('btn-sync').disabled = true;
-      log('info', '🚀 Starting recursive directory generation sequence...');
+      if (simBtn) simBtn.disabled = true;
+      if (isDryRun) {
+        log('warn', '🧪 DRY RUN — simulating the folder structure. NO Google Drive folders and NO Supabase writes will be made.');
+      } else {
+        log('info', '🚀 Starting recursive directory generation sequence...');
+      }
 
       try {
         // Step 1: Create top root folder
@@ -1200,9 +1228,13 @@
           }
         }
 
-        if (window.__MOCK_TEST__) {
+        if (isDryRun) {
+          log('warn', '🧪 DRY RUN complete — preview only. No Google Drive folders were created and nothing was saved to Supabase.');
+          log('info', '➡️  Happy with the structure? Click "Create Real Folders & Save" to apply it for real.');
+          showToast('Dry run complete — no changes made.');
+        } else if (window.__MOCK_TEST__) {
           log('warn', '🧪 SIMULATION complete — these were MOCK folders. NOTHING was created in Google Drive.');
-          log('warn', '➡️  To create REAL folders: open this page WITHOUT "?test=true", click "Connect Google Account", then "Generate Folder Structure".');
+          log('warn', '➡️  To create REAL folders: open this page WITHOUT "?test=true", click "Connect Google Account", then "Create Real Folders & Save".');
           showToast('Simulation complete — no real folders created.');
         } else {
           log('success', '🎉 ALL Google Drive folders generated and linked to database successfully.');
@@ -1212,7 +1244,10 @@
         log('error', 'Generation run encountered failure: ' + err.message);
         showToast('Generation execution failed.');
       } finally {
+        window.__DRY_RUN__ = false;
         document.getElementById('btn-sync').disabled = false;
+        const simBtn = document.getElementById('btn-simulate');
+        if (simBtn) simBtn.disabled = false;
       }
     }
 
@@ -1289,6 +1324,10 @@
     // ── README.txt HELPER ──
     // Idempotently places a README.txt describing the folder's purpose inside a Drive folder.
     async function getOrCreateReadme(parentId, folderPath, vidName) {
+      if (window.__DRY_RUN__) {
+        log('info', `+ [DRY RUN] Would create README.txt in "${folderPath}"`);
+        return null;
+      }
       // Skip if a README.txt already exists in this folder
       const existing = await gapi.client.drive.files.list({
         q: `name = 'README.txt' and '${parentId}' in parents and trashed = false`,
@@ -1328,6 +1367,12 @@
 
     // ── GOOGLE DRIVE HELPER ──
     async function getOrCreateDriveFolder(folderName, parentId) {
+      if (window.__DRY_RUN__) {
+        // Dry run: never touch Drive — return a synthetic id and log the intent
+        const fakeId = `dry-run-${(parentId || 'root')}-${folderName}`.replace(/[^a-zA-Z0-9_-]/g, '-');
+        log('info', `+ [DRY RUN] Would create folder: "${folderName}"`);
+        return fakeId;
+      }
       let query = `mimeType = 'application/vnd.google-apps.folder' and name = '${folderName}' and trashed = false`;
       if (parentId) {
         query += ` and '${parentId}' in parents`;
@@ -1382,6 +1427,10 @@
 
     // ── DATABASE UPDATE HELPER ──
     async function saveFolderLinkToSupabase(tableName, recordId, folderUrl) {
+      if (window.__DRY_RUN__) {
+        log('info', `↪ [DRY RUN] Would record folder link for ID ${recordId} in ${tableName}`);
+        return;
+      }
       try {
         const linkObject = [{ name: 'Google Drive Folder', url: folderUrl }];
         

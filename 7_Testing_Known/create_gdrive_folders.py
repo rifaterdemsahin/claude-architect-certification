@@ -504,8 +504,11 @@ def main():
             else:
                 mod_id = drive_service.get_or_create_folder(mod_title, root_id)
                 mod_url = f"https://drive.google.com/drive/folders/{mod_id}"
-                # Update Supabase database
-                update_supabase_link("course_modules", mod["id"], mod_url)
+                # Update Supabase database (skipped in simulation/dry-run mode)
+                if is_mock:
+                    log_info(f"↪ [DRY RUN] Would record module link for ID {mod['id']} in course_modules")
+                else:
+                    update_supabase_link("course_modules", mod["id"], mod_url)
             
             mod_report = {
                 "id": mod["id"],
@@ -529,8 +532,11 @@ def main():
                 else:
                     vid_id = drive_service.get_or_create_folder(vid_title, mod_id)
                     vid_url = f"https://drive.google.com/drive/folders/{vid_id}"
-                    # Update Supabase database
-                    update_supabase_link("course_videos", vid["id"], vid_url)
+                    # Update Supabase database (skipped in simulation/dry-run mode)
+                    if is_mock:
+                        log_info(f"↪ [DRY RUN] Would record video link for ID {vid['id']} in course_videos")
+                    else:
+                        update_supabase_link("course_videos", vid["id"], vid_url)
                 
                 # Create the full nested production subfolder structure (README.txt in each folder)
                 create_subfolder_structure(drive_service, vid_id, vid_title)
