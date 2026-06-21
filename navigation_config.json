@@ -280,25 +280,30 @@
           "description": "Recursively generate Google Drive folders for course modules and videos, and automatically record the folder links back to Supabase."
         },
         {
-          "label": "2. 🗣️ Talking Heads",
+          "label": "2. 🔗 Google Drive Links",
+          "url": "5_Symbols/production/prod/google_drive_links.html",
+          "description": "View and verify all created Google Drive directory links for modules and videos."
+        },
+        {
+          "label": "3. 🗣️ Talking Heads",
           "url": "5_Symbols/production/prod/talking-heads.html",
           "description": "All on-camera presenter scenes with greenscreen recording guide."
         },
         {
-          "label": "3. 🖥️ Screenshare",
+          "label": "4. 🖥️ Screenshare",
           "url": "5_Symbols/production/prod/screenshare.html",
           "description": "All screenshare scenes with screen recording setup guide."
         },
         {
-          "label": "4. 📸 Shot List & Assets",
+          "label": "5. 📸 Shot List & Assets",
           "url": "5_Symbols/production/postprod/production_shotlist.html?module=1&section=1"
         },
         {
-          "label": "5. 🎥 Footage Mapping",
+          "label": "6. 🎥 Footage Mapping",
           "url": "5_Symbols/production/prod/footage_mapping.html"
         },
         {
-          "label": "6. ✅ Production Checklist",
+          "label": "7. ✅ Production Checklist",
           "url": "5_Symbols/production/prod/checklist.html"
         },
         {
@@ -780,6 +785,14 @@
     {
       "label": "   ├─ ✅ Production Checklist",
       "url": "5_Symbols/production/prod/checklist.html"
+    },
+    {
+      "label": "   ├─ 📁 Google Drive Creator",
+      "url": "5_Symbols/production/prod/google_drive_folder_creator.html"
+    },
+    {
+      "label": "   ├─ 🔗 Google Drive Links",
+      "url": "5_Symbols/production/prod/google_drive_links.html"
     },
     {
       "label": "📁 6. Semblance",

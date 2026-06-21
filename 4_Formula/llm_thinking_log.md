@@ -999,4 +999,35 @@ Add robust unit and integration testing capabilities for the Google Drive folder
 - MODIFY: `5_Symbols/production/prod/google_drive_folder_creator.html`
 - MODIFY: `4_Formula/llm_thinking_log.md` (this entry)
 
+---
+
+## 2026-06-21 — ⚙️ Google Drive Terminal Test Code & Dashboard Links Page
+
+### 🎯 Objective
+1. Add a terminal-run script to check and verify the Google Drive folder creation configuration and test logic.
+2. Build a dedicated Google Drive Links page (`5_Symbols/production/prod/google_drive_links.html`) to display all created folder links alongside their corresponding course modules and videos.
+
+### 📐 Design & Implementation Plan
+1. **Terminal Test Script**:
+   - Create `7_Testing_Known/test_gdrive_folder_creation.py` (matching the repo's python validation pattern).
+   - The script will parse `.env` files, mock the folder creation process to execute test assertions on the tree traversal, verify idempotency logic, and check the Supabase update format.
+   - Run verification checks in terminal output.
+2. **Google Drive Links Dashboard**:
+   - Create `5_Symbols/production/prod/google_drive_links.html` with a glassmorphic look matching the unified stylesheet design rules.
+   - Pull modules and videos from Supabase and show them in a hierarchical card/table list showing name, type, and the Google Drive URL link status (either as a clickable button or a red warning indicating missing state).
+   - Display a visual progress/KPI card: Total folders created, percentage complete, and links back to the folder creator tool.
+3. **Register Route**:
+   - Register the new page under `🎥 Production` category child #7 in `navigation_config.json`, `index.html`, `home.html`, and `markdown_renderer.html` fallback menus.
+
+### 🗺 Files to Create/Modify
+- CREATE: `7_Testing_Known/test_gdrive_folder_creation.py`
+- CREATE: `5_Symbols/production/prod/google_drive_links.html`
+- MODIFY: `navigation_config.json`
+- MODIFY: `index.html`
+- MODIFY: `home.html`
+- MODIFY: `markdown_renderer.html`
+- MODIFY: `shared/nav.js`
+- MODIFY: `4_Formula/llm_thinking_log.md` (this entry)
+
+
 

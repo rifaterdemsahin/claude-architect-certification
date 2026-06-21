@@ -173,10 +173,13 @@
       { label: '📅 Timeline', url: '5_Symbols/timeline.html', description: 'Scheduled dates for the course execution.' }
     ]},
     { label: '🎥 Production', children: [
-      { label: '7. 📸 Shot List & Assets', url: '5_Symbols/production/postprod/production_shotlist.html?module=1&section=1' },
-      { label: '8. 🗣️ Talking Heads', url: '5_Symbols/production/prod/talking-heads.html', description: 'All on-camera presenter scenes with greenscreen recording guide.' },
-      { label: '9. 🖥️ Screenshare', url: '5_Symbols/production/prod/screenshare.html', description: 'All screenshare scenes with screen recording setup guide.' },
-      { label: '10. ✅ Production Checklist', url: '5_Symbols/production/prod/checklist.html' },
+      { label: '1. 📁 Google Drive Folder Creator', url: '5_Symbols/production/prod/google_drive_folder_creator.html', description: 'Recursively generate Google Drive folders for course modules and videos, and automatically record the folder links back to Supabase.' },
+      { label: '2. 🔗 Google Drive Links', url: '5_Symbols/production/prod/google_drive_links.html', description: 'View and verify all created Google Drive directory links for modules and videos.' },
+      { label: '3. 🗣️ Talking Heads', url: '5_Symbols/production/prod/talking-heads.html', description: 'All on-camera presenter scenes with greenscreen recording guide.' },
+      { label: '4. 🖥️ Screenshare', url: '5_Symbols/production/prod/screenshare.html', description: 'All screenshare scenes with screen recording setup guide.' },
+      { label: '5. 📸 Shot List & Assets', url: '5_Symbols/production/postprod/production_shotlist.html?module=1&section=1' },
+      { label: '6. 🎥 Footage Mapping', url: '5_Symbols/production/prod/footage_mapping.html' },
+      { label: '7. ✅ Production Checklist', url: '5_Symbols/production/prod/checklist.html' },
       {
         label: '🛠️ Tools',
         children: [
