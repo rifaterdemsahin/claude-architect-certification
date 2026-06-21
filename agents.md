@@ -230,6 +230,7 @@ This document defines how AI agents interact with the **Claude AI Certification 
 | **Kilo xAI** | `kilo -m xai/...` | Real-time info, bold reasoning | `grok-beta` |
 | **Kilo Kimi 2.7** | `kilo -m kimi/...` | Long-context code synthesis | `kimi-2.7` |
 | **Kilo DeepSeek V4 Flash** | `kilo -m deepseek/...`| Precision code generation, efficiency | `deepseek-v4-flash` |
+| **GLM (Zhipu AI)** | [glm.md](glm.md) | Long-context code synthesis, SQL/schema gen, bilingual (EN/中文) | `glm-4.6` |
 | GitHub Copilot | [copilot.md](copilot.md) | Inline autocompletion | `gpt-4o` |
 
 ---

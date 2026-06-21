@@ -1360,3 +1360,18 @@ video's sentences) — dedupe by lower-cased `item_name`, resolve against the
 match set is empty (no silent zeros).
 
 **Status:** formula written; pending commit + push.
+
+### 2026-06-21 — 🧬 Init glm.md agent guide (root), inspired by claude.md
+
+**Why:** Onboard GLM (Zhipu AI / ChatGLM) into the multi-agent roster so it
+has a first-class agent guide like the other models. GLM's roster niche:
+long-context code synthesis, SQL/schema generation, bilingual (EN/中文) docs,
+and methodical bulk-data/migration work.
+
+**Action:** Created `glm.md` at repo root mirroring `claude.md`'s structure
+(persona, 7-stage journey, folder layout, infra, nav/UI rules, model-specific
+instructions, Go migration constraints, skills, testing checklist, emoji
+guide, file classification labels). Adapted the persona + a "When to prefer
+GLM" table. Registered GLM in the `agents.md` Supported Agent Roles table.
+
+**Status:** IMPLEMENTED, pending commit + push.
