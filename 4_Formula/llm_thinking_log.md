@@ -1229,3 +1229,17 @@ gdrive_folders (idempotent on drive_folder_id).
 Result: **396 rows** — 1 root, 5 module, 15 video, 90 category, 285 subfolder.
 All module/video FKs mapped (0 unmapped non-root rows); paths, parent_drive_id,
 and has_readme populated. Verified via PostgREST count + sample queries.
+
+---
+
+## 2026-06-21 — 📊 google_drive_links.html: Drive Folder Inventory + Analysis
+
+User wanted to see all 396 folders on the links dashboard with an analysis
+section. Added a "🗂️ Drive Folder Inventory" section that fetches the full
+gdrive_folders table (PostgREST), with type filter chips (all/root/module/
+video/category/subfolder + counts), a name/path search, and a scrollable table
+(type, name, path, README, link). Below it a "📊 Analysis" block: KPI cards
+(total, categories, subfolders, README coverage %, avg folders/video), a
+structure-integrity checklist (category=videos×6, subfolder=videos×19, exactly
+1 root, README on every category/subfolder), and a folders-per-module table.
+Graceful message if the table is missing. JS validated.

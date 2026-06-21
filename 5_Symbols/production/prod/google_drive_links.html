@@ -640,6 +640,32 @@
         <div>Fetching course schema and links from Supabase...</div>
       </div>
     </div>
+
+    <!-- ── gdrive_folders inventory ── -->
+    <div id="gdrive-folders-section" style="margin-top: 48px;">
+      <h2 style="font-size: 1.3rem; margin-bottom: 4px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+        🗂️ Drive Folder Inventory
+        <span id="gf-count-badge" style="font-size:0.8rem; font-weight:600; background:rgba(59,130,246,0.18); color:#93c5fd; padding:3px 10px; border-radius:20px;">loading…</span>
+      </h2>
+      <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">
+        Every Google Drive folder created during the folder-creation process, read from the <code>gdrive_folders</code> table.
+      </p>
+
+      <div id="gf-toolbar" style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:14px;">
+        <div id="gf-filter-buttons" style="display:flex; gap:6px; flex-wrap:wrap;"></div>
+        <input id="gf-search" type="text" placeholder="Search name or path…" oninput="renderGfTable()"
+          style="flex:1; min-width:200px; padding:8px 12px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); border-radius:8px; color:var(--text-light, #f3f4f6); font-size:0.85rem;">
+      </div>
+
+      <div id="gf-table-wrap" style="border:1px solid rgba(255,255,255,0.08); border-radius:12px; overflow:auto; max-height:520px;">
+        <div style="text-align:center; padding:40px 0; color:var(--text-muted);">
+          <i class="fa-solid fa-spinner fa-spin"></i> Loading folder inventory…
+        </div>
+      </div>
+
+      <!-- Analysis -->
+      <div id="gf-analysis" style="margin-top: 28px;"></div>
+    </div>
   </div>
 
   <div class="toast" id="toast-notif"></div>
@@ -661,6 +687,7 @@
       if (window.supabase) {
         db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
         loadOutlineData();
+        loadGdriveFolders();
       } else {
         document.getElementById('outline-list').innerHTML = `
           <div style="text-align:center; padding: 40px; color: var(--error);">
@@ -914,6 +941,167 @@
           </div>
         `;
       }
+    }
+
+    // ── gdrive_folders INVENTORY ──
+    let gdriveFolders = [];
+    let gfActiveType = 'all';
+    const GF_TYPES = ['root', 'module', 'video', 'category', 'subfolder'];
+    const GF_TYPE_META = {
+      root:      { icon: '🌳', color: '#a78bfa' },
+      module:    { icon: '📚', color: '#60a5fa' },
+      video:     { icon: '🎬', color: '#34d399' },
+      category:  { icon: '🗂️', color: '#fbbf24' },
+      subfolder: { icon: '📂', color: '#9ca3af' }
+    };
+
+    async function loadGdriveFolders() {
+      const wrap = document.getElementById('gf-table-wrap');
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/gdrive_folders?select=*&order=path`, {
+          headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` }
+        });
+        if (res.status === 404 || res.status === 400) {
+          document.getElementById('gf-count-badge').innerText = 'table missing';
+          wrap.innerHTML = `<div style="text-align:center; padding:40px; color:var(--warning, #fbbf24);">
+            ⚠️ The <code>gdrive_folders</code> table was not found.<br>
+            Run <code>5_Symbols/supabase/migrations/migration_gdrive_folders.sql</code> in the Supabase SQL editor.</div>`;
+          return;
+        }
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        gdriveFolders = await res.json();
+        document.getElementById('gf-count-badge').innerText = `${gdriveFolders.length} folders`;
+        renderGfFilterButtons();
+        renderGfTable();
+        renderGdriveAnalysis();
+      } catch (err) {
+        document.getElementById('gf-count-badge').innerText = 'error';
+        wrap.innerHTML = `<div style="text-align:center; padding:40px; color:var(--error, #fca5a5);">
+          Failed to load gdrive_folders: ${err.message}</div>`;
+      }
+    }
+
+    function renderGfFilterButtons() {
+      const counts = { all: gdriveFolders.length };
+      GF_TYPES.forEach(t => counts[t] = gdriveFolders.filter(f => f.folder_type === t).length);
+      const types = ['all', ...GF_TYPES];
+      document.getElementById('gf-filter-buttons').innerHTML = types.map(t => {
+        const active = t === gfActiveType;
+        const label = t === 'all' ? 'All' : `${GF_TYPE_META[t].icon} ${t}`;
+        return `<button onclick="gfSetType('${t}')" style="
+          padding:6px 12px; border-radius:8px; font-size:0.78rem; cursor:pointer;
+          border:1px solid ${active ? 'var(--primary, #3b82f6)' : 'rgba(255,255,255,0.12)'};
+          background:${active ? 'rgba(59,130,246,0.25)' : 'rgba(255,255,255,0.04)'};
+          color:${active ? '#bfdbfe' : 'var(--text-muted)'};">
+          ${label} <strong>${counts[t]}</strong></button>`;
+      }).join('');
+    }
+
+    function gfSetType(t) { gfActiveType = t; renderGfFilterButtons(); renderGfTable(); }
+
+    function renderGfTable() {
+      const q = (document.getElementById('gf-search').value || '').toLowerCase();
+      let rows = gdriveFolders;
+      if (gfActiveType !== 'all') rows = rows.filter(f => f.folder_type === gfActiveType);
+      if (q) rows = rows.filter(f => (f.name || '').toLowerCase().includes(q) || (f.path || '').toLowerCase().includes(q));
+
+      const wrap = document.getElementById('gf-table-wrap');
+      if (!rows.length) {
+        wrap.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-muted);">No folders match the current filter.</div>`;
+        return;
+      }
+      const body = rows.map(f => {
+        const m = GF_TYPE_META[f.folder_type] || { icon: '📁', color: '#9ca3af' };
+        return `<tr style="border-top:1px solid rgba(255,255,255,0.06);">
+          <td style="padding:8px 12px; white-space:nowrap;"><span style="color:${m.color}; font-weight:600;">${m.icon} ${f.folder_type}</span></td>
+          <td style="padding:8px 12px; font-weight:600;">${escapeHtml(f.name)}</td>
+          <td style="padding:8px 12px; color:var(--text-muted); font-size:0.78rem; font-family:monospace;">${escapeHtml(f.path || '')}</td>
+          <td style="padding:8px 12px; text-align:center;">${f.has_readme ? '📝' : '—'}</td>
+          <td style="padding:8px 12px; white-space:nowrap;"><a href="${f.drive_url}" target="_blank" rel="noopener" style="color:#6ee7b7;">Open ↗</a></td>
+        </tr>`;
+      }).join('');
+      wrap.innerHTML = `<table style="width:100%; border-collapse:collapse; font-size:0.85rem;">
+        <thead><tr style="position:sticky; top:0; background:#0f172a; z-index:1; text-align:left;">
+          <th style="padding:10px 12px;">Type</th><th style="padding:10px 12px;">Name</th>
+          <th style="padding:10px 12px;">Path</th><th style="padding:10px 12px; text-align:center;">README</th>
+          <th style="padding:10px 12px;">Link</th></tr></thead>
+        <tbody>${body}</tbody></table>`;
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+    }
+
+    function renderGdriveAnalysis() {
+      const el = document.getElementById('gf-analysis');
+      if (!gdriveFolders.length) { el.innerHTML = ''; return; }
+      const byType = {}; GF_TYPES.forEach(t => byType[t] = gdriveFolders.filter(f => f.folder_type === t).length);
+      const total = gdriveFolders.length;
+      const videos = byType.video, modules = byType.module;
+      const withReadme = gdriveFolders.filter(f => f.has_readme).length;
+      const readmePct = total ? Math.round(withReadme / total * 100) : 0;
+
+      // Expected structure: each video → 6 category + 19 subfolder = 25; per module videos vary
+      const CATS_PER_VIDEO = 6, SUBS_PER_VIDEO = 19;
+      const expectedCats = videos * CATS_PER_VIDEO;
+      const expectedSubs = videos * SUBS_PER_VIDEO;
+      const catOk = byType.category === expectedCats;
+      const subOk = byType.subfolder === expectedSubs;
+
+      // Folders per module
+      const perModule = {};
+      gdriveFolders.forEach(f => {
+        if (f.module_id == null) return;
+        perModule[f.module_id] = (perModule[f.module_id] || 0) + 1;
+      });
+      const moduleNames = {};
+      gdriveFolders.filter(f => f.folder_type === 'module').forEach(f => moduleNames[f.module_id] = f.name);
+      const perModuleRows = Object.keys(perModule).sort((a,b)=>perModule[b]-perModule[a]).map(mid =>
+        `<tr style="border-top:1px solid rgba(255,255,255,0.06);">
+           <td style="padding:6px 12px;">${escapeHtml(moduleNames[mid] || ('Module #' + mid))}</td>
+           <td style="padding:6px 12px; text-align:right; font-weight:600;">${perModule[mid]}</td></tr>`).join('');
+
+      const orphanReadme = gdriveFolders.filter(f => f.has_readme && !['category','subfolder'].includes(f.folder_type)).length;
+
+      const card = (title, value, sub, color) => `
+        <div style="background:var(--bg-card, rgba(255,255,255,0.03)); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:16px;">
+          <div style="font-size:0.78rem; color:var(--text-muted); margin-bottom:6px;">${title}</div>
+          <div style="font-size:1.6rem; font-weight:700; color:${color||'#f3f4f6'};">${value}</div>
+          <div style="font-size:0.78rem; color:var(--text-muted); margin-top:4px;">${sub}</div>
+        </div>`;
+
+      const check = (ok, txt) => `<li style="margin:4px 0; color:${ok ? '#6ee7b7' : '#fca5a5'};">${ok ? '✅' : '⚠️'} ${txt}</li>`;
+
+      el.innerHTML = `
+        <h2 style="font-size:1.2rem; margin-bottom:14px;">📊 Analysis</h2>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:14px; margin-bottom:22px;">
+          ${card('Total folders', total, `${modules} modules · ${videos} videos`, '#93c5fd')}
+          ${card('Category folders', byType.category, `${CATS_PER_VIDEO} per video`, GF_TYPE_META.category.color)}
+          ${card('Subfolders', byType.subfolder, `${SUBS_PER_VIDEO} per video`, GF_TYPE_META.subfolder.color)}
+          ${card('README coverage', readmePct + '%', `${withReadme} of ${total} folders`, '#6ee7b7')}
+          ${card('Avg folders / video', videos ? (total/videos).toFixed(1) : '0', 'incl. the video folder', '#a78bfa')}
+        </div>
+
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:22px;">
+          <div>
+            <h3 style="font-size:1rem; margin-bottom:10px;">🧮 Structure integrity</h3>
+            <ul style="list-style:none; padding:0; font-size:0.85rem;">
+              ${check(catOk, `Category folders: ${byType.category} / ${expectedCats} expected (${videos} videos × ${CATS_PER_VIDEO})`)}
+              ${check(subOk, `Subfolders: ${byType.subfolder} / ${expectedSubs} expected (${videos} videos × ${SUBS_PER_VIDEO})`)}
+              ${check(byType.root === 1, `Root folders: ${byType.root} (exactly 1 expected)`)}
+              ${check(readmePct >= 99 || withReadme === (byType.category + byType.subfolder), `READMEs on every category & subfolder (${withReadme} files)`)}
+              ${check(orphanReadme === 0, `No README flagged on root/module/video rows (${orphanReadme} found)`)}
+            </ul>
+          </div>
+          <div>
+            <h3 style="font-size:1rem; margin-bottom:10px;">📚 Folders per module</h3>
+            <table style="width:100%; border-collapse:collapse; font-size:0.85rem;">
+              <thead><tr style="text-align:left; color:var(--text-muted);">
+                <th style="padding:6px 12px;">Module</th><th style="padding:6px 12px; text-align:right;">Folders</th></tr></thead>
+              <tbody>${perModuleRows}</tbody>
+            </table>
+          </div>
+        </div>`;
     }
 
     function getFolderUrl(links) {

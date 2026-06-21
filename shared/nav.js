@@ -147,19 +147,21 @@
         { label: '🧠 Self Learning Concept', url: '5_Symbols/production/preprod/self_learning.html', description: 'Feynman technique, Lacanian visual review, and Semblance error solving.' },
         { label: '📼 Multimedia Learning', url: '5_Symbols/production/preprod/multimedia_learning.html', description: 'Mayer\'s multimedia learning principles and Erdem\'s video-based transformation.' }
       ]},
-      {
-        label: '🛠️ Tools',
-        children: [
-          { label: '🐙 GitHub Repo', url: 'https://github.com/rifaterdemsahin/claude-architect-certification' },
-          { label: '💳 GitHub Billing Usage', url: 'https://github.com/settings/billing/usage?period=3&group=0&customer=592572' },
-          { label: '🔥 Supabase', url: 'https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/' },
-          { label: '📡 Axiom Errors Admin', url: '/admin/errors' },
-          { label: '🏠 Home Template', url: '5_Symbols/templates/index.html' },
-          { label: '📋 Error Log Template', url: '5_Symbols/templates/axiom_errors.html' },
-          { label: '☁️ Google Cloud API', url: 'https://console.cloud.google.com/' },
-          { label: '🤖 Claude Guide', url: 'claude.md' }
-        ]
-      }
+        {
+          label: '🛠️ Tools',
+          children: [
+            { label: '🐙 GitHub Repo', url: 'https://github.com/rifaterdemsahin/claude-architect-certification' },
+            { label: '💳 GitHub Billing Usage', url: 'https://github.com/settings/billing/usage?period=3&group=0&customer=592572' },
+            { label: '🔥 Supabase', url: 'https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/' },
+            { label: '📡 Axiom Errors Admin', url: '/admin/errors' },
+            { label: '🗃 Preprod Data Admin', url: '5_Symbols/production/preprod/tools/admin.html' },
+            { label: '🗄️ Database Analysis', url: '5_Symbols/production/preprod/tools/database_analysis.html', description: 'Collapsible analysis of every Supabase table: row counts, columns, and relationships.' },
+            { label: '🏠 Home Template', url: '5_Symbols/templates/index.html' },
+            { label: '📋 Error Log Template', url: '5_Symbols/templates/axiom_errors.html' },
+            { label: '☁️ Google Cloud API', url: 'https://console.cloud.google.com/' },
+            { label: '🤖 Claude Guide', url: 'claude.md' }
+          ]
+        }
     ]},
     { label: '📋 Planning', children: [
       { label: '🗂️ Planning Hub', url: '5_Symbols/production/preprod/planning.html', description: 'Critical path overview and pre-production checklists.' },
