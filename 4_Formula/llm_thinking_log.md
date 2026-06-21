@@ -971,3 +971,32 @@ Update the Talking Heads Guide (`5_Symbols/production/prod/talking-heads.html`) 
 - MODIFY: `5_Symbols/production/prod/talking-heads.html`
 - MODIFY: `4_Formula/llm_thinking_log.md` (this entry)
 
+---
+
+## 2026-06-21 — 🧪 Add Test Suite for Google Drive Folder Creator
+
+### 🎯 Objective
+Add robust unit and integration testing capabilities for the Google Drive folder creation process, enabling developers to run tests directly from the UI or via URL query parameter, mocking out external dependencies (Google API and Supabase) to verify folder creation and database sync behavior.
+
+### 📐 Design & Implementation Plan
+1. **Add UI Button**: Include a "🧪 Run Mock Test Suite" button in the API Config card of `5_Symbols/production/prod/google_drive_folder_creator.html`.
+2. **Mocking Infrastructure**:
+   - Implement `runMockTests()` which overrides the global `gapi` and `db` objects with spy/mock implementations.
+   - Mock `gapi.client.drive.files.list` to return simulated existing/non-existing folders depending on name (e.g. simulate root folder exists, but subfolders don't).
+   - Mock `gapi.client.drive.files.create` to return simulated folder IDs and verify parentage.
+   - Mock `db.from().update().eq()` to capture database records updated and verify the payload matches the expected schema: `[{ name: 'Google Drive Folder', url: folderUrl }]`.
+3. **Execution & Assertions**:
+   - Trigger the tree building and `startGeneration()` logic under mock conditions.
+   - Assert key expectations:
+     - Check that `getOrCreateDriveFolder` was called correct number of times.
+     - Check that `saveFolderLinkToSupabase` updated modules and videos correctly.
+     - Ensure idempotency handles existing folders correctly.
+   - Output colorful pass/fail logs to the UI system log terminal.
+   - Reset the original client states after execution.
+4. **URL Query Param Support**: Auto-trigger the test suite on page load if `?test=true` is present in the URL query string.
+
+### 🗺 Files to Modify
+- MODIFY: `5_Symbols/production/prod/google_drive_folder_creator.html`
+- MODIFY: `4_Formula/llm_thinking_log.md` (this entry)
+
+

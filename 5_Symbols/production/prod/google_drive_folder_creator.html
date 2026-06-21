@@ -410,8 +410,12 @@
             <input type="text" id="root-folder-name" value="Claude AI Architect Certification">
           </div>
           
-          <button class="btn btn-secondary" onclick="loadCourseOutline()">
+          <button class="btn btn-secondary" onclick="loadCourseOutline()" style="margin-bottom: 12px;">
             <i class="fa-solid fa-database"></i> Pull Supabase Outline
+          </button>
+
+          <button class="btn btn-secondary" onclick="runMockTests()" style="border: 1px dashed var(--primary);">
+            <i class="fa-solid fa-vial"></i> Run Mock Test Suite
           </button>
         </div>
       </div>
@@ -1061,6 +1065,246 @@
         toast.classList.remove('show');
       }, 3000);
     }
+
+    // ── AUTOMATED MOCK TEST SUITE ──
+    async function runMockTests() {
+      log('info', '🧪 Initiating Google Drive Folder Creator Mock Test Suite...');
+
+      // Backup current live state
+      const originalDb = db;
+      const originalGapi = window.gapi;
+      const originalAccessToken = accessToken;
+      const originalGapiInited = gapiInited;
+      const originalCourseOutline = courseOutline;
+
+      // Track test calls and outcomes
+      const listCalls = [];
+      const createCalls = [];
+      const dbUpdates = [];
+      let mockRootFolderExists = true; // Root folder simulated as already existing (idempotency check)
+
+      // 1. Mock Outline Data
+      const testOutline = [
+        {
+          id: 901,
+          module_number: 9,
+          title: "Mock Architecture Core",
+          course_videos: [
+            { id: 951, video_number: 1, title: "Mock Setup Verification" },
+            { id: 952, video_number: 2, title: "Mock Integration Testing" }
+          ]
+        },
+        {
+          id: 902,
+          module_number: 10,
+          title: "Mock Deployment Pipeline",
+          course_videos: [
+            { id: 953, video_number: 1, title: "Mock Delivery Release" }
+          ]
+        }
+      ];
+
+      // 2. Setup GAPI Mock with Spies
+      window.gapi = {
+        client: {
+          drive: {
+            files: {
+              list: async (params) => {
+                listCalls.push(params);
+                const query = params.q;
+                
+                // Simulate root folder check
+                if (query.includes("name = 'Claude AI Architect Certification'")) {
+                  if (mockRootFolderExists) {
+                    return {
+                      result: {
+                        files: [{ id: 'mock-root-folder-id', name: 'Claude AI Architect Certification' }]
+                      }
+                    };
+                  }
+                  return { result: { files: [] } };
+                }
+
+                // Simulate other folders not existing to trigger creation
+                return { result: { files: [] } };
+              },
+              create: async (params) => {
+                createCalls.push(params);
+                const name = params.resource.name;
+                const mockId = `mock-folder-id-${name.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
+                return {
+                  result: { id: mockId }
+                };
+              }
+            }
+          }
+        }
+      };
+
+      // 3. Setup Supabase DB Mock with Spies
+      db = {
+        from: (tableName) => {
+          return {
+            update: (payload) => {
+              return {
+                eq: (keyName, val) => {
+                  dbUpdates.push({
+                    table: tableName,
+                    payload: payload,
+                    key: keyName,
+                    id: val
+                  });
+                  return { data: null, error: null };
+                }
+              };
+            }
+          };
+        }
+      };
+
+      // Set authorization flags to true
+      accessToken = 'mocked-oauth-token';
+      gapiInited = true;
+
+      // Populate outline and build folder tree structure visually
+      courseOutline = testOutline;
+      buildFolderTree();
+
+      try {
+        // Run generation sequence under mock conditions
+        await startGeneration();
+
+        // 4. Assertions & Validation checks
+        const assertions = [];
+        
+        // Assert 1: Root folder query was checked via files.list
+        const rootChecked = listCalls.some(c => c.q.includes("name = 'Claude AI Architect Certification'"));
+        assertions.push({
+          name: "Root folder exists query executed",
+          passed: rootChecked,
+          detail: "Root folder check should be the first drive call."
+        });
+
+        // Assert 2: Idempotency check. Root folder creation was skipped because mock list returned existing folder ID
+        const rootCreated = createCalls.some(c => c.resource.name === "Claude AI Architect Certification");
+        assertions.push({
+          name: "Idempotency - Root folder creation skipped",
+          passed: !rootCreated,
+          detail: "Root folder already exists, so creation should not be triggered."
+        });
+
+        // Assert 3: Module folders were checked and created
+        const modulesCreated = [
+          "Module 9 - Mock Architecture Core",
+          "Module 10 - Mock Deployment Pipeline"
+        ].every(name => createCalls.some(c => c.resource.name === name));
+        assertions.push({
+          name: "Module folders created on Drive",
+          passed: modulesCreated,
+          detail: "All missing module folders must be created on Google Drive."
+        });
+
+        // Assert 4: Video folders were checked and created under modules
+        const videosCreated = [
+          "Video 1 - Mock Setup Verification",
+          "Video 2 - Mock Integration Testing",
+          "Video 1 - Mock Delivery Release"
+        ].every(name => createCalls.some(c => c.resource.name === name));
+        assertions.push({
+          name: "Video folders created on Drive",
+          passed: videosCreated,
+          detail: "All missing video folders must be created on Google Drive."
+        });
+
+        // Assert 5: Total drive creation calls matches count of modules and videos (5 calls)
+        const driveCallsCount = createCalls.length === 5;
+        assertions.push({
+          name: "Total Drive folder creation calls count",
+          passed: driveCallsCount,
+          detail: `Expected 5 folder creations, got ${createCalls.length}`
+        });
+
+        // Assert 6: Supabase database update calls executed for modules and videos (5 calls)
+        const dbCallsCount = dbUpdates.length === 5;
+        assertions.push({
+          name: "Supabase links update calls count",
+          passed: dbCallsCount,
+          detail: `Expected 5 updates, got ${dbUpdates.length}`
+        });
+
+        // Assert 7: Link payloads format is valid
+        const payloadsValid = dbUpdates.every(upd => 
+          Array.isArray(upd.payload.links) && 
+          upd.payload.links.length === 1 &&
+          upd.payload.links[0].name === "Google Drive Folder" &&
+          upd.payload.links[0].url.startsWith("https://drive.google.com/drive/folders/mock-folder-id-")
+        );
+        assertions.push({
+          name: "Database update payloads structure validation",
+          passed: payloadsValid,
+          detail: "Links column must be updated with standard format: [{name, url}]"
+        });
+
+        // Assert 8: Check correct IDs were targeted for updates
+        const targetedIdsCorrect = 
+          dbUpdates.some(u => u.table === 'course_modules' && u.id === 901) &&
+          dbUpdates.some(u => u.table === 'course_modules' && u.id === 902) &&
+          dbUpdates.some(u => u.table === 'course_videos' && u.id === 951) &&
+          dbUpdates.some(u => u.table === 'course_videos' && u.id === 952) &&
+          dbUpdates.some(u => u.table === 'course_videos' && u.id === 953);
+        assertions.push({
+          name: "Updates matched correct Supabase record IDs",
+          passed: targetedIdsCorrect,
+          detail: "Supabase queries must target exact primary key values from outline."
+        });
+
+        // Output detailed assertion reports to the System Log Terminal
+        let passedAll = true;
+        log('info', '── ASSERTION RESULTS ──');
+        assertions.forEach((assertion, index) => {
+          if (assertion.passed) {
+            log('success', `✓ [PASS] Assert ${index + 1}: ${assertion.name}`);
+          } else {
+            log('error', `❌ [FAIL] Assert ${index + 1}: ${assertion.name} (${assertion.detail})`);
+            passedAll = false;
+          }
+        });
+
+        if (passedAll) {
+          log('success', '🏆 TEST SUITE PASSED SUCCESSFULLY: 8/8 assertions verified.');
+          showToast('Mock Test Suite Completed: SUCCESS');
+        } else {
+          log('error', '🚨 TEST SUITE ENCOUNTERED ASSERTION FAILURES.');
+          showToast('Mock Test Suite Completed: FAILED');
+        }
+
+      } catch (error) {
+        log('error', 'Fatal error during test suite execution: ' + error.stack);
+        showToast('Mock Test Suite Execution Crashed.');
+      } finally {
+        // Restore original state
+        db = originalDb;
+        window.gapi = originalGapi;
+        accessToken = originalAccessToken;
+        gapiInited = originalGapiInited;
+        courseOutline = originalCourseOutline;
+        
+        // Re-build tree visualizer with actual outline
+        buildFolderTree();
+        log('info', '🔄 Mock context torn down. Original client state restored.');
+      }
+    }
+
+    // Auto-run if URL query parameter ?test=true is present
+    document.addEventListener("DOMContentLoaded", () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('test') === 'true') {
+        // Wait a small timeout to let initial loads finish printing logs
+        setTimeout(() => {
+          runMockTests();
+        }, 1000);
+      }
+    });
   </script>
 </body>
 </html>
