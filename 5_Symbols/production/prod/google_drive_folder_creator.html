@@ -637,6 +637,20 @@
       }
     }
 
+    async function saveTokenToSupabase(token) {
+      if (db) {
+        try {
+          const { error } = await db
+            .from('project_settings')
+            .upsert({ key: 'gdrive_access_token', value: token });
+          if (error) throw error;
+          log('success', '✓ Shared access token with Supabase for terminal CLI tools.');
+        } catch (err) {
+          log('warn', 'Could not save access token to Supabase: ' + err.message);
+        }
+      }
+    }
+
     // ── GOOGLE CLIENT INITIALIZATION ──
     function gapiLoaded() {
       gapi.load('client', initGapi);
@@ -689,6 +703,9 @@
               log('success', 'Google Drive scope authorized.');
               updateAuthUI(true, 'Google Connected');
               document.getElementById('btn-sync').disabled = false;
+              
+              // Share token with Supabase for CLI access
+              saveTokenToSupabase(resp.access_token);
             },
           });
           updateAuthUI(false, 'API Ready. Connect Drive Account.');

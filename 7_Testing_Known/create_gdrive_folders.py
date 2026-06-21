@@ -47,10 +47,40 @@ SCOPES = [
     'https://www.googleapis.com/auth/drive'
 ]
 
+def fetch_token_from_supabase():
+    if not SUPABASE_URL:
+        return None
+    endpoint = f"{SUPABASE_URL}/rest/v1/project_settings?key=eq.gdrive_access_token&select=value"
+    headers = {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': f'Bearer {SUPABASE_ANON_KEY}'
+    }
+    try:
+        res = requests.get(endpoint, headers=headers)
+        if res.status_code == 200:
+            data = res.json()
+            if data and len(data) > 0:
+                return data[0].get('value')
+    except Exception as e:
+        log_warn(f"Failed to fetch shared access token from Supabase: {e}")
+    return None
+
 def authenticate_google_drive():
     creds = None
     token_path = "token.json"
     
+    # 1. Try retrieving the browser-shared token from Supabase first
+    supabase_token = fetch_token_from_supabase()
+    if supabase_token:
+        try:
+            creds = Credentials(token=supabase_token)
+            log_info("Successfully authenticated using Google access token shared via Supabase settings.")
+            return creds
+        except Exception as e:
+            log_warn(f"Could not initialize credentials from shared Supabase token: {e}")
+            creds = None
+
+    # 2. Fall back to local token cache
     if os.path.exists(token_path):
         try:
             creds = Credentials.from_authorized_user_file(token_path, SCOPES)
