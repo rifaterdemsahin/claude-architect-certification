@@ -651,11 +651,19 @@
         Every Google Drive folder created during the folder-creation process, read from the <code>gdrive_folders</code> table.
       </p>
 
-      <div id="gf-toolbar" style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:14px;">
-        <div id="gf-filter-buttons" style="display:flex; gap:6px; flex-wrap:wrap;"></div>
+      <div id="gf-toolbar" style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:14px;">
+        <select id="gf-module-select" onchange="gfOnModuleChange()"
+          style="min-width:220px; padding:8px 12px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); border-radius:8px; color:var(--text-light, #f3f4f6); font-size:0.85rem;">
+          <option value="all">📚 All modules</option>
+        </select>
+        <select id="gf-video-select" onchange="gfOnVideoChange()"
+          style="min-width:220px; padding:8px 12px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); border-radius:8px; color:var(--text-light, #f3f4f6); font-size:0.85rem;">
+          <option value="all">🎬 All videos</option>
+        </select>
         <input id="gf-search" type="text" placeholder="Search name or path…" oninput="renderGfTable()"
-          style="flex:1; min-width:200px; padding:8px 12px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); border-radius:8px; color:var(--text-light, #f3f4f6); font-size:0.85rem;">
+          style="flex:1; min-width:180px; padding:8px 12px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); border-radius:8px; color:var(--text-light, #f3f4f6); font-size:0.85rem;">
       </div>
+      <div id="gf-filter-buttons" style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:14px;"></div>
 
       <div id="gf-table-wrap" style="border:1px solid rgba(255,255,255,0.08); border-radius:12px; overflow:auto; max-height:520px;">
         <div style="text-align:center; padding:40px 0; color:var(--text-muted);">
@@ -950,6 +958,10 @@
     let gfSortDir = 1; // 1 = asc, -1 = desc
     let gfModuleNameById = {};
     let gfVideoNameById = {};
+    let gfModuleFilter = 'all';
+    let gfVideoFilter = 'all';
+    let gfModules = []; // [{id, name}]
+    let gfVideos = [];  // [{id, name, module_id}]
     const GF_TYPES = ['root', 'module', 'video', 'category', 'subfolder'];
     const GF_TYPE_ORDER = { root: 0, module: 1, video: 2, category: 3, subfolder: 4 };
     const GF_TYPE_META = {
@@ -975,13 +987,17 @@
         }
         if (!res.ok) throw new Error('HTTP ' + res.status);
         gdriveFolders = await res.json();
-        // Build module/video id → name maps from the module/video rows themselves
-        gfModuleNameById = {}; gfVideoNameById = {};
+        // Build module/video id → name maps + dropdown source lists from the rows themselves
+        gfModuleNameById = {}; gfVideoNameById = {}; gfModules = []; gfVideos = [];
         gdriveFolders.forEach(f => {
-          if (f.folder_type === 'module') gfModuleNameById[f.module_id] = f.name;
-          if (f.folder_type === 'video') gfVideoNameById[f.video_id] = f.name;
+          if (f.folder_type === 'module') { gfModuleNameById[f.module_id] = f.name; gfModules.push({ id: f.module_id, name: f.name }); }
+          if (f.folder_type === 'video')  { gfVideoNameById[f.video_id] = f.name; gfVideos.push({ id: f.video_id, name: f.name, module_id: f.module_id }); }
         });
+        gfModules.sort((a, b) => a.name.localeCompare(b.name));
+        gfVideos.sort((a, b) => a.name.localeCompare(b.name));
         document.getElementById('gf-count-badge').innerText = `${gdriveFolders.length} folders`;
+        populateGfModuleDropdown();
+        populateGfVideoDropdown();
         renderGfFilterButtons();
         renderGfTable();
         renderGdriveAnalysis();
@@ -1010,6 +1026,51 @@
 
     function gfSetType(t) { gfActiveType = t; renderGfFilterButtons(); renderGfTable(); }
 
+    function populateGfModuleDropdown() {
+      const sel = document.getElementById('gf-module-select');
+      sel.innerHTML = `<option value="all">📚 All modules</option>` +
+        gfModules.map(m => `<option value="${m.id}">${escapeHtml(m.name)}</option>`).join('');
+      sel.value = gfModuleFilter;
+    }
+
+    // The video dropdown is linked to the module dropdown: when a module is selected it
+    // only lists that module's videos; otherwise it lists all videos.
+    function populateGfVideoDropdown() {
+      const sel = document.getElementById('gf-video-select');
+      const vids = gfModuleFilter === 'all'
+        ? gfVideos
+        : gfVideos.filter(v => String(v.module_id) === String(gfModuleFilter));
+      sel.innerHTML = `<option value="all">🎬 All videos</option>` +
+        vids.map(v => `<option value="${v.id}">${escapeHtml(v.name)}</option>`).join('');
+      // Keep current selection if still valid, else reset
+      if (gfVideoFilter !== 'all' && !vids.some(v => String(v.id) === String(gfVideoFilter))) {
+        gfVideoFilter = 'all';
+      }
+      sel.value = gfVideoFilter;
+    }
+
+    function gfOnModuleChange() {
+      gfModuleFilter = document.getElementById('gf-module-select').value;
+      gfVideoFilter = 'all';          // reset video when module changes
+      populateGfVideoDropdown();      // cascade: refresh video list for the chosen module
+      renderGfTable();
+    }
+
+    function gfOnVideoChange() {
+      gfVideoFilter = document.getElementById('gf-video-select').value;
+      // If a video is chosen, auto-select its parent module to keep the two in sync
+      if (gfVideoFilter !== 'all') {
+        const vid = gfVideos.find(v => String(v.id) === String(gfVideoFilter));
+        if (vid && String(vid.module_id) !== String(gfModuleFilter)) {
+          gfModuleFilter = String(vid.module_id);
+          populateGfModuleDropdown();
+          populateGfVideoDropdown();
+          document.getElementById('gf-video-select').value = gfVideoFilter;
+        }
+      }
+      renderGfTable();
+    }
+
     // Per-row value used for sorting a given column key
     function gfSortVal(f, key) {
       switch (key) {
@@ -1031,6 +1092,8 @@
     function renderGfTable() {
       const q = (document.getElementById('gf-search').value || '').toLowerCase();
       let rows = gdriveFolders.slice();
+      if (gfModuleFilter !== 'all') rows = rows.filter(f => String(f.module_id) === String(gfModuleFilter));
+      if (gfVideoFilter !== 'all') rows = rows.filter(f => String(f.video_id) === String(gfVideoFilter));
       if (gfActiveType !== 'all') rows = rows.filter(f => f.folder_type === gfActiveType);
       if (q) rows = rows.filter(f => (f.name || '').toLowerCase().includes(q) || (f.path || '').toLowerCase().includes(q));
 
