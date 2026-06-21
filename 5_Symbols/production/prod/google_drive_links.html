@@ -946,7 +946,12 @@
     // ── gdrive_folders INVENTORY ──
     let gdriveFolders = [];
     let gfActiveType = 'all';
+    let gfSortKey = 'path';
+    let gfSortDir = 1; // 1 = asc, -1 = desc
+    let gfModuleNameById = {};
+    let gfVideoNameById = {};
     const GF_TYPES = ['root', 'module', 'video', 'category', 'subfolder'];
+    const GF_TYPE_ORDER = { root: 0, module: 1, video: 2, category: 3, subfolder: 4 };
     const GF_TYPE_META = {
       root:      { icon: '🌳', color: '#a78bfa' },
       module:    { icon: '📚', color: '#60a5fa' },
@@ -970,6 +975,12 @@
         }
         if (!res.ok) throw new Error('HTTP ' + res.status);
         gdriveFolders = await res.json();
+        // Build module/video id → name maps from the module/video rows themselves
+        gfModuleNameById = {}; gfVideoNameById = {};
+        gdriveFolders.forEach(f => {
+          if (f.folder_type === 'module') gfModuleNameById[f.module_id] = f.name;
+          if (f.folder_type === 'video') gfVideoNameById[f.video_id] = f.name;
+        });
         document.getElementById('gf-count-badge').innerText = `${gdriveFolders.length} folders`;
         renderGfFilterButtons();
         renderGfTable();
@@ -999,11 +1010,40 @@
 
     function gfSetType(t) { gfActiveType = t; renderGfFilterButtons(); renderGfTable(); }
 
+    // Per-row value used for sorting a given column key
+    function gfSortVal(f, key) {
+      switch (key) {
+        case 'type':   return GF_TYPE_ORDER[f.folder_type] ?? 99;
+        case 'name':   return (f.name || '').toLowerCase();
+        case 'module': return (gfModuleNameById[f.module_id] || '').toLowerCase();
+        case 'video':  return (gfVideoNameById[f.video_id] || '').toLowerCase();
+        case 'path':   return (f.path || '').toLowerCase();
+        case 'readme': return f.has_readme ? 1 : 0;
+        default:       return (f.path || '').toLowerCase();
+      }
+    }
+
+    function gfSort(key) {
+      if (gfSortKey === key) { gfSortDir *= -1; } else { gfSortKey = key; gfSortDir = 1; }
+      renderGfTable();
+    }
+
     function renderGfTable() {
       const q = (document.getElementById('gf-search').value || '').toLowerCase();
-      let rows = gdriveFolders;
+      let rows = gdriveFolders.slice();
       if (gfActiveType !== 'all') rows = rows.filter(f => f.folder_type === gfActiveType);
       if (q) rows = rows.filter(f => (f.name || '').toLowerCase().includes(q) || (f.path || '').toLowerCase().includes(q));
+
+      // Sort by the active column, with path as a stable tie-breaker
+      rows.sort((a, b) => {
+        const va = gfSortVal(a, gfSortKey), vb = gfSortVal(b, gfSortKey);
+        let cmp = va < vb ? -1 : va > vb ? 1 : 0;
+        if (cmp === 0 && gfSortKey !== 'path') {
+          const pa = (a.path || '').toLowerCase(), pb = (b.path || '').toLowerCase();
+          cmp = pa < pb ? -1 : pa > pb ? 1 : 0;
+        }
+        return cmp * gfSortDir;
+      });
 
       const wrap = document.getElementById('gf-table-wrap');
       if (!rows.length) {
@@ -1012,18 +1052,25 @@
       }
       const body = rows.map(f => {
         const m = GF_TYPE_META[f.folder_type] || { icon: '📁', color: '#9ca3af' };
+        const moduleName = gfModuleNameById[f.module_id] || '';
+        const videoName = gfVideoNameById[f.video_id] || '';
         return `<tr style="border-top:1px solid rgba(255,255,255,0.06);">
           <td style="padding:8px 12px; white-space:nowrap;"><span style="color:${m.color}; font-weight:600;">${m.icon} ${f.folder_type}</span></td>
           <td style="padding:8px 12px; font-weight:600;">${escapeHtml(f.name)}</td>
+          <td style="padding:8px 12px; color:var(--text-muted); font-size:0.8rem;">${escapeHtml(moduleName)}</td>
+          <td style="padding:8px 12px; color:var(--text-muted); font-size:0.8rem;">${escapeHtml(videoName)}</td>
           <td style="padding:8px 12px; color:var(--text-muted); font-size:0.78rem; font-family:monospace;">${escapeHtml(f.path || '')}</td>
           <td style="padding:8px 12px; text-align:center;">${f.has_readme ? '📝' : '—'}</td>
           <td style="padding:8px 12px; white-space:nowrap;"><a href="${f.drive_url}" target="_blank" rel="noopener" style="color:#6ee7b7;">Open ↗</a></td>
         </tr>`;
       }).join('');
+
+      const arrow = (key) => gfSortKey === key ? (gfSortDir === 1 ? ' ▲' : ' ▼') : '';
+      const th = (key, label, extra = '') => `<th onclick="gfSort('${key}')" style="padding:10px 12px; cursor:pointer; user-select:none; ${extra}">${label}${arrow(key)}</th>`;
       wrap.innerHTML = `<table style="width:100%; border-collapse:collapse; font-size:0.85rem;">
         <thead><tr style="position:sticky; top:0; background:#0f172a; z-index:1; text-align:left;">
-          <th style="padding:10px 12px;">Type</th><th style="padding:10px 12px;">Name</th>
-          <th style="padding:10px 12px;">Path</th><th style="padding:10px 12px; text-align:center;">README</th>
+          ${th('type', 'Type')}${th('name', 'Name')}${th('module', 'Module')}${th('video', 'Video')}
+          ${th('path', 'Path')}${th('readme', 'README', 'text-align:center;')}
           <th style="padding:10px 12px;">Link</th></tr></thead>
         <tbody>${body}</tbody></table>`;
     }
