@@ -1170,3 +1170,21 @@ User can wipe stale/mock links and regenerate real folders. Python suite green; 
 
 ### ✅ Outcome
 Clear + reload no longer crashes; cleaner gapi logs; user can audit all stored links. Python suite green; HTML JS syntax validated.
+
+---
+
+## 2026-06-21 — 🗄️ GDrive Creator: gdrive_folders table to persist the full Drive hierarchy
+
+### 🎯 Request
+A Supabase table holding the Google Drive information created during folder creation (every folder, not just module/video top-level links), and populate it.
+
+### 🛠 Implementation
+- **Migration:** `5_Symbols/supabase/migrations/migration_gdrive_folders.sql` — `gdrive_folders` keyed on `drive_folder_id` (idempotent upsert) with name, path, drive_url, folder_type (root/module/video/category/subfolder), parent_drive_id, module_id/video_id FKs, has_readme, timestamps, indexes, and public RLS policies (anon).
+- **Populate:** new `recordGdriveFolder()` upserts each created folder (PostgREST merge-duplicates). Threaded through `startGeneration` (root/module/video, incl. the skip-if-already-linked branches) and `createSubfolderStructure(vidFolderId, vidName, ctx)` (category + subfolder rows with path/parent/module/video). Skipped in dry-run/mock; warns once (not fatal) if the table is missing.
+- **View:** "Show Folders Table" button + `showGdriveFolders()` summarising counts by type, README count, and root/module/video rows as links.
+
+### ⚠️ Constraint
+Cannot run DDL remotely (no supabase CLI / psql / service key / DB URL; anon key = PostgREST data-plane only). User runs the migration in the Supabase SQL editor, then a real run populates the table (idempotent — existing folders are found & recorded too).
+
+### ✅ Outcome
+Full Drive hierarchy persisted to Supabase on real runs. Python suite green; HTML JS syntax validated.

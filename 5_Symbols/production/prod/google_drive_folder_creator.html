@@ -463,16 +463,20 @@
           </p>
 
           <div style="margin-top: 16px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 16px; display: flex; flex-wrap: wrap; gap: 12px;">
-            <button id="btn-show-links" class="btn btn-secondary" onclick="showDriveLinks()" style="flex: 1; min-width: 200px;">
-              <i class="fa-solid fa-list"></i> Show All Drive Links
+            <button id="btn-show-links" class="btn btn-secondary" onclick="showDriveLinks()" style="flex: 1; min-width: 180px;">
+              <i class="fa-solid fa-list"></i> Show Drive Links
             </button>
-            <button id="btn-clear-links" class="btn btn-secondary" onclick="clearDriveLinks()" style="flex: 1; min-width: 200px; border: 1px solid rgba(239,68,68,0.4); color: #fca5a5;">
-              <i class="fa-solid fa-link-slash"></i> Clear Module &amp; Video Drive Links
+            <button id="btn-show-folders" class="btn btn-secondary" onclick="showGdriveFolders()" style="flex: 1; min-width: 180px;">
+              <i class="fa-solid fa-table"></i> Show Folders Table
+            </button>
+            <button id="btn-clear-links" class="btn btn-secondary" onclick="clearDriveLinks()" style="flex: 1; min-width: 180px; border: 1px solid rgba(239,68,68,0.4); color: #fca5a5;">
+              <i class="fa-solid fa-link-slash"></i> Clear Drive Links
             </button>
           </div>
           <p style="margin-top: 8px; font-size: 0.78rem; color: var(--text-muted);">
-            📋 <strong>Show All Drive Links</strong> lists every Google Drive link currently saved in Supabase.
-            🧹 <strong>Clear</strong> removes those links (e.g. stale mock links) so a fresh run recreates real folders. Folders in Google Drive are <strong>not</strong> deleted.
+            📋 <strong>Show Drive Links</strong> lists every module/video Drive link in Supabase.
+            🗂️ <strong>Show Folders Table</strong> summarises the full <code>gdrive_folders</code> table (every created folder).
+            🧹 <strong>Clear Drive Links</strong> removes module/video links so a fresh run recreates real folders. Drive folders are <strong>not</strong> deleted.
           </p>
         </div>
 
@@ -817,6 +821,47 @@
       if (!res.ok) {
         const text = await res.text().catch(() => '');
         throw new Error(`HTTP ${res.status} ${text}`.trim());
+      }
+    }
+
+    // Records (upserts) a single created Drive folder into the gdrive_folders table.
+    // Idempotent on drive_folder_id. Skipped in dry-run / mock-test modes. Never throws —
+    // a missing table (migration not yet run) only warns once so folder creation continues.
+    let __gdriveTableWarned = false;
+    async function recordGdriveFolder(rec) {
+      if (window.__MOCK_TEST__ || window.__DRY_RUN__ || !rec || !rec.driveId) return;
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/gdrive_folders`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_ANON,
+            'Authorization': `Bearer ${SUPABASE_ANON}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'resolution=merge-duplicates,return=minimal'
+          },
+          body: JSON.stringify({
+            drive_folder_id: rec.driveId,
+            name: rec.name,
+            path: rec.path || null,
+            drive_url: rec.url || driveFolderUrl(rec.driveId),
+            folder_type: rec.type,
+            parent_drive_id: rec.parentDriveId || null,
+            module_id: rec.moduleId || null,
+            video_id: rec.videoId || null,
+            has_readme: !!rec.hasReadme,
+            updated_at: new Date().toISOString()
+          })
+        });
+        if (!res.ok && !__gdriveTableWarned) {
+          __gdriveTableWarned = true;
+          const t = await res.text().catch(() => '');
+          log('warn', `⚠️ Could not write to gdrive_folders (HTTP ${res.status}). Run migration_gdrive_folders.sql in the Supabase SQL editor to create the table. ${t}`.trim());
+        }
+      } catch (err) {
+        if (!__gdriveTableWarned) {
+          __gdriveTableWarned = true;
+          log('warn', 'gdrive_folders record skipped: ' + (err.message || err));
+        }
       }
     }
 
@@ -1196,6 +1241,7 @@
             rootFolderIdFromDb = rootFolderId;
           }
         }
+        await recordGdriveFolder({ driveId: rootFolderId, name: courseTree.name, path: courseTree.name, type: 'root' });
         updateNodeStatus(courseTree, 'success');
 
         // Step 2: Loop through modules recursively
@@ -1213,6 +1259,8 @@
             log('info', `Updating Supabase module ID ${modNode.dbId} with folder link...`);
             await saveFolderLinkToSupabase('course_modules', modNode.dbId, driveFolderUrl(modFolderId));
           }
+          const modPath = `${courseTree.name}/${modNode.name}`;
+          await recordGdriveFolder({ driveId: modFolderId, name: modNode.name, path: modPath, type: 'module', parentDriveId: rootFolderId, moduleId: modNode.dbId });
           updateNodeStatus(modNode, 'success');
 
           // Step 3: Loop through videos under module
@@ -1230,11 +1278,13 @@
               log('info', `Updating Supabase video ID ${vidNode.dbId} with folder link...`);
               await saveFolderLinkToSupabase('course_videos', vidNode.dbId, driveFolderUrl(vidFolderId));
             }
+            const vidPath = `${courseTree.name}/${modNode.name}/${vidNode.name}`;
+            await recordGdriveFolder({ driveId: vidFolderId, name: vidNode.name, path: vidPath, type: 'video', parentDriveId: modFolderId, moduleId: modNode.dbId, videoId: vidNode.dbId });
 
             // Create the full nested production subfolder structure (each folder gets a README.txt).
             // getOrCreateDriveFolder is idempotent, so existing subfolders are reused, not duplicated.
             log('info', `Creating production subfolder structure under video: "${vidNode.name}"`);
-            await createSubfolderStructure(vidFolderId, vidNode.name);
+            await createSubfolderStructure(vidFolderId, vidNode.name, { moduleId: modNode.dbId, videoId: vidNode.dbId, basePath: vidPath });
 
             updateNodeStatus(vidNode, 'success');
           }
@@ -1325,13 +1375,17 @@
     }
 
     // Builds the nested category/subfolder tree under a video folder, dropping a README.txt in each.
-    async function createSubfolderStructure(vidFolderId, vidName) {
+    // ctx: { moduleId, videoId, basePath } threads metadata into the gdrive_folders records.
+    async function createSubfolderStructure(vidFolderId, vidName, ctx = {}) {
+      const base = ctx.basePath || vidName;
       for (const [topName, subs] of Object.entries(SUBFOLDER_TREE)) {
         const topId = await getOrCreateDriveFolder(topName, vidFolderId);
         await getOrCreateReadme(topId, topName, vidName);
+        await recordGdriveFolder({ driveId: topId, name: topName, path: `${base}/${topName}`, type: 'category', parentDriveId: vidFolderId, moduleId: ctx.moduleId, videoId: ctx.videoId, hasReadme: true });
         for (const subName of subs) {
           const subId = await getOrCreateDriveFolder(subName, topId);
           await getOrCreateReadme(subId, `${topName}/${subName}`, vidName);
+          await recordGdriveFolder({ driveId: subId, name: subName, path: `${base}/${topName}/${subName}`, type: 'subfolder', parentDriveId: topId, moduleId: ctx.moduleId, videoId: ctx.videoId, hasReadme: true });
         }
       }
     }
@@ -1503,6 +1557,48 @@
       } catch (err) {
         log('error', 'Failed to fetch Drive links: ' + (err.message || err));
         showToast('Failed to fetch Drive links.');
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    }
+
+    // Summarises the gdrive_folders table: counts by folder_type and lists the root/module/video
+    // rows as clickable links. (Subfolder rows are counted but not individually printed.)
+    async function showGdriveFolders() {
+      log('info', '🗂️ Reading gdrive_folders table from Supabase...');
+      const authHeaders = { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` };
+      const btn = document.getElementById('btn-show-folders');
+      if (btn) btn.disabled = true;
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/gdrive_folders?select=name,path,drive_url,folder_type,has_readme&order=path`, { headers: authHeaders });
+        if (res.status === 404 || res.status === 400) {
+          log('warn', '⚠️ gdrive_folders table not found. Run 5_Symbols/supabase/migrations/migration_gdrive_folders.sql in the Supabase SQL editor, then re-run "Create Real Folders".');
+          showToast('gdrive_folders table missing — run the migration.');
+          return;
+        }
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const rows = await res.json();
+        if (!rows.length) {
+          log('warn', 'gdrive_folders is empty. Run "Create Real Folders & Save" to populate it.');
+          showToast('gdrive_folders is empty.');
+          return;
+        }
+        const counts = rows.reduce((acc, r) => { acc[r.folder_type] = (acc[r.folder_type] || 0) + 1; return acc; }, {});
+        log('info', `── gdrive_folders: ${rows.length} rows ──`);
+        ['root', 'module', 'video', 'category', 'subfolder'].forEach(t => {
+          if (counts[t]) log('info', `   ${t}: ${counts[t]}`);
+        });
+        const withReadme = rows.filter(r => r.has_readme).length;
+        log('info', `   README.txt present: ${withReadme}`);
+        // Print the top-level rows (root/module/video) as clickable links
+        rows.filter(r => ['root', 'module', 'video'].includes(r.folder_type)).forEach(r => {
+          log('link', `   🔗 [${r.folder_type}] ${r.path || r.name}: ${r.drive_url}`);
+        });
+        log('success', `✓ gdrive_folders holds ${rows.length} Google Drive folders.`);
+        showToast(`gdrive_folders: ${rows.length} folders.`);
+      } catch (err) {
+        log('error', 'Failed to read gdrive_folders: ' + (err.message || err));
+        showToast('Failed to read gdrive_folders.');
       } finally {
         if (btn) btn.disabled = false;
       }
