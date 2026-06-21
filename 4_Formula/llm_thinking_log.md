@@ -1344,3 +1344,19 @@ sentences (142, 144, 146, 147, 148, 149, ...) carry sentence-linked images
 that exist in the `research-images` container.
 
 **Status:** IMPLEMENTED, pending commit + push.
+
+### 2026-06-21 — 📐 Formula extracted: Video Image Carousel UNION pattern
+
+**Why a formula:** The Talking Heads carousel fix (drop `container` filter +
+UNION sentence-level links + empty-state SQL panel) is a reusable aggregation
+pattern. Any page that scopes research images to a video should follow it, so
+it was lifted into `4_Formula/video_image_union_formula.md`.
+
+**Formula gist:** aggregate a video's images from two sources —
+video-level links (`WHERE video_id = <id>`, no container filter) UNION
+sentence-level links (`WHERE sentence_id IN (...)`, sentence ids from the
+video's sentences) — dedupe by lower-cased `item_name`, resolve against the
+`research-images` blob listing, and render a SQL + diagnostics panel when the
+match set is empty (no silent zeros).
+
+**Status:** formula written; pending commit + push.
