@@ -1094,14 +1094,9 @@
               await saveFolderLinkToSupabase('course_videos', vidNode.dbId, vidFolderUrl);
             }
 
-            // Create subfolders: project files, script, branding, thumbnails, 01_raw_footage, 02_broll
-            log('info', `Creating subfolders 'project files', 'script', 'branding', 'thumbnails', '01_raw_footage', '02_broll' under video: "${vidNode.name}"`);
-            await getOrCreateDriveFolder('project files', vidFolderId);
-            await getOrCreateDriveFolder('script', vidFolderId);
-            await getOrCreateDriveFolder('branding', vidFolderId);
-            await getOrCreateDriveFolder('thumbnails', vidFolderId);
-            await getOrCreateDriveFolder('01_raw_footage', vidFolderId);
-            await getOrCreateDriveFolder('02_broll', vidFolderId);
+            // Create the full nested production subfolder structure (each folder gets a README.txt)
+            log('info', `Creating production subfolder structure under video: "${vidNode.name}"`);
+            await createSubfolderStructure(vidFolderId, vidNode.name);
 
             updateNodeStatus(vidNode, 'success');
           }
@@ -1115,6 +1110,75 @@
       } finally {
         document.getElementById('btn-sync').disabled = false;
       }
+    }
+
+    // ── PRODUCTION SUBFOLDER STRUCTURE ──
+    // Nested category → subfolders. Every folder created also receives a README.txt.
+    const SUBFOLDER_TREE = {
+      '01_Planning_&_Research': ['research', 'scripts_&_outlines', 'transcripts_&_captions'],
+      '02_Raw_Footage': ['raw', 'broll', 'screencasts_&_slides'],
+      '03_Audio': ['music', 'sound_effects', 'external_mics'],
+      '04_Graphics_&_Assets': ['lowerthirds', 'backgrounds', 'logos_&_branding', 'overlays_&_screenshots'],
+      '05_Project_Files': ['editing_projects', 'auto_saves', 'audio_projects'],
+      '06_Exports_&_Deliverables': ['export', 'final_delivery', 'thumbnails_&_marketing']
+    };
+
+    // Builds the nested category/subfolder tree under a video folder, dropping a README.txt in each.
+    async function createSubfolderStructure(vidFolderId, vidName) {
+      for (const [topName, subs] of Object.entries(SUBFOLDER_TREE)) {
+        const topId = await getOrCreateDriveFolder(topName, vidFolderId);
+        await getOrCreateReadme(topId, topName, vidName);
+        for (const subName of subs) {
+          const subId = await getOrCreateDriveFolder(subName, topId);
+          await getOrCreateReadme(subId, `${topName}/${subName}`, vidName);
+        }
+      }
+    }
+
+    // ── README.txt HELPER ──
+    // Idempotently places a README.txt describing the folder's purpose inside a Drive folder.
+    async function getOrCreateReadme(parentId, folderPath, vidName) {
+      // Skip if a README.txt already exists in this folder
+      const existing = await gapi.client.drive.files.list({
+        q: `name = 'README.txt' and '${parentId}' in parents and trashed = false`,
+        fields: 'files(id, name)',
+        spaces: 'drive'
+      });
+      if (existing.result.files && existing.result.files.length > 0) {
+        log('info', `✓ README.txt already present in "${folderPath}"`);
+        return existing.result.files[0].id;
+      }
+
+      const content =
+        `📁 ${folderPath}\n` +
+        `\n` +
+        `Production assets for: ${vidName}\n` +
+        `\n` +
+        `This folder is part of the standard course video production structure.\n` +
+        `Place files belonging to "${folderPath.split('/').pop()}" here.\n`;
+
+      const boundary = '-------claude-architect-readme-boundary';
+      const delimiter = `\r\n--${boundary}\r\n`;
+      const closeDelim = `\r\n--${boundary}--`;
+      const metadata = { name: 'README.txt', mimeType: 'text/plain', parents: [parentId] };
+      const body =
+        delimiter +
+        'Content-Type: application/json; charset=UTF-8\r\n\r\n' +
+        JSON.stringify(metadata) +
+        delimiter +
+        'Content-Type: text/plain; charset=UTF-8\r\n\r\n' +
+        content +
+        closeDelim;
+
+      const res = await gapi.client.request({
+        path: '/upload/drive/v3/files',
+        method: 'POST',
+        params: { uploadType: 'multipart' },
+        headers: { 'Content-Type': `multipart/related; boundary="${boundary}"` },
+        body: body
+      });
+      log('success', `✓ Created README.txt in "${folderPath}"`);
+      return res.result ? res.result.id : null;
     }
 
     // ── GOOGLE DRIVE HELPER ──
@@ -1224,6 +1288,7 @@
       // Track test calls and outcomes
       const listCalls = [];
       const createCalls = [];
+      const readmeCalls = [];
       const dbUpdates = [];
       let mockRootFolderExists = true; // Root folder simulated as already existing (idempotency check)
 
@@ -1290,6 +1355,11 @@
                 };
               }
             }
+          },
+          // Spy on raw multipart requests used to upload README.txt files
+          request: async (params) => {
+            readmeCalls.push(params);
+            return { result: { id: `mock-readme-id-${readmeCalls.length}` } };
           }
         }
       };
@@ -1369,12 +1439,34 @@
           detail: "All missing video folders must be created on Google Drive."
         });
 
-        // Assert 5: Total drive creation calls matches count of modules and videos and their subfolders (23 calls)
-        const driveCallsCount = createCalls.length === 23;
+        // Assert 5: Total drive creation calls matches count of modules, videos and nested subfolders.
+        // Per video: 6 category folders + 19 nested subfolders = 25. 3 videos × 25 = 75.
+        // Total: 2 modules + 3 videos + 75 subfolders = 80.
+        const driveCallsCount = createCalls.length === 80;
         assertions.push({
           name: "Total Drive folder creation calls count",
           passed: driveCallsCount,
-          detail: `Expected 23 folder creations (2 modules, 3 videos, and 18 subfolders), got ${createCalls.length}`
+          detail: `Expected 80 folder creations (2 modules, 3 videos, and 75 nested subfolders), got ${createCalls.length}`
+        });
+
+        // Assert 5b: A README.txt is uploaded into every created subfolder (25 per video × 3 = 75)
+        const readmeCount = readmeCalls.length === 75;
+        assertions.push({
+          name: "README.txt files created in every subfolder",
+          passed: readmeCount,
+          detail: `Expected 75 README.txt uploads (25 subfolders × 3 videos), got ${readmeCalls.length}`
+        });
+
+        // Assert 5c: Nested category folders and a representative deep subfolder were created
+        const nestedFoldersCreated = [
+          '01_Planning_&_Research', '02_Raw_Footage', '03_Audio',
+          '04_Graphics_&_Assets', '05_Project_Files', '06_Exports_&_Deliverables',
+          'screencasts_&_slides', 'sound_effects', 'logos_&_branding', 'final_delivery'
+        ].every(name => createCalls.some(c => c.resource.name === name));
+        assertions.push({
+          name: "Nested category & subfolder structure created",
+          passed: nestedFoldersCreated,
+          detail: "All 6 category folders and their nested subfolders must be created."
         });
 
         // Assert 6: Supabase database update calls executed for modules and videos (5 calls)
@@ -1424,7 +1516,7 @@
         });
 
         if (passedAll) {
-          log('success', '🏆 TEST SUITE PASSED SUCCESSFULLY: 8/8 assertions verified.');
+          log('success', `🏆 TEST SUITE PASSED SUCCESSFULLY: ${assertions.length}/${assertions.length} assertions verified.`);
           showToast('Mock Test Suite Completed: SUCCESS');
         } else {
           log('error', '🚨 TEST SUITE ENCOUNTERED ASSERTION FAILURES.');

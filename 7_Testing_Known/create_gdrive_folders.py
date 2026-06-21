@@ -8,6 +8,18 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
+from googleapiclient.http import MediaInMemoryUpload
+
+# Nested production subfolder structure. Each category maps to its subfolders.
+# Every folder created (category and subfolder) also receives a README.txt.
+SUBFOLDER_TREE = {
+    "01_Planning_&_Research": ["research", "scripts_&_outlines", "transcripts_&_captions"],
+    "02_Raw_Footage": ["raw", "broll", "screencasts_&_slides"],
+    "03_Audio": ["music", "sound_effects", "external_mics"],
+    "04_Graphics_&_Assets": ["lowerthirds", "backgrounds", "logos_&_branding", "overlays_&_screenshots"],
+    "05_Project_Files": ["editing_projects", "auto_saves", "audio_projects"],
+    "06_Exports_&_Deliverables": ["export", "final_delivery", "thumbnails_&_marketing"],
+}
 
 def extract_folder_id(links):
     if not links:
@@ -253,6 +265,48 @@ class RealDriveService:
             log_error(f"Failed to create folder '{name}': {e}")
             raise e
 
+    def create_readme(self, parent_id, folder_path, vid_name):
+        # Skip if a README.txt already exists in this folder (idempotent)
+        try:
+            query = f"name = 'README.txt' and '{parent_id}' in parents and trashed = false"
+            results = self.service.files().list(q=query, fields="files(id)", spaces="drive").execute()
+            if results.get('files'):
+                log_info(f"✓ README.txt already present in '{folder_path}'")
+                return results['files'][0]['id']
+        except Exception as e:
+            log_warn(f"Error checking README.txt in '{folder_path}': {e}")
+
+        content = build_readme_content(folder_path, vid_name)
+        try:
+            metadata = {'name': 'README.txt', 'parents': [parent_id]}
+            media = MediaInMemoryUpload(content.encode('utf-8'), mimetype='text/plain')
+            f = self.service.files().create(body=metadata, media_body=media, fields='id').execute()
+            log_success(f"+ Created README.txt in '{folder_path}'")
+            return f.get('id')
+        except Exception as e:
+            log_warn(f"Could not create README.txt in '{folder_path}': {e}")
+            return None
+
+def build_readme_content(folder_path, vid_name):
+    leaf = folder_path.split("/")[-1]
+    return (
+        f"📁 {folder_path}\n"
+        f"\n"
+        f"Production assets for: {vid_name}\n"
+        f"\n"
+        f"This folder is part of the standard course video production structure.\n"
+        f"Place files belonging to \"{leaf}\" here.\n"
+    )
+
+def create_subfolder_structure(drive_service, vid_id, vid_name):
+    """Builds the nested category/subfolder tree under a video folder, with a README.txt in each."""
+    for top_name, subs in SUBFOLDER_TREE.items():
+        top_id = drive_service.get_or_create_folder(top_name, vid_id)
+        drive_service.create_readme(top_id, top_name, vid_name)
+        for sub_name in subs:
+            sub_id = drive_service.get_or_create_folder(sub_name, top_id)
+            drive_service.create_readme(sub_id, f"{top_name}/{sub_name}", vid_name)
+
 class MockDriveService:
     def folder_exists(self, folder_id):
         if not folder_id:
@@ -265,6 +319,10 @@ class MockDriveService:
         mock_id = f"mock-folder-id-{normalized_name}"
         log_info(f"✓ [SIMULATION] Simulated folder '{name}' -> ID: {mock_id}")
         return mock_id
+
+    def create_readme(self, parent_id, folder_path, vid_name):
+        log_info(f"✓ [SIMULATION] Simulated README.txt in '{folder_path}'")
+        return f"mock-readme-id-{parent_id}"
 
 def update_supabase_link(table_name, record_id, url):
     if not SUPABASE_URL:
@@ -440,28 +498,16 @@ def main():
                     # Update Supabase database
                     update_supabase_link("course_videos", vid["id"], vid_url)
                 
-                # Create subfolders: project files, script, branding, thumbnails, 01_raw_footage, 02_broll
-                pf_id = drive_service.get_or_create_folder("project files", vid_id)
-                scr_id = drive_service.get_or_create_folder("script", vid_id)
-                brand_id = drive_service.get_or_create_folder("branding", vid_id)
-                thumb_id = drive_service.get_or_create_folder("thumbnails", vid_id)
-                rf_id = drive_service.get_or_create_folder("01_raw_footage", vid_id)
-                br_id = drive_service.get_or_create_folder("02_broll", vid_id)
-                
+                # Create the full nested production subfolder structure (README.txt in each folder)
+                create_subfolder_structure(drive_service, vid_id, vid_title)
+
                 vid_report = {
                     "id": vid["id"],
                     "number": vid["video_number"],
                     "title": vid["title"],
                     "folder_id": vid_id,
                     "folder_url": vid_url,
-                    "subfolders": {
-                        "project_files_id": pf_id,
-                        "script_id": scr_id,
-                        "branding_id": brand_id,
-                        "thumbnails_id": thumb_id,
-                        "raw_footage_id": rf_id,
-                        "broll_id": br_id
-                    }
+                    "subfolders": SUBFOLDER_TREE
                 }
                 mod_report["videos"].append(vid_report)
                 
@@ -495,23 +541,30 @@ def write_markdown_report(data):
         f"| 📁 Root Folder | ✅ Synced | - | Main course container folder |"
     ]
     
+    # Subfolders per video: 6 categories + sum of their nested subfolders
+    subfolders_per_video = len(SUBFOLDER_TREE) + sum(len(s) for s in SUBFOLDER_TREE.values())
+
     total_folders = 1 # Root
     total_modules = 0
     total_videos = 0
     total_subfolders = 0
-    
+    total_readmes = 0
+
     for mod in data["modules"]:
         total_folders += 1
         total_modules += 1
         for vid in mod["videos"]:
-            total_folders += 7 # Video folder + 6 subfolders
+            total_folders += 1 + subfolders_per_video # Video folder + nested subfolders
             total_videos += 1
-            total_subfolders += 6
-            
+            total_subfolders += subfolders_per_video
+            total_readmes += subfolders_per_video # one README.txt per subfolder
+
+    category_list = ", ".join(f"`{c}`" for c in SUBFOLDER_TREE.keys())
     lines.extend([
         f"| 📚 Course Modules | ✅ Synced | {total_modules} records | Mapped to `course_modules.links` |",
         f"| 🎞️ Course Videos | ✅ Synced | {total_videos} records | Mapped to `course_videos.links` |",
-        f"| ⚙️ Video Assets (Subfolders) | ✅ Synced | {total_subfolders} folders | Nested subfolders `project files`, `script`, `branding`, `thumbnails`, `01_raw_footage`, `02_broll` |",
+        f"| ⚙️ Video Assets (Subfolders) | ✅ Synced | {total_subfolders} folders | Nested categories: {category_list} |",
+        f"| 📝 README.txt files | ✅ Synced | {total_readmes} files | One README.txt placed inside every subfolder |",
         f"",
         f"**Total Directories Synchronized:** `{total_folders}`",
         f"",
@@ -527,7 +580,10 @@ def write_markdown_report(data):
         for vid in mod["videos"]:
             lines.append(f"    - 📁 **Video {vid['number']} - {vid['title']}**")
             lines.append(f"      - 🔗 [Open Video Folder]({vid['folder_url']})")
-            lines.append(f"      - 🗂️ Subfolders: `project files`, `script`, `branding`, `thumbnails`, `01_raw_footage`, `02_broll` created")
+            for top_name, subs in SUBFOLDER_TREE.items():
+                lines.append(f"      - 🗂️ `{top_name}` (📝 README.txt)")
+                for sub_name in subs:
+                    lines.append(f"        - 📂 `{sub_name}` (📝 README.txt)")
             
     lines.append("")
     lines.append("## 🏆 Outcome & Verification")

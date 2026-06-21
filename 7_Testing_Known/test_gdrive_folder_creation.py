@@ -11,6 +11,16 @@ def log_error(msg):
 def log_info(msg):
     print(f"\033[94m[INFO] {msg}\033[0m")
 
+# Nested production subfolder structure (mirrors create_gdrive_folders.py)
+SUBFOLDER_TREE = {
+    "01_Planning_&_Research": ["research", "scripts_&_outlines", "transcripts_&_captions"],
+    "02_Raw_Footage": ["raw", "broll", "screencasts_&_slides"],
+    "03_Audio": ["music", "sound_effects", "external_mics"],
+    "04_Graphics_&_Assets": ["lowerthirds", "backgrounds", "logos_&_branding", "overlays_&_screenshots"],
+    "05_Project_Files": ["editing_projects", "auto_saves", "audio_projects"],
+    "06_Exports_&_Deliverables": ["export", "final_delivery", "thumbnails_&_marketing"],
+}
+
 # Mock outline structure representing course modules and videos
 MOCK_OUTLINE = [
     {
@@ -36,6 +46,7 @@ class MockGoogleDriveAPI:
     def __init__(self, root_exists=True):
         self.list_calls = []
         self.create_calls = []
+        self.readme_calls = []
         self.root_exists = root_exists
 
     def list_files(self, name, parent_id=None):
@@ -53,6 +64,10 @@ class MockGoogleDriveAPI:
         call_info = {"name": name, "parent_id": parent_id}
         self.create_calls.append(call_info)
         return f"mock-folder-id-{name.lower().replace(' ', '-')}"
+
+    def create_readme(self, parent_id, folder_path):
+        self.readme_calls.append({"parent_id": parent_id, "folder_path": folder_path})
+        return f"mock-readme-id-{parent_id}"
 
 class MockSupabaseDB:
     def __init__(self):
@@ -91,11 +106,17 @@ def run_generation_pipeline(outline, drive_api, db):
             vid_url = f"https://drive.google.com/drive/folders/{vid_id}"
             db.update_record("course_videos", vid["id"], [{"name": "Google Drive Folder", "url": vid_url}])
 
-            # Create subfolders: project files, script, branding, thumbnails, 01_raw_footage, 02_broll
-            for sub in ["project files", "script", "branding", "thumbnails", "01_raw_footage", "02_broll"]:
-                sub_id = drive_api.list_files(sub, vid_id)
-                if not sub_id:
-                    drive_api.create_folder(sub, vid_id)
+            # Create the full nested production subfolder structure, with a README.txt in each folder
+            for top_name, subs in SUBFOLDER_TREE.items():
+                top_id = drive_api.list_files(top_name, vid_id)
+                if not top_id:
+                    top_id = drive_api.create_folder(top_name, vid_id)
+                drive_api.create_readme(top_id, top_name)
+                for sub_name in subs:
+                    sub_id = drive_api.list_files(sub_name, top_id)
+                    if not sub_id:
+                        sub_id = drive_api.create_folder(sub_name, top_id)
+                    drive_api.create_readme(sub_id, f"{top_name}/{sub_name}")
 
 def run_tests():
     log_info("Starting Google Drive folder creation CLI unit test suite...")
@@ -148,32 +169,50 @@ def run_tests():
         log_error("Assert 4: Video folder creation requests missing or parented incorrectly")
         tests_failed += 1
 
-    # 4b. Verify video subfolder creation (project files, script, branding, thumbnails, 01_raw_footage, 02_broll)
-    subfolders_expected = [
-        {"name": "project files", "parent": "mock-folder-id-video-1---mock-setup-verification"},
-        {"name": "script", "parent": "mock-folder-id-video-1---mock-setup-verification"},
-        {"name": "branding", "parent": "mock-folder-id-video-1---mock-setup-verification"},
-        {"name": "thumbnails", "parent": "mock-folder-id-video-1---mock-setup-verification"},
-        {"name": "01_raw_footage", "parent": "mock-folder-id-video-1---mock-setup-verification"},
-        {"name": "02_broll", "parent": "mock-folder-id-video-1---mock-setup-verification"},
-        {"name": "project files", "parent": "mock-folder-id-video-2---mock-integration-testing"},
-        {"name": "script", "parent": "mock-folder-id-video-2---mock-integration-testing"},
-        {"name": "branding", "parent": "mock-folder-id-video-2---mock-integration-testing"},
-        {"name": "thumbnails", "parent": "mock-folder-id-video-2---mock-integration-testing"},
-        {"name": "01_raw_footage", "parent": "mock-folder-id-video-2---mock-integration-testing"},
-        {"name": "02_broll", "parent": "mock-folder-id-video-2---mock-integration-testing"},
-        {"name": "project files", "parent": "mock-folder-id-video-1---mock-delivery-release"},
-        {"name": "script", "parent": "mock-folder-id-video-1---mock-delivery-release"},
-        {"name": "branding", "parent": "mock-folder-id-video-1---mock-delivery-release"},
-        {"name": "thumbnails", "parent": "mock-folder-id-video-1---mock-delivery-release"},
-        {"name": "01_raw_footage", "parent": "mock-folder-id-video-1---mock-delivery-release"},
-        {"name": "02_broll", "parent": "mock-folder-id-video-1---mock-delivery-release"}
+    # 4b. Verify nested subfolder structure: 6 category folders under each video, with their
+    #     nested subfolders parented to the correct category folder.
+    video_ids = [
+        "mock-folder-id-video-1---mock-setup-verification",
+        "mock-folder-id-video-2---mock-integration-testing",
+        "mock-folder-id-video-1---mock-delivery-release",
     ]
-    assert_4b = all(any(c["name"] == sf["name"] and c["parent_id"] == sf["parent"] for c in mock_drive.create_calls) for sf in subfolders_expected)
-    if assert_4b:
-        log_success("Assert 4b: Video subfolders (project files, script, branding, thumbnails, 01_raw_footage, 02_broll) created under all videos")
+
+    def folder_id_for(name):
+        return f"mock-folder-id-{name.lower().replace(' ', '-')}"
+
+    nested_ok = True
+    for vid_id in video_ids:
+        for top_name, subs in SUBFOLDER_TREE.items():
+            # Category folder created directly under the video folder
+            if not any(c["name"] == top_name and c["parent_id"] == vid_id for c in mock_drive.create_calls):
+                nested_ok = False
+            # Each nested subfolder created under its category folder
+            for sub_name in subs:
+                if not any(c["name"] == sub_name and c["parent_id"] == folder_id_for(top_name) for c in mock_drive.create_calls):
+                    nested_ok = False
+    if nested_ok:
+        log_success("Assert 4b: Nested category/subfolder structure created and parented correctly under all videos")
     else:
-        log_error("Assert 4b: Video subfolder creation requests missing or parented incorrectly")
+        log_error("Assert 4b: Nested subfolder creation requests missing or parented incorrectly")
+        tests_failed += 1
+
+    # 4c. Verify a README.txt is created inside every subfolder (categories + nested)
+    subfolders_per_video = len(SUBFOLDER_TREE) + sum(len(s) for s in SUBFOLDER_TREE.values())
+    expected_readmes = subfolders_per_video * len(video_ids)
+    assert_4c = len(mock_drive.readme_calls) == expected_readmes
+    if assert_4c:
+        log_success(f"Assert 4c: README.txt created in every subfolder ({expected_readmes} files)")
+    else:
+        log_error(f"Assert 4c: Expected {expected_readmes} README.txt files, got {len(mock_drive.readme_calls)}")
+        tests_failed += 1
+
+    # 4d. Verify total folder creation count (2 modules + 3 videos + nested subfolders per video)
+    expected_folders = 2 + 3 + (subfolders_per_video * len(video_ids))
+    assert_4d = len(mock_drive.create_calls) == expected_folders
+    if assert_4d:
+        log_success(f"Assert 4d: Total Drive folder creation count matches expected ({expected_folders})")
+    else:
+        log_error(f"Assert 4d: Expected {expected_folders} folder creations, got {len(mock_drive.create_calls)}")
         tests_failed += 1
 
     # 5. Verify database updates count (2 modules + 3 videos = 5 records)
@@ -229,7 +268,7 @@ def run_tests():
 
     print("\n" + "="*50)
     if tests_failed == 0:
-        print("\033[92m🎉 CLI TEST SUITE COMPLETED SUCCESSFULLY: 8/8 unit assertions passed.\033[0m")
+        print("\033[92m🎉 CLI TEST SUITE COMPLETED SUCCESSFULLY: all unit assertions passed.\033[0m")
         sys.exit(0)
     else:
         print(f"\033[91m🚨 CLI TEST SUITE FAILED: {tests_failed} assertions failed.\033[0m")

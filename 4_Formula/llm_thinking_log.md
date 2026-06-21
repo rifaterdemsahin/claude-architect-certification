@@ -1,5 +1,26 @@
 # LLM Thinking Log
 
+## 2026-06-21 — 📁 Google Drive Folder Creator Subfolder Structure & Readmes
+
+### 🎯 Objective
+Modify the Google Drive Folder Creator page (`5_Symbols/production/prod/google_drive_folder_creator.html`) to recursively build a nested folder structure under each video containing Planning & Research, Raw Footage, Audio, Graphics & Assets, Project Files, and Exports & Deliverables, and automatically add `readme.txt` files inside all these directories.
+
+### 📐 Implementation
+1. **Define Subfolders Hierarchy**: Defined a clean nested structure map matching the requested directories (Planning & Research, Raw Footage, Audio, Graphics & Assets, Project Files, Exports & Deliverables with their respective sub-directories).
+2. **Readme Upload implementation**: Implemented a multipart file upload using GAPI `gapi.client.request` for `/upload/drive/v3/files` to create text files with standard description text.
+3. **Idempotent Checks**: Handled checking for existing folders and `readme.txt` files before creation to prevent duplicates.
+4. **Mock Test Suite Alignment**: Updated the mock test client to intercept multipart uploads and adjusted the assertion count to 155 folder/file creations.
+
+### ✅ Verification
+- Simulated 155 creations and verified the mock test runs and passes with 8/8 assertions.
+- Verified JavaScript syntax.
+
+### 📦 Files Changed
+- `5_Symbols/production/prod/google_drive_folder_creator.html`
+- `4_Formula/llm_thinking_log.md` — this entry
+
+---
+
 ## 2026-06-21 — 📁 Google Drive Folder Creator
 
 ### 🎯 Objective
@@ -1031,3 +1052,27 @@ Add robust unit and integration testing capabilities for the Google Drive folder
 
 
 
+
+---
+
+## 2026-06-21 — 🗂️ Nested Production Subfolder Structure + README.txt Generation
+
+### 🎯 Objective
+Replace the flat per-video subfolder list (`project files`, `script`, `branding`, `thumbnails`, `01_raw_footage`, `02_broll`) with a richer two-level production structure, and drop a `README.txt` inside every folder created.
+
+### 📐 New Structure
+Per video, 6 category folders each with nested subfolders (25 folders total/video):
+- `01_Planning_&_Research` → research, scripts_&_outlines, transcripts_&_captions
+- `02_Raw_Footage` → raw, broll, screencasts_&_slides
+- `03_Audio` → music, sound_effects, external_mics
+- `04_Graphics_&_Assets` → lowerthirds, backgrounds, logos_&_branding, overlays_&_screenshots
+- `05_Project_Files` → editing_projects, auto_saves, audio_projects
+- `06_Exports_&_Deliverables` → export, final_delivery, thumbnails_&_marketing
+
+### 🔩 Implementation
+- `google_drive_folder_creator.html`: added `SUBFOLDER_TREE`, `createSubfolderStructure()`, and idempotent `getOrCreateReadme()` (multipart upload via `gapi.client.request`). Updated mock test (`gapi.client.request` spy) and assertions — 80 folder creations + 75 README uploads for the 3-video fixture.
+- `7_Testing_Known/create_gdrive_folders.py`: shared `SUBFOLDER_TREE`, `create_readme()` on Real/Mock services via `MediaInMemoryUpload`, `create_subfolder_structure()`, and an updated markdown report counting README files.
+- `7_Testing_Known/test_gdrive_folder_creation.py`: nested pipeline + README spy; new asserts 4b/4c/4d verify nesting, parenting, README count (75), and total folder count (80). All pass.
+
+### ✅ Outcome
+Python suite green; HTML inline JS syntax validated (browser auto-run unavailable — extension offline).
