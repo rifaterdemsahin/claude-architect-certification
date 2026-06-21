@@ -741,9 +741,12 @@
         children: []
       };
 
+      log('info', `Planned creation for Root Folder: "${rootName}"`);
+
       courseOutline.forEach(mod => {
+        const modName = `Module ${mod.module_number} - ${mod.title}`;
         const modNode = {
-          name: `Module ${mod.module_number} - ${mod.title}`,
+          name: modName,
           type: 'folder',
           dbId: mod.id,
           dbType: 'module',
@@ -751,17 +754,21 @@
           children: []
         };
 
+        log('info', `  └── 📁 Planned Module Folder: "${modName}"`);
+
         if (mod.course_videos) {
           mod.course_videos.forEach(vid => {
+            const vidName = `Video ${vid.video_number} - ${vid.title}`;
             const vidNode = {
-              name: `Video ${vid.video_number} - ${vid.title}`,
+              name: vidName,
               type: 'folder',
               dbId: vid.id,
               dbType: 'video',
               status: 'pending',
-              children: [] // Videos represent the leaf folders
+              children: []
             };
             modNode.children.push(vidNode);
+            log('info', `        └── 📁 Planned Video Folder: "${vidName}"`);
           });
         }
         courseTree.children.push(modNode);
