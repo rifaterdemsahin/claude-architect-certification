@@ -112,6 +112,11 @@
               "description": "Critical path overview and pre-production checklists."
             },
             {
+              "label": "🎓 AI Certifications Analysis ↗",
+              "url": "https://rifaterdemsahin.github.io/ai-certifications-analysis/",
+              "description": "Market research on the hard, expensive AI certificates the course preps for — cost, difficulty, and re-sit pain framing the value proposition."
+            },
+            {
               "label": "🎨 Ways of Working",
               "url": "5_Symbols/production/preprod/ways_of_working.html",
               "description": "Visual script table read method with real-time image creation."
@@ -155,6 +160,11 @@
               "label": "📅 Timeline",
               "url": "5_Symbols/timeline.html",
               "description": "Scheduled dates for the course execution."
+            },
+            {
+              "label": "🗺️ Menu Map (2D)",
+              "url": "5_Symbols/menu_map.html",
+              "description": "Top-down 2D map of the entire site navigation — every Project and Debug link, colour-coded by group, with live filter."
             }
           ]
         },

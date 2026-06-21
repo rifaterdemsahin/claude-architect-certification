@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🗺️ Menu Map — 2D Top-Down | Claude AI Certification</title>
+  <meta name="description" content="A 2D top-down map of the entire site navigation — every Project and Debug menu link, colour-coded by group.">
+  <link rel="icon" type="image/png" href="../favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #030712;
+      --bg-card: rgba(17, 24, 39, 0.7);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --font-title: 'Outfit', sans-serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-dark);
+      background-image:
+        radial-gradient(circle at 12% 18%, rgba(59,130,246,0.06) 0%, transparent 42%),
+        radial-gradient(circle at 88% 82%, rgba(139,92,246,0.06) 0%, transparent 42%);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      line-height: 1.55;
+      padding: 0 0 80px;
+    }
+    .wrap { max-width: 1400px; margin: 0 auto; padding: 0 24px; }
+    header.page {
+      padding: 40px 0 18px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      margin-bottom: 26px;
+    }
+    h1 {
+      font-family: var(--font-title);
+      font-size: 2.3rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+      background: linear-gradient(to right, #f3f4f6, #c084fc, #60a5fa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    header.page p { color: var(--text-muted); max-width: 760px; }
+    .toolbar {
+      display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+      margin: 18px 0 4px;
+    }
+    .toolbar input {
+      flex: 1; min-width: 220px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 10px; padding: 10px 14px;
+      color: var(--text-main); font-family: inherit; font-size: 0.92rem;
+    }
+    .toolbar input:focus { outline: none; border-color: #8b5cf6; }
+    .counts { color: var(--text-muted); font-size: 0.82rem; white-space: nowrap; }
+
+    .section-title {
+      font-family: var(--font-title);
+      font-size: 1.15rem; font-weight: 700;
+      margin: 34px 0 14px; display: flex; align-items: center; gap: 10px;
+    }
+    .section-title .pill {
+      font-size: 0.7rem; font-weight: 700; color: var(--text-muted);
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+      padding: 2px 10px; border-radius: 100px; text-transform: uppercase; letter-spacing: 0.05em;
+    }
+
+    /* 2D top-down grid of group cards */
+    .map-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+      align-items: start;
+    }
+    .group {
+      background: var(--bg-card);
+      border: 1px solid var(--g-color, rgba(255,255,255,0.1));
+      border-top: 4px solid var(--g-color, #8b5cf6);
+      border-radius: 16px;
+      padding: 14px 16px 16px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    }
+    .group-head {
+      font-family: var(--font-title);
+      font-weight: 700; font-size: 0.98rem;
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      margin-bottom: 10px; color: var(--g-color, var(--text-main));
+    }
+    .group-head .n {
+      font-size: 0.7rem; font-weight: 700; color: var(--text-muted);
+      background: rgba(255,255,255,0.05); border-radius: 100px; padding: 1px 8px;
+    }
+    .items { display: flex; flex-direction: column; gap: 6px; }
+    .item {
+      display: block; text-decoration: none;
+      color: var(--text-main); font-size: 0.84rem;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-left: 3px solid var(--g-color, #8b5cf6);
+      border-radius: 8px; padding: 6px 10px;
+      transition: background .15s ease, transform .15s ease;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .item:hover { background: rgba(255,255,255,0.09); transform: translateX(2px); }
+    .item.sub { margin-left: 12px; font-size: 0.8rem; opacity: 0.92; }
+    .item .ext { color: var(--text-muted); font-size: 0.72rem; }
+    .subhead {
+      font-size: 0.74rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.05em; color: var(--text-muted);
+      margin: 8px 0 2px;
+    }
+    .empty { color: var(--text-muted); font-style: italic; padding: 20px 0; }
+    footer { margin-top: 44px; color: var(--text-muted); font-size: 0.82rem; text-align: center; }
+    footer a { color: #93c5fd; }
+  </style>
+</head>
+<body>
+  <script src="../shared/nav.js"></script>
+
+  <div class="wrap">
+    <header class="page">
+      <h1>🗺️ Menu Map — 2D Top-Down</h1>
+      <p>Every link in the site navigation on a single screen — the <strong>Project menu</strong> and the full <strong>Debug menu</strong>, laid out as colour-coded groups so you can see the whole structure at a glance.</p>
+      <div class="toolbar">
+        <input id="filter" type="text" placeholder="🔎 Filter links — type to highlight…" autocomplete="off">
+        <span class="counts" id="counts">Loading…</span>
+      </div>
+    </header>
+
+    <div id="project-wrap">
+      <div class="section-title">🚀 Project Menu <span class="pill">always visible</span></div>
+      <div class="map-grid" id="project-grid"></div>
+    </div>
+
+    <div id="debug-wrap">
+      <div class="section-title">🐞 Debug Menu <span class="pill">7-stage framework</span></div>
+      <div class="map-grid" id="debug-grid"></div>
+    </div>
+
+    <footer>
+      Generated live from <code>navigation_config.json</code> ·
+      <a href="../index.html">← Home</a> ·
+      <a href="https://claude-architect-certification.fly.dev/5_Symbols/menu_map.html" target="_blank">Live</a>
+    </footer>
+  </div>
+
+  <script>
+    // Rotating colour palette assigned per top-level group.
+    var PALETTE = [
+      '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444',
+      '#ec4899', '#3b82f6', '#84cc16', '#f97316', '#a855f7',
+      '#14b8a6', '#eab308', '#f43f5e', '#22d3ee', '#4ade80'
+    ];
+
+    function isExternal(url) { return /^https?:\/\//i.test(url || ''); }
+
+    function itemEl(node, color, sub) {
+      var a = document.createElement('a');
+      a.className = 'item' + (sub ? ' sub' : '');
+      a.href = node.url || '#';
+      if (isExternal(node.url)) { a.target = '_blank'; a.rel = 'noopener'; }
+      a.title = (node.label || '') + (node.description ? ' — ' + node.description : '');
+      a.style.setProperty('--g-color', color);
+      a.innerHTML = (node.label || '(untitled)') +
+        (isExternal(node.url) ? ' <span class="ext">↗</span>' : '');
+      a.dataset.search = ((node.label || '') + ' ' + (node.url || '') + ' ' + (node.description || '')).toLowerCase();
+      return a;
+    }
+
+    // Recursively flatten a group's children into the card (one level of sub-grouping).
+    function fillItems(container, children, color) {
+      (children || []).forEach(function (child) {
+        if (child.children && child.children.length) {
+          var h = document.createElement('div');
+          h.className = 'subhead';
+          h.textContent = child.label || '';
+          container.appendChild(h);
+          child.children.forEach(function (g) {
+            if (g.children && g.children.length) {
+              var h2 = document.createElement('div');
+              h2.className = 'subhead'; h2.style.opacity = '0.7';
+              h2.textContent = '· ' + (g.label || '');
+              container.appendChild(h2);
+              g.children.forEach(function (leaf) { container.appendChild(itemEl(leaf, color, true)); });
+            } else {
+              container.appendChild(itemEl(g, color, true));
+            }
+          });
+        } else {
+          container.appendChild(itemEl(child, color, false));
+        }
+      });
+    }
+
+    function groupCard(label, children, color, leafCount) {
+      var card = document.createElement('div');
+      card.className = 'group';
+      card.style.setProperty('--g-color', color);
+      var head = document.createElement('div');
+      head.className = 'group-head';
+      head.innerHTML = '<span>' + (label || '') + '</span><span class="n">' + leafCount + '</span>';
+      card.appendChild(head);
+      var items = document.createElement('div');
+      items.className = 'items';
+      fillItems(items, children, color);
+      card.appendChild(items);
+      return card;
+    }
+
+    function countLeaves(node) {
+      if (node.children && node.children.length) {
+        return node.children.reduce(function (s, c) { return s + countLeaves(c); }, 0);
+      }
+      return node.url ? 1 : 0;
+    }
+
+    // The debug menu is a FLAT array where "📁 …" entries act as group headers.
+    function renderFlatDebug(arr, gridEl) {
+      var groups = []; var current = null; var ci = 0;
+      arr.forEach(function (node) {
+        var label = node.label || '';
+        var isHeader = /^📁/.test(label) || (!node.url && !(node.children && node.children.length));
+        if (label.trim() === '---') { return; }
+        if (isHeader && !node.url) {
+          current = { label: label, items: [], color: PALETTE[ci % PALETTE.length] };
+          ci++; groups.push(current);
+        } else {
+          if (!current) { current = { label: '📂 Links', items: [], color: PALETTE[ci % PALETTE.length] }; ci++; groups.push(current); }
+          current.items.push(node);
+        }
+      });
+      groups.forEach(function (g) {
+        var children = g.items.map(function (n) { return { label: n.label, url: n.url, description: n.description }; });
+        gridEl.appendChild(groupCard(g.label, children, g.color, children.filter(function (c) { return c.url; }).length));
+      });
+      return groups.reduce(function (s, g) { return s + g.items.filter(function (i) { return i.url; }).length; }, 0);
+    }
+
+    function renderNested(arr, gridEl) {
+      var total = 0;
+      (arr || []).forEach(function (g, i) {
+        var color = PALETTE[i % PALETTE.length];
+        var leaves = countLeaves(g);
+        total += leaves;
+        if (g.children && g.children.length) {
+          gridEl.appendChild(groupCard(g.label, g.children, color, leaves));
+        } else {
+          // top-level direct link → tiny card
+          gridEl.appendChild(groupCard(g.label, [g], color, leaves));
+        }
+      });
+      return total;
+    }
+
+    function applyFilter(q) {
+      q = (q || '').trim().toLowerCase();
+      var items = document.querySelectorAll('.item');
+      var shown = 0;
+      items.forEach(function (el) {
+        var match = !q || (el.dataset.search || '').indexOf(q) !== -1;
+        el.style.display = match ? '' : 'none';
+        if (match) shown++;
+      });
+      // Hide group cards with no visible items.
+      document.querySelectorAll('.group').forEach(function (g) {
+        var any = g.querySelector('.item:not([style*="display: none"])');
+        g.style.display = any ? '' : 'none';
+      });
+      document.getElementById('counts').textContent = q ? (shown + ' match') : (window.__TOTAL__ + ' links across the menu');
+    }
+
+    (function init() {
+      var paths = ['../navigation_config.json', 'navigation_config.json', '/navigation_config.json'];
+      (function tryNext(i) {
+        if (i >= paths.length) {
+          document.getElementById('project-grid').innerHTML = '<p class="empty">Could not load navigation_config.json.</p>';
+          document.getElementById('counts').textContent = 'load error';
+          return;
+        }
+        fetch(paths[i]).then(function (r) {
+          if (!r.ok) throw new Error(r.status);
+          return r.json();
+        }).then(function (cfg) {
+          var pTotal = renderNested(cfg.projectMenu || [], document.getElementById('project-grid'));
+          var dTotal = renderFlatDebug(cfg.debugMenu || [], document.getElementById('debug-grid'));
+          window.__TOTAL__ = pTotal + dTotal;
+          document.getElementById('counts').textContent = window.__TOTAL__ + ' links across the menu';
+        }).catch(function () { tryNext(i + 1); });
+      })(0);
+
+      document.getElementById('filter').addEventListener('input', function (e) { applyFilter(e.target.value); });
+    })();
+  </script>
+</body>
+</html>
