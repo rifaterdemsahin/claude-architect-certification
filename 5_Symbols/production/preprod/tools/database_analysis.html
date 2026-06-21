@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🗄️ Database Analysis | Pre-Production Tools</title>
+  <meta name="description" content="Comprehensive Supabase database analysis: tables, row counts, properties, and relationships for the Claude Architect Certification project.">
+  <meta name="author" content="Rifat Erdem Sahin">
+  <link rel="icon" type="image/png" href="../../../../favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&family=Fira+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../../../../shared/seo.js" defer></script>
+  <style>
+    :root {
+      --bg: #030712; --card: rgba(17,24,39,0.92); --card-hover: rgba(25,33,52,0.95);
+      --border: rgba(255,255,255,0.07); --border-accent: rgba(139,92,246,0.25);
+      --text: #f3f4f6; --muted: #6b7280; --muted2: #9ca3af;
+      --primary: #8b5cf6; --secondary: #3b82f6; --green: #10b981;
+      --yellow: #f59e0b; --red: #ef4444; --teal: #06b6d4; --cyan: #22d3ee;
+      --font-h: 'Outfit', sans-serif; --font-b: 'Plus+Jakarta Sans', sans-serif; --font-mono: 'Fira Mono', monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      background-image: radial-gradient(circle at 8% 15%, rgba(139,92,246,0.07) 0%, transparent 45%),
+                        radial-gradient(circle at 92% 85%, rgba(59,130,246,0.06) 0%, transparent 45%);
+      color: var(--text); font-family: var(--font-b); line-height: 1.6; padding: 32px 24px 120px;
+    }
+    .container { max-width: 1200px; margin: 0 auto; }
+
+    .back-link { display: inline-flex; align-items: center; gap: 6px; color: var(--muted2); font-size: 0.85rem; margin-bottom: 20px; text-decoration: none; transition: color 0.2s; }
+    .back-link:hover { color: var(--text); }
+    .page-badge { display: inline-block; padding: 5px 14px; background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(139,92,246,0.2)); border: 1px solid rgba(245,158,11,0.3); border-radius: 100px; font-size: 0.75rem; font-weight: 700; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; }
+    h1 { font-family: var(--font-h); font-size: 2.2rem; font-weight: 800; margin-bottom: 6px; }
+    .subtitle { color: var(--muted2); margin-bottom: 28px; font-size: 0.95rem; }
+
+    /* Status bar */
+    .status-bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 24px; padding: 12px 18px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; }
+    .status-pill { display: inline-flex; align-items: center; gap: 6px; font-size: 0.78rem; font-weight: 700; padding: 4px 12px; border-radius: 100px; }
+    .status-pill.ok { background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3); color: #34d399; }
+    .status-pill.warn { background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.3); color: #fbbf24; }
+    .status-pill.err { background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3); color: #f87171; }
+    .status-pill.info { background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.3); color: #93c5fd; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+
+    /* Controls */
+    .controls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 28px; }
+    .btn { padding: 8px 16px; border-radius: 9px; border: none; cursor: pointer; font-size: 0.82rem; font-weight: 700; font-family: var(--font-b); transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--muted2); }
+    .btn:hover { background: rgba(255,255,255,0.1); color: var(--text); border-color: var(--primary); }
+    .filter-input { background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 9px; padding: 8px 14px; color: var(--text); font-size: 0.88rem; min-width: 240px; font-family: var(--font-b); transition: border-color 0.2s; }
+    .filter-input:focus { outline: none; border-color: var(--primary); }
+    .filter-input::placeholder { color: rgba(156,163,175,0.5); }
+
+    /* Section title */
+    .section-title { font-family: var(--font-h); font-size: 1.15rem; font-weight: 700; margin: 32px 0 16px; display: flex; align-items: center; gap: 8px; }
+    .section-title span { font-size: 0.72rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 5px; padding: 2px 8px; }
+
+    /* Relationship map */
+    .rel-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; margin-bottom: 32px; }
+    .rel-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px; transition: all 0.2s; }
+    .rel-card:hover { border-color: var(--border-accent); background: var(--card-hover); }
+    .rel-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-family: var(--font-mono); font-size: 0.9rem; }
+    .rel-card-header .from { color: #c084fc; }
+    .rel-card-header .arrow { color: var(--muted); }
+    .rel-card-header .to { color: #34d399; }
+    .rel-item { display: flex; align-items: center; gap: 10px; font-size: 0.82rem; color: var(--muted2); padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
+    .rel-item:last-child { border-bottom: none; }
+    .rel-col { font-family: var(--font-mono); color: #fbbf24; font-size: 0.78rem; background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.15); border-radius: 4px; padding: 1px 6px; }
+    .rel-type { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-left: auto; }
+
+    /* Group */
+    .group { margin-bottom: 24px; }
+    .group-header { font-family: var(--font-h); font-size: 1rem; font-weight: 700; color: var(--muted2); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .group-count { font-size: 0.72rem; color: var(--muted); background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 5px; padding: 2px 8px; text-transform: none; }
+    .table-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 14px; }
+
+    /* Collapsible table card */
+    details { background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; transition: all 0.2s; }
+    details[open] { border-color: var(--border-accent); background: var(--card-hover); }
+    details.hidden { display: none; }
+    summary { list-style: none; cursor: pointer; padding: 14px 16px; display: flex; align-items: center; gap: 12px; user-select: none; }
+    summary::-webkit-details-marker { display: none; }
+    summary .chevron { margin-left: auto; transition: transform 0.25s; color: var(--muted); font-size: 0.8rem; }
+    details[open] summary .chevron { transform: rotate(180deg); }
+    .table-icon { font-size: 1.4rem; }
+    .table-name { font-family: var(--font-mono); font-size: 0.95rem; font-weight: 600; color: #c084fc; }
+    .table-summary { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+    .table-meta { font-size: 0.72rem; color: var(--muted); font-family: var(--font-mono); }
+    .row-badge { font-size: 0.72rem; font-weight: 700; padding: 3px 10px; border-radius: 100px; font-family: var(--font-mono); }
+    .row-badge.loaded { background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.25); color: #34d399; }
+    .row-badge.loading { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.2); color: #fbbf24; }
+    .row-badge.error { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); color: #f87171; }
+    .row-badge.zero { background: rgba(107,114,128,0.1); border: 1px solid rgba(107,114,128,0.2); color: var(--muted); }
+
+    .table-body { padding: 0 16px 18px; }
+    .body-section { margin-top: 16px; }
+    .body-section-title { font-size: 0.75rem; font-weight: 700; color: var(--muted2); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px; }
+
+    /* Columns table */
+    .cols-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    .cols-table th { text-align: left; color: var(--muted); font-weight: 700; font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+    .cols-table td { padding: 7px 10px; border-bottom: 1px solid rgba(255,255,255,0.03); color: var(--text); font-family: var(--font-mono); font-size: 0.8rem; vertical-align: top; }
+    .cols-table tr:last-child td { border-bottom: none; }
+    .cols-table .col-type { color: var(--muted2); font-size: 0.74rem; }
+    .tag { font-size: 0.62rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.03em; white-space: nowrap; }
+    .tag-pk { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2); color: #34d399; }
+    .tag-fk { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.2); color: #fbbf24; }
+    .tag-json { background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); color: #93c5fd; }
+
+    /* Relationship list inside card */
+    .rel-list { display: flex; flex-direction: column; gap: 6px; }
+    .rel-list-item { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: var(--muted2); }
+    .rel-list-item a { color: var(--secondary); text-decoration: none; font-family: var(--font-mono); }
+    .rel-list-item a:hover { color: #fff; text-decoration: underline; }
+    .rel-list-empty { color: var(--muted); font-style: italic; font-size: 0.8rem; }
+
+    /* No results */
+    .no-results { color: var(--muted); text-align: center; padding: 32px; font-size: 0.95rem; }
+
+    footer { text-align: center; color: var(--muted); font-size: 0.8rem; margin-top: 48px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
+    footer a { color: var(--secondary); }
+    @media (max-width: 640px) {
+      .table-grid { grid-template-columns: 1fr; }
+      .rel-grid { grid-template-columns: 1fr; }
+      summary { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+<script src="../../../../shared/nav.js"></script>
+<div class="container">
+  <a class="back-link" href="../index.html">← Pre-Production</a>
+  <div class="page-badge">Tools</div>
+  <h1>🗄️ Database Analysis</h1>
+  <p class="subtitle">Every Supabase table in the project, with live row counts, column properties, and foreign-key relationships. Click a table card to expand.</p>
+
+  <div class="status-bar" id="status-bar">
+    <span id="pill-connection" class="status-pill warn"><span class="dot"></span> Supabase: connecting…</span>
+    <span id="pill-tables" class="status-pill info"><span class="dot"></span> Tables: –</span>
+    <button class="btn" onclick="expandAll()">Expand all</button>
+    <button class="btn" onclick="collapseAll()">Collapse all</button>
+  </div>
+
+  <div class="controls">
+    <input type="text" class="filter-input" id="filter-input" placeholder="Filter tables by name, column, or relationship…" oninput="filterTables(this.value)">
+  </div>
+
+  <div class="section-title">🔗 Relationship Map <span id="rel-count-badge">—</span></div>
+  <div class="rel-grid" id="relationship-grid">
+    <div class="rel-card"><div class="rel-list-empty">Loading relationships…</div></div>
+  </div>
+
+  <div class="section-title">📦 Tables <span id="table-count-badge">—</span></div>
+  <div id="tables-container"></div>
+
+  <footer>
+    <p>Schema sourced from <code>5_Symbols/supabase/schema/</code> and migrations. Row counts read live from Supabase via PostgREST.</p>
+    <p style="margin-top:8px;"><a href="admin.html">🔧 Data Admin</a> · <a href="https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/database/schemas" target="_blank" rel="noopener">Open Supabase Schema ↗</a></p>
+  </footer>
+</div>
+
+<script>
+// ── Supabase config ─────────────────────────────────────────────────────────
+const SUPABASE_URL  = localStorage.getItem('supabase_url')      || 'https://rmekfsdhglyiralxvkwc.supabase.co';
+const SUPABASE_ANON = localStorage.getItem('supabase_anon_key') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZWtmc2RoZ2x5aXJhbHh2a3djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NzYzODgsImV4cCI6MjA5NjM1MjM4OH0.ay6HsmO_CbMGDXL_Dv4DT-paAIAOqlQPfmqqx_mexSU';
+
+// ── Static schema model (mirrors 5_Symbols/supabase/schema + migrations) ─────
+const TABLES = [
+  // Core course
+  { group:'Core Course',                  icon:'📦', name:'modules', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'module_number',t:'INTEGER'},{n:'title',t:'TEXT'},{n:'description',t:'TEXT'},{n:'created_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'Core Course',                  icon:'🎬', name:'videos', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'module_id',t:'INTEGER',fk:'modules'},{n:'video_number',t:'INTEGER'},{n:'title',t:'TEXT'},{n:'duration',t:'TEXT'},{n:'script',t:'TEXT'},{n:'recorded',t:'BOOLEAN'},{n:'created_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'Core Course',                  icon:'🎙', name:'video_cues', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'video_id',t:'INTEGER',fk:'videos'},{n:'cue_text',t:'TEXT'},{n:'sort_order',t:'INTEGER'}
+  ]},
+  { group:'Core Course',                  icon:'📋', name:'outline', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'module_number',t:'INTEGER'},{n:'video_number',t:'INTEGER'},{n:'content_type',t:'TEXT'},{n:'content',t:'TEXT'},{n:'sort_order',t:'INTEGER'},{n:'module_id',t:'INTEGER',fk:'course_modules'},{n:'video_id',t:'INTEGER',fk:'course_videos'}
+  ]},
+  { group:'Core Course',                  icon:'🔗', name:'resource_links', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'module_id',t:'INTEGER',fk:'modules'},{n:'label',t:'TEXT'},{n:'url',t:'TEXT'}
+  ]},
+
+  // Production pipeline
+  { group:'Production Pipeline',          icon:'📝', name:'scripts', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'video_id',t:'INTEGER',fk:'videos'},{n:'script_text',t:'TEXT'},{n:'format',t:'TEXT'},{n:'target_duration',t:'TEXT'},{n:'created_at',t:'TIMESTAMPTZ'},{n:'updated_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'Production Pipeline',          icon:'🗣', name:'sentences', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'script_id',t:'INTEGER',fk:'scripts'},{n:'sentence_text',t:'TEXT'},{n:'sentence_type',t:'TEXT'},{n:'section',t:'TEXT'},{n:'visual_mode',t:'TEXT'},{n:'sort_order',t:'INTEGER'},{n:'created_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'Production Pipeline',          icon:'🎥', name:'scenes', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'module_number',t:'INTEGER'},{n:'section_number',t:'INTEGER'},{n:'scene_number',t:'INTEGER'},{n:'video_id',t:'INTEGER',fk:'videos'},{n:'script',t:'TEXT'},{n:'timing',t:'TEXT'},{n:'bg_image',t:'TEXT'},{n:'lt_image',t:'TEXT'},{n:'lt_main',t:'TEXT'},{n:'lt_sub',t:'TEXT'},{n:'overlay_lt',t:'TEXT'},{n:'overlay_text',t:'TEXT'},{n:'bundle_url',t:'TEXT'},{n:'audio_url',t:'TEXT'},{n:'scene_type',t:'TEXT'},{n:'sfx_needed',t:'TEXT'},{n:'bg_music',t:'TEXT'},{n:'scene_change',t:'TEXT'},{n:'audio_rationale',t:'TEXT'},{n:'audio_status',t:'TEXT'},{n:'created_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'Production Pipeline',          icon:'🎯', name:'scene_cues', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'scene_id',t:'INTEGER',fk:'scenes'},{n:'icon',t:'TEXT'},{n:'label',t:'TEXT'},{n:'prompt',t:'TEXT'},{n:'sort_order',t:'INTEGER'}
+  ]},
+  { group:'Production Pipeline',          icon:'✂️', name:'edl_entries', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'scene_id',t:'INTEGER',fk:'scenes'},{n:'timing',t:'TEXT'},{n:'description',t:'TEXT'},{n:'sort_order',t:'INTEGER'}
+  ]},
+  { group:'Production Pipeline',          icon:'💻', name:'code_references', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'video_id',t:'TEXT'},{n:'label',t:'TEXT'},{n:'url',t:'TEXT'},{n:'note',t:'TEXT'},{n:'sort_order',t:'INTEGER'},{n:'created_at',t:'TIMESTAMPTZ'},{n:'updated_at',t:'TIMESTAMPTZ'}
+  ], note:'video_id is a soft reference (TEXT) to production video identifiers.'},
+  { group:'Production Pipeline',          icon:'🎞', name:'lower_thirds', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'module_number',t:'INTEGER'},{n:'video_number',t:'INTEGER'},{n:'module_id',t:'INTEGER',fk:'modules'},{n:'video_id',t:'INTEGER',fk:'videos'},{n:'main_text',t:'TEXT'},{n:'sub_text',t:'TEXT'},{n:'rationale',t:'TEXT'},{n:'sort_order',t:'INTEGER'},{n:'created_at',t:'TIMESTAMPTZ'},{n:'updated_at',t:'TIMESTAMPTZ'}
+  ]},
+
+  // Learner experience
+  { group:'Learner Experience',           icon:'🎓', name:'course_modules', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'module_number',t:'INT'},{n:'title',t:'TEXT'},{n:'description',t:'TEXT'},{n:'links',t:'JSONB'},{n:'sort_order',t:'INT'},{n:'created_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'Learner Experience',           icon:'▶️', name:'course_videos', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'module_id',t:'INT',fk:'course_modules'},{n:'video_number',t:'INT'},{n:'title',t:'TEXT'},{n:'bullets',t:'JSONB'},{n:'links',t:'JSONB'},{n:'sort_order',t:'INT'},{n:'created_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'Learner Experience',           icon:'📊', name:'course_video_progress', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'video_id',t:'INT',fk:'course_videos'},{n:'user_id',t:'TEXT'},{n:'status',t:'TEXT'},{n:'updated_at',t:'TIMESTAMPTZ'},{n:'tell_done',t:'BOOLEAN'},{n:'show_done',t:'BOOLEAN'},{n:'do_done',t:'BOOLEAN'},{n:'apply_done',t:'BOOLEAN'}
+  ]},
+  { group:'Learner Experience',           icon:'☑️', name:'checklist_items', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'phase',t:'TEXT'},{n:'item_name',t:'TEXT'},{n:'item_desc',t:'TEXT'},{n:'item_url',t:'TEXT'},{n:'sort_order',t:'INTEGER'}
+  ]},
+  { group:'Learner Experience',           icon:'✅', name:'checklist_progress', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'item_id',t:'INTEGER',fk:'checklist_items'},{n:'user_id',t:'TEXT'},{n:'checked',t:'BOOLEAN'},{n:'in_progress',t:'BOOLEAN'},{n:'notes',t:'TEXT'},{n:'updated_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'Learner Experience',           icon:'🏁', name:'milestones', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'module_number',t:'INTEGER'},{n:'milestone_number',t:'INTEGER'},{n:'title',t:'TEXT'},{n:'description',t:'TEXT'},{n:'type',t:'TEXT'},{n:'sort_order',t:'INTEGER'}
+  ]},
+  { group:'Learner Experience',           icon:'🚩', name:'milestone_progress', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'milestone_id',t:'INTEGER',fk:'milestones'},{n:'user_id',t:'TEXT'},{n:'checked',t:'BOOLEAN'},{n:'notes',t:'TEXT'},{n:'updated_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'Learner Experience',           icon:'💰', name:'pricing', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'tier',t:'TEXT'},{n:'price_monthly',t:'NUMERIC'},{n:'description',t:'TEXT'},{n:'features',t:'JSONB'},{n:'cta_label',t:'TEXT'},{n:'cta_url',t:'TEXT'},{n:'is_featured',t:'BOOLEAN'},{n:'sort_order',t:'INTEGER'}
+  ]},
+  { group:'Learner Experience',           icon:'📚', name:'courses', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'title',t:'TEXT'},{n:'description',t:'TEXT'},{n:'module_number',t:'INTEGER'},{n:'tier',t:'TEXT'},{n:'icon',t:'TEXT'},{n:'status',t:'TEXT'},{n:'sort_order',t:'INTEGER'}
+  ]},
+  { group:'Learner Experience',           icon:'📄', name:'course_content', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'section',t:'TEXT'},{n:'content',t:'TEXT'},{n:'updated_at',t:'TIMESTAMPTZ'}
+  ]},
+
+  // Research & assets
+  { group:'Research & Assets',            icon:'🔬', name:'research_relationships', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'container',t:'TEXT'},{n:'item_name',t:'TEXT'},{n:'video_id',t:'INT',fk:'videos'},{n:'sentence_id',t:'INT',fk:'sentences'},{n:'created_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'Research & Assets',            icon:'🗃', name:'research_assets', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'container',t:'TEXT'},{n:'item_name',t:'TEXT'},{n:'thumb_name',t:'TEXT'},{n:'content_type',t:'TEXT'},{n:'size_bytes',t:'BIGINT'},{n:'created_at',t:'TIMESTAMPTZ'},{n:'updated_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'Research & Assets',            icon:'🔗', name:'sentence_links', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'sentence_id',t:'INT',fk:'sentences'},{n:'url',t:'TEXT'},{n:'description',t:'TEXT'},{n:'created_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'Research & Assets',            icon:'📊', name:'infographics', columns:[
+    {n:'id',t:'BIGINT',pk:true},{n:'created_at',t:'TIMESTAMPTZ'},{n:'module_number',t:'INT'},{n:'video_number',t:'INT'},{n:'sentence_id',t:'BIGINT',fk:'sentences'},{n:'topic',t:'TEXT'},{n:'style',t:'TEXT'},{n:'layout_json',t:'JSONB'},{n:'azure_blob_name',t:'TEXT'},{n:'status',t:'TEXT'}
+  ]},
+
+  // AI production objects
+  { group:'AI Production Objects',        icon:'🎙', name:'ai_voiceovers', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'sentence_id',t:'INTEGER',fk:'sentences'},{n:'module_number',t:'INTEGER'},{n:'video_number',t:'INTEGER'},{n:'script_id',t:'INTEGER',fk:'scripts'},{n:'generation_status',t:'TEXT'},{n:'voice_provider',t:'TEXT'},{n:'voice_name',t:'TEXT'},{n:'audio_url',t:'TEXT'},{n:'duration_seconds',t:'NUMERIC'},{n:'rationale',t:'TEXT'},{n:'error_message',t:'TEXT'},{n:'created_at',t:'TIMESTAMPTZ'},{n:'updated_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'AI Production Objects',        icon:'🧑‍💼', name:'ai_avatars', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'sentence_id',t:'INTEGER',fk:'sentences'},{n:'module_number',t:'INTEGER'},{n:'video_number',t:'INTEGER'},{n:'script_id',t:'INTEGER',fk:'scripts'},{n:'generation_status',t:'TEXT'},{n:'avatar_provider',t:'TEXT'},{n:'avatar_name',t:'TEXT'},{n:'video_url',t:'TEXT'},{n:'duration_seconds',t:'NUMERIC'},{n:'rationale',t:'TEXT'},{n:'error_message',t:'TEXT'},{n:'created_at',t:'TIMESTAMPTZ'},{n:'updated_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'AI Production Objects',        icon:'🎞', name:'ai_broll', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'sentence_id',t:'INTEGER',fk:'sentences'},{n:'module_number',t:'INTEGER'},{n:'video_number',t:'INTEGER'},{n:'script_id',t:'INTEGER',fk:'scripts'},{n:'generation_status',t:'TEXT'},{n:'video_provider',t:'TEXT'},{n:'prompt',t:'TEXT'},{n:'clip_url',t:'TEXT'},{n:'duration_seconds',t:'NUMERIC'},{n:'rationale',t:'TEXT'},{n:'error_message',t:'TEXT'},{n:'created_at',t:'TIMESTAMPTZ'},{n:'updated_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'AI Production Objects',        icon:'✍️', name:'ai_script_generations', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'sentence_id',t:'INTEGER',fk:'sentences'},{n:'module_number',t:'INTEGER'},{n:'video_number',t:'INTEGER'},{n:'script_id',t:'INTEGER',fk:'scripts'},{n:'generation_status',t:'TEXT'},{n:'llm_model',t:'TEXT'},{n:'source_blueprint',t:'TEXT'},{n:'prompt_used',t:'TEXT'},{n:'generated_text',t:'TEXT'},{n:'rationale',t:'TEXT'},{n:'error_message',t:'TEXT'},{n:'created_at',t:'TIMESTAMPTZ'},{n:'updated_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'AI Production Objects',        icon:'🌍', name:'ai_localizations', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'sentence_id',t:'INTEGER',fk:'sentences'},{n:'module_number',t:'INTEGER'},{n:'video_number',t:'INTEGER'},{n:'script_id',t:'INTEGER',fk:'scripts'},{n:'language_code',t:'TEXT'},{n:'generation_status',t:'TEXT'},{n:'translated_text',t:'TEXT'},{n:'dubbed_audio_url',t:'TEXT'},{n:'voice_clone_id',t:'TEXT'},{n:'duration_seconds',t:'NUMERIC'},{n:'rationale',t:'TEXT'},{n:'error_message',t:'TEXT'},{n:'created_at',t:'TIMESTAMPTZ'},{n:'updated_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'AI Production Objects',        icon:'🖼', name:'sentence_graphics', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'sentence_id',t:'INTEGER',fk:'sentences'},{n:'module_number',t:'INTEGER'},{n:'video_number',t:'INTEGER'},{n:'script_id',t:'INTEGER',fk:'scripts'},{n:'generation_status',t:'TEXT'},{n:'rationale',t:'TEXT'},{n:'graphics_type',t:'TEXT'},{n:'graphics_url',t:'TEXT'},{n:'prompt_used',t:'TEXT'},{n:'error_message',t:'TEXT'},{n:'created_at',t:'TIMESTAMPTZ'},{n:'updated_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'AI Production Objects',        icon:'🎥', name:'greenscreen_backgrounds', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'module_number',t:'INTEGER'},{n:'video_number',t:'INTEGER'},{n:'generation_status',t:'TEXT'},{n:'video_provider',t:'TEXT'},{n:'prompt',t:'TEXT'},{n:'refined_prompt',t:'TEXT'},{n:'video_url',t:'TEXT'},{n:'duration_seconds',t:'NUMERIC'},{n:'preset_style',t:'TEXT'},{n:'camera_movement',t:'TEXT'},{n:'rationale',t:'TEXT'},{n:'created_at',t:'TIMESTAMPTZ'},{n:'updated_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'AI Production Objects',        icon:'🖼', name:'generated_images', columns:[
+    {n:'id',t:'BIGINT',pk:true},{n:'created_at',t:'TIMESTAMPTZ'},{n:'module_number',t:'INT'},{n:'video_number',t:'INT'},{n:'prompt',t:'TEXT'},{n:'refined_prompt',t:'TEXT'},{n:'image_url',t:'TEXT'},{n:'azure_blob_name',t:'TEXT'},{n:'thumbnail_url',t:'TEXT'},{n:'thumbnail_blob_name',t:'TEXT'},{n:'status',t:'TEXT'}
+  ]},
+
+  // Problem statement
+  { group:'Problem Statement',            icon:'🎯', name:'problem_pages', columns:[
+    {n:'id',t:'UUID',pk:true},{n:'stage_number',t:'SMALLINT'},{n:'title',t:'TEXT'},{n:'headline',t:'TEXT'},{n:'subheadline',t:'TEXT'},{n:'created_at',t:'TIMESTAMPTZ'},{n:'updated_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'Problem Statement',            icon:'👤', name:'target_personas', columns:[
+    {n:'id',t:'UUID',pk:true},{n:'page_id',t:'UUID',fk:'problem_pages'},{n:'display_order',t:'SMALLINT'},{n:'emoji',t:'TEXT'},{n:'role_title',t:'TEXT'},{n:'description',t:'TEXT'},{n:'created_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'Problem Statement',            icon:'⚠️', name:'core_challenges', columns:[
+    {n:'id',t:'UUID',pk:true},{n:'page_id',t:'UUID',fk:'problem_pages'},{n:'challenge_number',t:'SMALLINT'},{n:'title',t:'TEXT'},{n:'description',t:'TEXT'},{n:'display_order',t:'SMALLINT'},{n:'created_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'Problem Statement',            icon:'📊', name:'exam_domains', columns:[
+    {n:'id',t:'UUID',pk:true},{n:'page_id',t:'UUID',fk:'problem_pages'},{n:'domain_name',t:'TEXT'},{n:'topics_covered',t:'TEXT[]'},{n:'weight_percent',t:'SMALLINT'},{n:'display_order',t:'SMALLINT'},{n:'created_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'Problem Statement',            icon:'💡', name:'course_solutions', columns:[
+    {n:'id',t:'UUID',pk:true},{n:'page_id',t:'UUID',fk:'problem_pages'},{n:'step_number',t:'SMALLINT'},{n:'title',t:'TEXT'},{n:'description',t:'TEXT'},{n:'display_order',t:'SMALLINT'},{n:'created_at',t:'TIMESTAMPTZ'}
+  ]},
+
+  // Course metadata & misc
+  { group:'Course Metadata',              icon:'📖', name:'course_metadata', columns:[
+    {n:'id',t:'UUID',pk:true},{n:'course_title',t:'TEXT'},{n:'instructor',t:'TEXT'},{n:'target_audience',t:'TEXT'},{n:'total_duration',t:'TEXT'},{n:'difficulty_level',t:'TEXT'},{n:'learning_objectives',t:'JSONB'},{n:'key_takeaways',t:'TEXT'},{n:'real_world_connections',t:'TEXT'},{n:'recommended_background',t:'VARCHAR(150)'},{n:'proof_of_learning',t:'TEXT'},{n:'course_description',t:'VARCHAR(1200)'},{n:'skills',t:'JSONB'},{n:'created_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'Course Metadata',              icon:'🛠', name:'course_tools', columns:[
+    {n:'id',t:'UUID',pk:true},{n:'course_id',t:'UUID',fk:'course_metadata'},{n:'tool_name',t:'TEXT'},{n:'purpose',t:'TEXT'},{n:'free_or_paid',t:'TEXT'},{n:'trial_available',t:'BOOLEAN'},{n:'trial_duration',t:'TEXT'},{n:'tool_validity',t:'TEXT'},{n:'display_order',t:'INT'}
+  ]},
+
+  // Publishing & storage
+  { group:'Publishing & Storage',         icon:'📁', name:'gdrive_folders', columns:[
+    {n:'drive_folder_id',t:'TEXT',pk:true},{n:'name',t:'TEXT'},{n:'path',t:'TEXT'},{n:'drive_url',t:'TEXT'},{n:'folder_type',t:'TEXT'},{n:'parent_drive_id',t:'TEXT'},{n:'module_id',t:'BIGINT',fk:'course_modules'},{n:'video_id',t:'BIGINT',fk:'course_videos'},{n:'has_readme',t:'BOOLEAN'},{n:'created_at',t:'TIMESTAMPTZ'},{n:'updated_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'Publishing & Storage',         icon:'⚙️', name:'project_settings', columns:[
+    {n:'key',t:'TEXT',pk:true},{n:'value',t:'TEXT'},{n:'created_at',t:'TIMESTAMPTZ'},{n:'updated_at',t:'TIMESTAMPTZ'}
+  ]},
+
+  // Content tools
+  { group:'Content Tools',                icon:'🏛', name:'memory_palaces', columns:[
+    {n:'id',t:'BIGINT',pk:true},{n:'module_id',t:'INTEGER'},{n:'user_id',t:'TEXT'},{n:'theme',t:'TEXT'},{n:'title',t:'TEXT'},{n:'palace',t:'JSONB'},{n:'notes',t:'TEXT'},{n:'created_at',t:'TIMESTAMPTZ'},{n:'updated_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'Content Tools',                icon:'🎓', name:'certification_videos', columns:[
+    {n:'id',t:'BIGINT',pk:true},{n:'created_at',t:'TIMESTAMPTZ'},{n:'module_number',t:'INT'},{n:'video_number',t:'INT'},{n:'title',t:'TEXT'},{n:'description',t:'TEXT'},{n:'edit_todo',t:'TEXT'},{n:'embed_url',t:'TEXT'},{n:'share_url',t:'TEXT'}
+  ]},
+  { group:'Content Tools',                icon:'📕', name:'dsl_entries', columns:[
+    {n:'id',t:'BIGINT',pk:true},{n:'term',t:'TEXT'},{n:'definition',t:'TEXT'},{n:'context',t:'TEXT'},{n:'category',t:'TEXT'},{n:'related_terms',t:'JSONB'},{n:'examples',t:'JSONB'},{n:'source',t:'TEXT'},{n:'created_at',t:'TIMESTAMPTZ'},{n:'updated_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'Content Tools',                icon:'💬', name:'explanations', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'entity_type',t:'TEXT'},{n:'entity_id',t:'TEXT'},{n:'explanation_text',t:'TEXT'},{n:'generated_by',t:'TEXT'},{n:'created_at',t:'TIMESTAMPTZ'},{n:'updated_at',t:'TIMESTAMPTZ'}
+  ]},
+
+  // IVQ
+  { group:'IVQ',                          icon:'❓', name:'ivq_questions', columns:[
+    {n:'id',t:'BIGSERIAL',pk:true},{n:'video_id',t:'BIGINT',fk:'videos'},{n:'question_text',t:'TEXT'},{n:'options',t:'JSONB'},{n:'correct_option',t:'TEXT'},{n:'explanation',t:'TEXT'},{n:'incorrect_explanations',t:'JSONB'},{n:'timestamp_seconds',t:'INT'},{n:'sort_order',t:'INT'},{n:'created_at',t:'TIMESTAMPTZ'}
+  ], note:'Shares the videos table, but the IVQ migration expects a different videos shape; only ivq_questions is unique.'},
+
+  // Navigation
+  { group:'Navigation',                   icon:'⭐', name:'nav_favorites', columns:[
+    {n:'url',t:'TEXT',pk:true},{n:'label',t:'TEXT'},{n:'created_at',t:'TIMESTAMPTZ'}
+  ]}
+];
+
+// Build reverse FK map: which tables reference each target table
+const REVERSE_FK = {};
+TABLES.forEach(t => REVERSE_FK[t.name] = []);
+TABLES.forEach(t => {
+  t.columns.forEach(c => {
+    if (c.fk) {
+      if (!REVERSE_FK[c.fk]) REVERSE_FK[c.fk] = [];
+      REVERSE_FK[c.fk].push({ table: t.name, column: c.n });
+    }
+  });
+});
+
+// ── Utility ─────────────────────────────────────────────────────────────────
+function esc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+async function sqCount(table) {
+  const url = `${SUPABASE_URL}/rest/v1/${table}?select=id`;
+  try {
+    const res = await fetch(url, {
+      method:'GET',
+      headers:{ 'apikey':SUPABASE_ANON, 'Authorization':`Bearer ${SUPABASE_ANON}`, 'Prefer':'count=exact', 'Range':'0-0' }
+    });
+    if (!res.ok) return { ok:false, status:res.status };
+    const range = res.headers.get('Content-Range') || '';
+    const m = range.match(/\/(\d+)/);
+    return { ok:true, count: m ? parseInt(m[1]) : 0 };
+  } catch (e) { return { ok:false, error:e.message }; }
+}
+
+function renderRowPill(name, counts) {
+  if (!counts || counts[name] === undefined) return `<span class="row-badge loading" id="rb-${esc(name)}">loading…</span>`;
+  const c = counts[name];
+  if (!c.ok) return `<span class="row-badge error" id="rb-${esc(name)}">—</span>`;
+  if (c.count === 0) return `<span class="row-badge zero" id="rb-${esc(name)}">0 rows</span>`;
+  return `<span class="row-badge loaded" id="rb-${esc(name)}">${c.count.toLocaleString()} rows</span>`;
+}
+
+function typeBadges(col) {
+  const badges = [];
+  if (col.pk) badges.push('<span class="tag tag-pk">PK</span>');
+  if (col.fk) badges.push('<span class="tag tag-fk">FK</span>');
+  if (col.t.toLowerCase().includes('json')) badges.push('<span class="tag tag-json">JSON</span>');
+  return badges.join(' ');
+}
+
+function renderRelationships(name) {
+  const table = TABLES.find(t => t.name === name);
+  const outgoing = table.columns.filter(c => c.fk).map(c => `<div class="rel-list-item">→ references <a href="#tbl-${esc(c.fk)}">${esc(c.fk)}</a> via <code>${esc(c.n)}</code></div>`).join('');
+  const incoming = (REVERSE_FK[name] || []).map(r => `<div class="rel-list-item">← <a href="#tbl-${esc(r.table)}">${esc(r.table)}</a> references this via <code>${esc(r.column)}</code></div>`).join('');
+  let html = '';
+  if (outgoing) html += `<div class="body-section"><div class="body-section-title">Outgoing Relationships</div><div class="rel-list">${outgoing}</div></div>`;
+  if (incoming) html += `<div class="body-section"><div class="body-section-title">Incoming Relationships</div><div class="rel-list">${incoming}</div></div>`;
+  if (!outgoing && !incoming) html += `<div class="body-section"><div class="rel-list-empty">No foreign-key relationships defined for this table.</div></div>`;
+  if (table.note) html += `<div class="body-section"><div class="body-section-title">Note</div><div style="font-size:0.8rem;color:var(--muted2);">${esc(table.note)}</div></div>`;
+  return html;
+}
+
+function renderColumns(table) {
+  const rows = table.columns.map(c => `<tr><td>${esc(c.n)} ${typeBadges(c)}</td><td class="col-type">${esc(c.t)}</td><td>${c.fk ? `<a href="#tbl-${esc(c.fk)}">${esc(c.fk)}</a>` : '—'}</td></tr>`).join('');
+  return `<table class="cols-table"><thead><tr><th>Column</th><th>Type</th><th>FK Target</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function renderTables(counts) {
+  const container = document.getElementById('tables-container');
+  const groups = {};
+  TABLES.forEach(t => { groups[t.group] = groups[t.group] || []; groups[t.group].push(t); });
+
+  let html = '';
+  for (const [group, tables] of Object.entries(groups)) {
+    const groupSlug = group.toLowerCase().replace(/[^a-z0-9]+/g,'-');
+    html += `<div class="group" data-group="${esc(groupSlug)}">
+      <div class="group-header">${esc(group)} <span class="group-count">${tables.length} tables</span></div>
+      <div class="table-grid">`;
+    html += tables.map(t => {
+      const rowPill = renderRowPill(t.name, counts);
+      return `<details class="table-card" id="tbl-${esc(t.name)}" data-name="${esc(t.name)}" data-keywords="${esc([t.name, ...t.columns.map(c=>c.n), group].join(' '))}">
+        <summary>
+          <span class="table-icon">${t.icon}</span>
+          <div class="table-summary">
+            <span class="table-name">${esc(t.name)}</span>
+            <span class="table-meta">${t.columns.length} columns</span>
+          </div>
+          ${rowPill}
+          <span class="chevron">▼</span>
+        </summary>
+        <div class="table-body">
+          <div class="body-section"><div class="body-section-title">Columns</div>${renderColumns(t)}</div>
+          ${renderRelationships(t.name)}
+        </div>
+      </details>`;
+    }).join('');
+    html += '</div></div>';
+  }
+  container.innerHTML = html;
+}
+
+function renderRelationshipMap() {
+  const grid = document.getElementById('relationship-grid');
+  const rels = [];
+  TABLES.forEach(t => {
+    t.columns.forEach(c => {
+      if (c.fk) rels.push({ from:t.name, col:c.n, to:c.fk });
+    });
+  });
+
+  document.getElementById('rel-count-badge').textContent = `${rels.length} FKs`;
+  if (!rels.length) { grid.innerHTML = '<div class="no-results">No relationships found.</div>'; return; }
+
+  // Group by target table
+  const byTarget = {};
+  rels.forEach(r => { byTarget[r.to] = byTarget[r.to] || []; byTarget[r.to].push(r); });
+
+  grid.innerHTML = Object.entries(byTarget).map(([target, list]) => `
+    <div class="rel-card">
+      <div class="rel-card-header"><span class="to">${esc(target)}</span><span class="arrow">←</span><span class="from">${list.length} table${list.length>1?'s':''}</span></div>
+      ${list.map(r => `<div class="rel-item"><a href="#tbl-${esc(r.from)}">${esc(r.from)}</a><span class="rel-col">${esc(r.col)}</span><span class="rel-type">FK</span></div>`).join('')}
+    </div>
+  `).join('');
+}
+
+async function loadCounts() {
+  const counts = {};
+  const test = await sqCount('modules');
+  const connected = test.ok;
+  const pillConn = document.getElementById('pill-connection');
+  if (connected) { pillConn.className = 'status-pill ok'; pillConn.innerHTML = `<span class="dot"></span> Supabase: connected`; }
+  else { pillConn.className = 'status-pill err'; pillConn.innerHTML = `<span class="dot"></span> Supabase: ${test.status || 'offline'}`; }
+
+  TABLES.forEach(t => counts[t.name] = undefined);
+  renderTables(counts);
+  renderRelationshipMap();
+  document.getElementById('table-count-badge').textContent = `${TABLES.length} tables`;
+
+  if (!connected) {
+    document.getElementById('pill-tables').className = 'status-pill err';
+    document.getElementById('pill-tables').innerHTML = `<span class="dot"></span> Tables: counts unavailable`;
+    return;
+  }
+
+  let loaded = 0;
+  await Promise.all(TABLES.map(async t => {
+    const c = await sqCount(t.name);
+    counts[t.name] = c;
+    const badge = document.getElementById(`rb-${t.name}`);
+    if (badge) {
+      if (!c.ok) badge.outerHTML = `<span class="row-badge error" id="rb-${esc(t.name)}">—</span>`;
+      else if (c.count === 0) badge.outerHTML = `<span class="row-badge zero" id="rb-${esc(t.name)}">0 rows</span>`;
+      else badge.outerHTML = `<span class="row-badge loaded" id="rb-${esc(t.name)}">${c.count.toLocaleString()} rows</span>`;
+    }
+    if (c.ok) loaded++;
+  }));
+
+  document.getElementById('pill-tables').className = 'status-pill ok';
+  document.getElementById('pill-tables').innerHTML = `<span class="dot"></span> Tables: ${loaded}/${TABLES.length} counted`;
+}
+
+function expandAll() { document.querySelectorAll('.table-card').forEach(d => d.open = true); }
+function collapseAll() { document.querySelectorAll('.table-card').forEach(d => d.open = false); }
+
+function filterTables(q) {
+  q = q.trim().toLowerCase();
+  document.querySelectorAll('.table-card').forEach(d => {
+    const keywords = d.dataset.keywords.toLowerCase();
+    const visible = !q || keywords.includes(q);
+    d.classList.toggle('hidden', !visible);
+  });
+  // hide empty groups
+  document.querySelectorAll('.group').forEach(g => {
+    const any = g.querySelector('.table-card:not(.hidden)');
+    g.style.display = any ? 'block' : 'none';
+  });
+}
+
+function init() {
+  renderTables({});
+  renderRelationshipMap();
+  loadCounts();
+}
+
+init();
+</script>
+<script src="../../../../shared/debug-panel.js"></script>
+</body>
+</html>

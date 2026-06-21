@@ -1,5 +1,32 @@
 # LLM Thinking Log
 
+## 2026-06-21 — 🗄️ Database Analysis Page (Preprod Tools)
+
+### 🎯 Objective
+Create a new Pre-Production tool page — `database_analysis.html` — that shows every Supabase table used by the project, live row counts, column properties, and foreign-key relationships, all inside collapsible sections so the view stays scannable.
+
+### 📐 Implementation
+1. **Canonical location**: Place the new page at `5_Symbols/production/preprod/tools/database_analysis.html` per the HTML-containment rule.
+2. **Static schema model**: Build a comprehensive in-page `TABLES` array derived from the canonical SQL files under `5_Symbols/supabase/schema/` and migrations. Each entry carries group, emoji, column list (name/type/PK/FK), and explicit relationship metadata (`relatesTo` / `relatedBy`).
+3. **Live row counts**: Query each table via PostgREST `Prefer: count=exact` with `Range: 0-0`, falling back gracefully if a table is missing or unreachable.
+4. **Collapsible UI**: Render grouped table cards; clicking a card expands to show columns, relationships, and live row count. A separate “Relationship Map” section shows which table connects to which table with cardinality and FK column.
+5. **Navigation wiring**: Add the tool to the Preprod → Tools menu in `navigation_config.json`, the `shared/nav.js` fallback, the preprod hub workflow steps/files/tools list, and the tools `README.md`.
+6. **No new dependencies**: Reuse existing dark glassmorphic style and vanilla JS; no Supabase JS SDK needed, only fetch.
+
+### ✅ Verification
+- Validate HTML syntax and that all referenced JS/CSS paths resolve from `preprod/tools/` (depth 4).
+- Start local server, open the page, confirm it renders table groups, expands/collapses, and populates row counts from Supabase.
+
+### 📦 Files Changed
+- `5_Symbols/production/preprod/tools/database_analysis.html` (new)
+- `5_Symbols/production/preprod/tools/README.md`
+- `5_Symbols/production/preprod/index.html`
+- `navigation_config.json`
+- `shared/nav.js`
+- `4_Formula/llm_thinking_log.md` — this entry
+
+---
+
 ## 2026-06-21 — 📁 Google Drive Folder Creator Subfolder Structure & Readmes
 
 ### 🎯 Objective
@@ -1188,3 +1215,17 @@ Cannot run DDL remotely (no supabase CLI / psql / service key / DB URL; anon key
 
 ### ✅ Outcome
 Full Drive hierarchy persisted to Supabase on real runs. Python suite green; HTML JS syntax validated.
+
+---
+
+## 2026-06-21 — 🗄️ Backfilled gdrive_folders from the live Drive tree
+
+User ran migration_gdrive_folders.sql; asked to populate the rows. Wrote
+`7_Testing_Known/backfill_gdrive_folders.py`: pulls the shared Google access
+token + root id from project_settings, walks the real Drive tree via the Drive
+API, maps each folder to its course module/video, and bulk-upserts into
+gdrive_folders (idempotent on drive_folder_id).
+
+Result: **396 rows** — 1 root, 5 module, 15 video, 90 category, 285 subfolder.
+All module/video FKs mapped (0 unmapped non-root rows); paths, parent_drive_id,
+and has_readme populated. Verified via PostgREST count + sample queries.
