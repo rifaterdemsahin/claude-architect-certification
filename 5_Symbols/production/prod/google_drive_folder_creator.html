@@ -358,8 +358,32 @@
 
           <div class="form-group">
             <label for="api-key">Google API Key</label>
-            <input type="password" id="api-key" placeholder="Paste API Key...">
+            <div style="position: relative;">
+              <input type="password" id="api-key" placeholder="Paste API Key..." style="padding-right: 38px;">
+              <button type="button" id="toggle-api-key" onclick="toggleApiKeyVisibility()"
+                title="Show / hide API Key" aria-label="Show or hide API Key"
+                style="position: absolute; right: 6px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-muted); padding: 4px; font-size: 0.9rem;">
+                <i class="fa-solid fa-eye"></i>
+              </button>
+            </div>
           </div>
+
+          <p style="font-size: 0.8rem; line-height: 1.5; margin: 0 0 14px;">
+            <i class="fa-solid fa-circle-question"></i>
+            <strong>Need credentials?</strong>
+            <a href="https://github.com/rifaterdemsahin/claude-architect-certification/blob/main/2_Environment/13_google_drive_setup.md" target="_blank" rel="noopener">
+              How to create the Google credentials &rarr;
+            </a>
+            <br>
+            <span style="color: var(--text-muted);">
+              Create the
+              <a href="https://console.cloud.google.com/apis/credentials?project=gen-lang-client-0369583419" target="_blank" rel="noopener">OAuth Client ID &amp; API Key</a>
+              in the GCP console, then enable the
+              <a href="https://console.cloud.google.com/apis/library/drive.googleapis.com?project=gen-lang-client-0369583419" target="_blank" rel="noopener">Drive API</a>
+              and
+              <a href="https://console.cloud.google.com/apis/library/picker.googleapis.com?project=gen-lang-client-0369583419" target="_blank" rel="noopener">Picker API</a>.
+            </span>
+          </p>
 
           <button class="btn btn-primary" onclick="saveCredentials()" style="margin-bottom: 12px;">
             <i class="fa-solid fa-floppy-disk"></i> Save Credentials
@@ -485,12 +509,8 @@
           log('warn', 'Admin authorization needed to pull credentials from Azure Key Vault.');
           showAdminWarningBanner(true);
           
-          // Auto-load localStorage credentials as fallback
-          const savedClientId = localStorage.getItem("gdrive_client_id") || "";
-          const savedApiKey = localStorage.getItem("gdrive_api_key") || "";
-          if (savedClientId && savedApiKey) {
-            initGapi();
-          }
+          // Try loading from Supabase settings table as fallback
+          await loadConfigFromSupabase();
           return;
         }
         if (!res.ok) throw new Error('Backend credentials request failed.');
@@ -505,13 +525,53 @@
           initGapi();
         }
       } catch (err) {
-        log('warn', 'Offline / could not auto-load credentials: ' + err.message);
-        // LocalStorage fallback
-        const savedClientId = localStorage.getItem("gdrive_client_id") || "";
-        const savedApiKey = localStorage.getItem("gdrive_api_key") || "";
-        if (savedClientId && savedApiKey) {
-          initGapi();
+        log('warn', 'Key Vault check bypassed: ' + err.message);
+        await loadConfigFromSupabase();
+      }
+    }
+
+    async function loadConfigFromSupabase() {
+      if (!db) {
+        fallbackToLocalStorage();
+        return;
+      }
+      log('info', 'Checking Supabase settings table for credentials...');
+      try {
+        const { data, error } = await db
+          .from('project_settings')
+          .select('key, value');
+        
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+          const clientIdSetting = data.find(item => item.key === 'gdrive_client_id');
+          const apiKeySetting = data.find(item => item.key === 'gdrive_api_key');
+          
+          if (clientIdSetting && apiKeySetting && clientIdSetting.value && apiKeySetting.value) {
+            document.getElementById("client-id").value = clientIdSetting.value;
+            document.getElementById("api-key").value = apiKeySetting.value;
+            localStorage.setItem("gdrive_client_id", clientIdSetting.value);
+            localStorage.setItem("gdrive_api_key", apiKeySetting.value);
+            log('success', '✓ Auto-loaded credentials from Supabase project_settings table.');
+            initGapi();
+          } else {
+            fallbackToLocalStorage();
+          }
+        } else {
+          fallbackToLocalStorage();
         }
+      } catch (err) {
+        log('warn', 'Supabase settings check bypassed: ' + err.message);
+        fallbackToLocalStorage();
+      }
+    }
+
+    function fallbackToLocalStorage() {
+      const savedClientId = localStorage.getItem("gdrive_client_id") || "";
+      const savedApiKey = localStorage.getItem("gdrive_api_key") || "";
+      if (savedClientId && savedApiKey) {
+        log('info', 'Loaded credentials from LocalStorage fallback.');
+        initGapi();
       }
     }
 
@@ -533,14 +593,44 @@
       }
     }
 
-    function saveCredentials() {
+    function toggleApiKeyVisibility() {
+      const input = document.getElementById("api-key");
+      const icon = document.querySelector("#toggle-api-key i");
+      const show = input.type === "password";
+      input.type = show ? "text" : "password";
+      icon.className = show ? "fa-solid fa-eye-slash" : "fa-solid fa-eye";
+    }
+
+    async function saveCredentials() {
       const clientId = document.getElementById("client-id").value.trim();
       const apiKey = document.getElementById("api-key").value.trim();
       localStorage.setItem("gdrive_client_id", clientId);
       localStorage.setItem("gdrive_api_key", apiKey);
-      showToast("Credentials saved successfully.");
-      log('info', 'Credentials updated. Initializing GAPI...');
+      
+      log('info', 'Saving credentials locally...');
       initGapi();
+
+      if (db) {
+        log('info', 'Saving credentials configuration to Supabase project_settings table...');
+        try {
+          const { error: err1 } = await db
+            .from('project_settings')
+            .upsert({ key: 'gdrive_client_id', value: clientId });
+
+          const { error: err2 } = await db
+            .from('project_settings')
+            .upsert({ key: 'gdrive_api_key', value: apiKey });
+
+          if (err1 || err2) throw (err1 || err2);
+          log('success', '✓ Saved configuration to Supabase project_settings table.');
+          showToast("Credentials saved locally and to Supabase!");
+        } catch (err) {
+          log('error', 'Failed saving to Supabase settings: ' + err.message);
+          showToast("Saved locally, but Supabase save failed.");
+        }
+      } else {
+        showToast("Credentials saved to localStorage.");
+      }
     }
 
     // ── GOOGLE CLIENT INITIALIZATION ──

@@ -396,6 +396,63 @@
       font-weight: 300;
     }
 
+    /* Value Proposition */
+    .value-prop {
+      max-width: 920px;
+      margin: 0 auto 1rem auto;
+      padding: 2rem;
+      text-align: center;
+      background: var(--bg-card);
+      border: 1px solid rgba(139, 92, 246, 0.25);
+      border-radius: 20px;
+      box-shadow: 0 8px 40px rgba(139, 92, 246, 0.12);
+      backdrop-filter: blur(12px);
+    }
+    .value-prop-headline {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 800;
+      line-height: 1.35;
+      margin-bottom: 0.85rem;
+      color: var(--text-primary);
+    }
+    .value-prop-lead {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      max-width: 720px;
+      margin: 0 auto 1.75rem auto;
+    }
+    .value-prop-lead strong { color: var(--text-primary); font-weight: 600; }
+    .value-prop-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.75rem;
+      text-align: left;
+    }
+    .value-prop-card {
+      background: var(--bg-glass);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 14px;
+      padding: 1.1rem 1.2rem;
+    }
+    .value-prop-card .vp-icon { font-size: 1.6rem; margin-bottom: 0.4rem; }
+    .value-prop-card h4 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 0.35rem;
+      color: var(--text-primary);
+    }
+    .value-prop-card p { font-size: 0.9rem; color: var(--text-muted); margin: 0; }
+    .value-prop-card strong { color: var(--accent-violet); }
+    .value-prop-cta {
+      display: inline-flex;
+      width: auto;
+      gap: 0.5rem;
+      padding: 0.85rem 1.75rem;
+      text-decoration: none;
+    }
+
     /* Interactive Simulator */
     .simulator-container {
       max-width: 1200px;
@@ -1167,6 +1224,39 @@
     <p class="hero-subtitle">
       A hands-on, production-grade guide to building secure, optimized, and sovereign AI workflows at enterprise scale. Learn system topologies, custom MCP servers, and prompt optimization.
     </p>
+
+    <!-- ── Value Proposition ── -->
+    <div class="value-prop">
+      <div class="value-prop-headline">
+        🎯 We prep you for the hard, expensive AI certificates — so you pass the first time.
+      </div>
+      <p class="value-prop-lead">
+        AI certifications are <strong>costly and slow to retake</strong>. Fail the
+        <strong>Red Hat AI certificate</strong>, for example, and you wait
+        <strong>6 months</strong> for another seat and lose your <strong>$500</strong> exam fee.
+        Our prep <strong>saves you that time</strong> and <strong>raises your odds of passing</strong>.
+      </p>
+      <div class="value-prop-grid">
+        <div class="value-prop-card">
+          <div class="vp-icon">⏳</div>
+          <h4>The pain</h4>
+          <p>Hard exams, long re-sit waits, and hundreds of dollars lost on every failed attempt.</p>
+        </div>
+        <div class="value-prop-card">
+          <div class="vp-icon">⚡</div>
+          <h4>The value</h4>
+          <p>Save months of trial-and-error and walk in prepared — increasing your chance to pass.</p>
+        </div>
+        <div class="value-prop-card">
+          <div class="vp-icon">🎥</div>
+          <h4>The offer</h4>
+          <p>A <strong>$10 YouTube membership</strong> unlocks the talking-head recordings — see the teaching quality and the real certificate, verified for you, before you commit.</p>
+        </div>
+      </div>
+      <a href="https://www.youtube.com/@RifatErdemSahin/join" target="_blank" rel="noopener" class="btn btn-primary value-prop-cta">
+        <i class="fa-brands fa-youtube"></i> Join the membership — $10/mo
+      </a>
+    </div>
   </section>
 
   <!-- Interactive Simulator Card -->

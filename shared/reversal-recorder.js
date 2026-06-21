@@ -98,6 +98,13 @@
       '#reversal-rec .rev-mode.recording .rev-dot{background:#ff3b3b;animation:rev-pulse 1s infinite;}' +
       '#reversal-rec .rev-mode.disabled{opacity:0.35;pointer-events:none;}' +
       '@keyframes rev-pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.35;transform:scale(1.4);}}' +
+      /* hide / show toggle */
+      '#reversal-rec .rev-toggle{display:flex;align-items:center;justify-content:center;' +
+      'width:34px;height:34px;border-radius:9999px;background:rgba(17,24,39,0.9);color:#fff;' +
+      'border:1px solid rgba(255,255,255,0.25);cursor:pointer;font-size:0.95rem;line-height:1;' +
+      'box-shadow:0 4px 14px rgba(0,0,0,0.4);transition:transform .15s ease,box-shadow .15s ease;}' +
+      '#reversal-rec .rev-toggle:hover{transform:translateY(-1px) scale(1.06);box-shadow:0 6px 20px rgba(0,0,0,0.55);}' +
+      '#reversal-rec.collapsed .rev-mode{display:none;}' +
       /* "ACTION!" tooltip on hover (idle state only) */
       '#reversal-rec .rev-tip{position:absolute;top:calc(100% + 8px);right:0;' +
       'background:#111827;color:#fde047;font-size:0.68rem;font-weight:900;' +
@@ -131,7 +138,35 @@
       btn.addEventListener('click', function () { toggle(mode); });
       wrap.appendChild(btn);
     });
+    // Hide / show toggle — collapses the recorder buttons to a single clapper.
+    var tgl = document.createElement('button');
+    tgl.type = 'button';
+    tgl.className = 'rev-toggle';
+    tgl.addEventListener('click', toggleCollapsed);
+    wrap.appendChild(tgl);
     document.body.appendChild(wrap);
+  }
+
+  var COLLAPSE_KEY = 'reversal_rec_hidden';
+
+  function setCollapsed(collapsed) {
+    var wrap = document.getElementById('reversal-rec');
+    if (!wrap) return;
+    wrap.classList.toggle('collapsed', collapsed);
+    var tgl = wrap.querySelector('.rev-toggle');
+    if (tgl) {
+      tgl.textContent = collapsed ? '🎬' : '🙈';
+      tgl.title = collapsed ? 'Show recorder' : 'Hide recorder';
+      tgl.setAttribute('aria-label', collapsed ? 'Show recorder controls' : 'Hide recorder controls');
+    }
+    try { localStorage.setItem(COLLAPSE_KEY, collapsed ? '1' : '0'); } catch (_) {}
+  }
+
+  function toggleCollapsed() {
+    // Don't hide mid-recording — the timer/stop button must stay reachable.
+    if (mediaRecorder && mediaRecorder.state === 'recording') { logDbg('cannot hide while recording'); return; }
+    var wrap = document.getElementById('reversal-rec');
+    setCollapsed(!(wrap && wrap.classList.contains('collapsed')));
   }
 
   function btnFor(mode) {
@@ -424,6 +459,9 @@
   function init() {
     injectStyles();
     buildControl();
+    var hidden = '0';
+    try { hidden = localStorage.getItem(COLLAPSE_KEY) || '0'; } catch (_) {}
+    setCollapsed(hidden === '1');
   }
 
   if (document.readyState === 'loading') {
