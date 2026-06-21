@@ -1,5 +1,33 @@
 # LLM Thinking Log
 
+## 2026-06-21 — 📁 Google Drive Folder Creator
+
+### 🎯 Objective
+Create a visual automation tool that generates Google Drive folders recursively for course modules and videos from Supabase, then records the resulting folder links back into the outline tables in Supabase.
+
+### 📐 Implementation
+1. **Migration**: Created `5_Symbols/supabase/migrations/migration_course_videos_links.sql` adding `links` column to `course_videos` table and enabling client-side UPDATE RLS policies.
+2. **Folder Creator Page**: Created `5_Symbols/production/prod/google_drive_folder_creator.html` using glassmorphic UI. Reused `localStorage` credentials `gdrive_client_id` and `gdrive_api_key`.
+3. **Database Integration**: Loaded Supabase outline data and rendered a hierarchical tree with status states.
+4. **Google Drive Integration**: Handled recursive folder checks and creation.
+5. **Database Updates**: Stored generated folder URLs as JSON list back to Supabase (`course_modules.links` and `course_videos.links`).
+6. **Navigation Config**: Integrated the tool as a top-level page in `navigation_config.json`, `index.html`, `home.html`, and `markdown_renderer.html` fallbacks.
+
+### ✅ Verification
+- Configured routes in all navigation menus.
+- Migration file placed in canonical folder structure.
+
+### 📦 Files Changed
+- `5_Symbols/supabase/migrations/migration_course_videos_links.sql`
+- `5_Symbols/production/prod/google_drive_folder_creator.html`
+- `navigation_config.json`
+- `index.html`
+- `home.html`
+- `markdown_renderer.html`
+- `4_Formula/llm_thinking_log.md` — this entry
+
+---
+
 ## 2026-06-20 — 🎞️ Talking Heads "Video Images" Carousel Player
 
 ### 🎯 Objective

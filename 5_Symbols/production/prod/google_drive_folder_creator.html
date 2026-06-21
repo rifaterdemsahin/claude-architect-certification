@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google Drive Folder Creator | Claude AI Certification</title>
+  <meta name="description" content="Recursively generate Google Drive folders for course modules and videos, and automatically record the folder links back to Supabase.">
+  <meta name="keywords" content="Google Drive, Folder Creator, Supabase, Course Outline, Asset Pipeline, Automation">
+  <meta name="author" content="Rifat Erdem Sahin">
+  <link rel="icon" type="image/png" href="../../../favicon.png">
+
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Google Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --bg-dark: #030712;
+      --bg-card: rgba(17, 24, 39, 0.85);
+      --bg-toast: #1f2937;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --primary: #8b5cf6;
+      --secondary: #3b82f6;
+      --accent: #10b981;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --font-title: 'Outfit', sans-serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.05) 0%, transparent 40%);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      line-height: 1.6;
+      padding-bottom: 80px;
+    }
+
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+    
+    header {
+      padding: 40px 0 20px 0;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      margin-bottom: 30px;
+    }
+    
+    .badge {
+      display: inline-block;
+      padding: 6px 16px;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      border-radius: 100px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #93c5fd;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      font-family: var(--font-title);
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+      background: linear-gradient(to right, #f3f4f6, #9ca3af);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    header p { color: var(--text-muted); max-width: 800px; }
+
+    .sync-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 30px;
+    }
+    
+    @media (min-width: 992px) {
+      .sync-grid {
+        grid-template-columns: 350px 1fr;
+      }
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 24px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      margin-bottom: 24px;
+    }
+
+    .card-title {
+      font-family: var(--font-title);
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--text-muted);
+    }
+
+    input, select {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+    .btn-primary:hover {
+      background: #7c3aed;
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .btn-accent {
+      background: var(--accent);
+      color: #030712;
+    }
+    .btn-accent:hover {
+      background: #059669;
+    }
+    .btn-accent:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      font-size: 0.85rem;
+      margin-top: 10px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .dot-offline { background-color: var(--text-muted); }
+    .dot-online { background-color: var(--accent); }
+
+    /* Interactive Tree Visualizer */
+    .tree {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      padding: 16px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      max-height: 450px;
+      overflow-y: auto;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .tree-node {
+      margin-left: 20px;
+      border-left: 1px dashed rgba(255, 255, 255, 0.15);
+      padding-left: 14px;
+      position: relative;
+    }
+    .tree-node::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 12px;
+      width: 12px;
+      border-top: 1px dashed rgba(255, 255, 255, 0.15);
+    }
+
+    .tree-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 0;
+    }
+
+    .tree-icon {
+      flex-shrink: 0;
+    }
+
+    .tree-label {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .tree-status {
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 100px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .status-pending { background: rgba(156, 163, 175, 0.15); color: var(--text-muted); }
+    .status-creating { background: rgba(59, 130, 246, 0.2); color: #93c5fd; }
+    .status-success { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; }
+    .status-error { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+
+    /* Console Terminal logs */
+    .console-wrapper {
+      background: #020617;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      overflow: hidden;
+      margin-top: 24px;
+    }
+
+    .console-titlebar {
+      background: rgba(255, 255, 255, 0.03);
+      padding: 8px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      font-family: var(--font-title);
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .console-logs {
+      padding: 16px;
+      height: 250px;
+      overflow-y: auto;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: #cbd5e1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .log-line {
+      line-height: 1.4;
+      white-space: pre-wrap;
+    }
+    .log-info { color: #94a3b8; }
+    .log-success { color: var(--accent); }
+    .log-warn { color: var(--warning); }
+    .log-error { color: #fca5a5; font-weight: bold; }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--bg-toast);
+      border: 1px solid var(--primary);
+      padding: 14px 24px;
+      border-radius: 10px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      z-index: 1000;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+      font-weight: 500;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+
+  <script src="../../../shared/nav.js" defer></script>
+  <script src="../../../shared/debug-panel.js" defer></script>
+  <script src="../../../shared/seo.js" defer></script>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div class="badge">🎥 Production Automation</div>
+      <h1>Google Drive Folder Creator</h1>
+      <p>Connects to Supabase, generates the target nested folder structures recursively on Google Drive, and saves folder links directly back to your course outline database.</p>
+    </header>
+
+    <div class="sync-grid">
+      <!-- Left Config Sidebar -->
+      <div class="sidebar">
+        <div class="card">
+          <div class="card-title">⚙️ API Config</div>
+          
+          <div class="form-group">
+            <label for="client-id">Google Client ID</label>
+            <input type="text" id="client-id" placeholder="Paste Client ID...">
+          </div>
+
+          <div class="form-group">
+            <label for="api-key">Google API Key</label>
+            <input type="password" id="api-key" placeholder="Paste API Key...">
+          </div>
+
+          <button class="btn btn-primary" onclick="saveCredentials()" style="margin-bottom: 12px;">
+            <i class="fa-solid fa-floppy-disk"></i> Save Credentials
+          </button>
+
+          <button class="btn btn-secondary" id="btn-login" style="display:none;" onclick="handleAuthClick()">
+            <i class="fa-brands fa-google"></i> Connect Google Account
+          </button>
+
+          <button class="btn btn-secondary" id="btn-logout" style="display:none;" onclick="handleSignoutClick()">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i> Unlink Drive
+          </button>
+
+          <div class="status-badge">
+            <span class="dot dot-offline" id="auth-dot"></span>
+            <span id="auth-text">Missing Credentials</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">📂 Root Folder Settings</div>
+          <div class="form-group">
+            <label for="root-folder-name">Target Root Directory Name</label>
+            <input type="text" id="root-folder-name" value="Claude AI Architect Certification">
+          </div>
+          
+          <button class="btn btn-secondary" onclick="loadCourseOutline()">
+            <i class="fa-solid fa-database"></i> Pull Supabase Outline
+          </button>
+        </div>
+      </div>
+
+      <!-- Right Main Content -->
+      <div class="main-content">
+        <div class="card">
+          <div class="card-title" style="justify-content: space-between;">
+            <span>📂 Google Drive Directory Structure Preview</span>
+            <button class="btn btn-secondary" onclick="loadCourseOutline()" style="width: auto; font-size: 0.8rem; padding: 6px 14px;">
+              <i class="fa-solid fa-arrows-rotate"></i> Refresh Outline
+            </button>
+          </div>
+          
+          <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 18px;">
+            The visual tree below displays your courses, modules, and video structure. Generating directories will reuse any existing folders with identical paths (idempotent run) and save the resulting Google Drive links directly back to Supabase.
+          </p>
+
+          <div class="tree" id="dir-tree">
+            <div style="text-align: center; padding: 24px; color: var(--text-muted); font-style: italic;">
+              Click 'Pull Supabase Outline' to render structural plan.
+            </div>
+          </div>
+
+          <div style="margin-top: 24px;">
+            <button id="btn-sync" class="btn btn-accent" disabled onclick="startGeneration()">
+              <i class="fa-solid fa-folder-plus"></i> Generate Folders & Record Links
+            </button>
+          </div>
+        </div>
+
+        <!-- Terminal Logs -->
+        <div class="console-wrapper">
+          <div class="console-titlebar">
+            <span>⚙️ SYSTEM LOG TERMINAL</span>
+            <button onclick="clearLogs()" style="background: none; border: none; color: var(--text-muted); cursor: pointer; text-decoration: underline; font-size: 0.75rem;">Clear Terminal</button>
+          </div>
+          <div class="console-logs" id="console-logs">
+            <div class="log-line log-info">[info] Waiting for Google APIs initialization...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast-notif"></div>
+
+  <!-- Google Auth & API Library Scripts -->
+  <script src="https://accounts.google.com/gsi/client" onload="gisLoaded()" async defer></script>
+  <script src="https://apis.google.com/js/api.js" onload="gapiLoaded()" async defer></script>
+
+  <script>
+    // ── CONFIG & CONSTANTS ──
+    const SUPABASE_URL  = 'https://rmekfsdhglyiralxvkwc.supabase.co';
+    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZWtmc2RoZ2x5aXJhbHh2a3djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NzYzODgsImV4cCI6MjA5NjM1MjM4OH0.ay6HsmO_CbMGDXL_Dv4DT-paAIAOqlQPfmqqx_mexSU';
+    const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
+    const SCOPES        = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive';
+
+    let gapiInited = false;
+    let ginit = false;
+    let tokenClient;
+    let accessToken = null;
+
+    let db = null;
+    let courseOutline = []; // Raw list of modules and nested videos
+    let courseTree = null;  // Tree representation used for rendering & processing
+
+    // Initialize Credentials input fields
+    document.addEventListener("DOMContentLoaded", () => {
+      const savedClientId = localStorage.getItem("gdrive_client_id") || "";
+      const savedApiKey = localStorage.getItem("gdrive_api_key") || "";
+      document.getElementById("client-id").value = savedClientId;
+      document.getElementById("api-key").value = savedApiKey;
+      
+      // Initialize Supabase Client
+      if (window.supabase) {
+        db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+        log('success', 'Supabase Client Initialized.');
+      } else {
+        log('error', 'Supabase script failed to load.');
+      }
+
+      // Auto-load credentials if saved
+      if (savedClientId && savedApiKey) {
+        initGapi();
+      }
+
+      // Load initial mock / empty outline
+      loadCourseOutline();
+    });
+
+    function saveCredentials() {
+      const clientId = document.getElementById("client-id").value.trim();
+      const apiKey = document.getElementById("api-key").value.trim();
+      localStorage.setItem("gdrive_client_id", clientId);
+      localStorage.setItem("gdrive_api_key", apiKey);
+      showToast("Credentials saved successfully.");
+      log('info', 'Credentials updated. Initializing GAPI...');
+      initGapi();
+    }
+
+    // ── GOOGLE CLIENT INITIALIZATION ──
+    function gapiLoaded() {
+      gapi.load('client', initGapi);
+    }
+
+    async function initGapi() {
+      const apiKey = document.getElementById("api-key").value || "";
+      if (!apiKey) {
+        log('warn', 'Enter Google API Key in settings to connect.');
+        updateAuthUI(false, 'Missing API Key');
+        return;
+      }
+      try {
+        await gapi.client.init({
+          apiKey: apiKey,
+          discoveryDocs: [DISCOVERY_DOC],
+        });
+        gapiInited = true;
+        log('success', 'Google API Client loaded.');
+        checkAuthInits();
+      } catch (err) {
+        log('error', 'GAPI Client initialization error: ' + JSON.stringify(err));
+        updateAuthUI(false, 'GAPI failed');
+      }
+    }
+
+    function gisLoaded() {
+      ginit = true;
+      checkAuthInits();
+    }
+
+    function checkAuthInits() {
+      if (gapiInited && ginit) {
+        const clientId = document.getElementById("client-id").value || "";
+        if (!clientId) {
+          log('warn', 'Enter Client ID to connect Google Identity Services.');
+          updateAuthUI(false, 'Missing Client ID');
+          return;
+        }
+        try {
+          tokenClient = google.accounts.oauth2.initTokenClient({
+            client_id: clientId,
+            scope: SCOPES,
+            callback: (resp) => {
+              if (resp.error !== undefined) {
+                log('error', 'Authentication error: ' + resp.error);
+                return;
+              }
+              accessToken = resp.access_token;
+              log('success', 'Google Drive scope authorized.');
+              updateAuthUI(true, 'Google Connected');
+              document.getElementById('btn-sync').disabled = false;
+            },
+          });
+          updateAuthUI(false, 'API Ready. Connect Drive Account.');
+          document.getElementById('btn-login').style.display = 'block';
+        } catch (err) {
+          log('error', 'Token client init failed: ' + err.message);
+          updateAuthUI(false, 'OAuth init error');
+        }
+      }
+    }
+
+    function handleAuthClick() {
+      if (!tokenClient) {
+        log('error', 'Google API Identity Client is not ready.');
+        return;
+      }
+      tokenClient.requestAccessToken({ prompt: 'consent' });
+    }
+
+    function handleSignoutClick() {
+      const token = gapi.client.getToken();
+      if (token !== null) {
+        google.accounts.oauth2.revokeToken(token.access_token);
+        gapi.client.setToken(null);
+        accessToken = null;
+        log('info', 'Disconnected Google Drive account.');
+        updateAuthUI(false, 'Drive Unlinked');
+        document.getElementById('btn-sync').disabled = true;
+      }
+    }
+
+    function updateAuthUI(connected, text) {
+      const dot = document.getElementById('auth-dot');
+      const label = document.getElementById('auth-text');
+      const loginBtn = document.getElementById('btn-login');
+      const logoutBtn = document.getElementById('btn-logout');
+
+      label.innerText = text;
+      if (connected) {
+        dot.className = 'dot dot-online';
+        loginBtn.style.display = 'none';
+        logoutBtn.style.display = 'block';
+      } else {
+        dot.className = 'dot dot-offline';
+        loginBtn.style.display = 'block';
+        logoutBtn.style.display = 'none';
+      }
+    }
+
+    // ── SUPABASE INTERACTION ──
+    async function loadCourseOutline() {
+      if (!db) {
+        log('error', 'Supabase client is not initialized.');
+        return;
+      }
+      log('info', 'Fetching outline from Supabase tables...');
+      try {
+        const { data, error } = await db
+          .from('course_modules')
+          .select('*, course_videos(*)')
+          .order('module_number', { ascending: true });
+
+        if (error) throw error;
+
+        // Sort videos inside modules
+        data.forEach(mod => {
+          if (mod.course_videos) {
+            mod.course_videos.sort((a, b) => a.video_number - b.video_number);
+          }
+        });
+
+        courseOutline = data;
+        log('success', `Loaded ${data.length} modules from database.`);
+        
+        buildFolderTree();
+      } catch (err) {
+        log('error', 'Failed to retrieve outline: ' + err.message);
+      }
+    }
+
+    // ── FOLDER TREE BUILDER & RENDERER ──
+    function buildFolderTree() {
+      const rootName = document.getElementById('root-folder-name').value.trim() || 'Claude AI Architect Certification';
+      
+      courseTree = {
+        name: rootName,
+        type: 'folder',
+        dbId: null,
+        dbType: 'root',
+        status: 'pending',
+        children: []
+      };
+
+      courseOutline.forEach(mod => {
+        const modNode = {
+          name: `Module ${mod.module_number} - ${mod.title}`,
+          type: 'folder',
+          dbId: mod.id,
+          dbType: 'module',
+          status: 'pending',
+          children: []
+        };
+
+        if (mod.course_videos) {
+          mod.course_videos.forEach(vid => {
+            const vidNode = {
+              name: `Video ${vid.video_number} - ${vid.title}`,
+              type: 'folder',
+              dbId: vid.id,
+              dbType: 'video',
+              status: 'pending',
+              children: [] // Videos represent the leaf folders
+            };
+            modNode.children.push(vidNode);
+          });
+        }
+        courseTree.children.push(modNode);
+      });
+
+      renderTree(courseTree);
+    }
+
+    function renderTree(node, containerId = 'dir-tree', isRoot = true) {
+      const container = document.getElementById(containerId);
+      if (isRoot) {
+        container.innerHTML = '';
+      }
+
+      const nodeEl = document.createElement('div');
+      nodeEl.className = 'tree-node';
+      if (isRoot) {
+        nodeEl.style.marginLeft = '0';
+        nodeEl.style.borderLeft = 'none';
+      }
+
+      const headerEl = document.createElement('div');
+      headerEl.className = 'tree-header';
+
+      const iconEl = document.createElement('span');
+      iconEl.className = 'tree-icon';
+      iconEl.innerText = '📁';
+
+      const labelEl = document.createElement('span');
+      labelEl.className = 'tree-label';
+      labelEl.innerText = node.name;
+
+      const statusEl = document.createElement('span');
+      statusEl.className = `tree-status status-${node.status}`;
+      statusEl.innerText = node.status;
+      node.statusElement = statusEl; // Reference to update live
+
+      headerEl.appendChild(iconEl);
+      headerEl.appendChild(labelEl);
+      headerEl.appendChild(statusEl);
+      nodeEl.appendChild(headerEl);
+
+      if (node.children && node.children.length > 0) {
+        const childrenContainer = document.createElement('div');
+        node.children.forEach(child => {
+          renderTree(child, childrenContainer, false);
+        });
+        nodeEl.appendChild(childrenContainer);
+      }
+
+      container.appendChild(nodeEl);
+    }
+
+    // ── GOOGLE DRIVE & DATABASE MAPPING RUNNER ──
+    async function startGeneration() {
+      if (!accessToken || !gapiInited) {
+        log('error', 'Google Auth is required before generation.');
+        return;
+      }
+      if (!db) {
+        log('error', 'Supabase Client not active.');
+        return;
+      }
+
+      document.getElementById('btn-sync').disabled = true;
+      log('info', '🚀 Starting recursive directory generation sequence...');
+
+      try {
+        // Step 1: Create top root folder
+        updateNodeStatus(courseTree, 'creating');
+        log('info', `Validating / Creating Root Folder: "${courseTree.name}"`);
+        const rootFolderId = await getOrCreateDriveFolder(courseTree.name, null);
+        updateNodeStatus(courseTree, 'success');
+        
+        // Step 2: Loop through modules recursively
+        for (let modNode of courseTree.children) {
+          updateNodeStatus(modNode, 'creating');
+          log('info', `Building folder for module: "${modNode.name}"`);
+          const modFolderId = await getOrCreateDriveFolder(modNode.name, rootFolderId);
+          const modFolderUrl = `https://drive.google.com/drive/folders/${modFolderId}`;
+          
+          // Record module folder link in Supabase
+          log('info', `Updating Supabase module ID ${modNode.dbId} with folder link...`);
+          await saveFolderLinkToSupabase('course_modules', modNode.dbId, modFolderUrl);
+          updateNodeStatus(modNode, 'success');
+
+          // Step 3: Loop through videos under module
+          for (let vidNode of modNode.children) {
+            updateNodeStatus(vidNode, 'creating');
+            log('info', `Building folder for video: "${vidNode.name}"`);
+            const vidFolderId = await getOrCreateDriveFolder(vidNode.name, modFolderId);
+            const vidFolderUrl = `https://drive.google.com/drive/folders/${vidFolderId}`;
+
+            // Record video folder link in Supabase
+            log('info', `Updating Supabase video ID ${vidNode.dbId} with folder link...`);
+            await saveFolderLinkToSupabase('course_videos', vidNode.dbId, vidFolderUrl);
+            updateNodeStatus(vidNode, 'success');
+          }
+        }
+
+        log('success', '🎉 ALL Google Drive folders generated and linked to database successfully.');
+        showToast('Google Drive setup and Database link sync complete!');
+      } catch (err) {
+        log('error', 'Generation run encountered failure: ' + err.message);
+        showToast('Generation execution failed.');
+      } finally {
+        document.getElementById('btn-sync').disabled = false;
+      }
+    }
+
+    // ── GOOGLE DRIVE HELPER ──
+    async function getOrCreateDriveFolder(folderName, parentId) {
+      let query = `mimeType = 'application/vnd.google-apps.folder' and name = '${folderName}' and trashed = false`;
+      if (parentId) {
+        query += ` and '${parentId}' in parents`;
+      } else {
+        query += ` and 'root' in parents`;
+      }
+
+      // Check if folder exists
+      const response = await gapi.client.drive.files.list({
+        q: query,
+        fields: 'files(id, name)',
+        spaces: 'drive'
+      });
+
+      const files = response.result.files;
+      if (files && files.length > 0) {
+        log('info', `✓ Folder found: "${folderName}" (ID: ${files[0].id})`);
+        return files[0].id;
+      }
+
+      // Create new folder
+      log('info', `+ Creating new folder: "${folderName}"`);
+      const folderMetadata = {
+        name: folderName,
+        mimeType: 'application/vnd.google-apps.folder'
+      };
+      if (parentId) {
+        folderMetadata.parents = [parentId];
+      }
+
+      const folderResponse = await gapi.client.drive.files.create({
+        resource: folderMetadata,
+        fields: 'id'
+      });
+
+      const newId = folderResponse.result.id;
+      log('success', `✓ Created folder "${folderName}" (ID: ${newId})`);
+      return newId;
+    }
+
+    // ── DATABASE UPDATE HELPER ──
+    async function saveFolderLinkToSupabase(tableName, recordId, folderUrl) {
+      try {
+        const linkObject = [{ name: 'Google Drive Folder', url: folderUrl }];
+        
+        const { data, error } = await db
+          .from(tableName)
+          .update({ links: linkObject })
+          .eq('id', recordId);
+
+        if (error) throw error;
+        log('success', `✓ Recorded folder link for ID ${recordId} in ${tableName}`);
+      } catch (err) {
+        log('error', `❌ Failed to update Supabase record: ${err.message}`);
+        throw err;
+      }
+    }
+
+    function updateNodeStatus(node, newStatus) {
+      node.status = newStatus;
+      if (node.statusElement) {
+        node.statusElement.className = `tree-status status-${newStatus}`;
+        node.statusElement.innerText = newStatus;
+      }
+    }
+
+    // ── LOGGER & UI UTILITIES ──
+    function log(type, msg) {
+      const logs = document.getElementById('console-logs');
+      const time = new Date().toLocaleTimeString();
+      const div = document.createElement('div');
+      div.className = `log-line log-${type}`;
+      div.innerText = `[${time}] [${type}] ${msg}`;
+      logs.appendChild(div);
+      logs.scrollTop = logs.scrollHeight;
+    }
+
+    function clearLogs() {
+      document.getElementById('console-logs').innerHTML = '';
+      log('info', 'Terminal cleared.');
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast-notif');
+      toast.innerText = message;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
