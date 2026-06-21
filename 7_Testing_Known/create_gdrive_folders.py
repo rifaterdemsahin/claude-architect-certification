@@ -82,15 +82,15 @@ def authenticate_google_drive():
                     "token_uri": "https://oauth2.googleapis.com/token",
                     "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
                     "client_secret": GOOGLE_CLIENT_SECRET,
-                    "redirect_uris": ["http://localhost"]
+                    "redirect_uris": ["http://localhost:8765/"]
                 }
             }
             
             try:
                 log_info("No valid Google credentials found. Initializing local interactive OAuth flow...")
                 flow = InstalledAppFlow.from_client_config(client_config, SCOPES)
-                # Run local server to complete auth flow automatically. Timeout after 60s.
-                creds = flow.run_local_server(port=0, timeout=60, open_browser=True)
+                # Run local server to complete auth flow automatically on port 8765. Timeout after 120s.
+                creds = flow.run_local_server(port=8765, timeout=120, open_browser=True)
                 with open(token_path, "w") as token:
                     token.write(creds.to_json())
                 log_success("Successfully authenticated and cached token.json")
