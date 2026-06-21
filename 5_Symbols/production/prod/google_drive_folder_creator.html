@@ -482,6 +482,7 @@
     let db = null;
     let courseOutline = []; // Raw list of modules and nested videos
     let courseTree = null;  // Tree representation used for rendering & processing
+    let rootFolderIdFromDb = null;
 
     // Initialize Credentials input fields
     document.addEventListener("DOMContentLoaded", () => {
@@ -550,7 +551,13 @@
         if (data && data.length > 0) {
           const clientIdSetting = data.find(item => item.key === 'gdrive_client_id');
           const apiKeySetting = data.find(item => item.key === 'gdrive_api_key');
+          const rootFolderIdSetting = data.find(item => item.key === 'gdrive_root_folder_id');
           
+          if (rootFolderIdSetting && rootFolderIdSetting.value) {
+            rootFolderIdFromDb = rootFolderIdSetting.value;
+            log('info', '✓ Found root folder ID in database settings.');
+          }
+
           if (clientIdSetting && apiKeySetting && clientIdSetting.value && apiKeySetting.value) {
             document.getElementById("client-id").value = clientIdSetting.value;
             document.getElementById("api-key").value = apiKeySetting.value;
@@ -862,6 +869,7 @@
           dbId: mod.id,
           dbType: 'module',
           status: 'pending',
+          links: mod.links,
           children: []
         };
 
@@ -876,6 +884,7 @@
               dbId: vid.id,
               dbType: 'video',
               status: 'pending',
+              links: vid.links,
               children: []
             };
             modNode.children.push(vidNode);
@@ -933,6 +942,37 @@
       container.appendChild(nodeEl);
     }
 
+    function extractFolderId(links) {
+      if (!links) return null;
+      let parsed = links;
+      if (typeof links === 'string') {
+        try {
+          parsed = JSON.parse(links);
+        } catch (e) {
+          return null;
+        }
+      }
+      if (!Array.isArray(parsed)) return null;
+      const link = parsed.find(l => l.name === 'Google Drive Folder');
+      if (!link || !link.url) return null;
+      const match = link.url.match(/\/folders\/([a-zA-Z0-9_-]+)/);
+      return match ? match[1] : null;
+    }
+
+    async function checkFolderExists(folderId) {
+      if (!folderId) return false;
+      try {
+        const response = await gapi.client.drive.files.get({
+          fileId: folderId,
+          fields: 'id, trashed'
+        });
+        const file = response.result;
+        return file && !file.trashed;
+      } catch (err) {
+        return false;
+      }
+    }
+
     // ── GOOGLE DRIVE & DATABASE MAPPING RUNNER ──
     async function startGeneration() {
       if (!accessToken || !gapiInited) {
@@ -951,31 +991,64 @@
         // Step 1: Create top root folder
         updateNodeStatus(courseTree, 'creating');
         log('info', `Validating / Creating Root Folder: "${courseTree.name}"`);
-        const rootFolderId = await getOrCreateDriveFolder(courseTree.name, null);
+        let rootFolderId = rootFolderIdFromDb;
+        let rootExists = false;
+        if (rootFolderId) {
+          rootExists = await checkFolderExists(rootFolderId);
+        }
+        if (rootExists) {
+          log('info', `✓ Reusing existing Root Folder: (ID: ${rootFolderId})`);
+        } else {
+          rootFolderId = await getOrCreateDriveFolder(courseTree.name, null);
+          if (rootFolderId && db) {
+            await db.from('project_settings').upsert({ key: 'gdrive_root_folder_id', value: rootFolderId });
+            rootFolderIdFromDb = rootFolderId;
+          }
+        }
         updateNodeStatus(courseTree, 'success');
         
         // Step 2: Loop through modules recursively
         for (let modNode of courseTree.children) {
           updateNodeStatus(modNode, 'creating');
-          log('info', `Building folder for module: "${modNode.name}"`);
-          const modFolderId = await getOrCreateDriveFolder(modNode.name, rootFolderId);
-          const modFolderUrl = `https://drive.google.com/drive/folders/${modFolderId}`;
-          
-          // Record module folder link in Supabase
-          log('info', `Updating Supabase module ID ${modNode.dbId} with folder link...`);
-          await saveFolderLinkToSupabase('course_modules', modNode.dbId, modFolderUrl);
+          let modFolderId = extractFolderId(modNode.links);
+          let modExists = false;
+          if (modFolderId) {
+            modExists = await checkFolderExists(modFolderId);
+          }
+
+          if (modExists) {
+            log('info', `✓ Reusing existing folder for module: "${modNode.name}" (ID: ${modFolderId})`);
+          } else {
+            log('info', `Building folder for module: "${modNode.name}"`);
+            modFolderId = await getOrCreateDriveFolder(modNode.name, rootFolderId);
+            const modFolderUrl = `https://drive.google.com/drive/folders/${modFolderId}`;
+            
+            // Record module folder link in Supabase
+            log('info', `Updating Supabase module ID ${modNode.dbId} with folder link...`);
+            await saveFolderLinkToSupabase('course_modules', modNode.dbId, modFolderUrl);
+          }
           updateNodeStatus(modNode, 'success');
 
           // Step 3: Loop through videos under module
           for (let vidNode of modNode.children) {
             updateNodeStatus(vidNode, 'creating');
-            log('info', `Building folder for video: "${vidNode.name}"`);
-            const vidFolderId = await getOrCreateDriveFolder(vidNode.name, modFolderId);
-            const vidFolderUrl = `https://drive.google.com/drive/folders/${vidFolderId}`;
+            let vidFolderId = extractFolderId(vidNode.links);
+            let vidExists = false;
+            if (vidFolderId) {
+              vidExists = await checkFolderExists(vidFolderId);
+            }
 
-            // Record video folder link in Supabase
-            log('info', `Updating Supabase video ID ${vidNode.dbId} with folder link...`);
-            await saveFolderLinkToSupabase('course_videos', vidNode.dbId, vidFolderUrl);
+            if (vidExists) {
+              log('info', `✓ Reusing existing folder for video: "${vidNode.name}" (ID: ${vidFolderId})`);
+            } else {
+              log('info', `Building folder for video: "${vidNode.name}"`);
+              vidFolderId = await getOrCreateDriveFolder(vidNode.name, modFolderId);
+              const vidFolderUrl = `https://drive.google.com/drive/folders/${vidFolderId}`;
+              
+              // Record video folder link in Supabase
+              log('info', `Updating Supabase video ID ${vidNode.dbId} with folder link...`);
+              await saveFolderLinkToSupabase('course_videos', vidNode.dbId, vidFolderUrl);
+            }
 
             // Create subfolders: raw, export, research
             log('info', `Creating subfolders 'raw', 'export', 'research' under video: "${vidNode.name}"`);
@@ -992,6 +1065,10 @@
       } catch (err) {
         log('error', 'Generation run encountered failure: ' + err.message);
         showToast('Generation execution failed.');
+      } finally {
+        document.getElementById('btn-sync').disabled = false;
+      }
+    }ed.');
       } finally {
         document.getElementById('btn-sync').disabled = false;
       }
@@ -1133,6 +1210,15 @@
         client: {
           drive: {
             files: {
+              get: async (params) => {
+                const fileId = params.fileId;
+                if (fileId) {
+                  return {
+                    result: { id: fileId, trashed: false }
+                  };
+                }
+                throw new Error("File not found");
+              },
               list: async (params) => {
                 listCalls.push(params);
                 const query = params.q;

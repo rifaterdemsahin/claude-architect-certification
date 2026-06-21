@@ -299,11 +299,239 @@
       background: rgba(255, 255, 255, 0.1);
       border-color: var(--primary);
     }
+
+    /* Collapsible GDrive Config Settings Panel */
+    .gdrive-config-drawer {
+      background: rgba(17, 24, 39, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 24px;
+      backdrop-filter: blur(12px);
+      display: none;
+    }
+    .gdrive-config-drawer.show {
+      display: block;
+    }
+    .gdrive-config-title {
+      font-family: var(--font-title);
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    @media (max-width: 768px) {
+      .form-row { grid-template-columns: 1fr; }
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    input {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    .btn-group {
+      display: flex;
+      gap: 12px;
+    }
+    .btn-action {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.85rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-action-primary { background: var(--primary); color: white; }
+    .btn-action-primary:hover { background: #7c3aed; }
+    .btn-action-secondary { background: rgba(255, 255, 255, 0.08); color: var(--text-main); border: 1px solid rgba(255, 255, 255, 0.1); }
+    .btn-action-secondary:hover { background: rgba(255, 255, 255, 0.15); }
+    .btn-action-success { background: var(--accent); color: #030712; }
+    .btn-action-success:hover { background: #059669; }
+    .btn-action-success:disabled { opacity: 0.5; cursor: not-allowed; }
+    
+    /* Connection Status */
+    .connection-status-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .dot-offline { background-color: var(--error); }
+    .dot-online { background-color: var(--accent); }
+
+    /* Manual Link Edit Section */
+    .link-editor-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+      background: rgba(17, 24, 39, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 8px 12px;
+      width: 100%;
+    }
+    .link-editor-input {
+      flex: 1;
+      font-size: 0.8rem;
+      padding: 6px 10px;
+    }
+
+    /* Research Section Layout */
+    .research-section {
+      margin-top: 14px;
+      background: rgba(255, 255, 255, 0.01);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      border-radius: 12px;
+      padding: 16px;
+      width: 100%;
+    }
+    .research-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .research-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #93c5fd;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .research-files-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .research-file-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      padding: 8px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.2s;
+    }
+    .research-file-card:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+    .file-card-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      overflow: hidden;
+      max-width: 80%;
+    }
+    .file-name {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-main);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .file-size {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+    .btn-file-open {
+      color: #60a5fa;
+      text-decoration: none;
+      font-size: 0.85rem;
+      padding: 4px;
+    }
+    .btn-file-open:hover {
+      color: #93c5fd;
+    }
+
+    /* Small circular icon buttons */
+    .btn-icon {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.9rem;
+      padding: 6px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    .btn-icon:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
+    }
+    .btn-icon-primary:hover {
+      color: var(--primary);
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #1f2937;
+      border: 1px solid var(--primary);
+      padding: 14px 24px;
+      border-radius: 10px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      z-index: 1000;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+      font-weight: 500;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
   </style>
 
   <script src="../../../shared/nav.js" defer></script>
   <script src="../../../shared/debug-panel.js" defer></script>
   <script src="../../../shared/seo.js" defer></script>
+  
+  <!-- Google Auth & API Library Scripts -->
+  <script src="https://accounts.google.com/gsi/client" onload="gisLoaded()" async defer></script>
+  <script src="https://apis.google.com/js/api.js" onload="gapiLoaded()" async defer></script>
 </head>
 <body>
 
@@ -313,6 +541,46 @@
       <h1>Google Drive Directories</h1>
       <p>A comprehensive dashboard displaying all generated Google Drive folders, mapping module and video records to their synchronized cloud locations.</p>
     </header>
+
+    <!-- Collapsible Settings Panel -->
+    <div class="gdrive-config-drawer" id="config-drawer">
+      <div class="gdrive-config-title">⚙️ Google Drive API Integration Settings</div>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label for="client-id">Google Client ID</label>
+          <input type="text" id="client-id" placeholder="616339871325-...">
+        </div>
+        <div class="form-group">
+          <label for="api-key">Google API Key</label>
+          <div style="position: relative; display: flex; width: 100%;">
+            <input type="password" id="api-key" placeholder="AIzaSy..." style="flex: 1; padding-right: 38px;">
+            <button type="button" id="toggle-api-key" onclick="toggleApiKeyVisibility()"
+              style="position: absolute; right: 6px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-muted); padding: 4px; font-size: 0.9rem;">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div class="btn-group">
+          <button class="btn-action btn-action-primary" onclick="saveCredentials()">
+            <i class="fa-solid fa-floppy-disk"></i> Save Config
+          </button>
+          <button class="btn-action btn-action-secondary" id="btn-login" style="display:none;" onclick="handleAuthClick()">
+            <i class="fa-brands fa-google"></i> Connect Drive
+          </button>
+          <button class="btn-action btn-action-secondary" id="btn-logout" style="display:none;" onclick="handleSignoutClick()">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i> Unlink Account
+          </button>
+        </div>
+        <div class="connection-status-bar">
+          <span class="dot dot-offline" id="auth-dot"></span>
+          <span id="auth-text">Missing Credentials</span>
+        </div>
+      </div>
+    </div>
 
     <!-- Stats Summary Card -->
     <div class="stats-container">
@@ -352,8 +620,13 @@
 
     <!-- Actions Panel -->
     <div class="actions-bar">
-      <div style="font-size: 0.9rem; color: var(--text-muted);" id="last-updated">
-        Loading connection...
+      <div style="display:flex; align-items:center; gap: 14px;">
+        <div style="font-size: 0.9rem; color: var(--text-muted);" id="last-updated">
+          Loading connection...
+        </div>
+        <button class="btn-action btn-action-secondary" onclick="toggleConfigDrawer()" style="padding: 6px 12px; font-size: 0.8rem;">
+          <i class="fa-solid fa-gears"></i> API Settings
+        </button>
       </div>
       <a href="google_drive_folder_creator.html" class="btn-creator">
         <i class="fa-solid fa-wand-magic-sparkles"></i> Open Folder Creator Tool &rarr;
@@ -369,11 +642,20 @@
     </div>
   </div>
 
+  <div class="toast" id="toast-notif"></div>
+
   <script>
     const SUPABASE_URL  = 'https://rmekfsdhglyiralxvkwc.supabase.co';
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZWtmc2RoZ2x5aXJhbHh2a3djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NzYzODgsImV4cCI6MjA5NjM1MjM4OH0.ay6HsmO_CbMGDXL_Dv4DT-paAIAOqlQPfmqqx_mexSU';
+    const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
+    const SCOPES        = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive';
     
     let db = null;
+    let courseOutlineData = [];
+    let gapiInited = false;
+    let ginit = false;
+    let tokenClient = null;
+    let accessToken = null;
 
     document.addEventListener("DOMContentLoaded", () => {
       if (window.supabase) {
@@ -387,8 +669,219 @@
           </div>
         `;
       }
+
+      // Initialize config inputs and load settings
+      const savedClientId = localStorage.getItem("gdrive_client_id") || "";
+      const savedApiKey = localStorage.getItem("gdrive_api_key") || "";
+      document.getElementById("client-id").value = savedClientId;
+      document.getElementById("api-key").value = savedApiKey;
+
+      autoloadCredentials();
     });
 
+    // ── OAUTH & CREDENTIALS MANAGEMENT ──
+    async function autoloadCredentials() {
+      try {
+        const res = await fetch('/api/admin/gdrive-credentials');
+        if (res.status === 401) {
+          await loadConfigFromSupabase();
+          return;
+        }
+        if (!res.ok) throw new Error('Backend credentials request failed.');
+        const data = await res.json();
+        if (data.clientId && data.apiKey) {
+          document.getElementById("client-id").value = data.clientId;
+          document.getElementById("api-key").value = data.apiKey;
+          localStorage.setItem("gdrive_client_id", data.clientId);
+          localStorage.setItem("gdrive_api_key", data.apiKey);
+          initGapi();
+        }
+      } catch (err) {
+        await loadConfigFromSupabase();
+      }
+    }
+
+    async function loadConfigFromSupabase() {
+      if (!db) {
+        fallbackToLocalStorage();
+        return;
+      }
+      try {
+        const { data, error } = await db
+          .from('project_settings')
+          .select('key, value');
+        
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+          const clientIdSetting = data.find(item => item.key === 'gdrive_client_id');
+          const apiKeySetting = data.find(item => item.key === 'gdrive_api_key');
+          
+          if (clientIdSetting && apiKeySetting && clientIdSetting.value && apiKeySetting.value) {
+            document.getElementById("client-id").value = clientIdSetting.value;
+            document.getElementById("api-key").value = apiKeySetting.value;
+            localStorage.setItem("gdrive_client_id", clientIdSetting.value);
+            localStorage.setItem("gdrive_api_key", apiKeySetting.value);
+            initGapi();
+          } else {
+            fallbackToLocalStorage();
+          }
+        } else {
+          fallbackToLocalStorage();
+        }
+      } catch (err) {
+        fallbackToLocalStorage();
+      }
+    }
+
+    function fallbackToLocalStorage() {
+      const savedClientId = localStorage.getItem("gdrive_client_id") || "";
+      const savedApiKey = localStorage.getItem("gdrive_api_key") || "";
+      if (savedClientId && savedApiKey) {
+        initGapi();
+      }
+    }
+
+    function toggleApiKeyVisibility() {
+      const input = document.getElementById("api-key");
+      const icon = document.querySelector("#toggle-api-key i");
+      const show = input.type === "password";
+      input.type = show ? "text" : "password";
+      icon.className = show ? "fa-solid fa-eye-slash" : "fa-solid fa-eye";
+    }
+
+    async function saveCredentials() {
+      const clientId = document.getElementById("client-id").value.trim();
+      const apiKey = document.getElementById("api-key").value.trim();
+      localStorage.setItem("gdrive_client_id", clientId);
+      localStorage.setItem("gdrive_api_key", apiKey);
+      
+      initGapi();
+
+      if (db) {
+        try {
+          await db.from('project_settings').upsert({ key: 'gdrive_client_id', value: clientId });
+          await db.from('project_settings').upsert({ key: 'gdrive_api_key', value: apiKey });
+          showToast("Credentials saved locally and to Supabase!");
+        } catch (err) {
+          showToast("Saved locally, but Supabase save failed.");
+        }
+      } else {
+        showToast("Credentials saved to localStorage.");
+      }
+    }
+
+    async function saveTokenToSupabase(token) {
+      if (db) {
+        try {
+          await db.from('project_settings').upsert({ key: 'gdrive_access_token', value: token });
+        } catch (err) {
+          console.warn('Could not save access token to Supabase: ' + err.message);
+        }
+      }
+    }
+
+    // ── GOOGLE CLIENT INITIALIZATION ──
+    function gapiLoaded() {
+      gapi.load('client', initGapi);
+    }
+
+    async function initGapi() {
+      const apiKey = document.getElementById("api-key").value || "";
+      if (!apiKey) {
+        updateAuthUI(false, 'Missing API Key');
+        return;
+      }
+      try {
+        await gapi.client.init({
+          apiKey: apiKey,
+          discoveryDocs: [DISCOVERY_DOC],
+        });
+        gapiInited = true;
+        checkAuthInits();
+      } catch (err) {
+        updateAuthUI(false, 'GAPI failed');
+      }
+    }
+
+    function gisLoaded() {
+      ginit = true;
+      checkAuthInits();
+    }
+
+    function checkAuthInits() {
+      if (gapiInited && ginit) {
+        const clientId = document.getElementById("client-id").value || "";
+        if (!clientId) {
+          updateAuthUI(false, 'Missing Client ID');
+          return;
+        }
+        try {
+          tokenClient = google.accounts.oauth2.initTokenClient({
+            client_id: clientId,
+            scope: SCOPES,
+            callback: (resp) => {
+              if (resp.error !== undefined) {
+                console.error('Authentication error: ' + resp.error);
+                return;
+              }
+              accessToken = resp.access_token;
+              updateAuthUI(true, 'Google Connected');
+              saveTokenToSupabase(resp.access_token);
+              showToast("Google Drive Connected!");
+              
+              // Load research folders for all synced videos
+              loadAllResearchFolders();
+            },
+          });
+          updateAuthUI(false, 'API Ready. Connect Drive Account.');
+        } catch (err) {
+          updateAuthUI(false, 'OAuth init error');
+        }
+      }
+    }
+
+    function handleAuthClick() {
+      if (!tokenClient) return;
+      tokenClient.requestAccessToken({ prompt: 'consent' });
+    }
+
+    function handleSignoutClick() {
+      const token = gapi.client.getToken();
+      if (token !== null) {
+        google.accounts.oauth2.revokeToken(token.access_token);
+        gapi.client.setToken(null);
+        accessToken = null;
+        updateAuthUI(false, 'Drive Unlinked');
+        
+        // Remove research elements from view
+        document.querySelectorAll('.research-section').forEach(el => el.remove());
+      }
+    }
+
+    function updateAuthUI(connected, text) {
+      const dot = document.getElementById('auth-dot');
+      const label = document.getElementById('auth-text');
+      const loginBtn = document.getElementById('btn-login');
+      const logoutBtn = document.getElementById('btn-logout');
+
+      label.innerText = text;
+      if (connected) {
+        dot.className = 'dot dot-online';
+        loginBtn.style.display = 'none';
+        logoutBtn.style.display = 'block';
+      } else {
+        dot.className = 'dot dot-offline';
+        loginBtn.style.display = 'block';
+        logoutBtn.style.display = 'none';
+      }
+    }
+
+    function toggleConfigDrawer() {
+      document.getElementById('config-drawer').classList.toggle('show');
+    }
+
+    // ── DATABASE OPERATIONS & DASHBOARD RENDER ──
     async function loadOutlineData() {
       try {
         const { data: modules, error } = await db
@@ -398,34 +891,47 @@
 
         if (error) throw error;
 
-        // Sort videos inside modules
         modules.forEach(mod => {
           if (mod.course_videos) {
             mod.course_videos.sort((a, b) => a.video_number - b.video_number);
           }
         });
 
+        courseOutlineData = modules;
         renderOutlineDashboard(modules);
         updateStatistics(modules);
+        
+        // Load all research folders if token is ready
+        if (accessToken) {
+          loadAllResearchFolders();
+        }
       } catch (err) {
         console.error("Supabase load error:", err);
         document.getElementById('outline-list').innerHTML = `
           <div style="text-align:center; padding: 40px; color: var(--warning);">
             <i class="fa-solid fa-database fa-2xl" style="margin-bottom:14px;"></i>
             <div>Error fetching Supabase data: ${err.message}</div>
-            <div style="margin-top:14px; font-size:0.85rem; color:var(--text-muted);">Rendering offline layout fallback.</div>
           </div>
         `;
-        renderOfflineFallback();
       }
     }
 
     function getFolderUrl(links) {
       if (!links) return null;
-      if (Array.isArray(links) && links.length > 0) {
-        return links[0].url || null;
+      let parsed = links;
+      if (typeof links === 'string') {
+        try { parsed = JSON.parse(links); } catch(e) { return null; }
+      }
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed[0].url || null;
       }
       return null;
+    }
+
+    function extractFolderId(url) {
+      if (!url) return null;
+      const match = url.match(/\/folders\/([a-zA-Z0-9_-]+)/);
+      return match ? match[1] : null;
     }
 
     function renderOutlineDashboard(modules) {
@@ -435,7 +941,7 @@
       if (!modules || modules.length === 0) {
         container.innerHTML = `
           <div style="text-align:center; padding: 40px; color: var(--text-muted);">
-            No course modules found. Ensure seeds are loaded in Supabase.
+            No course modules found.
           </div>
         `;
         return;
@@ -451,14 +957,20 @@
 
         modSection.innerHTML = `
           <div class="module-header">
-            <div class="module-title-wrapper">
-              <span class="module-num">Module ${mod.module_number}</span>
-              <span class="module-title">${mod.title}</span>
+            <div class="module-title-wrapper" style="display:flex; flex-direction:column; gap:4px; width:60%;">
+              <div style="display:flex; align-items:center; gap:12px;">
+                <span class="module-num">Module ${mod.module_number}</span>
+                <span class="module-title">${mod.title}</span>
+              </div>
+              <div id="editor-container-course_modules-${mod.id}" style="width:100%;"></div>
             </div>
             <div class="link-badge-container">
               <span class="sync-status ${modStatusClass}">
                 <i class="fa-solid ${modFolderUrl ? 'fa-circle-check' : 'fa-circle-xmark'}"></i> ${modStatusText}
               </span>
+              <button class="btn-icon btn-icon-primary" onclick="showLinkEditor('course_modules', ${mod.id}, '${modFolderUrl || ''}')" title="Manual Link Override">
+                <i class="fa-solid fa-link-slash"></i>
+              </button>
               ${modFolderUrl ? 
                 `<a href="${modFolderUrl}" target="_blank" class="btn-link btn-drive-open"><i class="fa-brands fa-google-drive"></i> Open Folder</a>` :
                 `<a href="google_drive_folder_creator.html" class="btn-link btn-drive-create"><i class="fa-solid fa-folder-plus"></i> Link Folder</a>`
@@ -473,29 +985,48 @@
         const videoContainer = document.getElementById(`video-list-${mod.id}`);
         if (mod.course_videos && mod.course_videos.length > 0) {
           mod.course_videos.forEach(vid => {
-            const vidItem = document.createElement('div');
-            vidItem.className = 'video-item';
+            const vidItemWrapper = document.createElement('div');
+            vidItemWrapper.style.display = 'flex';
+            vidItemWrapper.style.flexDirection = 'column';
+            vidItemWrapper.style.marginBottom = '12px';
 
             const vidFolderUrl = getFolderUrl(vid.links);
             const vidStatusClass = vidFolderUrl ? 'status-synced' : 'status-missing';
             const vidStatusText = vidFolderUrl ? 'Synced' : 'Not Synced';
 
+            const vidItem = document.createElement('div');
+            vidItem.className = 'video-item';
             vidItem.innerHTML = `
-              <div class="video-info">
-                <span class="video-num">Video ${vid.video_number}</span>
-                <span class="video-title">${vid.title}</span>
+              <div class="video-info" style="display:flex; flex-direction:column; gap:4px; width:60%;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                  <span class="video-num">Video ${vid.video_number}</span>
+                  <span class="video-title">${vid.title}</span>
+                </div>
+                <div id="editor-container-course_videos-${vid.id}" style="width:100%;"></div>
               </div>
               <div class="link-badge-container">
                 <span class="sync-status ${vidStatusClass}">
                   <i class="fa-solid ${vidFolderUrl ? 'fa-circle-check' : 'fa-circle-xmark'}"></i> ${vidStatusText}
                 </span>
+                <button class="btn-icon btn-icon-primary" onclick="showLinkEditor('course_videos', ${vid.id}, '${vidFolderUrl || ''}')" title="Manual Link Override">
+                  <i class="fa-solid fa-link-slash"></i>
+                </button>
                 ${vidFolderUrl ? 
                   `<a href="${vidFolderUrl}" target="_blank" class="btn-link btn-drive-open"><i class="fa-brands fa-google-drive"></i> Open Folder</a>` :
                   `<a href="google_drive_folder_creator.html" class="btn-link btn-drive-create"><i class="fa-solid fa-folder-plus"></i> Link Folder</a>`
                 }
               </div>
             `;
-            videoContainer.appendChild(vidItem);
+            vidItemWrapper.appendChild(vidItem);
+            
+            // Add dynamic research section placeholder if folder exists
+            if (vidFolderUrl) {
+              const rPlaceholder = document.createElement('div');
+              rPlaceholder.id = `research-section-container-${vid.id}`;
+              vidItemWrapper.appendChild(rPlaceholder);
+            }
+
+            videoContainer.appendChild(vidItemWrapper);
           });
         } else {
           videoContainer.innerHTML = `
@@ -514,13 +1045,13 @@
       let totalDirectories = 0;
 
       modules.forEach(mod => {
-        totalDirectories++; // Module folder
+        totalDirectories++;
         if (getFolderUrl(mod.links)) syncedCount++;
 
         if (mod.course_videos) {
           totalVideos += mod.course_videos.length;
           mod.course_videos.forEach(vid => {
-            totalDirectories++; // Video folder
+            totalDirectories++;
             if (getFolderUrl(vid.links)) syncedCount++;
           });
         }
@@ -543,7 +1074,6 @@
     }
 
     function renderOfflineFallback() {
-      // Mock outline for fallback view
       const offlineModules = [
         {
           id: 1,
@@ -551,25 +1081,302 @@
           title: "Claude Ecosystem & Flows",
           links: null,
           course_videos: [
-            { id: 1, video_number: 1, title: "Architecture Overview", links: null },
-            { id: 2, video_number: 2, title: "Stateful Orchestration", links: null },
-            { id: 3, video_number: 3, title: "Production Wiring", links: null }
-          ]
-        },
-        {
-          id: 2,
-          module_number: 2,
-          title: "Model Context Protocol (MCP)",
-          links: null,
-          course_videos: [
-            { id: 4, video_number: 1, title: "MCP Fundamentals", links: null },
-            { id: 5, video_number: 2, title: "Building an MCP Server", links: null }
+            { id: 1, video_number: 1, title: "Architecture Overview", links: null }
           ]
         }
       ];
       renderOutlineDashboard(offlineModules);
       updateStatistics(offlineModules);
       document.getElementById('last-updated').innerText = '⚠️ Running in offline simulation mode.';
+    }
+
+    // ── LINK MANUAL OVERRIDES ──
+    function showLinkEditor(tableName, recordId, currentUrl) {
+      const container = document.getElementById(`editor-container-${tableName}-${recordId}`);
+      if (!container) return;
+
+      container.innerHTML = `
+        <div class="link-editor-container">
+          <input type="text" class="link-editor-input" id="edit-input-${tableName}-${recordId}" value="${currentUrl}" placeholder="Paste Google Drive URL here...">
+          <button class="btn-action btn-action-primary" style="padding:4px 10px; font-size:0.75rem;" onclick="saveManualLink('${tableName}', ${recordId})">
+            <i class="fa-solid fa-check"></i> Save
+          </button>
+          <button class="btn-action btn-action-secondary" style="padding:4px 10px; font-size:0.75rem;" onclick="cancelLinkEdit('${tableName}', ${recordId})">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      `;
+    }
+
+    function cancelLinkEdit(tableName, recordId) {
+      const container = document.getElementById(`editor-container-${tableName}-${recordId}`);
+      if (container) container.innerHTML = '';
+    }
+
+    async function saveManualLink(tableName, recordId) {
+      const input = document.getElementById(`edit-input-${tableName}-${recordId}`);
+      const rawUrl = input.value.trim();
+      let links = [];
+      
+      if (rawUrl) {
+        if (!rawUrl.includes("drive.google.com")) {
+          showToast("Error: Link must be a valid Google Drive URL.");
+          return;
+        }
+        links = [{ name: 'Google Drive Folder', url: rawUrl }];
+      }
+
+      try {
+        const { error } = await db
+          .from(tableName)
+          .update({ links: links })
+          .eq('id', recordId);
+
+        if (error) throw error;
+        showToast("Link successfully updated!");
+        cancelLinkEdit(tableName, recordId);
+        loadOutlineData();
+      } catch (err) {
+        showToast("Error updating link: " + err.message);
+      }
+    }
+
+    // ── RESEARCH DIRECTORY & FILE UPLOADS ──
+    async function loadAllResearchFolders() {
+      if (!accessToken) return;
+      
+      courseOutlineData.forEach(mod => {
+        if (mod.course_videos) {
+          mod.course_videos.forEach(vid => {
+            const vidFolderUrl = getFolderUrl(vid.links);
+            if (vidFolderUrl) {
+              const vidFolderId = extractFolderId(vidFolderUrl);
+              if (vidFolderId) {
+                renderResearchSection(vid.id, vidFolderId);
+              }
+            }
+          });
+        }
+      });
+    }
+
+    async function renderResearchSection(vidId, vidFolderId) {
+      const rContainer = document.getElementById(`research-section-container-${vidId}`);
+      if (!rContainer) return;
+
+      rContainer.innerHTML = `
+        <div class="research-section" id="research-section-${vidId}">
+          <div class="research-header">
+            <div class="research-title"><i class="fa-solid fa-folder-open"></i> Research & Artifacts folder</div>
+            <div id="upload-actions-${vidId}">
+              <i class="fa-solid fa-circle-notch fa-spin"></i> Checking Drive...
+            </div>
+          </div>
+          <div class="research-files-list" id="research-files-${vidId}"></div>
+        </div>
+      `;
+
+      try {
+        const researchFolderId = await getOrCreateResearchFolder(vidFolderId);
+        if (!researchFolderId) {
+          document.getElementById(`upload-actions-${vidId}`).innerHTML = `
+            <span style="color:var(--error); font-size:0.8rem;"><i class="fa-solid fa-triangle-exclamation"></i> Research folder error</span>
+          `;
+          return;
+        }
+
+        // Set up upload button and file listener
+        document.getElementById(`upload-actions-${vidId}`).innerHTML = `
+          <button class="btn-action btn-action-success" style="padding:6px 12px; font-size:0.8rem;" onclick="triggerFileInput(${vidId})">
+            <i class="fa-solid fa-cloud-arrow-up"></i> Upload Artifact
+          </button>
+          <input type="file" id="file-input-${vidId}" multiple style="display:none;" onchange="handleFileSelection(this, ${vidId}, '${researchFolderId}')">
+        `;
+
+        loadResearchFilesList(vidId, researchFolderId);
+
+      } catch (err) {
+        console.error("Failed to render research section:", err);
+      }
+    }
+
+    async function getOrCreateResearchFolder(parentFolderId) {
+      if (!accessToken) return null;
+      try {
+        // Query for folder named 'research' under parent
+        const query = `mimeType = 'application/vnd.google-apps.folder' and name = 'research' and '${parentFolderId}' in parents and trashed = false`;
+        const res = await gapi.client.drive.files.list({
+          q: query,
+          fields: 'files(id, name)',
+          spaces: 'drive'
+        });
+        const files = res.result.files;
+        if (files && files.length > 0) {
+          return files[0].id;
+        }
+
+        // Create research folder if missing
+        const folderMetadata = {
+          name: 'research',
+          mimeType: 'application/vnd.google-apps.folder',
+          parents: [parentFolderId]
+        };
+        const folderRes = await gapi.client.drive.files.create({
+          resource: folderMetadata,
+          fields: 'id'
+        });
+        return folderRes.result.id;
+      } catch (err) {
+        console.error("Error checking/creating research folder:", err);
+        return null;
+      }
+    }
+
+    async function loadResearchFilesList(vidId, researchFolderId) {
+      const fileListDiv = document.getElementById(`research-files-${vidId}`);
+      if (!fileListDiv) return;
+
+      fileListDiv.innerHTML = `<span style="font-size:0.8rem; color:var(--text-muted);"><i class="fa-solid fa-spinner fa-spin"></i> Listing artifacts...</span>`;
+
+      try {
+        const query = `'${researchFolderId}' in parents and trashed = false`;
+        const res = await gapi.client.drive.files.list({
+          q: query,
+          fields: 'files(id, name, size, webViewLink)',
+          spaces: 'drive',
+          orderBy: 'name'
+        });
+
+        const files = res.result.files || [];
+        // Store on container to facilitate collision checks
+        fileListDiv.setAttribute("data-existing-files", JSON.stringify(files));
+
+        if (files.length === 0) {
+          fileListDiv.innerHTML = `<span style="font-size:0.8rem; color:var(--text-muted); font-style:italic;">No files uploaded in research folder.</span>`;
+          return;
+        }
+
+        fileListDiv.innerHTML = '';
+        files.forEach(f => {
+          const card = document.createElement('div');
+          card.className = 'research-file-card';
+          card.innerHTML = `
+            <div class="file-card-info">
+              <span class="file-name" title="${f.name}">${f.name}</span>
+              <span class="file-size">${f.size ? formatBytes(parseInt(f.size)) : 'Unknown size'}</span>
+            </div>
+            <a href="${f.webViewLink}" target="_blank" class="btn-file-open" title="Open in Google Drive"><i class="fa-brands fa-google-drive"></i></a>
+          `;
+          fileListDiv.appendChild(card);
+        });
+
+      } catch (err) {
+        fileListDiv.innerHTML = `<span style="color:var(--error); font-size:0.8rem;"><i class="fa-solid fa-circle-exclamation"></i> Error loading artifacts</span>`;
+      }
+    }
+
+    function triggerFileInput(vidId) {
+      const input = document.getElementById(`file-input-${vidId}`);
+      if (input) input.click();
+    }
+
+    async function handleFileSelection(input, vidId, researchFolderId) {
+      const files = input.files;
+      if (!files || files.length === 0) return;
+
+      const fileListDiv = document.getElementById(`research-files-${vidId}`);
+      let existingFiles = [];
+      try {
+        const existingStr = fileListDiv.getAttribute("data-existing-files") || "[]";
+        existingFiles = JSON.parse(existingStr);
+      } catch (e) {
+        existingFiles = [];
+      }
+
+      // Hide upload button and show progress indicator
+      const actionsDiv = document.getElementById(`upload-actions-${vidId}`);
+      const originalActionsHtml = actionsDiv.innerHTML;
+      actionsDiv.innerHTML = `<span style="font-size:0.8rem; color:var(--primary); font-weight:600;"><i class="fa-solid fa-spinner fa-spin"></i> Uploading...</span>`;
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const safeName = getSafeFilename(file.name, existingFiles);
+
+        // Update list of existing files so subsequent uploads in the same batch don't collide
+        existingFiles.push({ name: safeName });
+        
+        try {
+          await uploadFileToDrive(file, researchFolderId, safeName);
+        } catch (uploadErr) {
+          showToast(`Failed to upload ${file.name}: ${uploadErr.message}`);
+        }
+      }
+
+      showToast("Files processed successfully!");
+      
+      // Reset input, restore upload button, and reload list
+      input.value = '';
+      actionsDiv.innerHTML = originalActionsHtml;
+      loadResearchFilesList(vidId, researchFolderId);
+    }
+
+    function getSafeFilename(fileName, existingFiles) {
+      const nameExists = existingFiles.some(f => f.name === fileName);
+      if (!nameExists) return fileName;
+
+      const dotIndex = fileName.lastIndexOf('.');
+      let baseName = dotIndex !== -1 ? fileName.substring(0, dotIndex) : fileName;
+      const ext = dotIndex !== -1 ? fileName.substring(dotIndex) : '';
+
+      let counter = 1;
+      let newName = `${baseName} (${counter})${ext}`;
+      while (existingFiles.some(f => f.name === newName)) {
+        counter++;
+        newName = `${baseName} (${counter})${ext}`;
+      }
+      return newName;
+    }
+
+    async function uploadFileToDrive(file, folderId, newName) {
+      const metadata = {
+        name: newName,
+        parents: [folderId]
+      };
+
+      const formData = new FormData();
+      formData.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+      formData.append('file', file);
+
+      const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + accessToken
+        },
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error('Upload failed: ' + response.statusText);
+      }
+      return await response.json();
+    }
+
+    function formatBytes(bytes, decimals = 2) {
+      if (bytes === 0 || !bytes) return '0 Bytes';
+      const k = 1024;
+      const dm = decimals < 0 ? 0 : decimals;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast-notif');
+      toast.innerText = message;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
     }
   </script>
 </body>

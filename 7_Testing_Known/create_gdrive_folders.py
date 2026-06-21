@@ -2,11 +2,70 @@
 import os
 import sys
 import json
+import re
 import requests
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
+
+def extract_folder_id(links):
+    if not links:
+        return None
+    try:
+        if isinstance(links, str):
+            links = json.loads(links)
+        if isinstance(links, list):
+            for link in links:
+                if link.get("name") == "Google Drive Folder":
+                    url = link.get("url", "")
+                    match = re.search(r"/folders/([a-zA-Z0-9_-]+)", url)
+                    if match:
+                        return match.group(1)
+    except Exception as e:
+        log_warn(f"Failed to parse links JSON: {e}")
+    return None
+
+def fetch_root_id_from_supabase():
+    if not SUPABASE_URL:
+        return None
+    endpoint = f"{SUPABASE_URL}/rest/v1/project_settings?key=eq.gdrive_root_folder_id&select=value"
+    headers = {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': f'Bearer {SUPABASE_ANON_KEY}'
+    }
+    try:
+        res = requests.get(endpoint, headers=headers)
+        if res.status_code == 200:
+            data = res.json()
+            if data and len(data) > 0:
+                return data[0].get('value')
+    except Exception as e:
+        log_warn(f"Failed to fetch root folder ID from Supabase: {e}")
+    return None
+
+def save_root_id_to_supabase(root_id):
+    if not SUPABASE_URL:
+        return False
+    token = SUPABASE_SERVICE_KEY if (SUPABASE_SERVICE_KEY and SUPABASE_SERVICE_KEY.startswith("eyJ")) else SUPABASE_ANON_KEY
+    endpoint = f"{SUPABASE_URL}/rest/v1/project_settings"
+    headers = {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': f'Bearer {token}',
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates'
+    }
+    payload = {
+        "key": "gdrive_root_folder_id",
+        "value": root_id
+    }
+    try:
+        res = requests.post(endpoint, headers=headers, json=payload)
+        return res.status_code in [200, 201, 204]
+    except Exception as e:
+        log_warn(f"Failed to save root folder ID to Supabase: {e}")
+        return False
+
 
 def log_success(msg):
     print(f"\033[92m[SUCCESS] {msg}\033[0m")
@@ -137,6 +196,18 @@ class RealDriveService:
     def __init__(self, creds):
         self.service = build('drive', 'v3', credentials=creds)
         
+    def folder_exists(self, folder_id):
+        if not folder_id:
+            return False
+        try:
+            f = self.service.files().get(fileId=folder_id, fields="id, trashed").execute()
+            if not f.get('trashed', False):
+                return True
+        except Exception as e:
+            # Folder does not exist or user doesn't have permissions
+            pass
+        return False
+        
     def get_or_create_folder(self, name, parent_id=None):
         query = f"mimeType = 'application/vnd.google-apps.folder' and name = '{name}' and trashed = false"
         if parent_id:
@@ -183,6 +254,12 @@ class RealDriveService:
             raise e
 
 class MockDriveService:
+    def folder_exists(self, folder_id):
+        if not folder_id:
+            return False
+        # In mock mode, we assume mock folder IDs are valid if they start with 'mock-folder-id-'
+        return folder_id.startswith("mock-folder-id-")
+
     def get_or_create_folder(self, name, parent_id=None):
         normalized_name = name.lower().replace(" ", "-").replace("&", "and")
         mock_id = f"mock-folder-id-{normalized_name}"
@@ -246,14 +323,14 @@ def main():
     }
     
     try:
-        res_mods = requests.get(f"{SUPABASE_URL}/rest/v1/course_modules?select=id,module_number,title", headers=headers)
+        res_mods = requests.get(f"{SUPABASE_URL}/rest/v1/course_modules?select=id,module_number,title,links", headers=headers)
         if res_mods.status_code != 200:
             log_error(f"Failed to fetch modules: {res_mods.text}")
             sys.exit(1)
         modules = res_mods.json()
         modules.sort(key=lambda x: x['module_number'])
         
-        res_vids = requests.get(f"{SUPABASE_URL}/rest/v1/course_videos?select=id,module_id,video_number,title", headers=headers)
+        res_vids = requests.get(f"{SUPABASE_URL}/rest/v1/course_videos?select=id,module_id,video_number,title,links", headers=headers)
         if res_vids.status_code != 200:
             log_error(f"Failed to fetch videos: {res_vids.text}")
             sys.exit(1)
@@ -314,17 +391,29 @@ def main():
     
     try:
         # Step 3: Check/Create Root Folder
-        root_id = drive_service.get_or_create_folder("Claude AI Architect Certification")
+        root_id = fetch_root_id_from_supabase()
+        if root_id and drive_service.folder_exists(root_id):
+            log_info(f"✓ Reusing existing Root Folder: (ID: {root_id})")
+        else:
+            root_id = drive_service.get_or_create_folder("Claude AI Architect Certification")
+            if root_id and not is_mock:
+                save_root_id_to_supabase(root_id)
         report_data["root_id"] = root_id
         
         # Step 4: Traverse modules
         for mod in modules:
             mod_title = f"Module {mod['module_number']} - {mod['title']}"
-            mod_id = drive_service.get_or_create_folder(mod_title, root_id)
-            mod_url = f"https://drive.google.com/drive/folders/{mod_id}"
             
-            # Update Supabase database
-            update_supabase_link("course_modules", mod["id"], mod_url)
+            existing_mod_id = extract_folder_id(mod.get('links'))
+            if existing_mod_id and drive_service.folder_exists(existing_mod_id):
+                log_info(f"✓ Reusing existing folder for Module {mod['module_number']}: '{mod_title}' (ID: {existing_mod_id})")
+                mod_id = existing_mod_id
+                mod_url = f"https://drive.google.com/drive/folders/{mod_id}"
+            else:
+                mod_id = drive_service.get_or_create_folder(mod_title, root_id)
+                mod_url = f"https://drive.google.com/drive/folders/{mod_id}"
+                # Update Supabase database
+                update_supabase_link("course_modules", mod["id"], mod_url)
             
             mod_report = {
                 "id": mod["id"],
@@ -339,11 +428,17 @@ def main():
             mod_videos = [v for v in videos if v['module_id'] == mod['id']]
             for vid in mod_videos:
                 vid_title = f"Video {vid['video_number']} - {vid['title']}"
-                vid_id = drive_service.get_or_create_folder(vid_title, mod_id)
-                vid_url = f"https://drive.google.com/drive/folders/{vid_id}"
                 
-                # Update Supabase database
-                update_supabase_link("course_videos", vid["id"], vid_url)
+                existing_vid_id = extract_folder_id(vid.get('links'))
+                if existing_vid_id and drive_service.folder_exists(existing_vid_id):
+                    log_info(f"✓ Reusing existing folder for Video {vid['video_number']}: '{vid_title}' (ID: {existing_vid_id})")
+                    vid_id = existing_vid_id
+                    vid_url = f"https://drive.google.com/drive/folders/{vid_id}"
+                else:
+                    vid_id = drive_service.get_or_create_folder(vid_title, mod_id)
+                    vid_url = f"https://drive.google.com/drive/folders/{vid_id}"
+                    # Update Supabase database
+                    update_supabase_link("course_videos", vid["id"], vid_url)
                 
                 # Create subfolders: raw, export, research
                 raw_id = drive_service.get_or_create_folder("raw", vid_id)

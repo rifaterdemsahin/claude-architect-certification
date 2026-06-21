@@ -2459,9 +2459,16 @@ func adminGDriveCredentialsHandler(cfg config) http.HandlerFunc {
 		if clientID == "" {
 			clientID = cfg.getSecret("google-oauth-client-id")
 		}
+		if clientID == "" {
+			clientID = cfg.getSecret("GOOGLE_CLIENT_ID")
+		}
+		
 		apiKey := cfg.getSecret("GOOGLE-IMAGEN-API-KEY")
 		if apiKey == "" {
 			apiKey = cfg.getSecret("GOOGLE-SEARCH-API-KEY")
+		}
+		if apiKey == "" {
+			apiKey = cfg.getSecret("GOOGLE_API_KEY")
 		}
 
 		if strings.HasPrefix(remoteIP, "127.0.0.1") || strings.HasPrefix(remoteIP, "[::1]") || strings.HasPrefix(remoteIP, "localhost") {
