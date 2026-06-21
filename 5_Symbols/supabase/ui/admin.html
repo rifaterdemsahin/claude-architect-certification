@@ -36,8 +36,18 @@
 <script src="../../../shared/seo.js" defer></script></head>
 <body>
   <div class="container">
-    <h1>🚀 Supabase Database Seed</h1>
+    <h1>🚀 Supabase Database Seed & Admin</h1>
     <p>Populate your Supabase project with all course data: modules, videos, scenes, checklists, and content.</p>
+
+    <!-- Admin Authorization -->
+    <div class="card" id="admin-auth-card">
+      <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.4rem; margin-bottom: 12px;">🔐 Admin Authorization</h2>
+      <p style="margin-bottom:12px;">Access to sensitive operations (Google Drive credentials mapping) requires admin access.</p>
+      <label for="admin-password">Admin Password</label>
+      <input id="admin-password" type="password" placeholder="Enter admin password to unlock...">
+      <button class="btn btn-primary" id="btn-admin-login" onclick="loginAdmin()">Unlock Admin Mode</button>
+      <span id="admin-auth-status" class="status-badge status-pending" style="margin-left:12px;">Checking auth...</span>
+    </div>
 
     <div class="card">
       <label for="supabase-url">Supabase Project URL</label>
@@ -377,6 +387,61 @@
       }
       log('✅ All tables cleared.', 'ok');
     }
+
+    function getCookie(name) {
+      const m = document.cookie.match(new RegExp('(?:^|; )' + name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '=([^;]*)'));
+      return m ? decodeURIComponent(m[1]) : null;
+    }
+
+    async function checkAdminAuth() {
+      const statusEl = document.getElementById('admin-auth-status');
+      if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+        statusEl.className = 'status-badge status-ready';
+        statusEl.textContent = 'Local Admin';
+        return;
+      }
+      const adminCookie = getCookie('admin_logged_in');
+      if (adminCookie === 'true') {
+        statusEl.className = 'status-badge status-ready';
+        statusEl.textContent = 'Authorized';
+      } else {
+        statusEl.className = 'status-badge status-error';
+        statusEl.textContent = 'Unauthorized';
+      }
+    }
+
+    async function loginAdmin() {
+      const password = document.getElementById('admin-password').value.trim();
+      const statusEl = document.getElementById('admin-auth-status');
+      if (!password) return;
+
+      try {
+        const res = await fetch('/api/admin/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          statusEl.className = 'status-badge status-ready';
+          statusEl.textContent = 'Authorized';
+          
+          const urlParams = new URLSearchParams(window.location.search);
+          const redirect = urlParams.get('redirect');
+          if (redirect) {
+            window.location.href = '/' + redirect;
+          }
+        } else {
+          statusEl.className = 'status-badge status-error';
+          statusEl.textContent = data.error || 'Login failed';
+        }
+      } catch (err) {
+        statusEl.className = 'status-badge status-error';
+        statusEl.textContent = 'Connection error';
+      }
+    }
+
+    checkAdminAuth();
   </script>
 <script src="../../../shared/debug-panel.js"></script>
 </body>

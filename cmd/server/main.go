@@ -2390,6 +2390,122 @@ TEXT TO FIX:
 	}
 }
 
+// ── Admin Handlers ────────────────────────────────────────────────────────────
+
+func adminLoginHandler(cfg config) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+		var req struct {
+			Password string `json:"password"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		adminPass := cfg.getSecret("ClaudeCertificateSiteAdminPassword")
+		if adminPass == "" {
+			adminPass = cfg.getSecret("AdminPassword")
+		}
+		if adminPass == "" {
+			adminPass = "admin"
+		}
+
+		if req.Password != adminPass {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte(`{"success":false,"error":"Invalid password"}`))
+			return
+		}
+
+		http.SetCookie(w, &http.Cookie{
+			Name:     "admin_logged_in",
+			Value:    "true",
+			Path:     "/",
+			MaxAge:   3600 * 24,
+			HttpOnly: false,
+			SameSite: http.SameSiteLaxMode,
+		})
+
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(`{"success":true}`))
+	}
+}
+
+func adminGDriveCredentialsHandler(cfg config) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		isAdmin := false
+		remoteIP := r.RemoteAddr
+		if strings.HasPrefix(remoteIP, "127.0.0.1") || strings.HasPrefix(remoteIP, "[::1]") || strings.HasPrefix(remoteIP, "localhost") {
+			isAdmin = true
+		} else {
+			cookie, err := r.Cookie("admin_logged_in")
+			if err == nil && cookie.Value == "true" {
+				isAdmin = true
+			}
+		}
+
+		if !isAdmin {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte(`{"error":"Unauthorized"}`))
+			return
+		}
+
+		clientID := cfg.getSecret("claude-architect-GOOGLE-CLIENT-ID")
+		if clientID == "" {
+			clientID = cfg.getSecret("google-oauth-client-id")
+		}
+		apiKey := cfg.getSecret("GOOGLE-IMAGEN-API-KEY")
+		if apiKey == "" {
+			apiKey = cfg.getSecret("GOOGLE-SEARCH-API-KEY")
+		}
+
+		if strings.HasPrefix(remoteIP, "127.0.0.1") || strings.HasPrefix(remoteIP, "[::1]") || strings.HasPrefix(remoteIP, "localhost") {
+			saveCredentialsToDotEnv(clientID, apiKey)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{
+			"clientId": clientID,
+			"apiKey":   apiKey,
+		})
+	}
+}
+
+func saveCredentialsToDotEnv(clientId, apiKey string) {
+	if clientId == "" || apiKey == "" {
+		return
+	}
+	content, err := os.ReadFile(".env")
+	if err != nil {
+		content = []byte{}
+	}
+	lines := strings.Split(string(content), "\n")
+	hasClientID := false
+	hasAPIKey := false
+	for i, line := range lines {
+		if strings.HasPrefix(line, "GOOGLE_CLIENT_ID=") {
+			lines[i] = "GOOGLE_CLIENT_ID=" + clientId
+			hasClientID = true
+		}
+		if strings.HasPrefix(line, "GOOGLE_API_KEY=") {
+			lines[i] = "GOOGLE_API_KEY=" + apiKey
+			hasAPIKey = true
+		}
+	}
+	if !hasClientID {
+		lines = append(lines, "GOOGLE_CLIENT_ID="+clientId)
+	}
+	if !hasAPIKey {
+		lines = append(lines, "GOOGLE_API_KEY="+apiKey)
+	}
+	os.WriteFile(".env", []byte(strings.Join(lines, "\n")), 0644)
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 func main() {
@@ -2434,6 +2550,8 @@ func main() {
 	mux.Handle("/api/lowerthirds/generate", observe(cfg, lowerThirdGenerateHandler(cfg)))
 	mux.Handle("/api/ai/sanity-check", observe(cfg, sanityCheckHandler(cfg)))
 	mux.Handle("/api/ai/fix-grammar", observe(cfg, fixGrammarHandler(cfg)))
+	mux.Handle("/api/admin/login", observe(cfg, adminLoginHandler(cfg)))
+	mux.Handle("/api/admin/gdrive-credentials", observe(cfg, adminGDriveCredentialsHandler(cfg)))
 	mux.Handle("/admin/errors", observe(cfg, axiomErrorsHandler(tmpl, cfg, navConfigJS)))
 	mux.Handle("/", observe(cfg, homeHandler(tmpl, cfg, navConfigJS)))
 

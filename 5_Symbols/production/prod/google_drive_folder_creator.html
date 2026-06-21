@@ -470,14 +470,68 @@
         log('error', 'Supabase script failed to load.');
       }
 
-      // Auto-load credentials if saved
-      if (savedClientId && savedApiKey) {
-        initGapi();
-      }
-
       // Load initial mock / empty outline
       loadCourseOutline();
+
+      // Trigger Azure Key Vault auto-load
+      autoloadCredentials();
     });
+
+    async function autoloadCredentials() {
+      log('info', 'Checking Azure Key Vault for credentials...');
+      try {
+        const res = await fetch('/api/admin/gdrive-credentials');
+        if (res.status === 401) {
+          log('warn', 'Admin authorization needed to pull credentials from Azure Key Vault.');
+          showAdminWarningBanner(true);
+          
+          // Auto-load localStorage credentials as fallback
+          const savedClientId = localStorage.getItem("gdrive_client_id") || "";
+          const savedApiKey = localStorage.getItem("gdrive_api_key") || "";
+          if (savedClientId && savedApiKey) {
+            initGapi();
+          }
+          return;
+        }
+        if (!res.ok) throw new Error('Backend credentials request failed.');
+        const data = await res.json();
+        if (data.clientId && data.apiKey) {
+          document.getElementById("client-id").value = data.clientId;
+          document.getElementById("api-key").value = data.apiKey;
+          localStorage.setItem("gdrive_client_id", data.clientId);
+          localStorage.setItem("gdrive_api_key", data.apiKey);
+          log('success', '✓ Auto-loaded credentials from Key Vault.');
+          showAdminWarningBanner(false);
+          initGapi();
+        }
+      } catch (err) {
+        log('warn', 'Offline / could not auto-load credentials: ' + err.message);
+        // LocalStorage fallback
+        const savedClientId = localStorage.getItem("gdrive_client_id") || "";
+        const savedApiKey = localStorage.getItem("gdrive_api_key") || "";
+        if (savedClientId && savedApiKey) {
+          initGapi();
+        }
+      }
+    }
+
+    function showAdminWarningBanner(show) {
+      let banner = document.getElementById('admin-warning-banner');
+      if (!banner) {
+        banner = document.createElement('div');
+        banner.id = 'admin-warning-banner';
+        banner.style.cssText = 'background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); color:#fca5a5; padding:12px 18px; border-radius:12px; margin-bottom:20px; font-size:0.9rem; display:flex; justify-content:space-between; align-items:center;';
+        const header = document.querySelector('header');
+        header.parentNode.insertBefore(banner, header.nextSibling);
+      }
+      if (show) {
+        banner.innerHTML = `<span>⚠️ Google credentials not loaded: Admin authorization required.</span>
+          <a href="../../supabase/ui/admin.html?redirect=5_Symbols/production/prod/google_drive_folder_creator.html" style="background:#8b5cf6; color:white; padding:6px 14px; border-radius:6px; text-decoration:none; font-weight:700; font-size:0.8rem; display:flex; align-items:center; gap:6px;"><i class="fa-solid fa-lock-open"></i> Unlock Admin</a>`;
+        banner.style.display = 'flex';
+      } else {
+        banner.style.display = 'none';
+      }
+    }
 
     function saveCredentials() {
       const clientId = document.getElementById("client-id").value.trim();
