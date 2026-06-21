@@ -410,6 +410,15 @@
             <input type="text" id="root-folder-name" value="Claude AI Architect Certification">
           </div>
           
+          <div class="form-group">
+            <label for="root-folder-url">Root Folder Link / ID (Optional)</label>
+            <input type="text" id="root-folder-url" placeholder="Paste Root Folder URL...">
+          </div>
+
+          <button class="btn btn-primary" onclick="saveRootFolderUrl()" style="margin-bottom: 12px;">
+            <i class="fa-solid fa-floppy-disk"></i> Save Root Folder
+          </button>
+
           <button class="btn btn-secondary" onclick="loadCourseOutline()" style="margin-bottom: 12px;">
             <i class="fa-solid fa-database"></i> Pull Supabase Outline
           </button>
@@ -552,9 +561,9 @@
           const clientIdSetting = data.find(item => item.key === 'gdrive_client_id');
           const apiKeySetting = data.find(item => item.key === 'gdrive_api_key');
           const rootFolderIdSetting = data.find(item => item.key === 'gdrive_root_folder_id');
-          
           if (rootFolderIdSetting && rootFolderIdSetting.value) {
             rootFolderIdFromDb = rootFolderIdSetting.value;
+            document.getElementById("root-folder-url").value = `https://drive.google.com/drive/folders/${rootFolderIdFromDb}`;
             log('info', '✓ Found root folder ID in database settings.');
           }
 
@@ -641,6 +650,41 @@
         }
       } else {
         showToast("Credentials saved to localStorage.");
+      }
+    }
+
+    async function saveRootFolderUrl() {
+      const input = document.getElementById("root-folder-url");
+      const value = input.value.trim();
+      let rootId = null;
+      if (value) {
+        const match = value.match(/\/folders\/([a-zA-Z0-9_-]+)/);
+        rootId = match ? match[1] : value;
+      }
+      
+      rootFolderIdFromDb = rootId;
+
+      if (db) {
+        log('info', 'Saving root folder ID to Supabase...');
+        try {
+          const { error } = await db
+            .from('project_settings')
+            .upsert({ key: 'gdrive_root_folder_id', value: rootId || "" });
+          if (error) throw error;
+          
+          log('success', `✓ Saved root folder ID: ${rootId}`);
+          showToast("Root Folder ID saved to Supabase!");
+          if (rootId) {
+            input.value = `https://drive.google.com/drive/folders/${rootId}`;
+          } else {
+            input.value = "";
+          }
+        } catch (err) {
+          log('error', 'Failed to save root folder ID to Supabase: ' + err.message);
+          showToast("Failed to save to Supabase.");
+        }
+      } else {
+        showToast("Root Folder ID saved locally.");
       }
     }
 
@@ -1065,10 +1109,6 @@
       } catch (err) {
         log('error', 'Generation run encountered failure: ' + err.message);
         showToast('Generation execution failed.');
-      } finally {
-        document.getElementById('btn-sync').disabled = false;
-      }
-    }ed.');
       } finally {
         document.getElementById('btn-sync').disabled = false;
       }
