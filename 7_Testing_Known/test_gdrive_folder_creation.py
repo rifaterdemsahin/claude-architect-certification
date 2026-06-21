@@ -91,8 +91,8 @@ def run_generation_pipeline(outline, drive_api, db):
             vid_url = f"https://drive.google.com/drive/folders/{vid_id}"
             db.update_record("course_videos", vid["id"], [{"name": "Google Drive Folder", "url": vid_url}])
 
-            # Create subfolders: raw, export, research, music, sound effects, lowerthirds, backgrounds, broll
-            for sub in ["raw", "export", "research", "music", "sound effects", "lowerthirds", "backgrounds", "broll"]:
+            # Create subfolders: project files, script, branding, thumbnails, 01_raw_footage, 02_broll
+            for sub in ["project files", "script", "branding", "thumbnails", "01_raw_footage", "02_broll"]:
                 sub_id = drive_api.list_files(sub, vid_id)
                 if not sub_id:
                     drive_api.create_folder(sub, vid_id)
@@ -148,36 +148,30 @@ def run_tests():
         log_error("Assert 4: Video folder creation requests missing or parented incorrectly")
         tests_failed += 1
 
-    # 4b. Verify video subfolder creation (raw, export, research, music, sound effects, lowerthirds, backgrounds, broll)
+    # 4b. Verify video subfolder creation (project files, script, branding, thumbnails, 01_raw_footage, 02_broll)
     subfolders_expected = [
-        {"name": "raw", "parent": "mock-folder-id-video-1---mock-setup-verification"},
-        {"name": "export", "parent": "mock-folder-id-video-1---mock-setup-verification"},
-        {"name": "research", "parent": "mock-folder-id-video-1---mock-setup-verification"},
-        {"name": "music", "parent": "mock-folder-id-video-1---mock-setup-verification"},
-        {"name": "sound effects", "parent": "mock-folder-id-video-1---mock-setup-verification"},
-        {"name": "lowerthirds", "parent": "mock-folder-id-video-1---mock-setup-verification"},
-        {"name": "backgrounds", "parent": "mock-folder-id-video-1---mock-setup-verification"},
-        {"name": "broll", "parent": "mock-folder-id-video-1---mock-setup-verification"},
-        {"name": "raw", "parent": "mock-folder-id-video-2---mock-integration-testing"},
-        {"name": "export", "parent": "mock-folder-id-video-2---mock-integration-testing"},
-        {"name": "research", "parent": "mock-folder-id-video-2---mock-integration-testing"},
-        {"name": "music", "parent": "mock-folder-id-video-2---mock-integration-testing"},
-        {"name": "sound effects", "parent": "mock-folder-id-video-2---mock-integration-testing"},
-        {"name": "lowerthirds", "parent": "mock-folder-id-video-2---mock-integration-testing"},
-        {"name": "backgrounds", "parent": "mock-folder-id-video-2---mock-integration-testing"},
-        {"name": "broll", "parent": "mock-folder-id-video-2---mock-integration-testing"},
-        {"name": "raw", "parent": "mock-folder-id-video-1---mock-delivery-release"},
-        {"name": "export", "parent": "mock-folder-id-video-1---mock-delivery-release"},
-        {"name": "research", "parent": "mock-folder-id-video-1---mock-delivery-release"},
-        {"name": "music", "parent": "mock-folder-id-video-1---mock-delivery-release"},
-        {"name": "sound effects", "parent": "mock-folder-id-video-1---mock-delivery-release"},
-        {"name": "lowerthirds", "parent": "mock-folder-id-video-1---mock-delivery-release"},
-        {"name": "backgrounds", "parent": "mock-folder-id-video-1---mock-delivery-release"},
-        {"name": "broll", "parent": "mock-folder-id-video-1---mock-delivery-release"}
+        {"name": "project files", "parent": "mock-folder-id-video-1---mock-setup-verification"},
+        {"name": "script", "parent": "mock-folder-id-video-1---mock-setup-verification"},
+        {"name": "branding", "parent": "mock-folder-id-video-1---mock-setup-verification"},
+        {"name": "thumbnails", "parent": "mock-folder-id-video-1---mock-setup-verification"},
+        {"name": "01_raw_footage", "parent": "mock-folder-id-video-1---mock-setup-verification"},
+        {"name": "02_broll", "parent": "mock-folder-id-video-1---mock-setup-verification"},
+        {"name": "project files", "parent": "mock-folder-id-video-2---mock-integration-testing"},
+        {"name": "script", "parent": "mock-folder-id-video-2---mock-integration-testing"},
+        {"name": "branding", "parent": "mock-folder-id-video-2---mock-integration-testing"},
+        {"name": "thumbnails", "parent": "mock-folder-id-video-2---mock-integration-testing"},
+        {"name": "01_raw_footage", "parent": "mock-folder-id-video-2---mock-integration-testing"},
+        {"name": "02_broll", "parent": "mock-folder-id-video-2---mock-integration-testing"},
+        {"name": "project files", "parent": "mock-folder-id-video-1---mock-delivery-release"},
+        {"name": "script", "parent": "mock-folder-id-video-1---mock-delivery-release"},
+        {"name": "branding", "parent": "mock-folder-id-video-1---mock-delivery-release"},
+        {"name": "thumbnails", "parent": "mock-folder-id-video-1---mock-delivery-release"},
+        {"name": "01_raw_footage", "parent": "mock-folder-id-video-1---mock-delivery-release"},
+        {"name": "02_broll", "parent": "mock-folder-id-video-1---mock-delivery-release"}
     ]
     assert_4b = all(any(c["name"] == sf["name"] and c["parent_id"] == sf["parent"] for c in mock_drive.create_calls) for sf in subfolders_expected)
     if assert_4b:
-        log_success("Assert 4b: Video subfolders (raw, export, research, music, sound effects, lowerthirds, backgrounds, broll) created under all videos")
+        log_success("Assert 4b: Video subfolders (project files, script, branding, thumbnails, 01_raw_footage, 02_broll) created under all videos")
     else:
         log_error("Assert 4b: Video subfolder creation requests missing or parented incorrectly")
         tests_failed += 1

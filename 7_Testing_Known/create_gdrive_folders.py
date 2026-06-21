@@ -440,15 +440,13 @@ def main():
                     # Update Supabase database
                     update_supabase_link("course_videos", vid["id"], vid_url)
                 
-                # Create subfolders: raw, export, research, music, sound effects, lowerthirds, backgrounds, broll
-                raw_id = drive_service.get_or_create_folder("raw", vid_id)
-                export_id = drive_service.get_or_create_folder("export", vid_id)
-                research_id = drive_service.get_or_create_folder("research", vid_id)
-                music_id = drive_service.get_or_create_folder("music", vid_id)
-                se_id = drive_service.get_or_create_folder("sound effects", vid_id)
-                lt_id = drive_service.get_or_create_folder("lowerthirds", vid_id)
-                bg_id = drive_service.get_or_create_folder("backgrounds", vid_id)
-                broll_id = drive_service.get_or_create_folder("broll", vid_id)
+                # Create subfolders: project files, script, branding, thumbnails, 01_raw_footage, 02_broll
+                pf_id = drive_service.get_or_create_folder("project files", vid_id)
+                scr_id = drive_service.get_or_create_folder("script", vid_id)
+                brand_id = drive_service.get_or_create_folder("branding", vid_id)
+                thumb_id = drive_service.get_or_create_folder("thumbnails", vid_id)
+                rf_id = drive_service.get_or_create_folder("01_raw_footage", vid_id)
+                br_id = drive_service.get_or_create_folder("02_broll", vid_id)
                 
                 vid_report = {
                     "id": vid["id"],
@@ -457,14 +455,12 @@ def main():
                     "folder_id": vid_id,
                     "folder_url": vid_url,
                     "subfolders": {
-                        "raw_id": raw_id,
-                        "export_id": export_id,
-                        "research_id": research_id,
-                        "music_id": music_id,
-                        "se_id": se_id,
-                        "lowerthirds_id": lt_id,
-                        "backgrounds_id": bg_id,
-                        "broll_id": broll_id
+                        "project_files_id": pf_id,
+                        "script_id": scr_id,
+                        "branding_id": brand_id,
+                        "thumbnails_id": thumb_id,
+                        "raw_footage_id": rf_id,
+                        "broll_id": br_id
                     }
                 }
                 mod_report["videos"].append(vid_report)
@@ -508,14 +504,14 @@ def write_markdown_report(data):
         total_folders += 1
         total_modules += 1
         for vid in mod["videos"]:
-            total_folders += 9 # Video folder + 8 subfolders
+            total_folders += 7 # Video folder + 6 subfolders
             total_videos += 1
-            total_subfolders += 8
+            total_subfolders += 6
             
     lines.extend([
         f"| 📚 Course Modules | ✅ Synced | {total_modules} records | Mapped to `course_modules.links` |",
         f"| 🎞️ Course Videos | ✅ Synced | {total_videos} records | Mapped to `course_videos.links` |",
-        f"| ⚙️ Video Assets (Subfolders) | ✅ Synced | {total_subfolders} folders | Nested subfolders `raw`, `export`, `research`, `music`, `sound effects`, `lowerthirds`, `backgrounds`, `broll` |",
+        f"| ⚙️ Video Assets (Subfolders) | ✅ Synced | {total_subfolders} folders | Nested subfolders `project files`, `script`, `branding`, `thumbnails`, `01_raw_footage`, `02_broll` |",
         f"",
         f"**Total Directories Synchronized:** `{total_folders}`",
         f"",
@@ -531,7 +527,7 @@ def write_markdown_report(data):
         for vid in mod["videos"]:
             lines.append(f"    - 📁 **Video {vid['number']} - {vid['title']}**")
             lines.append(f"      - 🔗 [Open Video Folder]({vid['folder_url']})")
-            lines.append(f"      - 🗂️ Subfolders: `raw`, `export`, `research`, `music`, `sound effects`, `lowerthirds`, `backgrounds`, `broll` created")
+            lines.append(f"      - 🗂️ Subfolders: `project files`, `script`, `branding`, `thumbnails`, `01_raw_footage`, `02_broll` created")
             
     lines.append("")
     lines.append("## 🏆 Outcome & Verification")
