@@ -674,12 +674,31 @@ let carouselData = [];
     setTimeout(() => overlay.classList.add('active'), 10);
 
     try {
-      const res = await fetch(
-        `${SUPABASE_URL}/rest/v1/research_relationships?container=eq.research-images&video_id=eq.${videoId}&select=item_name,container`,
-        { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
-      );
-      const rows = res.ok ? await res.json() : [];
-      const relatedNames = [...new Set((rows || []).map(r => r.item_name))];
+      // Sentence ids belonging to this video (for the sentence-link UNION).
+      const sentIds = (allSentences || [])
+        .filter(s => s && s.video_id === videoId && s.id)
+        .map(s => s.id);
+
+      const hdrs = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` };
+
+      // Task 1: video-level relationships — keep video_id, drop the container filter
+      // so relationships from any container are considered.
+      const videoRelUrl = `${SUPABASE_URL}/rest/v1/research_relationships?video_id=eq.${videoId}&select=item_name`;
+      const videoRes = await fetch(videoRelUrl, { headers: hdrs });
+      const videoRows = videoRes.ok ? await videoRes.json() : [];
+
+      // Task 2: UNION sentence-level relationships ("Link an image to this sentence")
+      // for every sentence that belongs to this video, surfacing more images.
+      let sentRows = [];
+      if (sentIds.length) {
+        const sentRelUrl = `${SUPABASE_URL}/rest/v1/research_relationships?sentence_id=in.(${sentIds.join(',')})&select=item_name`;
+        const sentRes = await fetch(sentRelUrl, { headers: hdrs });
+        sentRows = sentRes.ok ? await sentRes.json() : [];
+      }
+
+      const videoNames = (videoRows || []).map(r => r.item_name);
+      const sentNames = (sentRows || []).map(r => r.item_name);
+      const relatedNames = [...new Set([...videoNames, ...sentNames].filter(Boolean))];
 
       const allFilesRes = await fetch(`/api/research/files?container=research-images`);
       const allFiles = allFilesRes.ok ? await allFilesRes.json() : [];
@@ -687,7 +706,8 @@ let carouselData = [];
       const thumbMap = {};
       (allFiles || []).forEach(f => { thumbMap[f.name] = true; });
 
-      // Only show images actually linked to this video; no fallback to all container files.
+      // Only show images actually linked to this video (video-level OR sentence-level);
+      // no fallback to all container files.
       const relatedSet = new Set(relatedNames.map(n => n.toLowerCase()));
       const allFileNames = (allFiles || []).map(f => f.name);
       const blobNameSet = new Set(allFileNames.map(n => n.toLowerCase()));
@@ -696,38 +716,57 @@ let carouselData = [];
 
       if (matchedNames.length === 0) {
         // Debug panel: surface the exact query used so the empty result can be diagnosed.
-        const relRestUrl = `${SUPABASE_URL}/rest/v1/research_relationships?container=eq.research-images&video_id=eq.${videoId}&select=item_name,container`;
+        const videoRestUrl = videoRelUrl;
+        const sentRestUrl = sentIds.length
+          ? `${SUPABASE_URL}/rest/v1/research_relationships?sentence_id=in.(${sentIds.join(',')})&select=item_name`
+          : null;
         const filesRestUrl = `/api/research/files?container=research-images`;
-        const relSql = `SELECT item_name, container\nFROM research_relationships\nWHERE container = 'research-images'\n  AND video_id = ${videoId};`;
+        const sentIdsList = sentIds.length ? sentIds.join(', ') : '(none)';
+        const relSql = `-- Task 1: video-level links (any container)\nSELECT item_name\nFROM research_relationships\nWHERE video_id = ${videoId};\n\nUNION\n\n-- Task 2: sentence-level links ("Link an image to this sentence")\nSELECT item_name\nFROM research_relationships\nWHERE sentence_id IN (${sentIdsList});`;
         const unmatched = relatedNames.filter(n => !blobNameSet.has(n.toLowerCase()));
         const unmatchedHtml = unmatched.length
           ? unmatched.map(n => `<li>${esc(n)}</li>`).join('')
           : '<li style="color:var(--success);">— none —</li>';
+        const sentBlock = sentRestUrl
+          ? `<div style="background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:14px; margin-bottom:10px;">
+              <div style="font-size:0.8rem; font-weight:700; color:#34d399; margin-bottom:6px;">🧾 SQL used (sentence-level links)</div>
+              <div style="font-size:0.72rem; color:var(--text-muted); word-break:break-all;">REST: <a href="${sentRestUrl}" target="_blank" style="color:#93c5fd;">${esc(sentRestUrl)}</a></div>
+              <div style="font-size:0.72rem; color:var(--text-muted); margin-top:4px;">Sentence IDs: ${esc(sentIdsList)} · matched: <strong style="color:var(--text-main);">${sentNames.length}</strong></div>
+            </div>`
+          : '<div style="font-size:0.74rem; color:var(--text-muted); margin-bottom:10px;">ℹ️ No sentences found for this video — sentence-level UNION skipped.</div>';
         body.innerHTML = `
           <div class="carousel-empty" style="text-align:left;">
             <div style="font-size:1.05rem; margin-bottom:12px;">🎞 No video images could be resolved for this video.</div>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:16px;">
               <div style="background:rgba(0,0,0,0.3); border-radius:10px; padding:12px;">
                 <div style="font-size:0.8rem; font-weight:700; color:#c084fc; margin-bottom:4px;">📊 Diagnostics</div>
-                <div style="font-size:0.78rem; color:var(--text-muted);">Relationships linked: <strong style="color:var(--text-main);">${relatedNames.length}</strong></div>
+                <div style="font-size:0.78rem; color:var(--text-muted);">Video-level links: <strong style="color:var(--text-main);">${videoNames.length}</strong></div>
+                <div style="font-size:0.78rem; color:var(--text-muted);">Sentence-level links: <strong style="color:var(--text-main);">${sentNames.length}</strong></div>
+                <div style="font-size:0.78rem; color:var(--text-muted);">Unique item names: <strong style="color:var(--text-main);">${relatedNames.length}</strong></div>
                 <div style="font-size:0.78rem; color:var(--text-muted);">Files in container: <strong style="color:var(--text-main);">${allFileNames.filter(n => !n.startsWith('__thumb__')).length}</strong></div>
                 <div style="font-size:0.78rem; color:var(--text-muted);">Matched blobs: <strong style="color:#ef4444;">0</strong></div>
               </div>
               <div style="background:rgba(0,0,0,0.3); border-radius:10px; padding:12px;">
                 <div style="font-size:0.8rem; font-weight:700; color:#ef4444; margin-bottom:4px;">⚠️ Linked but missing in storage</div>
-                <ul style="font-size:0.74rem; color:var(--text-muted); padding-left:16px; margin:0; max-height:90px; overflow:auto;">${unmatchedHtml}</ul>
+                <ul style="font-size:0.74rem; color:var(--text-muted); padding-left:16px; margin:0; max-height:110px; overflow:auto;">${unmatchedHtml}</ul>
+              </div>
+              <div style="background:rgba(0,0,0,0.3); border-radius:10px; padding:12px;">
+                <div style="font-size:0.8rem; font-weight:700; color:#3b82f6; margin-bottom:4px;">🔗 Source breakdown</div>
+                <div style="font-size:0.74rem; color:var(--text-muted);">video_id = ${videoId} → ${videoNames.length}</div>
+                <div style="font-size:0.74rem; color:var(--text-muted);">sentence_id IN (${sentIds.length}) → ${sentNames.length}</div>
               </div>
             </div>
             <div style="background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:14px; margin-bottom:10px;">
-              <div style="font-size:0.8rem; font-weight:700; color:#34d399; margin-bottom:6px;">🧾 SQL used (relationships)</div>
+              <div style="font-size:0.8rem; font-weight:700; color:#34d399; margin-bottom:6px;">🧾 SQL used (union of video + sentence links)</div>
               <pre style="font-size:0.78rem; color:#93c5fd; background:rgba(0,0,0,0.4); padding:10px; border-radius:8px; overflow:auto; margin:0;">${esc(relSql)}</pre>
-              <div style="font-size:0.72rem; color:var(--text-muted); margin-top:8px; word-break:break-all;">REST: <a href="${relRestUrl}" target="_blank" style="color:#93c5fd;">${esc(relRestUrl)}</a></div>
+              <div style="font-size:0.72rem; color:var(--text-muted); margin-top:8px; word-break:break-all;">Video REST: <a href="${videoRestUrl}" target="_blank" style="color:#93c5fd;">${esc(videoRestUrl)}</a></div>
             </div>
+            ${sentBlock}
             <div style="background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:14px;">
               <div style="font-size:0.8rem; font-weight:700; color:#34d399; margin-bottom:6px;">🧾 Files endpoint used (blob listing)</div>
               <div style="font-size:0.72rem; color:var(--text-muted); word-break:break-all;">REST: <a href="${filesRestUrl}" target="_blank" style="color:#93c5fd;">${esc(filesRestUrl)}</a></div>
             </div>
-            <div style="font-size:0.74rem; color:var(--text-muted); margin-top:14px; line-height:1.5;">💡 The relationship table returned <strong>${relatedNames.length}</strong> item name(s) for video_id <strong>${videoId}</strong>, but none of them exist in the <strong>research-images</strong> blob container (or their names do not match). Upload the missing files or re-link the correct filenames on the Scripts page.</div>
+            <div style="font-size:0.74rem; color:var(--text-muted); margin-top:14px; line-height:1.5;">💡 The relationship table returned <strong>${relatedNames.length}</strong> unique item name(s) for video_id <strong>${videoId}</strong> (video-level + sentence-level), but none of them exist in the <strong>research-images</strong> blob container (or their names do not match). Upload the missing files or re-link the correct filenames on the Scripts page.</div>
           </div>`;
         return;
       }

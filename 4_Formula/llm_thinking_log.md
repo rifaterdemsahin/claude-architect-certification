@@ -1309,3 +1309,38 @@ new panel will render for that case. No behaviour change for videos that do
 resolve (existing carousel path unchanged).
 
 **Status:** IMPLEMENTED, pending commit + push.
+
+### 2026-06-21 — 🎞️ Talking Heads carousel: drop container filter + UNION sentence links
+
+**Task 1:** Remove `container=eq.research-images` from the relationship query,
+keep `video_id=eq.${videoId}`. The carousel now pulls every
+research_relationships row for the video regardless of container (audio/video
+rows simply won't match image blobs).
+
+**Task 2:** UNION the sentence-level links ("Link an image to this sentence")
+for every sentence that belongs to this video, surfacing more images. Sentence
+ids are derived from the already-loaded `allSentences` (filtered by
+`video_id`). The two result sets are merged + deduped before matching against
+the `research-images` blob listing.
+
+**Result:** For video 1 this now surfaces sentence-linked images (e.g.
+sentence 142 → `Gemini_Generated_Image_ucrs0lucrs0lucrs.png`,
+`WhatsApp Image 2026-06-14 at 22.04.48.jpeg`; sentence 144 →
+`Gemini_Generated_Image_ije39mije39mije3.png`, etc.) in addition to the
+video-level links.
+
+**Empty-state panel** updated to reflect the new query shape:
+```sql
+SELECT item_name FROM research_relationships WHERE video_id = <id>;
+UNION
+SELECT item_name FROM research_relationships WHERE sentence_id IN (...);
+```
+Diagnostics now show video-level vs sentence-level link counts, a source
+breakdown card, the sentence-level REST URL, and the sentence id list.
+
+**Verification:** `go build ./... && go vet ./...` pass; page serves HTTP 200;
+`node --check` on the inline script passes. Confirmed video 1's talking-head
+sentences (142, 144, 146, 147, 148, 149, ...) carry sentence-linked images
+that exist in the `research-images` container.
+
+**Status:** IMPLEMENTED, pending commit + push.
