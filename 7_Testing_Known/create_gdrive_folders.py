@@ -440,10 +440,15 @@ def main():
                     # Update Supabase database
                     update_supabase_link("course_videos", vid["id"], vid_url)
                 
-                # Create subfolders: raw, export, research
+                # Create subfolders: raw, export, research, music, sound effects, lowerthirds, backgrounds, broll
                 raw_id = drive_service.get_or_create_folder("raw", vid_id)
                 export_id = drive_service.get_or_create_folder("export", vid_id)
                 research_id = drive_service.get_or_create_folder("research", vid_id)
+                music_id = drive_service.get_or_create_folder("music", vid_id)
+                se_id = drive_service.get_or_create_folder("sound effects", vid_id)
+                lt_id = drive_service.get_or_create_folder("lowerthirds", vid_id)
+                bg_id = drive_service.get_or_create_folder("backgrounds", vid_id)
+                broll_id = drive_service.get_or_create_folder("broll", vid_id)
                 
                 vid_report = {
                     "id": vid["id"],
@@ -454,7 +459,12 @@ def main():
                     "subfolders": {
                         "raw_id": raw_id,
                         "export_id": export_id,
-                        "research_id": research_id
+                        "research_id": research_id,
+                        "music_id": music_id,
+                        "se_id": se_id,
+                        "lowerthirds_id": lt_id,
+                        "backgrounds_id": bg_id,
+                        "broll_id": broll_id
                     }
                 }
                 mod_report["videos"].append(vid_report)
@@ -498,14 +508,14 @@ def write_markdown_report(data):
         total_folders += 1
         total_modules += 1
         for vid in mod["videos"]:
-            total_folders += 4 # Video folder + raw + export + research
+            total_folders += 9 # Video folder + 8 subfolders
             total_videos += 1
-            total_subfolders += 3
+            total_subfolders += 8
             
     lines.extend([
         f"| 📚 Course Modules | ✅ Synced | {total_modules} records | Mapped to `course_modules.links` |",
         f"| 🎞️ Course Videos | ✅ Synced | {total_videos} records | Mapped to `course_videos.links` |",
-        f"| ⚙️ Video Assets (Subfolders) | ✅ Synced | {total_subfolders} folders | Nested subfolders `raw`, `export`, `research` |",
+        f"| ⚙️ Video Assets (Subfolders) | ✅ Synced | {total_subfolders} folders | Nested subfolders `raw`, `export`, `research`, `music`, `sound effects`, `lowerthirds`, `backgrounds`, `broll` |",
         f"",
         f"**Total Directories Synchronized:** `{total_folders}`",
         f"",
@@ -521,7 +531,7 @@ def write_markdown_report(data):
         for vid in mod["videos"]:
             lines.append(f"    - 📁 **Video {vid['number']} - {vid['title']}**")
             lines.append(f"      - 🔗 [Open Video Folder]({vid['folder_url']})")
-            lines.append(f"      - 🗂️ Subfolders: `raw`, `export`, `research` created")
+            lines.append(f"      - 🗂️ Subfolders: `raw`, `export`, `research`, `music`, `sound effects`, `lowerthirds`, `backgrounds`, `broll` created")
             
     lines.append("")
     lines.append("## 🏆 Outcome & Verification")

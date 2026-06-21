@@ -1094,11 +1094,16 @@
               await saveFolderLinkToSupabase('course_videos', vidNode.dbId, vidFolderUrl);
             }
 
-            // Create subfolders: raw, export, research
-            log('info', `Creating subfolders 'raw', 'export', 'research' under video: "${vidNode.name}"`);
+            // Create subfolders: raw, export, research, music, sound effects, lowerthirds, backgrounds, broll
+            log('info', `Creating subfolders 'raw', 'export', 'research', 'music', 'sound effects', 'lowerthirds', 'backgrounds', 'broll' under video: "${vidNode.name}"`);
             await getOrCreateDriveFolder('raw', vidFolderId);
             await getOrCreateDriveFolder('export', vidFolderId);
             await getOrCreateDriveFolder('research', vidFolderId);
+            await getOrCreateDriveFolder('music', vidFolderId);
+            await getOrCreateDriveFolder('sound effects', vidFolderId);
+            await getOrCreateDriveFolder('lowerthirds', vidFolderId);
+            await getOrCreateDriveFolder('backgrounds', vidFolderId);
+            await getOrCreateDriveFolder('broll', vidFolderId);
 
             updateNodeStatus(vidNode, 'success');
           }
@@ -1366,12 +1371,12 @@
           detail: "All missing video folders must be created on Google Drive."
         });
 
-        // Assert 5: Total drive creation calls matches count of modules and videos and their subfolders (14 calls)
-        const driveCallsCount = createCalls.length === 14;
+        // Assert 5: Total drive creation calls matches count of modules and videos and their subfolders (29 calls)
+        const driveCallsCount = createCalls.length === 29;
         assertions.push({
           name: "Total Drive folder creation calls count",
           passed: driveCallsCount,
-          detail: `Expected 14 folder creations (2 modules, 3 videos, and 9 subfolders), got ${createCalls.length}`
+          detail: `Expected 29 folder creations (2 modules, 3 videos, and 24 subfolders), got ${createCalls.length}`
         });
 
         // Assert 6: Supabase database update calls executed for modules and videos (5 calls)
