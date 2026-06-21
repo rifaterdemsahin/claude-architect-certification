@@ -1093,3 +1093,18 @@ Python suite green; HTML inline JS syntax validated (browser auto-run unavailabl
 
 ### ✅ Outcome
 Python suite green; Python + HTML JS syntax validated. Browser auto-run still unavailable (extension offline).
+
+---
+
+## 2026-06-21 — 🩹 GDrive Creator: root-folder URL persistence + clear mock-vs-real distinction
+
+### 🐛 Symptoms
+1. Saved root folder URL didn't reappear on reload (cookie-creds path skipped `loadConfigFromSupabase`, which was the only thing populating the field).
+2. User saw `mock-folder-id-*` folders and "ALL folders generated successfully" — the `?test=true` auto-run runs the mock suite (mock outline + mock gapi), which looks identical to a real run.
+
+### 🛠 Fixes
+- **Root folder URL:** persists to cookie + localStorage on save; new `loadRootFolderId()` shows the cached value instantly then refreshes from Supabase via REST. Called on every page load (both credential paths). Field stays editable.
+- **Mock vs real clarity:** `simTag()` prefixes simulated folder/README logs with `[SIMULATED]`; Drive 🔗 links suppressed in mock mode; final message in test mode now says "SIMULATION complete — NOTHING created in Google Drive" with steps to do a real run; prominent yellow TEST MODE banner shown while the mock suite runs; clearer "Connect your Google account first" guard on the real generate path.
+
+### ✅ Outcome
+Real folders require: open WITHOUT `?test=true` → Connect Google Account → Generate. Python suite green; HTML JS syntax validated.
