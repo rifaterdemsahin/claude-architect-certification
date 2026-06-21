@@ -592,12 +592,12 @@
 
     // ── SUPABASE INTERACTION ──
     async function loadCourseOutline() {
-      if (!db) {
-        log('error', 'Supabase client is not initialized.');
-        return;
-      }
-      log('info', 'Fetching outline from Supabase tables...');
+      log('info', 'Loading outline structure...');
       try {
+        if (!db) {
+          throw new Error('Supabase client not initialized.');
+        }
+        
         const { data, error } = await db
           .from('course_modules')
           .select('*, course_videos(*)')
@@ -613,11 +613,64 @@
         });
 
         courseOutline = data;
-        log('success', `Loaded ${data.length} modules from database.`);
-        
-        buildFolderTree();
+        log('success', `✓ Successfully loaded ${data.length} modules from Supabase.`);
       } catch (err) {
-        log('error', 'Failed to retrieve outline: ' + err.message);
+        log('warn', 'Using offline course template fallback: ' + err.message);
+        // Clean default course fallback structure
+        courseOutline = [
+          {
+            id: 1,
+            module_number: 1,
+            title: "Claude Ecosystem & Flows",
+            course_videos: [
+              { id: 1, video_number: 1, title: "Architecture Overview" },
+              { id: 2, video_number: 2, title: "Stateful Orchestration" },
+              { id: 3, video_number: 3, title: "Production Wiring" }
+            ]
+          },
+          {
+            id: 2,
+            module_number: 2,
+            title: "Model Context Protocol (MCP)",
+            course_videos: [
+              { id: 4, video_number: 1, title: "MCP Fundamentals" },
+              { id: 5, video_number: 2, title: "Building an MCP Server" },
+              { id: 6, video_number: 3, title: "Enterprise MCP" }
+            ]
+          },
+          {
+            id: 3,
+            module_number: 3,
+            title: "Zero-Data Retention (ZDR)",
+            course_videos: [
+              { id: 7, video_number: 1, title: "ZDR Principles" },
+              { id: 8, video_number: 2, title: "Implementing ZDR" },
+              { id: 9, video_number: 3, title: "ZDR in Production" }
+            ]
+          },
+          {
+            id: 4,
+            module_number: 4,
+            title: "Deterministic Routers",
+            course_videos: [
+              { id: 10, video_number: 1, title: "Router Architecture" },
+              { id: 11, video_number: 2, title: "Building the Router" },
+              { id: 12, video_number: 3, title: "Router in Production" }
+            ]
+          },
+          {
+            id: 5,
+            module_number: 5,
+            title: "Financial Engineering",
+            course_videos: [
+              { id: 13, video_number: 1, title: "Cost Optimization Fundamentals" },
+              { id: 14, video_number: 2, title: "Implementing Caching" },
+              { id: 15, video_number: 3, title: "Enterprise ROI" }
+            ]
+          }
+        ];
+      } finally {
+        buildFolderTree();
       }
     }
 
