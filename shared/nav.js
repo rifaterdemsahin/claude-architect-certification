@@ -150,16 +150,26 @@
         {
           label: '🛠️ Tools',
           children: [
-            { label: '🐙 GitHub Repo', url: 'https://github.com/rifaterdemsahin/claude-architect-certification' },
-            { label: '💳 GitHub Billing Usage', url: 'https://github.com/settings/billing/usage?period=3&group=0&customer=592572' },
-            { label: '🔥 Supabase', url: 'https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/' },
-            { label: '📡 Axiom Errors Admin', url: '/admin/errors' },
-            { label: '🗃 Preprod Data Admin', url: '5_Symbols/production/preprod/tools/admin.html' },
-            { label: '🗄️ Database Analysis', url: '5_Symbols/production/preprod/tools/database_analysis.html', description: 'Collapsible analysis of every Supabase table: row counts, columns, and relationships.' },
-            { label: '🏠 Home Template', url: '5_Symbols/templates/index.html' },
-            { label: '📋 Error Log Template', url: '5_Symbols/templates/axiom_errors.html' },
-            { label: '☁️ Google Cloud API', url: 'https://console.cloud.google.com/' },
-            { label: '🤖 Claude Guide', url: 'claude.md' }
+            { group: true, label: '🐙 Code & Repo', children: [
+              { label: '🐙 GitHub Repo', url: 'https://github.com/rifaterdemsahin/claude-architect-certification' },
+              { label: '💳 GitHub Billing Usage', url: 'https://github.com/settings/billing/usage?period=3&group=0&customer=592572' }
+            ]},
+            { group: true, label: '🗄️ Data & Backend', children: [
+              { label: '🔥 Supabase', url: 'https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/' },
+              { label: '🗃 Preprod Data Admin', url: '5_Symbols/production/preprod/tools/admin.html' },
+              { label: '🗄️ Database Analysis', url: '5_Symbols/production/preprod/tools/database_analysis.html', description: 'Collapsible analysis of every Supabase table: row counts, columns, and relationships.' }
+            ]},
+            { group: true, label: '📊 Logs & Monitoring', children: [
+              { label: '📡 Axiom Errors Admin', url: '/admin/errors' }
+            ]},
+            { group: true, label: '🎨 Templates & Sitemap', children: [
+              { label: '🏠 Home Template', url: '5_Symbols/templates/index.html' },
+              { label: '📋 Error Log Template', url: '5_Symbols/templates/axiom_errors.html' }
+            ]},
+            { group: true, label: '🤖 AI & APIs', children: [
+              { label: '☁️ Google Cloud API', url: 'https://console.cloud.google.com/' },
+              { label: '🤖 Claude Guide', url: 'claude.md' }
+            ]}
           ]
         }
     ]},
@@ -185,11 +195,19 @@
       {
         label: '🛠️ Tools',
         children: [
-          { label: '📝 Prompters', url: 'https://zacue.com/index.html' },
-          { label: '🔊 Audio Generator', url: 'https://secondbrain-kokoro.fly.dev/' },
-          { label: '🎨 VS Code: Terminal Profiles', url: 'markdown_renderer.html?file=5_Symbols/tools/vscode_terminal_profiles/formula.md' },
-          { label: '☁️ Azure Portal', url: 'https://portal.azure.com/' },
-          { label: '🎨 Thumbnail Assembly (Canva)', url: 'https://www.canva.com/design/DAGJhH098do/7a-TDVcjX482MetGV3HLPA/edit' }
+          { group: true, label: '🎙️ Audio & Voice', children: [
+            { label: '📝 Prompters', url: 'https://zacue.com/index.html' },
+            { label: '🔊 Audio Generator', url: 'https://secondbrain-kokoro.fly.dev/' }
+          ]},
+          { group: true, label: '🎨 Visuals', children: [
+            { label: '🎨 Thumbnail Assembly (Canva)', url: 'https://www.canva.com/design/DAGJhH098do/7a-TDVcjX482MetGV3HLPA/edit' }
+          ]},
+          { group: true, label: '💻 Dev Environment', children: [
+            { label: '🎨 VS Code: Terminal Profiles', url: 'markdown_renderer.html?file=5_Symbols/tools/vscode_terminal_profiles/formula.md' }
+          ]},
+          { group: true, label: '☁️ Cloud', children: [
+            { label: '☁️ Azure Portal', url: 'https://portal.azure.com/' }
+          ]}
         ]
       }
     ]},
@@ -225,12 +243,21 @@
       {
         label: '🛠️ Tools',
         children: [
-          { label: '🎨 Canva', url: 'https://canva.com' },
-          { label: '📺 YouTube Studio', url: 'https://studio.youtube.com/' },
-          { label: '🎬 Channel Playlist', url: 'https://www.youtube.com/watch?v=F8IBooe3bXY&list=PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy/' },
-          { label: '🎬 Studio Playlist Editor', url: 'https://studio.youtube.com/playlist/PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy/edit' },
-          { label: '✨ Gemini Guide', url: 'gemini.md' },
-          { label: '🗂️ Video Production Repos', url: '5_Symbols/production/postprod/github_repos.html', description: 'All rifaterdemsahin GitHub repos related to video production — kokoro, fal.ai, remotion, greenscreen, etc.' }
+          { group: true, label: '🎨 Design', children: [
+            { label: '🎨 Canva', url: 'https://canva.com' }
+          ]},
+          { group: true, label: '📺 YouTube', children: [
+            { label: '📺 YouTube Studio', url: 'https://studio.youtube.com/' },
+            { label: '🎬 Channel Playlist', url: 'https://www.youtube.com/watch?v=F8IBooe3bXY&list=PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy/' },
+            { label: '🎬 Studio Playlist Editor', url: 'https://studio.youtube.com/playlist/PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy/edit' }
+          ]},
+          { group: true, label: '🤖 Guides', children: [
+            { label: '✨ Gemini Guide', url: 'gemini.md' },
+            { label: '📜 Commit History', url: 'https://github.com/rifaterdemsahin/claude-architect-certification/commits/main' }
+          ]},
+          { group: true, label: '🗂️ Repos', children: [
+            { label: '🗂️ Video Production Repos', url: '5_Symbols/production/postprod/github_repos.html', description: 'All rifaterdemsahin GitHub repos related to video production — kokoro, fal.ai, remotion, greenscreen, etc.' }
+          ]}
         ]
       }
     ]}
@@ -273,11 +300,22 @@
   }
 
   /* ---- recursively render a non-top-level menu item ---------------------
-     Groups (items with children) become nested subdropdowns to any depth;
-     the existing .site-subdrop-menu CSS (position:absolute; left:100%)
+     Items with children become nested subdropdowns; group headers are
+     rendered as non-interactive section labels inside the current menu.
+     The existing .site-subdrop-menu CSS (position:absolute; left:100%)
      cascades, so a 4th level flies out to the right of the 3rd. ---------- */
   function renderSubItem(item) {
     if (item.hideAfterDays && daysSinceLaunch >= item.hideAfterDays) return '';
+    if (item.group) {
+      var h = '<div class="site-drop-group-header">' + item.label + '</div>';
+      if (item.children) {
+        var visible = item.children.filter(function (c) {
+          return !(c.hideAfterDays && daysSinceLaunch >= c.hideAfterDays);
+        });
+        visible.forEach(function (c) { h += renderSubItem(c); });
+      }
+      return h;
+    }
     if (item.children) {
       var visible = item.children.filter(function (c) {
         return !(c.hideAfterDays && daysSinceLaunch >= c.hideAfterDays);
@@ -424,6 +462,7 @@
   function buildSearchIndex(items, parentPath) {
     var index = [];
     items.forEach(function (item) {
+      if (item.group) return;
       var currentPath = parentPath ? parentPath + ' ➔ ' + item.label : item.label;
       if (item.children) {
         index = index.concat(buildSearchIndex(item.children, currentPath));

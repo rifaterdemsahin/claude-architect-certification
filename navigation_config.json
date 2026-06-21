@@ -206,71 +206,101 @@
           "label": "🛠️ Tools",
           "children": [
             {
-              "label": "🐙 GitHub Repo",
-              "url": "https://github.com/rifaterdemsahin/claude-architect-certification"
+              "group": true,
+              "label": "🐙 Code & Repo",
+              "children": [
+                {
+                  "label": "🐙 GitHub Repo",
+                  "url": "https://github.com/rifaterdemsahin/claude-architect-certification"
+                },
+                {
+                  "label": "💳 GitHub Billing Usage",
+                  "url": "https://github.com/settings/billing/usage?period=3&group=0&customer=592572"
+                }
+              ]
             },
             {
-              "label": "💳 GitHub Billing Usage",
-              "url": "https://github.com/settings/billing/usage?period=3&group=0&customer=592572"
+              "group": true,
+              "label": "🗄️ Data & Backend",
+              "children": [
+                {
+                  "label": "🔥 Supabase",
+                  "url": "https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/"
+                },
+                {
+                  "label": "🧪 Supabase SQL Queries",
+                  "url": "https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/sql/05ea76ba-cb44-44c6-b83a-f85a226bc315",
+                  "description": "Execute and manage Supabase SQL queries."
+                },
+                {
+                  "label": "🗄 Database Schema",
+                  "url": "https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/database/schemas"
+                },
+                {
+                  "label": "🗃 Preprod Data Admin",
+                  "url": "5_Symbols/production/preprod/tools/admin.html"
+                },
+                {
+                  "label": "🗄️ Database Analysis",
+                  "url": "5_Symbols/production/preprod/tools/database_analysis.html",
+                  "description": "Collapsible analysis of every Supabase table: row counts, columns, and relationships."
+                }
+              ]
             },
             {
-              "label": "🔥 Supabase",
-              "url": "https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/"
+              "group": true,
+              "label": "📊 Logs & Monitoring",
+              "children": [
+                {
+                  "label": "📜 Project Logs",
+                  "url": "5_Symbols/production/preprod/log_viewer.html",
+                  "description": "Unified viewer for error.log and fix.log with search and filtering."
+                },
+                {
+                  "label": "📡 Axiom Errors Admin",
+                  "url": "/admin/errors"
+                }
+              ]
             },
             {
-              "label": "🧪 Supabase SQL Queries",
-              "url": "https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/sql/05ea76ba-cb44-44c6-b83a-f85a226bc315",
-              "description": "Execute and manage Supabase SQL queries."
+              "group": true,
+              "label": "🎨 Templates & Sitemap",
+              "children": [
+                {
+                  "label": "🗺 Project Sitemap",
+                  "url": "5_Symbols/tools/sitemap.html"
+                },
+                {
+                  "label": "🏠 Home Template",
+                  "url": "5_Symbols/templates/index.html"
+                },
+                {
+                  "label": "📋 Error Log Template",
+                  "url": "5_Symbols/templates/axiom_errors.html"
+                }
+              ]
             },
             {
-              "label": "🗄 Database Schema",
-              "url": "https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/database/schemas"
-            },
-            {
-              "label": "🗃 Preprod Data Admin",
-              "url": "5_Symbols/production/preprod/tools/admin.html"
-            },
-            {
-              "label": "🗄️ Database Analysis",
-              "url": "5_Symbols/production/preprod/tools/database_analysis.html",
-              "description": "Collapsible analysis of every Supabase table: row counts, columns, and relationships."
-            },
-            {
-              "label": "📜 Project Logs",
-              "url": "5_Symbols/production/preprod/log_viewer.html",
-              "description": "Unified viewer for error.log and fix.log with search and filtering."
-            },
-            {
-              "label": "📡 Axiom Errors Admin",
-              "url": "/admin/errors"
-            },
-            {
-              "label": "🗺 Project Sitemap",
-              "url": "5_Symbols/tools/sitemap.html"
-            },
-            {
-              "label": "🏠 Home Template",
-              "url": "5_Symbols/templates/index.html"
-            },
-            {
-              "label": "📋 Error Log Template",
-              "url": "5_Symbols/templates/axiom_errors.html"
-            },
-            {
-              "label": "☁️ Google Cloud API",
-              "url": "https://console.cloud.google.com/"
-            },
-            {
-              "label": "🤖 Claude Guide",
-              "url": "claude.md"
-            },
-            {
-              "label": "🔀 OpenRouter Logs",
-              "url": "https://openrouter.ai/logs"
-            },
-            {
-              "label": "🎧 Audio Player (Gemini Studio)",
-              "url": "https://aistudio.google.com/apps/b66c6f93-8411-4eb3-b7b0-63edbb8d509a?showPreview=true&showAssistant=true"
+              "group": true,
+              "label": "🤖 AI & APIs",
+              "children": [
+                {
+                  "label": "☁️ Google Cloud API",
+                  "url": "https://console.cloud.google.com/"
+                },
+                {
+                  "label": "🤖 Claude Guide",
+                  "url": "claude.md"
+                },
+                {
+                  "label": "🔀 OpenRouter Logs",
+                  "url": "https://openrouter.ai/logs"
+                },
+                {
+                  "label": "🎧 Audio Player (Gemini Studio)",
+                  "url": "https://aistudio.google.com/apps/b66c6f93-8411-4eb3-b7b0-63edbb8d509a?showPreview=true&showAssistant=true"
+                }
+              ]
             }
           ]
         }
@@ -315,25 +345,49 @@
           "label": "🛠️ Tools",
           "children": [
             {
-              "label": "📝 Prompters",
-              "url": "https://zacue.com/index.html"
+              "group": true,
+              "label": "🎙️ Audio & Voice",
+              "children": [
+                {
+                  "label": "📝 Prompters",
+                  "url": "https://zacue.com/index.html"
+                },
+                {
+                  "label": "🔊 Audio Generator",
+                  "url": "https://secondbrain-kokoro.fly.dev/"
+                }
+              ]
             },
             {
-              "label": "🔊 Audio Generator",
-              "url": "https://secondbrain-kokoro.fly.dev/"
+              "group": true,
+              "label": "🎨 Visuals",
+              "children": [
+                {
+                  "label": "🎨 Thumbnail Assembly (Canva)",
+                  "url": "https://www.canva.com/design/DAGJhH098do/7a-TDVcjX482MetGV3HLPA/edit"
+                }
+              ]
             },
             {
-              "label": "🎨 VS Code: Terminal Profiles",
-              "url": "markdown_renderer.html?file=5_Symbols/tools/vscode_terminal_profiles/formula.md",
-              "description": "Name and colour-code VS Code: integrated terminals for each AI agent."
+              "group": true,
+              "label": "💻 Dev Environment",
+              "children": [
+                {
+                  "label": "🎨 VS Code: Terminal Profiles",
+                  "url": "markdown_renderer.html?file=5_Symbols/tools/vscode_terminal_profiles/formula.md",
+                  "description": "Name and colour-code VS Code: integrated terminals for each AI agent."
+                }
+              ]
             },
             {
-              "label": "☁️ Azure Portal",
-              "url": "https://portal.azure.com/"
-            },
-            {
-              "label": "🎨 Thumbnail Assembly (Canva)",
-              "url": "https://www.canva.com/design/DAGJhH098do/7a-TDVcjX482MetGV3HLPA/edit"
+              "group": true,
+              "label": "☁️ Cloud",
+              "children": [
+                {
+                  "label": "☁️ Azure Portal",
+                  "url": "https://portal.azure.com/"
+                }
+              ]
             }
           ]
         }
@@ -493,33 +547,57 @@
           "label": "🛠️ Tools",
           "children": [
             {
-              "label": "🎨 Canva",
-              "url": "https://canva.com"
+              "group": true,
+              "label": "🎨 Design",
+              "children": [
+                {
+                  "label": "🎨 Canva",
+                  "url": "https://canva.com"
+                }
+              ]
             },
             {
-              "label": "📺 YouTube Studio",
-              "url": "https://studio.youtube.com/"
+              "group": true,
+              "label": "📺 YouTube",
+              "children": [
+                {
+                  "label": "📺 YouTube Studio",
+                  "url": "https://studio.youtube.com/"
+                },
+                {
+                  "label": "🎬 Channel Playlist",
+                  "url": "https://www.youtube.com/watch?v=F8IBooe3bXY&list=PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy/"
+                },
+                {
+                  "label": "🎬 Studio Playlist Editor",
+                  "url": "https://studio.youtube.com/playlist/PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy/edit"
+                }
+              ]
             },
             {
-              "label": "🎬 Channel Playlist",
-              "url": "https://www.youtube.com/watch?v=F8IBooe3bXY&list=PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy/"
+              "group": true,
+              "label": "🤖 Guides",
+              "children": [
+                {
+                  "label": "✨ Gemini Guide",
+                  "url": "gemini.md"
+                },
+                {
+                  "label": "📜 Commit History",
+                  "url": "https://github.com/rifaterdemsahin/claude-architect-certification/commits/main"
+                }
+              ]
             },
             {
-              "label": "🎬 Studio Playlist Editor",
-              "url": "https://studio.youtube.com/playlist/PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy/edit"
-            },
-            {
-              "label": "✨ Gemini Guide",
-              "url": "gemini.md"
-            },
-            {
-              "label": "📜 Commit History",
-              "url": "https://github.com/rifaterdemsahin/claude-architect-certification/commits/main"
-            },
-            {
-              "label": "🗂️ Video Production Repos",
-              "url": "5_Symbols/production/postprod/github_repos.html",
-              "description": "All rifaterdemsahin GitHub repos related to video production — kokoro, fal.ai, remotion, greenscreen, etc."
+              "group": true,
+              "label": "🗂️ Repos",
+              "children": [
+                {
+                  "label": "🗂️ Video Production Repos",
+                  "url": "5_Symbols/production/postprod/github_repos.html",
+                  "description": "All rifaterdemsahin GitHub repos related to video production — kokoro, fal.ai, remotion, greenscreen, etc."
+                }
+              ]
             }
           ]
         }

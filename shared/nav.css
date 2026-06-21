@@ -185,6 +185,26 @@
   opacity: 1 !important;
 }
 
+/* Group header inside dropdown menus */
+.site-drop-group-header {
+  padding: 8px 16px 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #6b7280;
+  margin-top: 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.site-drop-group-header:first-child {
+  border-top: none;
+  margin-top: 0;
+}
+
 /* Sub-dropdown (second level) */
 .site-nav-subdropdown {
   position: relative;

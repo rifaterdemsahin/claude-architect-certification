@@ -1546,11 +1546,16 @@
             {
               label: "🛠️ Tools",
               children: [
-                { label: "🐙 GitHub Repo", url: "https://github.com/rifaterdemsahin/claude-architect-certification" },
-                { label: "🔥 Supabase", url: "https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/" },
-                { label: "🗄 Database Schema", url: "https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/database/schemas" },
-                { label: "☁️ Google Cloud API", url: "https://console.cloud.google.com/" },
-                { label: "🤖 Claude Guide", url: "claude.md" }
+                { group: true, label: "🐙 Code & Repo", children: [
+                  { label: "🐙 GitHub Repo", url: "https://github.com/rifaterdemsahin/claude-architect-certification" },
+                  { label: "💳 GitHub Billing Usage", url: "https://github.com/settings/billing/usage?period=3&group=0&customer=592572" }
+                ]},
+                { group: true, label: "🗄️ Data & Backend", children: [
+                  { label: "🔥 Supabase", url: "https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/" },
+                  { label: "🗄 Database Schema", url: "https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/database/schemas" },
+                  { label: "☁️ Google Cloud API", url: "https://console.cloud.google.com/" },
+                  { label: "🤖 Claude Guide", url: "claude.md" }
+                ]}
               ]
             }
           ]
@@ -1568,11 +1573,19 @@
             {
               label: "🛠️ Tools",
               children: [
-              { label: "📝 Prompters", url: "https://zacue.com/index.html" },
-                { label: "🔊 Audio Generator", url: "https://secondbrain-kokoro.fly.dev/" },
-                { label: "🎨 VS Code: Terminal Profiles", url: "markdown_renderer.html?file=5_Symbols/tools/vscode_terminal_profiles/formula.md" },
-                { label: "☁️ Azure Portal", url: "https://portal.azure.com/" },
-                { label: "🎨 Thumbnail Assembly (Canva)", url: "https://www.canva.com/design/DAGJhH098do/7a-TDVcjX482MetGV3HLPA/edit" }
+                { group: true, label: "🎙️ Audio & Voice", children: [
+                  { label: "📝 Prompters", url: "https://zacue.com/index.html" },
+                  { label: "🔊 Audio Generator", url: "https://secondbrain-kokoro.fly.dev/" }
+                ]},
+                { group: true, label: "🎨 Visuals", children: [
+                  { label: "🎨 Thumbnail Assembly (Canva)", url: "https://www.canva.com/design/DAGJhH098do/7a-TDVcjX482MetGV3HLPA/edit" }
+                ]},
+                { group: true, label: "💻 Dev Environment", children: [
+                  { label: "🎨 VS Code: Terminal Profiles", url: "markdown_renderer.html?file=5_Symbols/tools/vscode_terminal_profiles/formula.md" }
+                ]},
+                { group: true, label: "☁️ Cloud", children: [
+                  { label: "☁️ Azure Portal", url: "https://portal.azure.com/" }
+                ]}
               ]
             }
           ]
@@ -1615,12 +1628,18 @@
             {
               label: "🛠️ Tools",
               children: [
-                { label: "🎨 Canva", url: "https://canva.com" },
-                { label: "📺 YouTube Studio", url: "https://studio.youtube.com/" },
-                { label: "🎬 Channel Playlist", url: "https://www.youtube.com/watch?v=F8IBooe3bXY&list=PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy/" },
-                { label: "🎬 Studio Playlist Editor", url: "https://studio.youtube.com/playlist/PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy/edit" },
-                { label: "✨ Gemini Guide", url: "gemini.md" },
-                { label: "📜 Commit History", url: "https://github.com/rifaterdemsahin/claude-architect-certification/commits/main" }
+                { group: true, label: "🎨 Design", children: [
+                  { label: "🎨 Canva", url: "https://canva.com" }
+                ]},
+                { group: true, label: "📺 YouTube", children: [
+                  { label: "📺 YouTube Studio", url: "https://studio.youtube.com/" },
+                  { label: "🎬 Channel Playlist", url: "https://www.youtube.com/watch?v=F8IBooe3bXY&list=PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy/" },
+                  { label: "🎬 Studio Playlist Editor", url: "https://studio.youtube.com/playlist/PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy/edit" }
+                ]},
+                { group: true, label: "🤖 Guides", children: [
+                  { label: "✨ Gemini Guide", url: "gemini.md" },
+                  { label: "📜 Commit History", url: "https://github.com/rifaterdemsahin/claude-architect-certification/commits/main" }
+                ]}
               ]
             }
           ]
@@ -1863,6 +1882,49 @@
              visibleChildren.forEach(child => {
               const isChildActive = isItemActive(child);
               const childActiveClass = isChildActive ? " active" : "";
+              if (child.group) {
+                const groupHeader = document.createElement("div");
+                groupHeader.className = "dropdown-group-header";
+                groupHeader.textContent = child.label;
+                groupHeader.style.cssText = "padding:8px 16px 4px;font-size:0.7rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#6b7280;margin-top:4px;border-top:1px solid rgba(255,255,255,0.06);pointer-events:none;white-space:nowrap;";
+                dropdown.appendChild(groupHeader);
+                if (child.children) {
+                  child.children
+                    .filter(sc => !(sc.hideAfterDays && daysSinceLaunch >= sc.hideAfterDays))
+                    .forEach(gc => {
+                      const gcActive = isItemActive(gc) ? " active" : "";
+                      if (gc.children) {
+                        const gcSubGroup = document.createElement("div");
+                        gcSubGroup.className = "menu-subgroup" + gcActive;
+                        const gcSubBtn = document.createElement("button");
+                        gcSubBtn.className = "menu-subgroup-btn";
+                        gcSubBtn.innerHTML = `${gc.label} <span class="chevron-right">▸</span>`;
+                        gcSubGroup.appendChild(gcSubBtn);
+                        const gcSubDropdown = document.createElement("div");
+                        gcSubDropdown.className = "menu-subdropdown";
+                        gc.children
+                          .filter(ggc => !(ggc.hideAfterDays && daysSinceLaunch >= ggc.hideAfterDays))
+                          .forEach(ggc => {
+                            const ggcActive = isItemActive(ggc) ? " active" : "";
+                            const ggcA = document.createElement("a");
+                            ggcA.href = resolveUrl(ggc.url);
+                            ggcA.className = "subdropdown-link" + ggcActive;
+                            ggcA.textContent = ggc.label;
+                            gcSubDropdown.appendChild(ggcA);
+                          });
+                        gcSubGroup.appendChild(gcSubDropdown);
+                        dropdown.appendChild(gcSubGroup);
+                      } else {
+                        const gcA = document.createElement("a");
+                        gcA.href = resolveUrl(gc.url);
+                        gcA.className = "dropdown-link" + gcActive;
+                        gcA.textContent = gc.label;
+                        dropdown.appendChild(gcA);
+                      }
+                    });
+                }
+                return;
+              }
               if (child.children) {
                 const subVisible = child.children.filter(sc => !(sc.hideAfterDays && daysSinceLaunch >= sc.hideAfterDays));
                 if (!subVisible.length) return;

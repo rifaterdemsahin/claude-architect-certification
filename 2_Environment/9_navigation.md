@@ -69,13 +69,31 @@ This is the delivery-pilot framework navigation. It contains:
 {
   "projectMenu": [
     { "label": "Home", "url": "/" },
-    { "label": "Docs", "url": "/docs" },
-    { "label": "API", "url": "/api" }
+    {
+      "label": "Tools",
+      "children": [
+        {
+          "group": true,
+          "label": "🗄️ Data",
+          "children": [
+            { "label": "Supabase", "url": "https://supabase.com/dashboard/..." }
+          ]
+        }
+      ]
+    }
   ]
 }
 ```
 
-> The project menu is customized per project. The debug menu is always the same.
+> The project menu is customized per project. Use `group: true` to create non-interactive category headers inside any dropdown. The debug menu is always the same.
+
+## Tool Menu Groups
+
+The phase-specific **Tools** submenus are grouped by category for scannability:
+
+- **🎬 Preprod**: 🐙 Code & Repo · 🗄️ Data & Backend · 📊 Logs & Monitoring · 🎨 Templates & Sitemap · 🤖 AI & APIs
+- **🎥 Production**: 🎙️ Audio & Voice · 🎨 Visuals · 💻 Dev Environment · ☁️ Cloud
+- **📦 Post Prod**: 🎨 Design · 📺 YouTube · 🤖 Guides · 🗂️ Repos
 
 ## Implementation Notes
 

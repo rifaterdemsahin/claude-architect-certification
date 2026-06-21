@@ -1,5 +1,37 @@
 # LLM Thinking Log
 
+## 2026-06-21 — 🧰 Grouped Tool Menus in Navigation
+
+### 🎯 Objective
+Phase-specific **Tools** submenus under 🎬 Preprod, 🎥 Production and 📦 Post Prod had grown into long flat lists. Group the tools by category so the dropdowns stay scannable and the most-used links are easy to locate.
+
+### 📐 Implementation
+1. **Group marker**: Introduced a new `group: true` property on menu items in `navigation_config.json`. Group items carry a label (category emoji + name) and `children`, but no `url`. This keeps the existing recursive shape without adding another nesting level of fly-out submenus.
+2. **Renderer support**: Updated `shared/nav.js` `renderSubItem()` to emit a non-interactive `.site-drop-group-header` for `group` items and then render their children as normal rows below the header. Added `group` skipping to `buildSearchIndex()` so group headers do not pollute search results.
+3. **Styling**: Added `.site-drop-group-header` styles in `shared/nav.css` — small uppercase muted labels with a subtle top border to separate sections.
+4. **Legacy homepage menu**: Updated the inline builder in `index.html` to recognize `group` items and render category headers followed by their child links.
+5. **Fallback sync**: Kept the three offline fallbacks in `shared/nav.js`, `index.html` and `markdown_renderer.html` in sync with the same grouped structure.
+6. **Categorised groupings**:
+   - **Preprod**: 🐙 Code & Repo, 🗄️ Data & Backend, 📊 Logs & Monitoring, 🎨 Templates & Sitemap, 🤖 AI & APIs
+   - **Production**: 🎙️ Audio & Voice, 🎨 Visuals, 💻 Dev Environment, ☁️ Cloud
+   - **Post Prod**: 🎨 Design, 📺 YouTube, 🤖 Guides, 🗂️ Repos
+
+### ✅ Verification
+- Validate `navigation_config.json` with `python3 -m json.tool`. ✅
+- Syntax-check `shared/nav.js` with `node --check`. ✅
+- Run `go build ./...` gate (no Go changes, but confirms workspace still compiles). ✅
+- Run `7_Testing_Known/test_links.py`; pre-existing broken links were not touched by this change.
+
+### 📦 Files Changed
+- `navigation_config.json`
+- `shared/nav.js`
+- `shared/nav.css`
+- `index.html`
+- `markdown_renderer.html`
+- `4_Formula/llm_thinking_log.md` — this entry
+
+---
+
 ## 2026-06-21 — 🗄️ Database Analysis Page (Preprod Tools)
 
 ### 🎯 Objective
