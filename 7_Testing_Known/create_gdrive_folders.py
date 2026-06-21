@@ -21,6 +21,36 @@ SUBFOLDER_TREE = {
     "06_Exports_&_Deliverables": ["export", "final_delivery", "thumbnails_&_marketing"],
 }
 
+# "Ways of working" guidance written into each folder's README.txt — keep in sync with
+# the FOLDER_GUIDANCE map in 5_Symbols/production/prod/google_drive_folder_creator.html.
+FOLDER_GUIDANCE = {
+    "01_Planning_&_Research": "Pre-production hub. Everything needed before the camera rolls lives in the subfolders here. Nothing in this folder ships in the final video.",
+    "research": "Reference material that informs the video: source articles, competitor videos, docs, links, and fact-checking notes. Name files <topic>_<source>.<ext>. Keep raw research separate from your own scripts.",
+    "scripts_&_outlines": "The working script, beat sheet, and shot outline. Keep one canonical script file and version it (script_v01, script_v02). The latest approved version drives the teleprompter and shotlist.",
+    "transcripts_&_captions": "Auto/manual transcripts, .srt/.vtt caption files, and chapter markers. Generate captions from the final cut, not the script, so timings match. Name as <video>_captions.srt.",
+    "02_Raw_Footage": "All originally captured video. Treat as read-only masters — never edit or rename camera originals in place; copy into editing_projects to work on them.",
+    "raw": "A-roll: primary talking-head / on-camera footage straight off the camera or recorder. Keep card structure or date_take naming. Back this up before you touch anything else.",
+    "broll": "Supplementary cutaway footage, stock clips, and AI-generated b-roll used to cover edits. Tag clips by subject so the editor can find them fast.",
+    "screencasts_&_slides": "Screen recordings, terminal captures, and exported slide decks — critical for tech/course videos. Record at final delivery resolution (e.g. 1080p/4K) to avoid scaling artifacts.",
+    "03_Audio": "All audio assets kept separate from video so they can be re-mixed independently. Confirm every track is licensed for use before publishing.",
+    "music": "Background music beds. Store the license/attribution next to each track. Prefer instrumental, loopable tracks; note BPM and mood in the filename when possible.",
+    "sound_effects": "SFX, stingers, whooshes, and UI sounds. Keep them short and categorised. Normalise levels so they sit under the voiceover, not over it.",
+    "external_mics": "Audio recorded separately from the camera (lav/shotgun/USB mic). Sync to video by clap/slate or timecode in the editor. Keep the original sample rate.",
+    "04_Graphics_&_Assets": "Reusable visual assets and overlays composited in the edit. Export with transparency (PNG/PSD/AE) where overlays are needed.",
+    "lowerthirds": "Name/title bars, speaker callouts, and chyron graphics. Keep a template and version per video. Use a transparent background and a safe-area-aware layout.",
+    "backgrounds": "Background plates, gradients, and set extensions used behind talking-head or motion graphics. Match the project resolution and color space.",
+    "logos_&_branding": "Channel/course logos, brand color swatches, fonts, and intro/outro brand frames. This is the single source of truth for brand — do not recolor logos per-video.",
+    "overlays_&_screenshots": "Annotated screenshots, arrows, highlights, and on-screen overlays. Keep the editable source (with layers) alongside the flattened export.",
+    "05_Project_Files": "Editor and DAW project files plus their auto-saves. These reference the media in the other folders — keep relative paths intact; do not move source media after linking.",
+    "editing_projects": "Premiere / Resolve / Final Cut / DaVinci project files. One project per video; increment versions (edit_v01). Commit a clean version before any major change.",
+    "auto_saves": "Editor auto-save and backup files. Treat as recovery-only — never your working copy. Safe to prune old auto-saves once the edit is locked.",
+    "audio_projects": "Separate sound-design / mixing sessions (e.g. Audition, Logic). Bounce the final mix back into 03_Audio or straight into the edit when approved.",
+    "06_Exports_&_Deliverables": "Rendered outputs for review and publishing. Keep drafts and finals strictly separated so the wrong file never gets uploaded.",
+    "export": "Rough cuts and review drafts for feedback rounds. Name with version + date (cut_v03_2026-06-21). These are disposable — clear out once superseded.",
+    "final_delivery": "The locked, fully encoded master ready for upload. Only one approved file lives here at a time. Encode to the target platform spec (codec/bitrate/resolution).",
+    "thumbnails_&_marketing": "Course cover images, YouTube thumbnails, promo clips, and social cut-downs. Keep the editable source and the platform-sized exports. Follow brand from logos_&_branding.",
+}
+
 def extract_folder_id(links):
     if not links:
         return None
@@ -289,13 +319,17 @@ class RealDriveService:
 
 def build_readme_content(folder_path, vid_name):
     leaf = folder_path.split("/")[-1]
+    guidance = FOLDER_GUIDANCE.get(leaf, "Place files belonging to this folder here.")
     return (
         f"📁 {folder_path}\n"
         f"\n"
         f"Production assets for: {vid_name}\n"
         f"\n"
+        f"── Ways of working ──\n"
+        f"{guidance}\n"
+        f"\n"
         f"This folder is part of the standard course video production structure.\n"
-        f"Place files belonging to \"{leaf}\" here.\n"
+        f"Keep contents scoped to \"{leaf}\" only — cross-folder files make the edit harder to assemble.\n"
     )
 
 def create_subfolder_structure(drive_service, vid_id, vid_name):

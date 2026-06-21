@@ -460,7 +460,10 @@
         <div class="console-wrapper">
           <div class="console-titlebar">
             <span>⚙️ SYSTEM LOG TERMINAL</span>
-            <button onclick="clearLogs()" style="background: none; border: none; color: var(--text-muted); cursor: pointer; text-decoration: underline; font-size: 0.75rem;">Clear Terminal</button>
+            <div style="display: flex; gap: 14px; align-items: center;">
+              <button id="copy-logs-btn" onclick="copyLogs()" style="background: none; border: none; color: var(--text-muted); cursor: pointer; text-decoration: underline; font-size: 0.75rem;"><i class="fa-regular fa-copy"></i> Copy Terminal</button>
+              <button onclick="clearLogs()" style="background: none; border: none; color: var(--text-muted); cursor: pointer; text-decoration: underline; font-size: 0.75rem;">Clear Terminal</button>
+            </div>
           </div>
           <div class="console-logs" id="console-logs">
             <div class="log-line log-info">[info] Waiting for Google APIs initialization...</div>
@@ -493,13 +496,29 @@
     let courseTree = null;  // Tree representation used for rendering & processing
     let rootFolderIdFromDb = null;
 
+    // ── COOKIE HELPERS ──
+    // Credentials are persisted to a cookie so a returning user is never re-prompted.
+    function setCookie(name, value, days = 365) {
+      const expires = new Date(Date.now() + days * 864e5).toUTCString();
+      document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax`;
+    }
+    function getCookie(name) {
+      const match = document.cookie.match(new RegExp('(?:^|; )' + name.replace(/([.$?*|{}()\[\]\\\/\+^])/g, '\\$1') + '=([^;]*)'));
+      return match ? decodeURIComponent(match[1]) : null;
+    }
+    function saveCredentialsToCookie(clientId, apiKey) {
+      setCookie('gdrive_client_id', clientId);
+      setCookie('gdrive_api_key', apiKey);
+    }
+
     // Initialize Credentials input fields
     document.addEventListener("DOMContentLoaded", () => {
-      const savedClientId = localStorage.getItem("gdrive_client_id") || "";
-      const savedApiKey = localStorage.getItem("gdrive_api_key") || "";
+      // Prefer cookie-stored credentials, then fall back to localStorage
+      const savedClientId = getCookie("gdrive_client_id") || localStorage.getItem("gdrive_client_id") || "";
+      const savedApiKey = getCookie("gdrive_api_key") || localStorage.getItem("gdrive_api_key") || "";
       document.getElementById("client-id").value = savedClientId;
       document.getElementById("api-key").value = savedApiKey;
-      
+
       // Initialize Supabase Client
       if (window.supabase) {
         db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -511,8 +530,19 @@
       // Load initial mock / empty outline
       loadCourseOutline();
 
-      // Trigger Azure Key Vault auto-load
-      autoloadCredentials();
+      // If credentials are already saved in the cookie, don't ask again — use them and skip
+      // the Key Vault / admin prompt entirely.
+      if (getCookie("gdrive_client_id") && getCookie("gdrive_api_key")) {
+        log('success', '✓ Credentials loaded from cookie — skipping re-prompt.');
+        showAdminWarningBanner(false);
+        // Keep localStorage in sync for legacy code paths
+        localStorage.setItem("gdrive_client_id", savedClientId);
+        localStorage.setItem("gdrive_api_key", savedApiKey);
+        initGapi();
+      } else {
+        // Trigger Azure Key Vault auto-load
+        autoloadCredentials();
+      }
     });
 
     async function autoloadCredentials() {
@@ -534,6 +564,7 @@
           document.getElementById("api-key").value = data.apiKey;
           localStorage.setItem("gdrive_client_id", data.clientId);
           localStorage.setItem("gdrive_api_key", data.apiKey);
+          saveCredentialsToCookie(data.clientId, data.apiKey);
           log('success', '✓ Auto-loaded credentials from Key Vault.');
           showAdminWarningBanner(false);
           initGapi();
@@ -572,6 +603,7 @@
             document.getElementById("api-key").value = apiKeySetting.value;
             localStorage.setItem("gdrive_client_id", clientIdSetting.value);
             localStorage.setItem("gdrive_api_key", apiKeySetting.value);
+            saveCredentialsToCookie(clientIdSetting.value, apiKeySetting.value);
             log('success', '✓ Auto-loaded credentials from Supabase project_settings table.');
             initGapi();
           } else {
@@ -626,22 +658,18 @@
       const apiKey = document.getElementById("api-key").value.trim();
       localStorage.setItem("gdrive_client_id", clientId);
       localStorage.setItem("gdrive_api_key", apiKey);
-      
-      log('info', 'Saving credentials locally...');
+      // Persist to cookie so the user is not re-prompted on return visits
+      saveCredentialsToCookie(clientId, apiKey);
+
+      log('info', 'Saving credentials locally and to cookie...');
+      showAdminWarningBanner(false);
       initGapi();
 
       if (db) {
         log('info', 'Saving credentials configuration to Supabase project_settings table...');
         try {
-          const { error: err1 } = await db
-            .from('project_settings')
-            .upsert({ key: 'gdrive_client_id', value: clientId });
-
-          const { error: err2 } = await db
-            .from('project_settings')
-            .upsert({ key: 'gdrive_api_key', value: apiKey });
-
-          if (err1 || err2) throw (err1 || err2);
+          await upsertSetting('gdrive_client_id', clientId);
+          await upsertSetting('gdrive_api_key', apiKey);
           log('success', '✓ Saved configuration to Supabase project_settings table.');
           showToast("Credentials saved locally and to Supabase!");
         } catch (err) {
@@ -667,11 +695,7 @@
       if (db) {
         log('info', 'Saving root folder ID to Supabase...');
         try {
-          const { error } = await db
-            .from('project_settings')
-            .upsert({ key: 'gdrive_root_folder_id', value: rootId || "" });
-          if (error) throw error;
-          
+          await upsertSetting('gdrive_root_folder_id', rootId || "");
           log('success', `✓ Saved root folder ID: ${rootId}`);
           showToast("Root Folder ID saved to Supabase!");
           if (rootId) {
@@ -691,14 +715,35 @@
     async function saveTokenToSupabase(token) {
       if (db) {
         try {
-          const { error } = await db
-            .from('project_settings')
-            .upsert({ key: 'gdrive_access_token', value: token });
-          if (error) throw error;
+          await upsertSetting('gdrive_access_token', token);
           log('success', '✓ Shared access token with Supabase for terminal CLI tools.');
         } catch (err) {
           log('warn', 'Could not save access token to Supabase: ' + err.message);
         }
+      }
+    }
+
+    // Upserts a row into project_settings via PostgREST directly (resolution=merge-duplicates).
+    // The supabase-js client's .from().upsert() builder is not reliably available from the CDN
+    // bundle in this page, so we hit the REST endpoint the same way the Python CLI tools do.
+    async function upsertSetting(key, value) {
+      if (window.__MOCK_TEST__) {
+        log('info', `[MOCK] Skipped Supabase upsert for '${key}'.`);
+        return;
+      }
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/project_settings`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_ANON,
+          'Authorization': `Bearer ${SUPABASE_ANON}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'resolution=merge-duplicates,return=minimal'
+        },
+        body: JSON.stringify({ key, value })
+      });
+      if (!res.ok) {
+        const text = await res.text().catch(() => '');
+        throw new Error(`HTTP ${res.status} ${text}`.trim());
       }
     }
 
@@ -1045,7 +1090,7 @@
         } else {
           rootFolderId = await getOrCreateDriveFolder(courseTree.name, null);
           if (rootFolderId && db) {
-            await db.from('project_settings').upsert({ key: 'gdrive_root_folder_id', value: rootFolderId });
+            await upsertSetting('gdrive_root_folder_id', rootFolderId);
             rootFolderIdFromDb = rootFolderId;
           }
         }
@@ -1123,6 +1168,53 @@
       '06_Exports_&_Deliverables': ['export', 'final_delivery', 'thumbnails_&_marketing']
     };
 
+    // "Ways of working" guidance written into each folder's README.txt — what belongs here,
+    // naming conventions, and the do/don't rules for keeping the production library clean.
+    const FOLDER_GUIDANCE = {
+      '01_Planning_&_Research': 'Pre-production hub. Everything needed before the camera rolls lives in the subfolders here. Nothing in this folder ships in the final video.',
+      'research':              'Reference material that informs the video: source articles, competitor videos, docs, links, and fact-checking notes. Name files <topic>_<source>.<ext>. Keep raw research separate from your own scripts.',
+      'scripts_&_outlines':    'The working script, beat sheet, and shot outline. Keep one canonical script file and version it (script_v01, script_v02). The latest approved version drives the teleprompter and shotlist.',
+      'transcripts_&_captions':'Auto/manual transcripts, .srt/.vtt caption files, and chapter markers. Generate captions from the final cut, not the script, so timings match. Name as <video>_captions.srt.',
+      '02_Raw_Footage':        'All originally captured video. Treat as read-only masters — never edit or rename camera originals in place; copy into editing_projects to work on them.',
+      'raw':                   'A-roll: primary talking-head / on-camera footage straight off the camera or recorder. Keep card structure or date_take naming. Back this up before you touch anything else.',
+      'broll':                 'Supplementary cutaway footage, stock clips, and AI-generated b-roll used to cover edits. Tag clips by subject so the editor can find them fast.',
+      'screencasts_&_slides':  'Screen recordings, terminal captures, and exported slide decks — critical for tech/course videos. Record at final delivery resolution (e.g. 1080p/4K) to avoid scaling artifacts.',
+      '03_Audio':              'All audio assets kept separate from video so they can be re-mixed independently. Confirm every track is licensed for use before publishing.',
+      'music':                 'Background music beds. Store the license/attribution next to each track. Prefer instrumental, loopable tracks; note BPM and mood in the filename when possible.',
+      'sound_effects':         'SFX, stingers, whooshes, and UI sounds. Keep them short and categorised. Normalise levels so they sit under the voiceover, not over it.',
+      'external_mics':         'Audio recorded separately from the camera (lav/shotgun/USB mic). Sync to video by clap/slate or timecode in the editor. Keep the original sample rate.',
+      '04_Graphics_&_Assets':  'Reusable visual assets and overlays composited in the edit. Export with transparency (PNG/PSD/AE) where overlays are needed.',
+      'lowerthirds':           'Name/title bars, speaker callouts, and chyron graphics. Keep a template and version per video. Use a transparent background and a safe-area-aware layout.',
+      'backgrounds':           'Background plates, gradients, and set extensions used behind talking-head or motion graphics. Match the project resolution and color space.',
+      'logos_&_branding':      'Channel/course logos, brand color swatches, fonts, and intro/outro brand frames. This is the single source of truth for brand — do not recolor logos per-video.',
+      'overlays_&_screenshots':'Annotated screenshots, arrows, highlights, and on-screen overlays. Keep the editable source (with layers) alongside the flattened export.',
+      '05_Project_Files':      'Editor and DAW project files plus their auto-saves. These reference the media in the other folders — keep relative paths intact; do not move source media after linking.',
+      'editing_projects':      'Premiere / Resolve / Final Cut / DaVinci project files. One project per video; increment versions (edit_v01). Commit a clean version before any major change.',
+      'auto_saves':            'Editor auto-save and backup files. Treat as recovery-only — never your working copy. Safe to prune old auto-saves once the edit is locked.',
+      'audio_projects':        'Separate sound-design / mixing sessions (e.g. Audition, Logic). Bounce the final mix back into 03_Audio or straight into the edit when approved.',
+      '06_Exports_&_Deliverables':'Rendered outputs for review and publishing. Keep drafts and finals strictly separated so the wrong file never gets uploaded.',
+      'export':                'Rough cuts and review drafts for feedback rounds. Name with version + date (cut_v03_2026-06-21). These are disposable — clear out once superseded.',
+      'final_delivery':        'The locked, fully encoded master ready for upload. Only one approved file lives here at a time. Encode to the target platform spec (codec/bitrate/resolution).',
+      'thumbnails_&_marketing':'Course cover images, YouTube thumbnails, promo clips, and social cut-downs. Keep the editable source and the platform-sized exports. Follow brand from logos_&_branding.'
+    };
+
+    // Builds rich README.txt text including the folder's "ways of working" guidance.
+    function buildReadmeContent(folderPath, vidName) {
+      const leaf = folderPath.split('/').pop();
+      const guidance = FOLDER_GUIDANCE[leaf] || 'Place files belonging to this folder here.';
+      return (
+        `📁 ${folderPath}\n` +
+        `\n` +
+        `Production assets for: ${vidName}\n` +
+        `\n` +
+        `── Ways of working ──\n` +
+        `${guidance}\n` +
+        `\n` +
+        `This folder is part of the standard course video production structure.\n` +
+        `Keep contents scoped to "${leaf}" only — cross-folder files make the edit harder to assemble.\n`
+      );
+    }
+
     // Builds the nested category/subfolder tree under a video folder, dropping a README.txt in each.
     async function createSubfolderStructure(vidFolderId, vidName) {
       for (const [topName, subs] of Object.entries(SUBFOLDER_TREE)) {
@@ -1149,13 +1241,7 @@
         return existing.result.files[0].id;
       }
 
-      const content =
-        `📁 ${folderPath}\n` +
-        `\n` +
-        `Production assets for: ${vidName}\n` +
-        `\n` +
-        `This folder is part of the standard course video production structure.\n` +
-        `Place files belonging to "${folderPath.split('/').pop()}" here.\n`;
+      const content = buildReadmeContent(folderPath, vidName);
 
       const boundary = '-------claude-architect-readme-boundary';
       const delimiter = `\r\n--${boundary}\r\n`;
@@ -1200,6 +1286,7 @@
       const files = response.result.files;
       if (files && files.length > 0) {
         log('info', `✓ Folder found: "${folderName}" (ID: ${files[0].id})`);
+        log('link', `   🔗 ${driveFolderUrl(files[0].id)}`);
         return files[0].id;
       }
 
@@ -1220,7 +1307,13 @@
 
       const newId = folderResponse.result.id;
       log('success', `✓ Created folder "${folderName}" (ID: ${newId})`);
+      log('link', `   🔗 ${driveFolderUrl(newId)}`);
       return newId;
+    }
+
+    // Builds the canonical Google Drive folder URL for a given folder ID.
+    function driveFolderUrl(folderId) {
+      return `https://drive.google.com/drive/folders/${folderId}`;
     }
 
     // ── DATABASE UPDATE HELPER ──
@@ -1255,7 +1348,21 @@
       const time = new Date().toLocaleTimeString();
       const div = document.createElement('div');
       div.className = `log-line log-${type}`;
-      div.innerText = `[${time}] [${type}] ${msg}`;
+      // 'link' lines render any Google Drive URL as a clickable anchor
+      const urlMatch = type === 'link' ? msg.match(/(https?:\/\/\S+)/) : null;
+      if (urlMatch) {
+        const prefix = document.createTextNode(`[${time}] [link] ${msg.slice(0, urlMatch.index)}`);
+        const a = document.createElement('a');
+        a.href = urlMatch[1];
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.textContent = urlMatch[1];
+        a.style.color = '#6ee7b7';
+        div.appendChild(prefix);
+        div.appendChild(a);
+      } else {
+        div.innerText = `[${time}] [${type}] ${msg}`;
+      }
       logs.appendChild(div);
       logs.scrollTop = logs.scrollHeight;
     }
@@ -1263,6 +1370,31 @@
     function clearLogs() {
       document.getElementById('console-logs').innerHTML = '';
       log('info', 'Terminal cleared.');
+    }
+
+    // Copy the full terminal log (all lines, in order) to the clipboard.
+    async function copyLogs() {
+      const lines = Array.from(document.querySelectorAll('#console-logs .log-line'))
+        .map(el => el.innerText).join('\n');
+      const btn = document.getElementById('copy-logs-btn');
+      try {
+        await navigator.clipboard.writeText(lines);
+        if (btn) btn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+        showToast('Terminal log copied to clipboard.');
+      } catch (err) {
+        // Fallback for non-secure contexts / older browsers
+        const ta = document.createElement('textarea');
+        ta.value = lines;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); } catch (_) {}
+        document.body.removeChild(ta);
+        if (btn) btn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+        showToast('Terminal log copied to clipboard.');
+      }
+      if (btn) setTimeout(() => { btn.innerHTML = '<i class="fa-regular fa-copy"></i> Copy Terminal'; }, 2000);
     }
 
     function showToast(message) {
@@ -1277,6 +1409,7 @@
     // ── AUTOMATED MOCK TEST SUITE ──
     async function runMockTests() {
       log('info', '🧪 Initiating Google Drive Folder Creator Mock Test Suite...');
+      window.__MOCK_TEST__ = true; // route Supabase upserts through no-op stub during tests
 
       // Backup current live state
       const originalDb = db;
@@ -1528,6 +1661,7 @@
         showToast('Mock Test Suite Execution Crashed.');
       } finally {
         // Restore original state
+        window.__MOCK_TEST__ = false;
         db = originalDb;
         window.gapi = originalGapi;
         accessToken = originalAccessToken;

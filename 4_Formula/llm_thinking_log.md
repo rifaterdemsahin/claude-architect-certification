@@ -1076,3 +1076,20 @@ Per video, 6 category folders each with nested subfolders (25 folders total/vide
 
 ### ✅ Outcome
 Python suite green; HTML inline JS syntax validated (browser auto-run unavailable — extension offline).
+
+---
+
+## 2026-06-21 — 🩹 GDrive Creator: upsert fix, terminal copy/links, README guidance, cookie creds
+
+### 🐛 Bug
+`db.from(...).upsert is not a function` — the supabase-js CDN client's `.from().upsert()` builder is unavailable on this page, breaking every `project_settings` write (client id, api key, root folder id, access token).
+
+### 🛠 Fixes
+- **Upsert via REST:** added `upsertSetting(key, value)` that POSTs to PostgREST with `Prefer: resolution=merge-duplicates` (mirrors the Python CLI). Replaced all 5 `.from('project_settings').upsert()` call sites. Mock test guarded with `window.__MOCK_TEST__` so it never hits the network.
+- **Copy Terminal:** added a Copy button + `copyLogs()` (clipboard API with execCommand fallback).
+- **Explicit Drive links:** `getOrCreateDriveFolder` now logs `🔗 https://drive.google.com/drive/folders/<id>` via a new `link` log type rendered as a clickable anchor.
+- **README ways-of-working:** added `FOLDER_GUIDANCE` (25 entries) in both the HTML and `create_gdrive_folders.py`; every README.txt now includes a "Ways of working" section describing what belongs in that folder, naming conventions, and do/don't rules.
+- **Cookie credentials:** credentials persist to a cookie (`setCookie`/`getCookie`); on load, if both cookie values exist the page uses them and skips the Key Vault/admin re-prompt. Auto-loads (Key Vault, Supabase) also seed the cookie.
+
+### ✅ Outcome
+Python suite green; Python + HTML JS syntax validated. Browser auto-run still unavailable (extension offline).
