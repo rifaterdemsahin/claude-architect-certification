@@ -1124,3 +1124,18 @@ Two buttons: Simulation = dry run (no Supabase writes, no Drive changes); Real =
 
 ### ✅ Outcome
 Simulate = safe preview, zero side effects. Real = Drive + Supabase. Python suite green; HTML JS syntax validated.
+
+---
+
+## 2026-06-21 — 🩹 GDrive Creator: real-mode shows only real URLs + skip-if-already-linked
+
+### 🐛 Symptom
+Clicking "Create Real Folders" produced `[SIMULATED] Created folder "Video 1 - Mock Setup Verification" (ID: mock-folder-id-…)` — mock output from the `?test=true` auto-test racing against the button click.
+
+### 🛠 Fixes
+- **Race closed:** `runMockTests` now disables both the Simulate and Create-Real buttons for the duration of the mock run, and restores them in `finally` (Create-Real re-enabled only if Google auth is present). Real generation can no longer overlap the mock harness, so it never shows `[SIMULATED]`/`mock-folder-id` output.
+- **Skip-if-linked:** in real mode, if a root/module/video already has a Google Drive URL in its `links`, the run now logs `⏭️ … already has a Google Drive folder — skipping creation & Supabase update` with the real `🔗` link, and does NOT recreate or re-write Supabase. Removed the `checkFolderExists` round-trip — presence of a URL is the skip signal, exactly as requested.
+- **Real URLs only:** Supabase writes use `driveFolderUrl(realId)`; mock IDs only ever appear inside the labelled test harness.
+
+### ✅ Outcome
+Real run = only real Drive URLs, existing items skipped+mentioned, no duplicate writes. Python suite green; HTML JS syntax validated.

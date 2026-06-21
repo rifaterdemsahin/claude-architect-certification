@@ -1158,16 +1158,13 @@
       }
 
       try {
-        // Step 1: Create top root folder
+        // Step 1: Root folder — if one is already recorded, skip & mention it (no update)
         updateNodeStatus(courseTree, 'creating');
         log('info', `Validating / Creating Root Folder: "${courseTree.name}"`);
         let rootFolderId = rootFolderIdFromDb;
-        let rootExists = false;
         if (rootFolderId) {
-          rootExists = await checkFolderExists(rootFolderId);
-        }
-        if (rootExists) {
-          log('info', `✓ Reusing existing Root Folder: (ID: ${rootFolderId})`);
+          log('info', `⏭️  Root folder already recorded — skipping creation & Supabase update.`);
+          log('link', `   🔗 ${driveFolderUrl(rootFolderId)}`);
         } else {
           rootFolderId = await getOrCreateDriveFolder(courseTree.name, null);
           if (rootFolderId && db) {
@@ -1176,51 +1173,42 @@
           }
         }
         updateNodeStatus(courseTree, 'success');
-        
+
         // Step 2: Loop through modules recursively
         for (let modNode of courseTree.children) {
           updateNodeStatus(modNode, 'creating');
+          // If a Google Drive URL already exists for this module, skip & mention it — don't update
           let modFolderId = extractFolderId(modNode.links);
-          let modExists = false;
           if (modFolderId) {
-            modExists = await checkFolderExists(modFolderId);
-          }
-
-          if (modExists) {
-            log('info', `✓ Reusing existing folder for module: "${modNode.name}" (ID: ${modFolderId})`);
+            log('info', `⏭️  Module "${modNode.name}" already has a Google Drive folder — skipping creation & Supabase update.`);
+            log('link', `   🔗 ${driveFolderUrl(modFolderId)}`);
           } else {
             log('info', `Building folder for module: "${modNode.name}"`);
             modFolderId = await getOrCreateDriveFolder(modNode.name, rootFolderId);
-            const modFolderUrl = `https://drive.google.com/drive/folders/${modFolderId}`;
-            
             // Record module folder link in Supabase
             log('info', `Updating Supabase module ID ${modNode.dbId} with folder link...`);
-            await saveFolderLinkToSupabase('course_modules', modNode.dbId, modFolderUrl);
+            await saveFolderLinkToSupabase('course_modules', modNode.dbId, driveFolderUrl(modFolderId));
           }
           updateNodeStatus(modNode, 'success');
 
           // Step 3: Loop through videos under module
           for (let vidNode of modNode.children) {
             updateNodeStatus(vidNode, 'creating');
+            // If a Google Drive URL already exists for this video, skip & mention it — don't update
             let vidFolderId = extractFolderId(vidNode.links);
-            let vidExists = false;
             if (vidFolderId) {
-              vidExists = await checkFolderExists(vidFolderId);
-            }
-
-            if (vidExists) {
-              log('info', `✓ Reusing existing folder for video: "${vidNode.name}" (ID: ${vidFolderId})`);
+              log('info', `⏭️  Video "${vidNode.name}" already has a Google Drive folder — skipping creation & Supabase update.`);
+              log('link', `   🔗 ${driveFolderUrl(vidFolderId)}`);
             } else {
               log('info', `Building folder for video: "${vidNode.name}"`);
               vidFolderId = await getOrCreateDriveFolder(vidNode.name, modFolderId);
-              const vidFolderUrl = `https://drive.google.com/drive/folders/${vidFolderId}`;
-              
               // Record video folder link in Supabase
               log('info', `Updating Supabase video ID ${vidNode.dbId} with folder link...`);
-              await saveFolderLinkToSupabase('course_videos', vidNode.dbId, vidFolderUrl);
+              await saveFolderLinkToSupabase('course_videos', vidNode.dbId, driveFolderUrl(vidFolderId));
             }
 
-            // Create the full nested production subfolder structure (each folder gets a README.txt)
+            // Create the full nested production subfolder structure (each folder gets a README.txt).
+            // getOrCreateDriveFolder is idempotent, so existing subfolders are reused, not duplicated.
             log('info', `Creating production subfolder structure under video: "${vidNode.name}"`);
             await createSubfolderStructure(vidFolderId, vidNode.name);
 
@@ -1524,6 +1512,11 @@
       log('info', '🧪 Initiating Google Drive Folder Creator Mock Test Suite...');
       window.__MOCK_TEST__ = true; // route Supabase upserts through no-op stub during tests
       showTestModeBanner(true);
+      // Block the real/simulate buttons so a click can't race against the mock run
+      const btnSyncEl = document.getElementById('btn-sync');
+      const btnSimEl = document.getElementById('btn-simulate');
+      if (btnSyncEl) btnSyncEl.disabled = true;
+      if (btnSimEl) btnSimEl.disabled = true;
 
       // Backup current live state
       const originalDb = db;
@@ -1777,6 +1770,9 @@
         // Restore original state
         window.__MOCK_TEST__ = false;
         showTestModeBanner(false);
+        // Re-enable buttons: Simulate is always usable; Create Real needs Google auth
+        if (btnSimEl) btnSimEl.disabled = false;
+        if (btnSyncEl) btnSyncEl.disabled = !(originalAccessToken && originalGapiInited);
         db = originalDb;
         window.gapi = originalGapi;
         accessToken = originalAccessToken;
