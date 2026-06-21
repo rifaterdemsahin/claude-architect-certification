@@ -1139,3 +1139,17 @@ Clicking "Create Real Folders" produced `[SIMULATED] Created folder "Video 1 - M
 
 ### ✅ Outcome
 Real run = only real Drive URLs, existing items skipped+mentioned, no duplicate writes. Python suite green; HTML JS syntax validated.
+
+---
+
+## 2026-06-21 — 🧹 GDrive Creator: "Clear Module & Video Drive Links" button
+
+### 🐛 Symptom
+Real run skipped every module/video because Supabase `links` still held stale **mock** URLs (`mock-folder-id-…`) from earlier test runs, then failed (`failure: undefined`) trying to build subfolders under a non-existent mock parent.
+
+### 🛠 Fixes
+- **Clear button:** new `clearDriveLinks()` reads every `course_modules`/`course_videos` row and PATCHes out only the `{name:'Google Drive Folder'}` link entry (other link types preserved) via PostgREST. Confirms first; Drive folders are never deleted. Reloads the outline + tree afterward so the next run recreates real folders.
+- **Better errors:** `startGeneration` catch now unwraps `err.message` / `err.result.error.message` / JSON instead of logging `undefined`, and hints to use the Clear button when a stale link is the cause.
+
+### ✅ Outcome
+User can wipe stale/mock links and regenerate real folders. Python suite green; HTML JS syntax validated.
