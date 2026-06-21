@@ -1275,3 +1275,37 @@ video/category/subfolder + counts), a name/path search, and a scrollable table
 structure-integrity checklist (category=videos×6, subfolder=videos×19, exactly
 1 root, README on every category/subfolder), and a folders-per-module table.
 Graceful message if the table is missing. JS validated.
+
+### 2026-06-21 — 🎞️ Talking Heads: video images empty-state SQL debug panel
+
+**Problem:** On `/5_Symbols/production/prod/talking-heads.html`, the "🎞 Video
+Images" carousel showed a bare "No video images linked to this video yet."
+message with no way to diagnose *why* it was empty. Investigation showed the
+carousel is correct for some videos (e.g. video_id=1 → 11 relationships, blobs
+present) but empty for others (e.g. video_id=16 links
+`claude-ecosystem-map.png` + `architecture-overview-diagram.png`, neither of
+which exists in the `research-images` blob container).
+
+**Root cause:** `research_relationships.item_name` references filenames that
+were never uploaded to Azure Blob Storage (or were renamed), so the
+case-insensitive join between the relationship table and the blob listing
+yields zero matches — but the UI gave no signal of this.
+
+**Fix:** Replaced the bare empty-state with a diagnostic panel that shows:
+1. 📊 Diagnostics — relationships linked count, files in container count,
+   matched blobs count (0).
+2. ⚠️ "Linked but missing in storage" — the exact `item_name`(s) returned by
+   the relationship query that have no matching blob.
+3. 🧾 The SQL used (`SELECT item_name, container FROM research_relationships
+   WHERE container='research-images' AND video_id=<id>;`) plus a clickable
+   REST link to the PostgREST endpoint.
+4. 🧾 The files endpoint used (blob listing REST URL).
+5. 💡 A plain-English hint pointing to upload the missing files or re-link on
+   the Scripts page.
+
+**Verification:** `go build ./... && go vet ./...` pass; page serves HTTP 200;
+confirmed video 16 returns 2 relationships but 0 matching blobs locally — the
+new panel will render for that case. No behaviour change for videos that do
+resolve (existing carousel path unchanged).
+
+**Status:** IMPLEMENTED, pending commit + push.

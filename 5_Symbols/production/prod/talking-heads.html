@@ -689,12 +689,46 @@ let carouselData = [];
 
       // Only show images actually linked to this video; no fallback to all container files.
       const relatedSet = new Set(relatedNames.map(n => n.toLowerCase()));
-      const matchedNames = (allFiles || [])
-        .map(f => f.name)
+      const allFileNames = (allFiles || []).map(f => f.name);
+      const blobNameSet = new Set(allFileNames.map(n => n.toLowerCase()));
+      const matchedNames = allFileNames
         .filter(n => !n.startsWith('__thumb__') && relatedSet.has(n.toLowerCase()));
 
       if (matchedNames.length === 0) {
-        body.innerHTML = '<div class="carousel-empty">🎞 No video images linked to this video yet.</div>';
+        // Debug panel: surface the exact query used so the empty result can be diagnosed.
+        const relRestUrl = `${SUPABASE_URL}/rest/v1/research_relationships?container=eq.research-images&video_id=eq.${videoId}&select=item_name,container`;
+        const filesRestUrl = `/api/research/files?container=research-images`;
+        const relSql = `SELECT item_name, container\nFROM research_relationships\nWHERE container = 'research-images'\n  AND video_id = ${videoId};`;
+        const unmatched = relatedNames.filter(n => !blobNameSet.has(n.toLowerCase()));
+        const unmatchedHtml = unmatched.length
+          ? unmatched.map(n => `<li>${esc(n)}</li>`).join('')
+          : '<li style="color:var(--success);">— none —</li>';
+        body.innerHTML = `
+          <div class="carousel-empty" style="text-align:left;">
+            <div style="font-size:1.05rem; margin-bottom:12px;">🎞 No video images could be resolved for this video.</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
+              <div style="background:rgba(0,0,0,0.3); border-radius:10px; padding:12px;">
+                <div style="font-size:0.8rem; font-weight:700; color:#c084fc; margin-bottom:4px;">📊 Diagnostics</div>
+                <div style="font-size:0.78rem; color:var(--text-muted);">Relationships linked: <strong style="color:var(--text-main);">${relatedNames.length}</strong></div>
+                <div style="font-size:0.78rem; color:var(--text-muted);">Files in container: <strong style="color:var(--text-main);">${allFileNames.filter(n => !n.startsWith('__thumb__')).length}</strong></div>
+                <div style="font-size:0.78rem; color:var(--text-muted);">Matched blobs: <strong style="color:#ef4444;">0</strong></div>
+              </div>
+              <div style="background:rgba(0,0,0,0.3); border-radius:10px; padding:12px;">
+                <div style="font-size:0.8rem; font-weight:700; color:#ef4444; margin-bottom:4px;">⚠️ Linked but missing in storage</div>
+                <ul style="font-size:0.74rem; color:var(--text-muted); padding-left:16px; margin:0; max-height:90px; overflow:auto;">${unmatchedHtml}</ul>
+              </div>
+            </div>
+            <div style="background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:14px; margin-bottom:10px;">
+              <div style="font-size:0.8rem; font-weight:700; color:#34d399; margin-bottom:6px;">🧾 SQL used (relationships)</div>
+              <pre style="font-size:0.78rem; color:#93c5fd; background:rgba(0,0,0,0.4); padding:10px; border-radius:8px; overflow:auto; margin:0;">${esc(relSql)}</pre>
+              <div style="font-size:0.72rem; color:var(--text-muted); margin-top:8px; word-break:break-all;">REST: <a href="${relRestUrl}" target="_blank" style="color:#93c5fd;">${esc(relRestUrl)}</a></div>
+            </div>
+            <div style="background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:14px;">
+              <div style="font-size:0.8rem; font-weight:700; color:#34d399; margin-bottom:6px;">🧾 Files endpoint used (blob listing)</div>
+              <div style="font-size:0.72rem; color:var(--text-muted); word-break:break-all;">REST: <a href="${filesRestUrl}" target="_blank" style="color:#93c5fd;">${esc(filesRestUrl)}</a></div>
+            </div>
+            <div style="font-size:0.74rem; color:var(--text-muted); margin-top:14px; line-height:1.5;">💡 The relationship table returned <strong>${relatedNames.length}</strong> item name(s) for video_id <strong>${videoId}</strong>, but none of them exist in the <strong>research-images</strong> blob container (or their names do not match). Upload the missing files or re-link the correct filenames on the Scripts page.</div>
+          </div>`;
         return;
       }
 
