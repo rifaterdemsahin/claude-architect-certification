@@ -265,8 +265,9 @@
       "label": "🎥 Production",
       "children": [
         {
-          "label": "1. 📸 Shot List & Assets",
-          "url": "5_Symbols/production/postprod/production_shotlist.html?module=1&section=1"
+          "label": "1. 📁 Google Drive Folder Creator",
+          "url": "5_Symbols/production/prod/google_drive_folder_creator.html",
+          "description": "Recursively generate Google Drive folders for course modules and videos, and automatically record the folder links back to Supabase."
         },
         {
           "label": "2. 🗣️ Talking Heads",
@@ -279,17 +280,16 @@
           "description": "All screenshare scenes with screen recording setup guide."
         },
         {
-          "label": "4. ✅ Production Checklist",
-          "url": "5_Symbols/production/prod/checklist.html"
+          "label": "4. 📸 Shot List & Assets",
+          "url": "5_Symbols/production/postprod/production_shotlist.html?module=1&section=1"
         },
         {
-          "label": "5. 📁 Google Drive Folder Creator",
-          "url": "5_Symbols/production/prod/google_drive_folder_creator.html",
-          "description": "Recursively generate Google Drive folders for course modules and videos, and automatically record the folder links back to Supabase."
-        },
-        {
-          "label": "6. 🎥 Footage Mapping",
+          "label": "5. 🎥 Footage Mapping",
           "url": "5_Symbols/production/prod/footage_mapping.html"
+        },
+        {
+          "label": "6. ✅ Production Checklist",
+          "url": "5_Symbols/production/prod/checklist.html"
         },
         {
           "label": "🛠️ Tools",
