@@ -462,14 +462,18 @@
             🚀 <strong>Create Real Folders</strong> creates everything in Google Drive and records links in Supabase (requires Google sign-in).
           </p>
 
-          <div style="margin-top: 16px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 16px;">
-            <button id="btn-clear-links" class="btn btn-secondary" onclick="clearDriveLinks()" style="border: 1px solid rgba(239,68,68,0.4); color: #fca5a5;">
+          <div style="margin-top: 16px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 16px; display: flex; flex-wrap: wrap; gap: 12px;">
+            <button id="btn-show-links" class="btn btn-secondary" onclick="showDriveLinks()" style="flex: 1; min-width: 200px;">
+              <i class="fa-solid fa-list"></i> Show All Drive Links
+            </button>
+            <button id="btn-clear-links" class="btn btn-secondary" onclick="clearDriveLinks()" style="flex: 1; min-width: 200px; border: 1px solid rgba(239,68,68,0.4); color: #fca5a5;">
               <i class="fa-solid fa-link-slash"></i> Clear Module &amp; Video Drive Links
             </button>
-            <p style="margin-top: 8px; font-size: 0.78rem; color: var(--text-muted);">
-              🧹 Removes saved Google Drive links from every module &amp; video in Supabase (e.g. stale mock links), so a fresh run recreates real folders. Folders in Google Drive are <strong>not</strong> deleted.
-            </p>
           </div>
+          <p style="margin-top: 8px; font-size: 0.78rem; color: var(--text-muted);">
+            📋 <strong>Show All Drive Links</strong> lists every Google Drive link currently saved in Supabase.
+            🧹 <strong>Clear</strong> removes those links (e.g. stale mock links) so a fresh run recreates real folders. Folders in Google Drive are <strong>not</strong> deleted.
+          </p>
         </div>
 
         <!-- Terminal Logs -->
@@ -828,6 +832,12 @@
         updateAuthUI(false, 'Missing API Key');
         return;
       }
+      // The gapi client library may not be loaded yet when called early (e.g. cookie path).
+      // gapiLoaded() → gapi.load('client', initGapi) will re-invoke this once it's ready.
+      if (!window.gapi || !gapi.client || typeof gapi.client.init !== 'function') {
+        log('info', 'Google API client not ready yet — will initialize once api.js finishes loading.');
+        return;
+      }
       try {
         await gapi.client.init({
           apiKey: apiKey,
@@ -837,7 +847,8 @@
         log('success', 'Google API Client loaded.');
         checkAuthInits();
       } catch (err) {
-        log('error', 'GAPI Client initialization error: ' + JSON.stringify(err));
+        const msg = (err && (err.message || err.details || (err.result && err.result.error && err.result.error.message))) || JSON.stringify(err);
+        log('error', 'GAPI Client initialization error: ' + msg);
         updateAuthUI(false, 'GAPI failed');
       }
     }
@@ -1055,8 +1066,12 @@
       renderTree(courseTree);
     }
 
-    function renderTree(node, containerId = 'dir-tree', isRoot = true) {
-      const container = document.getElementById(containerId);
+    function renderTree(node, containerRef = 'dir-tree', isRoot = true) {
+      // containerRef may be a string id (top-level call) or a DOM element (recursive calls)
+      const container = typeof containerRef === 'string'
+        ? document.getElementById(containerRef)
+        : containerRef;
+      if (!container) return;
       if (isRoot) {
         container.innerHTML = '';
       }
@@ -1447,6 +1462,52 @@
       }
     }
 
+    // Lists every Google Drive folder link currently stored in Supabase (modules + videos)
+    // in the terminal as clickable links, plus a count of items still missing a link.
+    async function showDriveLinks() {
+      log('info', '📋 Fetching all saved Google Drive links from Supabase...');
+      const authHeaders = { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}` };
+      const btn = document.getElementById('btn-show-links');
+      if (btn) btn.disabled = true;
+      const parseLink = (links) => {
+        if (typeof links === 'string') { try { links = JSON.parse(links); } catch (_) { return null; } }
+        if (!Array.isArray(links)) return null;
+        const drive = links.find(l => l && l.name === 'Google Drive Folder');
+        return drive ? drive.url : null;
+      };
+      try {
+        let totalWithLink = 0, totalMissing = 0;
+        const sources = [
+          { table: 'course_modules', label: 'Module', select: 'id,module_number,title,links', order: 'module_number', num: 'module_number' },
+          { table: 'course_videos', label: 'Video', select: 'id,video_number,title,links', order: 'video_number', num: 'video_number' }
+        ];
+        for (const src of sources) {
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/${src.table}?select=${src.select}&order=${src.order}`, { headers: authHeaders });
+          if (!res.ok) throw new Error(`${src.table} read failed: HTTP ${res.status}`);
+          const rows = await res.json();
+          log('info', `── ${src.label}s (${rows.length}) ──`);
+          rows.forEach(row => {
+            const url = parseLink(row.links);
+            const name = `${src.label} ${row[src.num]} - ${row.title}`;
+            if (url) {
+              totalWithLink++;
+              log('link', `   🔗 ${name}: ${url}`);
+            } else {
+              totalMissing++;
+              log('warn', `   ⚠️ ${name}: no Google Drive link`);
+            }
+          });
+        }
+        log('success', `✓ ${totalWithLink} item(s) have a Drive link, ${totalMissing} still missing.`);
+        showToast(`${totalWithLink} linked, ${totalMissing} missing.`);
+      } catch (err) {
+        log('error', 'Failed to fetch Drive links: ' + (err.message || err));
+        showToast('Failed to fetch Drive links.');
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    }
+
     // Removes the "Google Drive Folder" link from every course_modules and course_videos
     // record in Supabase (preserving any other link types). Drive folders are NOT deleted.
     async function clearDriveLinks() {
@@ -1484,8 +1545,7 @@
         }
         showToast('Module & video Drive links cleared.');
         log('info', '↻ Reloading outline so the tree reflects the cleared links...');
-        await loadCourseOutline();
-        buildFolderTree();
+        await loadCourseOutline(); // also rebuilds the folder tree in its finally block
       } catch (err) {
         log('error', 'Failed to clear Drive links: ' + (err.message || err));
         showToast('Failed to clear Drive links.');

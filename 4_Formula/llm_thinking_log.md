@@ -1153,3 +1153,20 @@ Real run skipped every module/video because Supabase `links` still held stale **
 
 ### ✅ Outcome
 User can wipe stale/mock links and regenerate real folders. Python suite green; HTML JS syntax validated.
+
+---
+
+## 2026-06-21 — 🐛 GDrive Creator: fix renderTree crash, gapi init noise, add "Show All Drive Links"
+
+### 🐛 Bugs
+1. `Cannot read properties of null (reading 'appendChild')` — `renderTree` recursed passing a DOM **element** as `containerId`, then did `document.getElementById(element)` → null. (Surfaced via clearDriveLinks; was a silent console error elsewhere.)
+2. `GAPI Client initialization error: {}` — the cookie credential path called `initGapi()` before `gapi.client` was loaded; the resulting TypeError stringified to `{}`.
+
+### 🛠 Fixes
+- `renderTree(node, containerRef, isRoot)` now accepts a string id **or** an element and bails if the container is missing.
+- `initGapi()` guards on `gapi.client` readiness (logs a friendly "not ready yet" — `gapiLoaded()` re-invokes it) and unwraps the real error message.
+- Removed the redundant `buildFolderTree()` in `clearDriveLinks` (loadCourseOutline already rebuilds in its finally).
+- **New feature:** `showDriveLinks()` + "Show All Drive Links" button — lists every Google Drive link saved in Supabase (modules + videos) as clickable links, with a linked/missing count.
+
+### ✅ Outcome
+Clear + reload no longer crashes; cleaner gapi logs; user can audit all stored links. Python suite green; HTML JS syntax validated.
