@@ -250,7 +250,8 @@
         { label: '5. 📜 Erdem\'s Certification', url: 'markdown_renderer.html?file=4_Formula/certification/erdems_certification.md' },
         { label: '6. 🧭 Exam & Case Study', url: 'markdown_renderer.html?file=4_Formula/certification/exam_and_case_study.md' },
         { label: '7. 📊 Business Plan', url: 'markdown_renderer.html?file=4_Formula/certification/business_plan.md' },
-        { label: '8. 💼 Membership / Business', url: '5_Symbols/production/publish/membership.html' }
+        { label: '8. 💼 Membership / Business', url: '5_Symbols/production/publish/membership.html' },
+        { label: '9. 📈 Sales & Marketing Plan', url: '5_Symbols/production/postprod/sales_and_marketing_plan.html' }
       ]},
       { label: '🤝 Outreach', children: [
         {

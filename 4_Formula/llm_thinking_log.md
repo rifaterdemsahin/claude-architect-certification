@@ -1738,3 +1738,16 @@ GLM" table. Registered GLM in the `agents.md` Supported Agent Roles table.
   - Validated offline against every DB-connected page: `problem.html`→5 tables (problem_pages, target_personas, core_challenges, exam_domains, course_solutions), `stats.html`→7 (via its TABLES array), `admin.html` 46→0 false positives (it's a schema viewer), `scripts/index.html`→5 (incl. real `code_references`/`sentence_links`), zero noise elsewhere.
 - **Verification:** `node -c` + `go build`/`go vet` pass; local Go server serves the page (HTTP 200) and updated panel; View-button REST requests return HTTP 200 for all 5 problem.html tables.
 - **Status:** IMPLEMENTED, pending commit + push.
+
+## 2026-06-22 - 📈 Sales and Marketing Plan
+- **Context:** Creating a Sales and Marketing Plan page under Post Prod.
+- **Approach:** 
+  - Add `sales_and_marketing_plan.html` with a glassmorphic design consistent with the site templates.
+  - Structure it into sections:
+    1. **Targeting RAISE**: Focus on the "Rapid AI Increases Skills Expectations" audience, addressing their anxiety and pain.
+    2. **Tangible Certificate**: Highlighting the *gain* (AI capability) validated through a tangible certificate.
+    3. **Content Strategy**: Course release via YouTube, automated LinkedIn posts, and upcoming YouTube Shorts.
+    4. **The Flywheel**: Visualizing the process of Pain → Gain → Product, showing how content and community drive momentum.
+  - Update `navigation_config.json`, `index.html`, `markdown_renderer.html`, and `shared/nav.js` to link the new page.
+- **Verification:** Built `sales_and_marketing_plan.html`, checked responsive design, updated menu structure, and ran `go build ./...` locally.
+- **Status:** IMPLEMENTED, pending commit + push.
