@@ -165,14 +165,16 @@
         </div>
         <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-top:8px;">
           <button class="btn" id="saveBtn">💾 Save & Upload</button>
-          <button class="btn btn-secondary" id="downloadBtn">📥 Download PNG</button>
           <button class="btn btn-secondary" id="generateBtn">🤖 Generate with Gemini</button>
           <button class="btn btn-secondary" id="clearBtn">🗑️ Clear Form</button>
           <span id="saveStatus" style="color:var(--text-muted);font-size:0.85rem;"></span>
         </div>
         <p style="margin-top:12px; font-size: 0.85rem; color: var(--text-muted);">🎨 <strong>Design Note:</strong> Lower thirds use <strong>Fira Code Medium</strong> font with highly <strong>contrasting colors</strong> (Deep Blue & Bright Yellow) for maximum visibility when saved as PNG.</p>
-        <div id="livePreview">
-          <h3>👁️ Live Preview</h3>
+        <div id="livePreview" style="margin-top: 24px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
+            <h3 style="margin-bottom:0;">👁️ Live Preview</h3>
+            <button class="btn btn-secondary btn-sm" id="downloadBtn">📥 Download PNG</button>
+          </div>
           <div class="lower-third-preview">
             <span class="lt-main" id="previewMain">Main Text</span>
             <span class="lt-sub" id="previewSub">Sub Text</span>

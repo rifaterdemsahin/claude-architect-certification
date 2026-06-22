@@ -1,5 +1,23 @@
 # LLM Thinking Log
 
+## 2026-06-22 — 📥 Move Lower Thirds Download Button
+
+### 🎯 Objective
+Move the "Download PNG" button next to the Live Preview title to align with user expectations.
+
+### 📐 Implementation
+1. **UI Update (`lower_thirds.html`)**:
+   - Extracted the `id="downloadBtn"` from the editor actions toolbar.
+   - Wrapped the Live Preview `<h3>` in a flexbox container with `justify-content: space-between`.
+   - Placed the Download button inline with the title.
+
+### ✅ Verification
+- Button renders successfully next to the Live Preview section header.
+- Functionality remains intact.
+
+### 📦 Files Changed
+- `5_Symbols/production/postprod/lower_thirds.html`
+- `4_Formula/llm_thinking_log.md` — this entry
 ## 2026-06-22 — 📥 Lower Thirds Download PNG Button
 
 ### 🎯 Objective
