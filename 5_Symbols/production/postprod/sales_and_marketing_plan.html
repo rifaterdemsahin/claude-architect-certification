@@ -51,6 +51,28 @@
     .strategy-item h4 { font-family: var(--font-title); font-size: 1.1rem; margin-bottom: 4px; color: var(--text-main); }
     .strategy-item p { color: var(--text-muted); font-size: 0.95rem; margin: 0; }
 
+    /* Business Model Canvas */
+    .bmc-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 48px; }
+    .bmc-card { background: rgba(17,24,39,0.9); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+    .bmc-card h4 { font-family: var(--font-title); font-size: 1.05rem; color: var(--teal); margin-bottom: 12px; border-bottom: 1px solid rgba(20,184,166,0.2); padding-bottom: 8px; }
+    .bmc-card ul { margin-left: 18px; color: var(--text-muted); font-size: 0.9rem; }
+    .bmc-card ul li { margin-bottom: 6px; }
+    .bmc-card strong { color: var(--text-main); }
+    .bmc-kp { grid-column: 1; grid-row: 1 / 3; }
+    .bmc-ka { grid-column: 2; grid-row: 1; }
+    .bmc-kr { grid-column: 2; grid-row: 2; }
+    .bmc-vp { grid-column: 3; grid-row: 1 / 3; background: linear-gradient(135deg, rgba(20,184,166,0.08), rgba(139,92,246,0.08)); border-color: rgba(139,92,246,0.3); }
+    .bmc-vp h4 { color: var(--primary); border-bottom-color: rgba(139,92,246,0.3); }
+    .bmc-cr { grid-column: 4; grid-row: 1; }
+    .bmc-ch { grid-column: 4; grid-row: 2; }
+    .bmc-cs { grid-column: 5; grid-row: 1 / 3; }
+    .bmc-cost { grid-column: 1 / 4; grid-row: 3; border-top: 3px solid #ef4444; }
+    .bmc-rev { grid-column: 4 / 6; grid-row: 3; border-top: 3px solid var(--success); }
+    @media (max-width: 900px) {
+      .bmc-grid { grid-template-columns: 1fr; }
+      .bmc-kp, .bmc-ka, .bmc-kr, .bmc-vp, .bmc-cr, .bmc-ch, .bmc-cs, .bmc-cost, .bmc-rev { grid-column: 1; grid-row: auto; }
+    }
+
     footer { text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
 
     @media (max-width: 768px) {
@@ -128,6 +150,92 @@
           <h4>YouTube Shorts Pipeline</h4>
           <p>High-retention, fast-paced YouTube Shorts are coming. These will extract the most impactful "Aha!" moments from the course to drive massive organic reach and funnel viewers to the full videos.</p>
         </div>
+      </div>
+    </div>
+
+    <h2 class="section-title">📊 Business Model Canvas</h2>
+    <p class="section-sub">A comprehensive overview of the value creation and capture engine.</p>
+
+    <div class="bmc-grid">
+      <div class="bmc-card bmc-kp">
+        <h4>🤝 Key Partners</h4>
+        <ul>
+          <li><strong>Cloud Providers:</strong> GCP, AWS, Azure (hosting & API usage)</li>
+          <li><strong>AI Platforms:</strong> Anthropic, Google, OpenAI, xAI</li>
+          <li><strong>Certification Bodies:</strong> Organizing the targeted exams</li>
+          <li><strong>Tooling:</strong> Supabase, GitHub, Fly.io</li>
+        </ul>
+      </div>
+      <div class="bmc-card bmc-ka">
+        <h4>⚙️ Key Activities</h4>
+        <ul>
+          <li>Learning & building POCs</li>
+          <li>Passing certifications</li>
+          <li>Recording & editing modules</li>
+          <li>Automated marketing</li>
+        </ul>
+      </div>
+      <div class="bmc-card bmc-kr">
+        <h4>📦 Key Resources</h4>
+        <ul>
+          <li>Rifat's expertise & contracting time</li>
+          <li>Preprod architecture</li>
+          <li>Codebase / Repos</li>
+          <li>YouTube channel & audience</li>
+        </ul>
+      </div>
+      <div class="bmc-card bmc-vp">
+        <h4>💎 Value Propositions</h4>
+        <ul>
+          <li><strong>Anxiety Relief:</strong> Closing the RAISE skill gap.</li>
+          <li><strong>Proof of Work:</strong> Earning tangible, verified certifications.</li>
+          <li><strong>Real-world Application:</strong> Building actual projects, not just theory.</li>
+          <li><strong>Transparency:</strong> Exam receipts and public build logs.</li>
+        </ul>
+      </div>
+      <div class="bmc-card bmc-cr">
+        <h4>❤️ Customer Relationships</h4>
+        <ul>
+          <li><strong>Community:</strong> YouTube Memberships & Discord</li>
+          <li><strong>Continuous Value:</strong> Free Module 1 drops</li>
+          <li><strong>Support:</strong> 48h Q&A response for members</li>
+        </ul>
+      </div>
+      <div class="bmc-card bmc-ch">
+        <h4>📢 Channels</h4>
+        <ul>
+          <li>YouTube (Long-form & Shorts)</li>
+          <li>Automated LinkedIn Posts</li>
+          <li>GitHub Repositories</li>
+          <li>Direct organic search</li>
+        </ul>
+      </div>
+      <div class="bmc-card bmc-cs">
+        <h4>🎯 Customer Segments</h4>
+        <ul>
+          <li><strong>RAISE Audience:</strong> Anxious professionals upskilling in AI.</li>
+          <li><strong>Cloud Architects:</strong> Looking to pivot to AI.</li>
+          <li><strong>Enterprise Teams:</strong> Standardizing AI skillsets.</li>
+          <li><strong>Self-learners:</strong> Seeking project-based certs.</li>
+        </ul>
+      </div>
+      <div class="bmc-card bmc-cost">
+        <h4>💰 Cost Structure</h4>
+        <ul>
+          <li><strong>Development:</strong> ~£100/mo (AI subscriptions: Claude, Gemini, ChatGPT).</li>
+          <li><strong>Infrastructure:</strong> ~£4/mo (GitHub Pages/Actions), Fly.io load, Supabase (Free Tier).</li>
+          <li><strong>Production:</strong> One-off gear costs, editing time (sweat equity).</li>
+          <li><strong>Certifications:</strong> £100-£300 per exam fee.</li>
+        </ul>
+      </div>
+      <div class="bmc-card bmc-rev">
+        <h4>💵 Revenue Streams</h4>
+        <ul>
+          <li><strong>YouTube Ads:</strong> Monetization from Shorts & Long-form views.</li>
+          <li><strong>Channel Memberships:</strong> Monthly recurring revenue for VIP support & exclusive content.</li>
+          <li><strong>Sponsorships:</strong> Future enterprise partnerships.</li>
+          <li><strong>Consulting:</strong> High-ticket funnel from the authority established.</li>
+        </ul>
       </div>
     </div>
 
