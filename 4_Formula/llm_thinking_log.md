@@ -1619,3 +1619,17 @@ GLM" table. Registered GLM in the `agents.md` Supported Agent Roles table.
   - In `navigation_config.json`, added the JSON entry under the "Data & Backend" subgroup.
   - Updated all JSON fallback objects across `shared/nav.js`, `home.html`, and `5_Symbols/tools/sitemap.html` to mirror the new structure.
 - **Status:** IMPLEMENTED, COMMITTED, PUSHED.
+
+## 2026-06-22 - 🗄️ Debug Panel DB Table Inspector (all DB-connected pages)
+- **Context:** User asked to add, on every website page that connects to the database, a debug helper button that surfaces database objects — logging DB access in the debug log and providing a button to display the related tables for that page.
+- **Approach:**
+  - Enhanced the shared `shared/debug-panel.js` (loaded site-wide) with a self-contained **DB Table Inspector** so the feature lands on every page automatically.
+  - **Triple detection** of the tables a page touches (robust to load order):
+    1. *Static scan* — on `DOMContentLoaded`, regex the page's inline scripts for `.from('table')`, `/rest/v1/<table>`, and `window.__DB_TABLES__`.
+    2. *Runtime intercept* — the existing `fetch` wrapper now parses Supabase REST URLs, logs every `🗄️ DB → <table>` access live, and auto-captures the base URL + `apikey` header.
+    3. *Inline-config extraction* — regex `SUPABASE_URL` / `SUPABASE_ANON` constants from the page so the inspector can query even on static GitHub Pages (no `/api/config`).
+  - Added a **`🗄️ DB Tables`** button to the debug header that toggles a panel listing the page's tables (with live hit counts). Each row has `👁 View` (runs `SELECT * LIMIT 50`, logs the result, and renders rows in a dark modal) and `⬇ JSON` (exports up to 1000 rows).
+  - Refactored the badge update into `render()` and removed the fragile `LOG.push` override hack.
+  - Added `shared/debug-panel.js` to the few DB-connected pages that were missing it: `index.html`, `5_Symbols/timeline.html`, `5_Symbols/production/prod/screenshare.html`, `5_Symbols/production/prod/talking-heads.html`, `5_Symbols/production/postprod/post_production_checklist.html`. (Skipped the Go server template `course_src/problem-server/templates/problem.html`.)
+- **Verification:** `go build ./... && go vet ./...` pass; table detection + view tested locally.
+- **Status:** IMPLEMENTED, pending commit + push.

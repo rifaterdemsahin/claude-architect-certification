@@ -26,6 +26,18 @@ This document defines how AI agents interact with the **Claude AI Certification 
 
 ## 📅 Agent Activity Log
 
+### 2026-06-22
+- **Task:** 🗄️ Add a DB debug helper button to every database-connected page that logs DB access and displays the page's related tables.
+- **Action:**
+    - Rewrote `shared/debug-panel.js` with a self-contained **🗄️ DB Table Inspector** so the feature lands on every page that loads the panel automatically.
+    - Triple table detection: (1) static scan of inline scripts for `.from('t')` + `/rest/v1/<t>` + `window.__DB_TABLES__`, (2) live `fetch` wrapper parses Supabase REST URLs and logs every `🗄️ DB → <table>` access, (3) regex extracts `SUPABASE_URL`/`SUPABASE_ANON(_KEY)` so the inspector can query even on static hosts.
+    - Added a `🗄️ DB Tables` button to the debug header → toggles a panel listing the page's tables (with hit counts); each row has `👁 View` (runs `SELECT * LIMIT 50`, logs the result, renders rows in a dark modal) and `⬇ JSON` (exports up to 1000 rows).
+    - Refactored the badge update into `render()` and removed the fragile `LOG.push` override hack.
+    - Added `shared/debug-panel.js` to the 5 DB-connected pages that were missing it: `index.html`, `5_Symbols/timeline.html`, `5_Symbols/production/prod/screenshare.html`, `5_Symbols/production/prod/talking-heads.html`, `5_Symbols/production/postprod/post_production_checklist.html`.
+    - Documented in `4_Formula/llm_thinking_log.md` and `shared/README.md`.
+- **Verification:** `go build ./... && go vet ./...` pass; `node -c` syntax OK; static detection validated on real pages; the exact Supabase REST request `viewTable()` makes returns HTTP 200 with live data; all DB-connected pages confirmed to load the panel via the local Go server.
+- **Status:** IMPLEMENTED, COMMITTED, PUSHED.
+
 ### 2026-06-18
 - **Task:** 📖 Add personal story and motivation to membership page.
 - **Action:**

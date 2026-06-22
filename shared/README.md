@@ -13,7 +13,7 @@
 |------|-------------|
 | `nav.js` | Shared navigation logic — reads `navigation_config.json`, renders menus |
 | `nav.css` | Shared navigation styles (Flexbox/Grid responsive) |
-| `debug-panel.js` | Debug menu toggle, cookie persistence, search autocomplete |
+| `debug-panel.js` | Bottom debug log panel + 🗄️ **DB Table Inspector** — auto-detects the Supabase tables each page touches (static scan + live fetch intercept + `window.__DB_TABLES__`), logs every DB access, and lets you `👁 View` (dump rows) or `⬇ JSON` (export) each table. Captures base URL + anon key from the page's `SUPABASE_URL`/`SUPABASE_ANON(_KEY)` constants, live fetches, or `/api/config`. |
 
 ## Rules
 - No hardcoded navbars in individual HTML files — always use shared components
