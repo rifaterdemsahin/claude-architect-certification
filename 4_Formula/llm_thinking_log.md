@@ -1,5 +1,22 @@
 # LLM Thinking Log
 
+## 2026-06-22 — 📥 Lower Thirds Download PNG Button
+
+### 🎯 Objective
+Add a quick "Download PNG" button to the editor toolbar to allow users to immediately save the generated canvas image locally for testing in video production editors like DaVinci Resolve.
+
+### 📐 Implementation
+1. **UI Update (`lower_thirds.html`)**:
+   - Added a new `<button id="downloadBtn">📥 Download PNG</button>` next to the Save & Upload button.
+   - Wired an event listener `downloadLowerThird` that calls `renderLowerThirdToCanvas` and triggers a programmatic `<a>` element download using `canvasEl.toDataURL()`.
+
+### ✅ Verification
+- Button successfully added and styling matches other secondary buttons.
+- Local tests confirm it directly triggers a browser download.
+
+### 📦 Files Changed
+- `5_Symbols/production/postprod/lower_thirds.html`
+- `4_Formula/llm_thinking_log.md` — this entry
 ## 2026-06-22 — 🧠 Lower Thirds OpenRouter .env Loading
 
 ### 🎯 Objective

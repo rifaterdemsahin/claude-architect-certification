@@ -165,6 +165,7 @@
         </div>
         <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-top:8px;">
           <button class="btn" id="saveBtn">💾 Save & Upload</button>
+          <button class="btn btn-secondary" id="downloadBtn">📥 Download PNG</button>
           <button class="btn btn-secondary" id="generateBtn">🤖 Generate with Gemini</button>
           <button class="btn btn-secondary" id="clearBtn">🗑️ Clear Form</button>
           <span id="saveStatus" style="color:var(--text-muted);font-size:0.85rem;"></span>
@@ -624,9 +625,24 @@
       }
     });
 
+    function downloadLowerThird() {
+      const ltMain = $('ltMain').value.trim() || 'Main Text';
+      const ltSub = $('ltSub').value.trim() || 'Sub Text';
+      
+      renderLowerThirdToCanvas(ltMain, ltSub);
+      
+      const link = document.createElement('a');
+      link.download = `lower_third_${Date.now()}.png`;
+      link.href = canvasEl.toDataURL('image/png');
+      link.click();
+      
+      showToast('Downloaded PNG for testing!');
+    }
+
     $('ltMain').addEventListener('input', updatePreview);
     $('ltSub').addEventListener('input', updatePreview);
     $('saveBtn').addEventListener('click', saveLowerThird);
+    $('downloadBtn').addEventListener('click', downloadLowerThird);
     $('clearBtn').addEventListener('click', clearForm);
     $('generateBtn').addEventListener('click', generateWithGemini);
     async function fetchScriptForVideo(moduleId, videoId) {
