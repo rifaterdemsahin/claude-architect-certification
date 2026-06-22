@@ -29,6 +29,7 @@
     .guide-card { background: linear-gradient(135deg, rgba(139,92,246,0.12), rgba(59,130,246,0.08)); border: 1px solid rgba(139,92,246,0.25); border-radius: 18px; padding: 28px; margin-bottom: 32px; }
     .guide-card h2 { font-family: var(--font-title); font-size: 1.3rem; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
     .guide-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .guide-grid.collapsed { display: none; }
     @media (max-width: 768px) { .guide-grid { grid-template-columns: 1fr; } }
     .guide-item { background: rgba(0,0,0,0.25); border-radius: 12px; padding: 16px; border: 1px solid rgba(255,255,255,0.06); }
     .guide-item h3 { font-size: 0.9rem; font-weight: 700; color: #c084fc; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
@@ -192,8 +193,11 @@
   </header>
 
   <div class="guide-card">
-    <h2>🟢 Greenscreen Recording Guide</h2>
-    <div class="guide-grid">
+    <h2 id="guide-header" onclick="toggleGuide()" style="cursor:pointer; user-select:none; justify-content:space-between;">
+      <span>🟢 Greenscreen Recording Guide</span>
+      <span class="video-toggle" id="guide-toggle" style="font-size:1.1rem;">▼</span>
+    </h2>
+    <div class="guide-grid" id="guide-grid">
       <div class="guide-item">
         <h3>💡 Lighting</h3>
         <ul>
@@ -215,7 +219,7 @@
       <div class="guide-item">
         <h3>📷 Camera Setup</h3>
         <ul>
-          <li>Resolution: 4K (3840×2160) at 24fps or 30fps</li>
+          <li>Resolution: 1080P 60fps for green screen</li>
           <li>Eye level with camera — not looking up or down</li>
           <li>Frame: head and shoulders (rule of thirds)</li>
           <li>Manual white balance — do not use auto</li>
@@ -283,6 +287,27 @@
 
   let allSentences = [];
   let activeModule = null;
+
+  // --- Collapsed-panel persistence (cookie) ---
+  const COLLAPSE_COOKIE = 'th_collapsed_panels';
+  const COLLAPSE_COOKIE_DAYS = 365;
+
+  function getCollapsedSet() {
+    const match = document.cookie.split('; ').find(c => c.startsWith(COLLAPSE_COOKIE + '='));
+    if (!match) return new Set();
+    try {
+      const raw = decodeURIComponent(match.split('=').slice(1).join('='));
+      return new Set(raw ? raw.split(',').filter(Boolean) : []);
+    } catch {
+      return new Set();
+    }
+  }
+
+  function saveCollapsedSet(set) {
+    const value = encodeURIComponent([...set].join(','));
+    const expires = new Date(Date.now() + COLLAPSE_COOKIE_DAYS * 864e5).toUTCString();
+    document.cookie = `${COLLAPSE_COOKIE}=${value}; expires=${expires}; path=/; SameSite=Lax`;
+  }
 
   async function fetchAll() {
     try {
@@ -526,6 +551,8 @@
 
     document.getElementById('video-count').textContent = sortedGroups.length;
 
+    const collapsedSet = getCollapsedSet();
+
     // Track recorded state per script_id
     window._recordedMap = {};
     sortedGroups.forEach(([, sents]) => {
@@ -546,11 +573,12 @@
       const videoTitle = firstSent.video_title || `Script ${scriptId}`;
       const groupLabel = `🎬 Module ${modNum} Video ${videoNum} (Video ID: ${videoId}) — ${videoTitle}`;
       const groupId = `panel-${scriptId}`;
+      const isCollapsed = collapsedSet.has(groupId);
 
       html += `<div class="module-section" style="background: rgba(17,24,39,0.4); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 24px; margin-bottom: 24px;">`;
       html += `  <div class="video-header" onclick="togglePanel('${groupId}')">`;
       html += `    <div class="video-header-left">`;
-      html += `      <span class="video-toggle" id="${groupId}-toggle">▼</span>`;
+      html += `      <span class="video-toggle${isCollapsed ? ' collapsed' : ''}" id="${groupId}-toggle">▼</span>`;
       const isRecorded = firstSent.recorded === true;
       html += `      <input type="checkbox" ${isRecorded ? 'checked' : ''} style="width:18px;height:18px;accent-color:var(--success);cursor:pointer;flex-shrink:0;" onclick="event.stopPropagation();toggleRecorded(${scriptId}, ${firstSent.video_id || 0}, this.checked)" title="Mark as shot">`;
       html += `      <h2 style="font-family: var(--font-title); font-size: 1.25rem; font-weight: 700; margin: 0; color: white;">${esc(groupLabel)}</h2>`;
@@ -563,7 +591,7 @@
       html += `      <a href="footage_mapping.html?module=${modNum}&video=${videoNum}" class="video-btn secondary" onclick="event.stopPropagation();">🎥 Footage Mapping</a>`;
       html += `    </div>`;
       html += `  </div>`;
-      html += `  <div class="sent-list" id="${groupId}">`;
+      html += `  <div class="sent-list${isCollapsed ? ' collapsed' : ''}" id="${groupId}">`;
 
       sentences.forEach(s => {
         const typeLabel = (s.sentence_type || 'body').replace(/_/g, ' ');
@@ -587,12 +615,35 @@
     area.innerHTML = html;
   }
 
+  window.toggleGuide = function() {
+    const grid = document.getElementById('guide-grid');
+    const toggle = document.getElementById('guide-toggle');
+    if (!grid) return;
+    const isCollapsed = grid.classList.toggle('collapsed');
+    if (toggle) toggle.classList.toggle('collapsed', isCollapsed);
+    const set = getCollapsedSet();
+    if (isCollapsed) set.add('guide-grid'); else set.delete('guide-grid');
+    saveCollapsedSet(set);
+  };
+
+  function restoreGuideState() {
+    if (getCollapsedSet().has('guide-grid')) {
+      const grid = document.getElementById('guide-grid');
+      const toggle = document.getElementById('guide-toggle');
+      if (grid) grid.classList.add('collapsed');
+      if (toggle) toggle.classList.add('collapsed');
+    }
+  }
+
   window.togglePanel = function(groupId) {
     const list = document.getElementById(groupId);
     const toggle = document.getElementById(`${groupId}-toggle`);
     if (list) {
-      list.classList.toggle('collapsed');
-      toggle.classList.toggle('collapsed');
+      const isCollapsed = list.classList.toggle('collapsed');
+      if (toggle) toggle.classList.toggle('collapsed', isCollapsed);
+      const set = getCollapsedSet();
+      if (isCollapsed) set.add(groupId); else set.delete(groupId);
+      saveCollapsedSet(set);
     }
   };
 
@@ -924,6 +975,7 @@ let carouselData = [];
   }
 
   document.addEventListener('DOMContentLoaded', async () => {
+    restoreGuideState();
     const [sentences, modules] = await Promise.all([fetchAll(), fetchModules()]);
     let rawSentences = (sentences || []).filter(s => s.visual_mode === 'talking_head');
 

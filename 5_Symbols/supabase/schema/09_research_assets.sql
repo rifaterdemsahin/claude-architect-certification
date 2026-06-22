@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS public.research_assets (
   container    TEXT NOT NULL,        -- 'research-images', 'research-audio', 'research-videos', 'research-notes'
   item_name    TEXT NOT NULL,        -- the original blob/filename
   thumb_name   TEXT,                 -- auto-generated thumbnail blob name ('__thumb__<item_name>'), null if none
+  description  TEXT,                 -- editable human-authored description (Footage & Research Mapping page)
   content_type TEXT,
   size_bytes   BIGINT,
   created_at   TIMESTAMPTZ DEFAULT NOW(),

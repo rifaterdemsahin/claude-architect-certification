@@ -181,7 +181,7 @@
       border-radius: 16px;
       padding: 16px;
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: space-between;
       gap: 16px;
       transition: all 0.2s;
@@ -230,6 +230,54 @@
       background: var(--secondary);
       color: white;
     }
+
+    /* Research element description editor */
+    .asset-desc-wrap { margin-top: 8px; }
+    .asset-desc-view { display: flex; align-items: flex-start; gap: 8px; }
+    .asset-desc-text {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+      white-space: normal;
+      word-break: break-word;
+    }
+    .asset-desc-view[data-empty="1"] .asset-desc-text { font-style: italic; opacity: 0.55; }
+    .btn-desc-edit {
+      background: none;
+      border: none;
+      color: var(--secondary);
+      cursor: pointer;
+      font-size: 0.85rem;
+      padding: 0 4px;
+      flex-shrink: 0;
+    }
+    .btn-desc-edit:hover { color: white; }
+    .asset-desc-input {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      color: white;
+      font-family: inherit;
+      font-size: 0.8rem;
+      padding: 8px;
+      resize: vertical;
+      min-height: 52px;
+    }
+    .asset-desc-input:focus { outline: none; border-color: var(--primary); }
+    .asset-desc-actions { display: flex; gap: 8px; margin-top: 6px; }
+    .btn-desc-save, .btn-desc-cancel {
+      padding: 4px 12px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid transparent;
+    }
+    .btn-desc-save { background: rgba(16, 185, 129, 0.15); color: var(--success); border-color: rgba(16, 185, 129, 0.3); }
+    .btn-desc-save:hover { background: var(--success); color: white; }
+    .btn-desc-cancel { background: rgba(255, 255, 255, 0.05); color: var(--text-muted); }
+    .btn-desc-cancel:hover { color: white; }
 
     /* Mapped Outputs */
     .mappings-container {
@@ -529,6 +577,10 @@
   </div>
 
   <script>
+    const SUPABASE_URL = localStorage.getItem('supabase_url') || 'https://rmekfsdhglyiralxvkwc.supabase.co';
+    const SUPABASE_ANON_KEY = localStorage.getItem('supabase_anon_key') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZWtmc2RoZ2x5aXJhbHh2a3djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NzYzODgsImV4cCI6MjA5NjM1MjM4OH0.ay6HsmO_CbMGDXL_Dv4DT-paAIAOqlQPfmqqx_mexSU';
+    const SB_HEADERS = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` };
+
     let activeTab = 'images';
     let loadedAssets = [];
     const containerMap = {
@@ -542,6 +594,150 @@
       'audio': '🎵',
       'videos': '🎬',
       'notes': '📝'
+    };
+
+    // --- Research element descriptions (Supabase-backed, editable inline) ---
+    // Primary store: research_assets.description in Supabase (upsert on
+    // container+item_name). A localStorage mirror keeps descriptions usable
+    // offline / when the storage proxy or Supabase is unreachable.
+    const DESC_STORE_KEY = 'research_descriptions';
+    let descRegistry = {};   // descId -> { container, name }
+    let descCounter = 0;
+    let descCache = {};      // 'container/name' -> description (from Supabase)
+
+    function escHtml(s) {
+      const d = document.createElement('div');
+      d.textContent = s == null ? '' : s;
+      return d.innerHTML;
+    }
+    function getLocalDescriptions() {
+      try { return JSON.parse(localStorage.getItem(DESC_STORE_KEY)) || {}; }
+      catch { return {}; }
+    }
+    function mirrorLocalDescription(k, text) {
+      const all = getLocalDescriptions();
+      if (text) all[k] = text; else delete all[k];
+      localStorage.setItem(DESC_STORE_KEY, JSON.stringify(all));
+    }
+    function descKey(container, name) { return `${container}/${name}`; }
+
+    // Load all descriptions for a container from Supabase into descCache.
+    async function loadDescriptionsForContainer(container) {
+      try {
+        const url = `${SUPABASE_URL}/rest/v1/research_assets`
+          + `?container=eq.${encodeURIComponent(container)}`
+          + `&select=item_name,description&description=not.is.null`;
+        const res = await fetch(url, { headers: SB_HEADERS });
+        if (res.ok) {
+          const rows = await res.json();
+          rows.forEach(r => { descCache[descKey(container, r.item_name)] = r.description || ''; });
+        }
+      } catch (e) {
+        // Offline: getDescription() will fall back to the localStorage mirror.
+        console.warn('Could not load descriptions from Supabase:', e);
+      }
+    }
+
+    function getDescription(container, name) {
+      const k = descKey(container, name);
+      if (k in descCache) return descCache[k] || '';
+      return getLocalDescriptions()[k] || '';
+    }
+
+    // Upsert the description to Supabase, mirroring to localStorage. Returns
+    // true if the Supabase write succeeded.
+    async function setDescription(container, name, text) {
+      const clean = (text || '').trim();
+      const k = descKey(container, name);
+      descCache[k] = clean;
+      mirrorLocalDescription(k, clean);
+      try {
+        const res = await fetch(
+          `${SUPABASE_URL}/rest/v1/research_assets?on_conflict=container,item_name`,
+          {
+            method: 'POST',
+            headers: {
+              ...SB_HEADERS,
+              'Content-Type': 'application/json',
+              'Prefer': 'resolution=merge-duplicates,return=minimal'
+            },
+            body: JSON.stringify({ container, item_name: name, description: clean || null })
+          }
+        );
+        return res.ok || res.status === 204;
+      } catch (e) {
+        console.warn('Description saved locally but Supabase write failed:', e);
+        return false;
+      }
+    }
+
+    function buildDescBlock(container, name) {
+      const id = 'desc-' + (descCounter++);
+      descRegistry[id] = { container, name };
+      const desc = getDescription(container, name);
+      const hasDesc = !!desc;
+      return `
+        <div class="asset-desc-wrap" id="${id}">
+          <div class="asset-desc-view"${hasDesc ? '' : ' data-empty="1"'}>
+            <span class="asset-desc-text">${hasDesc ? escHtml(desc) : 'No description yet — click ✎ to add one.'}</span>
+            <button class="btn-desc-edit" onclick="editDescription('${id}')" title="Edit description">✎</button>
+          </div>
+          <div class="asset-desc-edit" style="display:none;">
+            <textarea class="asset-desc-input" placeholder="Describe this research element..."></textarea>
+            <div class="asset-desc-actions">
+              <button class="btn-desc-save" onclick="saveDescription('${id}')">💾 Save</button>
+              <button class="btn-desc-cancel" onclick="cancelDescription('${id}')">Cancel</button>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    window.editDescription = function(id) {
+      const wrap = document.getElementById(id);
+      if (!wrap) return;
+      const { container, name } = descRegistry[id] || {};
+      const textarea = wrap.querySelector('.asset-desc-input');
+      textarea.value = getDescription(container, name);
+      wrap.querySelector('.asset-desc-view').style.display = 'none';
+      wrap.querySelector('.asset-desc-edit').style.display = 'block';
+      textarea.focus();
+    };
+
+    window.saveDescription = async function(id) {
+      const wrap = document.getElementById(id);
+      if (!wrap) return;
+      const { container, name } = descRegistry[id] || {};
+      const text = wrap.querySelector('.asset-desc-input').value;
+      const saveBtn = wrap.querySelector('.btn-desc-save');
+      const original = saveBtn ? saveBtn.innerHTML : '';
+      if (saveBtn) { saveBtn.disabled = true; saveBtn.innerHTML = '⏳ Saving…'; }
+
+      const ok = await setDescription(container, name, text);
+
+      const view = wrap.querySelector('.asset-desc-view');
+      const txtEl = wrap.querySelector('.asset-desc-text');
+      if (text && text.trim()) {
+        txtEl.textContent = text.trim();
+        view.removeAttribute('data-empty');
+      } else {
+        txtEl.textContent = 'No description yet — click ✎ to add one.';
+        view.setAttribute('data-empty', '1');
+      }
+      if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = original; }
+      if (!ok) {
+        view.setAttribute('title', '⚠️ Saved locally — Supabase sync failed, will need re-save when online.');
+      } else {
+        view.removeAttribute('title');
+      }
+      wrap.querySelector('.asset-desc-edit').style.display = 'none';
+      view.style.display = 'flex';
+    };
+
+    window.cancelDescription = function(id) {
+      const wrap = document.getElementById(id);
+      if (!wrap) return;
+      wrap.querySelector('.asset-desc-edit').style.display = 'none';
+      wrap.querySelector('.asset-desc-view').style.display = 'flex';
     };
 
     function onModuleChange() {
@@ -571,6 +767,7 @@
       container.innerHTML = '<div class="empty-state">Fetching elements from Go Storage proxy...</div>';
       
       const azureContainer = containerMap[activeTab];
+      await loadDescriptionsForContainer(azureContainer);
       try {
         const res = await fetch(`/api/research/files?container=${azureContainer}`);
         if (!res.ok) throw new Error('API unavailable');
@@ -630,6 +827,7 @@
             <div class="asset-details" style="flex: 1; min-width: 0;">
               <span class="asset-name" title="${file.name}">${file.name}</span>
               <span class="asset-meta">${iconMap[activeTab]} ${activeTab.toUpperCase()} • ${sizeStr}</span>
+              ${buildDescBlock(azureContainer, file.name)}
             </div>
             <button class="btn-action" onclick="mapAsset('${file.name.replace(/'/g, "\\'")}')">Map to Scene</button>
           `;
@@ -684,6 +882,7 @@
             <div class="asset-details" style="flex: 1; min-width: 0;">
               <span class="asset-name">${name}</span>
               <span class="asset-meta">${iconMap[activeTab]} ${activeTab.toUpperCase()} • Fallback Asset</span>
+              ${buildDescBlock(azureContainer, name)}
             </div>
             <button class="btn-action" onclick="mapAsset('${name}')">Map to Scene</button>
           `;

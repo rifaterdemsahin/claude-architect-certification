@@ -1,5 +1,56 @@
 # LLM Thinking Log
 
+## 2026-06-22 — 🧠 Lower Thirds OpenRouter Backend Integration & Mock Generation
+
+### 🎯 Objective
+Move the OpenRouter generation logic to the backend to secure the API key, move the buttons to the selector bar for better UX, and add a Mock Generation button to allow generating mock candidates for testing in video production editors like Davinci Resolve.
+
+### 📐 Implementation
+1. **Backend Integration (`cmd/server/main.go`)**:
+   - Added `openRouterGenerateHandler` to securely fetch the script and make an API call to OpenRouter (`https://openrouter.ai/api/v1/chat/completions`) using the `OPENROUTER_API_KEY` stored securely in the Key Vault.
+   - Registered the endpoint `/api/lowerthirds/openrouter`.
+2. **UI Updates (`lower_thirds.html`)**:
+   - Moved "Test OpenRouter Gen" button to the `.selector-bar`.
+   - Added "🧪 Mock Generation" button to the `.selector-bar`.
+   - Removed OpenRouter button from the editor section's action buttons.
+3. **Frontend Integration**:
+   - Refactored `testOpenRouterGeneration` to call the new `/api/lowerthirds/openrouter` backend endpoint instead of prompting the user for an API key.
+   - Implemented `mockGeneration` which directly populates the candidates table with mock candidates without hitting any APIs.
+
+### ✅ Verification
+- Buttons successfully moved to `.selector-bar`.
+- Backend compiles correctly (`go build ./...` passes).
+- Frontend securely proxies the request through the Go backend without exposing credentials.
+- Mock generation rapidly adds testing candidates to the UI.
+
+### 📦 Files Changed
+- `cmd/server/main.go`
+- `5_Symbols/production/postprod/lower_thirds.html`
+- `4_Formula/llm_thinking_log.md` — this entry
+
+
+## 2026-06-22 — 🧠 Lower Thirds OpenRouter Generation & Canvas Enhancements
+
+### 🎯 Objective
+Modify the `lower_thirds.html` page to allow generating lower third candidates (Main Text and Sub Text) via OpenRouter, display the script used for generation, format the canvas render with Fira Code Medium and highly contrasting colors (Yellow on Dark Blue).
+
+### 📐 Implementation
+1. **Google Fonts**: Added `Fira Code` to the Google Fonts import list.
+2. **OpenRouter API Test Button**: Added a "Test OpenRouter Generation" button.
+3. **Script Fetching**: Implemented `fetchScriptForVideo` to fetch the script from the `videos` Supabase table. If none is found, it falls back to a placeholder script.
+4. **OpenRouter Direct Call**: Implemented client-side API call to `https://openrouter.ai/api/v1/chat/completions`, prompting for a JSON output of Main Text, Sub Text, and Rationale based on the script.
+5. **Canvas Updates**: Updated `renderLowerThirdToCanvas` to use `500 28px "Fira Code", monospace` and gradient colors `dark blue` to `yellow`.
+
+### ✅ Verification
+- Button triggers OpenRouter API prompt correctly.
+- Script is rendered in `#scriptPanel`.
+- Canvas renderer sets highly visible fonts and colors as required.
+- File syntactic integrity verified.
+
+### 📦 Files Changed
+- `5_Symbols/production/postprod/lower_thirds.html`
+- `4_Formula/llm_thinking_log.md` — this entry
+
 ## 2026-06-21 — 🧰 Grouped Tool Menus in Navigation
 
 ### 🎯 Objective

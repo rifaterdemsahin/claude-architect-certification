@@ -2197,6 +2197,105 @@ Focus on professional, certification-quality overlays. Use the module/video them
 	}
 }
 
+func openRouterGenerateHandler(cfg config) http.HandlerFunc {
+	type ORRequest struct {
+		Script string `json:"script"`
+	}
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		if r.Method != http.MethodPost {
+			http.Error(w, `{"error":"method not allowed"}`, http.StatusMethodNotAllowed)
+			return
+		}
+
+		var req ORRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, `{"error":"invalid request body"}`, http.StatusBadRequest)
+			return
+		}
+
+		apiKey := cfg.getSecret("OPENROUTER_API_KEY")
+		if apiKey == "" {
+			http.Error(w, `{"error":"OPENROUTER_API_KEY missing from server configuration"}`, http.StatusServiceUnavailable)
+			return
+		}
+
+		prompt := fmt.Sprintf(`You are a lower thirds generator for a video course.
+Based on the following video script, generate exactly 3 lower third candidate options.
+Each candidate must have a "main" text (max 40 chars) and "sub" text (max 60 chars) and a brief "rationale".
+
+Video script:
+%s
+
+Return ONLY a JSON array with this structure:
+[
+  {"main": "Main Text", "sub": "Sub text description", "rationale": "Reason"}
+]`, req.Script)
+
+		ctx, cancel := context.WithTimeout(r.Context(), 30*time.Second)
+		defer cancel()
+
+		orURL := "https://openrouter.ai/api/v1/chat/completions"
+		reqBody := map[string]any{
+			"model": "google/gemini-2.5-flash",
+			"messages": []map[string]string{
+				{"role": "user", "content": prompt},
+			},
+			"response_format": map[string]map[string]string{
+				"type": {"type": "json_object"},
+			},
+		}
+
+		b, _ := json.Marshal(reqBody)
+		hreq, err := http.NewRequestWithContext(ctx, "POST", orURL, bytes.NewReader(b))
+		if err != nil {
+			http.Error(w, `{"error":"failed to build request"}`, http.StatusInternalServerError)
+			return
+		}
+
+		hreq.Header.Set("Content-Type", "application/json")
+		hreq.Header.Set("Authorization", "Bearer "+apiKey)
+		hreq.Header.Set("HTTP-Referer", "https://claude-architect-certification.com")
+		hreq.Header.Set("X-Title", "Claude Architect Certification")
+
+		hresp, err := http.DefaultClient.Do(hreq)
+		if err != nil {
+			http.Error(w, `{"error":"OpenRouter API call failed"}`, http.StatusBadGateway)
+			return
+		}
+		defer hresp.Body.Close()
+
+		if hresp.StatusCode >= 400 {
+			body, _ := io.ReadAll(hresp.Body)
+			http.Error(w, fmt.Sprintf(`{"error":"OpenRouter API returned HTTP %d: %s"}`, hresp.StatusCode, body), http.StatusBadGateway)
+			return
+		}
+
+		var orResp struct {
+			Choices []struct {
+				Message struct {
+					Content string `json:"content"`
+				} `json:"message"`
+			} `json:"choices"`
+		}
+
+		if err := json.NewDecoder(hresp.Body).Decode(&orResp); err != nil {
+			http.Error(w, `{"error":"failed to decode response"}`, http.StatusInternalServerError)
+			return
+		}
+
+		content := ""
+		if len(orResp.Choices) > 0 {
+			content = orResp.Choices[0].Message.Content
+		}
+
+		json.NewEncoder(w).Encode(map[string]string{
+			"content": content,
+		})
+	}
+}
+
 // setCORS allows the static GitHub Pages site (and local dev) to call this
 // backend cross-origin. The GitHub Pages site diverts /api calls here because
 // Pages cannot run the Go backend that proxies to Gemini.
@@ -2555,6 +2654,7 @@ func main() {
 	mux.Handle("/api/infographics/generate", observe(cfg, infographicGenerateHandler(cfg)))
 	mux.Handle("/api/infographics/save", observe(cfg, infographicSaveHandler(cfg)))
 	mux.Handle("/api/lowerthirds/generate", observe(cfg, lowerThirdGenerateHandler(cfg)))
+	mux.Handle("/api/lowerthirds/openrouter", observe(cfg, openRouterGenerateHandler(cfg)))
 	mux.Handle("/api/ai/sanity-check", observe(cfg, sanityCheckHandler(cfg)))
 	mux.Handle("/api/ai/fix-grammar", observe(cfg, fixGrammarHandler(cfg)))
 	mux.Handle("/api/admin/login", observe(cfg, adminLoginHandler(cfg)))

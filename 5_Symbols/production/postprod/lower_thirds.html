@@ -8,7 +8,7 @@
   <meta name="description" content="Generate, save, and preview lower third candidates via Gemini. Auto-deduplicated and stored in Supabase with learning rationale.">
   <link rel="icon" type="image/png" href="../../../favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg-dark: #030712; --bg-card: rgba(17,24,39,0.9); --border-glow: rgba(139,92,246,0.3);
@@ -137,6 +137,8 @@
       <select id="moduleSelect"><option value="">— Select Module —</option></select>
       <select id="videoSelect"><option value="">— Select Video —</option></select>
       <button class="btn btn-secondary" id="generateAllBtn" style="display:none;">⚡ Generate All Videos</button>
+      <button class="btn btn-secondary" id="openRouterBtn" style="background:#eab308; color:#000;">🧠 Test OpenRouter Gen</button>
+      <button class="btn btn-secondary" id="mockGenBtn" style="background:#3b82f6; color:#fff;">🧪 Mock Generation</button>
     </div>
     <div id="editorSection" style="display:none;">
       <div class="glass-card">
@@ -167,6 +169,7 @@
           <button class="btn btn-secondary" id="clearBtn">🗑️ Clear Form</button>
           <span id="saveStatus" style="color:var(--text-muted);font-size:0.85rem;"></span>
         </div>
+        <p style="margin-top:12px; font-size: 0.85rem; color: var(--text-muted);">🎨 <strong>Design Note:</strong> Lower thirds use <strong>Fira Code Medium</strong> font with highly <strong>contrasting colors</strong> (Deep Blue & Bright Yellow) for maximum visibility when saved as PNG.</p>
         <div id="livePreview">
           <h3>👁️ Live Preview</h3>
           <div class="lower-third-preview">
@@ -378,22 +381,24 @@
       const barHeight = 80;
       const barY = h - barHeight - 20;
       const grad = ctx2d.createLinearGradient(0, barY, w, barY);
-      grad.addColorStop(0, '#8b5cf6');
-      grad.addColorStop(1, '#3b82f6');
+      // Using contrasting colors: Deep Dark Blue to Bright Yellow
+      grad.addColorStop(0, '#0f172a');
+      grad.addColorStop(1, '#eab308');
       ctx2d.fillStyle = grad;
       ctx2d.beginPath();
       ctx2d.roundRect(0, barY, w, barHeight, 0);
       ctx2d.fill();
-      ctx2d.fillStyle = 'white';
+      ctx2d.fillStyle = '#eab308'; // Yellow accent bar
       ctx2d.fillRect(0, barY, 8, barHeight);
       ctx2d.fillStyle = '#ffffff';
-      ctx2d.font = 'bold 28px Outfit, sans-serif';
+      // Fira Code Medium for Main Text
+      ctx2d.font = '500 28px "Fira Code", monospace';
       ctx2d.textBaseline = 'middle';
       ctx2d.shadowColor = 'rgba(0,0,0,0.4)';
       ctx2d.shadowBlur = 4;
       ctx2d.fillText(main || 'Main Text', 24, barY + 28);
-      ctx2d.font = '18px "Plus Jakarta Sans", sans-serif';
-      ctx2d.fillStyle = 'rgba(255,255,255,0.85)';
+      ctx2d.font = '400 18px "Plus Jakarta Sans", sans-serif';
+      ctx2d.fillStyle = 'rgba(255,255,255,0.95)';
       ctx2d.shadowBlur = 2;
       ctx2d.fillText(sub || 'Sub Text', 24, barY + 58);
       ctx2d.shadowBlur = 0;
@@ -624,6 +629,122 @@
     $('saveBtn').addEventListener('click', saveLowerThird);
     $('clearBtn').addEventListener('click', clearForm);
     $('generateBtn').addEventListener('click', generateWithGemini);
+    async function fetchScriptForVideo(moduleId, videoId) {
+      if (!moduleId || !videoId) return null;
+      try {
+        const moduleNum = dbModules.find(m => m.id === moduleId)?.module_number || 0;
+        const videoNum = dbVideos.find(v => v.id === videoId)?.video_number || 0;
+        let videoData = await api(`videos?module_id=eq.${moduleId}&video_number=eq.${videoNum}&select=id,script`);
+        if (videoData.length > 0 && videoData[0].script) {
+           return videoData[0].script;
+        }
+        return null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    async function testOpenRouterGeneration() {
+      if (!currentModuleId || !currentVideoId) { showToast('Select a module and video first.', true); return; }
+
+      $('genLoading').style.display = 'block';
+      $('genLoading').querySelector('p').textContent = 'OpenRouter is identifying best candidates via backend...';
+
+      try {
+        let scriptText = await fetchScriptForVideo(currentModuleId, currentVideoId);
+        if (!scriptText) {
+          scriptText = "This is a placeholder script because no script was found in the database. In this video, we will learn about Claude AI, prompt engineering, and building agentic workflows.";
+        }
+
+        $('scriptContent').textContent = scriptText;
+        $('scriptPanel').style.display = 'block';
+
+        const res = await fetch('/api/lowerthirds/openrouter', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            script: scriptText
+          })
+        });
+
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        
+        let candidates = [];
+        try {
+           const content = data.content;
+           const jsonStr = content.substring(content.indexOf('['), content.lastIndexOf(']') + 1);
+           candidates = JSON.parse(jsonStr);
+        } catch(e) {
+           throw new Error("Failed to parse OpenRouter response as JSON.");
+        }
+
+        $('genLoading').style.display = 'none';
+
+        const wrap = $('candidatesTableWrap');
+        $('cacheInfo').textContent = '(OpenRouter Results)';
+        wrap.innerHTML =
+          '<table class="lt-table"><thead><tr>' +
+            '<th class="num-col">#</th>' +
+            '<th class="main-col">Main Text</th>' +
+            '<th class="sub-col">Sub Text</th>' +
+            '<th class="rationale-col">Rationale (Why It Matters for Learning)</th>' +
+            '<th class="action-col">Apply</th>' +
+          '</tr></thead><tbody>' +
+          candidates.map((r, i) =>
+            '<tr>' +
+              '<td class="num-col">' + (i + 1) + '</td>' +
+              '<td class="main-col"><strong>' + escHtml(r.main || r.main_text) + '</strong></td>' +
+              '<td class="sub-col">' + escHtml(r.sub || r.sub_text) + '</td>' +
+              '<td class="rationale-col"><div class="rationale-text">' + escHtml(r.rationale || 'OpenRouter identified this as a key term.') + '</div></td>' +
+              '<td class="action-col"><button class="btn btn-sm btn-secondary" onclick="applySuggestion(\'' + escJs(r.main || r.main_text) + '\', \'' + escJs(r.sub || r.sub_text) + '\')">✏️ Load</button></td>' +
+            '</tr>'
+          ).join('') +
+          '</tbody></table>';
+
+        showToast('OpenRouter generation complete!');
+      } catch (e) {
+        $('genLoading').style.display = 'none';
+        showToast('OpenRouter Error: ' + e.message, true);
+      }
+    }
+
+    function mockGeneration() {
+      if (!currentModuleId || !currentVideoId) { showToast('Select a module and video first.', true); return; }
+      
+      const mockCandidates = [
+        { main_text: "System Design", sub_text: "Scaling Microservices", rationale: "Mock testing candidate 1 for Davinci Resolve" },
+        { main_text: "Architecture", sub_text: "Serverless Deployment", rationale: "Mock testing candidate 2 for Davinci Resolve" }
+      ];
+
+      const wrap = $('candidatesTableWrap');
+      $('cacheInfo').textContent = '(Mock Data)';
+      wrap.innerHTML =
+        '<table class="lt-table"><thead><tr>' +
+          '<th class="num-col">#</th>' +
+          '<th class="main-col">Main Text</th>' +
+          '<th class="sub-col">Sub Text</th>' +
+          '<th class="rationale-col">Rationale (Why It Matters for Learning)</th>' +
+          '<th class="action-col">Apply</th>' +
+        '</tr></thead><tbody>' +
+        mockCandidates.map((r, i) =>
+          '<tr>' +
+            '<td class="num-col">' + (i + 1) + '</td>' +
+            '<td class="main-col"><strong>' + escHtml(r.main_text) + '</strong></td>' +
+            '<td class="sub-col">' + escHtml(r.sub_text) + '</td>' +
+            '<td class="rationale-col"><div class="rationale-text">' + escHtml(r.rationale) + '</div></td>' +
+            '<td class="action-col"><button class="btn btn-sm btn-secondary" onclick="applySuggestion(\'' + escJs(r.main_text) + '\', \'' + escJs(r.sub_text) + '\')">✏️ Load</button></td>' +
+          '</tr>'
+        ).join('') +
+        '</tbody></table>';
+      
+      showToast('Mock generation completed!');
+    }
+
+    $('openRouterBtn').addEventListener('click', testOpenRouterGeneration);
+    $('mockGenBtn').addEventListener('click', mockGeneration);
     $('generateAllBtn').addEventListener('click', generateAllVideos);
 
     loadConfig();

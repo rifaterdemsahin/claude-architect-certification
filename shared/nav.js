@@ -339,10 +339,12 @@
     var favs = getFavs();
 
     var html = '<div class="site-nav-container">' +
+      '<div class="site-nav-left">' +
       '<a href="' + ROOT + 'index.html" class="site-nav-logo">🏛️ Claude Architect</a>' +
       '<div class="site-nav-search-container">' +
         '<input type="text" id="site-nav-search" placeholder="Search menu (Press \'/\')..." autocomplete="off" aria-label="Search navigation menu" />' +
         '<div id="site-nav-search-results" class="site-nav-search-results"></div>' +
+      '</div>' +
       '</div>' +
       '<div class="site-nav-links">';
 
@@ -641,8 +643,20 @@
           if (siblings[si] !== subdropdown) siblings[si].classList.remove('open');
         }
 
-        if (isOpen) subdropdown.classList.remove('open');
-        else subdropdown.classList.add('open');
+        if (isOpen) {
+          subdropdown.classList.remove('open');
+        } else {
+          subdropdown.classList.add('open');
+          var menu = subdropdown.querySelector('.site-subdrop-menu');
+          if (menu) {
+            var rect = menu.getBoundingClientRect();
+            if (rect.right > window.innerWidth) {
+              menu.classList.add('open-left');
+            } else {
+              menu.classList.remove('open-left');
+            }
+          }
+        }
         return;
       }
 
@@ -662,8 +676,20 @@
         if (allOpen[i] !== dropdown) allOpen[i].classList.remove('open');
       }
 
-      if (isOpen) dropdown.classList.remove('open');
-      else dropdown.classList.add('open');
+      if (isOpen) {
+        dropdown.classList.remove('open');
+      } else {
+        dropdown.classList.add('open');
+        var dropMenu = dropdown.querySelector('.site-drop-menu');
+        if (dropMenu) {
+          var dropRect = dropMenu.getBoundingClientRect();
+          if (dropRect.right > window.innerWidth) {
+            dropMenu.classList.add('open-left');
+          } else {
+            dropMenu.classList.remove('open-left');
+          }
+        }
+      }
     });
 
     // Close all when clicking outside the nav
