@@ -189,6 +189,9 @@
 
       <div class="glass-card">
         <h2>📋 Lower Third Candidates <span id="cacheInfo" style="font-size:0.8rem;color:var(--text-muted);font-weight:400;"></span></h2>
+        <div style="margin-bottom: 12px; display: none;" id="bulkSaveWrap">
+          <button class="btn btn-secondary btn-sm" onclick="saveSelectedCandidates()">💾 Save Selected to Scenes</button>
+        </div>
         <div id="candidatesTableWrap">
           <div class="empty-state">
             <div class="empty-icon">💡</div>
@@ -313,6 +316,7 @@
       if (!moduleNumber || !videoNumber) {
         wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">💡</div><p>Select a video to load candidates.</p></div>';
         cacheInfo.textContent = '';
+        if ($('bulkSaveWrap')) $('bulkSaveWrap').style.display = 'none';
         return;
       }
       try {
@@ -322,13 +326,16 @@
         if (!rows.length) {
           wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">🤖</div><p>No candidates yet. Click <strong>"Generate with Gemini"</strong> to create them.</p></div>';
           cacheInfo.textContent = '';
+          if ($('bulkSaveWrap')) $('bulkSaveWrap').style.display = 'none';
           return;
         }
         cacheInfo.textContent = '(' + rows.length + ' saved · auto-deduplicated)';
+        if ($('bulkSaveWrap')) $('bulkSaveWrap').style.display = 'block';
         const modLabel = 'M' + moduleNumber;
         const vidLabel = 'V' + videoNumber;
         wrap.innerHTML =
           '<table class="lt-table"><thead><tr>' +
+            '<th class="sel-col" style="width:40px;"><input type="checkbox" onchange="toggleAllCands(this)"></th>' +
             '<th class="num-col">#</th>' +
             '<th class="main-col">Main Text</th>' +
             '<th class="sub-col">Sub Text</th>' +
@@ -337,6 +344,7 @@
           '</tr></thead><tbody>' +
           rows.map(r =>
             '<tr>' +
+              '<td class="sel-col"><input type="checkbox" class="cand-cb" data-main="' + escHtml(r.main_text) + '" data-sub="' + escHtml(r.sub_text) + '"></td>' +
               '<td class="num-col">' + (r.sort_order || r.id) + '</td>' +
               '<td class="main-col"><span class="module-video-tag">' + modLabel + ' / ' + vidLabel + '</span><br><strong>' + escHtml(r.main_text) + '</strong></td>' +
               '<td class="sub-col">' + escHtml(r.sub_text) + '</td>' +
@@ -657,7 +665,7 @@
       loadVideos(currentModuleId);
     });
 
-    $('videoSelect').addEventListener('change', function() {
+    $('videoSelect').addEventListener('change', async function() {
       currentVideoId = parseInt(this.value) || null;
       clearForm();
       if (currentVideoId) {
@@ -667,9 +675,18 @@
         const videoNum = dbVideos.find(v => v.id === currentVideoId)?.video_number || 0;
         loadLowerThirds(moduleNum, videoNum);
         loadScenes(currentVideoId);
+        
+        let scriptText = await fetchScriptForVideo(currentModuleId, currentVideoId);
+        if (scriptText) {
+          $('scriptContent').textContent = scriptText;
+          $('scriptPanel').style.display = 'block';
+        } else {
+          $('scriptPanel').style.display = 'none';
+        }
       } else {
         $('editorSection').style.display = 'none';
         $('emptyState').style.display = 'block';
+        $('scriptPanel').style.display = 'none';
       }
     });
 
@@ -769,6 +786,7 @@
         $('cacheInfo').textContent = '(OpenRouter Results)';
         wrap.innerHTML =
           '<table class="lt-table"><thead><tr>' +
+            '<th class="sel-col" style="width:40px;"><input type="checkbox" onchange="toggleAllCands(this)"></th>' +
             '<th class="num-col">#</th>' +
             '<th class="main-col">Main Text</th>' +
             '<th class="sub-col">Sub Text</th>' +
@@ -777,6 +795,7 @@
           '</tr></thead><tbody>' +
           candidates.map((r, i) =>
             '<tr>' +
+              '<td class="sel-col"><input type="checkbox" class="cand-cb" data-main="' + escHtml(r.main || r.main_text) + '" data-sub="' + escHtml(r.sub || r.sub_text) + '"></td>' +
               '<td class="num-col">' + (i + 1) + '</td>' +
               '<td class="main-col"><strong>' + escHtml(r.main || r.main_text) + '</strong></td>' +
               '<td class="sub-col">' + escHtml(r.sub || r.sub_text) + '</td>' +
@@ -786,6 +805,7 @@
           ).join('') +
           '</tbody></table>';
 
+        if ($('bulkSaveWrap')) $('bulkSaveWrap').style.display = 'block';
         showToast('OpenRouter generation complete!');
       } catch (e) {
         $('genLoading').style.display = 'none';
@@ -805,6 +825,7 @@
       $('cacheInfo').textContent = '(Mock Data)';
       wrap.innerHTML =
         '<table class="lt-table"><thead><tr>' +
+          '<th class="sel-col" style="width:40px;"><input type="checkbox" onchange="toggleAllCands(this)"></th>' +
           '<th class="num-col">#</th>' +
           '<th class="main-col">Main Text</th>' +
           '<th class="sub-col">Sub Text</th>' +
@@ -813,6 +834,7 @@
         '</tr></thead><tbody>' +
         mockCandidates.map((r, i) =>
           '<tr>' +
+            '<td class="sel-col"><input type="checkbox" class="cand-cb" data-main="' + escHtml(r.main_text) + '" data-sub="' + escHtml(r.sub_text) + '"></td>' +
             '<td class="num-col">' + (i + 1) + '</td>' +
             '<td class="main-col"><strong>' + escHtml(r.main_text) + '</strong></td>' +
             '<td class="sub-col">' + escHtml(r.sub_text) + '</td>' +
@@ -822,7 +844,48 @@
         ).join('') +
         '</tbody></table>';
       
+      if ($('bulkSaveWrap')) $('bulkSaveWrap').style.display = 'block';
       showToast('Mock generation completed!');
+    }
+
+    async function saveSelectedCandidates() {
+      const cbs = document.querySelectorAll('.cand-cb:checked');
+      if (!cbs.length) { showToast('Select at least one candidate.', true); return; }
+      if (!currentModuleId || !currentVideoId) return;
+
+      const moduleNum = dbModules.find(m => m.id === currentModuleId)?.module_number || 0;
+      const videoNum = dbVideos.find(v => v.id === currentVideoId)?.video_number || 0;
+
+      let maxScene = 0;
+      try {
+        const scenes = await api('scenes?module_number=eq.' + moduleNum + '&section_number=eq.' + videoNum + '&select=scene_number');
+        for (const s of scenes) {
+          if (s.scene_number > maxScene) maxScene = s.scene_number;
+        }
+      } catch(e) {}
+
+      let added = 0;
+      for (const cb of cbs) {
+        const main = cb.getAttribute('data-main') || '';
+        const sub = cb.getAttribute('data-sub') || '';
+        maxScene++;
+        try {
+          await api('scenes', {
+            method: 'POST',
+            body: JSON.stringify({ module_number: moduleNum, section_number: videoNum, scene_number: maxScene, lt_main: main, lt_sub: sub, lt_image: '' })
+          });
+          added++;
+        } catch(e) {
+          console.error(e);
+        }
+      }
+      showToast('Saved ' + added + ' candidates to scenes!');
+      await loadScenes(currentVideoId);
+    }
+
+    function toggleAllCands(master) {
+      const cbs = document.querySelectorAll('.cand-cb');
+      cbs.forEach(cb => cb.checked = master.checked);
     }
 
     $('openRouterBtn').addEventListener('click', testOpenRouterGeneration);

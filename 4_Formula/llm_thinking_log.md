@@ -1,5 +1,31 @@
 # LLM Thinking Log
 
+## 2026-06-22 — 🎬 Lower Thirds Multi-Select Saving & Auto Script Loading
+
+### 🎯 Objective
+Improve the lower thirds workflow by automatically loading the script when a video is selected, and allowing users to multi-select generated candidates (from OpenRouter or Mock data) to bulk-save them as Existing Scene Lower Thirds.
+
+### 📐 Implementation
+1. **Auto Script Loading**:
+   - Updated the `videoSelect` event listener to asynchronously call `fetchScriptForVideo` and populate the `#scriptPanel` immediately upon video selection.
+2. **Bulk Select & Save**:
+   - Added checkboxes (`.cand-cb`) to the candidate tables (Mock Generation and OpenRouter Generation).
+   - Created a "Select All" checkbox in the table headers.
+   - Added a "💾 Save Selected to Scenes" button which executes `saveSelectedCandidates()`.
+   - `saveSelectedCandidates()` finds the maximum `scene_number` for the current video, increments it for each selected candidate, and posts the data to the `scenes` Supabase table.
+3. **UI Polish**:
+   - The bulk save button only appears when candidate results exist.
+
+### ✅ Verification
+- Selecting a video correctly populates the script panel.
+- Mock candidate generation shows checkboxes.
+- Selecting candidates and clicking "Save Selected to Scenes" iterates the `scene_number` properly and saves to Supabase.
+- Visuals are consistent with the glassmorphic design and the UI updates cleanly.
+
+### 📦 Files Changed
+- `5_Symbols/production/postprod/lower_thirds.html`
+- `4_Formula/llm_thinking_log.md` — this entry
+
 ## 2026-06-22 — 📥 Existing Scenes Download Buttons
 
 ### 🎯 Objective
