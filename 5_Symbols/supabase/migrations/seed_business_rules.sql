@@ -16,6 +16,7 @@ INSERT INTO business_rules (category, rule_key, label, value, color, description
   ('branding', 'sub_font',       'Sub text font',       'Plus Jakarta Sans 18px', NULL, 'Secondary (sub) text font for lower thirds', 6),
   ('branding', 'main_color',     'Main text color',     '#ffffff', '#ffffff', 'Main text fill color', 7),
   ('branding', 'sub_color',      'Sub text color',      'rgba(255,255,255,0.95)', '#ffffff', 'Sub text fill color', 8),
+  ('branding', 'lower_thirds_quality', 'Image Quality Scale', 'x3', NULL, 'Multiplier for canvas resolution to ensure high-quality sharp text in lower thirds', 9),
 
   -- 🔤 NAMING conventions
   ('naming', 'commit_convention', 'Commit format',        'type(scope): description', NULL, 'Conventional Commits — types: feat, fix, refactor, docs, chore', 1),

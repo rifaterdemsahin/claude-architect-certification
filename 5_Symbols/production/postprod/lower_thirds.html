@@ -399,7 +399,15 @@
 
     function renderLowerThirdToCanvas(main, sub) {
       const t = BRAND_TEMPLATE;
-      const w = canvasEl.width, h = canvasEl.height;
+      
+      // Increase quality x3 and keep vectors/text sharp
+      const scale = 3;
+      canvasEl.width = 640 * scale;
+      canvasEl.height = 360 * scale;
+      ctx2d.scale(scale, scale);
+      ctx2d.imageSmoothingQuality = 'high';
+      
+      const w = 640, h = 360;
       ctx2d.clearRect(0, 0, w, h);
       const barHeight = 80;
       const barY = h - barHeight - 20;
