@@ -186,7 +186,7 @@
     </div>
 
     <div id="editorSection" style="display:none;">
-      <div class="glass-card">
+      <div class="glass-card" id="candidatesPanel" style="display:none;">
         <div class="glass-card-header" onclick="togglePanel(this)">
           <h2>4) Lower Third Candidates <span id="cacheInfo" style="font-size:0.8rem;color:var(--text-muted);font-weight:400;margin-left:8px;"></span></h2>
           <span class="collapse-icon">▼</span>
@@ -208,12 +208,12 @@
         </div>
       </div>
 
-      <div class="glass-card" id="editPanel">
+      <div class="glass-card" id="editPanel" style="display:none;">
         <div class="glass-card-header" onclick="togglePanel(this)">
           <h2>5) Edit Lower Third</h2>
-          <span class="collapse-icon" style="transform: rotate(-90deg);">▼</span>
+          <span class="collapse-icon" style="transform: rotate(0deg);">▼</span>
         </div>
-        <div class="glass-card-body collapsed" id="editPanelBody">
+        <div class="glass-card-body" id="editPanelBody">
           <div class="form-row">
             <div class="form-group">
               <label>Scene Number</label>
@@ -354,11 +354,13 @@
     });
 
     function openEditPanel() {
+      const panel = $('editPanel');
+      panel.style.display = 'block';
       const body = $('editPanelBody');
       const icon = body.previousElementSibling.querySelector('.collapse-icon');
       body.classList.remove('collapsed');
       icon.style.transform = 'rotate(0deg)';
-      body.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
     async function loadConfig() {
@@ -398,54 +400,7 @@
       } catch (e) { showToast('Failed to load videos: ' + e.message, true); }
     }
 
-    async function loadLowerThirds(moduleNumber, videoNumber) {
-      const wrap = $('candidatesTableWrap');
-      const cacheInfo = $('cacheInfo');
-      if (!moduleNumber || !videoNumber) {
-        wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">💡</div><p>Select a video to load candidates.</p></div>';
-        cacheInfo.textContent = '';
-        if ($('bulkSaveWrap')) $('bulkSaveWrap').style.display = 'none';
-        return;
-      }
-      try {
-        const rows = await api(
-          'lower_thirds?select=id,module_number,video_number,main_text,sub_text,rationale,sort_order,created_at&module_number=eq.' + moduleNumber + '&video_number=eq.' + videoNumber + '&order=sort_order.asc'
-        );
-        if (!rows.length) {
-          wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">🤖</div><p>No candidates yet. Click <strong>"Generate with Gemini"</strong> to create them.</p></div>';
-          cacheInfo.textContent = '';
-          if ($('bulkSaveWrap')) $('bulkSaveWrap').style.display = 'none';
-          return;
-        }
-        cacheInfo.textContent = '(' + rows.length + ' saved · auto-deduplicated)';
-        if ($('bulkSaveWrap')) $('bulkSaveWrap').style.display = 'block';
-        const modLabel = 'M' + moduleNumber;
-        const vidLabel = 'V' + videoNumber;
-        wrap.innerHTML =
-          '<table class="lt-table"><thead><tr>' +
-            '<th class="sel-col" style="width:40px;"><input type="checkbox" onchange="toggleAllCands(this)"></th>' +
-            '<th class="num-col">#</th>' +
-            '<th class="main-col">Main Text</th>' +
-            '<th class="sub-col">Sub Text</th>' +
-            '<th class="rationale-col">Rationale (Why It Matters for Learning)</th>' +
-            '<th class="action-col">Apply</th>' +
-          '</tr></thead><tbody>' +
-          rows.map(r =>
-            '<tr>' +
-              '<td class="sel-col"><input type="checkbox" class="cand-cb" data-main="' + escHtml(r.main_text) + '" data-sub="' + escHtml(r.sub_text) + '"></td>' +
-              '<td class="num-col">' + (r.sort_order || r.id) + '</td>' +
-              '<td class="main-col"><span class="module-video-tag">' + modLabel + ' / ' + vidLabel + '</span><br><strong>' + escHtml(r.main_text) + '</strong></td>' +
-              '<td class="sub-col">' + escHtml(r.sub_text) + '</td>' +
-              '<td class="rationale-col"><div class="rationale-text">' + escHtml(r.rationale || '—') + '</div></td>' +
-              '<td class="action-col"><button class="btn btn-sm btn-secondary" onclick="applySuggestion(\'' + escJs(r.main_text) + '\', \'' + escJs(r.sub_text) + '\')">✏️ Load</button></td>' +
-            '</tr>'
-          ).join('') +
-          '</tbody></table>';
-      } catch (e) {
-        wrap.innerHTML = '<div class="empty-state"><p>Error loading candidates: ' + escHtml(e.message) + '</p></div>';
-        cacheInfo.textContent = '';
-      }
-    }
+    // loadLowerThirds function removed per new flow (candidates load from OpenRouter only)
 
     async function loadScenes(videoId) {
       const container = $('scenesList');
@@ -642,6 +597,7 @@
       $('ltImage').value = '';
       $('saveBtn').textContent = 'Save & Upload';
       $('saveStatus').textContent = '';
+      $('editPanel').style.display = 'none';
       updatePreview();
     }
 
@@ -691,9 +647,10 @@
         
         ['openRouterBtn', 'mockGenBtn'].forEach(id => { if($(id)) $(id).style.display = 'inline-block'; });
 
+        $('candidatesPanel').style.display = 'none';
+
         const moduleNum = dbModules.find(m => m.id === currentModuleId)?.module_number || 0;
         const videoNum = dbVideos.find(v => v.id === currentVideoId)?.video_number || 0;
-        loadLowerThirds(moduleNum, videoNum);
         loadScenes(currentVideoId);
         
         let scriptText = await fetchScriptForVideo(currentModuleId, currentVideoId);
@@ -763,6 +720,7 @@
       if (!currentModuleId || !currentVideoId) { showToast('Select a module and video first.', true); return; }
 
       $('genLoading').style.display = 'block';
+      $('candidatesPanel').style.display = 'block';
       $('genLoading').querySelector('p').textContent = 'OpenRouter is identifying best candidates via backend...';
 
       try {
@@ -819,7 +777,7 @@
               '<td class="main-col"><strong>' + escHtml(r.main || r.main_text) + '</strong></td>' +
               '<td class="sub-col">' + escHtml(r.sub || r.sub_text) + '</td>' +
               '<td class="rationale-col"><div class="rationale-text">' + escHtml(r.rationale || 'OpenRouter identified this as a key term.') + '</div></td>' +
-              '<td class="action-col"><button class="btn btn-sm btn-secondary" onclick="applySuggestion(\'' + escJs(r.main || r.main_text) + '\', \'' + escJs(r.sub || r.sub_text) + '\')">✏️ Load</button></td>' +
+              '<td class="action-col"><button class="btn btn-sm btn-secondary" onclick="applySuggestion(\'' + escJs(r.main || r.main_text) + '\', \'' + escJs(r.sub || r.sub_text) + '\')">✏️ Edit</button></td>' +
             '</tr>'
           ).join('') +
           '</tbody></table>';
@@ -858,11 +816,12 @@
             '<td class="main-col"><strong>' + escHtml(r.main_text) + '</strong></td>' +
             '<td class="sub-col">' + escHtml(r.sub_text) + '</td>' +
             '<td class="rationale-col"><div class="rationale-text">' + escHtml(r.rationale) + '</div></td>' +
-            '<td class="action-col"><button class="btn btn-sm btn-secondary" onclick="applySuggestion(\'' + escJs(r.main_text) + '\', \'' + escJs(r.sub_text) + '\')">✏️ Load</button></td>' +
+            '<td class="action-col"><button class="btn btn-sm btn-secondary" onclick="applySuggestion(\'' + escJs(r.main_text) + '\', \'' + escJs(r.sub_text) + '\')">✏️ Edit</button></td>' +
           '</tr>'
         ).join('') +
         '</tbody></table>';
       
+      $('candidatesPanel').style.display = 'block';
       if ($('bulkSaveWrap')) $('bulkSaveWrap').style.display = 'block';
       showToast('Mock generation completed!');
     }
