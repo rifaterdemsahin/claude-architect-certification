@@ -1,5 +1,21 @@
 # LLM Thinking Log
 
+## 2026-06-22 — 🧠 Lower Thirds OpenRouter .env Loading
+
+### 🎯 Objective
+Force the application to read `OPENROUTER_API_KEY` directly from the local `.env` and `fly.io` secrets, explicitly avoiding the Key Vault fallback logic.
+
+### 📐 Implementation
+1. **Direct Environment Read**: Changed `cfg.getSecret("OPENROUTER_API_KEY")` to `os.Getenv("OPENROUTER_API_KEY")` in `openRouterGenerateHandler`.
+2. **Environment Template**: Appended the OpenRouter section to `.env.example`.
+
+### ✅ Verification
+- Confirmed `os.Getenv` pulls directly from the local environment (populated by `loadDotEnv` at boot) or native Fly.io secrets at runtime.
+
+### 📦 Files Changed
+- `cmd/server/main.go`
+- `.env.example`
+- `4_Formula/llm_thinking_log.md` — this entry
 ## 2026-06-22 — 🧠 Lower Thirds OpenRouter Backend Integration & Mock Generation
 
 ### 🎯 Objective
@@ -1426,3 +1442,13 @@ guide, file classification labels). Adapted the persona + a "When to prefer
 GLM" table. Registered GLM in the `agents.md` Supported Agent Roles table.
 
 **Status:** IMPLEMENTED, pending commit + push.
+
+## 2026-06-22 - 🕸️ Cytoscape Interactive ERD Visualization
+- **Context:** The user requested to add a page utilizing Cytoscape.js (a graph theory library) to visually represent the Entity-Relationship Diagram (ERD) of all Supabase database tables and add a link to it from `database_analysis.html`.
+- **Approach:**
+  - Designed `database_erd.html` mirroring the existing pre-production tools UI/UX (Outfit/Plus Jakarta Sans typography, dark background with subtle radial gradient, blur header overlays).
+  - Brought over the identical `TABLES` definition array that is currently statically maintained in `database_analysis.html`.
+  - Configured `cytoscape.js` using `dagre` (a directed acyclic graph layout engine) to plot tables as nodes and their foreign-key connections (`col.fk`) as directed edges.
+  - Implemented interactive features such as zooming, panning, and tap-highlighting (dimming non-connected nodes/edges when a specific node is clicked).
+  - Modified `database_analysis.html` controls section to prominently display a `🕸️ View ERD Visualization` button bridging to the new graph view.
+- **Verification:** Ran `go test ./...` and `go build ./...` locally.
