@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🕸️ Database ERD | Pre-Production Tools</title>
+  <meta name="description" content="Visual Entity Relationship Diagram of the Supabase database using Cytoscape.js.">
+  <link rel="icon" type="image/png" href="../../../../favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&family=Fira+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="../../../../shared/seo.js" defer></script>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dagre/0.8.5/dagre.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/cytoscape-dagre@2.5.0/cytoscape-dagre.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #030712; --card: rgba(17,24,39,0.92); --card-hover: rgba(25,33,52,0.95);
+      --border: rgba(255,255,255,0.07); --border-accent: rgba(139,92,246,0.25);
+      --text: #f3f4f6; --muted: #6b7280; --muted2: #9ca3af;
+      --primary: #8b5cf6; --secondary: #3b82f6;
+      --font-h: 'Outfit', sans-serif; --font-b: 'Plus+Jakarta Sans', sans-serif; --font-mono: 'Fira Mono', monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text); font-family: var(--font-b); line-height: 1.6;
+      display: flex; flex-direction: column; height: 100vh;
+      overflow: hidden;
+    }
+    header {
+      padding: 24px 24px 16px;
+      flex-shrink: 0;
+      z-index: 10;
+      background: rgba(3, 7, 18, 0.8);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+    }
+    .back-link { display: inline-flex; align-items: center; gap: 6px; color: var(--muted2); font-size: 0.85rem; margin-bottom: 12px; text-decoration: none; transition: color 0.2s; }
+    .back-link:hover { color: var(--text); }
+    h1 { font-family: var(--font-h); font-size: 1.8rem; font-weight: 800; margin-bottom: 4px; }
+    .subtitle { color: var(--muted2); font-size: 0.9rem; }
+    
+    #cy {
+      flex: 1;
+      width: 100%;
+      background-image: radial-gradient(circle at 8% 15%, rgba(139,92,246,0.07) 0%, transparent 45%),
+                        radial-gradient(circle at 92% 85%, rgba(59,130,246,0.06) 0%, transparent 45%);
+    }
+
+    .controls-overlay {
+      position: absolute; bottom: 24px; right: 24px;
+      display: flex; gap: 10px; z-index: 20;
+    }
+    .btn { padding: 8px 16px; border-radius: 9px; border: none; cursor: pointer; font-size: 0.82rem; font-weight: 700; font-family: var(--font-b); transition: all 0.2s; background: rgba(17,24,39,0.8); border: 1px solid var(--border); color: var(--text); backdrop-filter: blur(5px); }
+    .btn:hover { background: rgba(31,41,55,0.9); border-color: var(--primary); }
+  </style>
+</head>
+<body>
+<script src="../../../../shared/nav.js"></script>
+
+<header>
+  <a class="back-link" href="database_analysis.html">← Back to Database Analysis</a>
+  <h1>🕸️ Database Entity Relationship Diagram</h1>
+  <p class="subtitle">Interactive visualization of all tables and foreign-key relationships. Scroll to zoom, click and drag to pan.</p>
+</header>
+
+<div id="cy"></div>
+
+<div class="controls-overlay">
+  <button class="btn" onclick="layoutGraph('dagre')">Hierarchical</button>
+  <button class="btn" onclick="layoutGraph('cose')">Force Directed</button>
+  <button class="btn" onclick="layoutGraph('circle')">Circle</button>
+  <button class="btn" onclick="resetZoom()">Reset Zoom</button>
+</div>
+
+<script>
+const TABLES = [
+  // Core course
+  { group:'Core Course',                  icon:'📦', name:'modules', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'module_number',t:'INTEGER'},{n:'title',t:'TEXT'},{n:'description',t:'TEXT'},{n:'created_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'Core Course',                  icon:'🎬', name:'videos', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'module_id',t:'INTEGER',fk:'modules'},{n:'video_number',t:'INTEGER'},{n:'title',t:'TEXT'},{n:'duration',t:'TEXT'},{n:'script',t:'TEXT'},{n:'recorded',t:'BOOLEAN'},{n:'created_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'Core Course',                  icon:'🎙', name:'video_cues', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'video_id',t:'INTEGER',fk:'videos'},{n:'cue_text',t:'TEXT'},{n:'sort_order',t:'INTEGER'}
+  ]},
+  { group:'Core Course',                  icon:'📋', name:'outline', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'module_number',t:'INTEGER'},{n:'video_number',t:'INTEGER'},{n:'content_type',t:'TEXT'},{n:'content',t:'TEXT'},{n:'sort_order',t:'INTEGER'},{n:'module_id',t:'INTEGER',fk:'course_modules'},{n:'video_id',t:'INTEGER',fk:'course_videos'}
+  ]},
+  { group:'Core Course',                  icon:'🔗', name:'resource_links', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'module_id',t:'INTEGER',fk:'modules'},{n:'label',t:'TEXT'},{n:'url',t:'TEXT'}
+  ]},
+
+  // Production pipeline
+  { group:'Production Pipeline',          icon:'📝', name:'scripts', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'video_id',t:'INTEGER',fk:'videos'},{n:'script_text',t:'TEXT'},{n:'format',t:'TEXT'},{n:'target_duration',t:'TEXT'},{n:'created_at',t:'TIMESTAMPTZ'},{n:'updated_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'Production Pipeline',          icon:'🗣', name:'sentences', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'script_id',t:'INTEGER',fk:'scripts'},{n:'sentence_text',t:'TEXT'},{n:'sentence_type',t:'TEXT'},{n:'section',t:'TEXT'},{n:'visual_mode',t:'TEXT'},{n:'sort_order',t:'INTEGER'},{n:'created_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'Production Pipeline',          icon:'🎥', name:'scenes', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'module_number',t:'INTEGER'},{n:'section_number',t:'INTEGER'},{n:'scene_number',t:'INTEGER'},{n:'video_id',t:'INTEGER',fk:'videos'},{n:'script',t:'TEXT'},{n:'timing',t:'TEXT'},{n:'bg_image',t:'TEXT'},{n:'lt_image',t:'TEXT'},{n:'lt_main',t:'TEXT'},{n:'lt_sub',t:'TEXT'},{n:'overlay_lt',t:'TEXT'},{n:'overlay_text',t:'TEXT'},{n:'bundle_url',t:'TEXT'},{n:'audio_url',t:'TEXT'},{n:'scene_type',t:'TEXT'},{n:'sfx_needed',t:'TEXT'},{n:'bg_music',t:'TEXT'},{n:'scene_change',t:'TEXT'},{n:'audio_rationale',t:'TEXT'},{n:'audio_status',t:'TEXT'},{n:'created_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'Production Pipeline',          icon:'🎯', name:'scene_cues', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'scene_id',t:'INTEGER',fk:'scenes'},{n:'icon',t:'TEXT'},{n:'label',t:'TEXT'},{n:'prompt',t:'TEXT'},{n:'sort_order',t:'INTEGER'}
+  ]},
+  { group:'Production Pipeline',          icon:'✂️', name:'edl_entries', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'scene_id',t:'INTEGER',fk:'scenes'},{n:'timing',t:'TEXT'},{n:'description',t:'TEXT'},{n:'sort_order',t:'INTEGER'}
+  ]},
+  { group:'Production Pipeline',          icon:'💻', name:'code_references', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'video_id',t:'TEXT'},{n:'label',t:'TEXT'},{n:'url',t:'TEXT'},{n:'note',t:'TEXT'},{n:'sort_order',t:'INTEGER'},{n:'created_at',t:'TIMESTAMPTZ'},{n:'updated_at',t:'TIMESTAMPTZ'}
+  ], note:'video_id is a soft reference (TEXT) to production video identifiers.'},
+  { group:'Production Pipeline',          icon:'🎞', name:'lower_thirds', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'module_number',t:'INTEGER'},{n:'video_number',t:'INTEGER'},{n:'module_id',t:'INTEGER',fk:'modules'},{n:'video_id',t:'INTEGER',fk:'videos'},{n:'main_text',t:'TEXT'},{n:'sub_text',t:'TEXT'},{n:'rationale',t:'TEXT'},{n:'sort_order',t:'INTEGER'},{n:'created_at',t:'TIMESTAMPTZ'},{n:'updated_at',t:'TIMESTAMPTZ'}
+  ]},
+
+  // Learner experience
+  { group:'Learner Experience',           icon:'🎓', name:'course_modules', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'module_number',t:'INT'},{n:'title',t:'TEXT'},{n:'description',t:'TEXT'},{n:'links',t:'JSONB'},{n:'sort_order',t:'INT'},{n:'created_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'Learner Experience',           icon:'▶️', name:'course_videos', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'module_id',t:'INT',fk:'course_modules'},{n:'video_number',t:'INT'},{n:'title',t:'TEXT'},{n:'bullets',t:'JSONB'},{n:'links',t:'JSONB'},{n:'sort_order',t:'INT'},{n:'created_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'Learner Experience',           icon:'📊', name:'course_video_progress', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'video_id',t:'INT',fk:'course_videos'},{n:'user_id',t:'TEXT'},{n:'status',t:'TEXT'},{n:'updated_at',t:'TIMESTAMPTZ'},{n:'tell_done',t:'BOOLEAN'},{n:'show_done',t:'BOOLEAN'},{n:'do_done',t:'BOOLEAN'},{n:'apply_done',t:'BOOLEAN'}
+  ]},
+  { group:'Learner Experience',           icon:'☑️', name:'checklist_items', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'phase',t:'TEXT'},{n:'item_name',t:'TEXT'},{n:'item_desc',t:'TEXT'},{n:'item_url',t:'TEXT'},{n:'sort_order',t:'INTEGER'}
+  ]},
+  { group:'Learner Experience',           icon:'✅', name:'checklist_progress', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'item_id',t:'INTEGER',fk:'checklist_items'},{n:'user_id',t:'TEXT'},{n:'checked',t:'BOOLEAN'},{n:'in_progress',t:'BOOLEAN'},{n:'notes',t:'TEXT'},{n:'updated_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'Learner Experience',           icon:'🏁', name:'milestones', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'module_number',t:'INTEGER'},{n:'milestone_number',t:'INTEGER'},{n:'title',t:'TEXT'},{n:'description',t:'TEXT'},{n:'type',t:'TEXT'},{n:'sort_order',t:'INTEGER'}
+  ]},
+  { group:'Learner Experience',           icon:'🚩', name:'milestone_progress', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'milestone_id',t:'INTEGER',fk:'milestones'},{n:'user_id',t:'TEXT'},{n:'checked',t:'BOOLEAN'},{n:'notes',t:'TEXT'},{n:'updated_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'Learner Experience',           icon:'💰', name:'pricing', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'tier',t:'TEXT'},{n:'price_monthly',t:'NUMERIC'},{n:'description',t:'TEXT'},{n:'features',t:'JSONB'},{n:'cta_label',t:'TEXT'},{n:'cta_url',t:'TEXT'},{n:'is_featured',t:'BOOLEAN'},{n:'sort_order',t:'INTEGER'}
+  ]},
+  { group:'Learner Experience',           icon:'📚', name:'courses', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'title',t:'TEXT'},{n:'description',t:'TEXT'},{n:'module_number',t:'INTEGER'},{n:'tier',t:'TEXT'},{n:'icon',t:'TEXT'},{n:'status',t:'TEXT'},{n:'sort_order',t:'INTEGER'}
+  ]},
+  { group:'Learner Experience',           icon:'📄', name:'course_content', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'section',t:'TEXT'},{n:'content',t:'TEXT'},{n:'updated_at',t:'TIMESTAMPTZ'}
+  ]},
+
+  // Research & assets
+  { group:'Research & Assets',            icon:'🔬', name:'research_relationships', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'container',t:'TEXT'},{n:'item_name',t:'TEXT'},{n:'video_id',t:'INT',fk:'videos'},{n:'sentence_id',t:'INT',fk:'sentences'},{n:'created_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'Research & Assets',            icon:'🗃', name:'research_assets', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'container',t:'TEXT'},{n:'item_name',t:'TEXT'},{n:'thumb_name',t:'TEXT'},{n:'content_type',t:'TEXT'},{n:'size_bytes',t:'BIGINT'},{n:'created_at',t:'TIMESTAMPTZ'},{n:'updated_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'Research & Assets',            icon:'🔗', name:'sentence_links', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'sentence_id',t:'INT',fk:'sentences'},{n:'url',t:'TEXT'},{n:'description',t:'TEXT'},{n:'created_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'Research & Assets',            icon:'📊', name:'infographics', columns:[
+    {n:'id',t:'BIGINT',pk:true},{n:'created_at',t:'TIMESTAMPTZ'},{n:'module_number',t:'INT'},{n:'video_number',t:'INT'},{n:'sentence_id',t:'BIGINT',fk:'sentences'},{n:'topic',t:'TEXT'},{n:'style',t:'TEXT'},{n:'layout_json',t:'JSONB'},{n:'azure_blob_name',t:'TEXT'},{n:'status',t:'TEXT'}
+  ]},
+
+  // AI production objects
+  { group:'AI Production Objects',        icon:'🎙', name:'ai_voiceovers', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'sentence_id',t:'INTEGER',fk:'sentences'},{n:'module_number',t:'INTEGER'},{n:'video_number',t:'INTEGER'},{n:'script_id',t:'INTEGER',fk:'scripts'},{n:'generation_status',t:'TEXT'},{n:'voice_provider',t:'TEXT'},{n:'voice_name',t:'TEXT'},{n:'audio_url',t:'TEXT'},{n:'duration_seconds',t:'NUMERIC'},{n:'rationale',t:'TEXT'},{n:'error_message',t:'TEXT'},{n:'created_at',t:'TIMESTAMPTZ'},{n:'updated_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'AI Production Objects',        icon:'🧑‍💼', name:'ai_avatars', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'sentence_id',t:'INTEGER',fk:'sentences'},{n:'module_number',t:'INTEGER'},{n:'video_number',t:'INTEGER'},{n:'script_id',t:'INTEGER',fk:'scripts'},{n:'generation_status',t:'TEXT'},{n:'avatar_provider',t:'TEXT'},{n:'avatar_name',t:'TEXT'},{n:'video_url',t:'TEXT'},{n:'duration_seconds',t:'NUMERIC'},{n:'rationale',t:'TEXT'},{n:'error_message',t:'TEXT'},{n:'created_at',t:'TIMESTAMPTZ'},{n:'updated_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'AI Production Objects',        icon:'🎞', name:'ai_broll', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'sentence_id',t:'INTEGER',fk:'sentences'},{n:'module_number',t:'INTEGER'},{n:'video_number',t:'INTEGER'},{n:'script_id',t:'INTEGER',fk:'scripts'},{n:'generation_status',t:'TEXT'},{n:'video_provider',t:'TEXT'},{n:'prompt',t:'TEXT'},{n:'clip_url',t:'TEXT'},{n:'duration_seconds',t:'NUMERIC'},{n:'rationale',t:'TEXT'},{n:'error_message',t:'TEXT'},{n:'created_at',t:'TIMESTAMPTZ'},{n:'updated_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'AI Production Objects',        icon:'✍️', name:'ai_script_generations', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'sentence_id',t:'INTEGER',fk:'sentences'},{n:'module_number',t:'INTEGER'},{n:'video_number',t:'INTEGER'},{n:'script_id',t:'INTEGER',fk:'scripts'},{n:'generation_status',t:'TEXT'},{n:'llm_model',t:'TEXT'},{n:'source_blueprint',t:'TEXT'},{n:'prompt_used',t:'TEXT'},{n:'generated_text',t:'TEXT'},{n:'rationale',t:'TEXT'},{n:'error_message',t:'TEXT'},{n:'created_at',t:'TIMESTAMPTZ'},{n:'updated_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'AI Production Objects',        icon:'🌍', name:'ai_localizations', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'sentence_id',t:'INTEGER',fk:'sentences'},{n:'module_number',t:'INTEGER'},{n:'video_number',t:'INTEGER'},{n:'script_id',t:'INTEGER',fk:'scripts'},{n:'language_code',t:'TEXT'},{n:'generation_status',t:'TEXT'},{n:'translated_text',t:'TEXT'},{n:'dubbed_audio_url',t:'TEXT'},{n:'voice_clone_id',t:'TEXT'},{n:'duration_seconds',t:'NUMERIC'},{n:'rationale',t:'TEXT'},{n:'error_message',t:'TEXT'},{n:'created_at',t:'TIMESTAMPTZ'},{n:'updated_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'AI Production Objects',        icon:'🖼', name:'sentence_graphics', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'sentence_id',t:'INTEGER',fk:'sentences'},{n:'module_number',t:'INTEGER'},{n:'video_number',t:'INTEGER'},{n:'script_id',t:'INTEGER',fk:'scripts'},{n:'generation_status',t:'TEXT'},{n:'rationale',t:'TEXT'},{n:'graphics_type',t:'TEXT'},{n:'graphics_url',t:'TEXT'},{n:'prompt_used',t:'TEXT'},{n:'error_message',t:'TEXT'},{n:'created_at',t:'TIMESTAMPTZ'},{n:'updated_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'AI Production Objects',        icon:'🎥', name:'greenscreen_backgrounds', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'module_number',t:'INTEGER'},{n:'video_number',t:'INTEGER'},{n:'generation_status',t:'TEXT'},{n:'video_provider',t:'TEXT'},{n:'prompt',t:'TEXT'},{n:'refined_prompt',t:'TEXT'},{n:'video_url',t:'TEXT'},{n:'duration_seconds',t:'NUMERIC'},{n:'preset_style',t:'TEXT'},{n:'camera_movement',t:'TEXT'},{n:'rationale',t:'TEXT'},{n:'created_at',t:'TIMESTAMPTZ'},{n:'updated_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'AI Production Objects',        icon:'🖼', name:'generated_images', columns:[
+    {n:'id',t:'BIGINT',pk:true},{n:'created_at',t:'TIMESTAMPTZ'},{n:'module_number',t:'INT'},{n:'video_number',t:'INT'},{n:'prompt',t:'TEXT'},{n:'refined_prompt',t:'TEXT'},{n:'image_url',t:'TEXT'},{n:'azure_blob_name',t:'TEXT'},{n:'thumbnail_url',t:'TEXT'},{n:'thumbnail_blob_name',t:'TEXT'},{n:'status',t:'TEXT'}
+  ]},
+
+  // Problem statement
+  { group:'Problem Statement',            icon:'🎯', name:'problem_pages', columns:[
+    {n:'id',t:'UUID',pk:true},{n:'stage_number',t:'SMALLINT'},{n:'title',t:'TEXT'},{n:'headline',t:'TEXT'},{n:'subheadline',t:'TEXT'},{n:'created_at',t:'TIMESTAMPTZ'},{n:'updated_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'Problem Statement',            icon:'👤', name:'target_personas', columns:[
+    {n:'id',t:'UUID',pk:true},{n:'page_id',t:'UUID',fk:'problem_pages'},{n:'display_order',t:'SMALLINT'},{n:'emoji',t:'TEXT'},{n:'role_title',t:'TEXT'},{n:'description',t:'TEXT'},{n:'created_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'Problem Statement',            icon:'⚠️', name:'core_challenges', columns:[
+    {n:'id',t:'UUID',pk:true},{n:'page_id',t:'UUID',fk:'problem_pages'},{n:'challenge_number',t:'SMALLINT'},{n:'title',t:'TEXT'},{n:'description',t:'TEXT'},{n:'display_order',t:'SMALLINT'},{n:'created_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'Problem Statement',            icon:'📊', name:'exam_domains', columns:[
+    {n:'id',t:'UUID',pk:true},{n:'page_id',t:'UUID',fk:'problem_pages'},{n:'domain_name',t:'TEXT'},{n:'topics_covered',t:'TEXT[]'},{n:'weight_percent',t:'SMALLINT'},{n:'display_order',t:'SMALLINT'},{n:'created_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'Problem Statement',            icon:'💡', name:'course_solutions', columns:[
+    {n:'id',t:'UUID',pk:true},{n:'page_id',t:'UUID',fk:'problem_pages'},{n:'step_number',t:'SMALLINT'},{n:'title',t:'TEXT'},{n:'description',t:'TEXT'},{n:'display_order',t:'SMALLINT'},{n:'created_at',t:'TIMESTAMPTZ'}
+  ]},
+
+  // Course metadata & misc
+  { group:'Course Metadata',              icon:'📖', name:'course_metadata', columns:[
+    {n:'id',t:'UUID',pk:true},{n:'course_title',t:'TEXT'},{n:'instructor',t:'TEXT'},{n:'target_audience',t:'TEXT'},{n:'total_duration',t:'TEXT'},{n:'difficulty_level',t:'TEXT'},{n:'learning_objectives',t:'JSONB'},{n:'key_takeaways',t:'TEXT'},{n:'real_world_connections',t:'TEXT'},{n:'recommended_background',t:'VARCHAR(150)'},{n:'proof_of_learning',t:'TEXT'},{n:'course_description',t:'VARCHAR(1200)'},{n:'skills',t:'JSONB'},{n:'created_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'Course Metadata',              icon:'🛠', name:'course_tools', columns:[
+    {n:'id',t:'UUID',pk:true},{n:'course_id',t:'UUID',fk:'course_metadata'},{n:'tool_name',t:'TEXT'},{n:'purpose',t:'TEXT'},{n:'free_or_paid',t:'TEXT'},{n:'trial_available',t:'BOOLEAN'},{n:'trial_duration',t:'TEXT'},{n:'tool_validity',t:'TEXT'},{n:'display_order',t:'INT'}
+  ]},
+
+  // Publishing & storage
+  { group:'Publishing & Storage',         icon:'📁', name:'gdrive_folders', columns:[
+    {n:'drive_folder_id',t:'TEXT',pk:true},{n:'name',t:'TEXT'},{n:'path',t:'TEXT'},{n:'drive_url',t:'TEXT'},{n:'folder_type',t:'TEXT'},{n:'parent_drive_id',t:'TEXT'},{n:'module_id',t:'BIGINT',fk:'course_modules'},{n:'video_id',t:'BIGINT',fk:'course_videos'},{n:'has_readme',t:'BOOLEAN'},{n:'created_at',t:'TIMESTAMPTZ'},{n:'updated_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'Publishing & Storage',         icon:'⚙️', name:'project_settings', columns:[
+    {n:'key',t:'TEXT',pk:true},{n:'value',t:'TEXT'},{n:'created_at',t:'TIMESTAMPTZ'},{n:'updated_at',t:'TIMESTAMPTZ'}
+  ]},
+
+  // Content tools
+  { group:'Content Tools',                icon:'🏛', name:'memory_palaces', columns:[
+    {n:'id',t:'BIGINT',pk:true},{n:'module_id',t:'INTEGER'},{n:'user_id',t:'TEXT'},{n:'theme',t:'TEXT'},{n:'title',t:'TEXT'},{n:'palace',t:'JSONB'},{n:'notes',t:'TEXT'},{n:'created_at',t:'TIMESTAMPTZ'},{n:'updated_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'Content Tools',                icon:'🎓', name:'certification_videos', columns:[
+    {n:'id',t:'BIGINT',pk:true},{n:'created_at',t:'TIMESTAMPTZ'},{n:'module_number',t:'INT'},{n:'video_number',t:'INT'},{n:'title',t:'TEXT'},{n:'description',t:'TEXT'},{n:'edit_todo',t:'TEXT'},{n:'embed_url',t:'TEXT'},{n:'share_url',t:'TEXT'}
+  ]},
+  { group:'Content Tools',                icon:'📕', name:'dsl_entries', columns:[
+    {n:'id',t:'BIGINT',pk:true},{n:'term',t:'TEXT'},{n:'definition',t:'TEXT'},{n:'context',t:'TEXT'},{n:'category',t:'TEXT'},{n:'related_terms',t:'JSONB'},{n:'examples',t:'JSONB'},{n:'source',t:'TEXT'},{n:'created_at',t:'TIMESTAMPTZ'},{n:'updated_at',t:'TIMESTAMPTZ'}
+  ]},
+  { group:'Content Tools',                icon:'💬', name:'explanations', columns:[
+    {n:'id',t:'SERIAL',pk:true},{n:'entity_type',t:'TEXT'},{n:'entity_id',t:'TEXT'},{n:'explanation_text',t:'TEXT'},{n:'generated_by',t:'TEXT'},{n:'created_at',t:'TIMESTAMPTZ'},{n:'updated_at',t:'TIMESTAMPTZ'}
+  ]},
+
+  // IVQ
+  { group:'IVQ',                          icon:'❓', name:'ivq_questions', columns:[
+    {n:'id',t:'BIGSERIAL',pk:true},{n:'video_id',t:'BIGINT',fk:'videos'},{n:'question_text',t:'TEXT'},{n:'options',t:'JSONB'},{n:'correct_option',t:'TEXT'},{n:'explanation',t:'TEXT'},{n:'incorrect_explanations',t:'JSONB'},{n:'timestamp_seconds',t:'INT'},{n:'sort_order',t:'INT'},{n:'created_at',t:'TIMESTAMPTZ'}
+  ], note:'Shares the videos table, but the IVQ migration expects a different videos shape; only ivq_questions is unique.'},
+
+  // Navigation
+  { group:'Navigation',                   icon:'⭐', name:'nav_favorites', columns:[
+    {n:'url',t:'TEXT',pk:true},{n:'label',t:'TEXT'},{n:'created_at',t:'TIMESTAMPTZ'}
+  ]}
+];
+
+// Initialize cytoscape
+let cy;
+
+document.addEventListener('DOMContentLoaded', () => {
+  const elements = [];
+  
+  // Add nodes (tables)
+  TABLES.forEach(table => {
+    elements.push({
+      data: { 
+        id: table.name, 
+        label: `${table.icon} ${table.name}`,
+        group: table.group
+      }
+    });
+  });
+  
+  // Add edges (foreign keys)
+  TABLES.forEach(table => {
+    table.columns.forEach(col => {
+      if (col.fk) {
+        elements.push({
+          data: {
+            id: `${table.name}-${col.fk}`,
+            source: table.name,
+            target: col.fk,
+            label: col.n
+          }
+        });
+      }
+    });
+  });
+
+  cy = cytoscape({
+    container: document.getElementById('cy'),
+    elements: elements,
+    style: [
+      {
+        selector: 'node',
+        style: {
+          'background-color': '#1f2937',
+          'border-width': 2,
+          'border-color': '#8b5cf6',
+          'label': 'data(label)',
+          'color': '#f3f4f6',
+          'font-family': 'Fira Mono, monospace',
+          'font-size': '12px',
+          'text-valign': 'center',
+          'text-halign': 'center',
+          'shape': 'round-rectangle',
+          'width': 'label',
+          'height': 'label',
+          'padding': '12px'
+        }
+      },
+      {
+        selector: 'edge',
+        style: {
+          'width': 2,
+          'line-color': '#4b5563',
+          'target-arrow-color': '#3b82f6',
+          'target-arrow-shape': 'triangle',
+          'curve-style': 'bezier',
+          'label': 'data(label)',
+          'font-size': '10px',
+          'color': '#9ca3af',
+          'text-background-color': '#030712',
+          'text-background-opacity': 0.8,
+          'text-background-padding': '4px',
+          'text-background-shape': 'round-rectangle'
+        }
+      }
+    ],
+    layout: {
+      name: 'dagre',
+      rankDir: 'LR',
+      padding: 50
+    }
+  });
+
+  // Highlight connections on tap
+  cy.on('tap', 'node', function(evt){
+    const node = evt.target;
+    const connectedEdges = node.connectedEdges();
+    
+    // Reset all
+    cy.elements().style({ 'opacity': 0.2 });
+    
+    // Highlight connected
+    node.style({ 'opacity': 1 });
+    connectedEdges.style({ 'opacity': 1 });
+    connectedEdges.connectedNodes().style({ 'opacity': 1 });
+  });
+
+  // Reset highlight on tapping background
+  cy.on('tap', function(evt){
+    if(evt.target === cy){
+      cy.elements().style({ 'opacity': 1 });
+    }
+  });
+});
+
+function layoutGraph(name) {
+  let options = { name: name, animate: true, animationDuration: 500 };
+  if (name === 'dagre') {
+    options.rankDir = 'LR';
+  }
+  cy.layout(options).run();
+}
+
+function resetZoom() {
+  cy.fit(cy.elements(), 50);
+}
+</script>
+<script src="../../../../shared/debug-panel.js"></script>
+</body>
+</html>
