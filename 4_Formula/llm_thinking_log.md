@@ -1,5 +1,29 @@
 # LLM Thinking Log
 
+## 2026-06-22 — ✨ Video Script Sentences, Bulk Download & Prompt Viewer
+
+### 🎯 Objective
+Expand lower thirds capabilities: automatically include sentences in the video script view, show the OpenRouter prompt on demand, and add a one-click bulk download button for all generated scenes.
+
+### 📐 Implementation
+1. **Sentence Concatenation (Task 1)**:
+   - Updated `fetchScriptForVideo` in `lower_thirds.html` to pull not just from the `videos` table but to actively join with the `scripts` and `sentences` tables.
+   - Sentences are now automatically appended at the bottom of the script viewer under `=== Sentences ===`, formatted clearly for LLM ingestion.
+2. **OpenRouter Prompt Display (Task 2)**:
+   - Added an `👁️ View OpenRouter Prompt` toggle button inside the "Action Buttons" panel.
+   - Clicking it reveals a collapsible `<div id="promptDisplay">` containing the precise system prompt the Go backend uses, ensuring total transparency.
+3. **Bulk PNG Downloader (Task 3)**:
+   - Injected a `📥 Bulk Download All Lower Thirds` button into the Existing Scenes panel.
+   - Wrote `bulkDownloadExistingScenes()` which iterates over the `dbScenesData` array, dynamically renders each lower third to the hidden `<canvas>`, converts to a Blob, and triggers an `<a>` download sequence. Added a 400ms interval to prevent browsers from blocking multiple popups.
+
+### ✅ Verification
+- All UI buttons display correctly in their respective panels.
+- `go test ./...` passes indicating no backend regression.
+
+### 📦 Files Changed
+- `5_Symbols/production/postprod/lower_thirds.html`
+- `4_Formula/llm_thinking_log.md` — this entry
+
 ## 2026-06-22 — 🐛 Fix JS Initialization Halt (Dangling Event Listener)
 
 ### 🎯 Objective

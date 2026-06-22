@@ -181,7 +181,19 @@
         <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
           <button class="btn btn-secondary" id="openRouterBtn" style="background:#eab308; color:#000;">🧠 Open Router Generate Lower Thirds</button>
           <button class="btn btn-secondary" id="mockGenBtn" style="background:#3b82f6; color:#fff;">🧪 Mock Generation</button>
+          <button class="btn btn-secondary" id="togglePromptBtn">👁️ View OpenRouter Prompt</button>
         </div>
+        <div id="promptDisplay" style="display:none; margin-top: 16px; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; font-size: 0.85rem; color: var(--text-muted); text-align: left; white-space: pre-wrap;">You are a lower thirds generator for a video course.
+Based on the following video script, generate exactly 3 lower third candidate options.
+Each candidate must have a "main" text (max 40 chars) and "sub" text (max 60 chars) and a brief "rationale".
+
+Video script:
+[THE SCRIPT TEXT FROM ABOVE]
+
+Return ONLY a JSON array with this structure:
+[
+  {"main": "Main Text", "sub": "Sub text description", "rationale": "Reason"}
+]</div>
       </div>
     </div>
 
@@ -402,6 +414,8 @@
 
     // loadLowerThirds function removed per new flow (candidates load from OpenRouter only)
 
+    let dbScenesData = [];
+
     async function loadScenes(videoId) {
       const container = $('scenesList');
       if (!videoId) {
@@ -414,11 +428,13 @@
         const scenes = await api(
           'scenes?module_number=eq.' + moduleNum + '&section_number=eq.' + videoNum + '&select=id,scene_number,lt_main,lt_sub,lt_image&order=scene_number.asc'
         );
+        dbScenesData = scenes || [];
         if (!scenes.length) {
           container.innerHTML = '<div class="empty-state"><div class="empty-icon">➕</div><p>No scene-specific lower thirds yet. Use the form above to create one.</p></div>';
           return;
         }
-        container.innerHTML = scenes.map(s =>
+        let html = '<div style="margin-bottom: 12px; text-align: right;"><button class="btn btn-secondary btn-sm" id="bulkDownloadBtn" onclick="bulkDownloadExistingScenes()">📥 Bulk Download All Lower Thirds</button></div>';
+        html += scenes.map(s =>
           '<div class="scene-card" data-id="' + s.id + '">' +
             (s.lt_image ? '<img class="scene-thumb" src="' + s.lt_image + '" alt="LT" onerror="this.style.display=\'none\'">' : '') +
             '<div class="scene-info">' +
@@ -432,6 +448,7 @@
             '</div>' +
           '</div>'
         ).join('');
+        container.innerHTML = html;
       } catch (e) { showToast('Failed to load scenes: ' + e.message, true); }
     }
 
@@ -704,14 +721,35 @@
     async function fetchScriptForVideo(moduleId, videoId) {
       if (!moduleId || !videoId) return null;
       try {
-        const moduleNum = dbModules.find(m => m.id === moduleId)?.module_number || 0;
-        const videoNum = dbVideos.find(v => v.id === videoId)?.video_number || 0;
-        let videoData = await api(`videos?module_id=eq.${moduleId}&video_number=eq.${videoNum}&select=id,script`);
-        if (videoData.length > 0 && videoData[0].script) {
-           return videoData[0].script;
+        let fullScript = "";
+        
+        // Fetch from `videos` table
+        const video = await api('videos?id=eq.' + videoId + '&select=script&limit=1');
+        if (video && video[0] && video[0].script) {
+          fullScript += video[0].script + "\n\n";
         }
-        return null;
+
+        // Fetch from `scripts` table which ties to `sentences`
+        const scriptRecs = await api('scripts?video_id=eq.' + videoId + '&select=id,script_text&limit=1');
+        if (scriptRecs && scriptRecs.length > 0) {
+          const scriptId = scriptRecs[0].id;
+          if (scriptRecs[0].script_text && !fullScript.includes(scriptRecs[0].script_text)) {
+            fullScript += scriptRecs[0].script_text + "\n\n";
+          }
+          
+          // Fetch sentences for this script
+          const sents = await api('sentences?script_id=eq.' + scriptId + '&order=sort_order.asc');
+          if (sents && sents.length > 0) {
+            fullScript += "=== Sentences ===\n";
+            sents.forEach(s => {
+              fullScript += `[Scene ${s.sort_order || s.sentence_number || '?'}] ${s.text}\n`;
+            });
+          }
+        }
+        
+        return fullScript.trim() || null;
       } catch (e) {
+        console.error("Failed to load script", e);
         return null;
       }
     }
@@ -872,6 +910,53 @@
       const cbs = document.querySelectorAll('.cand-cb');
       cbs.forEach(cb => cb.checked = master.checked);
     }
+
+    async function bulkDownloadExistingScenes() {
+      if (!currentVideoId || !dbScenesData || !dbScenesData.length) return;
+      
+      const btn = $('bulkDownloadBtn');
+      if (!btn) return;
+      const origText = btn.textContent;
+      btn.textContent = 'Generating & Downloading...';
+      btn.disabled = true;
+
+      try {
+        let downloaded = 0;
+        for (const s of dbScenesData) {
+          if (!s.lt_main && !s.lt_sub) continue;
+          renderLowerThirdToCanvas(s.lt_main, s.lt_sub);
+          const blob = await new Promise(resolve => canvasEl.toBlob(resolve, 'image/png'));
+          if (!blob) continue;
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = brandFilePrefix(s.scene_number) + '.png';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          downloaded++;
+          await new Promise(r => setTimeout(r, 400)); // Delay to prevent browser throttling/blocking multiple downloads
+        }
+        showToast('Bulk download completed: ' + downloaded + ' files.');
+      } catch (e) {
+        showToast('Bulk download error: ' + e.message, true);
+      } finally {
+        btn.textContent = origText;
+        btn.disabled = false;
+      }
+    }
+
+    $('togglePromptBtn').addEventListener('click', function() {
+      const p = $('promptDisplay');
+      if (p.style.display === 'none') {
+        p.style.display = 'block';
+        this.textContent = '👁️ Hide OpenRouter Prompt';
+      } else {
+        p.style.display = 'none';
+        this.textContent = '👁️ View OpenRouter Prompt';
+      }
+    });
 
     $('openRouterBtn').addEventListener('click', testOpenRouterGeneration);
     $('mockGenBtn').addEventListener('click', mockGeneration);
