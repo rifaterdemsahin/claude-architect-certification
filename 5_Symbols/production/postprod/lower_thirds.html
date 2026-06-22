@@ -61,13 +61,18 @@
     .btn-danger:hover { box-shadow: 0 8px 20px rgba(239,68,68,0.3); }
     .btn-sm { padding: 6px 14px; font-size: 0.8rem; }
     .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-    .lower-third-preview {
-      margin-top: 16px; background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
-      padding: 20px 32px; border-left: 12px solid white; border-radius: 8px;
-      display: inline-block; position: relative; min-width: 360px;
+    .preview-canvas {
+      margin-top: 16px; width: 100%; max-width: 480px; border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.1); display: block;
     }
-    .lower-third-preview .lt-main { display: block; font-weight: 700; font-size: 1.2rem; margin-bottom: 4px; }
-    .lower-third-preview .lt-sub { display: block; font-size: 0.85rem; opacity: 0.85; }
+    .brand-template {
+      margin-top: 16px; background: rgba(0,0,0,0.25); border: 1px solid rgba(234,179,8,0.25);
+      border-radius: 12px; padding: 16px 18px;
+    }
+    .brand-template h4 { font-family: var(--font-title); font-size: 0.95rem; margin-bottom: 12px; color: #eab308; }
+    .brand-grid { display: flex; gap: 18px; flex-wrap: wrap; }
+    .brand-item { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: var(--text-muted); }
+    .brand-swatch { width: 22px; height: 22px; border-radius: 5px; border: 1px solid rgba(255,255,255,0.2); flex-shrink: 0; }
     .scene-card {
       background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px;
       padding: 20px; margin-bottom: 16px; display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap;
@@ -96,7 +101,7 @@
     .suggestion-card .sug-rationale { color: var(--text-muted); font-size: 0.85rem; font-style: italic; }
     .suggestion-card .sug-apply { display: inline-block; margin-top: 10px; font-size: 0.8rem; color: var(--primary); font-weight: 600; }
     .script-preview { background: rgba(0,0,0,0.3); border-radius: 12px; padding: 20px; max-height: 300px; overflow-y: auto; white-space: pre-wrap; font-size: 0.9rem; color: var(--text-muted); line-height: 1.7; }
-    canvas { display: none; }
+    canvas.export-only { display: none; }
     .badge {
       display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 0.7rem;
       font-weight: 700; letter-spacing: 0.03em; margin-left: 6px;
@@ -169,15 +174,15 @@
           <button class="btn btn-secondary" id="clearBtn">🗑️ Clear Form</button>
           <span id="saveStatus" style="color:var(--text-muted);font-size:0.85rem;"></span>
         </div>
-        <p style="margin-top:12px; font-size: 0.85rem; color: var(--text-muted);">🎨 <strong>Design Note:</strong> Lower thirds use <strong>Fira Code Medium</strong> font with highly <strong>contrasting colors</strong> (Deep Blue & Bright Yellow) for maximum visibility when saved as PNG.</p>
         <div id="livePreview" style="margin-top: 24px;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
-            <h3 style="margin-bottom:0;">👁️ Live Preview</h3>
+            <h3 style="margin-bottom:0;">👁️ Live Preview <span style="font-size:0.75rem; color:var(--text-muted); font-weight:400;">(exact PNG output)</span></h3>
             <button class="btn btn-secondary btn-sm" id="downloadBtn">📥 Download PNG</button>
           </div>
-          <div class="lower-third-preview">
-            <span class="lt-main" id="previewMain">Main Text</span>
-            <span class="lt-sub" id="previewSub">Sub Text</span>
+          <canvas id="ltCanvas" class="preview-canvas" width="640" height="360"></canvas>
+          <div class="brand-template">
+            <h4 id="brandName">🎨 Brand Template</h4>
+            <div class="brand-grid" id="brandGrid"></div>
           </div>
         </div>
       </div>
@@ -224,12 +229,25 @@
     </footer>
   </div>
   <div id="toast" class="toast"></div>
-  <canvas id="ltCanvas" width="640" height="360"></canvas>
 
   <script>
     const SUPABASE_URL = localStorage.getItem('supabase_url') || 'https://rmekfsdhglyiralxvkwc.supabase.co';
     const SUPABASE_ANON_KEY = localStorage.getItem('supabase_anon_key') || '';
     const HEADERS = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
+
+    // 🎨 Single source of truth — both the live preview and the downloaded PNG render from this.
+    const BRAND_TEMPLATE = {
+      name: 'Claude Architect — Deep Blue / Bright Yellow',
+      gradientFrom: '#0f172a',
+      gradientTo: '#eab308',
+      accentBar: '#eab308',
+      mainColor: '#ffffff',
+      subColor: 'rgba(255,255,255,0.95)',
+      mainFont: '500 28px "Fira Code", monospace',
+      subFont: '400 18px "Plus Jakarta Sans", sans-serif',
+      mainFontLabel: 'Fira Code Medium 28px',
+      subFontLabel: 'Plus Jakarta Sans 18px'
+    };
 
     let dbModules = [];
     let dbVideos = [];
@@ -380,32 +398,52 @@
     }
 
     function renderLowerThirdToCanvas(main, sub) {
+      const t = BRAND_TEMPLATE;
       const w = canvasEl.width, h = canvasEl.height;
       ctx2d.clearRect(0, 0, w, h);
       const barHeight = 80;
       const barY = h - barHeight - 20;
       const grad = ctx2d.createLinearGradient(0, barY, w, barY);
-      // Using contrasting colors: Deep Dark Blue to Bright Yellow
-      grad.addColorStop(0, '#0f172a');
-      grad.addColorStop(1, '#eab308');
+      grad.addColorStop(0, t.gradientFrom);
+      grad.addColorStop(1, t.gradientTo);
       ctx2d.fillStyle = grad;
       ctx2d.beginPath();
       ctx2d.roundRect(0, barY, w, barHeight, 0);
       ctx2d.fill();
-      ctx2d.fillStyle = '#eab308'; // Yellow accent bar
+      ctx2d.fillStyle = t.accentBar; // Accent bar
       ctx2d.fillRect(0, barY, 8, barHeight);
-      ctx2d.fillStyle = '#ffffff';
-      // Fira Code Medium for Main Text
-      ctx2d.font = '500 28px "Fira Code", monospace';
+      ctx2d.fillStyle = t.mainColor;
+      ctx2d.font = t.mainFont;
       ctx2d.textBaseline = 'middle';
       ctx2d.shadowColor = 'rgba(0,0,0,0.4)';
       ctx2d.shadowBlur = 4;
       ctx2d.fillText(main || 'Main Text', 24, barY + 28);
-      ctx2d.font = '400 18px "Plus Jakarta Sans", sans-serif';
-      ctx2d.fillStyle = 'rgba(255,255,255,0.95)';
+      ctx2d.font = t.subFont;
+      ctx2d.fillStyle = t.subColor;
       ctx2d.shadowBlur = 2;
       ctx2d.fillText(sub || 'Sub Text', 24, barY + 58);
       ctx2d.shadowBlur = 0;
+    }
+
+    function renderBrandPanel() {
+      const t = BRAND_TEMPLATE;
+      $('brandName').innerHTML = '🎨 Brand Template: <span style="color:var(--text-main);">' + escHtml(t.name) + '</span>';
+      $('brandGrid').innerHTML =
+        '<div class="brand-item"><span class="brand-swatch" style="background:' + t.gradientFrom + ';"></span> Gradient start ' + t.gradientFrom + '</div>' +
+        '<div class="brand-item"><span class="brand-swatch" style="background:' + t.gradientTo + ';"></span> Gradient end ' + t.gradientTo + '</div>' +
+        '<div class="brand-item"><span class="brand-swatch" style="background:' + t.accentBar + ';"></span> Accent bar</div>' +
+        '<div class="brand-item">🅰️ Main: ' + escHtml(t.mainFontLabel) + '</div>' +
+        '<div class="brand-item">🔤 Sub: ' + escHtml(t.subFontLabel) + '</div>';
+    }
+
+    // Build a filename prefix from the selected module & video names.
+    function brandFilePrefix(sceneNum) {
+      const slug = s => String(s || '').replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'untitled';
+      const m = dbModules.find(x => x.id === currentModuleId);
+      const v = dbVideos.find(x => x.id === currentVideoId);
+      const mp = m ? 'M' + m.module_number + '-' + slug(m.title) : 'M0';
+      const vp = v ? 'V' + v.video_number + '-' + slug(v.title) : 'V0';
+      return mp + '_' + vp + (sceneNum ? '_s' + sceneNum : '');
     }
 
     async function uploadToAzure(blob, moduleNum, videoNum, sceneNum) {
@@ -477,8 +515,7 @@
     }
 
     function updatePreview() {
-      $('previewMain').textContent = $('ltMain').value || 'Main Text';
-      $('previewSub').textContent = $('ltSub').value || 'Sub Text';
+      renderLowerThirdToCanvas($('ltMain').value, $('ltSub').value);
     }
 
     function editScene(id, sceneNum, main, sub, image) {
@@ -632,24 +669,25 @@
       const ltMain = $('ltMain').value.trim() || 'Main Text';
       const ltSub = $('ltSub').value.trim() || 'Sub Text';
       
+      const sceneNum = parseInt($('sceneNumber').value) || 0;
       renderLowerThirdToCanvas(ltMain, ltSub);
-      
+
       const link = document.createElement('a');
-      link.download = `lower_third_${Date.now()}.png`;
+      link.download = `${brandFilePrefix(sceneNum)}_lower_third.png`;
       link.href = canvasEl.toDataURL('image/png');
       link.click();
-      
+
       showToast('Downloaded PNG for testing!');
     }
 
     function downloadExistingScene(main, sub, sceneNum) {
       renderLowerThirdToCanvas(main || 'Main Text', sub || 'Sub Text');
-      
+
       const link = document.createElement('a');
-      link.download = `lower_third_s${sceneNum}_${Date.now()}.png`;
+      link.download = `${brandFilePrefix(sceneNum)}_lower_third.png`;
       link.href = canvasEl.toDataURL('image/png');
       link.click();
-      
+
       showToast('Downloaded PNG for scene ' + sceneNum);
       
       // Restore preview to the editor's current state
@@ -782,6 +820,13 @@
     $('openRouterBtn').addEventListener('click', testOpenRouterGeneration);
     $('mockGenBtn').addEventListener('click', mockGeneration);
     $('generateAllBtn').addEventListener('click', generateAllVideos);
+
+    renderBrandPanel();
+    updatePreview();
+    // Re-render once web fonts (Fira Code) are ready so the canvas matches the brand template.
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => updatePreview());
+    }
 
     loadConfig();
     loadModules();
