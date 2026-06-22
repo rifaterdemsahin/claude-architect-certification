@@ -357,6 +357,7 @@
               '<div class="scene-desc">' + (s.lt_main || '(no main text)') + (s.lt_sub ? ' — ' + s.lt_sub : '') + '</div>' +
             '</div>' +
             '<div class="scene-actions">' +
+              '<button class="btn btn-sm btn-secondary" onclick="downloadExistingScene(\'' + escJs(s.lt_main) + '\',\'' + escJs(s.lt_sub) + '\',' + s.scene_number + ')">📥 Download</button>' +
               '<button class="btn btn-sm btn-secondary" onclick="editScene(' + s.id + ',' + s.scene_number + ',\'' + escJs(s.lt_main) + '\',\'' + escJs(s.lt_sub) + '\',\'' + escJs(s.lt_image) + '\')">✏️ Edit</button>' +
               '<button class="btn btn-sm btn-danger" onclick="deleteScene(' + s.id + ')">🗑️</button>' +
             '</div>' +
@@ -639,6 +640,23 @@
       link.click();
       
       showToast('Downloaded PNG for testing!');
+    }
+
+    function downloadExistingScene(main, sub, sceneNum) {
+      renderLowerThirdToCanvas(main || 'Main Text', sub || 'Sub Text');
+      
+      const link = document.createElement('a');
+      link.download = `lower_third_s${sceneNum}_${Date.now()}.png`;
+      link.href = canvasEl.toDataURL('image/png');
+      link.click();
+      
+      showToast('Downloaded PNG for scene ' + sceneNum);
+      
+      // Restore preview to the editor's current state
+      updatePreview();
+      const ltMain = $('ltMain').value.trim() || 'Main Text';
+      const ltSub = $('ltSub').value.trim() || 'Sub Text';
+      renderLowerThirdToCanvas(ltMain, ltSub);
     }
 
     $('ltMain').addEventListener('input', updatePreview);

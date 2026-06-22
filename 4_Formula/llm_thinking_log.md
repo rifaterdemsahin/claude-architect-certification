@@ -1,5 +1,23 @@
 # LLM Thinking Log
 
+## 2026-06-22 — 📥 Existing Scenes Download Buttons
+
+### 🎯 Objective
+Add a quick "Download" button to each existing scene card so users can quickly retrieve previously created lower thirds without needing to edit them first.
+
+### 📐 Implementation
+1. **UI Update (`lower_thirds.html`)**:
+   - In `loadScenes`, appended a `<button>` with `downloadExistingScene` to the `.scene-actions` container.
+   - Implemented `downloadExistingScene` which temporarily overwrites the local HTML canvas with the existing scene's main and sub text, triggers the programmatic download, and then restores the canvas to the current editor's state so the user's active draft is preserved.
+
+### ✅ Verification
+- Button renders successfully on all existing scene cards.
+- Clicking the button accurately downloads a `.png` for that specific scene.
+- The editor's live preview safely recovers from the temporary canvas overwrite.
+
+### 📦 Files Changed
+- `5_Symbols/production/postprod/lower_thirds.html`
+- `4_Formula/llm_thinking_log.md` — this entry
 ## 2026-06-22 — 📥 Move Lower Thirds Download Button
 
 ### 🎯 Objective
