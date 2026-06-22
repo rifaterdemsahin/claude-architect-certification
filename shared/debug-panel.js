@@ -118,14 +118,32 @@
       const html = document.documentElement.outerHTML || '';
       const tableSet = new Set();
       let m;
-      const reFrom = /\.from\(\s*['"`]([a-z_]+)['"`]/gi;
-      while ((m = reFrom.exec(html))) tableSet.add(m[1]);
-      const reRest = /\/rest\/v1\/([a-z_]+)/gi;
-      while ((m = reRest.exec(html))) tableSet.add(m[1]);
+      // 1. supabase-js:  .from('table')
+      let re = /\.from\(\s*['"`]([a-z_]+)['"`]/gi;
+      while ((m = re.exec(html))) tableSet.add(m[1]);
+      // 2. direct REST literal:  /rest/v1/<table>
+      re = /\/rest\/v1\/([a-z_]+)/gi;
+      while ((m = re.exec(html))) tableSet.add(m[1]);
+      // 3. REST helper first-arg, e.g. sbGet/sbPatch/sbPost/sbDelete('table', …).
+      //    Bare `from` or a PREFIXED verb (sbGet) — the \b after the verb excludes
+      //    getItem()/getElementById(), and requiring a prefix excludes bare get()/post()
+      //    (Map/storage lookups) whose first arg is a key, not a table.
+      re = /(?:\bfrom\b|\b\w+(?:get|patch|post|put|delete))\b\s*\(\s*['"`]([a-z][a-z0-9_]*)['"`]/gi;
+      while ((m = re.exec(html))) tableSet.add(m[1]);
+      // 4. const TABLES/ENDPOINTS/PATHS = [{ name: 'table', … }]  (only name: values)
+      re = /const\s+(?:TABLES|ENDPOINTS|PATHS|TABLE_LIST|DB_TABLES)\s*=\s*\[([\s\S]*?)\]/gi;
+      while ((m = re.exec(html))) {
+        let m2; const r2 = /\bname\s*:\s*['"`]([a-z][a-z0-9_]*)['"`]/g;
+        while ((m2 = r2.exec(m[1]))) tableSet.add(m2[1]);
+      }
+      // opt-in explicit declaration
       if (Array.isArray(window.__DB_TABLES__)) window.__DB_TABLES__.forEach(t => tableSet.add(t));
 
-      const urlM = html.match(/SUPABASE_URL\s*=\s*[^;\n]*?(https:\/\/[a-z0-9.-]+\.supabase\.co)/i);
-      const anonM = html.match(/SUPABASE_(?:ANON_KEY|ANON)\s*=\s*[^;\n]*?(eyJ[A-Za-z0-9_.-]+)/);
+      // Config is detected variable-name-agnostically: any *.supabase.co URL and
+      // any JWT in the page source (covers SUPABASE_URL / SB_URL / supabaseUrl / SB
+      // and SUPABASE_ANON / SB_KEY / SUPABASE_ANON_KEY alike).
+      const urlM = html.match(/(https:\/\/[a-z0-9][a-z0-9.-]*\.supabase\.co)/i);
+      const anonM = html.match(/\b(eyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,})\b/);
       if (urlM && !DB_BASE_URL) DB_BASE_URL = urlM[1];
       if (anonM && !DB_ANON_KEY) DB_ANON_KEY = anonM[1];
 
@@ -328,7 +346,7 @@
     if (!box) return;
     const hasCreds = DB_BASE_URL && DB_ANON_KEY;
     if (DB_TABLES.size === 0) {
-      box.innerHTML = `<div style="color:#6b7280;font-size:0.72rem;padding:6px 0;">No DB tables detected on this page. Tables appear automatically as the page queries Supabase, or declare <code style="color:#a78bfa;">window.__DB_TABLES__ = ['table']</code>.</div>`;
+      box.innerHTML = `<div style="color:#6b7280;font-size:0.72rem;padding:6px 0;">No DB tables detected on this page. Tables are auto-detected from <code style="color:#a78bfa;">.from('t')</code>, <code style="color:#a78bfa;">/rest/v1/t</code>, REST helpers like <code style="color:#a78bfa;">sbGet('t')</code>, a <code style="color:#a78bfa;">const TABLES=[{name:'t'}]</code> array, live fetches, or an explicit <code style="color:#a78bfa;">window.__DB_TABLES__=['t']</code>.</div>`;
       return;
     }
     const btnStyle = (color) => `background:${color};color:#e5e7eb;border:1px solid rgba(255,255,255,0.18);padding:2px 8px;border-radius:6px;cursor:pointer;font-size:0.68rem;font-weight:700;`;

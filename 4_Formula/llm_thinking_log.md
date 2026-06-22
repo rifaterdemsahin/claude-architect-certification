@@ -1633,3 +1633,16 @@ GLM" table. Registered GLM in the `agents.md` Supported Agent Roles table.
   - Added `shared/debug-panel.js` to the few DB-connected pages that were missing it: `index.html`, `5_Symbols/timeline.html`, `5_Symbols/production/prod/screenshare.html`, `5_Symbols/production/prod/talking-heads.html`, `5_Symbols/production/postprod/post_production_checklist.html`. (Skipped the Go server template `course_src/problem-server/templates/problem.html`.)
 - **Verification:** `go build ./... && go vet ./...` pass; table detection + view tested locally.
 - **Status:** IMPLEMENTED, pending commit + push.
+
+## 2026-06-22 - 🗄️ Debug Panel DB Inspector — robust detection (problem.html fix)
+- **Context:** The DB inspector reported "No DB tables detected" on `5_Symbols/production/preprod/problem.html` despite the page heavily using Supabase. Root causes:
+  1. **Config vars** — the page uses `SB_URL`/`SB_KEY` (other pages use `supabaseUrl`, `SB`), not the `SUPABASE_URL`/`SUPABASE_ANON` my regex required → base/key stayed ❌.
+  2. **REST helper pattern** — the page calls `sbGet('problem_pages', …)` / `sbPatch` / `sbPost` / `sbDelete`, passing the table as a string-literal first arg. My scanner only knew `.from('t')` and literal `/rest/v1/<t>`, so it saw nothing. This pattern is used on 13+ pages.
+  3. **Load order** — the inline script calls `loadAll()` (and thus `fetch`) before `debug-panel.js` loads, so the runtime fetch-intercept also missed the queries. Static detection therefore had to carry the weight.
+- **Approach (all in `shared/debug-panel.js`, no per-page edits):**
+  - **Config detection** is now variable-name-agnostic: match any `*.supabase.co` URL and any JWT (`eyJ…`) anywhere in the page source.
+  - **Table detection** runs four regexes: (1) `.from('t')`, (2) literal `/rest/v1/<t>`, (3) table-taking helper first-arg, (4) `const TABLES=[{name:'t'}]` array (name values only).
+  - The helper regex `(?:\bfrom\b|\b\w+(?:get|patch|post|put|delete))\b\s*\(` matches `.from`, `sbGet/sbPatch/sbPost/sbDelete` while the `\b` after the verb excludes `getItem()`/`getElementById()` and the required prefix excludes bare `get()`/`post()` (Map/storage lookups) whose first arg is a key, not a table.
+  - Validated offline against every DB-connected page: `problem.html`→5 tables (problem_pages, target_personas, core_challenges, exam_domains, course_solutions), `stats.html`→7 (via its TABLES array), `admin.html` 46→0 false positives (it's a schema viewer), `scripts/index.html`→5 (incl. real `code_references`/`sentence_links`), zero noise elsewhere.
+- **Verification:** `node -c` + `go build`/`go vet` pass; local Go server serves the page (HTTP 200) and updated panel; View-button REST requests return HTTP 200 for all 5 problem.html tables.
+- **Status:** IMPLEMENTED, pending commit + push.

@@ -35,7 +35,17 @@ This document defines how AI agents interact with the **Claude AI Certification 
     - Refactored the badge update into `render()` and removed the fragile `LOG.push` override hack.
     - Added `shared/debug-panel.js` to the 5 DB-connected pages that were missing it: `index.html`, `5_Symbols/timeline.html`, `5_Symbols/production/prod/screenshare.html`, `5_Symbols/production/prod/talking-heads.html`, `5_Symbols/production/postprod/post_production_checklist.html`.
     - Documented in `4_Formula/llm_thinking_log.md` and `shared/README.md`.
-- **Verification:** `go build ./... && go vet ./...` pass; `node -c` syntax OK; static detection validated on real pages; the exact Supabase REST request `viewTable()` makes returns HTTP 200 with live data; all DB-connected pages confirmed to load the panel via the local Go server.
+- **Verification:** `go build ./... && go vet ./...` pass; `node -c` syntax OK; static detection validated on every DB-connected page (problem.html→5 tables, stats.html→7 via TABLES array, admin.html 46→0 false positives, scripts/index→5 with zero noise); the exact Supabase REST request `viewTable()` makes returns HTTP 200 with live data; all DB-connected pages confirmed to load the panel via the local Go server.
+- **Status:** IMPLEMENTED, COMMITTED, PUSHED.
+
+### 2026-06-22
+- **Task:** 🐛 Fix DB inspector reporting "No DB tables detected" on `problem.html` (and make detection robust for all pages using REST helpers / non-standard config vars).
+- **Action:**
+    - Made config detection variable-name-agnostic (any `*.supabase.co` URL + any JWT) so `SB_URL`/`SB_KEY`/`supabaseUrl`/`SB` are all captured, not just `SUPABASE_URL`/`SUPABASE_ANON`.
+    - Added table detection for the REST-helper pattern (`sbGet`/`sbPatch`/`sbPost`/`sbDelete`/`.from` first-arg string literals) used on 13+ pages, plus `const TABLES=[{name:'t'}]` array extraction (name values only).
+    - Refined the helper regex to exclude `getItem()`/`getElementById()` and bare `get()`/`post()` Map/storage lookups, eliminating false positives (admin.html went 46→0).
+    - problem.html now surfaces all 5 related tables: `problem_pages`, `target_personas`, `core_challenges`, `exam_domains`, `course_solutions`.
+- **Verification:** `node -c` + `go build`/`go vet` pass; View-button REST queries return HTTP 200 for all 5 problem.html tables; offline detection check clean across all DB pages.
 - **Status:** IMPLEMENTED, COMMITTED, PUSHED.
 
 ### 2026-06-18
