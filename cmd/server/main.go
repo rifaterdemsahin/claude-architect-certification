@@ -2199,7 +2199,10 @@ Focus on professional, certification-quality overlays. Use the module/video them
 
 func openRouterGenerateHandler(cfg config) http.HandlerFunc {
 	type ORRequest struct {
-		Script string `json:"script"`
+		Script     string `json:"script"`
+		CourseName string `json:"courseName"`
+		ModuleName string `json:"moduleName"`
+		VideoName  string `json:"videoName"`
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -2222,6 +2225,10 @@ func openRouterGenerateHandler(cfg config) http.HandlerFunc {
 		}
 
 		prompt := fmt.Sprintf(`You are a lower thirds generator for a video course.
+Course Title: %s
+Module Name: %s
+Video Name: %s
+
 Based on the following video script, generate exactly 3 lower third candidate options.
 Each candidate must have a "main" text (max 40 chars) and "sub" text (max 60 chars) and a brief "rationale".
 
@@ -2231,7 +2238,7 @@ Video script:
 Return ONLY a JSON array with this structure:
 [
   {"main": "Main Text", "sub": "Sub text description", "rationale": "Reason"}
-]`, req.Script)
+]`, req.CourseName, req.ModuleName, req.VideoName, req.Script)
 
 		ctx, cancel := context.WithTimeout(r.Context(), 30*time.Second)
 		defer cancel()

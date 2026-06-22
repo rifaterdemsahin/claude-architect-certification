@@ -167,6 +167,11 @@
               { label: '🏠 Home Template', url: '5_Symbols/templates/index.html' },
               { label: '📋 Error Log Template', url: '5_Symbols/templates/axiom_errors.html' }
             ]},
+            { group: true, label: '📈 AI Usage', children: [
+              { label: '✨ Gemini Usage', url: 'https://gemini.google.com/usage' },
+              { label: '🤖 Claude Usage', url: 'https://console.anthropic.com/settings/usage' },
+              { label: '🧠 xAI Usage', url: 'https://console.x.ai/usage' }
+            ]},
             { group: true, label: '🤖 AI & APIs', children: [
               { label: '☁️ Google Cloud API', url: 'https://console.cloud.google.com/' },
               { label: '🤖 Claude Guide', url: 'claude.md' }
@@ -176,14 +181,30 @@
     ]},
     { label: '📋 Planning', children: [
       { label: '🗂️ Planning Hub', url: '5_Symbols/production/preprod/planning.html', description: 'Critical path overview and pre-production checklists.' },
-      { label: '🎨 Ways of Working', url: '5_Symbols/production/preprod/ways_of_working.html', description: 'Visual script table read method with real-time image creation.' },
-      { label: '📈 Customer Development', url: '5_Symbols/production/preprod/customer_development.html', description: 'Validation framework from macro brand authority to micro-execution loops.' },
-      { label: '🎬 Production Doctrine', url: '5_Symbols/production/preprod/production_doctrine.html', description: 'Operating manual and doctrine: the recording is the process.' },
-      { label: '🔴 Critical Path', url: 'markdown_renderer.html?file=1_Real_Unknown/critical_task.md', description: 'Rules for shipping the course content before the platform.' },
-      { label: '✅ Sanity Checklist', url: '5_Symbols/production/preprod/sanity_checklist.html', description: 'Pre-flight checks before going live.' },
-      { label: '📋 Producer Checklist', url: '5_Symbols/production/preprod/producer_checklist.html', description: 'Pre-production readiness verification checklist.' },
-      { label: '🧩 Pipeline', url: '5_Symbols/pipeline.html', description: 'End-to-end production workflow pipeline.' },
-      { label: '📅 Timeline', url: '5_Symbols/timeline.html', description: 'Scheduled dates for the course execution.' }
+      { group: true, label: '1. 🧭 Strategy & Research', children: [
+        { label: '🎓 AI Certifications Analysis ↗', url: 'https://rifaterdemsahin.github.io/ai-certifications-analysis/', description: 'Market research on the hard, expensive AI certificates the course preps for — framing the value proposition.' },
+        { label: '📈 Customer Development', url: '5_Symbols/production/preprod/customer_development.html', description: 'Validation framework from macro brand authority to micro-execution loops.' }
+      ]},
+      { group: true, label: '2. 🎨 Method & Doctrine', children: [
+        { label: '🎨 Ways of Working', url: '5_Symbols/production/preprod/ways_of_working.html', description: 'Visual script table read method with real-time image creation.' },
+        { label: '🎯 Tell · Show · Do · Apply', url: '5_Symbols/production/preprod/tell_show_do_apply.html', description: 'Four-beat instructional design loop: Tell, Show, Do, Apply.' },
+        { label: '🎬 Production Doctrine', url: '5_Symbols/production/preprod/production_doctrine.html', description: 'Operating manual and doctrine: the recording is the process.' }
+      ]},
+      { group: true, label: '3. 📐 Standards & Config', children: [
+        { label: '🎨 Branding & Business Rules', url: '5_Symbols/production/preprod/tools/branding.html', description: 'Branding configuration (colors, fonts) and core project business rules stored in the Supabase business_rules table — view, edit, and seed.' }
+      ]},
+      { group: true, label: '4. ✅ Readiness & Checklists', children: [
+        { label: '🔴 Critical Path', url: 'markdown_renderer.html?file=1_Real_Unknown/critical_task.md', description: 'Rules for shipping the course content before the platform.' },
+        { label: '✅ Sanity Checklist', url: '5_Symbols/production/preprod/sanity_checklist.html', description: 'Pre-flight checks before going live.' },
+        { label: '📋 Producer Checklist', url: '5_Symbols/production/preprod/producer_checklist.html', description: 'Pre-production readiness verification checklist.' }
+      ]},
+      { group: true, label: '5. 🗓️ Schedule & Pipeline', children: [
+        { label: '🧩 Pipeline', url: '5_Symbols/pipeline.html', description: 'End-to-end production workflow pipeline.' },
+        { label: '📅 Timeline', url: '5_Symbols/timeline.html', description: 'Scheduled dates for the course execution.' }
+      ]},
+      { group: true, label: '6. 🗺️ Reference', children: [
+        { label: '🗺️ Menu Map (2D)', url: '5_Symbols/menu_map.html', description: 'Top-down 2D map of the entire site navigation, colour-coded by group, with live filter.' }
+      ]}
     ]},
     { label: '🎥 Production', children: [
       { label: '1. 📁 Google Drive Folder Creator', url: '5_Symbols/production/prod/google_drive_folder_creator.html', description: 'Recursively generate Google Drive folders for course modules and videos, and automatically record the folder links back to Supabase.' },
@@ -465,11 +486,10 @@
   function buildSearchIndex(items, parentPath) {
     var index = [];
     items.forEach(function (item) {
-      if (item.group) return;
       var currentPath = parentPath ? parentPath + ' ➔ ' + item.label : item.label;
       if (item.children) {
         index = index.concat(buildSearchIndex(item.children, currentPath));
-      } else if (item.url) {
+      } else if (item.url && !item.group) {
         index.push({
           label: item.label,
           path: parentPath || 'Direct Links',

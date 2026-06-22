@@ -1,5 +1,28 @@
 # LLM Thinking Log
 
+## 2026-06-22 — ✨ UX Polishing, OpenRouter Prompt Upgrades & Instant Save
+
+### 🎯 Objective
+Resolve undefined sentence rendering, simplify the script UI by linking out rather than inline-saving, enrich the backend generation context, perfectly center generation errors, and provide a 1-click line-item save workflow.
+
+### 📐 Implementation
+1. **Undefined Sentences Fixed (Task 1)**: Corrected the schema mapping in `fetchScriptForVideo()`. The sentences table utilizes `sentence_text`, not `text`. Now, lines render gracefully (e.g., `[Scene 10] ...`).
+2. **Read-Only Script Viewer (Task 2)**: Removed the "💾 Save Script" button. Replaced it with a "✏️ Edit Script" link which automatically passes `module_id` and `video_id` via URL parameters and opens the comprehensive `/scripts/index.html` in a new tab.
+3. **Prompt Enrichment (Task 3)**:
+   - *Backend*: Modified `openRouterGenerateHandler` in `cmd/server/main.go` to accept `CourseName`, `ModuleName`, and `VideoName` within the JSON payload and format them into the system prompt.
+   - *Frontend*: Dynamic fetching maps these from `dbModules` and `dbVideos`. The prompt display toggler now clearly notes `[Model: google/gemini-2.5-flash]` alongside the exact, fully enriched payload.
+4. **Centered Generation Error (Task 4)**: Inside the OpenRouter catch-block, the table wraps itself with a centered `.empty-state` container styled in danger-red (`var(--danger)`). Error messages (e.g. 503 or parsing failures) are highly visible rather than quietly failing.
+5. **Instant Line Item Save (Task 5)**: Appended a green `💾 Save` button directly next to the Edit button for every generated candidate. Coded `instantSaveCandidate()` which determines the highest existing `scene_number`, automatically increments it, and POSTs the payload straight into the `scenes` table without requiring the user to open the edit panel.
+
+### ✅ Verification
+- All UI buttons display correctly in their respective panels.
+- `go test ./...` passes indicating no backend regression.
+
+### 📦 Files Changed
+- `5_Symbols/production/postprod/lower_thirds.html`
+- `cmd/server/main.go`
+- `4_Formula/llm_thinking_log.md` — this entry
+
 ## 2026-06-22 — 🔢 Dynamic Panel Line Item Counts
 
 ### 🎯 Objective

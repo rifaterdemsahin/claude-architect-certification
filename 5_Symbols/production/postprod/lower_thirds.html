@@ -173,7 +173,7 @@
       <div class="glass-card-body">
         <textarea id="scriptContent" class="script-preview" style="width:100%; min-height:150px; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:20px; color:var(--text-muted); font-family:var(--font-body); resize:vertical;" placeholder="Paste the full video script here..."></textarea>
         <div style="margin-top: 12px; text-align: right;">
-          <button class="btn btn-secondary btn-sm" onclick="saveVideoScript(event)">💾 Save Script</button>
+          <button class="btn btn-secondary btn-sm" onclick="window.open('../preprod/scripts/index.html?module_id=' + currentModuleId + '&video_id=' + currentVideoId, '_blank')">✏️ Edit Script</button>
         </div>
       </div>
     </div>
@@ -754,7 +754,7 @@ Return ONLY a JSON array with this structure:
             $('countScript').style.display = 'inline-block';
             fullScript += "=== Sentences ===\n";
             sents.forEach(s => {
-              fullScript += `[Scene ${s.sort_order || s.sentence_number || '?'}] ${s.text}\n`;
+              fullScript += `[Scene ${s.sort_order || s.sentence_number || '?'}] ${s.sentence_text || s.text || ''}\n`;
             });
           }
         }
@@ -787,13 +787,38 @@ Return ONLY a JSON array with this structure:
         $('scriptContent').value = scriptText;
         $('scriptPanel').style.display = 'block';
 
+        const moduleName = dbModules.find(m => m.id === currentModuleId)?.title || '';
+        const videoName = dbVideos.find(v => v.id === currentVideoId)?.title || '';
+        const courseTitle = "Claude Architect Certification";
+
+        $('promptDisplay').textContent = `[Model: google/gemini-2.5-flash]
+
+You are a lower thirds generator for a video course.
+Course Title: ${courseTitle}
+Module Name: ${moduleName}
+Video Name: ${videoName}
+
+Based on the following video script, generate exactly 3 lower third candidate options.
+Each candidate must have a "main" text (max 40 chars) and "sub" text (max 60 chars) and a brief "rationale".
+
+Video script:
+${scriptText}
+
+Return ONLY a JSON array with this structure:
+[
+  {"main": "Main Text", "sub": "Sub text description", "rationale": "Reason"}
+]`;
+
         const res = await fetch('/api/lowerthirds/openrouter', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            script: scriptText
+            script: scriptText,
+            courseName: courseTitle,
+            moduleName: moduleName,
+            videoName: videoName
           })
         });
 
@@ -833,7 +858,7 @@ Return ONLY a JSON array with this structure:
               '<td class="main-col"><strong>' + escHtml(r.main || r.main_text) + '</strong></td>' +
               '<td class="sub-col">' + escHtml(r.sub || r.sub_text) + '</td>' +
               '<td class="rationale-col"><div class="rationale-text">' + escHtml(r.rationale || 'OpenRouter identified this as a key term.') + '</div></td>' +
-              '<td class="action-col"><button class="btn btn-sm btn-secondary" onclick="applySuggestion(\'' + escJs(r.main || r.main_text) + '\', \'' + escJs(r.sub || r.sub_text) + '\')">✏️ Edit</button></td>' +
+              '<td class="action-col"><button class="btn btn-sm btn-secondary" onclick="applySuggestion(\'' + escJs(r.main || r.main_text) + '\', \'' + escJs(r.sub || r.sub_text) + '\')">✏️ Edit</button> <button class="btn btn-sm" style="background:var(--success);color:#000;" onclick="instantSaveCandidate(this, \'' + escJs(r.main || r.main_text) + '\', \'' + escJs(r.sub || r.sub_text) + '\')">💾 Save</button></td>' +
             '</tr>'
           ).join('') +
           '</tbody></table>';
@@ -843,6 +868,7 @@ Return ONLY a JSON array with this structure:
       } catch (e) {
         $('genLoading').style.display = 'none';
         $('candidatesTableWrap').style.display = 'block';
+        $('candidatesTableWrap').innerHTML = `<div class="empty-state" style="color:var(--danger);"><div class="empty-icon" style="font-size:3rem;margin-bottom:12px;">⚠️</div><p style="font-weight:700;">OpenRouter Error</p><p style="font-size:0.9rem;margin-top:8px;">${e.message}</p></div>`;
         showToast('OpenRouter Error: ' + e.message, true);
       }
     }
@@ -879,7 +905,7 @@ Return ONLY a JSON array with this structure:
             '<td class="main-col"><strong>' + escHtml(r.main_text) + '</strong></td>' +
             '<td class="sub-col">' + escHtml(r.sub_text) + '</td>' +
             '<td class="rationale-col"><div class="rationale-text">' + escHtml(r.rationale) + '</div></td>' +
-            '<td class="action-col"><button class="btn btn-sm btn-secondary" onclick="applySuggestion(\'' + escJs(r.main_text) + '\', \'' + escJs(r.sub_text) + '\')">✏️ Edit</button></td>' +
+            '<td class="action-col"><button class="btn btn-sm btn-secondary" onclick="applySuggestion(\'' + escJs(r.main_text) + '\', \'' + escJs(r.sub_text) + '\')">✏️ Edit</button> <button class="btn btn-sm" style="background:var(--success);color:#000;" onclick="instantSaveCandidate(this, \'' + escJs(r.main_text) + '\', \'' + escJs(r.sub_text) + '\')">💾 Save</button></td>' +
           '</tr>'
         ).join('') +
         '</tbody></table>';
@@ -922,6 +948,37 @@ Return ONLY a JSON array with this structure:
       }
       showToast('Saved ' + added + ' candidates to scenes!');
       await loadScenes(currentVideoId);
+    }
+
+    async function instantSaveCandidate(btn, main, sub) {
+      if (!currentModuleId || !currentVideoId) return;
+      btn.disabled = true;
+      btn.textContent = '⏳...';
+
+      const moduleNum = dbModules.find(m => m.id === currentModuleId)?.module_number || 0;
+      const videoNum = dbVideos.find(v => v.id === currentVideoId)?.video_number || 0;
+
+      let maxScene = 0;
+      try {
+        const scenes = await api('scenes?module_number=eq.' + moduleNum + '&section_number=eq.' + videoNum + '&select=scene_number');
+        for (const s of scenes) { if (s.scene_number > maxScene) maxScene = s.scene_number; }
+      } catch(e) {}
+      maxScene++;
+
+      try {
+        await api('scenes', {
+          method: 'POST',
+          body: JSON.stringify({ module_number: moduleNum, section_number: videoNum, scene_number: maxScene, lt_main: main, lt_sub: sub, lt_image: '' })
+        });
+        showToast('Saved scene ' + maxScene);
+        btn.textContent = '✅ Saved';
+        btn.style.background = 'rgba(255,255,255,0.1)';
+        btn.style.color = 'var(--success)';
+        await loadScenes(currentVideoId);
+      } catch(e) {
+        btn.textContent = '❌ Error';
+        showToast(e.message, true);
+      }
     }
 
     function toggleAllCands(master) {
