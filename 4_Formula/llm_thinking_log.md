@@ -1,5 +1,28 @@
 # LLM Thinking Log
 
+## 2026-06-22 — 🔢 Dynamic Panel Line Item Counts
+
+### 🎯 Objective
+Give users immediate visibility into the contents of collapsed panels by displaying dynamic line item count badges directly within the panel headers.
+
+### 📐 Implementation
+1. **Badge UI Component**:
+   - Added a `.badge-count` CSS class styled consistently with the application's glass-morphism aesthetic (semi-transparent border, subtle padding, distinct font weighting).
+2. **Dynamic Header Injection**:
+   - Panel `2) Video Script`: Added a span dynamically updated inside `fetchScriptForVideo()` displaying the exact number of parsed sentences.
+   - Panel `4) Lower Third Candidates`: Added a span dynamically updated by `testOpenRouterGeneration()` and `mockGeneration()` showing the count of generated JSON objects.
+   - Panel `6) Existing Scene Lower Thirds`: Added a span dynamically updated by `loadScenes()` reflecting the size of the returned Supabase `scenes` array.
+3. **State Handling**:
+   - Ensured counts cleanly revert to `display: none;` during active loading or when videos/modules are deselected to prevent stale metadata.
+
+### ✅ Verification
+- Badges appear flawlessly aligned next to the panel titles.
+- Checked JavaScript syntax functionality; `go test` executed successfully.
+
+### 📦 Files Changed
+- `5_Symbols/production/postprod/lower_thirds.html`
+- `4_Formula/llm_thinking_log.md` — this entry
+
 ## 2026-06-22 — ✨ Video Script Sentences, Bulk Download & Prompt Viewer
 
 ### 🎯 Objective

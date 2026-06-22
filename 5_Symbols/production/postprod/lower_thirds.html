@@ -108,6 +108,12 @@
     }
     .badge-cached { background: rgba(59,130,246,0.2); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); }
     .badge-fresh { background: rgba(16,185,129,0.2); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+    .badge-count {
+      background: rgba(255,255,255,0.1); color: var(--text-main);
+      border: 1px solid rgba(255,255,255,0.2); border-radius: 12px;
+      padding: 2px 8px; font-size: 0.8rem; margin-left: 8px; font-weight: 500;
+      display: inline-block; vertical-align: middle;
+    }
     .lt-table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
     .lt-table th { text-align: left; color: var(--text-muted); font-size: 0.8rem; font-weight: 600; padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.06); }
     .lt-table td { padding: 12px; background: rgba(0,0,0,0.15); vertical-align: top; }
@@ -161,7 +167,7 @@
 
     <div class="glass-card" id="scriptPanel" style="display:none; margin-bottom: 32px;">
       <div class="glass-card-header" onclick="togglePanel(this)">
-        <h2>2) Video Script</h2>
+        <h2>2) Video Script <span id="countScript" class="badge-count" style="display:none;"></span></h2>
         <span class="collapse-icon">▼</span>
       </div>
       <div class="glass-card-body">
@@ -200,7 +206,7 @@ Return ONLY a JSON array with this structure:
     <div id="editorSection" style="display:none;">
       <div class="glass-card" id="candidatesPanel" style="display:none;">
         <div class="glass-card-header" onclick="togglePanel(this)">
-          <h2>4) Lower Third Candidates <span id="cacheInfo" style="font-size:0.8rem;color:var(--text-muted);font-weight:400;margin-left:8px;"></span></h2>
+          <h2>4) Lower Third Candidates <span id="countCandidates" class="badge-count" style="display:none;"></span><span id="cacheInfo" style="font-size:0.8rem;color:var(--text-muted);font-weight:400;margin-left:8px;"></span></h2>
           <span class="collapse-icon">▼</span>
         </div>
         <div class="glass-card-body">
@@ -265,9 +271,9 @@ Return ONLY a JSON array with this structure:
         </div>
       </div>
 
-      <div class="glass-card">
+      <div class="glass-card" id="scenesPanel">
         <div class="glass-card-header" onclick="togglePanel(this)">
-          <h2>6) Existing Scene Lower Thirds</h2>
+          <h2>6) Existing Scene Lower Thirds <span id="countScenes" class="badge-count" style="display:none;"></span></h2>
           <span class="collapse-icon">▼</span>
         </div>
         <div class="glass-card-body">
@@ -419,6 +425,7 @@ Return ONLY a JSON array with this structure:
     async function loadScenes(videoId) {
       const container = $('scenesList');
       if (!videoId) {
+        $('countScenes').style.display = 'none';
         container.innerHTML = '<div class="empty-state"><div class="empty-icon">🎬</div><p>Select a video to view scenes.</p></div>';
         return;
       }
@@ -429,6 +436,8 @@ Return ONLY a JSON array with this structure:
           'scenes?module_number=eq.' + moduleNum + '&section_number=eq.' + videoNum + '&select=id,scene_number,lt_main,lt_sub,lt_image&order=scene_number.asc'
         );
         dbScenesData = scenes || [];
+        $('countScenes').textContent = dbScenesData.length + ' items';
+        $('countScenes').style.display = 'inline-block';
         if (!scenes.length) {
           container.innerHTML = '<div class="empty-state"><div class="empty-icon">➕</div><p>No scene-specific lower thirds yet. Use the form above to create one.</p></div>';
           return;
@@ -719,6 +728,7 @@ Return ONLY a JSON array with this structure:
     $('downloadBtn').addEventListener('click', downloadLowerThird);
     $('clearBtn').addEventListener('click', clearForm);
     async function fetchScriptForVideo(moduleId, videoId) {
+      $('countScript').style.display = 'none';
       if (!moduleId || !videoId) return null;
       try {
         let fullScript = "";
@@ -740,6 +750,8 @@ Return ONLY a JSON array with this structure:
           // Fetch sentences for this script
           const sents = await api('sentences?script_id=eq.' + scriptId + '&order=sort_order.asc');
           if (sents && sents.length > 0) {
+            $('countScript').textContent = sents.length + ' sentences';
+            $('countScript').style.display = 'inline-block';
             fullScript += "=== Sentences ===\n";
             sents.forEach(s => {
               fullScript += `[Scene ${s.sort_order || s.sentence_number || '?'}] ${s.text}\n`;
@@ -800,6 +812,9 @@ Return ONLY a JSON array with this structure:
         $('genLoading').style.display = 'none';
         $('candidatesTableWrap').style.display = 'block';
 
+        $('countCandidates').textContent = candidates.length + ' items';
+        $('countCandidates').style.display = 'inline-block';
+
         const wrap = $('candidatesTableWrap');
         $('cacheInfo').textContent = '(OpenRouter Results)';
         wrap.innerHTML =
@@ -842,6 +857,9 @@ Return ONLY a JSON array with this structure:
         { main_text: "System Design", sub_text: "Scaling Microservices", rationale: "Mock testing candidate 1 for Davinci Resolve" },
         { main_text: "Architecture", sub_text: "Serverless Deployment", rationale: "Mock testing candidate 2 for Davinci Resolve" }
       ];
+
+      $('countCandidates').textContent = mockCandidates.length + ' items';
+      $('countCandidates').style.display = 'inline-block';
 
       const wrap = $('candidatesTableWrap');
       $('cacheInfo').textContent = '(Mock Data)';
