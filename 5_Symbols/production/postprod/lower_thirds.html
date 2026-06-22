@@ -189,7 +189,12 @@
           <button class="btn btn-secondary" id="mockGenBtn" style="background:#3b82f6; color:#fff;">🧪 Mock Generation</button>
           <button class="btn btn-secondary" id="togglePromptBtn">👁️ View OpenRouter Prompt</button>
         </div>
-        <div id="promptDisplay" style="display:none; margin-top: 16px; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; font-size: 0.85rem; color: var(--text-muted); text-align: left; white-space: pre-wrap;">You are a lower thirds generator for a video course.
+        <div class="prompt-viewer" id="promptViewer" style="display:none; margin-top: 16px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <strong>OpenRouter System Prompt</strong>
+            <button class="btn btn-sm" style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:#fff;" onclick="navigator.clipboard.writeText($('promptDisplay').textContent); showToast('Prompt copied!')">📋 Copy</button>
+          </div>
+          <pre id="promptDisplay" style="padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; font-size: 0.85rem; color: var(--text-muted); text-align: left; white-space: pre-wrap;">You are a lower thirds generator for a video course.
 Based on the following video script, generate exactly 3 lower third candidate options.
 Each candidate must have a "main" text (max 40 chars) and "sub" text (max 60 chars) and a brief "rationale".
 
@@ -199,7 +204,8 @@ Video script:
 Return ONLY a JSON array with this structure:
 [
   {"main": "Main Text", "sub": "Sub text description", "rationale": "Reason"}
-]</div>
+]</pre>
+        </div>
       </div>
     </div>
 
@@ -418,8 +424,6 @@ Return ONLY a JSON array with this structure:
       } catch (e) { showToast('Failed to load videos: ' + e.message, true); }
     }
 
-    // loadLowerThirds function removed per new flow (candidates load from OpenRouter only)
-
     let dbScenesData = [];
 
     async function loadScenes(videoId) {
@@ -433,13 +437,13 @@ Return ONLY a JSON array with this structure:
         const moduleNum = dbModules.find(m => m.id === currentModuleId)?.module_number || 0;
         const videoNum = dbVideos.find(v => v.id === currentVideoId)?.video_number || 0;
         const scenes = await api(
-          'scenes?module_number=eq.' + moduleNum + '&section_number=eq.' + videoNum + '&select=id,scene_number,lt_main,lt_sub,lt_image&order=scene_number.asc'
+          'scenes?module_number=eq.' + moduleNum + '&section_number=eq.' + videoNum + '&scene_type=neq.candidate&select=id,scene_number,lt_main,lt_sub,lt_image&order=scene_number.asc'
         );
         dbScenesData = scenes || [];
         $('countScenes').textContent = dbScenesData.length + ' items';
         $('countScenes').style.display = 'inline-block';
         if (!scenes.length) {
-          container.innerHTML = '<div class="empty-state"><div class="empty-icon">➕</div><p>No scene-specific lower thirds yet. Use the form above to create one.</p></div>';
+          container.innerHTML = '<div class="empty-state"><div class="empty-icon">➕</div><p>No scene-specific lower thirds yet.</p></div>';
           return;
         }
         let html = '<div style="margin-bottom: 12px; text-align: right;"><button class="btn btn-secondary btn-sm" id="bulkDownloadBtn" onclick="bulkDownloadExistingScenes()">📥 Bulk Download All Lower Thirds</button></div>';
@@ -459,6 +463,45 @@ Return ONLY a JSON array with this structure:
         ).join('');
         container.innerHTML = html;
       } catch (e) { showToast('Failed to load scenes: ' + e.message, true); }
+    }
+
+    async function loadCandidates(videoId) {
+      const wrap = $('candidatesTableWrap');
+      if (!videoId) return;
+      try {
+        const moduleNum = dbModules.find(m => m.id === currentModuleId)?.module_number || 0;
+        const videoNum = dbVideos.find(v => v.id === currentVideoId)?.video_number || 0;
+        const candidates = await api(
+          'scenes?module_number=eq.' + moduleNum + '&section_number=eq.' + videoNum + '&scene_type=eq.candidate&select=id,lt_main,lt_sub&order=id.asc'
+        );
+        
+        $('countCandidates').textContent = (candidates || []).length + ' items';
+        $('countCandidates').style.display = 'inline-block';
+
+        if (!candidates || !candidates.length) {
+          wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">🤖</div><p>No candidates available. Generate some first.</p></div>';
+          return;
+        }
+
+        wrap.innerHTML =
+          '<table class="lt-table"><thead><tr>' +
+            '<th class="sel-col" style="width:40px;"><input type="checkbox" onchange="toggleAllCands(this)"></th>' +
+            '<th class="num-col">#</th>' +
+            '<th class="main-col">Main Text</th>' +
+            '<th class="sub-col">Sub Text</th>' +
+            '<th class="action-col">Apply</th>' +
+          '</tr></thead><tbody>' +
+          candidates.map((r, i) =>
+            '<tr>' +
+              '<td class="sel-col"><input type="checkbox" class="cand-cb" data-id="' + r.id + '" data-main="' + escHtml(r.lt_main) + '" data-sub="' + escHtml(r.lt_sub) + '"></td>' +
+              '<td class="num-col">' + (i + 1) + '</td>' +
+              '<td class="main-col"><strong>' + escHtml(r.lt_main) + '</strong></td>' +
+              '<td class="sub-col">' + escHtml(r.lt_sub) + '</td>' +
+              '<td class="action-col"><button class="btn btn-sm btn-secondary" onclick="applySuggestion(\'' + escJs(r.lt_main) + '\', \'' + escJs(r.lt_sub) + '\')">✏️ Edit</button> <button class="btn btn-sm" style="background:var(--success);color:#000;" onclick="instantSaveCandidate(this, ' + r.id + ')">💾 Save</button></td>' +
+            '</tr>'
+          ).join('') +
+          '</tbody></table>';
+      } catch(e) { console.error(e); }
     }
 
     function applySuggestion(main, sub) {
@@ -521,7 +564,6 @@ Return ONLY a JSON array with this structure:
         '<div class="brand-item">🔤 Sub: ' + escHtml(t.subFontLabel) + '</div>';
     }
 
-    // Build a filename prefix from the selected module & video names.
     function brandFilePrefix(sceneNum) {
       const slug = s => String(s || '').replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'untitled';
       const m = dbModules.find(x => x.id === currentModuleId);
@@ -627,28 +669,6 @@ Return ONLY a JSON array with this structure:
       updatePreview();
     }
 
-    async function saveVideoScript(event) {
-      if (!currentVideoId) { showToast('Select a video first.', true); return; }
-      const btn = event.target;
-      const originalText = btn.textContent;
-      btn.disabled = true;
-      btn.textContent = 'Saving...';
-      try {
-        const text = $('scriptContent').value;
-        await api('videos?id=eq.' + currentVideoId, {
-          method: 'PATCH',
-          body: JSON.stringify({ script: text })
-        });
-        showToast('Script saved to video successfully!');
-      } catch (e) {
-        showToast('Failed to save script: ' + e.message, true);
-      } finally {
-        btn.disabled = false;
-        btn.textContent = originalText;
-      }
-    }
-
-
     $('moduleSelect').addEventListener('change', function() {
       const val = parseInt(this.value);
       currentModuleId = val || null;
@@ -657,10 +677,8 @@ Return ONLY a JSON array with this structure:
       $('editorSection').style.display = 'none';
       $('emptyState').style.display = 'block';
       $('scriptPanel').style.display = 'none';
-      
       $('actionPanel').style.display = val ? 'block' : 'none';
       ['openRouterBtn', 'mockGenBtn'].forEach(id => { if($(id)) $(id).style.display = 'none'; });
-
       loadVideos(currentModuleId);
     });
 
@@ -670,18 +688,14 @@ Return ONLY a JSON array with this structure:
       if (currentVideoId) {
         $('editorSection').style.display = 'block';
         $('emptyState').style.display = 'none';
-        
         ['openRouterBtn', 'mockGenBtn'].forEach(id => { if($(id)) $(id).style.display = 'inline-block'; });
-
         $('candidatesPanel').style.display = 'none';
-
-        const moduleNum = dbModules.find(m => m.id === currentModuleId)?.module_number || 0;
-        const videoNum = dbVideos.find(v => v.id === currentVideoId)?.video_number || 0;
         loadScenes(currentVideoId);
-        
         let scriptText = await fetchScriptForVideo(currentModuleId, currentVideoId);
         $('scriptContent').value = scriptText || '';
         $('scriptPanel').style.display = 'block';
+        loadCandidates(currentVideoId);
+        if ($('candidatesTableWrap').querySelector('.lt-table')) $('candidatesPanel').style.display = 'block';
       } else {
         $('editorSection').style.display = 'none';
         $('emptyState').style.display = 'block';
@@ -693,33 +707,23 @@ Return ONLY a JSON array with this structure:
     function downloadLowerThird() {
       const ltMain = $('ltMain').value.trim() || 'Main Text';
       const ltSub = $('ltSub').value.trim() || 'Sub Text';
-      
       const sceneNum = parseInt($('sceneNumber').value) || 0;
       renderLowerThirdToCanvas(ltMain, ltSub);
-
       const link = document.createElement('a');
       link.download = `${brandFilePrefix(sceneNum)}_lower_third.png`;
       link.href = canvasEl.toDataURL('image/png');
       link.click();
-
       showToast('Downloaded PNG for testing!');
     }
 
     function downloadExistingScene(main, sub, sceneNum) {
       renderLowerThirdToCanvas(main || 'Main Text', sub || 'Sub Text');
-
       const link = document.createElement('a');
       link.download = `${brandFilePrefix(sceneNum)}_lower_third.png`;
       link.href = canvasEl.toDataURL('image/png');
       link.click();
-
       showToast('Downloaded PNG for scene ' + sceneNum);
-      
-      // Restore preview to the editor's current state
       updatePreview();
-      const ltMain = $('ltMain').value.trim() || 'Main Text';
-      const ltSub = $('ltSub').value.trim() || 'Sub Text';
-      renderLowerThirdToCanvas(ltMain, ltSub);
     }
 
     $('ltMain').addEventListener('input', updatePreview);
@@ -732,186 +736,72 @@ Return ONLY a JSON array with this structure:
       if (!moduleId || !videoId) return null;
       try {
         let fullScript = "";
-        
-        // Fetch from `videos` table
         const video = await api('videos?id=eq.' + videoId + '&select=script&limit=1');
-        if (video && video[0] && video[0].script) {
-          fullScript += video[0].script + "\n\n";
-        }
-
-        // Fetch from `scripts` table which ties to `sentences`
+        if (video && video[0] && video[0].script) { fullScript += video[0].script + "\n\n"; }
         const scriptRecs = await api('scripts?video_id=eq.' + videoId + '&select=id,script_text&limit=1');
         if (scriptRecs && scriptRecs.length > 0) {
           const scriptId = scriptRecs[0].id;
-          if (scriptRecs[0].script_text && !fullScript.includes(scriptRecs[0].script_text)) {
-            fullScript += scriptRecs[0].script_text + "\n\n";
-          }
-          
-          // Fetch sentences for this script
+          if (scriptRecs[0].script_text && !fullScript.includes(scriptRecs[0].script_text)) { fullScript += scriptRecs[0].script_text + "\n\n"; }
           const sents = await api('sentences?script_id=eq.' + scriptId + '&order=sort_order.asc');
           if (sents && sents.length > 0) {
             $('countScript').textContent = sents.length + ' sentences';
             $('countScript').style.display = 'inline-block';
             fullScript += "=== Sentences ===\n";
-            sents.forEach(s => {
-              fullScript += `[Scene ${s.sort_order || s.sentence_number || '?'}] ${s.sentence_text || s.text || ''}\n`;
-            });
+            sents.forEach(s => { fullScript += `[Scene ${s.sort_order || s.sentence_number || '?'}] ${s.sentence_text || s.text || ''}\n`; });
           }
         }
-        
         return fullScript.trim() || null;
-      } catch (e) {
-        console.error("Failed to load script", e);
-        return null;
-      }
+      } catch (e) { return null; }
     }
 
     async function testOpenRouterGeneration() {
       if (!currentModuleId || !currentVideoId) { showToast('Select a module and video first.', true); return; }
-
       $('genLoading').style.display = 'block';
       $('candidatesTableWrap').style.display = 'none';
       if ($('bulkSaveWrap')) $('bulkSaveWrap').style.display = 'none';
       $('candidatesPanel').style.display = 'block';
-      $('genLoading').querySelector('p').textContent = 'OpenRouter is identifying best candidates via backend...';
-
       try {
-        let scriptText = await fetchScriptForVideo(currentModuleId, currentVideoId);
-        if (!scriptText) {
-          scriptText = $('scriptContent').value.trim();
-        }
-        if (!scriptText) {
-          scriptText = "This is a placeholder script because no script was found in the database. In this video, we will learn about Claude AI, prompt engineering, and building agentic workflows.";
-        }
-
-        $('scriptContent').value = scriptText;
-        $('scriptPanel').style.display = 'block';
-
+        let scriptText = await fetchScriptForVideo(currentModuleId, currentVideoId) || $('scriptContent').value.trim();
         const moduleName = dbModules.find(m => m.id === currentModuleId)?.title || '';
         const videoName = dbVideos.find(v => v.id === currentVideoId)?.title || '';
-        const courseTitle = "Claude Architect Certification";
-
-        $('promptDisplay').textContent = `[Model: google/gemini-2.5-flash]
-
-You are a lower thirds generator for a video course.
-Course Title: ${courseTitle}
-Module Name: ${moduleName}
-Video Name: ${videoName}
-
-Based on the following video script, generate exactly 3 lower third candidate options.
-Each candidate must have a "main" text (max 40 chars) and "sub" text (max 60 chars) and a brief "rationale".
-
-Video script:
-${scriptText}
-
-Return ONLY a JSON array with this structure:
-[
-  {"main": "Main Text", "sub": "Sub text description", "rationale": "Reason"}
-]`;
-
         const res = await fetch('/api/lowerthirds/openrouter', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            script: scriptText,
-            courseName: courseTitle,
-            moduleName: moduleName,
-            videoName: videoName
-          })
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ script: scriptText, courseName: "Claude Architect Certification", moduleName, videoName })
         });
-
         if (!res.ok) throw new Error(await res.text());
         const data = await res.json();
-        
-        let candidates = [];
-        try {
-           const content = data.content;
-           const jsonStr = content.substring(content.indexOf('['), content.lastIndexOf(']') + 1);
-           candidates = JSON.parse(jsonStr);
-        } catch(e) {
-           throw new Error("Failed to parse OpenRouter response as JSON.");
+        const jsonStr = data.content.substring(data.content.indexOf('['), data.content.lastIndexOf(']') + 1);
+        const candidates = JSON.parse(jsonStr);
+        const moduleNum = dbModules.find(m => m.id === currentModuleId)?.module_number || 0;
+        const videoNum = dbVideos.find(v => v.id === currentVideoId)?.video_number || 0;
+        await api('scenes?module_number=eq.' + moduleNum + '&section_number=eq.' + videoNum + '&scene_type=eq.candidate', { method: 'DELETE' });
+        for (const c of candidates) {
+           await api('scenes', {
+              method: 'POST',
+              body: JSON.stringify({ module_number: moduleNum, section_number: videoNum, scene_number: 999, lt_main: c.main || c.main_text, lt_sub: c.sub || c.sub_text, scene_type: 'candidate' })
+           });
         }
-
         $('genLoading').style.display = 'none';
         $('candidatesTableWrap').style.display = 'block';
-
-        $('countCandidates').textContent = candidates.length + ' items';
-        $('countCandidates').style.display = 'inline-block';
-
-        const wrap = $('candidatesTableWrap');
         $('cacheInfo').textContent = '(OpenRouter Results)';
-        wrap.innerHTML =
-          '<table class="lt-table"><thead><tr>' +
-            '<th class="sel-col" style="width:40px;"><input type="checkbox" onchange="toggleAllCands(this)"></th>' +
-            '<th class="num-col">#</th>' +
-            '<th class="main-col">Main Text</th>' +
-            '<th class="sub-col">Sub Text</th>' +
-            '<th class="rationale-col">Rationale (Why It Matters for Learning)</th>' +
-            '<th class="action-col">Apply</th>' +
-          '</tr></thead><tbody>' +
-          candidates.map((r, i) =>
-            '<tr>' +
-              '<td class="sel-col"><input type="checkbox" class="cand-cb" data-main="' + escHtml(r.main || r.main_text) + '" data-sub="' + escHtml(r.sub || r.sub_text) + '"></td>' +
-              '<td class="num-col">' + (i + 1) + '</td>' +
-              '<td class="main-col"><strong>' + escHtml(r.main || r.main_text) + '</strong></td>' +
-              '<td class="sub-col">' + escHtml(r.sub || r.sub_text) + '</td>' +
-              '<td class="rationale-col"><div class="rationale-text">' + escHtml(r.rationale || 'OpenRouter identified this as a key term.') + '</div></td>' +
-              '<td class="action-col"><button class="btn btn-sm btn-secondary" onclick="applySuggestion(\'' + escJs(r.main || r.main_text) + '\', \'' + escJs(r.sub || r.sub_text) + '\')">✏️ Edit</button> <button class="btn btn-sm" style="background:var(--success);color:#000;" onclick="instantSaveCandidate(this, \'' + escJs(r.main || r.main_text) + '\', \'' + escJs(r.sub || r.sub_text) + '\')">💾 Save</button></td>' +
-            '</tr>'
-          ).join('') +
-          '</tbody></table>';
-
+        await loadScenes(currentVideoId);
+        await loadCandidates(currentVideoId);
         if ($('bulkSaveWrap')) $('bulkSaveWrap').style.display = 'block';
         showToast('OpenRouter generation complete!');
       } catch (e) {
         $('genLoading').style.display = 'none';
         $('candidatesTableWrap').style.display = 'block';
-        $('candidatesTableWrap').innerHTML = `<div class="empty-state" style="color:var(--danger);"><div class="empty-icon" style="font-size:3rem;margin-bottom:12px;">⚠️</div><p style="font-weight:700;">OpenRouter Error</p><p style="font-size:0.9rem;margin-top:8px;">${e.message}</p></div>`;
         showToast('OpenRouter Error: ' + e.message, true);
       }
     }
 
     function mockGeneration() {
       if (!currentModuleId || !currentVideoId) { showToast('Select a module and video first.', true); return; }
-      
-      $('genLoading').style.display = 'none';
-      $('candidatesTableWrap').style.display = 'block';
-      
       const mockCandidates = [
-        { main_text: "System Design", sub_text: "Scaling Microservices", rationale: "Mock testing candidate 1 for Davinci Resolve" },
-        { main_text: "Architecture", sub_text: "Serverless Deployment", rationale: "Mock testing candidate 2 for Davinci Resolve" }
+        { main_text: "System Design", sub_text: "Scaling Microservices", rationale: "Mock testing candidate 1" },
+        { main_text: "Architecture", sub_text: "Serverless Deployment", rationale: "Mock testing candidate 2" }
       ];
-
-      $('countCandidates').textContent = mockCandidates.length + ' items';
-      $('countCandidates').style.display = 'inline-block';
-
-      const wrap = $('candidatesTableWrap');
-      $('cacheInfo').textContent = '(Mock Data)';
-      wrap.innerHTML =
-        '<table class="lt-table"><thead><tr>' +
-          '<th class="sel-col" style="width:40px;"><input type="checkbox" onchange="toggleAllCands(this)"></th>' +
-          '<th class="num-col">#</th>' +
-          '<th class="main-col">Main Text</th>' +
-          '<th class="sub-col">Sub Text</th>' +
-          '<th class="rationale-col">Rationale (Why It Matters for Learning)</th>' +
-          '<th class="action-col">Apply</th>' +
-        '</tr></thead><tbody>' +
-        mockCandidates.map((r, i) =>
-          '<tr>' +
-            '<td class="sel-col"><input type="checkbox" class="cand-cb" data-main="' + escHtml(r.main_text) + '" data-sub="' + escHtml(r.sub_text) + '"></td>' +
-            '<td class="num-col">' + (i + 1) + '</td>' +
-            '<td class="main-col"><strong>' + escHtml(r.main_text) + '</strong></td>' +
-            '<td class="sub-col">' + escHtml(r.sub_text) + '</td>' +
-            '<td class="rationale-col"><div class="rationale-text">' + escHtml(r.rationale) + '</div></td>' +
-            '<td class="action-col"><button class="btn btn-sm btn-secondary" onclick="applySuggestion(\'' + escJs(r.main_text) + '\', \'' + escJs(r.sub_text) + '\')">✏️ Edit</button> <button class="btn btn-sm" style="background:var(--success);color:#000;" onclick="instantSaveCandidate(this, \'' + escJs(r.main_text) + '\', \'' + escJs(r.sub_text) + '\')">💾 Save</button></td>' +
-          '</tr>'
-        ).join('') +
-        '</tbody></table>';
-      
-      $('candidatesPanel').style.display = 'block';
-      if ($('bulkSaveWrap')) $('bulkSaveWrap').style.display = 'block';
       showToast('Mock generation completed!');
     }
 
@@ -933,13 +823,12 @@ Return ONLY a JSON array with this structure:
 
       let added = 0;
       for (const cb of cbs) {
-        const main = cb.getAttribute('data-main') || '';
-        const sub = cb.getAttribute('data-sub') || '';
+        const cid = cb.getAttribute('data-id');
         maxScene++;
         try {
-          await api('scenes', {
-            method: 'POST',
-            body: JSON.stringify({ module_number: moduleNum, section_number: videoNum, scene_number: maxScene, lt_main: main, lt_sub: sub, lt_image: '' })
+          await api('scenes?id=eq.' + cid, {
+            method: 'PATCH',
+            body: JSON.stringify({ scene_number: maxScene, scene_type: 'standard' })
           });
           added++;
         } catch(e) {
@@ -948,9 +837,10 @@ Return ONLY a JSON array with this structure:
       }
       showToast('Saved ' + added + ' candidates to scenes!');
       await loadScenes(currentVideoId);
+      await loadCandidates(currentVideoId);
     }
 
-    async function instantSaveCandidate(btn, main, sub) {
+    async function instantSaveCandidate(btn, candidateId) {
       if (!currentModuleId || !currentVideoId) return;
       btn.disabled = true;
       btn.textContent = '⏳...';
@@ -960,21 +850,23 @@ Return ONLY a JSON array with this structure:
 
       let maxScene = 0;
       try {
-        const scenes = await api('scenes?module_number=eq.' + moduleNum + '&section_number=eq.' + videoNum + '&select=scene_number');
+        const scenes = await api('scenes?module_number=eq.' + moduleNum + '&section_number=eq.' + videoNum + '&scene_type=neq.candidate&select=scene_number');
         for (const s of scenes) { if (s.scene_number > maxScene) maxScene = s.scene_number; }
       } catch(e) {}
       maxScene++;
 
       try {
-        await api('scenes', {
-          method: 'POST',
-          body: JSON.stringify({ module_number: moduleNum, section_number: videoNum, scene_number: maxScene, lt_main: main, lt_sub: sub, lt_image: '' })
+        await api('scenes?id=eq.' + candidateId, {
+          method: 'PATCH',
+          body: JSON.stringify({ scene_number: maxScene, scene_type: 'standard' })
         });
         showToast('Saved scene ' + maxScene);
         btn.textContent = '✅ Saved';
         btn.style.background = 'rgba(255,255,255,0.1)';
         btn.style.color = 'var(--success)';
+        
         await loadScenes(currentVideoId);
+        setTimeout(() => loadCandidates(currentVideoId), 1000);
       } catch(e) {
         btn.textContent = '❌ Error';
         showToast(e.message, true);
