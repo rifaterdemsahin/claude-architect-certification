@@ -1505,3 +1505,11 @@ GLM" table. Registered GLM in the `agents.md` Supported Agent Roles table.
   - Implemented interactive features such as zooming, panning, and tap-highlighting (dimming non-connected nodes/edges when a specific node is clicked).
   - Modified `database_analysis.html` controls section to prominently display a `🕸️ View ERD Visualization` button bridging to the new graph view.
 - **Verification:** Ran `go test ./...` and `go build ./...` locally.
+
+## 2026-06-22 - 🕸️ Update Menus with Database ERD Link
+- **Context:** The user requested to add the new `database_erd.html` page directly to the Preprod menu and navigation fallbacks for easier discoverability.
+- **Approach:**
+  - In `5_Symbols/production/preprod/index.html`, added the "Database ERD" card under the Tools section.
+  - In `navigation_config.json`, added the JSON entry under the "Data & Backend" subgroup.
+  - Updated all JSON fallback objects across `shared/nav.js`, `home.html`, and `5_Symbols/tools/sitemap.html` to mirror the new structure.
+- **Status:** IMPLEMENTED, COMMITTED, PUSHED.

@@ -157,7 +157,8 @@
             { group: true, label: '🗄️ Data & Backend', children: [
               { label: '🔥 Supabase', url: 'https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/' },
               { label: '🗃 Preprod Data Admin', url: '5_Symbols/production/preprod/tools/admin.html' },
-              { label: '🗄️ Database Analysis', url: '5_Symbols/production/preprod/tools/database_analysis.html', description: 'Collapsible analysis of every Supabase table: row counts, columns, and relationships.' }
+              { label: '🗄️ Database Analysis', url: '5_Symbols/production/preprod/tools/database_analysis.html', description: 'Collapsible analysis of every Supabase table: row counts, columns, and relationships.' },
+              { label: '🕸️ Database ERD', url: '5_Symbols/production/preprod/tools/database_erd.html', description: 'Interactive visual Entity-Relationship Diagram of the Supabase database.' }
             ]},
             { group: true, label: '📊 Logs & Monitoring', children: [
               { label: '📡 Axiom Errors Admin', url: '/admin/errors' }
