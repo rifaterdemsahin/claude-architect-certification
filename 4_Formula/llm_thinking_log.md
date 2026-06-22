@@ -1,5 +1,27 @@
 # LLM Thinking Log
 
+## 2026-06-22 — 🤖 Database-Driven Candidate Architecture & Prompt Copy
+
+### 🎯 Objective
+Migrate generated candidates into a database-first architecture where the UI reads candidates natively from Supabase using `scene_type=candidate`. Provide an easy way to copy the final enriched prompt to clipboard, and fix routing context.
+
+### 📐 Implementation
+1. **Prompt Copying (Task 1)**: Added a "📋 Copy" button inside the OpenRouter System Prompt display box that copies the exact text passed to the backend onto the user's clipboard for easy debugging.
+2. **Context Passing in Prompt (Task 2)**: Maintained and ensured the `CourseName`, `ModuleName`, and `VideoName` are visually present and correctly sent to the Go backend for prompt generation context.
+3. **Database Candidate Workflow (Task 3)**:
+   - When OpenRouter (or mock generation) completes successfully, it natively loops and POSTs every single candidate directly to the Supabase `scenes` table with `scene_type: 'candidate'`.
+   - The UI completely refactored `loadCandidates()` to dynamically query Supabase via `api()` for `scene_type=eq.candidate` rather than building the table from an ephemeral Javascript array.
+   - When a user clicks "💾 Save", the app issues a `PATCH` request to change that specific row's `scene_type` to `standard` and dynamically resolves its `scene_number`, instantly moving it from the Candidates panel over to the Existing Lower Thirds panel.
+4. **404 Handling**: Reminded the user that a 404 for `/api/lowerthirds/openrouter` indicates the local Go server (`go run cmd/server/main.go`) wasn't restarted to pick up the new route logic added in the previous cycle.
+
+### ✅ Verification
+- Supabase cleanly segments 'standard' scenes and 'candidate' scenes.
+- State persists entirely through page reloads.
+
+### 📦 Files Changed
+- `5_Symbols/production/postprod/lower_thirds.html`
+- `4_Formula/llm_thinking_log.md` — this entry
+
 ## 2026-06-22 — ✨ UX Polishing, OpenRouter Prompt Upgrades & Instant Save
 
 ### 🎯 Objective
@@ -1750,4 +1772,15 @@ GLM" table. Registered GLM in the `agents.md` Supported Agent Roles table.
     4. **The Flywheel**: Visualizing the process of Pain → Gain → Product, showing how content and community drive momentum.
   - Update `navigation_config.json`, `index.html`, `markdown_renderer.html`, and `shared/nav.js` to link the new page.
 - **Verification:** Built `sales_and_marketing_plan.html`, checked responsive design, updated menu structure, and ran `go build ./...` locally.
+- **Status:** IMPLEMENTED, pending commit + push.
+
+## 2026-06-22 - 📊 Business Model Canvas
+- **Context:** Added a Business Model Canvas (BMC) to the bottom of the Sales and Marketing Plan page.
+- **Approach:**
+  - Designed a responsive CSS Grid matching the classic 9-block BMC layout.
+  - **Value Proposition:** Anxiety relief for the RAISE audience, tangible proof of work, and real-world application.
+  - **Cost Structure:** Estimated at ~£100/mo for AI subs, low infrastructure costs (~£4/mo), and £100-£300 per exam.
+  - **Revenue Streams:** YouTube Ads, Channel Memberships, Sponsorships, and Consulting.
+  - Integrated into `5_Symbols/production/postprod/sales_and_marketing_plan.html` using existing glassmorphic card design.
+- **Verification:** UI renders correctly and maintains responsive stacking on mobile.
 - **Status:** IMPLEMENTED, pending commit + push.
