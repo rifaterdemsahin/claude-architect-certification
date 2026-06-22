@@ -1,5 +1,27 @@
 # LLM Thinking Log
 
+## 2026-06-22 — 🐛 Fix JS Initialization Halt (Dangling Event Listener)
+
+### 🎯 Objective
+Fix a bug where the `lower_thirds.html` page failed to load modules and initialize properly due to a JavaScript error.
+
+### 📐 Implementation
+1. **Dangling Event Listener Fix**:
+   - In a previous commit, the `generateAllBtn` button was removed from the HTML.
+   - However, the event listener `$('generateAllBtn').addEventListener('click', generateAllVideos)` was left in the initialization block.
+   - Since `$('generateAllBtn')` returned `null`, it threw a `TypeError` and abruptly halted all subsequent script execution (specifically preventing `loadConfig()` and `loadModules()` from ever firing).
+   - I deleted this dangling listener, restoring the page's ability to successfully boot and load Supabase data.
+2. **Generation Loading UX**:
+   - Ensured that `$('genLoading').style.display = 'block'` correctly hides `$('candidatesTableWrap')` so the user only sees the spinner during Open Router and mock generation.
+
+### ✅ Verification
+- Navigated to `/5_Symbols/production/postprod/lower_thirds.html` locally.
+- Confirmed there are no console errors and the dropdowns successfully populate with Modules and Videos.
+
+### 📦 Files Changed
+- `5_Symbols/production/postprod/lower_thirds.html`
+- `4_Formula/llm_thinking_log.md` — this entry
+
 ## 2026-06-22 — 👁️ Dynamic Loading of Candidates & Edit Panels
 
 ### 🎯 Objective

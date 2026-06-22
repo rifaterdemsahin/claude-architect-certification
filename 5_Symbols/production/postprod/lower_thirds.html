@@ -720,6 +720,8 @@
       if (!currentModuleId || !currentVideoId) { showToast('Select a module and video first.', true); return; }
 
       $('genLoading').style.display = 'block';
+      $('candidatesTableWrap').style.display = 'none';
+      if ($('bulkSaveWrap')) $('bulkSaveWrap').style.display = 'none';
       $('candidatesPanel').style.display = 'block';
       $('genLoading').querySelector('p').textContent = 'OpenRouter is identifying best candidates via backend...';
 
@@ -758,6 +760,7 @@
         }
 
         $('genLoading').style.display = 'none';
+        $('candidatesTableWrap').style.display = 'block';
 
         const wrap = $('candidatesTableWrap');
         $('cacheInfo').textContent = '(OpenRouter Results)';
@@ -786,12 +789,16 @@
         showToast('OpenRouter generation complete!');
       } catch (e) {
         $('genLoading').style.display = 'none';
+        $('candidatesTableWrap').style.display = 'block';
         showToast('OpenRouter Error: ' + e.message, true);
       }
     }
 
     function mockGeneration() {
       if (!currentModuleId || !currentVideoId) { showToast('Select a module and video first.', true); return; }
+      
+      $('genLoading').style.display = 'none';
+      $('candidatesTableWrap').style.display = 'block';
       
       const mockCandidates = [
         { main_text: "System Design", sub_text: "Scaling Microservices", rationale: "Mock testing candidate 1 for Davinci Resolve" },
@@ -868,7 +875,6 @@
 
     $('openRouterBtn').addEventListener('click', testOpenRouterGeneration);
     $('mockGenBtn').addEventListener('click', mockGeneration);
-    $('generateAllBtn').addEventListener('click', generateAllVideos);
 
     renderBrandPanel();
     updatePreview();
