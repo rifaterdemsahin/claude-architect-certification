@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="../../../../shared/redirect-to-live-site.js"></script>
+  <title>Branding & Business Rules | Claude AI Certification</title>
+  <meta name="description" content="Branding configuration and core business rules for the project, stored in Supabase (business_rules table). View, edit, and seed brand colors, fonts, naming, navigation, and infrastructure rules.">
+  <link rel="icon" type="image/png" href="../../../../favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #030712; --bg-card: rgba(17,24,39,0.9); --text-main: #f3f4f6; --text-muted: #9ca3af;
+      --primary: #8b5cf6; --secondary: #3b82f6; --success: #10b981; --danger: #ef4444; --accent: #10b981;
+      --brand-yellow: #eab308; --brand-blue: #0f172a;
+      --font-title: 'Outfit', sans-serif; --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-dark);
+      background-image: radial-gradient(circle at 10% 20%, rgba(234,179,8,0.07) 0%, transparent 40%),
+                        radial-gradient(circle at 90% 80%, rgba(139,92,246,0.08) 0%, transparent 40%);
+      color: var(--text-main); font-family: var(--font-body); line-height: 1.6; padding: 100px 24px 60px;
+    }
+    .container { max-width: 1100px; margin: 0 auto; }
+    header { text-align: center; margin-bottom: 32px; }
+    header h1 { font-family: var(--font-title); font-size: 2.4rem; font-weight: 900; letter-spacing: -0.02em; margin-bottom: 10px; }
+    header p { color: var(--text-muted); font-size: 1.0rem; }
+    .status-bar { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 28px; }
+    .pill { background: var(--bg-card); border: 1px solid rgba(255,255,255,0.1); border-radius: 999px; padding: 8px 16px; font-size: 0.82rem; color: var(--text-muted); display: flex; align-items: center; gap: 8px; }
+    .pill .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--text-muted); }
+    .pill.ok .dot { background: var(--success); }
+    .pill.bad .dot { background: var(--danger); }
+    .glass-card { background: var(--bg-card); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 28px; margin-bottom: 24px; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.6); }
+    .glass-card h2 { font-family: var(--font-title); font-weight: 700; font-size: 1.25rem; margin-bottom: 18px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .cat-count { font-size: 0.78rem; color: var(--text-muted); font-weight: 400; }
+    .btn { background: var(--accent); color: #000; border: none; border-radius: 10px; padding: 9px 20px; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-block; }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(16,185,129,0.3); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+    .btn-secondary { background: rgba(255,255,255,0.1); color: var(--text-main); }
+    .btn-secondary:hover { background: rgba(255,255,255,0.2); box-shadow: none; }
+    .btn-sm { padding: 5px 12px; font-size: 0.78rem; }
+    .toolbar { display: flex; gap: 10px; justify-content: flex-end; margin-bottom: 20px; flex-wrap: wrap; }
+    table.rules { width: 100%; border-collapse: separate; border-spacing: 0 6px; }
+    table.rules th { text-align: left; color: var(--text-muted); font-size: 0.75rem; font-weight: 600; padding: 6px 12px; }
+    table.rules td { padding: 10px 12px; background: rgba(0,0,0,0.18); vertical-align: middle; font-size: 0.88rem; }
+    table.rules tr td:first-child { border-radius: 10px 0 0 10px; }
+    table.rules tr td:last-child { border-radius: 0 10px 10px 0; }
+    .swatch { display: inline-block; width: 20px; height: 20px; border-radius: 5px; border: 1px solid rgba(255,255,255,0.25); vertical-align: middle; margin-right: 8px; }
+    .val-input { width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 6px 10px; color: var(--text-main); font-family: var(--font-body); font-size: 0.85rem; }
+    .val-input:focus { outline: none; border-color: var(--accent); }
+    .rule-label { font-weight: 600; }
+    .rule-desc { color: var(--text-muted); font-size: 0.78rem; }
+    .key-col { color: var(--text-muted); font-family: 'Fira Code', monospace; font-size: 0.78rem; }
+    .empty-state, .error-box { text-align: center; padding: 40px 24px; color: var(--text-muted); }
+    .error-box { border: 1px dashed rgba(239,68,68,0.4); border-radius: 16px; background: rgba(239,68,68,0.05); }
+    .error-box code { background: rgba(0,0,0,0.4); padding: 2px 8px; border-radius: 6px; font-family: 'Fira Code', monospace; color: var(--brand-yellow); }
+    /* Brand preview (mirrors lower_thirds.html canvas output) */
+    .preview-canvas { width: 100%; max-width: 460px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); display: block; margin: 0 auto; }
+    .toast { position: fixed; top: 24px; right: 24px; background: var(--success); color: #000; padding: 14px 24px; border-radius: 12px; font-weight: 700; z-index: 1000; transform: translateX(120%); transition: transform 0.4s ease; max-width: 400px; }
+    .toast.show { transform: translateX(0); }
+    .toast.error { background: var(--danger); color: white; }
+    footer { text-align: center; margin-top: 32px; }
+    footer a { color: var(--secondary); text-decoration: none; }
+  </style>
+  <script src="../../../../shared/nav.js"></script>
+  <script src="../../../../shared/debug-panel.js"></script>
+  <script src="../../../../shared/seo.js" defer></script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🎨 Branding &amp; Business Rules</h1>
+      <p>Branding configuration and the project's core business rules — stored in the Supabase <strong>business_rules</strong> table and editable here.</p>
+    </header>
+
+    <div class="status-bar">
+      <div class="pill" id="pillSB"><span class="dot"></span> Supabase: checking…</div>
+      <div class="pill" id="pillCount"><span class="dot"></span> Rules: —</div>
+    </div>
+
+    <div class="toolbar">
+      <button class="btn btn-secondary btn-sm" id="reloadBtn">🔄 Reload</button>
+      <button class="btn btn-sm" id="seedBtn">🌱 Seed defaults</button>
+    </div>
+
+    <div id="errorWrap"></div>
+
+    <div class="glass-card" id="brandPreviewCard" style="display:none;">
+      <h2>👁️ Brand Template Preview <span class="cat-count">(live lower-third render from the values below)</span></h2>
+      <canvas id="ltCanvas" class="preview-canvas" width="640" height="360"></canvas>
+    </div>
+
+    <div id="rulesContainer">
+      <div class="glass-card"><div class="empty-state">⏳ Loading business rules…</div></div>
+    </div>
+
+    <footer>
+      <p><a href="../index.html">← Back to Pre-Production</a></p>
+    </footer>
+  </div>
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const SUPABASE_URL  = localStorage.getItem('supabase_url')      || 'https://rmekfsdhglyiralxvkwc.supabase.co';
+    const SUPABASE_ANON = localStorage.getItem('supabase_anon_key') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZWtmc2RoZ2x5aXJhbHh2a3djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NzYzODgsImV4cCI6MjA5NjM1MjM4OH0.ay6HsmO_CbMGDXL_Dv4DT-paAIAOqlQPfmqqx_mexSU';
+    const HEADERS = { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}`, 'Content-Type': 'application/json' };
+
+    const CATEGORY_META = {
+      branding:       { icon: '🎨', title: 'Branding' },
+      naming:         { icon: '🔤', title: 'Naming Conventions' },
+      navigation:     { icon: '🧭', title: 'Navigation Rules' },
+      infra:          { icon: '🏗️', title: 'Infrastructure' },
+      classification: { icon: '🏷️', title: 'File Classification' },
+      content:        { icon: '📐', title: 'Content & Structure' }
+    };
+
+    // Default rows — mirror seed_business_rules.sql. Used by the "Seed defaults" button.
+    const DEFAULTS = [
+      ['branding','template_name','Brand Template','Claude Architect — Deep Blue / Bright Yellow',null,'Active lower-thirds brand template name',1],
+      ['branding','gradient_start','Gradient start','#0f172a','#0f172a','Lower-thirds bar gradient start color (deep blue)',2],
+      ['branding','gradient_end','Gradient end','#eab308','#eab308','Lower-thirds bar gradient end color (bright yellow)',3],
+      ['branding','accent_bar','Accent bar','#eab308','#eab308','Left accent bar color on the lower-third bar',4],
+      ['branding','main_font','Main text font','Fira Code Medium 28px',null,'Primary (main) text font for lower thirds',5],
+      ['branding','sub_font','Sub text font','Plus Jakarta Sans 18px',null,'Secondary (sub) text font for lower thirds',6],
+      ['branding','main_color','Main text color','#ffffff','#ffffff','Main text fill color',7],
+      ['branding','sub_color','Sub text color','rgba(255,255,255,0.95)','#ffffff','Sub text fill color',8],
+      ['naming','commit_convention','Commit format','type(scope): description',null,'Conventional Commits — feat, fix, refactor, docs, chore',1],
+      ['naming','lower_thirds_file','Lower-third PNG name','M<n>-<module-slug>_V<n>-<video-slug>_s<scene>_lower_third.png',null,'Downloaded lower-third PNG filename prefix',2],
+      ['naming','pipeline_asset','Pipeline asset name','[01-11]_[phase]_pipeline.png',null,'Pipeline stage image naming',3],
+      ['navigation','single_top_nav','One top nav only','Top nav rendered exclusively by shared/nav.js',null,'Never hardcode a header/nav on pages loading nav.js',1],
+      ['navigation','debug_menu','Debug menu','Bottom-right toggle button',null,'Hidden by default; persists via debug=true cookie',2],
+      ['navigation','config_source','Nav config source','navigation_config.json',null,'Navigation reads from shared JSON config',3],
+      ['navigation','dev_phase_hide','Dev-phase auto-hide','90 days',null,'Dev-phase items auto-hide from project menu after 90 days',4],
+      ['infra','hosting','Static hosting','GitHub Pages (via GitHub Actions)',null,'Static site hosting + CI/CD deploy',1],
+      ['infra','edge','Edge & auth','Cloudflare Workers',null,'Edge routing, rate-limiting, caching, simple auth',2],
+      ['infra','backend','Backend services','Supabase (PostgreSQL + RLS + storage + realtime)',null,'Primary application database and auth',3],
+      ['infra','python','Python backend','Fly.io (FastAPI/Flask, hosts Qdrant)',null,'No Docker Desktop — containers managed by Fly.io',4],
+      ['infra','secrets','Secrets management','Azure Key Vault',null,'Never commit secrets; secrets prefixed claude-architect-',5],
+      ['infra','ai_stack','AI / vector store','Qdrant on Fly.io (cloud-only)',null,'No local Docker or Ollama required',6],
+      ['classification','course_content','Course Content 🎓','Certification training material',null,'Scripts, outlines, production files, course UI',1],
+      ['classification','delivery_pilot','Delivery Pilot 🚀','Reusable project framework/template',null,'Agent guides, 7-stage structure, nav, CI/CD',2],
+      ['classification','poc','POC 🔬','Proof-of-concept product',null,'Working app code, Supabase integrations, MCP server',3],
+      ['content','seven_stage','Seven-stage structure','1_Real_Unknown → 7_Testing_Known',null,'Unknown → Proven journey',1],
+      ['content','readme_each','README per folder','Every directory must have a README.md',null,'Critical for AI agent onboarding',2],
+      ['content','emoji_style','Emoji visual style','Use emojis on headings, lists, status, log lines',null,'Maximize scannability',3],
+      ['content','commit_cadence','Commit cadence','Commit & push after every step',null,'Each step gets its own commit',4]
+    ];
+
+    const $ = id => document.getElementById(id);
+    let rows = [];
+
+    function showToast(msg, isError, ms) {
+      const t = $('toast');
+      t.textContent = msg; t.className = 'toast' + (isError ? ' error' : '');
+      setTimeout(() => t.classList.add('show'), 10);
+      setTimeout(() => t.classList.remove('show'), ms || 3200);
+    }
+    function escHtml(s) { if (s == null) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+    async function api(path, opts) {
+      const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, { ...opts, headers: { ...HEADERS, ...(opts?.headers || {}) } });
+      if (!res.ok) { const err = await res.text().catch(() => ''); const e = new Error(res.status + ': ' + err); e.status = res.status; throw e; }
+      const ct = res.headers.get('content-type') || '';
+      return ct.includes('json') ? res.json() : res.text();
+    }
+
+    function getVal(key) { const r = rows.find(x => x.category === 'branding' && x.rule_key === key); return r ? r.value : ''; }
+
+    function renderPreview() {
+      const card = $('brandPreviewCard');
+      if (!rows.some(r => r.category === 'branding')) { card.style.display = 'none'; return; }
+      card.style.display = 'block';
+      const canvas = $('ltCanvas'), ctx = canvas.getContext('2d');
+      const w = canvas.width, h = canvas.height;
+      const fromC = getVal('gradient_start') || '#0f172a';
+      const toC   = getVal('gradient_end') || '#eab308';
+      const bar   = getVal('accent_bar') || '#eab308';
+      const mainColor = getVal('main_color') || '#ffffff';
+      const subColor  = getVal('sub_color') || 'rgba(255,255,255,0.95)';
+      ctx.clearRect(0, 0, w, h);
+      const barHeight = 80, barY = h - barHeight - 20;
+      const grad = ctx.createLinearGradient(0, barY, w, barY);
+      grad.addColorStop(0, fromC); grad.addColorStop(1, toC);
+      ctx.fillStyle = grad; ctx.fillRect(0, barY, w, barHeight);
+      ctx.fillStyle = bar; ctx.fillRect(0, barY, 8, barHeight);
+      ctx.textBaseline = 'middle';
+      ctx.shadowColor = 'rgba(0,0,0,0.4)'; ctx.shadowBlur = 4;
+      ctx.fillStyle = mainColor; ctx.font = '500 28px "Fira Code", monospace';
+      ctx.fillText('Claude Architect Masterclass', 24, barY + 28);
+      ctx.shadowBlur = 2; ctx.fillStyle = subColor; ctx.font = '400 18px "Plus Jakarta Sans", sans-serif';
+      ctx.fillText('Module 1: Architecture Overview', 24, barY + 58);
+      ctx.shadowBlur = 0;
+    }
+
+    function render() {
+      const container = $('rulesContainer');
+      if (!rows.length) {
+        container.innerHTML = '<div class="glass-card"><div class="empty-state">📭 No rules yet. Click <strong>🌱 Seed defaults</strong> to populate the table.</div></div>';
+        renderPreview();
+        return;
+      }
+      const cats = {};
+      rows.forEach(r => { (cats[r.category] = cats[r.category] || []).push(r); });
+      const order = ['branding','naming','navigation','infra','classification','content'];
+      const keys = Object.keys(cats).sort((a, b) => {
+        const ia = order.indexOf(a), ib = order.indexOf(b);
+        return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
+      });
+      container.innerHTML = keys.map(cat => {
+        const meta = CATEGORY_META[cat] || { icon: '📌', title: cat };
+        const list = cats[cat].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+        return '<div class="glass-card">' +
+          '<h2>' + meta.icon + ' ' + escHtml(meta.title) + ' <span class="cat-count">(' + list.length + ')</span></h2>' +
+          '<table class="rules"><thead><tr><th style="width:22%">Rule</th><th style="width:14%">Key</th><th style="width:44%">Value</th><th style="width:20%"></th></tr></thead><tbody>' +
+          list.map(r =>
+            '<tr data-id="' + r.id + '">' +
+              '<td><div class="rule-label">' + escHtml(r.label) + '</div>' + (r.description ? '<div class="rule-desc">' + escHtml(r.description) + '</div>' : '') + '</td>' +
+              '<td class="key-col">' + escHtml(r.rule_key) + '</td>' +
+              '<td>' + (r.color ? '<span class="swatch" style="background:' + escHtml(r.color) + '"></span>' : '') +
+                '<input class="val-input" value="' + escHtml(r.value) + '" data-id="' + r.id + '"></td>' +
+              '<td style="text-align:right"><button class="btn btn-sm save-btn" data-id="' + r.id + '">💾 Save</button></td>' +
+            '</tr>'
+          ).join('') +
+          '</tbody></table></div>';
+      }).join('');
+      container.querySelectorAll('.save-btn').forEach(b => b.addEventListener('click', () => saveRow(parseInt(b.dataset.id))));
+      renderPreview();
+    }
+
+    async function saveRow(id) {
+      const input = document.querySelector('.val-input[data-id="' + id + '"]');
+      if (!input) return;
+      const value = input.value;
+      try {
+        await api('business_rules?id=eq.' + id, { method: 'PATCH', body: JSON.stringify({ value: value, updated_at: new Date().toISOString() }) });
+        const r = rows.find(x => x.id === id); if (r) r.value = value;
+        showToast('Saved.');
+        renderPreview();
+      } catch (e) { showToast('Save failed: ' + e.message, true); }
+    }
+
+    function showTableMissing() {
+      $('pillSB').className = 'pill bad'; $('pillSB').innerHTML = '<span class="dot"></span> Supabase: table missing';
+      $('errorWrap').innerHTML =
+        '<div class="glass-card"><div class="error-box">' +
+        '<h2 style="justify-content:center;color:var(--brand-yellow);">⚠️ Table <code>business_rules</code> not found</h2>' +
+        '<p style="margin:12px 0;">Run the migration once in the Supabase SQL editor, then click <strong>🌱 Seed defaults</strong>:</p>' +
+        '<p><code>5_Symbols/supabase/migrations/migration_business_rules.sql</code></p>' +
+        '<p style="margin-top:8px;"><a class="btn btn-sm" href="https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/sql/new" target="_blank" rel="noopener">Open SQL Editor</a></p>' +
+        '</div></div>';
+    }
+
+    async function load() {
+      $('errorWrap').innerHTML = '';
+      try {
+        rows = await api('business_rules?select=*&order=category.asc,sort_order.asc');
+        $('pillSB').className = 'pill ok'; $('pillSB').innerHTML = '<span class="dot"></span> Supabase: connected — ' + SUPABASE_URL.replace('https://','').split('.')[0];
+        $('pillCount').className = 'pill ok'; $('pillCount').innerHTML = '<span class="dot"></span> Rules: ' + rows.length;
+        render();
+      } catch (e) {
+        if (e.status === 404) { showTableMissing(); rows = []; render(); }
+        else { $('pillSB').className = 'pill bad'; $('pillSB').innerHTML = '<span class="dot"></span> Supabase: error'; showToast('Load failed: ' + e.message, true); }
+      }
+    }
+
+    async function seedDefaults() {
+      $('seedBtn').disabled = true; $('seedBtn').textContent = 'Seeding…';
+      try {
+        const payload = DEFAULTS.map(d => ({ category: d[0], rule_key: d[1], label: d[2], value: d[3], color: d[4], description: d[5], sort_order: d[6] }));
+        // Upsert on (category, rule_key)
+        await api('business_rules?on_conflict=category,rule_key', {
+          method: 'POST',
+          headers: { 'Prefer': 'resolution=merge-duplicates,return=minimal' },
+          body: JSON.stringify(payload)
+        });
+        showToast('Seeded ' + payload.length + ' rules.');
+        await load();
+      } catch (e) {
+        if (e.status === 404) showTableMissing();
+        else showToast('Seed failed: ' + e.message, true);
+      } finally {
+        $('seedBtn').disabled = false; $('seedBtn').textContent = '🌱 Seed defaults';
+      }
+    }
+
+    $('reloadBtn').addEventListener('click', load);
+    $('seedBtn').addEventListener('click', seedDefaults);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(renderPreview);
+    load();
+  </script>
+</body>
+</html>
