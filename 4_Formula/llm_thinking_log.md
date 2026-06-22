@@ -1,5 +1,34 @@
 # LLM Thinking Log
 
+## 2026-06-22 — 🎬 Lower Thirds Panel Reorganization & Collapsibility
+
+### 🎯 Objective
+Sort the lower thirds UI into 6 specifically named panels and make them all collapsible to improve scannability and space management.
+
+### 📐 Implementation
+1. **HTML Restructuring**:
+   - Organized the content into 6 `glass-card` elements: `1) Filter`, `2) Video Script`, `3) Action Buttons`, `4) Lower Third Candidates`, `5) Edit Lower Third`, and `6) Existing Scene Lower Thirds`.
+   - Used `#actionPanel` for grouping the generation action buttons.
+   - Used `editorSection` as the wrapper for candidate and existing scene panels.
+2. **CSS & Collapsibility**:
+   - Added `glass-card-header` with flexbox layout and pointer cursors.
+   - Added a `collapse-icon` (▼) that rotates when collapsed.
+   - Added `glass-card-body` with `max-height` transition styles and `.collapsed` state hiding content (`display: none`).
+3. **Javascript Logic**:
+   - Created `togglePanel(header)` to toggle the `collapsed` class and rotate the icon.
+   - Created `openEditPanel()` which ensures the "Edit Lower Third" panel expands automatically when users click "Edit" on existing scenes or "Load" on candidates.
+   - Updated visibility logic in `moduleSelect` and `videoSelect` listeners to show/hide the correct panels seamlessly.
+
+### ✅ Verification
+- All 6 panels exist and follow the named order.
+- Each panel header can be clicked to toggle its visibility.
+- Action buttons are cleanly grouped.
+- The workflow correctly guides users from filtering to script review, generation, previewing, and saving.
+
+### 📦 Files Changed
+- `5_Symbols/production/postprod/lower_thirds.html`
+- `4_Formula/llm_thinking_log.md` — this entry
+
 ## 2026-06-22 — 🎬 Lower Thirds Multi-Select Saving & Auto Script Loading
 
 ### 🎯 Objective
