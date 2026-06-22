@@ -165,7 +165,10 @@
         <span class="collapse-icon">▼</span>
       </div>
       <div class="glass-card-body">
-        <div class="script-preview" id="scriptContent"></div>
+        <textarea id="scriptContent" class="script-preview" style="width:100%; min-height:150px; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:20px; color:var(--text-muted); font-family:var(--font-body); resize:vertical;" placeholder="Paste the full video script here..."></textarea>
+        <div style="margin-top: 12px; text-align: right;">
+          <button class="btn btn-secondary btn-sm" onclick="saveVideoScript(event)">💾 Save Script</button>
+        </div>
       </div>
     </div>
 
@@ -176,10 +179,8 @@
       </div>
       <div class="glass-card-body">
         <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
-          <button class="btn btn-secondary" id="openRouterBtn" style="background:#eab308; color:#000;">🧠 Test OpenRouter Gen</button>
+          <button class="btn btn-secondary" id="openRouterBtn" style="background:#eab308; color:#000;">🧠 Open Router Generate Lower Thirds</button>
           <button class="btn btn-secondary" id="mockGenBtn" style="background:#3b82f6; color:#fff;">🧪 Mock Generation</button>
-          <button class="btn btn-secondary" id="generateBtn">🤖 Generate with Gemini</button>
-          <button class="btn btn-secondary" id="generateAllBtn" style="display:none;">⚡ Generate All Videos</button>
         </div>
       </div>
     </div>
@@ -268,8 +269,6 @@
       </div>
     </div>
 
-    <div id="genProgressPanel" class="glass-card gen-progress"></div>
-
     <div id="emptyState" class="glass-card empty-state">
       <div class="empty-icon">🎬</div>
       <h2 style="font-family:var(--font-title);margin-bottom:8px;">Select a Module & Video</h2>
@@ -322,16 +321,37 @@
     function escJs(s) { if (!s) return ''; return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,'\\n'); }
 
     function togglePanel(header) {
+      const card = header.closest('.glass-card');
+      const panelId = card ? (card.id || 'panel_' + Array.from(document.querySelectorAll('.glass-card')).indexOf(card)) : null;
       const body = header.nextElementSibling;
       const icon = header.querySelector('.collapse-icon');
       if (body.classList.contains('collapsed')) {
         body.classList.remove('collapsed');
         icon.style.transform = 'rotate(0deg)';
+        if (panelId) localStorage.setItem('lt_collapse_' + panelId, 'expanded');
       } else {
         body.classList.add('collapsed');
         icon.style.transform = 'rotate(-90deg)';
+        if (panelId) localStorage.setItem('lt_collapse_' + panelId, 'collapsed');
       }
     }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.glass-card').forEach((card, idx) => {
+        const panelId = card.id || 'panel_' + idx;
+        const state = localStorage.getItem('lt_collapse_' + panelId);
+        const body = card.querySelector('.glass-card-body');
+        const icon = card.querySelector('.collapse-icon');
+        if (!body || !icon) return;
+        if (state === 'collapsed') {
+          body.classList.add('collapsed');
+          icon.style.transform = 'rotate(-90deg)';
+        } else if (state === 'expanded') {
+          body.classList.remove('collapsed');
+          icon.style.transform = 'rotate(0deg)';
+        }
+      });
+    });
 
     function openEditPanel() {
       const body = $('editPanelBody');
@@ -625,103 +645,27 @@
       updatePreview();
     }
 
-    async function generateWithGemini() {
-      if (!currentModuleId || !currentVideoId) { showToast('Select a module and video first.', true); return; }
-      const moduleNum = dbModules.find(m => m.id === currentModuleId)?.module_number || 0;
-      const videoNum = dbVideos.find(v => v.id === currentVideoId)?.video_number || 0;
-
-      $('genLoading').style.display = 'block';
-      $('generateBtn').disabled = true;
-      $('generateBtn').textContent = 'Generating...';
-
+    async function saveVideoScript(event) {
+      if (!currentVideoId) { showToast('Select a video first.', true); return; }
+      const btn = event.target;
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Saving...';
       try {
-        const res = await fetch('/api/lowerthirds/generate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ module_number: moduleNum, video_number: videoNum })
+        const text = $('scriptContent').value;
+        await api('videos?id=eq.' + currentVideoId, {
+          method: 'PATCH',
+          body: JSON.stringify({ script: text })
         });
-        if (!res.ok) { const err = await res.text(); throw new Error(err); }
-        const data = await res.json();
-
-        $('genLoading').style.display = 'none';
-        $('generateBtn').disabled = false;
-        $('generateBtn').textContent = 'Generate with Gemini';
-
-        if (data.script_text) {
-          $('scriptContent').textContent = data.script_text;
-          $('scriptPanel').style.display = 'block';
-        }
-
-        if (data.from_cache) {
-          showToast('Using cached candidates from Supabase (already generated)', false, 2500);
-        } else if (data.suggestions && data.suggestions.length) {
-          showToast('Generated ' + data.suggestions.length + ' candidates and saved to Supabase');
-        }
-
-        // Reload the candidates table to show persisted results
-        await loadLowerThirds(moduleNum, videoNum);
+        showToast('Script saved to video successfully!');
       } catch (e) {
-        $('genLoading').style.display = 'none';
-        $('generateBtn').disabled = false;
-        $('generateBtn').textContent = 'Generate with Gemini';
-        showToast('Generation failed: ' + e.message, true);
+        showToast('Failed to save script: ' + e.message, true);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
       }
     }
 
-    async function generateAllVideos() {
-      if (!currentModuleId) { showToast('Select a module first.', true); return; }
-      const moduleNum = dbModules.find(m => m.id === currentModuleId)?.module_number || 0;
-      const videos = dbVideos;
-      if (!videos.length) { showToast('No videos in this module.', true); return; }
-
-      const panel = $('genProgressPanel');
-      panel.style.display = 'block';
-      $('generateAllBtn').disabled = true;
-
-      let html = '<h2>Bulk Generation Progress</h2>';
-      const stepEls = {};
-      for (const v of videos) {
-        const id = 'step_' + v.id;
-        stepEls[v.id] = id;
-        html += '<div class="progress-step" id="' + id + '"><span class="step-dot"></span> V' + v.video_number + ': ' + escHtml(v.title) + ' <span class="step-status">Pending</span></div>';
-      }
-      panel.innerHTML = html;
-
-      let completed = 0;
-      let errors = 0;
-      for (const v of videos) {
-        const step = $(stepEls[v.id]);
-        if (step) { step.className = 'progress-step active'; step.querySelector('.step-status').textContent = 'Generating...'; }
-        try {
-          const res = await fetch('/api/lowerthirds/generate', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ module_number: moduleNum, video_number: v.video_number })
-          });
-          if (!res.ok) throw new Error(await res.text());
-          const data = await res.json();
-          if (step) {
-            step.className = 'progress-step done';
-            step.querySelector('.step-status').textContent = (data.from_cache ? 'Cached' : 'Saved') + ' (' + (data.suggestions?.length || 0) + ' candidates)';
-          }
-          completed++;
-        } catch (e) {
-          errors++;
-          if (step) {
-            step.className = 'progress-step';
-            step.querySelector('.step-status').textContent = 'Error: ' + e.message;
-          }
-        }
-      }
-
-      $('generateAllBtn').disabled = false;
-      showToast('Bulk generate complete: ' + completed + ' done, ' + errors + ' errors');
-
-      // Reload current view if video is selected
-      if (currentVideoId) {
-        await loadLowerThirds(moduleNum, dbVideos.find(v => v.id === currentVideoId)?.video_number || 0);
-      }
-    }
 
     $('moduleSelect').addEventListener('change', function() {
       const val = parseInt(this.value);
@@ -733,8 +677,7 @@
       $('scriptPanel').style.display = 'none';
       
       $('actionPanel').style.display = val ? 'block' : 'none';
-      $('generateAllBtn').style.display = val ? 'inline-block' : 'none';
-      ['openRouterBtn', 'mockGenBtn', 'generateBtn'].forEach(id => { if($(id)) $(id).style.display = 'none'; });
+      ['openRouterBtn', 'mockGenBtn'].forEach(id => { if($(id)) $(id).style.display = 'none'; });
 
       loadVideos(currentModuleId);
     });
@@ -746,7 +689,7 @@
         $('editorSection').style.display = 'block';
         $('emptyState').style.display = 'none';
         
-        ['openRouterBtn', 'mockGenBtn', 'generateBtn'].forEach(id => { if($(id)) $(id).style.display = 'inline-block'; });
+        ['openRouterBtn', 'mockGenBtn'].forEach(id => { if($(id)) $(id).style.display = 'inline-block'; });
 
         const moduleNum = dbModules.find(m => m.id === currentModuleId)?.module_number || 0;
         const videoNum = dbVideos.find(v => v.id === currentVideoId)?.video_number || 0;
@@ -754,17 +697,13 @@
         loadScenes(currentVideoId);
         
         let scriptText = await fetchScriptForVideo(currentModuleId, currentVideoId);
-        if (scriptText) {
-          $('scriptContent').textContent = scriptText;
-          $('scriptPanel').style.display = 'block';
-        } else {
-          $('scriptPanel').style.display = 'none';
-        }
+        $('scriptContent').value = scriptText || '';
+        $('scriptPanel').style.display = 'block';
       } else {
         $('editorSection').style.display = 'none';
         $('emptyState').style.display = 'block';
         $('scriptPanel').style.display = 'none';
-        ['openRouterBtn', 'mockGenBtn', 'generateBtn'].forEach(id => { if($(id)) $(id).style.display = 'none'; });
+        ['openRouterBtn', 'mockGenBtn'].forEach(id => { if($(id)) $(id).style.display = 'none'; });
       }
     });
 
@@ -805,7 +744,6 @@
     $('saveBtn').addEventListener('click', saveLowerThird);
     $('downloadBtn').addEventListener('click', downloadLowerThird);
     $('clearBtn').addEventListener('click', clearForm);
-    $('generateBtn').addEventListener('click', generateWithGemini);
     async function fetchScriptForVideo(moduleId, videoId) {
       if (!moduleId || !videoId) return null;
       try {
@@ -830,10 +768,13 @@
       try {
         let scriptText = await fetchScriptForVideo(currentModuleId, currentVideoId);
         if (!scriptText) {
+          scriptText = $('scriptContent').value.trim();
+        }
+        if (!scriptText) {
           scriptText = "This is a placeholder script because no script was found in the database. In this video, we will learn about Claude AI, prompt engineering, and building agentic workflows.";
         }
 
-        $('scriptContent').textContent = scriptText;
+        $('scriptContent').value = scriptText;
         $('scriptPanel').style.display = 'block';
 
         const res = await fetch('/api/lowerthirds/openrouter', {

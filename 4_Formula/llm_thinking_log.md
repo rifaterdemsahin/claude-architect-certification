@@ -1,5 +1,31 @@
 # LLM Thinking Log
 
+## 2026-06-22 — 🍪 Panel Collapse State Persistence & Editable Video Script
+
+### 🎯 Objective
+Persist the collapsible state of panels using `localStorage`, make the Video Script editable to allow manual "add all script" functionality, and remove obsolete Gemini generation buttons in favor of OpenRouter.
+
+### 📐 Implementation
+1. **State Persistence**:
+   - Updated `togglePanel()` to save the expanded/collapsed state to `localStorage` using unique panel IDs (`lt_collapse_panelId`).
+   - Added a `DOMContentLoaded` event listener that restores these states when the page loads, ensuring users retain their preferred layout across reloads.
+2. **Editable Video Script**:
+   - Replaced the static `div` in `#scriptPanel` with a `<textarea id="scriptContent">` that permits editing and pasting the full script.
+   - Added a `💾 Save Script` button bound to `saveVideoScript()`, which `PATCH`es the updated script directly to the `videos` table in Supabase.
+3. **Button Cleanup**:
+   - Renamed "Test OpenRouter Gen" to "Open Router Generate Lower Thirds".
+   - Completely removed the "Generate with Gemini" and "Generate All Videos" buttons from the UI.
+   - Removed the obsolete `generateWithGemini()` and `generateAllVideos()` JavaScript functions and the progress panel HTML.
+
+### ✅ Verification
+- Toggling a panel, reloading the page, and verifying it stays toggled.
+- The video script is editable. Clicking Save updates Supabase.
+- Only OpenRouter and Mock generation buttons remain.
+
+### 📦 Files Changed
+- `5_Symbols/production/postprod/lower_thirds.html`
+- `4_Formula/llm_thinking_log.md` — this entry
+
 ## 2026-06-22 — 🎬 Lower Thirds Panel Reorganization & Collapsibility
 
 ### 🎯 Objective
