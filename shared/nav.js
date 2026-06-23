@@ -172,6 +172,9 @@
               { label: '🤖 Claude Usage', url: 'https://console.anthropic.com/settings/usage' },
               { label: '🧠 xAI Usage', url: 'https://console.x.ai/usage' }
             ]},
+            { group: true, label: '🧘 Wellbeing & Focus', children: [
+              { label: '🧘 Meditation Timer', url: 'https://rifaterdemsahin.github.io/schedule-helper/meditation-timer.html?page=meditation' }
+            ]},
             { group: true, label: '🤖 AI & APIs', children: [
               { label: '☁️ Google Cloud API', url: 'https://console.cloud.google.com/' },
               { label: '🤖 Claude Guide', url: 'claude.md' }
@@ -183,7 +186,8 @@
       { label: '🗂️ Planning Hub', url: '5_Symbols/production/preprod/planning.html', description: 'Critical path overview and pre-production checklists.' },
       { group: true, label: '1. 🧭 Strategy & Research', children: [
         { label: '🎓 AI Certifications Analysis ↗', url: 'https://rifaterdemsahin.github.io/ai-certifications-analysis/', description: 'Market research on the hard, expensive AI certificates the course preps for — framing the value proposition.' },
-        { label: '📈 Customer Development', url: '5_Symbols/production/preprod/customer_development.html', description: 'Validation framework from macro brand authority to micro-execution loops.' }
+        { label: '📈 Customer Development', url: '5_Symbols/production/preprod/customer_development.html', description: 'Validation framework from macro brand authority to micro-execution loops.' },
+        { label: '⚖️ Theory of Constraints', url: '5_Symbols/production/preprod/theory_of_constraints.html', description: 'Analysis of the Customer Development process, focusing on retention and sequencing risks.' }
       ]},
       { group: true, label: '2. 🎨 Method & Doctrine', children: [
         { label: '🎨 Ways of Working', url: '5_Symbols/production/preprod/ways_of_working.html', description: 'Visual script table read method with real-time image creation.' },

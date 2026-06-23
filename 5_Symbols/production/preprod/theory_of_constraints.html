@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Theory of Constraints | Claude AI Certification</title>
+  <meta name="description" content="Analysis of the Customer Development process, focusing on retention as the main constraint.">
+  <link rel="icon" type="image/png" href="../../../favicon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #030712;
+      --bg-card: rgba(17, 24, 39, 0.85);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --primary: #8b5cf6;
+      --secondary: #3b82f6;
+      --accent: #f59e0b;
+      --danger: #ef4444;
+      --success: #10b981;
+      --teal: #14b8a6;
+      --font-title: 'Outfit', sans-serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-dark);
+      background-image: radial-gradient(circle at 10% 20%, rgba(239, 68, 68, 0.05) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(245, 158, 11, 0.05) 0%, transparent 40%);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      line-height: 1.6;
+      padding-top: 70px;
+      padding-bottom: 80px;
+    }
+    .container { max-width: 900px; margin: 0 auto; padding: 0 24px; }
+
+    header { text-align: center; margin-bottom: 48px; }
+    .badge {
+      display: inline-block;
+      padding: 6px 16px;
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(239, 68, 68, 0.2));
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      border-radius: 100px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 14px;
+    }
+    h1 { font-family: var(--font-title); font-size: 2.8rem; font-weight: 900; margin-bottom: 16px; }
+    header p { color: var(--text-muted); max-width: 720px; margin: 0 auto; font-size: 1.1rem; }
+
+    .main-issue {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-left: 4px solid var(--danger);
+      padding: 24px;
+      border-radius: 12px;
+      margin-bottom: 40px;
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+    }
+    .main-issue-icon { font-size: 2rem; line-height: 1; }
+    .main-issue-content h3 { color: #fca5a5; margin-bottom: 8px; font-family: var(--font-title); }
+
+    .analysis-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    .analysis-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 20px;
+      padding: 32px;
+    }
+    .analysis-card.success h2 { color: var(--success); border-bottom-color: rgba(16, 185, 129, 0.2); }
+    .analysis-card.warning h2 { color: var(--accent); border-bottom-color: rgba(245, 158, 11, 0.2); }
+    .analysis-card.danger h2 { color: var(--danger); border-bottom-color: rgba(239, 68, 68, 0.2); }
+    .analysis-card.action h2 { color: var(--secondary); border-bottom-color: rgba(59, 130, 246, 0.2); }
+
+    .analysis-card h2 {
+      font-family: var(--font-title);
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+      border-bottom: 1px solid;
+      padding-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .analysis-card p {
+      margin-bottom: 16px;
+      color: var(--text-muted);
+    }
+    .analysis-card p:last-child { margin-bottom: 0; }
+    
+    .analysis-card strong { color: var(--text-main); }
+
+    .quote-block {
+      font-style: italic;
+      color: #cbd5e1;
+      padding: 16px 20px;
+      background: rgba(255, 255, 255, 0.03);
+      border-left: 3px solid var(--primary);
+      margin: 24px 0;
+      border-radius: 0 8px 8px 0;
+    }
+
+    footer {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+    footer a { color: var(--secondary); text-decoration: none; }
+  </style>
+  <script src="../../../shared/nav.js"></script>
+  <script src="../../../shared/seo.js" defer></script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="badge">⚖️ Theory of Constraints</div>
+      <h1>Customer Development Analysis</h1>
+      <p>A critical review of the Customer Development process, identifying the core bottlenecks and sequencing risks in the current plan.</p>
+    </header>
+
+    <div class="main-issue">
+      <div class="main-issue-icon">🚨</div>
+      <div class="main-issue-content">
+        <h3>The Core Constraint: Audience Retention</h3>
+        <p>The primary bottleneck and main issue in Rifat Erdem Sahin's YouTube channel is <strong>retention</strong>. Before optimizing monetization, infrastructure scaling, or company building, the system must first solve for keeping viewers engaged throughout the core MVP (the YouTube series).</p>
+      </div>
+    </div>
+
+    <div class="quote-block">
+      "This is your Customer Development page for the AI Certification Course — a clean mashup of Steve Blank's four-step model (Discovery → Validation → Creation → Company Building) with Gary Vee's 'Jab, Jab, Right Hook.' The framing is coherent and the v1→v2 iteration shows the thinking is live rather than decorative. A few observations worth flagging."
+    </div>
+
+    <div class="analysis-grid">
+      <!-- What Works -->
+      <div class="analysis-card success">
+        <h2><span>✅</span> What Works</h2>
+        <p>The four stages are correctly ordered and the <strong>Jab/Right-Hook</strong> overlay maps sensibly — give value through Discovery and Validation, monetise at Creation.</p>
+        <p>Treating the YouTube series as the MVP is the right instinct: it's the cheapest possible test of audience resonance before building anything heavier.</p>
+      </div>
+
+      <!-- Where it's Thin -->
+      <div class="analysis-card warning">
+        <h2><span>⚠️</span> Where It's Thin</h2>
+        <p>The biggest gap is that there are <strong>no kill criteria or thresholds anywhere</strong>. "Pivot Check" says to review responses and pivot if the audience doesn't connect — but connect by what measure?</p>
+        <p>Without a number (watch-time, signup rate, reply volume), "pivot" stays a vibe rather than a decision rule, and that's exactly the kind of ambiguity that lets a project drift.</p>
+        <p>Additionally, Stage 1 poses the persona question ("Who is the system architect needing AI validation?") but never answers it on the page. A single named persona would anchor everything downstream.</p>
+      </div>
+
+      <!-- Sequencing Risk -->
+      <div class="analysis-card danger">
+        <h2><span>🔥</span> Sequencing Risk</h2>
+        <p><strong>Stage 4</strong> — Scale Infrastructure (Supabase, Fly.io, Key Vault), hire team and contractors, systemise ops — is a long way ahead of where the business actually sits at ~700 subs and ~£10K lifetime revenue.</p>
+        <p>That's fine as a horizon, but the page presents all four stages at equal weight, with no "you are here" marker. Given the scaffolding-deadlock pattern we've talked about before, a roadmap that gives this much real estate to infrastructure and hiring is itself a small temptation toward building over shipping.</p>
+        <p>This very page is arguably Stage 1 work dressed as Stage 4 planning.</p>
+      </div>
+
+      <!-- Action Items -->
+      <div class="analysis-card action">
+        <h2><span>🎯</span> Concrete Edits</h2>
+        <p>To mitigate these risks, the Customer Development page requires two immediate, concrete edits:</p>
+        <p><strong>1. Explicit Metric + Threshold</strong><br>Add an explicit metric and threshold to the Pivot Check (e.g. "if 40% watch-time retention by week 4, continue; else pivot").</p>
+        <p><strong>2. Active Stage Marker</strong><br>Put a visible marker showing which stage is active right now (Stage 1), so the later stages read as future, not as a to-do list competing for attention today.</p>
+      </div>
+    </div>
+
+    <footer>
+      <p style="margin-bottom: 8px;">
+        <a href="customer_development.html">View Customer Development</a>
+        &nbsp;&nbsp;·&nbsp;&nbsp;
+        <a href="planning.html">← Back to Planning Hub</a>
+      </p>
+    </footer>
+  </div>
+
+  <script src="../../../shared/debug-panel.js"></script>
+</body>
+</html>

@@ -1794,3 +1794,8 @@ GLM" table. Registered GLM in the `agents.md` Supported Agent Roles table.
   - Appended **UK Taxes (50%)** and **Estimated Totals** to the **Cost Structure** block.
 - **Verification:** Changes incorporated successfully into the HTML.
 - **Status:** IMPLEMENTED, pending commit + push.
+
+## 2026-06-23 - 🧘 Meditation Timer in Preprod
+- **Context:** Added Meditation Timer to the Tools menu under Preprod.
+- **Approach:** Created a new `"🧘 Wellbeing & Focus"` subgroup and inserted the `https://rifaterdemsahin.github.io/schedule-helper/meditation-timer.html?page=meditation` link across all navigation sources (`navigation_config.json`, `index.html`, `markdown_renderer.html`, `shared/nav.js`).
+- **Status:** IMPLEMENTED, pending commit.
