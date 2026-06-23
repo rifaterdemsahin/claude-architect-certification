@@ -1784,3 +1784,13 @@ GLM" table. Registered GLM in the `agents.md` Supported Agent Roles table.
   - Integrated into `5_Symbols/production/postprod/sales_and_marketing_plan.html` using existing glassmorphic card design.
 - **Verification:** UI renders correctly and maintains responsive stacking on mobile.
 - **Status:** IMPLEMENTED, pending commit + push.
+
+## 2026-06-22 - 📊 BMC Upgrades
+- **Context:** User requested updates to the Business Model Canvas on the Sales and Marketing Plan page.
+- **Approach:**
+  - Updated **Key Partners** to explicitly list: Claude, Google, Microsoft.
+  - Added a **10x ROI** value proposition to highlight the massive return on the $10/month YouTube join button investment.
+  - Expanded **Customer Relationships** to offer free talking heads in each module, alongside free Module 1 drops.
+  - Appended **UK Taxes (50%)** and **Estimated Totals** to the **Cost Structure** block.
+- **Verification:** Changes incorporated successfully into the HTML.
+- **Status:** IMPLEMENTED, pending commit + push.
