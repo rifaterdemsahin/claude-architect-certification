@@ -1799,3 +1799,14 @@ GLM" table. Registered GLM in the `agents.md` Supported Agent Roles table.
 - **Context:** Added Meditation Timer to the Tools menu under Preprod.
 - **Approach:** Created a new `"🧘 Wellbeing & Focus"` subgroup and inserted the `https://rifaterdemsahin.github.io/schedule-helper/meditation-timer.html?page=meditation` link across all navigation sources (`navigation_config.json`, `index.html`, `markdown_renderer.html`, `shared/nav.js`).
 - **Status:** IMPLEMENTED, pending commit.
+
+### 2026-06-23: Update Theory of Constraints with June 2026 Problem & Kill Criteria
+
+**Context:** The Customer Development strategy has evolved. The course is now free until the YouTube partnership goes active (requiring 4,000 watch hours to complete the MVP). Furthermore, explicit kill criteria have been established.
+
+**Decisions:**
+- **Updated Main Issue:** Changed the primary bottleneck text in `theory_of_constraints.html` to clearly state the "Problem in June 2026", focusing on the 4,000-hour MVP completion milestone.
+- **Added Kill Criteria & Financial Goals:** Replaced the generic "Where It's Thin" section with concrete thresholds: £10k monthly revenue as the business goal, £10k lifetime revenue target per course, and killing the project if it fails to hit the MVP milestone or sustain the revenue target.
+- **Updated Action Items:** Marked the "Explicit Metric + Threshold" and "Active Stage Marker" changes as implemented rather than pending.
+
+**Outcome:** The `theory_of_constraints.html` page now correctly reflects the active constraints, revenue models, and explicit kill criteria, aligning the theory with the practical metrics defined in the Customer Development page.
