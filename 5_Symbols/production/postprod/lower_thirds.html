@@ -792,7 +792,14 @@ Return ONLY a JSON array with this structure:
       } catch (e) {
         $('genLoading').style.display = 'none';
         $('candidatesTableWrap').style.display = 'block';
-        showToast('OpenRouter Error: ' + e.message, true);
+        
+        let errorMsg = e.message;
+        if (errorMsg.includes('404')) {
+          errorMsg = "This simply means that your local Go server process running on localhost:8080 had not been restarted since we wrote the new /api/lowerthirds/openrouter handler logic. Because Go is a compiled language, code changes do not instantly sync to the running binary in the background. The active server process was still running the older version of the code, so it fell back to the static file server and returned a 404.<br><br><b>Fix: Stop the server (Ctrl+C) and restart it with <code>go run cmd/server/main.go</code></b>";
+        }
+        
+        $('candidatesTableWrap').innerHTML = `<div class="empty-state" style="color:var(--danger); border:1px solid rgba(255,100,100,0.2);"><div class="empty-icon" style="font-size:3rem;margin-bottom:12px;">⚠️</div><p style="font-weight:700;font-size:1.2rem;">OpenRouter Error</p><p style="font-size:0.95rem;margin-top:12px;line-height:1.5;max-width:600px;margin-left:auto;margin-right:auto;">${errorMsg}</p></div>`;
+        showToast('OpenRouter Error', true);
       }
     }
 
@@ -915,7 +922,7 @@ Return ONLY a JSON array with this structure:
     }
 
     $('togglePromptBtn').addEventListener('click', function() {
-      const p = $('promptDisplay');
+      const p = $('promptViewer');
       if (p.style.display === 'none') {
         p.style.display = 'block';
         this.textContent = '👁️ Hide OpenRouter Prompt';
