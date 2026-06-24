@@ -70,6 +70,40 @@
     .card-desc { color: var(--text-muted); font-size: 0.86rem; }
     .card-tag { display: inline-block; margin-top: 14px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent); background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.2); padding: 3px 10px; border-radius: 100px; }
 
+    /* ── Target Persona & Skill Gaps ── */
+    .persona-card {
+      background: linear-gradient(160deg, rgba(139,92,246,0.1), rgba(59,130,246,0.06), var(--bg-card));
+      border: 1px solid rgba(139,92,246,0.28); border-radius: 22px; padding: 28px; margin-bottom: 8px;
+    }
+    .persona-head { display: flex; align-items: center; gap: 18px; margin-bottom: 16px; }
+    .persona-avatar {
+      width: 64px; height: 64px; flex-shrink: 0; border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-title); font-weight: 800; font-size: 1.5rem; color: white;
+    }
+    .persona-name { font-family: var(--font-title); font-weight: 800; font-size: 1.4rem; }
+    .persona-role { color: var(--text-muted); font-size: 0.88rem; margin: 2px 0 4px; }
+    .persona-link { color: #93c5fd; text-decoration: none; font-size: 0.82rem; font-weight: 700; }
+    .persona-link:hover { text-decoration: underline; }
+    .persona-story { color: var(--text-main); font-size: 0.92rem; line-height: 1.65; margin-bottom: 16px; }
+    .persona-story strong { color: #c084fc; }
+    .persona-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+    .persona-tag {
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+      color: var(--text-muted); background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      padding: 4px 12px; border-radius: 100px;
+    }
+    .persona-tag.good { color: var(--good); background: rgba(16,185,129,0.12); border-color: rgba(16,185,129,0.3); }
+    .gap-title { font-family: var(--font-title); font-weight: 700; font-size: 1.05rem; margin-bottom: 14px; }
+    .gap-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+    .gap-item {
+      background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 16px;
+    }
+    .gap-item-head { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 0.92rem; margin-bottom: 6px; }
+    .gap-item-desc { color: var(--text-muted); font-size: 0.82rem; line-height: 1.5; }
+    .gap-bridge { display: block; margin-top: 8px; font-size: 0.78rem; color: var(--good); }
+
     footer { text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 48px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
     footer a { color: var(--secondary); text-decoration: none; }
   </style>
@@ -123,6 +157,67 @@
     <div class="gate-note">
       <strong>Order is non-negotiable.</strong> Each step is a gate — you do not advance until the previous one is done well enough to work through. Read the full rationale in the
       <a href="../../../markdown_renderer.html?file=1_Real_Unknown/critical_task.md" style="color:#c084fc; font-weight:700;">Critical Task →</a>
+    </div>
+
+    <!-- ── Target Persona & Skill Gaps ── -->
+    <div class="section-title">🎯 Target Persona &amp; Skill Gaps</div>
+    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 18px;">
+      Who we are really making this for. The market is <strong style="color:var(--text-main);">not only developers</strong> defending their existing jobs — it is people stepping into the new roles AI is creating, learning Claude to become productive, self-reliant, and to run their own operations.
+    </p>
+
+    <div class="persona-card">
+      <div class="persona-head">
+        <div class="persona-avatar">AD</div>
+        <div>
+          <div class="persona-name">Abdullah Dönmez</div>
+          <div class="persona-role">🛒 Amazon Seller &amp; Business Operator · Non-developer Claude power user</div>
+          <a class="persona-link" href="https://www.linkedin.com/in/abdullah-d%C3%B6nmez-87296679/?locale=en" target="_blank" rel="noopener">in/abdullah-dönmez ↗</a>
+        </div>
+      </div>
+      <p class="persona-story">
+        Abdullah runs an <strong>Amazon e-commerce business</strong> and uses Claude to improve his day-to-day operations — listings, customer messages, inventory and sales analysis, and process automation. He is not a software engineer; he is a <strong>business owner becoming productive with AI</strong>. He represents the broader market this course is built for: not developers clinging to their jobs, but people equipping themselves for the <strong>new roles AI is creating</strong> — and helping themselves grow from <em>asking Claude questions</em> to <em>building their own workflows</em>.
+      </p>
+      <div class="persona-tags">
+        <span class="persona-tag good">Primary persona</span>
+        <span class="persona-tag">Self-taught</span>
+        <span class="persona-tag">Business operator</span>
+        <span class="persona-tag">Non-developer</span>
+        <span class="persona-tag">New AI-era role</span>
+      </div>
+
+      <div class="gap-title">🧩 Skill gaps the course closes for him</div>
+      <div class="gap-grid">
+        <div class="gap-item">
+          <div class="gap-item-head">🧠 Structured prompting</div>
+          <div class="gap-item-desc">Moving from one-off questions to prompts that produce reliable, repeatable output for listings, replies, and reports.</div>
+          <span class="gap-bridge">→ Bridged by: prompt patterns &amp; templates</span>
+        </div>
+        <div class="gap-item">
+          <div class="gap-item-head">🔌 Connecting Claude to his tools</div>
+          <div class="gap-item-desc">Wiring Claude into his own data and apps (MCP) instead of copy-pasting between tabs all day.</div>
+          <span class="gap-bridge">→ Bridged by: MCP module</span>
+        </div>
+        <div class="gap-item">
+          <div class="gap-item-head">📊 Analysis without code</div>
+          <div class="gap-item-desc">Turning raw sales and inventory exports into decisions — without needing to be a developer.</div>
+          <span class="gap-bridge">→ Bridged by: data-analysis walkthroughs</span>
+        </div>
+        <div class="gap-item">
+          <div class="gap-item-head">⚙️ Operational automation</div>
+          <div class="gap-item-desc">Building repeatable workflows for customer service and product operations that run with less manual effort.</div>
+          <span class="gap-bridge">→ Bridged by: agents &amp; workflow recipes</span>
+        </div>
+        <div class="gap-item">
+          <div class="gap-item-head">🔐 Trust &amp; data safety</div>
+          <div class="gap-item-desc">Knowing what is safe to share, how Zero-Data-Retention works, and where Claude's limits are for business data.</div>
+          <span class="gap-bridge">→ Bridged by: ZDR module</span>
+        </div>
+        <div class="gap-item">
+          <div class="gap-item-head">🚀 From user to builder</div>
+          <div class="gap-item-desc">Growing confidence to ship his own small tools and agents, not just consume answers — owning his productivity.</div>
+          <span class="gap-bridge">→ Bridged by: end-to-end build path</span>
+        </div>
+      </div>
     </div>
 
     <!-- ── Planning Pages collected ── -->
