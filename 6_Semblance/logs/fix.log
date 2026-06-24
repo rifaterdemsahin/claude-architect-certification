@@ -103,3 +103,4 @@ Lesson captured in lessons_learned.md
 [2026-06-20] [5_Symbols/talking-heads.html] [VERIFIED] — Grouped talking-head sentences by video, eliminating repeated headers. Implemented per-video "📋 Prompter" modal and "🎥 Footage Mapping" button. Modified footage_mapping.html to read module/video parameters from URL query string on page load.
 
 [2026-06-21] 🛠 [5_Symbols/supabase] [APPLIED] — Migration gap closed: migration_greenscreen_backgrounds.sql run in Supabase SQL Editor (table public.greenscreen_backgrounds now present). Seeded 15 rows (one per course_videos entry, 5 modules x 3 videos) with per-module preset_style/camera_movement and topic-aware prompts via seed_greenscreen_backgrounds.sql.
+[2026-06-23] [5_Symbols/cmd/server] [APPLIED] — Restarted Go server process to pick up new /api/lowerthirds/openrouter handler, resolving 404. Documented in 6_Semblance/error_openrouter_404_not_found.md
