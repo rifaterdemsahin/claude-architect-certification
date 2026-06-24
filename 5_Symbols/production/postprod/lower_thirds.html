@@ -188,6 +188,7 @@
           <button class="btn btn-secondary" id="openRouterBtn" style="background:#eab308; color:#000;">🧠 Open Router Generate Lower Thirds</button>
           <button class="btn btn-secondary" id="mockGenBtn" style="background:#3b82f6; color:#fff;">🧪 Mock Generation</button>
           <button class="btn btn-secondary" id="togglePromptBtn">👁️ View OpenRouter Prompt</button>
+          <button class="btn btn-secondary" id="debugServerBtn" style="background:#8b5cf6; color:#fff;">🛠️ Debug Server & Dependencies</button>
         </div>
         <div class="prompt-viewer" id="promptViewer" style="display:none; margin-top: 16px;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
@@ -795,7 +796,7 @@ Return ONLY a JSON array with this structure:
         
         let errorMsg = e.message;
         if (errorMsg.includes('404')) {
-          errorMsg = "This simply means that your local Go server process running on localhost:8080 had not been restarted since we wrote the new /api/lowerthirds/openrouter handler logic. Because Go is a compiled language, code changes do not instantly sync to the running binary in the background. The active server process was still running the older version of the code, so it fell back to the static file server and returned a 404.<br><br><b>Fix: Stop the server (Ctrl+C) and restart it with <code>go run cmd/server/main.go</code></b>";
+          errorMsg = "This simply means that your local Go server process running on localhost:8080 had not been restarted since we wrote the new /api/lowerthirds/openrouter handler logic. Because Go is a compiled language, code changes do not instantly sync to the running binary in the background. The active server process was still running the older version of the code, so it fell back to the static file server and returned a 404.<br><br><b>Note:</b> This won't be an issue on production (Fly.io), as deployments automatically compile and restart the binary with the latest code.<br><br><b>Local Fix: Stop the server (Ctrl+C) and restart it with <code>go run cmd/server/main.go</code></b>";
         }
         
         $('candidatesTableWrap').innerHTML = `<div class="empty-state" style="color:var(--danger); border:1px solid rgba(255,100,100,0.2);"><div class="empty-icon" style="font-size:3rem;margin-bottom:12px;">⚠️</div><p style="font-weight:700;font-size:1.2rem;">OpenRouter Error</p><p style="font-size:0.95rem;margin-top:12px;line-height:1.5;max-width:600px;margin-left:auto;margin-right:auto;">${errorMsg}</p></div>`;
@@ -934,6 +935,52 @@ Return ONLY a JSON array with this structure:
 
     $('openRouterBtn').addEventListener('click', testOpenRouterGeneration);
     $('mockGenBtn').addEventListener('click', mockGeneration);
+    
+    $('debugServerBtn').addEventListener('click', async function() {
+      const btn = this;
+      const origText = btn.innerHTML;
+      btn.innerHTML = '⏳ Checking...';
+      btn.disabled = true;
+      try {
+        let debugMsg = '<h3>Server & Dependency Status</h3><ul style="text-align:left; margin-top:12px; font-size:0.95rem; line-height:1.6; display:inline-block;">';
+        
+        try {
+          const configRes = await fetch('/api/config');
+          if (configRes.ok) {
+            const cfg = await configRes.json();
+            debugMsg += `<li>✅ Go Server is UP (<code>/api/config</code>)</li>`;
+            debugMsg += `<li>✅ SUPABASE_URL: ${cfg.supabase_url ? '<span style="color:var(--success)">Configured</span>' : '<span style="color:var(--danger)">Missing!</span>'}</li>`;
+            debugMsg += `<li>✅ SUPABASE_ANON_KEY: ${cfg.supabase_anon_key ? '<span style="color:var(--success)">Configured</span>' : '<span style="color:var(--danger)">Missing!</span>'}</li>`;
+          } else {
+             debugMsg += `<li>❌ Go Server Config endpoint returned ${configRes.status}</li>`;
+          }
+        } catch(e) {
+          debugMsg += `<li>❌ Go Server is UNREACHABLE (Did you start it?)</li>`;
+        }
+        
+        try {
+          const orRes = await fetch('/api/lowerthirds/openrouter', { method: 'OPTIONS' });
+          if (orRes.status === 404) {
+             debugMsg += `<li>❌ OpenRouter Endpoint is MISSING (404). Restart server!</li>`;
+          } else {
+             debugMsg += `<li>✅ OpenRouter Endpoint is ACTIVE (Returned ${orRes.status})</li>`;
+          }
+        } catch(e) {
+          debugMsg += `<li>❌ OpenRouter Endpoint check failed</li>`;
+        }
+
+        debugMsg += '</ul>';
+
+        $('candidatesTableWrap').style.display = 'block';
+        $('candidatesTableWrap').innerHTML = `<div class="empty-state" style="color:var(--text); border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.4);"><div class="empty-icon" style="font-size:3rem;margin-bottom:12px;">🛠️</div>${debugMsg}</div>`;
+
+      } catch(e) {
+        showToast('Debug failed: ' + e.message, true);
+      } finally {
+        btn.innerHTML = origText;
+        btn.disabled = false;
+      }
+    });
 
     renderBrandPanel();
     updatePreview();
