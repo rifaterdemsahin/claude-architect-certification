@@ -1829,3 +1829,23 @@ GLM" table. Registered GLM in the `agents.md` Supported Agent Roles table.
 **Outcome:** The OpenRouter error is eliminated at runtime. The handler now resolves the key through the same Key-Vault-then-env mechanism as the rest of the app, so it works both locally (env / Key Vault) and on Fly.io (env secret).
 
 **Operational note:** On Fly.io the path is **env secret**, not Key Vault, because the `AZURE_KEYVAULT_NAME`/`AZURE_TENANT_ID`/`AZURE_CLIENT_ID`/`AZURE_CLIENT_SECRET` service-principal vars are intentionally not provisioned on Fly (secrets hygiene — keeps the SP out of the browser-reachable runtime). The `getSecret` fallback handles this cleanly.
+
+## 2026-06-25 - 🐛 Duplicate-Key 409 on OpenRouter Lower-Thirds Insert
+
+**Context:** After the key was wired, clicking **🧠 OpenRouter Generate Lower Thirds** surfaced `409: duplicate key value violates unique constraint "scenes_module_number_section_number_scene_number_key"`. The OpenRouter call itself now succeeded; the failure was at the DB insert step.
+
+**Root cause:** `testOpenRouterGeneration()` in `5_Symbols/production/postprod/lower_thirds.html` inserted **every** candidate into `scenes` with the same `scene_number: 999`. The `scenes` table enforces `UNIQUE(module_number, section_number, scene_number)`, so the first candidate inserted fine and the **second** collided on `(module, section, 999)` → Postgres `23505` → Supabase `409`. The pre-insert `DELETE … scene_type=eq.candidate` only clears *prior* candidate rows; it does nothing about the duplicates created within the same loop.
+
+**Fix:** Compute a collision-free base `scene_number` per run:
+1. Delete old candidates (`scene_type=eq.candidate`).
+2. Query the highest `scene_number` still present for `(module_number, section_number)` (`order=scene_number.desc&limit=1`). Since candidates were just deleted, this reflects real scenes.
+3. Insert candidates with **distinct** numbers `nextSceneNum + i`.
+
+This guarantees uniqueness both among the new candidates and against existing non-candidate scenes, and stays self-cleaning across reruns (candidates are deleted first each time).
+
+**Verification:**
+- JS syntax check across all 5 `<script>` blocks ✅; `go build ./... && go vet ./...` ✅
+- Direct live-Supabase round-trip of the exact sequence: DELETE candidates → 204, max scene_number=1 → nextSceneNum=2, insert 3 candidates at scene_numbers 2/3/4 → **all HTTP 201 (no 409)**, cleanup → 204 ✅
+- Local Go server (fresh binary): `lower_thirds.html` serves 200 with the fix present; `/api/lowerthirds/openrouter` resolves (200, was 404 on a stale binary) ✅
+
+**Outcome:** Multiple candidate rows now insert cleanly; the duplicate-key 409 is eliminated. (The OpenRouter content generation was already fixed in the prior entry.)

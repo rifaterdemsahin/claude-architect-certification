@@ -777,10 +777,26 @@ Return ONLY a JSON array with this structure:
         const moduleNum = dbModules.find(m => m.id === currentModuleId)?.module_number || 0;
         const videoNum = dbVideos.find(v => v.id === currentVideoId)?.video_number || 0;
         await api('scenes?module_number=eq.' + moduleNum + '&section_number=eq.' + videoNum + '&scene_type=eq.candidate', { method: 'DELETE' });
-        for (const c of candidates) {
+
+        // scenes has UNIQUE(module_number, section_number, scene_number). Real
+        // (non-candidate) scenes occupy scene_number 1..N, and every candidate
+        // previously reused 999 -> the 2nd insert hit a duplicate-key 409.
+        // Find the highest scene_number still present (old candidates were just
+        // deleted, so this reflects real scenes) and hand each candidate a
+        // distinct, collision-free number above it.
+        let nextSceneNum = 1;
+        try {
+          const top = await api('scenes?module_number=eq.' + moduleNum + '&section_number=eq.' + videoNum + '&select=scene_number&order=scene_number.desc&limit=1');
+          if (Array.isArray(top) && top.length && typeof top[0].scene_number === 'number') {
+            nextSceneNum = top[0].scene_number + 1;
+          }
+        } catch (_) { /* no existing rows -> start at 1 */ }
+
+        for (let i = 0; i < candidates.length; i++) {
+           const c = candidates[i];
            await api('scenes', {
               method: 'POST',
-              body: JSON.stringify({ module_number: moduleNum, section_number: videoNum, scene_number: 999, lt_main: c.main || c.main_text, lt_sub: c.sub || c.sub_text, scene_type: 'candidate' })
+              body: JSON.stringify({ module_number: moduleNum, section_number: videoNum, scene_number: nextSceneNum + i, lt_main: c.main || c.main_text, lt_sub: c.sub || c.sub_text, scene_type: 'candidate' })
            });
         }
         $('genLoading').style.display = 'none';
