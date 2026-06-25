@@ -2218,8 +2218,9 @@ func openRouterGenerateHandler(cfg config) http.HandlerFunc {
 			return
 		}
 
-		apiKey := os.Getenv("OPENROUTER_API_KEY")
+		apiKey := cfg.getSecret("OPENROUTER_API_KEY")
 		if apiKey == "" {
+			log.Printf("OPENROUTER_API_KEY unavailable: not in Key Vault and not in env")
 			http.Error(w, `{"error":"OPENROUTER_API_KEY missing from server configuration"}`, http.StatusServiceUnavailable)
 			return
 		}

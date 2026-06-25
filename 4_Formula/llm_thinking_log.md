@@ -1810,3 +1810,22 @@ GLM" table. Registered GLM in the `agents.md` Supported Agent Roles table.
 - **Updated Action Items:** Marked the "Explicit Metric + Threshold" and "Active Stage Marker" changes as implemented rather than pending.
 
 **Outcome:** The `theory_of_constraints.html` page now correctly reflects the active constraints, revenue models, and explicit kill criteria, aligning the theory with the practical metrics defined in the Customer Development page.
+
+## 2026-06-25 - 🔑 OpenRouter Key Wiring (Fly.io + Azure Key Vault)
+
+**Context:** `/5_Symbols/production/postprod/lower_thirds.html` failed in production with `OpenRouter Error {"error":"OPENROUTER_API_KEY missing from server configuration"}`. The `openRouterGenerateHandler` was the only secret-using handler that read its key with `os.Getenv("OPENROUTER_API_KEY")` directly instead of the project's `cfg.getSecret(...)` helper (which checks Azure Key Vault first, then falls back to env). On Fly.io, no `OPENROUTER_API_KEY` existed at all — the Key Vault fallback also never engaged because the `AZURE_*` service-principal vars aren't provisioned on Fly.io.
+
+**Root cause:** Two-fold — (1) the secret was never set on Fly.io, and (2) the handler bypassed the Key Vault-aware `getSecret` path used everywhere else (GEMINI, ADMIN, GOOGLE, etc.).
+
+**Approach:**
+- 🔧 **Code fix:** Switched `openRouterGenerateHandler` from `os.Getenv("OPENROUTER_API_KEY")` to `cfg.getSecret("OPENROUTER_API_KEY")`, bringing it in line with all other handlers. `getSecret` maps `OPENROUTER_API_KEY → openrouter-api-key` for the Key Vault lookup and gracefully falls back to env when Key Vault isn't configured (the Fly.io case).
+- ☁️ **Secret provisioning:** Retrieved `OPENROUTER-API-KEY` from Azure Key Vault `dp-kv-deliverypilot` via `az keyvault secret show` and injected it straight into Fly.io with `fly secrets set OPENROUTER_API_KEY=... --app claude-architect-certification` (value piped, never echoed). Fly rolled the machine automatically so the new env var is live.
+
+**Verification:**
+- `go build ./... && go vet ./...` ✅
+- `fly secrets list` now shows `OPENROUTER_API_KEY` (Deployed) ✅
+- Live smoke test: `POST https://claude-architect-certification.fly.dev/api/lowerthirds/openrouter` returned a real `content` JSON payload with 3 lower-third candidates instead of the missing-key error ✅
+
+**Outcome:** The OpenRouter error is eliminated at runtime. The handler now resolves the key through the same Key-Vault-then-env mechanism as the rest of the app, so it works both locally (env / Key Vault) and on Fly.io (env secret).
+
+**Operational note:** On Fly.io the path is **env secret**, not Key Vault, because the `AZURE_KEYVAULT_NAME`/`AZURE_TENANT_ID`/`AZURE_CLIENT_ID`/`AZURE_CLIENT_SECRET` service-principal vars are intentionally not provisioned on Fly (secrets hygiene — keeps the SP out of the browser-reachable runtime). The `getSecret` fallback handles this cleanly.
