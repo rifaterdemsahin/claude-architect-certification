@@ -186,6 +186,7 @@
       <div class="glass-card-body">
         <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
           <button class="btn btn-secondary" id="openRouterBtn" style="background:#eab308; color:#000;">🧠 Open Router Generate Lower Thirds</button>
+          <button class="btn btn-secondary" id="inspectIoBtn" style="background:#0ea5e9; color:#000; display:none;" title="View the exact prompt sent to OpenRouter and the model output">🔍 Prompt &amp; Output</button>
           <button class="btn btn-secondary" id="mockGenBtn" style="background:#3b82f6; color:#fff;">🧪 Mock Generation</button>
           <button class="btn btn-secondary" id="togglePromptBtn">👁️ View OpenRouter Prompt</button>
           <button class="btn btn-secondary" id="debugServerBtn" style="background:#8b5cf6; color:#fff;">🛠️ Debug Server & Dependencies</button>
@@ -304,6 +305,36 @@ Return ONLY a JSON array with this structure:
     </footer>
   </div>
   <div id="toast" class="toast"></div>
+
+  <!-- 🔍 OpenRouter Prompt & Output Inspector Modal -->
+  <div id="ioInspectorOverlay" onclick="if(event.target===this)closeIoInspector()" style="position:fixed; inset:0; z-index:10000; background:rgba(0,0,0,0.75); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); display:none; align-items:center; justify-content:center; padding:24px;">
+    <div class="glass-card" style="display:flex; flex-direction:column; width:min(900px,96vw); max-height:90vh; overflow:hidden;">
+      <div class="glass-card-header" style="cursor:default;">
+        <h2>🔍 OpenRouter Prompt &amp; Output</h2>
+        <span class="collapse-icon" style="cursor:pointer;" onclick="closeIoInspector()">✕</span>
+      </div>
+      <div class="glass-card-body" style="overflow-y:auto;">
+        <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:16px;">
+          <button class="btn btn-sm" style="background:var(--primary); color:#fff;" onclick="copyIoText('all')">📋 Copy All (Prompt + Output)</button>
+          <span id="ioMeta" style="font-size:0.8rem; color:var(--text-muted);"></span>
+        </div>
+        <div style="margin-bottom:20px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px;">
+            <strong style="color:var(--text-main);">⬇️ Input — Prompt sent to model</strong>
+            <button class="btn btn-sm btn-secondary" onclick="copyIoText('prompt')">📋 Copy Prompt</button>
+          </div>
+          <pre id="ioPrompt" style="padding:14px; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.12); border-radius:10px; font-size:0.82rem; color:var(--text-muted); white-space:pre-wrap; word-break:break-word; max-height:300px; overflow:auto; text-align:left; margin:0;"></pre>
+        </div>
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px;">
+            <strong style="color:var(--text-main);">⬆️ Output — Model result</strong>
+            <button class="btn btn-sm btn-secondary" onclick="copyIoText('output')">📋 Copy Output</button>
+          </div>
+          <pre id="ioOutput" style="padding:14px; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.12); border-radius:10px; font-size:0.82rem; color:var(--text-muted); white-space:pre-wrap; word-break:break-word; max-height:300px; overflow:auto; text-align:left; margin:0;"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script>
     const SUPABASE_URL = localStorage.getItem('supabase_url') || 'https://rmekfsdhglyiralxvkwc.supabase.co';
@@ -757,6 +788,8 @@ Return ONLY a JSON array with this structure:
 
     async function testOpenRouterGeneration() {
       if (!currentModuleId || !currentVideoId) { showToast('Select a module and video first.', true); return; }
+      let lastRequestBody = null;
+      let ioStored = false;
       $('genLoading').style.display = 'block';
       $('candidatesTableWrap').style.display = 'none';
       if ($('bulkSaveWrap')) $('bulkSaveWrap').style.display = 'none';
@@ -765,13 +798,23 @@ Return ONLY a JSON array with this structure:
         let scriptText = await fetchScriptForVideo(currentModuleId, currentVideoId) || $('scriptContent').value.trim();
         const moduleName = dbModules.find(m => m.id === currentModuleId)?.title || '';
         const videoName = dbVideos.find(v => v.id === currentVideoId)?.title || '';
+        lastRequestBody = { script: scriptText, courseName: "Claude Architect Certification", moduleName, videoName };
         const res = await fetch('/api/lowerthirds/openrouter', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ script: scriptText, courseName: "Claude Architect Certification", moduleName, videoName })
+          body: JSON.stringify(lastRequestBody)
         });
-        if (!res.ok) throw new Error(await res.text());
+        if (!res.ok) {
+          const errBody = await res.text();
+          storeOpenRouterIO({ request: lastRequestBody, prompt: clientFallbackPrompt(lastRequestBody), output: '', model: '', status: res.status, error: res.status + ': ' + errBody });
+          ioStored = true;
+          throw new Error(errBody);
+        }
         const data = await res.json();
+        // Capture the EXACT prompt the server built + the model output so the
+        // 🔍 inspector can show "actual executed prompt and output result".
+        storeOpenRouterIO({ request: lastRequestBody, prompt: data.prompt || '(prompt not returned by this server build)', output: data.content || '', model: data.model || '', status: res.status });
+        ioStored = true;
         const jsonStr = data.content.substring(data.content.indexOf('['), data.content.lastIndexOf(']') + 1);
         const candidates = JSON.parse(jsonStr);
         const moduleNum = dbModules.find(m => m.id === currentModuleId)?.module_number || 0;
@@ -807,6 +850,10 @@ Return ONLY a JSON array with this structure:
         if ($('bulkSaveWrap')) $('bulkSaveWrap').style.display = 'block';
         showToast('OpenRouter generation complete!');
       } catch (e) {
+        if (!ioStored && lastRequestBody) {
+          storeOpenRouterIO({ request: lastRequestBody, prompt: clientFallbackPrompt(lastRequestBody), output: '', model: '', status: 0, error: e.message });
+          ioStored = true;
+        }
         $('genLoading').style.display = 'none';
         $('candidatesTableWrap').style.display = 'block';
         
@@ -938,6 +985,75 @@ Return ONLY a JSON array with this structure:
       }
     }
 
+    // ── 🔍 OpenRouter Prompt & Output Inspector ────────────────────────────
+    // Keeps the last run's exact server-built prompt + model output so it can
+    // be reviewed/copied for feedback. Mirrors the server prompt template as a
+    // fallback for error paths where the server never returns a prompt.
+    let lastOpenRouterIO = null;
+
+    function clientFallbackPrompt(req) {
+      return 'You are a lower thirds generator for a video course.\n' +
+        'Course Title: ' + (req.courseName || '') + '\n' +
+        'Module Name: ' + (req.moduleName || '') + '\n' +
+        'Video Name: ' + (req.videoName || '') + '\n\n' +
+        'Based on the following video script, generate exactly 3 lower third candidate options.\n' +
+        'Each candidate must have a "main" text (max 40 chars) and "sub" text (max 60 chars) and a brief "rationale".\n\n' +
+        'Video script:\n' + (req.script || '') + '\n\n' +
+        'Return ONLY a JSON array with this structure:\n' +
+        '[\n  {"main": "Main Text", "sub": "Sub text description", "rationale": "Reason"}\n]';
+    }
+
+    function storeOpenRouterIO(io) {
+      io.ts = new Date().toISOString();
+      lastOpenRouterIO = io;
+      const btn = $('inspectIoBtn');
+      if (btn) btn.style.display = 'inline-block';
+    }
+
+    function openIoInspector() {
+      const io = lastOpenRouterIO;
+      if (!io) { showToast('No OpenRouter run captured yet.', true); return; }
+      $('ioPrompt').textContent = io.prompt || '(no prompt captured)';
+      $('ioOutput').textContent = io.error ? ('ERROR: ' + io.error) : (io.output || '(no output)');
+      const meta = [];
+      if (io.model) meta.push('Model: ' + io.model);
+      if (io.status) meta.push('HTTP ' + io.status);
+      meta.push('Time: ' + io.ts);
+      $('ioMeta').textContent = meta.join(' · ');
+      $('ioInspectorOverlay').style.display = 'flex';
+    }
+
+    function closeIoInspector() {
+      $('ioInspectorOverlay').style.display = 'none';
+    }
+
+    async function copyIoText(kind) {
+      const io = lastOpenRouterIO;
+      if (!io) { showToast('Nothing to copy.', true); return; }
+      let text = '';
+      if (kind === 'prompt') {
+        text = io.prompt || '';
+      } else if (kind === 'output') {
+        text = io.error ? ('ERROR: ' + io.error) : (io.output || '');
+      } else { // all
+        text = '=== OPENROUTER REQUEST (model input) ===\n';
+        if (io.model) text += 'Model: ' + io.model + '\n';
+        if (io.status) text += 'HTTP Status: ' + io.status + '\n';
+        text += '\n--- PROMPT ---\n' + (io.prompt || '') + '\n\n';
+        text += '=== OPENROUTER RESPONSE (model output) ===\n';
+        text += io.error ? ('ERROR: ' + io.error) : (io.output || '');
+        text += '\n';
+      }
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast(kind === 'all' ? 'Copied prompt + output!' : 'Copied!');
+      } catch (e) {
+        showToast('Copy failed: ' + e.message, true);
+      }
+    }
+
+    document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeIoInspector(); });
+
     $('togglePromptBtn').addEventListener('click', function() {
       const p = $('promptViewer');
       if (p.style.display === 'none') {
@@ -951,6 +1067,7 @@ Return ONLY a JSON array with this structure:
 
     $('openRouterBtn').addEventListener('click', testOpenRouterGeneration);
     $('mockGenBtn').addEventListener('click', mockGeneration);
+    $('inspectIoBtn').addEventListener('click', openIoInspector);
     
     $('debugServerBtn').addEventListener('click', async function() {
       const btn = this;

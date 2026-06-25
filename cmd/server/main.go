@@ -2298,8 +2298,12 @@ Return ONLY a JSON array with this structure:
 			content = orResp.Choices[0].Message.Content
 		}
 
+		// Return the exact prompt that was sent so the UI can expose the
+		// "actual executed prompt" for feedback/debugging (no client rebuild drift).
 		json.NewEncoder(w).Encode(map[string]string{
 			"content": content,
+			"prompt":  prompt,
+			"model":   "google/gemini-2.5-flash",
 		})
 	}
 }

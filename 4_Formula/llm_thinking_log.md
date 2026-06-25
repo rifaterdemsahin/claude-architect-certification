@@ -1849,3 +1849,22 @@ This guarantees uniqueness both among the new candidates and against existing no
 - Local Go server (fresh binary): `lower_thirds.html` serves 200 with the fix present; `/api/lowerthirds/openrouter` resolves (200, was 404 on a stale binary) ✅
 
 **Outcome:** Multiple candidate rows now insert cleanly; the duplicate-key 409 is eliminated. (The OpenRouter content generation was already fixed in the prior entry.)
+
+## 2026-06-25 - 🔍 OpenRouter Prompt & Output Inspector (Feedback Modal)
+
+**Context:** User asked for a way to see the **actual executed prompt** (input) and the **output result** from the OpenRouter lower-thirds generation, so they can copy the whole input/output for feedback.
+
+**Approach:**
+- 🖥️ **Server (`openRouterGenerateHandler`):** the prompt was built server-side only and never returned, so the UI couldn't show the *real* executed prompt. Added `prompt` and `model` to the JSON response (`{content, prompt, model}`). This guarantees the inspector shows the exact text the model received — no client-side rebuild drift.
+- 🎛️ **Frontend (`lower_thirds.html`):**
+  - Added a **🔍 Prompt & Output** icon button (hidden until the first run) next to the OpenRouter generate button.
+  - `testOpenRouterGeneration()` now captures `data.prompt`/`data.content`/`data.model` on success, and the request body + error text on failure, into a `lastOpenRouterIO` state object.
+  - Added a glassmorphic **modal popup** (`#ioInspectorOverlay`) with two sections — **⬇️ Input (Prompt)** and **⬆️ Output (Model result)** — each with its own copy button, plus a **📋 Copy All (Prompt + Output)** button for one-shot feedback. Closes via ✕, backdrop click, or Escape.
+  - `clientFallbackPrompt()` mirrors the server template so error paths still show a meaningful prompt.
+
+**Verification:**
+- `go build ./... && go vet ./...` ✅; JS syntax OK across all 5 `<script>` blocks ✅
+- Local Go server: page serves 200; modal + button present in served HTML ✅
+- `POST /api/lowerthirds/openrouter` now returns `prompt` (613 chars), `model` (google/gemini-2.5-flash), and `content` ✅
+
+**Outcome:** After clicking **🧠 OpenRouter Generate Lower Thirds**, a **🔍 Prompt & Output** button appears; clicking it opens a modal with the exact prompt + model output, each copyable (plus copy-all) for feedback.
