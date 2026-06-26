@@ -1,5 +1,8 @@
 # Spec: 🏛️ Claude AI Certification for Architects
 
+> 🔖 **Version**: `0.1`
+> 📐 **Versioning rule** — `0.1` initial · `0.11` small update · `0.2` bigger update. Bump manually when you edit this spec.
+
 ## 📍 Path
 `./5_Symbols/templates/index.html`
 
@@ -7,6 +10,27 @@
 **Description**: Claude AI Certification for Architects - Enterprise Systems & Integration Masterclass Companion Workspace. Learn custom MCP, VPC PrivateLink, multi-agent topologies, and cost-reduction prompt caching.
 
 *Rationale*: This file exists to serve as the `🏛️ Claude AI Certification for Architects` page for the project. Its primary goal is to provide the UI and functionality described in the description above. It is placed in `./5_Symbols/templates` following the 7-stage folder structure framework.
+
+## 🧩 Functionality — Recreate the Page
+To rebuild this page from scratch, implement the following behaviours (derived from the page's interactive logic):
+- `buildDebugMenu()`
+- `debugLog()`
+- `getAbsoluteUrl()`
+- `getCookie()`
+- `initMenus()`
+- `isItemActive()`
+- `isUrlActive()`
+- `resetNodes()`
+- `resolveUrl()`
+- `setCookie()`
+- `termLog()`
+
+## 🗄️ Data Layer — Tables & APIs Used
+**Database tables (Supabase / PostgREST):**
+- None — this page does not read or write database tables.
+
+**Backend / external endpoints:**
+- `/api/errors`
 
 ## 🏗️ How to Create / Implementation Details
 
@@ -21,8 +45,8 @@ The following stylesheets must be included:
 - `https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css`
 - `https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css`
 
-### 3. Core Layout & Containers
-The page should be structured with the following main semantic containers and IDs/classes:
+### 3. 🖥️ UI — Core Layout & Containers
+The page should be structured with the following main semantic containers and IDs/classes. When hovering over a container it should reveal its container name for easy prompting:
 - `<div id='node-user'>`
 - `<div id='line-1'>`
 - `<div id='node-router'>`
@@ -52,16 +76,17 @@ The page should be structured with the following main semantic containers and ID
 - H3: Symbols (Code)
 
 ### 5. Scripts Required
-The following JavaScript files must be loaded:
+The following JavaScript files must be loaded which are reusable shared scripts.
 - `shared/nav.js`
 - `shared/debug-panel.js`
 - `../shared/seo.js`
 
 **Inline Script Logic Includes:**
-- Functions: debugLog, termLog, getAbsoluteUrl, initMenus, isUrlActive, buildDebugMenu, resetNodes, resolveUrl, isItemActive, getCookie
-- Constants/Variables: debugMenuOverlay, debugLinksList, matchCount, btn, subVisible, divider, li, urlLower, subBtn, a
+- Functions: buildDebugMenu, debugLog, getAbsoluteUrl, getCookie, initMenus, isItemActive, isUrlActive, resetNodes, resolveUrl, setCookie, termLog
+- Constants/Variables: DAY_MS, LAUNCH_DATE, a, activeClass, btn, childActiveClass, currentFile, currentParams, d, daysSinceLaunch
 
 ## ✅ Acceptance Criteria
 - [ ] Page renders correctly without console errors.
 - [ ] Debug menu and navigation work if applicable.
 - [ ] Responsive design works on mobile and desktop.
+- [ ] All listed database tables and endpoints respond as expected.

@@ -2,6 +2,32 @@
 
 This directory contains auto-generated specifications for all HTML files in the project. You can edit these specs to document how the files should be built, their rationales, and acceptance criteria.
 
+## 🔖 Versioning Convention
+
+Every spec carries a `**Version**` field near the top. Bump it **manually** when you edit a spec:
+
+| Bump | When | Example |
+|------|------|---------|
+| `0.1` | Initial auto-generated spec | new file |
+| `0.11`, `0.12` … | Small update — typo, single field, minor clarification | tweak one heading |
+| `0.2`, `0.3` … | Bigger update — new functionality, new tables, structural rewrite | add data-layer section |
+
+> ♻️ **Re-generation is safe.** `4_Formula/generate_specs.py` **preserves** the existing version when it re-runs (it only stamps `0.1` on brand-new specs), so manual bumps and hand edits to the version line survive.
+
+## 🧩 What every spec must contain (to recreate the page)
+
+The generator emits these sections for each HTML file so the page can be rebuilt from the spec alone:
+
+1. **🔖 Version** + versioning rule
+2. **🎯 Purpose & Rationale**
+3. **🧩 Functionality — Recreate the Page** — the interactive functions / behaviours
+4. **🗄️ Data Layer — Tables & APIs Used** — Supabase/PostgREST tables + backend/external endpoints
+5. **🖥️ UI — Core Layout & Containers** — container IDs (hover reveals the name for prompting) + key headings
+6. **🏗️ Implementation Details** — stylesheets, shared scripts, inline constants
+7. **✅ Acceptance Criteria**
+
+Hand-authored specs (e.g. `5_Symbols_production_postprod_lower_thirds_spec.md` at `0.2`) may add table schemas, changelogs, and prose beyond what the generator extracts.
+
 ## All Specifications
 
 - [4_Formula_cost_calculator_gemini_generation_spec.md](4_Formula_cost_calculator_gemini_generation_spec.md)

@@ -1,20 +1,19 @@
-# Spec: AI Generation Cost Calculator | Claude AI Certification
+# Spec: 🥊 Competitive Analysis — Research Hub
 
 > 🔖 **Version**: `0.1`
 > 📐 **Versioning rule** — `0.1` initial · `0.11` small update · `0.2` bigger update. Bump manually when you edit this spec.
 
 ## 📍 Path
-`./5_Symbols/production/postprod/cost_calculator.html`
+`./5_Symbols/production/preprod/research/competitive_analysis.html`
 
 ## 🎯 Purpose & Rationale
 **Description**: No description provided.
 
-*Rationale*: This file exists to serve as the `AI Generation Cost Calculator | Claude AI Certification` page for the project. Its primary goal is to provide the UI and functionality described in the description above. It is placed in `./5_Symbols/production/postprod` following the 7-stage folder structure framework.
+*Rationale*: This file exists to serve as the `🥊 Competitive Analysis — Research Hub` page for the project. Its primary goal is to provide the UI and functionality described in the description above. It is placed in `./5_Symbols/production/preprod/research` following the 7-stage folder structure framework.
 
 ## 🧩 Functionality — Recreate the Page
 To rebuild this page from scratch, implement the following behaviours (derived from the page's interactive logic):
-- `calc()`
-- `fmt()`
+- Static page — no interactive JavaScript functions detected.
 
 ## 🗄️ Data Layer — Tables & APIs Used
 **Database tables (Supabase / PostgREST):**
@@ -32,34 +31,27 @@ The HTML should follow standard HTML5 boilerplate.
 
 ### 2. Stylesheets Required
 The following stylesheets must be included:
-- `https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap`
+- `https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap`
+- `../../../../shared/nav.css`
 
 ### 3. 🖥️ UI — Core Layout & Containers
 The page should be structured with the following main semantic containers and IDs/classes. When hovering over a container it should reveal its container name for easy prompting:
 - `<div class='container'>`
-- `<div id='dispImageCost'>`
-- `<div id='dispLowerCost'>`
-- `<div id='dispSfxCost'>`
-- `<div id='dispMusicCost'>`
-- `<div id='tikTotal'>`
-- `<div id='arcTotal'>`
 
 ### 4. Key Headings
-- H1: AI Generation Cost Calculator
-- H2: 💰 Per-Unit Costs (shared)
-- H3: 🎬 "TikTok" Style
-- H3: 🏛 "Architect" Style −86%
-- H2: 📊 Budget Comparison
-- H2: 📈 Module-Level Estimate (Architect Style)
-- H2: 📝 Notes
+- H1: 🥊 Competitive Analysis
+- H2: 🌐 Similar Offers on the Web
+- H3: 1. Official Certification & Materials (Anthropic)
+- H3: 2. Online Courses & Prep Platforms
+- H3: 3. YouTube Community & Content Creators
+- H3: 4. Articles & Community Discussions
+- H2: 🧭 Competitive Positioning
 
 ### 5. Scripts Required
 The following JavaScript files must be loaded which are reusable shared scripts.
-- `../../../shared/redirect-to-live-site.js`
-
-**Inline Script Logic Includes:**
-- Functions: calc, fmt
-- Constants/Variables: arcImg, arcLow, arcMus, arcSfx, arcTot, cImg, cLow, cMus, cSfx, label
+- `../../../../shared/seo.js`
+- `../../../../shared/nav.js`
+- `../../../../shared/debug-panel.js`
 
 ## ✅ Acceptance Criteria
 - [ ] Page renders correctly without console errors.

@@ -1,5 +1,8 @@
 # Spec: Supabase Database Seed
 
+> 🔖 **Version**: `0.1`
+> 📐 **Versioning rule** — `0.1` initial · `0.11` small update · `0.2` bigger update. Bump manually when you edit this spec.
+
 ## 📍 Path
 `./5_Symbols/supabase/ui/admin.html`
 
@@ -7,6 +10,29 @@
 **Description**: No description provided.
 
 *Rationale*: This file exists to serve as the `Supabase Database Seed` page for the project. Its primary goal is to provide the UI and functionality described in the description above. It is placed in `./5_Symbols/supabase/ui` following the 7-stage folder structure framework.
+
+## 🧩 Functionality — Recreate the Page
+To rebuild this page from scratch, implement the following behaviours (derived from the page's interactive logic):
+- `checkAdminAuth()`
+- `clearAll()`
+- `getAnonKey()`
+- `getCookie()`
+- `getSupabaseUrl()`
+- `log()`
+- `loginAdmin()`
+- `saveAxiomConfig()`
+- `saveConfig()`
+- `seedAll()`
+- `supFetch()`
+- `testConnection()`
+- `triggerTestError()`
+
+## 🗄️ Data Layer — Tables & APIs Used
+**Database tables (Supabase / PostgREST):**
+- None — this page does not read or write database tables.
+
+**Backend / external endpoints:**
+- `/api/admin/login`
 
 ## 🏗️ How to Create / Implementation Details
 
@@ -19,8 +45,8 @@ The HTML should follow standard HTML5 boilerplate.
 The following stylesheets must be included:
 - `https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;800&family=Plus+Jakarta+Sans:wght@400;500;700&display=swap`
 
-### 3. Core Layout & Containers
-The page should be structured with the following main semantic containers and IDs/classes:
+### 3. 🖥️ UI — Core Layout & Containers
+The page should be structured with the following main semantic containers and IDs/classes. When hovering over a container it should reveal its container name for easy prompting:
 - `<div class='container'>`
 - `<div id='admin-auth-card'>`
 - `<div id='log-area'>`
@@ -31,16 +57,17 @@ The page should be structured with the following main semantic containers and ID
 - H2: 📡 Axiom Log Ingestion
 
 ### 5. Scripts Required
-The following JavaScript files must be loaded:
+The following JavaScript files must be loaded which are reusable shared scripts.
 - `../../shared/nav.js`
 - `../../../shared/seo.js`
 - `../../../shared/debug-panel.js`
 
 **Inline Script Logic Includes:**
-- Functions: triggerTestError, testConnection, saveAxiomConfig, seedAll, loginAdmin, supFetch, log, getAnonKey, saveConfig, getSupabaseUrl
-- Constants/Variables: status, v, mData, token, savedAxiomUrl, cues, scriptsToSeed, btn, vData, edlData
+- Functions: checkAdminAuth, clearAll, getAnonKey, getCookie, getSupabaseUrl, log, loginAdmin, saveAxiomConfig, saveConfig, seedAll, supFetch, testConnection
+- Constants/Variables: adminCookie, btn, checklistItems, courseContent, cues, data, dataset, ed, edlData, insertedScenes
 
 ## ✅ Acceptance Criteria
 - [ ] Page renders correctly without console errors.
 - [ ] Debug menu and navigation work if applicable.
 - [ ] Responsive design works on mobile and desktop.
+- [ ] All listed database tables and endpoints respond as expected.
