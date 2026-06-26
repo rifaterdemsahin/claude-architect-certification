@@ -1891,3 +1891,14 @@ This guarantees uniqueness both among the new candidates and against existing no
 - The returned JSON array format was updated to include `"scene"` and `"type"` parameters as defined in the instructions. The frontend's `scenes` table schema requires `lt_main` and `lt_sub`, and we will continue inserting sequentially to avoid unique key collisions (`module_number, section_number, scene_number`), ensuring the integrity of the data remains intact.
 
 **Outcome:** Modified `cmd/server/main.go` to add `Presenter` to the JSON request payload and updated `openRouterGenerateHandler` to pass it into the revised template. Modified `lower_thirds.html` to inject `presenter: ""` into `lastRequestBody` and updated `clientFallbackPrompt`. Verified via `go build` and `go vet`.
+
+### 📅 2026-06-26 — Update 10x Certification Page with Expanded TSDA Steps
+**Objective:** Expand the Tell, Show, Do, Apply steps with specific details provided by the user, add supporting infographic images, and push changes.
+**Approach:** 
+- Generate an infographic image representing the 4-step learning framework.
+- Update the HTML of `10x_certification.html` to include the generated image and the new detailed copy for each step:
+  - Tell: AI-generated 1-hour course, 3 modules, 3 videos (Coursera standard).
+  - Show: Nano banana, infographics, multimedia table read 1-by-1 creation.
+  - Do: GitHub repo creation, hands-on implementation with explanations.
+  - Apply: Reversal shots with lower thirds, graphics, and animations to ease learning.
+- Commit and push to GitHub.

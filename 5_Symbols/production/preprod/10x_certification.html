@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>10x Certification Guarantee — Claude AI Architect</title>
+    <meta name="description" content="Our 10x Guarantee: How our $10 membership ensures you pass the $100 certification. Laser-focused on passing through hands-on application and reversal shots.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --panel-bg: rgba(21, 27, 36, 0.7);
+            --border-color: #30363d;
+            --text-main: #c9d1d9;
+            --text-muted: #8b949e;
+            --accent-green: #2ea043;
+            --accent-gold: #e3b341;
+            --accent-purple: #8957e5;
+            --font-main: 'Inter', sans-serif;
+            --font-head: 'Anton', sans-serif;
+            --font-code: 'Space Mono', monospace;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-main);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Nav spacer */
+        .nav-spacer {
+            height: 80px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            flex: 1;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        h1 {
+            font-family: var(--font-head);
+            font-size: 4rem;
+            letter-spacing: 2px;
+            margin-bottom: 1rem;
+            background: linear-gradient(90deg, var(--accent-gold), var(--accent-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+        }
+
+        .subtitle {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* 10x ROI Section */
+        .roi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .glass-card {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-gold);
+        }
+
+        .glass-card h2 {
+            font-family: var(--font-head);
+            font-size: 2rem;
+            color: white;
+            margin-bottom: 1rem;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .glass-card p {
+            color: var(--text-muted);
+        }
+
+        /* The Strategy */
+        .strategy-section {
+            background: rgba(46, 160, 67, 0.05);
+            border-left: 4px solid var(--accent-green);
+            padding: 3rem;
+            border-radius: 0 12px 12px 0;
+            margin-bottom: 4rem;
+        }
+
+        .strategy-section h2 {
+            font-family: var(--font-head);
+            font-size: 2.5rem;
+            color: white;
+            margin-bottom: 1.5rem;
+            letter-spacing: 1px;
+        }
+
+        .strategy-content {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            font-size: 1.1rem;
+        }
+
+        .highlight-text {
+            color: var(--accent-gold);
+            font-weight: 600;
+        }
+
+        /* Camera Turn / Apply Section */
+        .camera-reversal {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+            margin-bottom: 4rem;
+        }
+
+        @media (max-width: 768px) {
+            .camera-reversal {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .camera-text h2 {
+            font-family: var(--font-head);
+            font-size: 2.5rem;
+            color: var(--accent-purple);
+            margin-bottom: 1.5rem;
+            letter-spacing: 1px;
+        }
+
+        .step-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .step-list li {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .step-list li.active-step {
+            border-color: var(--accent-purple);
+            background: rgba(137, 87, 229, 0.1);
+        }
+
+        .step-number {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-family: var(--font-code);
+            font-weight: bold;
+            color: white;
+        }
+
+        /* Related Links */
+        .related-links {
+            text-align: center;
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .related-links h3 {
+            margin-bottom: 1.5rem;
+            color: white;
+        }
+
+        .link-grid {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .link-btn {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .link-btn:hover {
+            border-color: var(--accent-gold);
+            color: white;
+            background: var(--panel-bg);
+        }
+
+        /* UI Decorative elements */
+        .dot-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: radial-gradient(var(--border-color) 1px, transparent 1px);
+            background-size: 30px 30px;
+            z-index: -1;
+            opacity: 0.3;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="dot-pattern"></div>
+    <div class="nav-spacer"></div>
+
+    <div class="container">
+        <header>
+            <h1>The 10x Guarantee</h1>
+            <p class="subtitle">How our <strong>$10 membership</strong> ensures you pass the <strong>$100 certification process</strong>. We are laser-focused on one outcome: giving you the experience to pass with absolute ease.</p>
+        </header>
+
+        <section class="roi-grid">
+            <div class="glass-card">
+                <h2>💰 The 10x ROI</h2>
+                <p>The math is simple. You invest $10 in our comprehensive membership, and we ensure you conquer the $100 Claude Architect Certification. You gain a massive multiplier on your skills, portfolio, and value.</p>
+            </div>
+            <div class="glass-card">
+                <h2>🎯 Laser Focused</h2>
+                <p>We do not waste time on abstract theory that won't be tested. Every module, shot, and exercise is reverse-engineered from the certification rubric. If it's not on the exam, it's not in the course.</p>
+            </div>
+            <div class="glass-card">
+                <h2>🎓 Showcase with Erdem</h2>
+                <p>Erdem has navigated the path. He will transparently document his own exam scores, learning processes, and self-correction loop, providing a proven psychological and technical template.</p>
+            </div>
+        </section>
+
+        <section class="camera-reversal">
+            <div class="camera-text">
+                <h2>🎥 Turning the Camera Around</h2>
+                <p>Most courses fail at the <strong>Apply</strong> stage. They stop after <em>Tell</em>, <em>Show</em>, and <em>Do</em>. We use post-production tools to literally "turn the camera around", giving you the reigns.</p>
+                <p>Through our dedicated <strong>Reversal Shots</strong>, you aren't just watching Erdem execute—you are placed in the architect's seat with matching prompts, scaffolding, and tasks.</p>
+            </div>
+            <div class="infographic-container" style="text-align: center; margin-bottom: 2rem;">
+                <img src="../../../3_Simulation/generated/tsda_framework_infographic.jpg" alt="Tell, Show, Do, Apply Infographic" style="max-width: 100%; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
+            </div>
+            <ul class="step-list">
+                <li>
+                    <div class="step-number" style="border-color: var(--accent-green);">01</div>
+                    <div><strong>Tell:</strong> The Architecture theory & requirements. <br><span class="highlight-text">>>> generated with ai for 1 hour course 3 modules and each module 3 videos > coursera standart</span></div>
+                </li>
+                <li>
+                    <div class="step-number" style="border-color: var(--accent-gold);">02</div>
+                    <div><strong>Show:</strong> Erdem models the prompt execution. <br><span class="highlight-text">> use the nano banana and infographics on the learning platform using the multi media and reading it outloud like a table read. 1 by 1 creation</span></div>
+                </li>
+                <li>
+                    <div class="step-number" style="border-color: #3b82f6;">03</div>
+                    <div><strong>Do:</strong> Joint review of the resulting system. <br><span class="highlight-text">> create a github and do the handson implementation while explaining it.</span></div>
+                </li>
+                <li class="active-step">
+                    <div class="step-number" style="border-color: var(--accent-purple);">04</div>
+                    <div><strong>Apply:</strong> <em>Camera Reversal.</em> Your turn to build the architecture using provided assets. <br><span style="color: var(--text-main);">> and focus on listening the other by helping yourself such as outlining the lower thirds and givign graphics and animations to make learning process easier.</span></div>
+                </li>
+            </ul>
+        </section>
+
+        <section class="strategy-section">
+            <h2>The Experience of Passing</h2>
+            <div class="strategy-content">
+                <p>Passing isn't about memorization; it's about <span class="highlight-text">predictability and muscle memory</span>. By practicing the exact workflows you will see in the exam, the certification becomes a mere formality.</p>
+                <p>We leverage our <strong>Post-Production Editor</strong> to extract the <em>Apply</em> chunks. For every major concept, there is an explicit Reversal stage where you clone the sandbox, run the prompts, and evaluate your output against Erdem's known-good baselines.</p>
+            </div>
+        </section>
+
+        <section class="related-links">
+            <h3>🔗 Related Pathways</h3>
+            <div class="link-grid">
+                <a href="../../../index.html" class="link-btn">🏠 Home</a>
+                <a href="course_outline.html" class="link-btn">📋 Course Outline</a>
+                <a href="../publish/membership.html" class="link-btn">💎 Membership Info</a>
+                <a href="../postprod/production_shotlist.html" class="link-btn">🎬 Reversal Shotlist</a>
+                <a href="strategy.html" class="link-btn">🧠 Strategy</a>
+            </div>
+        </section>
+    </div>
+
+    <!-- Scripts for Navigation and Debug Panel -->
+    <script src="../../../shared/nav.js"></script>
+    <script src="../../../shared/debug-panel.js"></script>
+</body>
+</html>
