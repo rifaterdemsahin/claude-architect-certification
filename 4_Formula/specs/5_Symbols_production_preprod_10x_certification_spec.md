@@ -1,0 +1,43 @@
+# Spec: 10x Certification Guarantee — Claude AI Architect
+
+## 📍 Path
+`./5_Symbols/production/preprod/10x_certification.html`
+
+## 🎯 Purpose & Rationale
+**Description**: Our 10x Guarantee: How our $10 membership ensures you pass the $100 certification. Laser-focused on passing through hands-on application and reversal shots.
+
+*Rationale*: This file exists to serve as the `10x Certification Guarantee — Claude AI Architect` page for the project. Its primary goal is to provide the UI and functionality described in the description above. It is placed in `./5_Symbols/production/preprod` following the 7-stage folder structure framework.
+
+## 🏗️ How to Create / Implementation Details
+
+### 1. Document Structure
+The HTML should follow standard HTML5 boilerplate.
+- **Language**: `en`
+- **Viewport**: `width=device-width, initial-scale=1.0`
+
+### 2. Stylesheets Required
+The following stylesheets must be included:
+- `https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap`
+
+### 3. Core Layout & Containers
+The page should be structured with the following main semantic containers and IDs/classes:
+- `<div class='container'>`
+
+### 4. Key Headings
+- H1: The 10x Guarantee
+- H2: 💰 The 10x ROI
+- H2: 🎯 Laser Focused
+- H2: 🎓 Showcase with Erdem
+- H2: 🎥 Turning the Camera Around
+- H2: The Experience of Passing
+- H3: 🔗 Related Pathways
+
+### 5. Scripts Required
+The following JavaScript files must be loaded:
+- `../../../shared/nav.js`
+- `../../../shared/debug-panel.js`
+
+## ✅ Acceptance Criteria
+- [ ] Page renders correctly without console errors.
+- [ ] Debug menu and navigation work if applicable.
+- [ ] Responsive design works on mobile and desktop.
