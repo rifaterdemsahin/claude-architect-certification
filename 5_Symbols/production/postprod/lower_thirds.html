@@ -145,6 +145,7 @@
   </style>
   <script src="../../../shared/nav.js"></script>
   <script src="../../../shared/debug-panel.js"></script>
+  <script src="https://accounts.google.com/gsi/client" onload="gisLoaded()" async defer></script>
 <script src="../../../shared/seo.js" defer></script></head>
 <body>
   <div class="container">
@@ -300,6 +301,39 @@ Return ONLY a JSON array with this structure:
       <h2 style="font-family:var(--font-title);margin-bottom:8px;">Select a Module & Video</h2>
       <p>Choose a module and video above to start managing lower thirds for each scene.</p>
     </div>
+    <div class="glass-card" id="gdrivePanel" style="margin-bottom: 32px;">
+      <div class="glass-card-header" onclick="togglePanel(this)">
+        <h2>☁️ Save to Google Drive</h2>
+        <span class="collapse-icon">▼</span>
+      </div>
+      <div class="glass-card-body">
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:12px;">
+          <span id="driveAuthDot" style="width:10px;height:10px;border-radius:50%;background:var(--text-muted);display:inline-block;"></span>
+          <span id="driveAuthText" style="font-size:0.85rem;color:var(--text-muted);">Checking Google auth…</span>
+          <button class="btn btn-sm" id="driveLinkBtn" style="display:none;background:var(--secondary);color:#fff;">🔗 Link Google Drive</button>
+          <button class="btn btn-sm" id="driveUnlinkBtn" style="display:none;background:var(--danger);color:#fff;">⏏ Disconnect</button>
+        </div>
+
+        <div style="background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:14px;margin-bottom:12px;">
+          <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:6px;font-weight:600;">📁 Target folder <span style="font-weight:400;">(resolved before you press save)</span></div>
+          <div id="driveFolderPath" style="font-size:0.9rem;color:var(--text-main);word-break:break-word;">—</div>
+          <div id="driveFolderLinkWrap" style="margin-top:8px;display:none;font-size:0.85rem;">
+            <a id="driveFolderLink" href="#" target="_blank" rel="noopener" style="color:var(--secondary);">🔗 Open lowerthirds folder in Drive</a>
+            <span id="driveFolderId" style="margin-left:10px;color:var(--text-muted);font-family:var(--font-mono);font-size:0.75rem;"></span>
+          </div>
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <button class="btn" id="driveSaveBtn" disabled style="background:#10b981;color:#000;">☁️ Save Current Lower Third to Google Drive</button>
+        </div>
+
+        <details style="margin-top:4px;">
+          <summary style="cursor:pointer;color:var(--text-muted);font-size:0.8rem;">🐞 Debug log</summary>
+          <pre id="driveDebugLog" style="margin-top:8px;padding:10px;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.08);border-radius:8px;font-size:0.75rem;color:var(--text-muted);max-height:160px;overflow:auto;white-space:pre-wrap;"></pre>
+        </details>
+      </div>
+    </div>
+
     <footer>
       <p><a href="index.html" style="color:var(--secondary);text-decoration:none;">← Back to Post-Production</a></p>
     </footer>
@@ -714,6 +748,7 @@ Return ONLY a JSON array with this structure:
       $('actionPanel').style.display = val ? 'block' : 'none';
       ['openRouterBtn', 'mockGenBtn'].forEach(id => { if($(id)) $(id).style.display = 'none'; });
       loadVideos(currentModuleId);
+      if (typeof driveUpdatePathPreview === 'function') driveUpdatePathPreview();
     });
 
     $('videoSelect').addEventListener('change', async function() {
@@ -730,6 +765,8 @@ Return ONLY a JSON array with this structure:
         $('scriptPanel').style.display = 'block';
         loadCandidates(currentVideoId);
         if ($('candidatesTableWrap').querySelector('.lt-table')) $('candidatesPanel').style.display = 'block';
+        if (typeof driveUpdatePathPreview === 'function') driveUpdatePathPreview();
+        if (driveAccessToken && typeof refreshDriveFolderPreview === 'function') refreshDriveFolderPreview();
       } else {
         $('editorSection').style.display = 'none';
         $('emptyState').style.display = 'block';
@@ -1135,6 +1172,209 @@ Return ONLY a JSON array with this structure:
         btn.disabled = false;
       }
     });
+
+    // ── ☁️ Google Drive Save (video/module/lowerthirds subfolder) ─────────────
+    // Uses Google Identity Services (GIS) for the OAuth token + raw fetch to the
+    // Drive REST API. Reuses the shared `gdrive_client_id` in localStorage (same
+    // credential store as the Folder Creator & GDrive Sync pages), so no API key
+    // is required. The target folder chain is RESOLVED + LINKED right after auth
+    // so you can verify/open the destination before pressing Save.
+    const DRIVE_ROOT_NAME = 'Claude AI Architect Certification';
+    const DRIVE_SCOPES = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive';
+    let driveTokenClient = null;
+    let driveAccessToken = null;
+    let driveFolderChain = null; // { lt: {id}, path }
+
+    function driveLog(msg, kind) {
+      const el = $('driveDebugLog');
+      const ts = new Date().toLocaleTimeString();
+      const prefix = kind === 'error' ? '❌ ' : kind === 'success' ? '✅ ' : '› ';
+      el.textContent = `[${ts}] ${prefix}${msg}\n` + el.textContent;
+    }
+
+    function driveEsc(s) { return String(s || '').replace(/'/g, "\\'"); }
+
+    function driveFolderPreview() {
+      const m = dbModules.find(x => x.id === currentModuleId);
+      const v = dbVideos.find(x => x.id === currentVideoId);
+      const modName = m ? `Module ${m.module_number} - ${m.title}` : 'Module 0 — Unknown';
+      const vidName = v ? `Video ${v.video_number} - ${v.title}` : 'Video 0 — Unknown';
+      return `${DRIVE_ROOT_NAME}  ›  ${modName}  ›  ${vidName}  ›  lowerthirds`;
+    }
+
+    function updateDriveAuthUI(connected, text) {
+      const dot = $('driveAuthDot');
+      $('driveAuthText').textContent = text;
+      if (connected) {
+        dot.style.background = 'var(--success)';
+        $('driveLinkBtn').style.display = 'none';
+        $('driveUnlinkBtn').style.display = 'inline-block';
+        $('driveSaveBtn').disabled = false;
+      } else {
+        dot.style.background = 'var(--text-muted)';
+        $('driveLinkBtn').style.display = driveTokenClient ? 'inline-block' : 'none';
+        $('driveUnlinkBtn').style.display = 'none';
+        $('driveSaveBtn').disabled = true;
+      }
+    }
+
+    // GIS calls this once the gsi/client script finishes loading.
+    function gisLoaded() {
+      const clientId = localStorage.getItem('gdrive_client_id');
+      if (!clientId) {
+        $('driveFolderPath').textContent = driveFolderPreview();
+        updateDriveAuthUI(false, 'No Google Client ID — set it in 📁 Folder Creator first.');
+        driveLog('No gdrive_client_id in localStorage. Open the Folder Creator page to set it.', 'error');
+        return;
+      }
+      try {
+        driveTokenClient = google.accounts.oauth2.initTokenClient({
+          client_id: clientId,
+          scope: DRIVE_SCOPES,
+          callback: async (resp) => {
+            if (resp.error !== undefined) { driveLog('Auth callback error: ' + resp.error, 'error'); return; }
+            driveAccessToken = resp.access_token;
+            updateDriveAuthUI(true, 'Google Drive linked');
+            driveLog('Access token granted.', 'success');
+            await refreshDriveFolderPreview(); // resolve + link BEFORE the save press
+          }
+        });
+        $('driveFolderPath').textContent = driveFolderPreview();
+        updateDriveAuthUI(false, 'Ready — link your Google account.');
+        driveLog('GIS token client ready (client_id loaded).');
+      } catch (e) {
+        driveLog('GIS init failed: ' + e.message, 'error');
+      }
+    }
+
+    function driveLink() {
+      if (!driveTokenClient) { driveLog('Token client not ready.', 'error'); return; }
+      driveTokenClient.requestAccessToken({ prompt: 'consent' });
+    }
+
+    function driveUnlink() {
+      if (window.google && google.accounts && google.accounts.oauth2 && driveAccessToken) {
+        try { google.accounts.oauth2.revokeToken(driveAccessToken); } catch (_) {}
+      }
+      driveAccessToken = null;
+      driveFolderChain = null;
+      $('driveFolderLinkWrap').style.display = 'none';
+      updateDriveAuthUI(false, 'Disconnected.');
+      driveLog('Token revoked, disconnected.');
+    }
+
+    // Re-render the live folder path when module/video selection changes.
+    function driveUpdatePathPreview() {
+      $('driveFolderPath').textContent = driveFolderPreview();
+    }
+
+    async function driveGetOrCreateFolder(name, parentId) {
+      const parentClause = parentId ? `'${parentId}' in parents` : `'root' in parents`;
+      const q = `mimeType='application/vnd.google-apps.folder' and name='${driveEsc(name)}' and trashed=false and ${parentClause}`;
+      const url = 'https://www.googleapis.com/drive/v3/files?q=' + encodeURIComponent(q) + '&fields=files(id,name)&spaces=drive';
+      const r = await fetch(url, { headers: { Authorization: 'Bearer ' + driveAccessToken } });
+      if (!r.ok) throw new Error('Drive list failed: ' + await r.text());
+      const data = await r.json();
+      if (data.files && data.files.length) return data.files[0];
+      const meta = { name: name, mimeType: 'application/vnd.google-apps.folder' };
+      if (parentId) meta.parents = [parentId];
+      const cr = await fetch('https://www.googleapis.com/drive/v3/files?fields=id,name', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + driveAccessToken, 'Content-Type': 'application/json' },
+        body: JSON.stringify(meta)
+      });
+      if (!cr.ok) throw new Error('Drive create-folder failed: ' + await cr.text());
+      return await cr.json();
+    }
+
+    async function driveUploadPng(blob, fileName, parentId) {
+      const meta = { name: fileName };
+      if (parentId) meta.parents = [parentId];
+      const boundary = 'lt_drive_' + Date.now();
+      const body = new Blob([
+        '--' + boundary + '\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n' + JSON.stringify(meta) + '\r\n' +
+        '--' + boundary + '\r\nContent-Type: image/png\r\n\r\n',
+        blob,
+        '\r\n--' + boundary + '--'
+      ], { type: 'multipart/related; boundary=' + boundary });
+      const r = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + driveAccessToken, 'Content-Type': 'multipart/related; boundary=' + boundary },
+        body: body
+      });
+      if (!r.ok) throw new Error('Drive upload failed: ' + await r.text());
+      return await r.json();
+    }
+
+    async function driveResolveChain() {
+      const m = dbModules.find(x => x.id === currentModuleId);
+      const v = dbVideos.find(x => x.id === currentVideoId);
+      if (!m || !v) throw new Error('Select a module and video first.');
+      const modName = `Module ${m.module_number} - ${m.title}`;
+      const vidName = `Video ${v.video_number} - ${v.title}`;
+      driveLog('Resolving folder chain…');
+      const root = await driveGetOrCreateFolder(DRIVE_ROOT_NAME, null);
+      driveLog(`Root "${DRIVE_ROOT_NAME}" → ${root.id} (${root.name === root.name ? 'found' : 'created'})`);
+      const mod = await driveGetOrCreateFolder(modName, root.id);
+      driveLog(`Module "${modName}" → ${mod.id}`);
+      const vid = await driveGetOrCreateFolder(vidName, mod.id);
+      driveLog(`Video "${vidName}" → ${vid.id}`);
+      const lt = await driveGetOrCreateFolder('lowerthirds', vid.id);
+      driveLog(`lowerthirds → ${lt.id}`, 'success');
+      return { root, mod, vid, lt, path: `${DRIVE_ROOT_NAME} › ${modName} › ${vidName} › lowerthirds` };
+    }
+
+    // Resolves the target folder (idempotent) and reveals the open-in-Drive link
+    // so the destination can be verified BEFORE pressing the Save button.
+    async function refreshDriveFolderPreview() {
+      if (!driveAccessToken) return;
+      try {
+        $('driveAuthText').textContent = 'Resolving folder…';
+        const chain = await driveResolveChain();
+        driveFolderChain = chain;
+        $('driveFolderPath').textContent = chain.path;
+        const link = $('driveFolderLink');
+        link.href = 'https://drive.google.com/drive/folders/' + chain.lt.id;
+        $('driveFolderId').textContent = 'id: ' + chain.lt.id;
+        $('driveFolderLinkWrap').style.display = 'block';
+        updateDriveAuthUI(true, 'Folder ready — verify it above before saving.');
+      } catch (e) {
+        driveLog('Folder resolve failed: ' + e.message, 'error');
+        updateDriveAuthUI(true, 'Linked, but folder resolve failed — see log.');
+      }
+    }
+
+    async function driveSaveLowerThird() {
+      if (!driveAccessToken) { showToast('Link Google Drive first.', true); return; }
+      const ltMain = $('ltMain').value.trim() || 'Main Text';
+      const ltSub = $('ltSub').value.trim() || 'Sub Text';
+      if (!currentModuleId || !currentVideoId) { showToast('Select a module and video first.', true); return; }
+      const btn = $('driveSaveBtn');
+      const orig = btn.textContent;
+      btn.disabled = true; btn.textContent = 'Uploading…';
+      try {
+        renderLowerThirdToCanvas(ltMain, ltSub);
+        const blob = await new Promise(res => canvasEl.toBlob(res, 'image/png'));
+        if (!blob) throw new Error('Canvas render failed');
+        // Re-resolve to ensure the folder exists (cheap when cached).
+        if (!driveFolderChain) await refreshDriveFolderPreview();
+        const parentId = driveFolderChain ? driveFolderChain.lt.id : null;
+        const fileName = brandFilePrefix(ltMain) + '.png';
+        const up = await driveUploadPng(blob, fileName, parentId);
+        driveLog(`Uploaded "${fileName}" → ${up.id}`, 'success');
+        showToast('Saved to Google Drive!');
+        if (up.webViewLink) driveLog('File link: ' + up.webViewLink, 'success');
+      } catch (e) {
+        showToast('Drive upload failed: ' + e.message, true);
+        driveLog('Upload failed: ' + e.message, 'error');
+      } finally {
+        btn.disabled = false; btn.textContent = orig;
+      }
+    }
+
+    if ($('driveLinkBtn')) $('driveLinkBtn').addEventListener('click', driveLink);
+    if ($('driveUnlinkBtn')) $('driveUnlinkBtn').addEventListener('click', driveUnlink);
+    if ($('driveSaveBtn')) $('driveSaveBtn').addEventListener('click', driveSaveLowerThird);
 
     renderBrandPanel();
     updatePreview();

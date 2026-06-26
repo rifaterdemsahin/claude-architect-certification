@@ -1885,6 +1885,24 @@ This guarantees uniqueness both among the new candidates and against existing no
 
 **Outcome:** Every lower-third PNG (download or Azure upload) is now named `module{N}_video{N}_{MainText}_{ModuleName}_{VideoName}.png`, consistent across the tool.
 
+## 2026-06-25 - ☁️ Save Lower Third to Google Drive (video/module/lowerthirds)
+
+**Context:** User asked for a button at the bottom of the lower-thirds page that saves the current lower-third PNG into a Google Drive folder structure `Root › Module › Video › lowerthirds`, with the target folder **resolved + linked in the UI before the save is pressed** (debug + open-in-Drive link), so it can be verified first.
+
+**Approach:**
+- **Auth:** Added Google Identity Services (`accounts.google.com/gsi/client`) for the OAuth token. Reuses the shared `gdrive_client_id` already stored in `localStorage` by the 📁 Folder Creator / GDrive Sync pages — so **no API key is required**. Scope matches the existing pages (`drive.file` + `drive`).
+- **Drive ops via raw `fetch`** to the Drive REST API (`/drive/v3/files`, `/upload/drive/v3/files?uploadType=multipart`) with the Bearer token — avoids the gapi/API-key dependency and handles binary PNG upload correctly via a `multipart/related` Blob body.
+- **Folder chain (idempotent):** `Root "Claude AI Architect Certification" › "Module {n} - {title}" › "Video {n} - {title}" › "lowerthirds"`, each created-or-reused via `driveGetOrCreateFolder(name, parentId)`.
+- **“Show folder before press”:** right after auth (and whenever the module/video selection changes while linked) the chain is resolved and the path + a **🔗 open-in-Drive link** + folder `id` are rendered into the Target Folder box — visible **before** the user presses Save. A collapsible **🐞 Debug log** records every found/created step with IDs and any errors.
+- **Save button:** `☁️ Save Current Lower Third to Google Drive` renders the current canvas to a PNG blob, re-resolves the folder if needed, and uploads with the brand file-prefix name (`module{N}_video{N}_{MainText}_{ModuleName}_{VideoName}.png`).
+- Filename reuses the existing `brandFilePrefix(mainText)` so Drive files match local downloads/uploads.
+
+**Verification:**
+- JS syntax OK across all 6 `<script>` blocks; 6 key Drive functions present; `go build`/`go vet` pass.
+- Local Go server serves page 200; GIS script + Drive panel + functions present in served HTML.
+
+**Outcome:** Authenticated users see the resolved `lowerthirds` folder + open-in-Drive link before saving; the bottom button uploads the current lower-third PNG into that folder.
+
 ### 📅 2026-06-26 — 10x Certification Guarantee Page
 **Objective:** Create a page `5_Symbols/production/preprod/10x_certification.html` explaining how the $10 membership guarantees passing the $100 certification process.
 **Approach:** 
