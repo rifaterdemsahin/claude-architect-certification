@@ -360,6 +360,53 @@
     return buildDropItemHtml(item.url, item.label, isUrlActive(item.url) ? 'active' : '', false, item.description);
   }
 
+  // ── 🔐 Shared Google Drive login indicator ──────────────────────────────
+  // Shown in the top nav on every page. Reflects the Drive sign-in hint stored
+  // in localStorage ('gdrive_logged_in'); clicking the chip navigates to the
+  // login page (Folder Creator) where the actual Google OAuth happens. Pages
+  // that perform Drive auth call window.SiteAuth.setLoggedIn(true/false) to keep
+  // the chip in sync.
+  var LOGIN_URL = ROOT + '5_Symbols/production/prod/google_drive_folder_creator.html';
+
+  function isDriveLoggedIn() {
+    try { return localStorage.getItem('gdrive_logged_in') === 'true'; } catch (e) { return false; }
+  }
+
+  function buildAuthChipHtml() {
+    var on = isDriveLoggedIn();
+    var dot = on ? '#10b981' : '#9ca3af';
+    return '<a href="' + LOGIN_URL + '" id="site-nav-auth" ' +
+      'style="display:inline-flex;align-items:center;gap:6px;margin-left:10px;padding:6px 12px;border-radius:20px;' +
+      'background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);text-decoration:none;color:inherit;' +
+      'font-size:0.85rem;white-space:nowrap;" ' +
+      'title="' + (on ? 'Google Drive connected — click to manage sign-in' : 'Sign in to Google Drive') + '">' +
+      '<span class="site-nav-auth-dot" style="width:8px;height:8px;border-radius:50%;flex-shrink:0;background:' + dot + ';"></span>' +
+      '<span class="site-nav-auth-label">' + (on ? '🔐 Drive' : '🔓 Sign in') + '</span></a>';
+  }
+
+  function refreshAuthChip() {
+    var el = document.getElementById('site-nav-auth');
+    if (!el) return;
+    var on = isDriveLoggedIn();
+    el.title = on ? 'Google Drive connected — click to manage sign-in' : 'Sign in to Google Drive';
+    var dot = el.querySelector('.site-nav-auth-dot');
+    if (dot) dot.style.background = on ? '#10b981' : '#9ca3af';
+    var label = el.querySelector('.site-nav-auth-label');
+    if (label) label.textContent = on ? '🔐 Drive' : '🔓 Sign in';
+  }
+
+  window.SiteAuth = {
+    isLoggedIn: isDriveLoggedIn,
+    loginUrl: LOGIN_URL,
+    setLoggedIn: function (v) {
+      try {
+        if (v) localStorage.setItem('gdrive_logged_in', 'true');
+        else localStorage.removeItem('gdrive_logged_in');
+      } catch (e) {}
+      refreshAuthChip();
+    }
+  };
+
   function buildNav(menu) {
     if (document.getElementById('site-nav')) return;
 
@@ -403,6 +450,10 @@
         html += '<a href="' + resolveUrl(item.url) + '">' + item.label + '</a>';
       }
     });
+
+    // 🔐 Google Drive login chip — visible on every page; click redirects to the
+    // login (Folder Creator) page where Google authentication happens.
+    html += buildAuthChipHtml();
 
     html += '</div></div>';
 

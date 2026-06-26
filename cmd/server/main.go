@@ -39,6 +39,7 @@ type config struct {
 	azureTenantID     string
 	azureClientID     string
 	azureClientSecret string
+	googleClientID    string
 }
 
 func loadDotEnv(path string) {
@@ -82,7 +83,23 @@ func loadConfig() config {
 	if connStr := os.Getenv("AZURE_STORAGE_CONN_STR"); connStr != "" {
 		cfg.azureAccountName, cfg.azureAccountKey = parseStorageConnStr(connStr)
 	}
+	// Resolve the Google OAuth client ID once at startup so pages can read it from
+	// /api/config instead of requiring it to be set in the browser (Folder Creator).
+	cfg.googleClientID = firstNonEmpty(
+		cfg.getSecret("claude-architect-GOOGLE-CLIENT-ID"),
+		cfg.getSecret("google-oauth-client-id"),
+		cfg.getSecret("GOOGLE_CLIENT_ID"),
+	)
 	return cfg
+}
+
+func firstNonEmpty(vals ...string) string {
+	for _, v := range vals {
+		if v != "" {
+			return v
+		}
+	}
+	return ""
 }
 
 func getSecretFromKeyVault(vaultName, tenantID, clientID, clientSecret, secretName string) (string, error) {
@@ -558,11 +575,13 @@ func configHandler(cfg config) http.HandlerFunc {
 		SupabaseURL      string `json:"supabaseUrl"`
 		SupabaseAnon     string `json:"supabaseAnon"`
 		AzureAccountName string `json:"azureAccountName"`
+		GoogleClientID   string `json:"googleClientId"`
 	}
 	payload, _ := json.Marshal(configResp{
 		SupabaseURL:      cfg.supabaseURL,
 		SupabaseAnon:     cfg.supabaseAnon,
 		AzureAccountName: cfg.azureAccountName,
+		GoogleClientID:   cfg.googleClientID,
 	})
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")

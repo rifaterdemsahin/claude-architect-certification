@@ -1,8 +1,9 @@
 # Spec: Lower Thirds Manager | Claude AI Certification
 
-> 🔖 **Version**: `0.21`
+> 🔖 **Version**: `0.3`
 > 📐 **Versioning rule** — `0.1` initial · `0.11` small update · `0.2` bigger update. Bump manually when you edit this spec.
 > 🏷 **Label**: 🎓 COURSE CONTENT (post-production tool)
+> 📝 **v0.3 changelog** — Google Drive auth overhaul: the OAuth **Client ID is now provided by the Go server runtime** via `/api/config` (`googleClientId`), not required from `localStorage`/Folder Creator. On module+video selection the page does a **find-only** Drive lookup — loads the existing folder if present, otherwise links to the 📁 Folder Creator (never auto-creates). Added a **shared login chip** in the top nav (`shared/nav.js` → `window.SiteAuth`) visible on every page.
 > 📝 **v0.21 changelog** — Page↔spec audit: added the UX/interaction behaviours present in the page but missing from the spec (collapsible persisted panels, server/dependency debug check, static prompt toggle, edit-script deep link, badge counts, Esc-to-close, 3× canvas scaling, localStorage config). Corrected candidate-promotion behaviour (`scene_type:'standard'`, not row deletion).
 > 📝 **v0.2 changelog** — Hand-authored functionality walkthrough, full UI section, and verified database table schemas (incl. dedicated `lower_thirds` migration table).
 
@@ -49,7 +50,7 @@ To rebuild this page from scratch, implement these behaviours end-to-end:
 - `deleteScene()` → `DELETE` from `scenes`.
 - `downloadLowerThird()` / `downloadExistingScene()` / `bulkDownloadExistingScenes()` → render + download PNG(s) locally.
 - `uploadToAzure()` → `POST /api/research/upload?container=research-images` to store the PNG in Azure blob storage.
-- Google Drive: `gisLoaded()`, `updateDriveAuthUI()`, `driveGetOrCreateFolder()`, `driveUploadPng()`, `driveSaveLowerThird()`, `driveResolveChain()`, `driveFolderPreview()` / `driveUpdatePathPreview()` / `refreshDriveFolderPreview()`, `driveLink()` / `driveUnlink()`, `driveLog()` → OAuth (GIS, using the shared `gdrive_client_id` from `localStorage`) into Google Drive. The target chain `DRIVE_ROOT_NAME › Module N - title › Video N - title › lowerthirds` is **resolved and link-verified before** the save press; the PNG is then uploaded via multipart.
+- Google Drive: `gisLoaded()` + `initDriveAuth()` → initialise GIS OAuth using the **Client ID from `/api/config` (`googleClientId`)**, waiting until both the GIS script and config fetch complete (falls back to cached `localStorage.gdrive_client_id`). `driveFindFolder()` / `driveFindExistingChain()` / `previewExistingDriveFolder()` → **find-only** walk of `DRIVE_ROOT_NAME › Module N - title › Video N - title › lowerthirds`; on module+video selection (and after linking) it **loads the existing folder** and reveals the open-in-Drive link, or shows a referral to the 📁 Folder Creator (`FOLDER_CREATOR_URL`) when any segment is missing — it never auto-creates. `driveUploadPng()` / `driveSaveLowerThird()` upload the PNG (save is disabled until the folder is found). `driveLink()` / `driveUnlink()` also toggle the shared nav login chip via `window.SiteAuth.setLoggedIn()`.
 
 ### G. UX & interaction behaviours (present on the page — keep when rebuilding)
 - **Collapsible panels with persistence** → `togglePanel(header)` collapses/expands any `.glass-card` and stores the state per panel in `localStorage` (`lt_collapse_<panelId>`). On `DOMContentLoaded` every panel's saved state is restored (collapsed/expanded + chevron rotation).
@@ -77,7 +78,7 @@ To rebuild this page from scratch, implement these behaviours end-to-end:
 > ⚠️ Note: the live page currently persists candidates into `scenes` with `scene_type='candidate'`; `lower_thirds` is the purpose-built table from the migration. Keep both documented until they are consolidated.
 
 ### Backend / external endpoints
-- `GET /api/config` — runtime Supabase + Google config.
+- `GET /api/config` — runtime config: `supabaseUrl`, `supabaseAnon`, `azureAccountName`, and **`googleClientId`** (Google OAuth client ID resolved server-side from `GOOGLE_CLIENT_ID` / the `claude-architect-GOOGLE-CLIENT-ID` Key Vault secret).
 - `POST /api/lowerthirds/openrouter` — OpenRouter LLM generation proxy (Go handler; restart the local Go server after changes or it 404s).
 - `POST /api/research/upload?container=research-images` — Azure blob upload of the rendered PNG.
 - `https://www.googleapis.com/drive/v3/files` — Google Drive folder/file lookup.

@@ -321,6 +321,7 @@ Return ONLY a JSON array with this structure:
             <a id="driveFolderLink" href="#" target="_blank" rel="noopener" style="color:var(--secondary);">🔗 Open lowerthirds folder in Drive</a>
             <span id="driveFolderId" style="margin-left:10px;color:var(--text-muted);font-family:var(--font-mono);font-size:0.75rem;"></span>
           </div>
+          <div id="driveFolderMissing" style="margin-top:8px;display:none;font-size:0.85rem;color:#fbbf24;"></div>
         </div>
 
         <div style="margin-bottom:14px;">
@@ -395,6 +396,9 @@ Return ONLY a JSON array with this structure:
     let currentVideoId = null;
     let editingSceneId = null;
     let azureAccountName = '';
+    let googleClientId = null;   // resolved from /api/config (Go server runtime)
+    let gisReady = false;        // Google Identity Services script loaded
+    let configLoaded = false;    // /api/config fetch finished
 
     const $ = id => document.getElementById(id);
     const canvasEl = $('ltCanvas');
@@ -459,8 +463,15 @@ Return ONLY a JSON array with this structure:
         if (res.ok) {
           const cfg = await res.json();
           if (cfg.azureAccountName) azureAccountName = cfg.azureAccountName;
+          if (cfg.googleClientId) {
+            googleClientId = cfg.googleClientId;
+            // Cache for the other Drive pages (folder creator / sync) too.
+            localStorage.setItem('gdrive_client_id', cfg.googleClientId);
+          }
         }
       } catch (_) {}
+      configLoaded = true;
+      if (typeof initDriveAuth === 'function') initDriveAuth();
     }
 
     async function api(path, opts) {
@@ -766,7 +777,7 @@ Return ONLY a JSON array with this structure:
         loadCandidates(currentVideoId);
         if ($('candidatesTableWrap').querySelector('.lt-table')) $('candidatesPanel').style.display = 'block';
         if (typeof driveUpdatePathPreview === 'function') driveUpdatePathPreview();
-        if (driveAccessToken && typeof refreshDriveFolderPreview === 'function') refreshDriveFolderPreview();
+        if (driveAccessToken && typeof previewExistingDriveFolder === 'function') previewExistingDriveFolder();
       } else {
         $('editorSection').style.display = 'none';
         $('emptyState').style.display = 'block';
@@ -1181,6 +1192,7 @@ Return ONLY a JSON array with this structure:
     // so you can verify/open the destination before pressing Save.
     const DRIVE_ROOT_NAME = 'Claude AI Architect Certification';
     const DRIVE_SCOPES = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive';
+    const FOLDER_CREATOR_URL = '../prod/google_drive_folder_creator.html';
     let driveTokenClient = null;
     let driveAccessToken = null;
     let driveFolderChain = null; // { lt: {id}, path }
@@ -1220,11 +1232,21 @@ Return ONLY a JSON array with this structure:
 
     // GIS calls this once the gsi/client script finishes loading.
     function gisLoaded() {
-      const clientId = localStorage.getItem('gdrive_client_id');
+      gisReady = true;
+      initDriveAuth();
+    }
+
+    // Initialises the OAuth token client using the Google Client ID provided by
+    // the Go server runtime (/api/config). Waits until BOTH the GIS script is
+    // loaded AND the config fetch has finished, so we always prefer the server
+    // value over any stale localStorage copy. Runs at most once.
+    function initDriveAuth() {
+      if (!gisReady || !configLoaded || driveTokenClient) return;
+      const clientId = googleClientId || localStorage.getItem('gdrive_client_id') || '';
       if (!clientId) {
         $('driveFolderPath').textContent = driveFolderPreview();
-        updateDriveAuthUI(false, 'No Google Client ID — set it in 📁 Folder Creator first.');
-        driveLog('No gdrive_client_id in localStorage. Open the Folder Creator page to set it.', 'error');
+        updateDriveAuthUI(false, 'Google Client ID not configured on the server.');
+        driveLog('No Google Client ID from /api/config. Set GOOGLE_CLIENT_ID (or the claude-architect-GOOGLE-CLIENT-ID secret) on the server.', 'error');
         return;
       }
       try {
@@ -1235,13 +1257,14 @@ Return ONLY a JSON array with this structure:
             if (resp.error !== undefined) { driveLog('Auth callback error: ' + resp.error, 'error'); return; }
             driveAccessToken = resp.access_token;
             updateDriveAuthUI(true, 'Google Drive linked');
+            if (window.SiteAuth) window.SiteAuth.setLoggedIn(true); // reflect in shared nav chip
             driveLog('Access token granted.', 'success');
-            await refreshDriveFolderPreview(); // resolve + link BEFORE the save press
+            await previewExistingDriveFolder(); // locate (not create) the folder before saving
           }
         });
         $('driveFolderPath').textContent = driveFolderPreview();
         updateDriveAuthUI(false, 'Ready — link your Google account.');
-        driveLog('GIS token client ready (client_id loaded).');
+        driveLog('GIS token client ready (client_id from server runtime).');
       } catch (e) {
         driveLog('GIS init failed: ' + e.message, 'error');
       }
@@ -1259,7 +1282,9 @@ Return ONLY a JSON array with this structure:
       driveAccessToken = null;
       driveFolderChain = null;
       $('driveFolderLinkWrap').style.display = 'none';
+      if ($('driveFolderMissing')) $('driveFolderMissing').style.display = 'none';
       updateDriveAuthUI(false, 'Disconnected.');
+      if (window.SiteAuth) window.SiteAuth.setLoggedIn(false); // reflect in shared nav chip
       driveLog('Token revoked, disconnected.');
     }
 
@@ -1268,23 +1293,16 @@ Return ONLY a JSON array with this structure:
       $('driveFolderPath').textContent = driveFolderPreview();
     }
 
-    async function driveGetOrCreateFolder(name, parentId) {
+    // Find-only folder lookup — never creates. Folder creation is delegated to
+    // the 📁 Folder Creator page. Returns the folder object or null.
+    async function driveFindFolder(name, parentId) {
       const parentClause = parentId ? `'${parentId}' in parents` : `'root' in parents`;
       const q = `mimeType='application/vnd.google-apps.folder' and name='${driveEsc(name)}' and trashed=false and ${parentClause}`;
       const url = 'https://www.googleapis.com/drive/v3/files?q=' + encodeURIComponent(q) + '&fields=files(id,name)&spaces=drive';
       const r = await fetch(url, { headers: { Authorization: 'Bearer ' + driveAccessToken } });
       if (!r.ok) throw new Error('Drive list failed: ' + await r.text());
       const data = await r.json();
-      if (data.files && data.files.length) return data.files[0];
-      const meta = { name: name, mimeType: 'application/vnd.google-apps.folder' };
-      if (parentId) meta.parents = [parentId];
-      const cr = await fetch('https://www.googleapis.com/drive/v3/files?fields=id,name', {
-        method: 'POST',
-        headers: { Authorization: 'Bearer ' + driveAccessToken, 'Content-Type': 'application/json' },
-        body: JSON.stringify(meta)
-      });
-      if (!cr.ok) throw new Error('Drive create-folder failed: ' + await cr.text());
-      return await cr.json();
+      return (data.files && data.files.length) ? data.files[0] : null;
     }
 
     async function driveUploadPng(blob, fileName, parentId) {
@@ -1306,41 +1324,59 @@ Return ONLY a JSON array with this structure:
       return await r.json();
     }
 
-    async function driveResolveChain() {
+    // Find-only walk of Root › Module › Video › lowerthirds. Never creates.
+    // Returns { found:true, lt, path } or { found:false, missing:'<segment>', path }.
+    async function driveFindExistingChain() {
       const m = dbModules.find(x => x.id === currentModuleId);
       const v = dbVideos.find(x => x.id === currentVideoId);
       if (!m || !v) throw new Error('Select a module and video first.');
       const modName = `Module ${m.module_number} - ${m.title}`;
       const vidName = `Video ${v.video_number} - ${v.title}`;
-      driveLog('Resolving folder chain…');
-      const root = await driveGetOrCreateFolder(DRIVE_ROOT_NAME, null);
-      driveLog(`Root "${DRIVE_ROOT_NAME}" → ${root.id} (${root.name === root.name ? 'found' : 'created'})`);
-      const mod = await driveGetOrCreateFolder(modName, root.id);
-      driveLog(`Module "${modName}" → ${mod.id}`);
-      const vid = await driveGetOrCreateFolder(vidName, mod.id);
-      driveLog(`Video "${vidName}" → ${vid.id}`);
-      const lt = await driveGetOrCreateFolder('lowerthirds', vid.id);
-      driveLog(`lowerthirds → ${lt.id}`, 'success');
-      return { root, mod, vid, lt, path: `${DRIVE_ROOT_NAME} › ${modName} › ${vidName} › lowerthirds` };
+      const path = `${DRIVE_ROOT_NAME} › ${modName} › ${vidName} › lowerthirds`;
+      const root = await driveFindFolder(DRIVE_ROOT_NAME, null);
+      if (!root) return { found: false, missing: DRIVE_ROOT_NAME, path };
+      const mod = await driveFindFolder(modName, root.id);
+      if (!mod) return { found: false, missing: modName, path };
+      const vid = await driveFindFolder(vidName, mod.id);
+      if (!vid) return { found: false, missing: vidName, path };
+      const lt = await driveFindFolder('lowerthirds', vid.id);
+      if (!lt) return { found: false, missing: `${vidName} › lowerthirds`, path };
+      return { found: true, root, mod, vid, lt, path };
     }
 
-    // Resolves the target folder (idempotent) and reveals the open-in-Drive link
-    // so the destination can be verified BEFORE pressing the Save button.
-    async function refreshDriveFolderPreview() {
-      if (!driveAccessToken) return;
+    // On module+video selection (and after linking): LOAD the existing Drive
+    // folder if present and reveal the open-in-Drive link; otherwise point the
+    // user to the 📁 Folder Creator to create it (we never auto-create here).
+    async function previewExistingDriveFolder() {
+      if (!driveAccessToken) { driveUpdatePathPreview(); return; }
+      if (!currentModuleId || !currentVideoId) return;
       try {
-        $('driveAuthText').textContent = 'Resolving folder…';
-        const chain = await driveResolveChain();
-        driveFolderChain = chain;
+        $('driveAuthText').textContent = 'Looking up folder in Drive…';
+        const chain = await driveFindExistingChain();
         $('driveFolderPath').textContent = chain.path;
-        const link = $('driveFolderLink');
-        link.href = 'https://drive.google.com/drive/folders/' + chain.lt.id;
-        $('driveFolderId').textContent = 'id: ' + chain.lt.id;
-        $('driveFolderLinkWrap').style.display = 'block';
-        updateDriveAuthUI(true, 'Folder ready — verify it above before saving.');
+        if (chain.found) {
+          driveFolderChain = chain;
+          const link = $('driveFolderLink');
+          link.href = 'https://drive.google.com/drive/folders/' + chain.lt.id;
+          $('driveFolderId').textContent = 'id: ' + chain.lt.id;
+          $('driveFolderLinkWrap').style.display = 'block';
+          $('driveFolderMissing').style.display = 'none';
+          updateDriveAuthUI(true, 'Folder found in Drive — ready to save.');
+          $('driveSaveBtn').disabled = false;
+          driveLog('Existing lowerthirds folder located: ' + chain.lt.id, 'success');
+        } else {
+          driveFolderChain = null;
+          $('driveFolderLinkWrap').style.display = 'none';
+          $('driveFolderMissing').innerHTML = '⚠️ No <b>' + escHtml(chain.missing) + '</b> folder in Drive yet. ' +
+            '<a href="' + FOLDER_CREATOR_URL + '" target="_blank" rel="noopener" style="color:var(--secondary);font-weight:600;">📁 Create it in the Folder Creator →</a>';
+          $('driveFolderMissing').style.display = 'block';
+          updateDriveAuthUI(true, 'Folder not found — create it in the Folder Creator first.');
+          $('driveSaveBtn').disabled = true;
+          driveLog('Folder chain missing at "' + chain.missing + '". Use the Folder Creator.', 'error');
+        }
       } catch (e) {
-        driveLog('Folder resolve failed: ' + e.message, 'error');
-        updateDriveAuthUI(true, 'Linked, but folder resolve failed — see log.');
+        driveLog('Folder lookup failed: ' + e.message, 'error');
+        updateDriveAuthUI(true, 'Linked, but folder lookup failed — see log.');
       }
     }
 
@@ -1356,9 +1392,10 @@ Return ONLY a JSON array with this structure:
         renderLowerThirdToCanvas(ltMain, ltSub);
         const blob = await new Promise(res => canvasEl.toBlob(res, 'image/png'));
         if (!blob) throw new Error('Canvas render failed');
-        // Re-resolve to ensure the folder exists (cheap when cached).
-        if (!driveFolderChain) await refreshDriveFolderPreview();
-        const parentId = driveFolderChain ? driveFolderChain.lt.id : null;
+        // Locate the existing folder (never create — that's the Folder Creator's job).
+        if (!driveFolderChain) await previewExistingDriveFolder();
+        if (!driveFolderChain) throw new Error('Target folder not found in Drive. Create it in the Folder Creator first.');
+        const parentId = driveFolderChain.lt.id;
         const fileName = brandFilePrefix(ltMain) + '.png';
         const up = await driveUploadPng(blob, fileName, parentId);
         driveLog(`Uploaded "${fileName}" → ${up.id}`, 'success');
