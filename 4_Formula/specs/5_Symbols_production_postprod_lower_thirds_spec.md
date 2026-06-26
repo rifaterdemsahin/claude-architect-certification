@@ -28,12 +28,12 @@ To rebuild this page from scratch, implement these behaviours end-to-end:
 - `fetchScriptForVideo()` → reads `scripts` (by `video_id`) and `sentences` (by `script_id`, ordered by `sort_order`) to assemble the full video script into the script panel — the LLM context for generation.
 
 ### C. Generation (LLM)
-- `testOpenRouterGeneration()` → `POST /api/lowerthirds/openrouter` with the script + brand context; returns candidate `{main_text, sub_text, rationale}` objects.
+- `testOpenRouterGeneration()` → `POST /api/lowerthirds/openrouter` with the script + existing lower thirds as negative prompt + brand context; returns candidate `{main_text, sub_text, rationale}` objects.
 - `clientFallbackPrompt()` / `mockGeneration()` → client-side fallback prompt and mock data when the backend handler is unavailable (e.g. local Go server not restarted — see in-page 404 troubleshooting note).
 - `storeOpenRouterIO()` / `openIoInspector()` / `closeIoInspector()` / `copyIoText()` → capture and inspect the raw OpenRouter request/response for debugging (the "🔍 OpenRouter Prompt & Output" inspector).
 
 ### D. Candidates (review → persist)
-- `loadCandidates()` → reads `scenes` where `scene_type = 'candidate'` for the selected module/video and renders the `.lt-table` (checkbox + #, Main, Sub, Apply).
+- `loadCandidates()` → reads `scenes` where `scene_type = 'candidate'` for the selected module/video and renders the `.lt-table` (checkbox + #, Main, Sub, Apply). Existing lower thirds from `loadScenes()` are visually marked with an icon, and their apply/save buttons and checkboxes are disabled.
 - `toggleAllCands()` + `saveSelectedCandidates()` → promote selected candidates: `PATCH`es each row to `scene_type:'standard'` with a fresh `scene_number` above the current max (rows are **promoted in place**, not deleted).
 - `instantSaveCandidate()` → one-click promote of a single candidate (same `scene_type:'standard'` PATCH).
 - Auto-deduplication: a new generation first `DELETE`s existing `scene_type='candidate'` rows, then inserts the new candidates with collision-free `scene_number`s above the highest existing scene; the UI advertises "running Generate again returns cached results".
@@ -79,7 +79,7 @@ To rebuild this page from scratch, implement these behaviours end-to-end:
 
 ### Backend / external endpoints
 - `GET /api/config` — runtime config: `supabaseUrl`, `supabaseAnon`, `azureAccountName`, and **`googleClientId`** (Google OAuth client ID resolved server-side from `GOOGLE_CLIENT_ID` / the `claude-architect-GOOGLE-CLIENT-ID` Key Vault secret).
-- `POST /api/lowerthirds/openrouter` — OpenRouter LLM generation proxy (Go handler; restart the local Go server after changes or it 404s).
+- `POST /api/lowerthirds/openrouter` — OpenRouter LLM generation proxy (Go handler; restart the local Go server after changes or it 404s). Accepts `existingLowerThirds` string to act as negative prompt.
 - `POST /api/research/upload?container=research-images` — Azure blob upload of the rendered PNG.
 - `https://www.googleapis.com/drive/v3/files` — Google Drive folder/file lookup.
 - `https://www.googleapis.com/upload/drive/v3/files` — Google Drive PNG upload (multipart).

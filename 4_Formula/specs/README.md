@@ -70,6 +70,7 @@ Hand-authored specs (e.g. `5_Symbols_production_postprod_lower_thirds_spec.md` a
 - [5_Symbols_production_preprod_course_outline_spec.md](5_Symbols_production_preprod_course_outline_spec.md)
 - [5_Symbols_production_preprod_customer_development_spec.md](5_Symbols_production_preprod_customer_development_spec.md)
 - [5_Symbols_production_preprod_edit_scripts_spec.md](5_Symbols_production_preprod_edit_scripts_spec.md)
+- [5_Symbols_production_preprod_environment_spec.md](5_Symbols_production_preprod_environment_spec.md)
 - [5_Symbols_production_preprod_explanations_spec.md](5_Symbols_production_preprod_explanations_spec.md)
 - [5_Symbols_production_preprod_image_link_report_spec.md](5_Symbols_production_preprod_image_link_report_spec.md)
 - [5_Symbols_production_preprod_index_spec.md](5_Symbols_production_preprod_index_spec.md)

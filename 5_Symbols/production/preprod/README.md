@@ -14,6 +14,7 @@
 | `scripts/` | Pre-production scripts and utilities |
 | `self_learning.html` | 🧠 Video self-learning framework explaining Feynman, Lacanian visual review, and Semblance |
 | `multimedia_learning.html` | 📼 Multimedia learning principles explaining Erdem's video-based transformation |
+| `environment.html` | 🌍 Diagnostic view of the environment values the Go server loaded at runtime (`.env` / Azure Key Vault); secrets masked via `/api/env-status` |
 
 ## Rules
 - Custom steps created via (+) buttons persist to localStorage

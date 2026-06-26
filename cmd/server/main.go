@@ -590,6 +590,85 @@ func configHandler(cfg config) http.HandlerFunc {
 	}
 }
 
+// maskSecret returns a non-reversible preview of a secret so the env page can
+// confirm a value is loaded without exposing it (e.g. "ab••••… (40 chars)").
+func maskSecret(v string) string {
+	if v == "" {
+		return ""
+	}
+	n := len(v)
+	if n <= 8 {
+		return fmt.Sprintf("•••• (%d chars)", n)
+	}
+	return fmt.Sprintf("%s••••%s (%d chars)", v[:2], v[n-2:], n)
+}
+
+// envStatusHandler reports which environment values the server loaded at
+// startup. Gated to localhost or an admin session (same policy as the gdrive
+// credentials endpoint). Secret values are masked — only presence + a short
+// preview is returned, never the raw secret.
+func envStatusHandler(cfg config) http.HandlerFunc {
+	type envEntry struct {
+		Key    string `json:"key"`
+		Group  string `json:"group"`
+		Set    bool   `json:"set"`
+		Secret bool   `json:"secret"`
+		Value  string `json:"value"`
+		Note   string `json:"note,omitempty"`
+	}
+	return func(w http.ResponseWriter, r *http.Request) {
+		isAdmin := false
+		remoteIP := r.RemoteAddr
+		if strings.HasPrefix(remoteIP, "127.0.0.1") || strings.HasPrefix(remoteIP, "[::1]") || strings.HasPrefix(remoteIP, "localhost") {
+			isAdmin = true
+		} else if c, err := r.Cookie("admin_logged_in"); err == nil && c.Value == "true" {
+			isAdmin = true
+		}
+		if !isAdmin {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte(`{"error":"Unauthorized — sign in as admin or open from localhost."}`))
+			return
+		}
+
+		show := func(key, group, val string, secret bool, note string) envEntry {
+			e := envEntry{Key: key, Group: group, Set: val != "", Secret: secret, Note: note}
+			if val == "" {
+				e.Value = ""
+			} else if secret {
+				e.Value = maskSecret(val)
+			} else {
+				e.Value = val
+			}
+			return e
+		}
+
+		entries := []envEntry{
+			show("SUPABASE_URL", "Supabase", cfg.supabaseURL, false, ""),
+			show("SUPABASE_ANON_KEY", "Supabase", cfg.supabaseAnon, true, "Public anon key (RLS-protected)"),
+			show("AXIOM_DATASET", "Axiom", cfg.axiomDataset, false, ""),
+			show("AXIOM_API_URL", "Axiom", cfg.axiomAPIURL, false, ""),
+			show("AXIOM_QUERY_URL", "Axiom", cfg.axiomQueryURL, false, ""),
+			show("AXIOM_TOKEN", "Axiom", cfg.axiomToken, true, ""),
+			show("PORT", "Server", cfg.port, false, ""),
+			show("AZURE_KEYVAULT_NAME", "Azure", cfg.azureKeyVaultName, false, ""),
+			show("AZURE_TENANT_ID", "Azure", cfg.azureTenantID, true, ""),
+			show("AZURE_CLIENT_ID", "Azure", cfg.azureClientID, true, ""),
+			show("AZURE_CLIENT_SECRET", "Azure", cfg.azureClientSecret, true, ""),
+			show("AZURE_STORAGE (account name)", "Azure", cfg.azureAccountName, false, "Parsed from AZURE_STORAGE_CONN_STR"),
+			show("AZURE_STORAGE (account key)", "Azure", cfg.azureAccountKey, true, "Parsed from AZURE_STORAGE_CONN_STR"),
+			show("GOOGLE_CLIENT_ID", "Google", cfg.googleClientID, false, "OAuth client ID (public; served via /api/config)"),
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Cache-Control", "no-store")
+		json.NewEncoder(w).Encode(map[string]any{
+			"keyVaultActive": cfg.azureKeyVaultName != "" && cfg.azureTenantID != "" && cfg.azureClientID != "" && cfg.azureClientSecret != "",
+			"entries":        entries,
+		})
+	}
+}
+
 // ── Client-side error ingestion ───────────────────────────────────────────────
 
 func clientErrorsHandler(cfg config) http.HandlerFunc {
@@ -2218,11 +2297,12 @@ Focus on professional, certification-quality overlays. Use the module/video them
 
 func openRouterGenerateHandler(cfg config) http.HandlerFunc {
 	type ORRequest struct {
-		Script     string `json:"script"`
-		CourseName string `json:"courseName"`
-		ModuleName string `json:"moduleName"`
-		VideoName  string `json:"videoName"`
-		Presenter  string `json:"presenter"`
+		Script              string `json:"script"`
+		CourseName          string `json:"courseName"`
+		ModuleName          string `json:"moduleName"`
+		VideoName           string `json:"videoName"`
+		Presenter           string `json:"presenter"`
+		ExistingLowerThirds string `json:"existingLowerThirds"`
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -2275,13 +2355,16 @@ Lower-third types to choose from:
 
 Constraints: "main" ≤ 40 chars, "sub" ≤ 60 chars.
 
+DO NOT GENERATE these existing lower thirds (use this as negative prompt):
+%s
+
 SCRIPT (scene-anchored — use this, never the prose version):
 %s
 
 Return ONLY a JSON array, in scene order, with no markdown fences:
 [
   {"scene": <int>, "type": "<one of the types above>", "main": "...", "sub": "...", "rationale": "..."}
-]`, req.CourseName, req.ModuleName, req.VideoName, req.Presenter, req.Script)
+]`, req.CourseName, req.ModuleName, req.VideoName, req.Presenter, req.ExistingLowerThirds, req.Script)
 
 		ctx, cancel := context.WithTimeout(r.Context(), 30*time.Second)
 		defer cancel()
@@ -2693,6 +2776,7 @@ func main() {
 	mux.Handle("/shared/", observe(cfg, fs))
 	mux.Handle("/navigation_config.json", observe(cfg, fs))
 	mux.Handle("/api/config", observe(cfg, configHandler(cfg)))
+	mux.Handle("/api/env-status", observe(cfg, envStatusHandler(cfg)))
 	mux.Handle("/api/nav/favs", observe(cfg, navFavsHandler(cfg)))
 	mux.Handle("/api/errors", observe(cfg, clientErrorsHandler(cfg)))
 	mux.Handle("/api/research/upload", observe(cfg, researchUploadHandler(cfg)))

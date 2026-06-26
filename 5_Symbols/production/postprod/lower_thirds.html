@@ -568,15 +568,21 @@ Return ONLY a JSON array with this structure:
             '<th class="sub-col">Sub Text</th>' +
             '<th class="action-col">Apply</th>' +
           '</tr></thead><tbody>' +
-          candidates.map((r, i) =>
-            '<tr>' +
-              '<td class="sel-col"><input type="checkbox" class="cand-cb" data-id="' + r.id + '" data-main="' + escHtml(r.lt_main) + '" data-sub="' + escHtml(r.lt_sub) + '"></td>' +
+          candidates.map((r, i) => {
+            const exists = dbScenesData.some(s => s.lt_main === r.lt_main && s.lt_sub === r.lt_sub);
+            const existsBadge = exists ? ' <span class="badge badge-cached" title="Already exists in your scenes">✅ Saved</span>' : '';
+            const cbDisabled = exists ? ' disabled' : '';
+            const saveBtn = exists
+              ? '<button class="btn btn-sm" style="background:rgba(255,255,255,0.1);color:var(--text-muted);" disabled>✅ Saved</button>'
+              : '<button class="btn btn-sm" style="background:var(--success);color:#000;" onclick="instantSaveCandidate(this, ' + r.id + ')">💾 Save</button>';
+            return '<tr' + (exists ? ' style="opacity: 0.6;"' : '') + '>' +
+              '<td class="sel-col"><input type="checkbox" class="cand-cb"' + cbDisabled + ' data-id="' + r.id + '" data-main="' + escHtml(r.lt_main) + '" data-sub="' + escHtml(r.lt_sub) + '"></td>' +
               '<td class="num-col">' + (i + 1) + '</td>' +
-              '<td class="main-col"><strong>' + escHtml(r.lt_main) + '</strong></td>' +
+              '<td class="main-col"><strong>' + escHtml(r.lt_main) + '</strong>' + existsBadge + '</td>' +
               '<td class="sub-col">' + escHtml(r.lt_sub) + '</td>' +
-              '<td class="action-col"><button class="btn btn-sm btn-secondary" onclick="applySuggestion(\'' + escJs(r.lt_main) + '\', \'' + escJs(r.lt_sub) + '\')">✏️ Edit</button> <button class="btn btn-sm" style="background:var(--success);color:#000;" onclick="instantSaveCandidate(this, ' + r.id + ')">💾 Save</button></td>' +
-            '</tr>'
-          ).join('') +
+              '<td class="action-col"><button class="btn btn-sm btn-secondary" onclick="applySuggestion(\'' + escJs(r.lt_main) + '\', \'' + escJs(r.lt_sub) + '\')">✏️ Edit</button> ' + saveBtn + '</td>' +
+            '</tr>';
+          }).join('') +
           '</tbody></table>';
       } catch(e) { console.error(e); }
     }
@@ -848,7 +854,8 @@ Return ONLY a JSON array with this structure:
         let scriptText = await fetchScriptForVideo(currentModuleId, currentVideoId) || $('scriptContent').value.trim();
         const moduleName = dbModules.find(m => m.id === currentModuleId)?.title || '';
         const videoName = dbVideos.find(v => v.id === currentVideoId)?.title || '';
-        lastRequestBody = { script: scriptText, courseName: "Claude Architect Certification", moduleName, videoName, presenter: "" };
+        const existingLTs = dbScenesData.filter(s => s.lt_main || s.lt_sub).map(s => `- Main: "${s.lt_main || ''}", Sub: "${s.lt_sub || ''}"`).join('\n') || '(None)';
+        lastRequestBody = { script: scriptText, courseName: "Claude Architect Certification", moduleName, videoName, presenter: "", existingLowerThirds: existingLTs };
         const res = await fetch('/api/lowerthirds/openrouter', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -1066,6 +1073,8 @@ Return ONLY a JSON array with this structure:
         '- key_point       (a claim worth reinforcing on screen)\n' +
         '- takeaway        (the one thing to remember)\n\n' +
         'Constraints: "main" ≤ 40 chars, "sub" ≤ 60 chars.\n\n' +
+        'DO NOT GENERATE these existing lower thirds (use this as negative prompt):\n' +
+        (req.existingLowerThirds || '(None)') + '\n\n' +
         'SCRIPT (scene-anchored — use this, never the prose version):\n' +
         (req.script || '') + '\n\n' +
         'Return ONLY a JSON array, in scene order, with no markdown fences:\n' +
