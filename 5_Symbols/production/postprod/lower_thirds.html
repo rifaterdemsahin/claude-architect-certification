@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="../../../shared/redirect-to-live-site.js"></script>
   <title>Lower Thirds Manager | Claude AI Certification</title>
-  <meta name="description" content="Generate, save, and preview lower third candidates via Gemini. Auto-deduplicated and stored in Supabase with learning rationale.">
+  <meta name="description" content="Generate, save, and preview lower third candidates via an LLM (OpenRouter). Auto-deduplicated and stored in Supabase with learning rationale.">
   <link rel="icon" type="image/png" href="../../../favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -151,7 +151,7 @@
   <div class="container">
     <header>
       <h1>🎬 Lower Thirds Manager</h1>
-      <p>Gemini generates lower third candidates with <strong>learning rationale</strong> per video. Results are saved to Supabase and <strong>auto-deduplicated</strong> — running Generate again returns cached results.</p>
+      <p>OpenRouter generates lower third candidates with <strong>learning rationale</strong> per video. Results are saved to Supabase and <strong>auto-deduplicated</strong> — running Generate again returns cached results.</p>
     </header>
     <div class="glass-card panel-filter" style="margin-bottom: 32px;">
       <div class="glass-card-header" onclick="togglePanel(this)">
@@ -925,13 +925,52 @@ Return ONLY a JSON array with this structure:
       }
     }
 
-    function mockGeneration() {
+    // Client-side fallback when the OpenRouter backend handler is unavailable
+    // (e.g. local Go server not restarted). Persists mock candidates through the
+    // same dedup → insert → reload flow as testOpenRouterGeneration so the
+    // candidates table renders identically.
+    async function mockGeneration() {
       if (!currentModuleId || !currentVideoId) { showToast('Select a module and video first.', true); return; }
       const mockCandidates = [
-        { main_text: "System Design", sub_text: "Scaling Microservices", rationale: "Mock testing candidate 1" },
-        { main_text: "Architecture", sub_text: "Serverless Deployment", rationale: "Mock testing candidate 2" }
+        { main: "System Design", sub: "Scaling Microservices", rationale: "Mock testing candidate 1" },
+        { main: "Architecture", sub: "Serverless Deployment", rationale: "Mock testing candidate 2" },
+        { main: "Key Takeaway", sub: "Design for failure, not perfection", rationale: "Mock testing candidate 3" }
       ];
-      showToast('Mock generation completed!');
+      $('genLoading').style.display = 'block';
+      $('candidatesTableWrap').style.display = 'none';
+      if ($('bulkSaveWrap')) $('bulkSaveWrap').style.display = 'none';
+      $('candidatesPanel').style.display = 'block';
+      try {
+        const moduleNum = dbModules.find(m => m.id === currentModuleId)?.module_number || 0;
+        const videoNum = dbVideos.find(v => v.id === currentVideoId)?.video_number || 0;
+        // Auto-dedup: clear prior candidates, then insert above the highest scene_number.
+        await api('scenes?module_number=eq.' + moduleNum + '&section_number=eq.' + videoNum + '&scene_type=eq.candidate', { method: 'DELETE' });
+        let nextSceneNum = 1;
+        try {
+          const top = await api('scenes?module_number=eq.' + moduleNum + '&section_number=eq.' + videoNum + '&select=scene_number&order=scene_number.desc&limit=1');
+          if (Array.isArray(top) && top.length && typeof top[0].scene_number === 'number') {
+            nextSceneNum = top[0].scene_number + 1;
+          }
+        } catch (_) { /* no existing rows -> start at 1 */ }
+        for (let i = 0; i < mockCandidates.length; i++) {
+          const c = mockCandidates[i];
+          await api('scenes', {
+            method: 'POST',
+            body: JSON.stringify({ module_number: moduleNum, section_number: videoNum, scene_number: nextSceneNum + i, lt_main: c.main, lt_sub: c.sub, scene_type: 'candidate' })
+          });
+        }
+        $('genLoading').style.display = 'none';
+        $('candidatesTableWrap').style.display = 'block';
+        $('cacheInfo').textContent = '(Mock Results)';
+        await loadScenes(currentVideoId);
+        await loadCandidates(currentVideoId);
+        if ($('bulkSaveWrap')) $('bulkSaveWrap').style.display = 'block';
+        showToast('Mock generation completed!');
+      } catch (e) {
+        $('genLoading').style.display = 'none';
+        $('candidatesTableWrap').style.display = 'block';
+        showToast('Mock generation failed: ' + e.message, true);
+      }
     }
 
     async function saveSelectedCandidates() {

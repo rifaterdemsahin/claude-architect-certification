@@ -1,8 +1,9 @@
 # Spec: Lower Thirds Manager | Claude AI Certification
 
-> 🔖 **Version**: `0.3`
+> 🔖 **Version**: `0.31`
 > 📐 **Versioning rule** — `0.1` initial · `0.11` small update · `0.2` bigger update. Bump manually when you edit this spec.
 > 🏷 **Label**: 🎓 COURSE CONTENT (post-production tool)
+> 📝 **v0.31 changelog** — Page↔spec drift reconciliation: replaced stale "Gemini" branding (meta description + header) with OpenRouter, and made `mockGeneration()` a real fallback (dedup→insert→reload) instead of a no-op stub. See [🔀 Spec ↔ Implementation Drift](#-spec--implementation-drift-spec_implementation_drift).
 > 📝 **v0.3 changelog** — Google Drive auth overhaul: the OAuth **Client ID is now provided by the Go server runtime** via `/api/config` (`googleClientId`), not required from `localStorage`/Folder Creator. On module+video selection the page does a **find-only** Drive lookup — loads the existing folder if present, otherwise links to the 📁 Folder Creator (never auto-creates). Added a **shared login chip** in the top nav (`shared/nav.js` → `window.SiteAuth`) visible on every page.
 > 📝 **v0.21 changelog** — Page↔spec audit: added the UX/interaction behaviours present in the page but missing from the spec (collapsible persisted panels, server/dependency debug check, static prompt toggle, edit-script deep link, badge counts, Esc-to-close, 3× canvas scaling, localStorage config). Corrected candidate-promotion behaviour (`scene_type:'standard'`, not row deletion).
 > 📝 **v0.2 changelog** — Hand-authored functionality walkthrough, full UI section, and verified database table schemas (incl. dedicated `lower_thirds` migration table).
@@ -133,6 +134,24 @@ Single `.container` column with numbered panels. Each container should reveal it
 - `../../../shared/seo.js`
 
 **Inline constants/variables:** `BRAND_TEMPLATE`, `DRIVE_ROOT_NAME`, `DRIVE_SCOPES`, `HEADERS`, `SUPABASE_ANON_KEY`, `SUPABASE_URL`, canvas geometry (`barHeight`, `barY`), `blob`.
+
+## 🔀 Spec ↔ Implementation Drift {#spec_implementation_drift}
+
+> 🗓 Audited `2026-06-26` against `./5_Symbols/production/postprod/lower_thirds.html`. This section logs places where the live page diverged from this spec and how each was reconciled. Append a dated row whenever a future audit finds new drift.
+
+### ✅ Reconciled (page edited to match spec)
+| 🐛 Drift | 📍 Location | 🛠 Fix applied |
+|---------|------------|----------------|
+| Stale **"Gemini"** branding — page text claimed Gemini did the generation, but §C and the code use **OpenRouter**. | `<meta name="description">` (line ~8) + header `<p>` (line ~154) | Reworded to "via an LLM (OpenRouter)" / "OpenRouter generates…". |
+| **`mockGeneration()` was a dead stub** — built an unused array + toast, persisted/rendered nothing, despite §C listing it as the mock fallback. | `mockGeneration()` (~line 928) | Rewrote to run the same **dedup → insert candidates above max `scene_number` → reload** flow as `testOpenRouterGeneration()` minus the network call; sets `cacheInfo` to `(Mock Results)`. |
+
+### ⚠️ Known, intentionally-not-fixed divergence
+| 🔎 Divergence | 📝 Why left as-is |
+|--------------|-------------------|
+| Candidates persist into `scenes` with `scene_type='candidate'`, **not** the dedicated `lower_thirds` migration table. | The spec (Data Layer note) explicitly says to keep **both documented until consolidated**. Consolidation is a larger, separate decision — not drift to silently fix. |
+
+### 🟢 Verified in-sync (no change needed)
+Sections **A–G** and the full Data Layer were checked and already match the page: `loadConfig`/`api`, module→video→script filter, OpenRouter generation with negative prompt, the I/O inspector + real-time search, dedup/promote-in-place candidates, 3× canvas live preview, Azure upload, the find-only Google Drive chain using `googleClientId` from `/api/config` + `SiteAuth` nav chip, collapsible-persisted panels, server-debug check, count badges, and Esc-to-close. The `lower_thirds` migration and referenced pages (Folder Creator, scripts deep-link) all exist.
 
 ## ✅ Acceptance Criteria
 - [ ] Page renders correctly without console errors.

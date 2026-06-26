@@ -26,6 +26,62 @@ This document defines how AI agents interact with the **Claude AI Certification 
 
 ## 📅 Agent Activity Log
 
+### 2026-06-26
+- **Task:** 🥊 Create Competitive Analysis page and auto-generate HTML Specs.
+- **Action:**
+    - Auto-generated 90 `*_spec.md` files for every HTML file, saved to `4_Formula/specs/`, and created an index `README.md`.
+    - Created `5_Symbols/production/preprod/research/competitive_analysis.html` analyzing CCA-F (Anthropic), Udemy/Whizlabs courses, and YouTube creators based on actual 2026 web search results.
+    - Updated `navigation_config.json`, `index.html`, `markdown_renderer.html`, and `shared/nav.js` to make these pages accessible in the Project and Debug menus.
+- **Verification:** Specs correctly mapped; changes deployed via GitHub Pages. Live URL: `https://rifaterdemsahin.github.io/claude-architect-certification/5_Symbols/production/preprod/research/competitive_analysis.html`
+- **Status:** IMPLEMENTED, COMMITTED, PUSHED, DEPLOYED.
+
+### 2026-06-25
+- **Task:** ☁️ Add a “Save to Google Drive” button at the bottom of the lower-thirds page that saves the current lower-third PNG into a `Root › Module › Video › lowerthirds` folder chain, with the target folder **resolved + linked in the UI before pressing save** (debug log + open-in-Drive link).
+- **Action:**
+    - Added Google Identity Services for OAuth (reuses shared `gdrive_client_id` in localStorage — no API key needed) and used raw `fetch` against the Drive REST API (`/drive/v3/files`, `/upload/drive/v3/files?uploadType=multipart`) for idempotent folder creation + binary PNG multipart upload.
+    - Implemented `driveGetOrCreateFolder`, `driveUploadPng`, `driveResolveChain`, `refreshDriveFolderPreview`, `driveSaveLowerThird`, and a collapsible debug log in `5_Symbols/production/postprod/lower_thirds.html`.
+    - On auth (and on module/video change while linked) the chain is resolved and the path + a 🔗 open-in-Drive link + folder id are shown in the Target Folder box before the Save press; the Save button uploads with the brand file-prefix name.
+    - Documented in `4_Formula/llm_thinking_log.md`.
+- **Verification:** JS syntax OK (6 blocks); 6 key Drive functions present; `go build`/`go vet` pass; local server serves page 200 with GIS script + Drive panel + functions present.
+- **Status:** IMPLEMENTED, COMMITTED, PUSHED.
+
+### 2026-06-25
+- **Task:** 🏷️ Standardise lower-thirds file prefix to `module1_video1_[MainText]_[ModuleName]_[VideoName]`; commit + push + publish.
+- **Action:**
+    - Rewrote `brandFilePrefix(sceneNum)` → `brandFilePrefix(mainText)` in `5_Symbols/production/postprod/lower_thirds.html` to produce `module{N}_video{N}_{slug(MainText)}_{slug(ModuleName)}_{slug(VideoName)}`.
+    - Made `brandFilePrefix` the single source of truth for BOTH downloaded PNGs and uploaded Azure blobs (`uploadToAzure` previously used a separate `lt_m{}_v{}_s{}_{}.png`); updated all 4 callers to pass the main text.
+    - Documented in `4_Formula/llm_thinking_log.md`.
+- **Verification:** JS syntax OK (5 blocks); 0 stale refs; simulated output `module1_video1_Claude-Architect-Masterclass_Foundations-of-Cloud-Architecture_Architecture-Overview.png`; local server serves page 200.
+- **Status:** IMPLEMENTED, COMMITTED, PUSHED.
+
+### 2026-06-25
+- **Task:** 🔍 Add an icon to the OpenRouter lower-thirds flow that opens a modal showing the **actual executed prompt (input)** and the **output result**, copyable for feedback.
+- **Action:**
+    - Server (`cmd/server/main.go`, `openRouterGenerateHandler`): the prompt was built server-side and never returned, so the UI couldn't show the real executed prompt. Added `prompt` + `model` to the JSON response (`{content, prompt, model}`) — exact text, no client rebuild drift.
+    - Frontend (`5_Symbols/production/postprod/lower_thirds.html`): added a **🔍 Prompt & Output** icon button (hidden until the first run) next to the generate button; `testOpenRouterGeneration()` captures `data.prompt/content/model` (success) and request body + error (failure) into `lastOpenRouterIO`; added a glassmorphic modal (`#ioInspectorOverlay`) with **⬇️ Input (Prompt)** and **⬆️ Output (Model result)** sections, each with a copy button, plus **📋 Copy All (Prompt + Output)**; closes via ✕ / backdrop / Escape. `clientFallbackPrompt()` mirrors the server template for error paths.
+    - Documented in `4_Formula/llm_thinking_log.md`.
+- **Verification:** `go build`/`go vet` pass; JS syntax OK (5 blocks); local server serves page 200 with modal + button; `POST /api/lowerthirds/openrouter` returns `prompt` (613 chars) + `model` + `content`.
+- **Status:** IMPLEMENTED, COMMITTED, PUSHED.
+
+### 2026-06-25
+- **Task:** 🐛 Fix `409: duplicate key value violates unique constraint "scenes_module_number_section_number_scene_number_key"` when clicking **🧠 OpenRouter Generate Lower Thirds**.
+- **Action:**
+    - Root cause: `testOpenRouterGeneration()` in `5_Symbols/production/postprod/lower_thirds.html` inserted **every** candidate into `scenes` with the same `scene_number: 999`; `scenes` has `UNIQUE(module_number, section_number, scene_number)`, so the 2nd candidate collided → Postgres `23505` → Supabase `409`. The pre-insert `DELETE … scene_type=eq.candidate` only clears prior runs, not in-run duplicates.
+    - Fix: after deleting old candidates, query the highest `scene_number` for `(module_number, section_number)` (`order=scene_number.desc&limit=1`) and insert candidates with **distinct** numbers `nextSceneNum + i`, so they never collide with each other or with real scenes.
+    - Documented in `4_Formula/llm_thinking_log.md`.
+- **Verification:** JS syntax OK; `go build`/`go vet` pass; direct live-Supabase round-trip of the exact sequence (DELETE → 204, max=1 → next=2, insert 3 candidates at 2/3/4 → all **201**, no 409); local server serves the page with the fix and the openrouter route resolves.
+- **Status:** IMPLEMENTED, COMMITTED, PUSHED.
+
+### 2026-06-25
+- **Task:** 🔑 Eliminate `OpenRouter Error {"error":"OPENROUTER_API_KEY missing from server configuration"}` on the Fly.io lower-thirds page (`/5_Symbols/production/postprod/lower_thirds.html`) — retrieve the key via Azure CLI and wire it into the Go runtime.
+- **Action:**
+    - Root cause: `openRouterGenerateHandler` was the only secret handler reading the key via `os.Getenv("OPENROUTER_API_KEY")` directly instead of the Key-Vault-aware `cfg.getSecret(...)`, **and** no `OPENROUTER_API_KEY` was provisioned on Fly.io.
+    - Code fix in `cmd/server/main.go`: changed `os.Getenv("OPENROUTER_API_KEY")` → `cfg.getSecret("OPENROUTER_API_KEY")` so it matches all other handlers (checks Azure Key Vault `openrouter-api-key`, falls back to env).
+    - Retrieved `OPENROUTER-API-KEY` from Azure Key Vault `dp-kv-deliverypilot` with `az keyvault secret show` and injected it into Fly.io via `fly secrets set OPENROUTER_API_KEY=... --app claude-architect-certification` (value piped, never printed). Fly rolled the machine automatically.
+    - Documented in `4_Formula/llm_thinking_log.md`.
+- **Verification:** `go build ./... && go vet ./...` pass; `fly secrets list` shows `OPENROUTER_API_KEY` (Deployed); live `POST /api/lowerthirds/openrouter` returned 3 real lower-third candidates instead of the error.
+- **Status:** IMPLEMENTED, COMMITTED, PUSHED.
+
 ### 2026-06-22
 - **Task:** 🗄️ Add a DB debug helper button to every database-connected page that logs DB access and displays the page's related tables.
 - **Action:**
