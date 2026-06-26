@@ -2203,6 +2203,7 @@ func openRouterGenerateHandler(cfg config) http.HandlerFunc {
 		CourseName string `json:"courseName"`
 		ModuleName string `json:"moduleName"`
 		VideoName  string `json:"videoName"`
+		Presenter  string `json:"presenter"`
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -2225,21 +2226,43 @@ func openRouterGenerateHandler(cfg config) http.HandlerFunc {
 			return
 		}
 
-		prompt := fmt.Sprintf(`You are a lower thirds generator for a video course.
-Course Title: %s
-Module Name: %s
-Video Name: %s
+		prompt := fmt.Sprintf(`You are the lower-thirds editor for a technical teaching video.
+Your goal is to help a learner follow along: name the speaker/module,
+put a label + one-line gloss on screen the moment a domain-specific term
+is first spoken, reinforce each learning objective, and mark the key takeaway.
 
-Based on the following video script, generate exactly 3 lower third candidate options.
-Each candidate must have a "main" text (max 40 chars) and "sub" text (max 60 chars) and a brief "rationale".
+Course: %s
+Module: %s
+Video: %s
+Presenter: %s   (use only for the opening speaker_id; skip if empty)
 
-Video script:
+Below is the scene-by-scene script. Walk it IN ORDER, scene by scene.
+For each scene, decide whether an on-screen lower third would aid
+comprehension. Emit one when it helps; emit none for filler or pure
+transition scenes. Do NOT pad to a fixed number and do NOT cap the count —
+let the content decide. As a guide, expect roughly one lower third per
+distinct idea, term, or section, and skip anything a viewer wouldn't
+need spelled out.
+
+When a domain-specific or technical term is first spoken, emit a
+"term_definition" so the viewer sees the term plus a plain-language gloss.
+
+Lower-third types to choose from:
+- speaker_id      (who's talking / module banner — opening only)
+- section_title   (entering a new part of the video)
+- term_definition (a technical term just appeared — label + define it)
+- key_point       (a claim worth reinforcing on screen)
+- takeaway        (the one thing to remember)
+
+Constraints: "main" ≤ 40 chars, "sub" ≤ 60 chars.
+
+SCRIPT (scene-anchored — use this, never the prose version):
 %s
 
-Return ONLY a JSON array with this structure:
+Return ONLY a JSON array, in scene order, with no markdown fences:
 [
-  {"main": "Main Text", "sub": "Sub text description", "rationale": "Reason"}
-]`, req.CourseName, req.ModuleName, req.VideoName, req.Script)
+  {"scene": <int>, "type": "<one of the types above>", "main": "...", "sub": "...", "rationale": "..."}
+]`, req.CourseName, req.ModuleName, req.VideoName, req.Presenter, req.Script)
 
 		ctx, cancel := context.WithTimeout(r.Context(), 30*time.Second)
 		defer cancel()

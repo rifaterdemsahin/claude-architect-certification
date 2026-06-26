@@ -798,7 +798,7 @@ Return ONLY a JSON array with this structure:
         let scriptText = await fetchScriptForVideo(currentModuleId, currentVideoId) || $('scriptContent').value.trim();
         const moduleName = dbModules.find(m => m.id === currentModuleId)?.title || '';
         const videoName = dbVideos.find(v => v.id === currentVideoId)?.title || '';
-        lastRequestBody = { script: scriptText, courseName: "Claude Architect Certification", moduleName, videoName };
+        lastRequestBody = { script: scriptText, courseName: "Claude Architect Certification", moduleName, videoName, presenter: "" };
         const res = await fetch('/api/lowerthirds/openrouter', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -992,15 +992,34 @@ Return ONLY a JSON array with this structure:
     let lastOpenRouterIO = null;
 
     function clientFallbackPrompt(req) {
-      return 'You are a lower thirds generator for a video course.\n' +
-        'Course Title: ' + (req.courseName || '') + '\n' +
-        'Module Name: ' + (req.moduleName || '') + '\n' +
-        'Video Name: ' + (req.videoName || '') + '\n\n' +
-        'Based on the following video script, generate exactly 3 lower third candidate options.\n' +
-        'Each candidate must have a "main" text (max 40 chars) and "sub" text (max 60 chars) and a brief "rationale".\n\n' +
-        'Video script:\n' + (req.script || '') + '\n\n' +
-        'Return ONLY a JSON array with this structure:\n' +
-        '[\n  {"main": "Main Text", "sub": "Sub text description", "rationale": "Reason"}\n]';
+      return 'You are the lower-thirds editor for a technical teaching video.\n' +
+        'Your goal is to help a learner follow along: name the speaker/module,\n' +
+        'put a label + one-line gloss on screen the moment a domain-specific term\n' +
+        'is first spoken, reinforce each learning objective, and mark the key takeaway.\n\n' +
+        'Course: ' + (req.courseName || '') + '\n' +
+        'Module: ' + (req.moduleName || '') + '\n' +
+        'Video: ' + (req.videoName || '') + '\n' +
+        'Presenter: ' + (req.presenter || '') + '   (use only for the opening speaker_id; skip if empty)\n\n' +
+        'Below is the scene-by-scene script. Walk it IN ORDER, scene by scene.\n' +
+        'For each scene, decide whether an on-screen lower third would aid\n' +
+        'comprehension. Emit one when it helps; emit none for filler or pure\n' +
+        'transition scenes. Do NOT pad to a fixed number and do NOT cap the count —\n' +
+        'let the content decide. As a guide, expect roughly one lower third per\n' +
+        'distinct idea, term, or section, and skip anything a viewer wouldn\'t\n' +
+        'need spelled out.\n\n' +
+        'When a domain-specific or technical term is first spoken, emit a\n' +
+        '"term_definition" so the viewer sees the term plus a plain-language gloss.\n\n' +
+        'Lower-third types to choose from:\n' +
+        '- speaker_id      (who\'s talking / module banner — opening only)\n' +
+        '- section_title   (entering a new part of the video)\n' +
+        '- term_definition (a technical term just appeared — label + define it)\n' +
+        '- key_point       (a claim worth reinforcing on screen)\n' +
+        '- takeaway        (the one thing to remember)\n\n' +
+        'Constraints: "main" ≤ 40 chars, "sub" ≤ 60 chars.\n\n' +
+        'SCRIPT (scene-anchored — use this, never the prose version):\n' +
+        (req.script || '') + '\n\n' +
+        'Return ONLY a JSON array, in scene order, with no markdown fences:\n' +
+        '[\n  {"scene": <int>, "type": "<one of the types above>", "main": "...", "sub": "...", "rationale": "..."}\n]';
     }
 
     function storeOpenRouterIO(io) {

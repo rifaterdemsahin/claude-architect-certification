@@ -1868,3 +1868,26 @@ This guarantees uniqueness both among the new candidates and against existing no
 - `POST /api/lowerthirds/openrouter` now returns `prompt` (613 chars), `model` (google/gemini-2.5-flash), and `content` ✅
 
 **Outcome:** After clicking **🧠 OpenRouter Generate Lower Thirds**, a **🔍 Prompt & Output** button appears; clicking it opens a modal with the exact prompt + model output, each copyable (plus copy-all) for feedback.
+
+### 📅 2026-06-26 — 10x Certification Guarantee Page
+**Objective:** Create a page `5_Symbols/production/preprod/10x_certification.html` explaining how the $10 membership guarantees passing the $100 certification process.
+**Approach:** 
+- Outline the "10x Return on Investment" concept.
+- Highlight "Laser Focus on Passing".
+- Add "Showcase with Erdem" using the reversal/post-production tools (turning the camera around to transition from Tell/Show/Do to the audience's Apply phase).
+- Ensure high-fidelity UI design (glassmorphism, dark theme with accent colors).
+- Use `shared/nav.js` and `shared/debug-panel.js`.
+- Add links to related pages.
+
+### 2026-06-26 - Update Lower Thirds Prompt Template
+
+**Task:** Update the OpenRouter lower thirds system prompt to reflect the new dynamic editorial guidelines (speaker name, term definitions, key points, etc.).
+
+**Reasoning:**
+- The prompt defines how `gemini-2.5-flash` behaves when generating lower thirds candidates from the script. The new prompt transitions the LLM from simply generating "3 generic options" to functioning as a "lower-thirds editor" that follows a scene-by-scene script to surface domain-specific terms, takeaways, and speaker names.
+- The `ORRequest` struct in `cmd/server/main.go` needed a new `Presenter` field (`presenter`) to feed into the prompt `{{SPEAKER_NAME}}` token.
+- Both the server-side `openRouterGenerateHandler` prompt template and the client-side `clientFallbackPrompt` mirror (in `5_Symbols/production/postprod/lower_thirds.html`) required updating so that the debug/inspect view (`🔍`) correctly displays the fallback text if the network/API fails.
+- Adjusted maximum characters to 40 for "main" and 60 for "sub" as per standard constraints.
+- The returned JSON array format was updated to include `"scene"` and `"type"` parameters as defined in the instructions. The frontend's `scenes` table schema requires `lt_main` and `lt_sub`, and we will continue inserting sequentially to avoid unique key collisions (`module_number, section_number, scene_number`), ensuring the integrity of the data remains intact.
+
+**Outcome:** Modified `cmd/server/main.go` to add `Presenter` to the JSON request payload and updated `openRouterGenerateHandler` to pass it into the revised template. Modified `lower_thirds.html` to inject `presenter: ""` into `lastRequestBody` and updated `clientFallbackPrompt`. Verified via `go build` and `go vet`.
