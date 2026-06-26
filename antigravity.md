@@ -67,6 +67,10 @@ To collaborate on production-ready AI workflows, ensuring:
 
 ## 🪵 Activity Log
 
+### 2026-06-26 (HTML Specs & Competitive Analysis)
+- **Action:** Auto-generated 90 `*_spec.md` files for every HTML file to `4_Formula/specs/`. Added `5_Symbols/production/preprod/research/competitive_analysis.html` analyzing CCA-F based on web search results. Updated `navigation_config.json`, `index.html`, `markdown_renderer.html`, and `shared/nav.js`.
+- **Status:** IMPLEMENTED, COMMITTED, PUSHED, DEPLOYED. Live URL: `https://rifaterdemsahin.github.io/claude-architect-certification/5_Symbols/production/preprod/research/competitive_analysis.html`
+
 ### 2026-06-07 (VS Code Extension Audit & Update)
 - **Action:** Scanned project tech stack (HTML/CSS/JS, Python, Mermaid, YAML, Markdown, Supabase, Azure, Fly.io) and installed/updated all 26 required extensions from `4_Formula/tools/vscode_extensions.md`.
 - **Newly installed:** `ecmel.vscode-html-css`, `esbenp.prettier-vscode`, `formulahendry.auto-rename-tag`, `christian-kohler.path-intellisense`, `charliermarsh.ruff`, `yzhang.markdown-all-in-one`, `hnw.vscode-auto-open-markdown-preview`, `mikestead.dotenv`, `eriklynd.json-tools`, `usernamehw.errorlens`, `oderwat.indent-rainbow`, `wayou.vscode-todo-highlight`, `supabase.vscode-supabase-extension`, `tamasfe.even-better-toml`, `flyio.sprites-for-vscode`.
