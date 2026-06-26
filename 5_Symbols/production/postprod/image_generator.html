@@ -5,869 +5,1031 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="../../../shared/redirect-to-live-site.js"></script>
   <title>AI Image Generator | Claude AI Certification</title>
+  <meta name="description" content="Load a video script, generate candidate images per sentence with a recommended (editable) asset type, save them to Azure, and push to Google Drive.">
+  <link rel="icon" type="image/png" href="../../../favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-dark: #030712;
-      --bg-card: rgba(17, 24, 39, 0.9);
-      --border-glow: rgba(139, 92, 246, 0.3);
-      --text-main: #f3f4f6;
-      --text-muted: #9ca3af;
-      --primary: #8b5cf6;
-      --primary-glow: rgba(139, 92, 246, 0.6);
-      --secondary: #3b82f6;
-      --success: #10b981;
-      --danger: #ef4444;
-      --font-title: 'Outfit', sans-serif;
-      --font-body: 'Plus Jakarta Sans', sans-serif;
+      --bg-dark: #030712; --bg-card: rgba(17,24,39,0.9); --border-glow: rgba(139,92,246,0.3);
+      --text-main: #f3f4f6; --text-muted: #9ca3af; --primary: #8b5cf6; --primary-glow: rgba(139,92,246,0.6);
+      --secondary: #3b82f6; --success: #10b981; --danger: #ef4444; --warning: #f59e0b; --accent: #8b5cf6;
+      --font-title: 'Outfit', sans-serif; --font-body: 'Plus Jakarta Sans', sans-serif;
     }
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
       background-color: var(--bg-dark);
-      background-image: 
-        radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.12) 0%, transparent 40%),
-        radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.12) 0%, transparent 40%);
-      color: var(--text-main);
-      font-family: var(--font-body);
-      line-height: 1.6;
+      background-image: radial-gradient(circle at 10% 20%, rgba(139,92,246,0.12) 0%, transparent 40%),
+                        radial-gradient(circle at 90% 80%, rgba(59,130,246,0.12) 0%, transparent 40%);
+      color: var(--text-main); font-family: var(--font-body); line-height: 1.6;
       padding: 100px 24px 60px;
     }
-
-    .container { max-width: 1000px; margin: 0 auto; }
-
-    header { margin-bottom: 60px; text-align: center; }
-    header h1 { font-family: var(--font-title); font-size: 3rem; font-weight: 900; letter-spacing: -0.02em; margin-bottom: 10px; }
-    header p { font-size: 1.2rem; color: var(--text-muted); }
-
+    .container { max-width: 1200px; margin: 0 auto; }
+    header { text-align: center; margin-bottom: 48px; }
+    header h1 { font-family: var(--font-title); font-size: 2.6rem; font-weight: 900; letter-spacing: -0.02em; margin-bottom: 10px; }
+    header p { color: var(--text-muted); font-size: 1.05rem; }
+    .selector-bar { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+    .selector-bar select {
+      background: var(--bg-card); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px;
+      color: var(--text-main); padding: 12px 20px; font-size: 1rem; font-family: var(--font-body);
+      min-width: 220px; cursor: pointer;
+    }
+    .selector-bar select:focus { outline: none; border-color: var(--accent); }
     .glass-card {
-      background: var(--bg-card);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 24px;
-      padding: 32px;
-      margin-bottom: 40px;
-      box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(12px);
+      background: var(--bg-card); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px;
+      padding: 32px; margin-bottom: 32px; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.6); backdrop-filter: blur(12px);
     }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-      margin-bottom: 24px;
-    }
-
-    .form-group { margin-bottom: 20px; }
-    .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-muted); }
-    .form-group input, .form-group textarea, .form-group select {
-      width: 100%;
-      padding: 12px 16px;
-      background: rgba(0, 0, 0, 0.3);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
-      color: white;
-      font-family: inherit;
-    }
-    .form-group input:focus { border-color: var(--primary); outline: none; }
-
+    .glass-card h2 { font-family: var(--font-title); font-weight: 700; font-size: 1.3rem; margin-bottom: 0; }
+    .glass-card-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+    .glass-card-body { margin-top: 20px; }
+    .glass-card-body.collapsed { display: none; }
+    .collapse-icon { transition: transform 0.3s ease; font-size: 1.2rem; }
     .btn {
-      padding: 12px 24px;
-      border-radius: 12px;
-      font-weight: 700;
-      cursor: pointer;
-      border: none;
-      transition: all 0.2s;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 1rem;
+      background: var(--primary); color: #fff; border: none; border-radius: 10px; padding: 10px 22px;
+      font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; text-decoration: none;
+      display: inline-flex; align-items: center; gap: 8px;
     }
-    .btn-primary { background: var(--primary); color: white; }
-    .btn-secondary { background: var(--secondary); color: white; }
-    .btn-success { background: var(--success); color: white; }
-    .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4); }
-    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(139,92,246,0.3); }
+    .btn-secondary { background: var(--secondary); color: #fff; }
+    .btn-success { background: var(--success); color: #000; }
+    .btn-warning { background: var(--warning); color: #000; }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-sm { padding: 6px 14px; font-size: 0.8rem; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+    .badge-count {
+      background: rgba(255,255,255,0.1); color: var(--text-main); border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 12px; padding: 2px 8px; font-size: 0.8rem; margin-left: 8px; font-weight: 500;
+      display: inline-block; vertical-align: middle;
+    }
+    .empty-state { text-align: center; padding: 48px 24px; color: var(--text-muted); }
+    .empty-state .empty-icon { font-size: 3rem; margin-bottom: 12px; }
+    .script-preview {
+      width: 100%; min-height: 150px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px; padding: 20px; color: var(--text-muted); font-family: var(--font-body);
+      resize: vertical; line-height: 1.7; font-size: 0.9rem;
+    }
+    .toast {
+      position: fixed; top: 24px; right: 24px; background: var(--success); color: #000;
+      padding: 14px 24px; border-radius: 12px; font-weight: 700; z-index: 1000;
+      transform: translateX(120%); transition: transform 0.4s ease; max-width: 400px;
+    }
+    .toast.show { transform: translateX(0); }
+    .toast.error { background: var(--danger); color: #fff; }
 
-    .result-container {
-      display: none;
-      margin-top: 40px;
-      text-align: center;
+    /* Stats */
+    .stats-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+    .stat-badge {
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px;
+      padding: 8px 16px; font-size: 0.85rem; display: flex; align-items: center; gap: 6px;
     }
+    .stat-badge .count { font-weight: 800; font-size: 1.05rem; }
+    .stat-badge.candidate .count { color: var(--primary); }
+    .stat-badge.completed .count { color: var(--success); }
+    .stat-badge.pending  .count { color: var(--text-muted); }
+    .stat-badge.failed   .count { color: var(--danger); }
 
-    .result-image {
-      max-width: 100%;
-      border-radius: 16px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-      margin-bottom: 24px;
+    /* Sentence / candidate table */
+    .ig-table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
+    .ig-table th { text-align: left; color: var(--text-muted); font-size: 0.78rem; font-weight: 600; padding: 8px 12px; text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .ig-table td { padding: 12px; background: rgba(0,0,0,0.18); vertical-align: top; font-size: 0.9rem; }
+    .ig-table tr td:first-child { border-radius: 12px 0 0 12px; }
+    .ig-table tr td:last-child { border-radius: 0 12px 12px 0; }
+    .ig-table .num-col { width: 42px; text-align: center; font-weight: 700; color: var(--accent); }
+    .ig-table .sentence-col { min-width: 260px; }
+    .ig-table .type-col { width: 92px; }
+    .ig-table .asset-col { width: 168px; }
+    .ig-table .img-col { width: 150px; text-align: center; }
+    .ig-table .action-col { width: 150px; text-align: center; }
+    .ig-table .sentence-text { line-height: 1.5; }
+    .section-tag { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 0.68rem; font-weight: 600; background: rgba(59,130,246,0.12); color: var(--secondary); margin-right: 6px; }
+    .type-tag { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 600; background: rgba(139,92,246,0.15); color: var(--primary); }
+    .type-tag.hook { background: rgba(245,158,11,0.15); color: var(--warning); }
+    .type-tag.objective { background: rgba(59,130,246,0.15); color: var(--secondary); }
+    .type-tag.takeaway { background: rgba(16,185,129,0.15); color: var(--success); }
+    .type-tag.transition { background: rgba(156,163,175,0.15); color: var(--text-muted); }
+    .asset-select {
+      width: 100%; padding: 6px 8px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px; color: #fff; font-family: inherit; font-size: 0.8rem;
     }
+    .asset-select:focus { outline: none; border-color: var(--accent); }
+    .reco-hint { font-size: 0.68rem; color: var(--text-muted); margin-top: 4px; }
+    .reco-hint b { color: var(--primary); }
+    .cand-thumb { width: 140px; height: 79px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; background: rgba(0,0,0,0.3); }
+    .status-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; }
+    .status-badge.candidate { background: rgba(139,92,246,0.15); color: var(--primary); }
+    .status-badge.completed { background: rgba(16,185,129,0.15); color: var(--success); }
+    .status-badge.pending   { background: rgba(156,163,175,0.15); color: var(--text-muted); }
+    .status-badge.generating{ background: rgba(59,130,246,0.15); color: var(--secondary); }
+    .status-badge.failed    { background: rgba(239,68,68,0.15); color: var(--danger); }
 
-    .refined-prompt-box {
-      background: rgba(0, 0, 0, 0.4);
-      padding: 20px;
-      border-radius: 12px;
-      text-align: left;
-      margin-bottom: 24px;
-      border: 1px solid var(--border-glow);
-    }
+    /* Existing images gallery */
+    .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; }
+    .gallery-item { background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; overflow: hidden; }
+    .gallery-item img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; background: rgba(0,0,0,0.4); }
+    .gallery-item .meta { padding: 8px 10px; font-size: 0.72rem; color: var(--text-muted); }
 
-    .refined-prompt-box h3 {
-      font-size: 0.9rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--primary);
-      margin-bottom: 10px;
-    }
+    /* Progress + log */
+    .progress-bar-wrap { width: 100%; height: 8px; background: rgba(255,255,255,0.06); border-radius: 4px; overflow: hidden; margin: 12px 0; }
+    .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); border-radius: 4px; transition: width 0.4s ease; width: 0%; }
+    .progress-log { max-height: 180px; overflow-y: auto; margin-top: 12px; font-size: 0.8rem; font-family: monospace; }
+    .progress-log .log-entry { padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .progress-log .log-entry.success { color: var(--success); }
+    .progress-log .log-entry.fail { color: var(--danger); }
 
-    .refined-prompt-box p {
-      font-size: 0.95rem;
-      color: var(--text-main);
-      font-style: italic;
-    }
+    .guide-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 0.82rem; }
+    .guide-table td, .guide-table th { padding: 6px 10px; border-bottom: 1px solid rgba(255,255,255,0.06); text-align: left; vertical-align: top; }
+    .guide-table th { color: var(--text-muted); text-transform: uppercase; font-size: 0.72rem; }
 
-    footer {
-      margin-top: 80px;
-      text-align: center;
-      padding-top: 40px;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    .nav-links { display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; }
-    .nav-links a { color: var(--text-muted); text-decoration: none; font-weight: 600; }
-    .nav-links a:hover { color: var(--primary); }
+    /* Lightbox */
+    .lightbox { display: none; position: fixed; inset: 0; z-index: 2000; background: rgba(0,0,0,0.88); backdrop-filter: blur(6px); align-items: center; justify-content: center; padding: 24px; }
+    .lightbox.show { display: flex; }
+    .lightbox img { max-width: 92vw; max-height: 88vh; border-radius: 14px; border: 1px solid rgba(255,255,255,0.15); }
 
-    .loader {
-      display: none;
-      width: 24px;
-      height: 24px;
-      border: 3px solid rgba(255, 255, 255, 0.3);
-      border-radius: 50%;
-      border-top-color: white;
-      animation: spin 1s ease-in-out infinite;
+    @media (max-width: 900px) {
+      .ig-table { font-size: 0.8rem; }
+      .ig-table .sentence-col { min-width: 140px; }
+      header h1 { font-size: 2rem; }
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* Modal Styles */
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.85);
-      backdrop-filter: blur(8px);
-      z-index: 1000;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-    }
-
-    .modal-content {
-      background: var(--bg-card);
-      border: 1px solid var(--border-glow);
-      border-radius: 24px;
-      width: 100%;
-      max-width: 800px;
-      max-height: 85vh;
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-    }
-
-    .modal-header {
-      padding: 20px 32px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .modal-header h2 {
-      font-family: var(--font-title);
-      font-size: 1.5rem;
-      margin: 0;
-    }
-
-    .modal-body {
-      padding: 32px;
-      overflow-y: auto;
-      font-size: 1rem;
-      line-height: 1.7;
-      color: var(--text-main);
-    }
-
-    .modal-body h1, .modal-body h2, .modal-body h3 {
-      margin-top: 24px;
-      margin-bottom: 12px;
-      color: var(--primary);
-    }
-
-    .modal-body p { margin-bottom: 16px; }
-
-    .modal-body blockquote {
-      border-left: 4px solid var(--primary);
-      background: rgba(139, 92, 246, 0.1);
-      padding: 16px;
-      margin: 20px 0;
-      border-radius: 0 12px 12px 0;
-      font-style: italic;
-    }
-
-    .modal-body pre {
-      background: rgba(0, 0, 0, 0.3);
-      padding: 16px;
-      border-radius: 12px;
-      overflow-x: auto;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      margin: 20px 0;
-    }
-
-    .close-modal {
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      font-size: 2rem;
-      cursor: pointer;
-      line-height: 1;
-    }
-    .close-modal:hover { color: white; }
-
-    .script-btn {
-      margin-bottom: 15px;
-      background: rgba(139, 92, 246, 0.1);
-      border: 1px solid var(--border-glow);
-      color: var(--primary);
-      width: 100%;
-      justify-content: center;
-    }
-    .script-btn:hover { background: rgba(139, 92, 246, 0.2); }
-
-    .asset-types-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 10px;
-      margin: 20px 0;
-    }
-    .asset-type-card {
-      background: rgba(0, 0, 0, 0.2);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 14px;
-      padding: 12px;
-      cursor: pointer;
-      transition: all 0.2s;
-      position: relative;
-      user-select: none;
-    }
-    .asset-type-card:hover { border-color: var(--primary); background: rgba(139, 92, 246, 0.05); }
-    .asset-type-card.selected {
-      border-color: var(--primary);
-      background: rgba(139, 92, 246, 0.12);
-      box-shadow: 0 0 20px rgba(139, 92, 246, 0.15);
-    }
-    .asset-type-card input[type="checkbox"] { display: none; }
-    .asset-type-card .card-icon { font-size: 1.4rem; margin-bottom: 4px; }
-    .asset-type-card .card-title { font-weight: 700; font-size: 0.82rem; }
-    .asset-type-card .card-desc { font-size: 0.7rem; color: var(--text-muted); margin-top: 3px; line-height: 1.3; }
-    .asset-type-card .check-mark {
-      position: absolute;
-      top: 6px; right: 8px;
-      width: 16px; height: 16px;
-      border-radius: 50%;
-      border: 2px solid rgba(255,255,255,0.2);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 10px; color: transparent;
-      transition: all 0.2s;
-    }
-    .asset-type-card.selected .check-mark {
-      background: var(--primary);
-      border-color: var(--primary);
-      color: white;
-    }
-    .guide-toggle {
-      background: none; border: none; color: var(--text-muted);
-      cursor: pointer; font-size: 0.85rem; padding: 4px 8px;
-      border-radius: 8px; transition: all 0.2s;
-    }
-    .guide-toggle:hover { color: var(--primary); background: rgba(139,92,246,0.1); }
-    .guide-panel {
-      display: none;
-      background: rgba(0,0,0,0.3);
-      border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 16px;
-      padding: 20px;
-      margin-top: 12px;
-      font-size: 0.9rem;
-      line-height: 1.6;
-    }
-    .guide-panel.visible { display: block; }
-    .guide-panel h4 { color: var(--primary); margin-bottom: 8px; }
-    .guide-panel table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-    .guide-panel td, .guide-panel th {
-      padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.06);
-      text-align: left; vertical-align: top;
-    }
-    .guide-panel th { color: var(--text-muted); font-weight: 600; font-size: 0.8rem; text-transform: uppercase; }
-    .guide-panel td { font-size: 0.85rem; }
   </style>
-<script src="../../../shared/seo.js" defer></script></head>
+  <script src="../../../shared/nav.js"></script>
+  <script src="../../../shared/debug-panel.js"></script>
+  <script src="https://accounts.google.com/gsi/client" onload="gisLoaded()" async defer></script>
+  <script src="../../../shared/seo.js" defer></script>
+</head>
 <body>
   <div class="container">
     <header>
       <h1>🖼️ AI Image Generator</h1>
-      <p>Generate module assets with Gemini & Azure</p>
+      <p>Load a video script, generate a <strong>candidate image per sentence</strong> with a <strong>recommended asset type</strong> you can change, save them to <strong>Azure</strong>, then push to <strong>Google Drive</strong>.</p>
     </header>
 
-    <div class="glass-card">
-      <button id="view-script-btn" class="btn script-btn" type="button">
-        📖 View Production Script
-      </button>
-
-      <form id="gen-form">
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Module Number</label>
-            <select id="module-number" required>
-              <option value="1">Module 1</option>
-              <option value="2">Module 2</option>
-              <option value="3">Module 3</option>
-              <option value="4">Module 4</option>
-              <option value="5">Module 5</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Video Number</label>
-            <select id="video-number" required>
-              <option value="1">Video 1</option>
-              <option value="2">Video 2</option>
-              <option value="3">Video 3</option>
-              <option value="4">Video 4</option>
-              <option value="5">Video 5</option>
-            </select>
-          </div>
+    <!-- 1) Filter -->
+    <div class="glass-card" id="filterPanel">
+      <div class="glass-card-header" onclick="togglePanel(this)">
+        <h2>1) Filter</h2>
+        <span class="collapse-icon" style="transform: rotate(0deg);">▼</span>
+      </div>
+      <div class="glass-card-body">
+        <div class="selector-bar">
+          <select id="moduleSelect"><option value="">— Select Module —</option></select>
+          <select id="videoSelect"><option value="">— Select Video —</option></select>
         </div>
-
-        <div class="form-group">
-          <label>Image Prompt (What do you want to see?)</label>
-          <textarea id="prompt" rows="4" required placeholder="e.g., A futuristic server room with purple neon lights and glass walls reflecting data streams..."></textarea>
-        </div>
-
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-          <label style="font-weight:700;color:var(--text-muted);font-size:0.9rem;">🎯 Asset Type(s)</label>
-          <button type="button" id="guide-toggle-btn" class="guide-toggle">📖 Guide</button>
-        </div>
-        <div class="asset-types-grid" id="asset-types-container">
-          <label class="asset-type-card" data-type="explain">
-            <input type="checkbox" value="explain"><div class="check-mark">✓</div>
-            <div class="card-icon">📝</div><div class="card-title">Explain</div>
-            <div class="card-desc">Annotated concept — callouts, arrows, labels</div>
-          </label>
-          <label class="asset-type-card" data-type="infographic">
-            <input type="checkbox" value="infographic"><div class="check-mark">✓</div>
-            <div class="card-icon">📊</div><div class="card-title">Infographic</div>
-            <div class="card-desc">Data layout with stats, icons, sections</div>
-          </label>
-          <label class="asset-type-card" data-type="graphic">
-            <input type="checkbox" value="graphic"><div class="check-mark">✓</div>
-            <div class="card-icon">🖼️</div><div class="card-title">Standalone Graphic</div>
-            <div class="card-desc">Full-scene hero, backdrop, thumbnail</div>
-          </label>
-          <label class="asset-type-card" data-type="diagram">
-            <input type="checkbox" value="diagram"><div class="check-mark">✓</div>
-            <div class="card-icon">🔷</div><div class="card-title">Diagram</div>
-            <div class="card-desc">Flow chart, topology, process map</div>
-          </label>
-          <label class="asset-type-card" data-type="code">
-            <input type="checkbox" value="code"><div class="check-mark">✓</div>
-            <div class="card-icon">💻</div><div class="card-title">Code / Terminal</div>
-            <div class="card-desc">Syntax-highlighted code, CLI, configs</div>
-          </label>
-          <label class="asset-type-card" data-type="comparison">
-            <input type="checkbox" value="comparison"><div class="check-mark">✓</div>
-            <div class="card-icon">⚖️</div><div class="card-title">Comparison</div>
-            <div class="card-desc">Side-by-side before/after or X vs Y</div>
-          </label>
-          <label class="asset-type-card" data-type="stepbystep">
-            <input type="checkbox" value="stepbystep"><div class="check-mark">✓</div>
-            <div class="card-icon">🔢</div><div class="card-title">Step-by-Step</div>
-            <div class="card-desc">Numbered sequence / runbook card</div>
-          </label>
-          <label class="asset-type-card" data-type="thumbnail">
-            <input type="checkbox" value="thumbnail"><div class="check-mark">✓</div>
-            <div class="card-icon">▶️</div><div class="card-title">Thumbnail</div>
-            <div class="card-desc">YouTube 16:9 hero, bold text zone</div>
-          </label>
-          <label class="asset-type-card" data-type="architecture">
-            <input type="checkbox" value="architecture"><div class="check-mark">✓</div>
-            <div class="card-icon">🏛️</div><div class="card-title">Architecture</div>
-            <div class="card-desc">Cloud/system layout, boxes, data flow</div>
-          </label>
-          <label class="asset-type-card" data-type="callout">
-            <input type="checkbox" value="callout"><div class="check-mark">✓</div>
-            <div class="card-icon">💡</div><div class="card-title">Callout / Key Takeaway</div>
-            <div class="card-desc">Single big-idea quote or highlight</div>
-          </label>
-          <label class="asset-type-card" data-type="timeline">
-            <input type="checkbox" value="timeline"><div class="check-mark">✓</div>
-            <div class="card-icon">📅</div><div class="card-title">Timeline / Roadmap</div>
-            <div class="card-desc">Horizontal progression, milestones</div>
-          </label>
-          <label class="asset-type-card" data-type="table">
-            <input type="checkbox" value="table"><div class="check-mark">✓</div>
-            <div class="card-icon">📋</div><div class="card-title">Table / Matrix</div>
-            <div class="card-desc">Feature matrix, decision grid, tiers</div>
-          </label>
-          <label class="asset-type-card" data-type="titlecard">
-            <input type="checkbox" value="titlecard"><div class="check-mark">✓</div>
-            <div class="card-icon">🎬</div><div class="card-title">Title / Section Card</div>
-            <div class="card-desc">Chapter divider, module intro frame</div>
-          </label>
-          <label class="asset-type-card" data-type="analogy">
-            <input type="checkbox" value="analogy"><div class="check-mark">✓</div>
-            <div class="card-icon">🧩</div><div class="card-title">Analogy / Metaphor</div>
-            <div class="card-desc">Illustrative concept comparison image</div>
-          </label>
-          <label class="asset-type-card" data-type="background">
-            <input type="checkbox" value="background"><div class="check-mark">✓</div>
-            <div class="card-icon">🌄</div><div class="card-title">Background Asset</div>
-            <div class="card-desc">Ambient texture, abstract bokeh, or environmental scenery</div>
-          </label>
-          <label class="asset-type-card" data-type="transparent">
-            <input type="checkbox" value="transparent"><div class="check-mark">✓</div>
-            <div class="card-icon">🔲</div><div class="card-title">Transparent / Layered PNG</div>
-            <div class="card-desc">No background, ready for motion overlay</div>
-          </label>
-          <label class="asset-type-card" data-type="icon">
-            <input type="checkbox" value="icon"><div class="check-mark">✓</div>
-            <div class="card-icon">🏷️</div><div class="card-title">Icon / Badge</div>
-            <div class="card-desc">Single glyph, cert badge, visual lang</div>
-          </label>
-        </div>
-
-        <div id="guide-panel" class="guide-panel">
-          <h4>📖 Asset Type Guide</h4>
-          <p>Select one or more. The AI will tailor the prompt to each selected type:</p>
-          <table>
-            <tr><th>Type</th><th>Best For</th><th>Style Prompt Addition</th></tr>
-            <tr><td>📝 Explain</td><td>Annotated walkthroughs, callout visuals</td><td>"Annotated diagram with clear callouts, labels, and explanatory flow"</td></tr>
-            <tr><td>📊 Infographic</td><td>Stats, milestones, comparisons</td><td>"Structured infographic with data points, icons, section dividers, hierarchy"</td></tr>
-            <tr><td>🖼️ Standalone Graphic</td><td>Hero images, thumbnails, backdrop</td><td>"Full illustrative scene, cinematic lighting, 16:9, hero quality"</td></tr>
-            <tr><td>🔷 Diagram</td><td>Flowcharts, topology, process flows</td><td>"Clean diagram with labeled components, directional arrows, minimalist palette"</td></tr>
-            <tr><td>💻 Code / Terminal</td><td>Commands, configs, YAML, manifests</td><td>"Stylised code or terminal window with syntax highlighting, dark background"</td></tr>
-            <tr><td>⚖️ Comparison</td><td>X vs Y, before/after, prototype vs prod</td><td>"Side-by-side or split layout showing contrast, labels for each side"</td></tr>
-            <tr><td>🔢 Step-by-Step</td><td>Runbooks, numbered processes</td><td>"Numbered sequence card with clear progression arrows or checklist design"</td></tr>
-            <tr><td>▶️ Thumbnail</td><td>YouTube 16:9 hero, bold focal point</td><td>"Bold high-contrast 16:9 layout with prominent text zone and focal imagery"</td></tr>
-            <tr><td>🏛️ Architecture</td><td>Cloud/system diagrams, service boxes</td><td>"System architecture with service boxes, zones, data flow arrows, cloud icons"</td></tr>
-            <tr><td>💡 Callout / Takeaway</td><td>Single big-idea quote, key highlight</td><td>"Clean quote-card design with emphasis on one key insight or statistic"</td></tr>
-            <tr><td>📅 Timeline / Roadmap</td><td>Module roadmaps, release history</td><td>"Horizontal timeline with milestone nodes, dates, and progression arc"</td></tr>
-            <tr><td>📋 Table / Matrix</td><td>Feature matrices, decision tables, tiers</td><td>"Structured grid layout with labelled rows and columns, clear cell hierarchy"</td></tr>
-            <tr><td>🎬 Title / Section Card</td><td>Chapter dividers, module intro frame</td><td>"Clean transition card with title, subtitle, and decorative accent"</td></tr>
-            <tr><td>🧩 Analogy / Metaphor</td><td>Concept illustrations, "X is like Y"</td><td>"Illustrative metaphor image linking the technical concept to a familiar scene"</td></tr>
-            <tr><td>🌄 Background</td><td>Ambient fillers, video backdrops</td><td>"Ambient environmental background, soft focal depth, abstract textures, cinematic lighting"</td></tr>
-            <tr><td>🔲 Transparent PNG</td><td>Motion-ready overlay assets</td><td>"Asset with no background, isolated subject, suitable for compositing"</td></tr>
-            <tr><td>🏷️ Icon / Badge</td><td>Course-wide visual language, cert badges</td><td>"Single clean glyph, scalable, minimal detail, high contrast on any background"</td></tr>
-          </table>
-          <p style="margin-top:12px;color:var(--text-muted);font-size:0.8rem;">When multiple types are selected, the Enhance button generates a prompt covering all selected types.</p>
-        </div>
-
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
-          <div style="display: flex; gap: 12px; align-items: center;">
-            <button type="button" id="enhance-btn" class="btn btn-secondary">
-              <span id="enhance-text">🪄 Enhance with Gemini</span>
-              <div class="loader" id="enhance-loader"></div>
-            </button>
-            <button type="submit" id="gen-btn" class="btn btn-primary">
-              <span id="btn-text">✨ Generate with Gemini</span>
-              <div class="loader" id="btn-loader"></div>
-            </button>
-          </div>
-          <button type="button" id="test-gemini-btn" class="btn" style="background:rgba(16,185,129,0.15);border:1px solid var(--success);color:var(--success);">
-            <span id="test-gemini-text">🔌 Test Gemini Connection</span>
-            <div class="loader" id="test-gemini-loader"></div>
-          </button>
-        </div>
-        <div id="gemini-status" style="margin-top:12px;padding:12px 16px;border-radius:12px;display:none;"></div>
-      </form>
-    </div>
-
-    <div id="result-container" class="result-container">
-      <div class="glass-card">
-        <div class="refined-prompt-box">
-          <h3>🧠 Refined Gemini Prompt</h3>
-          <p id="refined-prompt-text"></p>
-        </div>
-
-        <div id="cost-box" style="display:none;background:rgba(16,185,129,0.08);border:1px solid var(--success);border-radius:12px;padding:14px 18px;margin-bottom:24px;text-align:left;">
-          <span style="font-weight:700;color:var(--success);">💰 Generation Cost:</span>
-          <span id="cost-text" style="color:var(--text-main);"></span>
-          <div id="cost-detail" style="color:var(--text-muted);font-size:0.8rem;margin-top:4px;"></div>
-        </div>
-
-        <img id="result-img" src="" alt="Generated Visual" class="result-image">
-
-        <div style="display: flex; justify-content: center; gap: 16px; flex-wrap: wrap;">
-          <button id="save-btn" class="btn btn-success">
-            💾 Save to Azure Blob Storage
-          </button>
-          <button id="copy-btn" class="btn btn-secondary" type="button">
-            📋 Copy Image
-          </button>
-          <button id="download-btn" class="btn btn-secondary" type="button">
-            ⬇️ Download
-          </button>
-          <button id="reset-btn" class="btn btn-secondary" onclick="resetForm()">
-            🔄 Try Another
-          </button>
-        </div>
-        <p id="save-status" style="margin-top: 15px; color: var(--success); display: none;"></p>
       </div>
     </div>
 
-    <!-- Script Modal -->
-    <div id="script-modal" class="modal">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h2 id="modal-title">🎬 Production Script</h2>
-          <button class="close-modal" onclick="closeModal()">&times;</button>
+    <!-- 2) Video Script -->
+    <div class="glass-card" id="scriptPanel" style="display:none;">
+      <div class="glass-card-header" onclick="togglePanel(this)">
+        <h2>2) Video Script <span id="countScript" class="badge-count" style="display:none;"></span></h2>
+        <span class="collapse-icon">▼</span>
+      </div>
+      <div class="glass-card-body">
+        <textarea id="scriptContent" class="script-preview" placeholder="The video script (and its sentences) load here once a module and video are selected…"></textarea>
+        <div style="margin-top: 12px; text-align: right;">
+          <button class="btn btn-secondary btn-sm" onclick="window.open('../preprod/scripts/index.html?module_id=' + (currentModuleId||'') + '&video_id=' + (currentVideoId||''), '_blank')">✏️ Edit Script</button>
         </div>
-        <div id="modal-body" class="modal-body">
-          <div style="text-align: center; padding: 40px;">
-            <div class="loader" style="display: inline-block;"></div>
-            <p style="margin-top: 15px;">Fetching script...</p>
+      </div>
+    </div>
+
+    <!-- 3) Action Buttons -->
+    <div class="glass-card" id="actionPanel" style="display:none;">
+      <div class="glass-card-header" onclick="togglePanel(this)">
+        <h2>3) Action Buttons</h2>
+        <span class="collapse-icon">▼</span>
+      </div>
+      <div class="glass-card-body">
+        <div style="display:flex; gap:14px; justify-content:center; flex-wrap:wrap;">
+          <button class="btn" id="genAllBtn">✨ Generate Images for All Sentences</button>
+          <button class="btn btn-warning" id="resetBtn" style="background:rgba(245,158,11,0.15);color:var(--warning);border:1px solid rgba(245,158,11,0.3);">🔄 Reset Candidates</button>
+          <button class="btn btn-secondary" id="guideBtn" style="background:rgba(255,255,255,0.1);">📖 Asset Type Guide</button>
+          <button class="btn btn-success" id="testGeminiBtn" style="background:rgba(16,185,129,0.15);color:var(--success);border:1px solid var(--success);">🔌 Test Gemini Connection</button>
+        </div>
+        <div id="geminiStatus" style="margin-top:14px;padding:12px 16px;border-radius:12px;display:none;"></div>
+        <div id="costBox" style="display:none;margin-top:14px;background:rgba(16,185,129,0.08);border:1px solid var(--success);border-radius:12px;padding:12px 16px;font-size:0.9rem;">
+          <span style="font-weight:700;color:var(--success);">💰 Session cost:</span>
+          <span id="costText" style="color:var(--text-main);">$0.00 USD</span>
+          <span id="costDetail" style="color:var(--text-muted);font-size:0.8rem;margin-left:6px;"></span>
+        </div>
+        <div id="guidePanel" style="display:none;margin-top:16px;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:18px;">
+          <h3 style="font-family:var(--font-title);color:var(--primary);margin-bottom:8px;font-size:1rem;">📖 Asset Type Guide</h3>
+          <p style="color:var(--text-muted);font-size:0.85rem;">A type is auto-recommended per sentence from its kind and visual mode — change any of them in the Candidate Images table before (or after) generating.</p>
+          <table class="guide-table" id="guideTable"></table>
+        </div>
+
+        <!-- Generation progress -->
+        <div id="progressWrap" style="display:none;margin-top:18px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <strong>⏳ Generating candidate images…</strong>
+            <span class="progress-text" id="progressText" style="color:var(--text-muted);font-size:0.85rem;">0 / 0</span>
+          </div>
+          <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBarFill"></div></div>
+          <div class="progress-log" id="progressLog"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4) Candidate Images + recommended asset type -->
+    <div class="glass-card" id="candidatesPanel" style="display:none;">
+      <div class="glass-card-header" onclick="togglePanel(this)">
+        <h2>4) Candidate Images <span id="countCandidates" class="badge-count" style="display:none;"></span></h2>
+        <span class="collapse-icon">▼</span>
+      </div>
+      <div class="glass-card-body">
+        <div id="statsRow" class="stats-row" style="display:none;"></div>
+        <div style="margin-bottom:14px;display:flex;gap:10px;flex-wrap:wrap;" id="candBulkBar">
+          <button class="btn btn-success btn-sm" id="saveAllAzureBtn">☁️ Save All Candidates to Azure</button>
+        </div>
+        <div id="candidatesWrap" style="overflow-x:auto;">
+          <div class="empty-state">
+            <div class="empty-icon">🤖</div>
+            <p>No candidates yet. Pick the recommended asset type per sentence, then press <strong>Generate Images for All Sentences</strong>.</p>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- 5) Existing Images -->
+    <div class="glass-card" id="existingPanel" style="display:none;">
+      <div class="glass-card-header" onclick="togglePanel(this)">
+        <h2>5) Existing Images <span id="countExisting" class="badge-count" style="display:none;"></span></h2>
+        <span class="collapse-icon">▼</span>
+      </div>
+      <div class="glass-card-body">
+        <div style="margin-bottom:14px;text-align:right;">
+          <button class="btn btn-secondary btn-sm" id="refreshExistingBtn" style="background:rgba(255,255,255,0.1);">🔄 Refresh</button>
+        </div>
+        <div id="existingWrap">
+          <div class="empty-state"><div class="empty-icon">🖼️</div><p>Saved images for this module &amp; video will appear here.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty state -->
+    <div id="emptyState" class="glass-card empty-state">
+      <div class="empty-icon">🎬</div>
+      <h2 style="font-family:var(--font-title);margin-bottom:8px;">Select a Module &amp; Video</h2>
+      <p>Choose a module and video above to load its script and start generating per-sentence images.</p>
+    </div>
+
+    <!-- ☁️ Save to Google Drive -->
+    <div class="glass-card" id="gdrivePanel" style="display:none;">
+      <div class="glass-card-header" onclick="togglePanel(this)">
+        <h2>☁️ Save to Google Drive</h2>
+        <span class="collapse-icon">▼</span>
+      </div>
+      <div class="glass-card-body">
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:12px;">
+          <span id="driveAuthDot" style="width:10px;height:10px;border-radius:50%;background:var(--text-muted);display:inline-block;"></span>
+          <span id="driveAuthText" style="font-size:0.85rem;color:var(--text-muted);">Checking Google auth…</span>
+          <button class="btn btn-sm" id="driveLinkBtn" style="display:none;background:var(--secondary);color:#fff;">🔗 Link Google Drive</button>
+          <button class="btn btn-sm" id="driveUnlinkBtn" style="display:none;background:var(--danger);color:#fff;">⏏ Disconnect</button>
+        </div>
+
+        <div style="background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:14px;margin-bottom:12px;">
+          <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:6px;font-weight:600;">📁 Target folder <span style="font-weight:400;">(resolved before you press save)</span></div>
+          <div id="driveFolderPath" style="font-size:0.9rem;color:var(--text-main);word-break:break-word;">—</div>
+          <div id="driveFolderLinkWrap" style="margin-top:8px;display:none;font-size:0.85rem;">
+            <a id="driveFolderLink" href="#" target="_blank" rel="noopener" style="color:var(--secondary);">🔗 Open images folder in Drive</a>
+            <span id="driveFolderId" style="margin-left:10px;color:var(--text-muted);font-size:0.75rem;"></span>
+          </div>
+          <div id="driveFolderMissing" style="margin-top:8px;display:none;font-size:0.85rem;color:#fbbf24;"></div>
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <button class="btn" id="driveSaveBtn" disabled style="background:#10b981;color:#000;">☁️ Save All Saved Images to Google Drive</button>
+          <div style="font-size:0.78rem;color:var(--text-muted);margin-top:6px;">Uploads every image already saved to Azure for this video (Section 4 → Save to Azure first).</div>
+        </div>
+
+        <details style="margin-top:4px;">
+          <summary style="cursor:pointer;color:var(--text-muted);font-size:0.8rem;">🐞 Debug log</summary>
+          <pre id="driveDebugLog" style="margin-top:8px;padding:10px;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.08);border-radius:8px;font-size:0.75rem;color:var(--text-muted);max-height:160px;overflow:auto;white-space:pre-wrap;"></pre>
+        </details>
       </div>
     </div>
 
     <footer>
-      <p style="font-weight: 800; font-size: 1.1rem; color: white; margin-bottom: 20px;">Claude AI Certification | Asset Production</p>
-      <div class="nav-links">
-        <a href="post_production_master.html">🎬 Post-Prod Master</a>
-        <a href="edit_list.html">📝 Edit List</a>
-        <a href="../production_hub.html">🏭 Production Hub</a>
-        <a href="../../../index.html">🏠 Home</a>
-      </div>
+      <p><a href="index.html" style="color:var(--secondary);text-decoration:none;">← Back to Post-Production</a></p>
     </footer>
   </div>
 
-  <script src="../../../shared/debug-panel.js"></script>
-  <script src="../../../shared/nav.js"></script>
+  <div id="toast" class="toast"></div>
+  <div id="lightbox" class="lightbox" onclick="this.classList.remove('show')"><img id="lightboxImg" src="" alt="preview"></div>
 
   <script>
-    let currentImageData = null;
+    const SUPABASE_URL = localStorage.getItem('supabase_url') || 'https://rmekfsdhglyiralxvkwc.supabase.co';
+    const SUPABASE_ANON_KEY = localStorage.getItem('supabase_anon_key') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZWtmc2RoZ2x5aXJhbHh2a3djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NzYzODgsImV4cCI6MjA5NjM1MjM4OH0.ay6HsmO_CbMGDXL_Dv4DT-paAIAOqlQPfmqqx_mexSU';
+    const HEADERS = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
 
-    // Script Modal Logic
-    const modal = document.getElementById('script-modal');
-    const modalBody = document.getElementById('modal-body');
-    const viewScriptBtn = document.getElementById('view-script-btn');
+    // Asset types valid for sentence_graphics.graphics_type CHECK constraint.
+    const ASSET_TYPES = [
+      'explain','infographic','diagram','screenshot','thumbnail','title_card','callout',
+      'comparison','timeline','architecture','code_terminal','standalone_graphic',
+      'background_asset','analogy','table_matrix','transparent_png','icon_badge'
+    ];
+    // Map the DB vocabulary → the /api/images/generate asset_type keys (better Gemini styling).
+    const DB_TO_API_ASSET = {
+      code_terminal: 'code', standalone_graphic: 'graphic', background_asset: 'background',
+      table_matrix: 'table', transparent_png: 'transparent', icon_badge: 'icon',
+      title_card: 'titlecard', screenshot: 'explain'
+    };
+    const ASSET_GUIDE = {
+      explain: 'Annotated concept with callouts, arrows, labels',
+      infographic: 'Data layout with stats, icons, sections',
+      diagram: 'Flow chart, topology, process map',
+      screenshot: 'UI / screenshare style annotated capture',
+      thumbnail: 'YouTube 16:9 hero with bold text zone',
+      title_card: 'Chapter divider / section intro frame',
+      callout: 'Single big-idea quote or key takeaway',
+      comparison: 'Side-by-side before/after or X vs Y',
+      timeline: 'Horizontal progression / roadmap milestones',
+      architecture: 'Cloud/system layout, boxes, data flow',
+      code_terminal: 'Syntax-highlighted code / CLI / configs',
+      standalone_graphic: 'Full-scene hero, backdrop, thumbnail',
+      background_asset: 'Ambient texture / abstract environmental scene',
+      analogy: 'Illustrative concept metaphor',
+      table_matrix: 'Feature matrix, decision grid, tiers',
+      transparent_png: 'No background, motion-overlay ready',
+      icon_badge: 'Single glyph, cert badge, visual language'
+    };
 
-    viewScriptBtn.addEventListener('click', async () => {
-      const moduleNum = document.getElementById('module-number').value;
-      modal.style.display = 'flex';
-      modalBody.innerHTML = '<div style="text-align: center; padding: 40px;"><div class="loader" style="display: inline-block;"></div><p style="margin-top: 15px;">Fetching script for Module ' + moduleNum + '...</p></div>';
+    let dbModules = [];
+    let dbVideos = [];
+    let currentModuleId = null;
+    let currentVideoId = null;
+    let currentModuleNumber = null;
+    let currentVideoNumber = null;
+    let currentScriptId = null;
+    let currentSentences = [];
+    let savedMap = {};       // sentence_id -> sentence_graphics row (status completed/etc.)
+    let candidateMap = {};   // sentence_id -> { dataUrl, refinedPrompt, assetType, cost }
+    let assetTypeMap = {};   // sentence_id -> chosen/recommended asset type (string)
+    let sessionCost = 0;
+    let genCount = 0;
+    let isGenerating = false;
 
-      try {
-        // Determine which file to fetch
-        let scriptPath = '../../../4_Formula/production/script.md'; // Default fallback
-        if (moduleNum === '1') {
-          scriptPath = '../../../5_Symbols/production/prod/module_1_plan.md';
-        }
+    let azureAccountName = '';
+    let googleClientId = null;
+    let gisReady = false;
+    let configLoaded = false;
 
-        const res = await fetch(scriptPath);
-        if (!res.ok) throw new Error('Script file not found');
-        const text = await res.text();
-        
-        // Basic Markdown to HTML conversion
-        let html = text
-          .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-          .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-          .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-          .replace(/^\> (.*$)/gim, '<blockquote>$1</blockquote>')
-          .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
-          .replace(/\*(.*)\*/gim, '<em>$1</em>')
-          .replace(/\n/g, '<br>');
-        
-        modalBody.innerHTML = html;
-      } catch (err) {
-        modalBody.innerHTML = '<div style="color: var(--danger); text-align: center; padding: 40px;">❌ Error: ' + err.message + '</div>';
-      }
-    });
+    const $ = id => document.getElementById(id);
 
-    function closeModal() {
-      modal.style.display = 'none';
+    function showToast(msg, isError, ms) {
+      const t = $('toast');
+      t.textContent = msg; t.className = 'toast' + (isError ? ' error' : '');
+      setTimeout(() => t.classList.add('show'), 10);
+      setTimeout(() => t.classList.remove('show'), ms || 3500);
     }
+    function escHtml(s) { if (!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-    // Close modal on outside click
-    window.onclick = function(event) {
-      if (event.target == modal) {
-        closeModal();
+    // ── Collapsible panels (persist state) ──
+    function togglePanel(header) {
+      const card = header.closest('.glass-card');
+      const panelId = card ? (card.id || 'panel_' + Array.from(document.querySelectorAll('.glass-card')).indexOf(card)) : null;
+      const body = header.nextElementSibling;
+      const icon = header.querySelector('.collapse-icon');
+      if (body.classList.contains('collapsed')) {
+        body.classList.remove('collapsed'); icon.style.transform = 'rotate(0deg)';
+        if (panelId) localStorage.setItem('ig_collapse_' + panelId, 'expanded');
+      } else {
+        body.classList.add('collapsed'); icon.style.transform = 'rotate(-90deg)';
+        if (panelId) localStorage.setItem('ig_collapse_' + panelId, 'collapsed');
       }
     }
-
-    // ── Asset Type Card Toggles ──
-    document.querySelectorAll('.asset-type-card').forEach(card => {
-      card.addEventListener('click', () => {
-        const cb = card.querySelector('input[type="checkbox"]');
-        cb.checked = !cb.checked;
-        card.classList.toggle('selected', cb.checked);
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.glass-card').forEach((card, idx) => {
+        const panelId = card.id || 'panel_' + idx;
+        const state = localStorage.getItem('ig_collapse_' + panelId);
+        const body = card.querySelector('.glass-card-body');
+        const icon = card.querySelector('.collapse-icon');
+        if (!body || !icon) return;
+        if (state === 'collapsed') { body.classList.add('collapsed'); icon.style.transform = 'rotate(-90deg)'; }
+        else if (state === 'expanded') { body.classList.remove('collapsed'); icon.style.transform = 'rotate(0deg)'; }
       });
+      // Build the asset type guide once.
+      $('guideTable').innerHTML = '<tr><th>Type</th><th>Best for</th></tr>' +
+        ASSET_TYPES.map(t => `<tr><td><strong>${t.replace(/_/g,' ')}</strong></td><td>${escHtml(ASSET_GUIDE[t]||'')}</td></tr>`).join('');
     });
 
-    // ── Guide Toggle ──
-    document.getElementById('guide-toggle-btn').addEventListener('click', () => {
-      document.getElementById('guide-panel').classList.toggle('visible');
-    });
-
-    function getSelectedAssetTypes() {
-      return Array.from(document.querySelectorAll('.asset-type-card.selected'))
-        .map(c => c.dataset.type);
+    async function loadConfig() {
+      try {
+        const res = await fetch('/api/config');
+        if (res.ok) {
+          const cfg = await res.json();
+          if (cfg.azureAccountName) azureAccountName = cfg.azureAccountName;
+          if (cfg.googleClientId) { googleClientId = cfg.googleClientId; localStorage.setItem('gdrive_client_id', cfg.googleClientId); }
+        }
+      } catch (_) {}
+      configLoaded = true;
+      if (typeof initDriveAuth === 'function') initDriveAuth();
     }
 
-    document.getElementById('enhance-btn').addEventListener('click', async () => {
-      const promptField = document.getElementById('prompt');
-      const prompt = promptField.value;
-      if (!prompt) { alert('Please enter a prompt first.'); return; }
+    async function api(path, opts) {
+      const url = SUPABASE_URL + '/rest/v1/' + path;
+      const res = await fetch(url, { ...opts, headers: { ...HEADERS, ...(opts?.headers || {}) } });
+      if (!res.ok) { const err = await res.text().catch(() => ''); throw new Error(res.status + ': ' + err); }
+      const ct = res.headers.get('content-type') || '';
+      return ct.includes('json') ? res.json() : res.text();
+    }
 
-      const assetTypes = getSelectedAssetTypes();
-
-      const btn = document.getElementById('enhance-btn');
-      const btnText = document.getElementById('enhance-text');
-      const loader = document.getElementById('enhance-loader');
-
-      btn.disabled = true;
-      btnText.style.display = 'none';
-      loader.style.display = 'block';
-
+    async function loadModules() {
       try {
-        const res = await fetch('/api/images/enhance-prompt', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt, asset_types: assetTypes })
-        });
+        dbModules = await api('modules?select=id,module_number,title&order=module_number.asc');
+        $('moduleSelect').innerHTML = '<option value="">— Select Module —</option>' +
+          dbModules.map(m => `<option value="${m.id}">M${m.module_number}: ${escHtml(m.title)}</option>`).join('');
+      } catch (e) { showToast('Failed to load modules: ' + e.message, true); }
+    }
 
-        if (!res.ok) {
-          const errData = await res.json().catch(() => ({}));
-          throw new Error(errData.error || 'Enhancement failed');
+    async function loadVideos(moduleId) {
+      if (!moduleId) { $('videoSelect').innerHTML = '<option value="">— Select Video —</option>'; return; }
+      try {
+        dbVideos = await api(`videos?select=id,video_number,title&module_id=eq.${moduleId}&order=video_number.asc`);
+        $('videoSelect').innerHTML = '<option value="">— Select Video —</option>' +
+          dbVideos.map(v => `<option value="${v.id}">V${v.video_number}: ${escHtml(v.title)}</option>`).join('');
+      } catch (e) { showToast('Failed to load videos: ' + e.message, true); }
+    }
+
+    // ── Script + sentences ──────────────────────────────────────────────────
+    async function fetchScriptForVideo(videoId) {
+      $('countScript').style.display = 'none';
+      if (!videoId) return null;
+      try {
+        let fullScript = '';
+        const video = await api('videos?id=eq.' + videoId + '&select=script&limit=1');
+        if (video && video[0] && video[0].script) fullScript += video[0].script + '\n\n';
+        const scriptRecs = await api('scripts?video_id=eq.' + videoId + '&select=id,script_text&limit=1');
+        currentScriptId = null;
+        currentSentences = [];
+        if (scriptRecs && scriptRecs.length) {
+          currentScriptId = scriptRecs[0].id;
+          if (scriptRecs[0].script_text && !fullScript.includes(scriptRecs[0].script_text)) fullScript += scriptRecs[0].script_text + '\n\n';
+          const sents = await api('sentences?script_id=eq.' + currentScriptId + '&select=id,sentence_text,sentence_type,section,visual_mode,sort_order,script_id&order=sort_order.asc');
+          currentSentences = sents || [];
+          if (currentSentences.length) {
+            $('countScript').textContent = currentSentences.length + ' sentences';
+            $('countScript').style.display = 'inline-block';
+            fullScript += '=== Sentences ===\n';
+            currentSentences.forEach((s, i) => { fullScript += `[${i + 1}] ${s.sentence_text || ''}\n`; });
+          }
+        }
+        return fullScript.trim() || null;
+      } catch (e) { return null; }
+    }
+
+    async function loadSentenceGraphics() {
+      savedMap = {};
+      const sids = currentSentences.map(s => s.id);
+      if (!sids.length) return;
+      try {
+        const rows = await api(`sentence_graphics?select=id,sentence_id,generation_status,rationale,graphics_type,graphics_url,prompt_used,error_message&sentence_id=in.(${sids.join(',')})`);
+        for (const g of rows) savedMap[g.sentence_id] = g;
+      } catch (_) {}
+    }
+
+    // ── Asset type recommendation ──
+    function recommendAssetType(s) {
+      const vm = (s.visual_mode || '').toLowerCase();
+      const st = (s.sentence_type || '').toLowerCase();
+      if (vm === 'screenshare') return 'screenshot';
+      if (vm === 'b_roll') return 'background_asset';
+      if (st === 'hook') return 'thumbnail';
+      if (st === 'objective') return 'callout';
+      if (st === 'takeaway' || st === 'insight') return 'callout';
+      if (st === 'heading') return 'title_card';
+      if (st === 'transition') return 'title_card';
+      if (st === 'step') return 'explain';
+      if (st === 'cue') return 'screenshot';
+      return 'explain';
+    }
+    function chosenAssetType(s) {
+      if (assetTypeMap[s.id]) return assetTypeMap[s.id];
+      if (savedMap[s.id]?.graphics_type) return savedMap[s.id].graphics_type;
+      return recommendAssetType(s);
+    }
+
+    function statusFor(sentenceId) {
+      if (candidateMap[sentenceId]) return 'candidate';
+      const g = savedMap[sentenceId];
+      if (g?.generation_status === 'completed' && g.graphics_url) return 'completed';
+      if (g?.generation_status === 'generating') return 'generating';
+      if (g?.generation_status === 'failed') return 'failed';
+      return 'pending';
+    }
+
+    // ── Render candidates table ──
+    function renderCandidates() {
+      const wrap = $('candidatesWrap');
+      if (!currentSentences.length) {
+        wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">📝</div><p>No sentences found for this video. Add a script first.</p></div>';
+        $('countCandidates').style.display = 'none';
+        $('statsRow').style.display = 'none';
+        return;
+      }
+      const rows = currentSentences.map((s, i) => {
+        const at = chosenAssetType(s);
+        const reco = recommendAssetType(s);
+        const status = statusFor(s.id);
+        const cand = candidateMap[s.id];
+        const saved = savedMap[s.id];
+        const imgUrl = cand ? cand.dataUrl : (status === 'completed' ? saved.graphics_url : '');
+        const typeClass = (s.sentence_type || 'body');
+        const typeLabel = (s.sentence_type || 'body').replace(/_/g, ' ');
+        const sectionLabel = (s.section || '').replace(/_/g, ' ');
+        const statusIcon = status === 'completed' ? '✅' : status === 'candidate' ? '🟣' : status === 'generating' ? '⏳' : status === 'failed' ? '❌' : '⏸️';
+
+        const imgCell = imgUrl
+          ? `<img class="cand-thumb" src="${escHtml(imgUrl)}" alt="candidate" onclick="openLightbox('${escHtml(imgUrl)}')" onerror="this.style.opacity=0.3">`
+          : '<span style="color:var(--text-muted);font-size:0.78rem;">—</span>';
+
+        let actionCell;
+        if (status === 'completed') {
+          actionCell = `<a class="btn btn-success btn-sm" href="${escHtml(saved.graphics_url)}" target="_blank">👁️ View</a>
+            <button class="btn btn-secondary btn-sm" style="background:rgba(255,255,255,0.1);" onclick="generateForSentence(${s.id}, true)" ${isGenerating ? 'disabled' : ''}>🔄 Regen</button>`;
+        } else if (status === 'candidate') {
+          actionCell = `<button class="btn btn-success btn-sm" onclick="saveToAzure(${s.id})">☁️ Save Azure</button>
+            <button class="btn btn-secondary btn-sm" style="background:rgba(255,255,255,0.1);" onclick="generateForSentence(${s.id}, true)" ${isGenerating ? 'disabled' : ''}>🔄 Regen</button>`;
+        } else {
+          actionCell = `<button class="btn btn-sm" onclick="generateForSentence(${s.id})" ${isGenerating ? 'disabled' : ''}>${status === 'failed' ? '🔄 Retry' : '✨ Generate'}</button>`;
         }
 
-        const data = await res.json();
-        promptField.value = data.refined_prompt;
-      } catch (err) {
-        alert('Error: ' + err.message);
-      } finally {
-        btn.disabled = false;
-        btnText.style.display = 'block';
-        loader.style.display = 'none';
-      }
-    });
+        return `<tr data-sid="${s.id}">
+          <td class="num-col">${i + 1}</td>
+          <td class="sentence-col"><div class="sentence-text">${s.section ? `<span class="section-tag">${escHtml(sectionLabel)}</span>` : ''}${escHtml(s.sentence_text || '')}</div></td>
+          <td class="type-col"><span class="type-tag ${typeClass}">${escHtml(typeLabel)}</span></td>
+          <td class="asset-col">
+            <select class="asset-select" data-sid="${s.id}">
+              ${ASSET_TYPES.map(t => `<option value="${t}" ${t === at ? 'selected' : ''}>${t.replace(/_/g,' ')}</option>`).join('')}
+            </select>
+            <div class="reco-hint">⭐ Recommended: <b>${reco.replace(/_/g,' ')}</b></div>
+          </td>
+          <td class="img-col">${imgCell}</td>
+          <td class="action-col">
+            <div style="display:flex;flex-direction:column;gap:6px;align-items:center;">
+              <span class="status-badge ${status}">${statusIcon} ${status}</span>
+              ${actionCell}
+              ${saved?.error_message && status === 'failed' ? `<small style="color:var(--danger);font-size:0.68rem;">${escHtml(saved.error_message)}</small>` : ''}
+            </div>
+          </td>
+        </tr>`;
+      }).join('');
 
-    document.getElementById('gen-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      const prompt = document.getElementById('prompt').value;
-      const moduleNumber = parseInt(document.getElementById('module-number').value);
-      const videoNumber = parseInt(document.getElementById('video-number').value);
-      const assetTypes = getSelectedAssetTypes();
-      
-      const btn = document.getElementById('gen-btn');
-      const btnText = document.getElementById('btn-text');
-      const loader = document.getElementById('btn-loader');
-      
-      btn.disabled = true;
-      btnText.style.display = 'none';
-      loader.style.display = 'block';
-      
+      wrap.innerHTML = `<table class="ig-table"><thead><tr>
+          <th class="num-col">#</th>
+          <th class="sentence-col">Sentence</th>
+          <th class="type-col">Type</th>
+          <th class="asset-col">Asset Type (recommended)</th>
+          <th class="img-col">Candidate</th>
+          <th class="action-col">Action</th>
+        </tr></thead><tbody>${rows}</tbody></table>`;
+
+      wrap.querySelectorAll('.asset-select').forEach(sel => {
+        sel.addEventListener('change', () => updateAssetType(parseInt(sel.dataset.sid), sel.value));
+      });
+      updateStats();
+    }
+
+    function updateStats() {
+      const total = currentSentences.length;
+      const completed = currentSentences.filter(s => statusFor(s.id) === 'completed').length;
+      const candidates = currentSentences.filter(s => statusFor(s.id) === 'candidate').length;
+      const failed = currentSentences.filter(s => statusFor(s.id) === 'failed').length;
+      const pending = total - completed - candidates - failed;
+      $('statsRow').innerHTML =
+        `<div class="stat-badge"><span>📊 Total</span><span class="count">${total}</span></div>
+         <div class="stat-badge pending"><span>⏸️ Pending</span><span class="count">${pending}</span></div>
+         <div class="stat-badge candidate"><span>🟣 Candidates</span><span class="count">${candidates}</span></div>
+         <div class="stat-badge completed"><span>✅ Saved</span><span class="count">${completed}</span></div>
+         <div class="stat-badge failed"><span>❌ Failed</span><span class="count">${failed}</span></div>`;
+      $('statsRow').style.display = 'flex';
+      $('countCandidates').textContent = candidates + ' candidates';
+      $('countCandidates').style.display = candidates ? 'inline-block' : 'none';
+    }
+
+    async function updateAssetType(sentenceId, type) {
+      assetTypeMap[sentenceId] = type;
+      // Persist the choice on existing graphics rows so it survives reload.
+      const g = savedMap[sentenceId];
+      if (g && g.id) {
+        try { await api('sentence_graphics?id=eq.' + g.id, { method: 'PATCH', body: JSON.stringify({ graphics_type: type, updated_at: new Date().toISOString() }) }); } catch (_) {}
+      }
+      const reco = recommendAssetType(currentSentences.find(s => s.id === sentenceId) || {});
+      const row = document.querySelector(`tr[data-sid="${sentenceId}"] .reco-hint`);
+      if (row) row.innerHTML = `⭐ Recommended: <b>${reco.replace(/_/g,' ')}</b>`;
+    }
+
+    // ── Image generation (candidate) ──
+    function apiAssetKey(dbType) { return DB_TO_API_ASSET[dbType] || dbType; }
+
+    async function generateForSentence(sentenceId, isRegen) {
+      if (isGenerating && !isRegen) return;
+      const s = currentSentences.find(x => x.id === sentenceId);
+      if (!s) return;
+      const prevGenerating = isGenerating;
+      isGenerating = true;
+      const at = chosenAssetType(s);
+      // Show a transient generating state for this row.
+      const badge = document.querySelector(`tr[data-sid="${sentenceId}"] .status-badge`);
+      if (badge) { badge.className = 'status-badge generating'; badge.textContent = '⏳ generating'; }
       try {
         const res = await fetch('/api/images/generate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            prompt,
-            module_number: moduleNumber,
-            video_number: videoNumber,
-            asset_types: assetTypes
-          })
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt: s.sentence_text, module_number: currentModuleNumber, video_number: currentVideoNumber, asset_types: [apiAssetKey(at)] })
         });
-        
-        if (!res.ok) {
-          const errData = await res.json().catch(() => ({}));
-          throw new Error(errData.error || 'Generation failed');
-        }
-        
+        if (!res.ok) { const ed = await res.json().catch(() => ({})); throw new Error(ed.error || 'Generation failed'); }
         const data = await res.json();
-        currentImageData = data;
-        
-        document.getElementById('refined-prompt-text').innerText = data.refined_prompt;
-        document.getElementById('result-img').src = data.image_url;
-
-        // Show generation cost + model
-        const costBox = document.getElementById('cost-box');
-        if (typeof data.cost_usd === 'number') {
-          const cost = data.cost_usd;
-          // Show enough precision for sub-cent amounts.
-          const costStr = cost < 0.01 ? `$${cost.toFixed(5)}` : `$${cost.toFixed(4)}`;
-          document.getElementById('cost-text').innerText = `${costStr} USD`;
-          const t = data.tokens || {};
-          document.getElementById('cost-detail').innerText =
-            `Model: ${data.model || 'gemini-2.5-flash-image'} · ` +
-            `refine ${(t.refine_prompt||0)}+${(t.refine_candidates||0)} tok · ` +
-            `image ${(t.image_prompt||0)}+${(t.image_candidates||0)} tok`;
-          costBox.style.display = 'block';
-        } else {
-          costBox.style.display = 'none';
-        }
-
-        document.getElementById('result-container').style.display = 'block';
-        
-        window.scrollTo({ top: document.getElementById('result-container').offsetTop - 50, behavior: 'smooth' });
+        candidateMap[sentenceId] = { dataUrl: data.image_url, refinedPrompt: data.refined_prompt || s.sentence_text, assetType: at, cost: typeof data.cost_usd === 'number' ? data.cost_usd : 0 };
+        if (typeof data.cost_usd === 'number') { sessionCost += data.cost_usd; genCount++; updateCostBox(); }
+        addLog(`✅ Sentence #${sentenceId} candidate generated`, 'success');
+        return true;
       } catch (err) {
-        alert('Error: ' + err.message);
+        addLog(`❌ Sentence #${sentenceId} failed: ${err.message}`, 'fail');
+        showToast('Generation failed: ' + err.message, true);
+        return false;
       } finally {
-        btn.disabled = false;
-        btnText.style.display = 'block';
-        loader.style.display = 'none';
+        isGenerating = prevGenerating;
+        renderCandidates();
       }
-    });
-
-    document.getElementById('save-btn').addEventListener('click', async () => {
-      if (!currentImageData) return;
-      
-      const btn = document.getElementById('save-btn');
-      const status = document.getElementById('save-status');
-      
-      btn.disabled = true;
-      btn.innerText = '⌛ Saving...';
-      
-      try {
-        const res = await fetch('/api/images/save', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            image_url: currentImageData.image_url,
-            module_number: currentImageData.module_number,
-            video_number: currentImageData.video_number,
-            prompt: currentImageData.original_prompt
-          })
-        });
-        
-        if (!res.ok) {
-          const errData = await res.json().catch(() => ({}));
-          throw new Error(errData.error || 'Save failed');
-        }
-        
-        const data = await res.json();
-        status.innerText = `✅ Saved as ${data.blob_name} in research-images container!`;
-        status.style.display = 'block';
-        btn.innerText = '✅ Saved';
-      } catch (err) {
-        alert('Save Error: ' + err.message);
-        btn.disabled = false;
-        btn.innerText = '💾 Save to Azure Blob Storage';
-      }
-    });
-
-    // ── Copy image to clipboard ──
-    document.getElementById('copy-btn').addEventListener('click', async () => {
-      if (!currentImageData) return;
-      const btn = document.getElementById('copy-btn');
-      const original = btn.innerText;
-      try {
-        const res = await fetch(currentImageData.image_url);
-        const blob = await res.blob();
-        // Clipboard API needs PNG; convert if necessary via a canvas.
-        let pngBlob = blob;
-        if (blob.type !== 'image/png') {
-          pngBlob = await new Promise((resolve) => {
-            const img = new Image();
-            img.onload = () => {
-              const canvas = document.createElement('canvas');
-              canvas.width = img.naturalWidth;
-              canvas.height = img.naturalHeight;
-              canvas.getContext('2d').drawImage(img, 0, 0);
-              canvas.toBlob(resolve, 'image/png');
-            };
-            img.src = currentImageData.image_url;
-          });
-        }
-        await navigator.clipboard.write([new ClipboardItem({ 'image/png': pngBlob })]);
-        btn.innerText = '✅ Copied!';
-      } catch (err) {
-        btn.innerText = '❌ Copy failed';
-        console.error(err);
-      }
-      setTimeout(() => { btn.innerText = original; }, 2000);
-    });
-
-    // ── Download image ──
-    document.getElementById('download-btn').addEventListener('click', () => {
-      if (!currentImageData) return;
-      const a = document.createElement('a');
-      a.href = currentImageData.image_url;
-      const m = currentImageData.module_number;
-      const v = currentImageData.video_number;
-      a.download = `m${m}_v${v}_${Date.now()}.png`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    });
-
-    function resetForm() {
-      document.getElementById('gen-form').reset();
-      document.getElementById('result-container').style.display = 'none';
-      document.getElementById('save-btn').disabled = false;
-      document.getElementById('save-btn').innerText = '💾 Save to Azure Blob Storage';
-      document.getElementById('save-status').style.display = 'none';
-      document.getElementById('cost-box').style.display = 'none';
-      currentImageData = null;
     }
 
-    document.getElementById('test-gemini-btn').addEventListener('click', async () => {
-      const btn = document.getElementById('test-gemini-btn');
-      const btnText = document.getElementById('test-gemini-text');
-      const loader = document.getElementById('test-gemini-loader');
-      const statusDiv = document.getElementById('gemini-status');
+    async function generateAll() {
+      if (isGenerating) return;
+      const targets = currentSentences.filter(s => statusFor(s.id) === 'pending' || statusFor(s.id) === 'failed');
+      if (!targets.length) { showToast('No pending sentences. Reset candidates or regenerate individual rows.'); return; }
+      isGenerating = true;
+      $('genAllBtn').disabled = true;
+      $('progressWrap').style.display = 'block';
+      $('progressLog').innerHTML = '';
+      $('candidatesPanel').style.display = 'block';
+      renderCandidates();
+      for (let i = 0; i < targets.length; i++) {
+        setProgress(i, targets.length);
+        addLog(`⏳ (${i + 1}/${targets.length}) Generating sentence #${targets[i].id}…`, '');
+        await generateForSentence(targets[i].id, true);
+        setProgress(i + 1, targets.length);
+      }
+      isGenerating = false;
+      $('genAllBtn').disabled = false;
+      renderCandidates();
+      showToast('✅ Candidate generation complete!');
+    }
 
-      btn.disabled = true;
-      btnText.textContent = '⏳ Testing...';
-      loader.style.display = 'block';
-      statusDiv.style.display = 'none';
+    function setProgress(cur, total) {
+      const pct = total > 0 ? Math.round((cur / total) * 100) : 0;
+      $('progressBarFill').style.width = pct + '%';
+      $('progressText').textContent = `${cur} / ${total}`;
+    }
+    function addLog(msg, cls) {
+      const el = document.createElement('div');
+      el.className = 'log-entry ' + (cls || '');
+      el.textContent = msg;
+      $('progressLog').appendChild(el);
+      $('progressLog').scrollTop = $('progressLog').scrollHeight;
+    }
+    function updateCostBox() {
+      $('costText').textContent = '$' + sessionCost.toFixed(sessionCost < 0.01 ? 5 : 4) + ' USD';
+      $('costDetail').textContent = `· ${genCount} image${genCount === 1 ? '' : 's'} this session`;
+      $('costBox').style.display = 'block';
+    }
 
+    // ── Save candidate to Azure (for sentences) ──
+    async function upsertGraphics(sentenceId, data) {
+      const existing = savedMap[sentenceId];
+      if (existing && existing.id) {
+        await api('sentence_graphics?id=eq.' + existing.id, { method: 'PATCH', body: JSON.stringify({ ...data, updated_at: new Date().toISOString() }) });
+        savedMap[sentenceId] = { ...existing, ...data };
+      } else {
+        const res = await api('sentence_graphics', {
+          method: 'POST',
+          body: JSON.stringify({ sentence_id: sentenceId, module_number: currentModuleNumber, video_number: currentVideoNumber, script_id: currentScriptId, ...data })
+        });
+        savedMap[sentenceId] = Array.isArray(res) ? res[0] : res;
+      }
+    }
+
+    async function saveToAzure(sentenceId) {
+      const cand = candidateMap[sentenceId];
+      if (!cand) { showToast('Generate a candidate first.', true); return; }
+      const s = currentSentences.find(x => x.id === sentenceId);
+      try {
+        const saveRes = await fetch('/api/images/save', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image_url: cand.dataUrl, module_number: currentModuleNumber, video_number: currentVideoNumber, prompt: s.sentence_text })
+        });
+        if (!saveRes.ok) { const ed = await saveRes.json().catch(() => ({})); throw new Error(ed.error || 'Azure save failed'); }
+        const sd = await saveRes.json();
+        const url = sd.url || `/api/research/file?container=research-images&name=${encodeURIComponent(sd.blob_name)}`;
+        await upsertGraphics(sentenceId, { generation_status: 'completed', graphics_type: cand.assetType, graphics_url: url, prompt_used: cand.refinedPrompt, error_message: '' });
+        delete candidateMap[sentenceId];
+        showToast('☁️ Saved to Azure as ' + sd.blob_name);
+        renderCandidates();
+        loadExistingImages();
+      } catch (e) {
+        showToast('Save failed: ' + e.message, true);
+      }
+    }
+
+    async function saveAllToAzure() {
+      const ids = Object.keys(candidateMap).map(Number);
+      if (!ids.length) { showToast('No candidates to save.'); return; }
+      const btn = $('saveAllAzureBtn');
+      btn.disabled = true; const orig = btn.textContent; btn.textContent = '☁️ Saving…';
+      let saved = 0;
+      for (const id of ids) { try { await saveToAzure(id); saved++; } catch (_) {} }
+      btn.disabled = false; btn.textContent = orig;
+      showToast(`☁️ Saved ${saved} image(s) to Azure.`);
+    }
+
+    // ── Existing images ──
+    async function loadExistingImages() {
+      if (!currentModuleNumber || !currentVideoNumber) return;
+      const wrap = $('existingWrap');
+      try {
+        const rows = await api(`generated_images?select=id,prompt,image_url,thumbnail_url,created_at,status&module_number=eq.${currentModuleNumber}&video_number=eq.${currentVideoNumber}&order=created_at.desc`);
+        $('countExisting').textContent = (rows || []).length + ' images';
+        $('countExisting').style.display = rows.length ? 'inline-block' : 'none';
+        if (!rows || !rows.length) {
+          wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">🖼️</div><p>No saved images yet for this module &amp; video.</p></div>';
+          return;
+        }
+        wrap.innerHTML = '<div class="gallery">' + rows.map(r => {
+          const url = r.thumbnail_url || r.image_url || '';
+          const full = r.image_url || url;
+          return `<div class="gallery-item">
+            <img src="${escHtml(url)}" alt="image" onclick="openLightbox('${escHtml(full)}')" onerror="this.style.opacity=0.3">
+            <div class="meta">${escHtml((r.prompt || '').slice(0, 70))}</div>
+          </div>`;
+        }).join('') + '</div>';
+      } catch (e) {
+        wrap.innerHTML = '<div class="empty-state" style="color:var(--danger);"><p>Failed to load existing images: ' + escHtml(e.message) + '</p></div>';
+      }
+    }
+
+    function openLightbox(url) { if (!url) return; $('lightboxImg').src = url; $('lightbox').classList.add('show'); }
+
+    async function resetCandidates() {
+      candidateMap = {};
+      renderCandidates();
+      showToast('🔄 Candidates cleared (saved images kept).');
+    }
+
+    // ── Test Gemini ──
+    async function testGemini() {
+      const btn = $('testGeminiBtn'); const statusDiv = $('geminiStatus');
+      btn.disabled = true; const orig = btn.textContent; btn.textContent = '⏳ Testing…'; statusDiv.style.display = 'none';
       try {
         const res = await fetch('/api/images/test-gemini');
         const data = await res.json();
-
         if (data.status === 'ok') {
-          statusDiv.style.background = 'rgba(16,185,129,0.1)';
-          statusDiv.style.border = '1px solid var(--success)';
-          statusDiv.style.color = 'var(--success)';
-          statusDiv.innerHTML = `✅ <strong>Connected</strong> — ${data.message}<br><small>Model: ${data.model} | Reply: "${data.ping_reply}"</small>`;
+          statusDiv.style.background = 'rgba(16,185,129,0.1)'; statusDiv.style.border = '1px solid var(--success)'; statusDiv.style.color = 'var(--success)';
+          statusDiv.innerHTML = `✅ <strong>Connected</strong> — ${escHtml(data.message || '')}<br><small>Model: ${escHtml(data.model || '')}</small>`;
         } else {
-          statusDiv.style.background = 'rgba(239,68,68,0.1)';
-          statusDiv.style.border = '1px solid var(--danger)';
-          statusDiv.style.color = 'var(--danger)';
-          let detail = data.message;
-          if (data.detail) {
-            try {
-              const parsed = JSON.parse(data.detail);
-              detail += ' — ' + (parsed.error?.message || parsed.error || data.detail.substring(0, 200));
-            } catch { detail += ' — ' + data.detail.substring(0, 200); }
-          }
-          statusDiv.innerHTML = `❌ <strong>Connection Failed</strong><br>${detail}`;
+          statusDiv.style.background = 'rgba(239,68,68,0.1)'; statusDiv.style.border = '1px solid var(--danger)'; statusDiv.style.color = 'var(--danger)';
+          statusDiv.innerHTML = `❌ <strong>Connection Failed</strong><br>${escHtml(data.message || 'Unknown error')}`;
         }
       } catch (err) {
-        statusDiv.style.background = 'rgba(239,68,68,0.1)';
-        statusDiv.style.border = '1px solid var(--danger)';
-        statusDiv.style.color = 'var(--danger)';
-        statusDiv.innerHTML = `❌ <strong>Request Error</strong><br>${err.message}`;
+        statusDiv.style.background = 'rgba(239,68,68,0.1)'; statusDiv.style.border = '1px solid var(--danger)'; statusDiv.style.color = 'var(--danger)';
+        statusDiv.innerHTML = `❌ <strong>Request Error</strong><br>${escHtml(err.message)}`;
       }
-
       statusDiv.style.display = 'block';
-      btn.disabled = false;
-      btnText.textContent = '🔌 Test Gemini Connection';
-      loader.style.display = 'none';
+      btn.disabled = false; btn.textContent = orig;
+    }
+
+    // ── Selection handlers ──
+    $('moduleSelect').addEventListener('change', function () {
+      currentModuleId = parseInt(this.value) || null;
+      const mod = dbModules.find(m => m.id === currentModuleId);
+      currentModuleNumber = mod ? mod.module_number : null;
+      currentVideoId = null; currentVideoNumber = null;
+      candidateMap = {}; assetTypeMap = {}; savedMap = {}; currentSentences = [];
+      ['scriptPanel','actionPanel','candidatesPanel','existingPanel','gdrivePanel'].forEach(id => $(id).style.display = 'none');
+      $('emptyState').style.display = 'block';
+      loadVideos(currentModuleId);
+      if (typeof driveUpdatePathPreview === 'function') driveUpdatePathPreview();
     });
+
+    $('videoSelect').addEventListener('change', async function () {
+      currentVideoId = parseInt(this.value) || null;
+      const v = dbVideos.find(x => x.id === currentVideoId);
+      currentVideoNumber = v ? v.video_number : null;
+      candidateMap = {}; assetTypeMap = {};
+      if (!currentVideoId) {
+        ['scriptPanel','actionPanel','candidatesPanel','existingPanel','gdrivePanel'].forEach(id => $(id).style.display = 'none');
+        $('emptyState').style.display = 'block';
+        return;
+      }
+      $('emptyState').style.display = 'none';
+      ['scriptPanel','actionPanel','candidatesPanel','existingPanel','gdrivePanel'].forEach(id => $(id).style.display = 'block');
+      const scriptText = await fetchScriptForVideo(currentVideoId);
+      $('scriptContent').value = scriptText || '';
+      await loadSentenceGraphics();
+      renderCandidates();
+      loadExistingImages();
+      if (typeof driveUpdatePathPreview === 'function') driveUpdatePathPreview();
+      if (driveAccessToken && typeof previewExistingDriveFolder === 'function') previewExistingDriveFolder();
+    });
+
+    $('genAllBtn').addEventListener('click', generateAll);
+    $('resetBtn').addEventListener('click', resetCandidates);
+    $('saveAllAzureBtn').addEventListener('click', saveAllToAzure);
+    $('refreshExistingBtn').addEventListener('click', loadExistingImages);
+    $('testGeminiBtn').addEventListener('click', testGemini);
+    $('guideBtn').addEventListener('click', () => { const p = $('guidePanel'); p.style.display = p.style.display === 'none' ? 'block' : 'none'; });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') $('lightbox').classList.remove('show'); });
+
+    // ── ☁️ Google Drive Save (Root › Module › Video › images) ────────────────
+    // Mirrors lower_thirds.html: GIS OAuth + find-only folder walk (never creates;
+    // delegates creation to the 📁 Folder Creator), then multipart upload.
+    const DRIVE_ROOT_NAME = 'Claude AI Architect Certification';
+    const DRIVE_SCOPES = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive';
+    const FOLDER_CREATOR_URL = '../prod/google_drive_folder_creator.html';
+    const DRIVE_TARGET_FOLDER = 'images';
+    let driveTokenClient = null;
+    let driveAccessToken = null;
+    let driveFolderChain = null;
+
+    function driveLog(msg, kind) {
+      const el = $('driveDebugLog');
+      const ts = new Date().toLocaleTimeString();
+      const prefix = kind === 'error' ? '❌ ' : kind === 'success' ? '✅ ' : '› ';
+      el.textContent = `[${ts}] ${prefix}${msg}\n` + el.textContent;
+    }
+    function driveEsc(s) { return String(s || '').replace(/'/g, "\\'"); }
+
+    function driveFolderPreview() {
+      const m = dbModules.find(x => x.id === currentModuleId);
+      const v = dbVideos.find(x => x.id === currentVideoId);
+      const modName = m ? `Module ${m.module_number} - ${m.title}` : 'Module 0 — Unknown';
+      const vidName = v ? `Video ${v.video_number} - ${v.title}` : 'Video 0 — Unknown';
+      return `${DRIVE_ROOT_NAME}  ›  ${modName}  ›  ${vidName}  ›  ${DRIVE_TARGET_FOLDER}`;
+    }
+    function updateDriveAuthUI(connected, text) {
+      const dot = $('driveAuthDot');
+      $('driveAuthText').textContent = text;
+      if (connected) {
+        dot.style.background = 'var(--success)';
+        $('driveLinkBtn').style.display = 'none';
+        $('driveUnlinkBtn').style.display = 'inline-block';
+        $('driveSaveBtn').disabled = false;
+      } else {
+        dot.style.background = 'var(--text-muted)';
+        $('driveLinkBtn').style.display = driveTokenClient ? 'inline-block' : 'none';
+        $('driveUnlinkBtn').style.display = 'none';
+        $('driveSaveBtn').disabled = true;
+      }
+    }
+    function gisLoaded() { gisReady = true; initDriveAuth(); }
+
+    function initDriveAuth() {
+      if (!gisReady || !configLoaded || driveTokenClient) return;
+      const clientId = googleClientId || localStorage.getItem('gdrive_client_id') || '';
+      if (!clientId) {
+        $('driveFolderPath').textContent = driveFolderPreview();
+        updateDriveAuthUI(false, 'Google Client ID not configured on the server.');
+        driveLog('No Google Client ID from /api/config. Set GOOGLE_CLIENT_ID on the server.', 'error');
+        return;
+      }
+      try {
+        driveTokenClient = google.accounts.oauth2.initTokenClient({
+          client_id: clientId, scope: DRIVE_SCOPES,
+          callback: async (resp) => {
+            if (resp.error !== undefined) { driveLog('Auth callback error: ' + resp.error, 'error'); return; }
+            driveAccessToken = resp.access_token;
+            updateDriveAuthUI(true, 'Google Drive linked');
+            if (window.SiteAuth) window.SiteAuth.setLoggedIn(true);
+            driveLog('Access token granted.', 'success');
+            await previewExistingDriveFolder();
+          }
+        });
+        $('driveFolderPath').textContent = driveFolderPreview();
+        updateDriveAuthUI(false, 'Ready — link your Google account.');
+        driveLog('GIS token client ready (client_id from server runtime).');
+      } catch (e) { driveLog('GIS init failed: ' + e.message, 'error'); }
+    }
+    function driveLink() { if (!driveTokenClient) { driveLog('Token client not ready.', 'error'); return; } driveTokenClient.requestAccessToken({ prompt: 'consent' }); }
+    function driveUnlink() {
+      if (window.google && google.accounts && google.accounts.oauth2 && driveAccessToken) { try { google.accounts.oauth2.revokeToken(driveAccessToken); } catch (_) {} }
+      driveAccessToken = null; driveFolderChain = null;
+      $('driveFolderLinkWrap').style.display = 'none'; $('driveFolderMissing').style.display = 'none';
+      updateDriveAuthUI(false, 'Disconnected.');
+      if (window.SiteAuth) window.SiteAuth.setLoggedIn(false);
+      driveLog('Token revoked, disconnected.');
+    }
+    function driveUpdatePathPreview() { $('driveFolderPath').textContent = driveFolderPreview(); }
+
+    async function driveFindFolder(name, parentId) {
+      const parentClause = parentId ? `'${parentId}' in parents` : `'root' in parents`;
+      const q = `mimeType='application/vnd.google-apps.folder' and name='${driveEsc(name)}' and trashed=false and ${parentClause}`;
+      const url = 'https://www.googleapis.com/drive/v3/files?q=' + encodeURIComponent(q) + '&fields=files(id,name)&spaces=drive';
+      const r = await fetch(url, { headers: { Authorization: 'Bearer ' + driveAccessToken } });
+      if (!r.ok) throw new Error('Drive list failed: ' + await r.text());
+      const data = await r.json();
+      return (data.files && data.files.length) ? data.files[0] : null;
+    }
+    async function driveUploadPng(blob, fileName, parentId) {
+      const meta = { name: fileName }; if (parentId) meta.parents = [parentId];
+      const boundary = 'ig_drive_' + Date.now();
+      const body = new Blob([
+        '--' + boundary + '\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n' + JSON.stringify(meta) + '\r\n' +
+        '--' + boundary + '\r\nContent-Type: image/png\r\n\r\n', blob, '\r\n--' + boundary + '--'
+      ], { type: 'multipart/related; boundary=' + boundary });
+      const r = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink', {
+        method: 'POST', headers: { Authorization: 'Bearer ' + driveAccessToken, 'Content-Type': 'multipart/related; boundary=' + boundary }, body
+      });
+      if (!r.ok) throw new Error('Drive upload failed: ' + await r.text());
+      return await r.json();
+    }
+    async function driveFindExistingChain() {
+      const m = dbModules.find(x => x.id === currentModuleId);
+      const v = dbVideos.find(x => x.id === currentVideoId);
+      if (!m || !v) throw new Error('Select a module and video first.');
+      const modName = `Module ${m.module_number} - ${m.title}`;
+      const vidName = `Video ${v.video_number} - ${v.title}`;
+      const path = `${DRIVE_ROOT_NAME} › ${modName} › ${vidName} › ${DRIVE_TARGET_FOLDER}`;
+      const root = await driveFindFolder(DRIVE_ROOT_NAME, null);
+      if (!root) return { found: false, missing: DRIVE_ROOT_NAME, path };
+      const mod = await driveFindFolder(modName, root.id);
+      if (!mod) return { found: false, missing: modName, path };
+      const vid = await driveFindFolder(vidName, mod.id);
+      if (!vid) return { found: false, missing: vidName, path };
+      const img = await driveFindFolder(DRIVE_TARGET_FOLDER, vid.id);
+      if (!img) return { found: false, missing: `${vidName} › ${DRIVE_TARGET_FOLDER}`, path };
+      return { found: true, root, mod, vid, img, path };
+    }
+    async function previewExistingDriveFolder() {
+      if (!driveAccessToken) { driveUpdatePathPreview(); return; }
+      if (!currentModuleId || !currentVideoId) return;
+      try {
+        $('driveAuthText').textContent = 'Looking up folder in Drive…';
+        const chain = await driveFindExistingChain();
+        $('driveFolderPath').textContent = chain.path;
+        if (chain.found) {
+          driveFolderChain = chain;
+          $('driveFolderLink').href = 'https://drive.google.com/drive/folders/' + chain.img.id;
+          $('driveFolderId').textContent = 'id: ' + chain.img.id;
+          $('driveFolderLinkWrap').style.display = 'block';
+          $('driveFolderMissing').style.display = 'none';
+          updateDriveAuthUI(true, 'Folder found in Drive — ready to save.');
+          $('driveSaveBtn').disabled = false;
+          driveLog('Existing images folder located: ' + chain.img.id, 'success');
+        } else {
+          driveFolderChain = null;
+          $('driveFolderLinkWrap').style.display = 'none';
+          $('driveFolderMissing').innerHTML = '⚠️ No <b>' + escHtml(chain.missing) + '</b> folder in Drive yet. ' +
+            '<a href="' + FOLDER_CREATOR_URL + '" target="_blank" rel="noopener" style="color:var(--secondary);font-weight:600;">📁 Create it in the Folder Creator →</a>';
+          $('driveFolderMissing').style.display = 'block';
+          updateDriveAuthUI(true, 'Folder not found — create it in the Folder Creator first.');
+          $('driveSaveBtn').disabled = true;
+          driveLog('Folder chain missing at "' + chain.missing + '". Use the Folder Creator.', 'error');
+        }
+      } catch (e) {
+        driveLog('Folder lookup failed: ' + e.message, 'error');
+        updateDriveAuthUI(true, 'Linked, but folder lookup failed — see log.');
+      }
+    }
+    function driveFileName(sentenceId, idx) {
+      const m = dbModules.find(x => x.id === currentModuleId);
+      const v = dbVideos.find(x => x.id === currentVideoId);
+      const slug = s => String(s || '').replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'untitled';
+      return `module${m ? m.module_number : 0}_video${v ? v.video_number : 0}_sentence${sentenceId}_${slug(m ? m.title : '')}.png`;
+    }
+    async function driveSaveAllImages() {
+      if (!driveAccessToken) { showToast('Link Google Drive first.', true); return; }
+      if (!currentModuleId || !currentVideoId) { showToast('Select a module and video first.', true); return; }
+      // Collect every sentence that has a saved Azure image.
+      const completed = currentSentences.filter(s => savedMap[s.id]?.generation_status === 'completed' && savedMap[s.id]?.graphics_url);
+      if (!completed.length) { showToast('No saved images yet. Save candidates to Azure first.', true); return; }
+      const btn = $('driveSaveBtn'); const orig = btn.textContent; btn.disabled = true; btn.textContent = 'Uploading…';
+      try {
+        if (!driveFolderChain) await previewExistingDriveFolder();
+        if (!driveFolderChain) throw new Error('Target folder not found in Drive. Create it in the Folder Creator first.');
+        const parentId = driveFolderChain.img.id;
+        let uploaded = 0;
+        for (let i = 0; i < completed.length; i++) {
+          const s = completed[i];
+          try {
+            const resp = await fetch(savedMap[s.id].graphics_url);
+            if (!resp.ok) throw new Error('fetch image ' + resp.status);
+            const blob = await resp.blob();
+            const up = await driveUploadPng(blob, driveFileName(s.id, i), parentId);
+            driveLog(`Uploaded sentence #${s.id} → ${up.id}`, 'success');
+            uploaded++;
+          } catch (e) { driveLog(`Sentence #${s.id} upload failed: ${e.message}`, 'error'); }
+          await new Promise(r => setTimeout(r, 200));
+        }
+        showToast(`☁️ Uploaded ${uploaded}/${completed.length} image(s) to Google Drive!`);
+      } catch (e) {
+        showToast('Drive upload failed: ' + e.message, true);
+        driveLog('Upload failed: ' + e.message, 'error');
+      } finally { btn.disabled = false; btn.textContent = orig; }
+    }
+
+    if ($('driveLinkBtn')) $('driveLinkBtn').addEventListener('click', driveLink);
+    if ($('driveUnlinkBtn')) $('driveUnlinkBtn').addEventListener('click', driveUnlink);
+    if ($('driveSaveBtn')) $('driveSaveBtn').addEventListener('click', driveSaveAllImages);
+
+    loadConfig();
+    loadModules();
   </script>
 </body>
 </html>
