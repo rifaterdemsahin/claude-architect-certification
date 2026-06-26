@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🥊 Competitive Analysis — Research Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../../../shared/nav.css">
+  <style>
+    :root {
+      --bg: #030712; --card: rgba(17,24,39,0.9); --border: rgba(139,92,246,0.2);
+      --text: #f3f4f6; --muted: #9ca3af; --primary: #8b5cf6; --green: #10b981;
+      --red: #ef4444; --blue: #3b82f6; --yellow: #f59e0b;
+      --font-h: 'Outfit', sans-serif; --font-b: 'Plus Jakarta Sans', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: var(--font-b); line-height: 1.65; padding: 32px 24px 120px; }
+    .container { max-width: 920px; margin: 0 auto; }
+    .breadcrumb { font-size: 0.82rem; color: var(--muted); margin-bottom: 18px; }
+    .breadcrumb a { color: var(--primary); text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+    h1 { font-family: var(--font-h); font-size: 2.4rem; font-weight: 800; margin-bottom: 6px; }
+    .subtitle { color: var(--muted); margin-bottom: 10px; }
+    .meta-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 32px; }
+    .pill { font-size: 0.72rem; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: rgba(139,92,246,0.12); border: 1px solid rgba(139,92,246,0.3); color: #c4b5fd; }
+    .pill.blue { background: rgba(59,130,246,0.12); border-color: rgba(59,130,246,0.3); color: #93c5fd; }
+    
+    h2 { font-family: var(--font-h); font-size: 1.45rem; font-weight: 800; margin: 38px 0 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    h3 { font-family: var(--font-h); font-size: 1.1rem; font-weight: 700; margin: 22px 0 10px; color: #e9d5ff; }
+    p { margin-bottom: 14px; }
+    ul { margin: 0 0 16px 0; padding-left: 4px; list-style: none; }
+    li { margin-bottom: 8px; padding-left: 26px; position: relative; }
+    li::before { content: attr(data-emoji); position: absolute; left: 0; top: 0; }
+
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px 24px; margin-bottom: 18px; }
+    
+    .competitor-card { border-left: 4px solid var(--primary); }
+    .competitor-card.anthropic { border-left-color: #f59e0b; }
+    .competitor-card.microsoft { border-left-color: #3b82f6; }
+    .competitor-card.aws { border-left-color: #f97316; }
+    .competitor-card.ibm { border-left-color: #0ea5e9; }
+
+    table { width: 100%; border-collapse: collapse; margin: 8px 0 20px; font-size: 0.88rem; }
+    th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); }
+    th { font-family: var(--font-h); color: #c4b5fd; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; }
+    td:first-child { font-weight: 600; }
+
+    .callout { background: rgba(139,92,246,0.08); border-left: 3px solid var(--primary); border-radius: 8px; padding: 14px 18px; margin: 16px 0 24px; font-size: 0.92rem; }
+  </style>
+<script src="../../../../shared/seo.js" defer></script></head>
+<body>
+<script src="../../../../shared/nav.js"></script>
+<div class="container">
+  <div class="breadcrumb"><a href="index.html">🔬 Research Hub</a> &nbsp;›&nbsp; 🥊 Competitive Analysis</div>
+
+  <h1>🥊 Competitive Analysis</h1>
+  <p class="subtitle">Reviewing similar offers on the web to position the <strong>Claude AI Architect Certification</strong> course.</p>
+  <div class="meta-row">
+    <span class="pill">🗓 Last updated: 2026-06-26</span>
+    <span class="pill blue">🔍 Source: Web Search</span>
+  </div>
+
+  <div class="callout">
+    🎯 <strong>Overview:</strong> The AI certification market is crowded with introductory prompting and generic AI usage courses. However, few offerings focus on the deep, production-grade <em>AI architecture</em> (multi-agent systems, MCP, security, cost control) that our certification targets. Below are the closest similar offers currently on the web.
+  </div>
+
+  <h2>🌐 Similar Offers on the Web</h2>
+
+  <div class="card competitor-card anthropic">
+    <h3>1. Claude Certified Architect (CCA) — Foundations (Anthropic)</h3>
+    <p>The official Anthropic technical certification, focusing on agentic architecture and Claude Code configuration.</p>
+    <ul>
+      <li data-emoji="🎯"><strong>Focus:</strong> Agentic Orchestration, MCP Integration, Context Management, Tool Design.</li>
+      <li data-emoji="💰"><strong>Pricing/Access:</strong> Currently restricted to Anthropic Partner Network members.</li>
+      <li data-emoji="🥊"><strong>Our Advantage:</strong> The CCA is gated behind partner status. Our course is open to the public, self-paced, and focuses heavily on practical, shipped POCs using the Fly.io/Supabase stack.</li>
+    </ul>
+  </div>
+
+  <div class="card competitor-card microsoft">
+    <h3>2. Microsoft Certified: Agentic AI Business Solutions Architect</h3>
+    <p>A high-level certification focused on designing agentic systems within the Microsoft and Azure ecosystem.</p>
+    <ul>
+      <li data-emoji="🎯"><strong>Focus:</strong> Azure OpenAI, Copilot Studio, Microsoft ecosystem architecture.</li>
+      <li data-emoji="💰"><strong>Pricing/Access:</strong> Standard Microsoft exam pricing (~$165).</li>
+      <li data-emoji="🥊"><strong>Our Advantage:</strong> Microsoft's cert is heavily vendor-locked to Azure. Our course focuses on open-standard MCP servers and Claude's leading reasoning capabilities, appealing to multi-cloud builders.</li>
+    </ul>
+  </div>
+
+  <div class="card competitor-card aws">
+    <h3>3. AWS Certified AI Practitioner / Solutions Architect</h3>
+    <p>Industry-standard certifications for cloud and AI infrastructure.</p>
+    <ul>
+      <li data-emoji="🎯"><strong>Focus:</strong> AWS SageMaker, Bedrock integrations, LLM deployment, and cloud scalability.</li>
+      <li data-emoji="💰"><strong>Pricing/Access:</strong> $150 - $300.</li>
+      <li data-emoji="🥊"><strong>Our Advantage:</strong> AWS certifications teach you how to use AWS services. They do not teach deep Claude-specific prompt engineering, nor do they focus on the specific nuances of MCP and Anthropic's agentic workflows.</li>
+    </ul>
+  </div>
+
+  <div class="card competitor-card ibm">
+    <h3>4. IBM AI Engineering Professional Certificate (Coursera)</h3>
+    <p>A multi-course path for hands-on experience in building, testing, and deploying AI applications.</p>
+    <ul>
+      <li data-emoji="🎯"><strong>Focus:</strong> RAG systems, LLM integrations, PyTorch, general ML.</li>
+      <li data-emoji="💰"><strong>Pricing/Access:</strong> Coursera subscription ($49/mo).</li>
+      <li data-emoji="🥊"><strong>Our Advantage:</strong> Too broad. It covers general machine learning rather than focusing exclusively on the cutting-edge agentic workflows, MCP, and LLM orchestration that Claude excels at.</li>
+    </ul>
+  </div>
+
+  <h2>🧭 Competitive Positioning</h2>
+  <table>
+    <thead>
+      <tr><th>Feature</th><th>Our Claude Course</th><th>Vendor Certs (AWS/MS)</th><th>Official CCA</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Access</strong></td><td>Public / Self-paced</td><td>Public</td><td>Gated (Partners)</td></tr>
+      <tr><td><strong>Vendor Lock-in</strong></td><td>Low (Open Stack/MCP)</td><td>High (Azure/AWS)</td><td>Medium (Anthropic)</td></tr>
+      <tr><td><strong>Practical Output</strong></td><td>Shipped POC</td><td>Multiple Choice Exam</td><td>Proctored Exam</td></tr>
+      <tr><td><strong>Focus</strong></td><td>Claude, MCP, Agentic</td><td>Broad Cloud AI</td><td>Claude, Agentic</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    💡 <strong>Strategic Conclusion:</strong> We must aggressively position this course against the gated official CCA by offering the <strong>only accessible, public alternative</strong> that teaches the exact same architectural principles (MCP, context management, multi-agent) but with a focus on building a real-world POC.
+  </div>
+
+</div>
+<script src="../../../../shared/debug-panel.js"></script>
+</body>
+</html>

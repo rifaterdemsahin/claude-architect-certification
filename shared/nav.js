@@ -134,7 +134,8 @@
     { label: '🎬 Preprod', children: [
       { label: '1. ❓ Problem', children: [
         { label: '❓ Problem Statement', url: '5_Symbols/production/preprod/problem.html', description: 'Core problem the course solves — gap, audience, and value proposition.' },
-        { label: '📊 Market Analysis', url: '5_Symbols/production/preprod/research/market_analysis.html', description: 'Demand sizing, target audience, competitive landscape, and positioning.' }
+        { label: '📊 Market Analysis', url: '5_Symbols/production/preprod/research/market_analysis.html', description: 'Demand sizing, target audience, competitive landscape, and positioning.' },
+        { label: '🥊 Competitive Analysis', url: '5_Symbols/production/preprod/research/competitive_analysis.html', description: 'Reviewing similar offers on the web to position the course.' }
       ]},
       { label: '2. 🏠 Product (Solution)', url: 'index.html' },
       { label: '4. 📋 Outline', url: '5_Symbols/production/preprod/course_outline.html' },
