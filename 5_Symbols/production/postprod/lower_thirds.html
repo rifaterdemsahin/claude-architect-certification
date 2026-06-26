@@ -596,18 +596,20 @@ Return ONLY a JSON array with this structure:
         '<div class="brand-item">🔤 Sub: ' + escHtml(t.subFontLabel) + '</div>';
     }
 
-    function brandFilePrefix(sceneNum) {
+    // File-name prefix: module{N}_video{N}_{MainText}_{ModuleName}_{VideoName}
+    // Single source of truth for BOTH downloaded PNGs and uploaded Azure blobs.
+    function brandFilePrefix(mainText) {
       const slug = s => String(s || '').replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'untitled';
       const m = dbModules.find(x => x.id === currentModuleId);
       const v = dbVideos.find(x => x.id === currentVideoId);
-      const mp = m ? 'M' + m.module_number + '-' + slug(m.title) : 'M0';
-      const vp = v ? 'V' + v.video_number + '-' + slug(v.title) : 'V0';
-      return mp + '_' + vp + (sceneNum ? '_s' + sceneNum : '');
+      const modPart = m ? 'module' + m.module_number : 'module0';
+      const vidPart = v ? 'video' + v.video_number : 'video0';
+      return modPart + '_' + vidPart + '_' + slug(mainText) + '_' + slug(m ? m.title : '') + '_' + slug(v ? v.title : '');
     }
 
-    async function uploadToAzure(blob, moduleNum, videoNum, sceneNum) {
+    async function uploadToAzure(blob, ltMain) {
       const form = new FormData();
-      const fileName = 'lt_m' + moduleNum + '_v' + videoNum + '_s' + sceneNum + '_' + Date.now() + '.png';
+      const fileName = brandFilePrefix(ltMain) + '.png';
       form.append('file', blob, fileName);
       const res = await fetch('/api/research/upload?container=research-images', { method: 'POST', body: form });
       if (!res.ok) { const err = await res.text(); throw new Error('Azure upload: ' + err); }
@@ -634,7 +636,7 @@ Return ONLY a JSON array with this structure:
         renderLowerThirdToCanvas(ltMain, ltSub);
         const blob = await new Promise(resolve => canvasEl.toBlob(resolve, 'image/png'));
         if (!blob) throw new Error('Canvas render failed');
-        const ltImageUrl = await uploadToAzure(blob, moduleNum, videoNum, sceneNum);
+        const ltImageUrl = await uploadToAzure(blob, ltMain);
         const body = { lt_main: ltMain, lt_sub: ltSub, lt_image: ltImageUrl };
         if (editingSceneId) {
           await api('scenes?id=eq.' + editingSceneId, { method: 'PATCH', body: JSON.stringify(body) });
@@ -742,7 +744,7 @@ Return ONLY a JSON array with this structure:
       const sceneNum = parseInt($('sceneNumber').value) || 0;
       renderLowerThirdToCanvas(ltMain, ltSub);
       const link = document.createElement('a');
-      link.download = `${brandFilePrefix(sceneNum)}_lower_third.png`;
+      link.download = brandFilePrefix(ltMain) + '.png';
       link.href = canvasEl.toDataURL('image/png');
       link.click();
       showToast('Downloaded PNG for testing!');
@@ -751,7 +753,7 @@ Return ONLY a JSON array with this structure:
     function downloadExistingScene(main, sub, sceneNum) {
       renderLowerThirdToCanvas(main || 'Main Text', sub || 'Sub Text');
       const link = document.createElement('a');
-      link.download = `${brandFilePrefix(sceneNum)}_lower_third.png`;
+      link.download = brandFilePrefix(main) + '.png';
       link.href = canvasEl.toDataURL('image/png');
       link.click();
       showToast('Downloaded PNG for scene ' + sceneNum);
@@ -968,7 +970,7 @@ Return ONLY a JSON array with this structure:
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
-          a.download = brandFilePrefix(s.scene_number) + '.png';
+          a.download = brandFilePrefix(s.lt_main) + '.png';
           document.body.appendChild(a);
           a.click();
           document.body.removeChild(a);

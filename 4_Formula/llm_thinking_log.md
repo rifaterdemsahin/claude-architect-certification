@@ -1869,6 +1869,22 @@ This guarantees uniqueness both among the new candidates and against existing no
 
 **Outcome:** After clicking **🧠 OpenRouter Generate Lower Thirds**, a **🔍 Prompt & Output** button appears; clicking it opens a modal with the exact prompt + model output, each copyable (plus copy-all) for feedback.
 
+## 2026-06-25 - 🏷️ File Prefix: `module{N}_video{N}_{MainText}_{ModuleName}_{VideoName}`
+
+**Context:** User asked to standardise the lower-thirds file-name prefix to `module1_video1_[MainText]_[ModuleName]_[videoname]`.
+
+**Approach:**
+- Rewrote `brandFilePrefix(sceneNum)` → `brandFilePrefix(mainText)` in `5_Symbols/production/postprod/lower_thirds.html` so the prefix now reads `module{N}_video{N}_{slug(MainText)}_{slug(ModuleName)}_{slug(VideoName)}` (slug = alphanumerics + hyphens, capped at 40 chars per segment).
+- Made `brandFilePrefix` the **single source of truth** for BOTH paths: downloaded PNGs (`downloadLowerThird`, `downloadExistingScene`, `bulkDownloadExistingScenes`) AND uploaded Azure blobs (`uploadToAzure`). Previously the Azure upload used a separate hard-coded `lt_m{N}_v{N}_s{N}_{timestamp}.png`; it now calls `brandFilePrefix(ltMain)` so saved and downloaded files match.
+- Updated all 4 callers to pass the lower-third main text instead of the scene number.
+
+**Verification:**
+- JS syntax OK across all 5 `<script>` blocks; 0 stale references to the old signature ✅
+- Simulated output: `module1_video1_Claude-Architect-Masterclass_Foundations-of-Cloud-Architecture_Architecture-Overview.png` ✅
+- Local Go server serves the page 200 with the new logic present ✅
+
+**Outcome:** Every lower-third PNG (download or Azure upload) is now named `module{N}_video{N}_{MainText}_{ModuleName}_{VideoName}.png`, consistent across the tool.
+
 ### 📅 2026-06-26 — 10x Certification Guarantee Page
 **Objective:** Create a page `5_Symbols/production/preprod/10x_certification.html` explaining how the $10 membership guarantees passing the $100 certification process.
 **Approach:** 
