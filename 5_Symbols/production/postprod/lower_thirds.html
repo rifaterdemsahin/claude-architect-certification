@@ -351,7 +351,8 @@ Return ONLY a JSON array with this structure:
       <div class="glass-card-body" style="overflow-y:auto;">
         <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:16px;">
           <button class="btn btn-sm" style="background:var(--primary); color:#fff;" onclick="copyIoText('all')">📋 Copy All (Prompt + Output)</button>
-          <span id="ioMeta" style="font-size:0.8rem; color:var(--text-muted);"></span>
+          <input type="text" id="ioSearch" placeholder="🔍 Search in prompt & output..." style="padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); color: var(--text-main); font-size: 0.85rem; width: 250px;" oninput="highlightIoSearch()">
+          <span id="ioMeta" style="font-size:0.8rem; color:var(--text-muted); margin-left: auto;"></span>
         </div>
         <div style="margin-bottom:20px;">
           <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px;">
@@ -1091,8 +1092,17 @@ Return ONLY a JSON array with this structure:
     function openIoInspector() {
       const io = lastOpenRouterIO;
       if (!io) { showToast('No OpenRouter run captured yet.', true); return; }
-      $('ioPrompt').textContent = io.prompt || '(no prompt captured)';
-      $('ioOutput').textContent = io.error ? ('ERROR: ' + io.error) : (io.output || '(no output)');
+      
+      const pText = io.prompt || '(no prompt captured)';
+      const oText = io.error ? ('ERROR: ' + io.error) : (io.output || '(no output)');
+      
+      $('ioPrompt').dataset.raw = pText;
+      $('ioOutput').dataset.raw = oText;
+      
+      const searchEl = $('ioSearch');
+      if (searchEl) searchEl.value = '';
+      
+      highlightIoSearch(); // Re-render text without highlights
       const meta = [];
       if (io.model) meta.push('Model: ' + io.model);
       if (io.status) meta.push('HTTP ' + io.status);
@@ -1103,6 +1113,30 @@ Return ONLY a JSON array with this structure:
 
     function closeIoInspector() {
       $('ioInspectorOverlay').style.display = 'none';
+    }
+
+    function highlightIoSearch() {
+      const term = ($('ioSearch').value || '').trim().toLowerCase();
+      const pEl = $('ioPrompt');
+      const oEl = $('ioOutput');
+      const pText = pEl.dataset.raw || '';
+      const oText = oEl.dataset.raw || '';
+      
+      if (!term) {
+        pEl.innerHTML = escHtml(pText);
+        oEl.innerHTML = escHtml(oText);
+        return;
+      }
+      
+      const highlight = (text) => {
+        if (!text) return '';
+        const escaped = escHtml(text);
+        const regex = new RegExp('(' + term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+        return escaped.replace(regex, '<mark style="background:var(--primary); color:#fff; padding:0 2px; border-radius:2px;">$1</mark>');
+      };
+      
+      pEl.innerHTML = highlight(pText);
+      oEl.innerHTML = highlight(oText);
     }
 
     async function copyIoText(kind) {
