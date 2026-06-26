@@ -9,7 +9,7 @@
 `./5_Symbols/production/postprod/lower_thirds.html`
 
 ## 🎯 Purpose & Rationale
-**Description**: Generate, save, and preview lower-third candidates via an LLM (OpenRouter), auto-deduplicate them, store them in Supabase with a learning *rationale*, render the exact PNG output to canvas, and optionally push the PNG to Google Drive.
+**Description**: Generate, save, and preview lower-third candidates via an LLM (OpenRouter), auto-deduplicate them, store them in Relational Database (Supabase) with a learning *rationale*, render the exact PNG output to canvas, and optionally push the PNG to Google Drive.
 
 *Rationale*: A "lower third" is the on-screen name/title graphic overlaid on the lower portion of a video. This page is the single place where a producer generates candidate lower thirds for each Module → Video, edits the text, previews the rendered PNG pixel-for-pixel, and persists the chosen ones as scenes so the post-production pipeline can consume them. It lives in `5_Symbols/production/postprod` following the 7-stage folder structure.
 
