@@ -1,5 +1,35 @@
 # LLM Thinking Log
 
+## 2026-06-27 — 🎭 Audio Scoring: Module/Video Filter + Sentence Audio Emotion Map
+
+### 🎯 Objective
+On `5_Symbols/production/postprod/audio_scoring.html`: add module + video selectors that filter the audio map and show the script (using `image_generator.html` as the UI inspiration); add an **audio emotion mapping** to the DB for sentences (covering module + video roll-ups); and **show the prompt before generating** it.
+
+### 📐 Implementation
+1. **DB — new per-sentence audio emotion columns.** Created `5_Symbols/supabase/migrations/migration_sentence_audio_emotion.sql` adding to `sentences`: `audio_emotion`, `audio_intensity` (low/medium/high), `audio_pace` (slow/normal/fast), `audio_sfx`, `audio_music`, `audio_rationale`, `audio_status` (pending/search/done). Mirrored them into the canonical `5_Symbols/supabase/schema/01_core_schema.sql` CREATE TABLE. Because `sentences → scripts → videos → modules`, this single per-sentence map gives roll-up coverage for a whole video and module. The `sentences` table already had anon INSERT/UPDATE/DELETE/SELECT policies, so **no RLS changes needed**. DDL can't run via REST → migration copied to clipboard for the Supabase SQL Editor.
+2. **Page rewrite (`audio_scoring.html`)** mirroring `image_generator.html`:
+   - **Filter card** — Module + Video selectors (load via `modules`/`videos` tables).
+   - **Video Script panel** — loads the full script (video.script + scripts.script_text + numbered sentences) read-only, with an ✏️ Edit Script link.
+   - **🎭 Sentence Audio Emotion Map** (new) — per sentence: #, text (+section/type tags), emotion (input), intensity/pace (selects), SFX, music, rationale, status, and Save / 🎚️ SFX Prompt / 🎵 Music Prompt actions. Edits PATCH the `sentences` row. Live stats row (total/mapped/pending/search/done).
+   - **🎬 Scene Audio Map** (existing) — now **filtered by module** (`module_number=eq.X`) instead of loading all scenes; shows the module scope label.
+3. **Show prompt before generating.** The prompt modal now renders a **context summary** (on-screen line, emotion, energy, SFX, music, rationale), a “review before you generate” warning, the full editable prompt built from the sentence + its emotion, plus Copy / 💾 Use &amp; Save (persists the edited prompt back to the row's rationale) and a deep link to an audio generator (ElevenLabs SFX / Suno music). The prompt is auto-copied on open so it's ready to paste.
+4. **Resilience.** `fetchScriptForVideo` first queries sentences **with** the new audio_* columns; on HTTP 400 (migration not applied yet) it falls back to the core columns so the script + sentence list still render (emotion fields empty) and saving fails with a clear toast — the full feature activates the moment the migration runs.
+
+### ✅ Verification
+- JS syntax OK across the page's script block; `go build ./... && go vet ./...` pass.
+- Fresh local server serves the page HTTP 200 with all new elements (moduleSelect, emotionTableBody, fetchScriptForVideo, useAndSavePrompt, audio_emotion refs).
+- Data paths confirmed live: `modules` → 5 modules, `videos?module_id=eq.X` → per-module videos, core `sentences` select → 200 (fallback path). The full `sentences` select with audio_* columns currently returns 400 (migration pending) — confirmed the fallback kicks in.
+- Round-trip mechanics pre-validated: `sentences` has anon UPDATE policy, so PATCH `audio_emotion` will succeed once the columns exist.
+
+### 📋 Migration to run (also in clipboard)
+Paste `5_Symbols/supabase/migrations/migration_sentence_audio_emotion.sql` into the Supabase SQL Editor: https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/sql/new
+
+### 📦 Files Changed
+- `5_Symbols/supabase/migrations/migration_sentence_audio_emotion.sql` — new per-sentence audio emotion columns.
+- `5_Symbols/supabase/schema/01_core_schema.sql` — mirrored columns into the canonical CREATE TABLE.
+- `5_Symbols/production/postprod/audio_scoring.html` — module/video filter, script panel, sentence emotion map, filtered scene map, prompt-shown-before-generating modal.
+- `4_Formula/llm_thinking_log.md` — this entry.
+
 ## 2026-06-27 — 🧮 Nested Sub-Menu Count Badges (Part 2)
 
 ### 🎯 Objective

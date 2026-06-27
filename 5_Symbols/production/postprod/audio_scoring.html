@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="../../../shared/redirect-to-live-site.js"></script>
   <title>Audio Scoring | Post-Production</title>
-  <meta name="description" content="Find and map sound effects and background music to every scene in the script for post-production.">
-  <meta name="keywords" content="audio scoring, sound effects, SFX, background music, post-production, Claude AI Certification">
+  <meta name="description" content="Map the audio emotion per sentence across a module and video, then spot SFX and background music for every scene.">
+  <meta name="keywords" content="audio scoring, sound effects, SFX, background music, audio emotion, post-production, Claude AI Certification">
   <meta name="author" content="Rifat Erdem Sahin">
   <link rel="icon" type="image/png" href="../../../favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,7 +26,7 @@
     .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
     .badge { display: inline-block; padding: 6px 16px; background: linear-gradient(135deg, rgba(139,92,246,0.2), rgba(16,185,129,0.2)); border: 1px solid rgba(139,92,246,0.3); border-radius: 100px; font-size: 0.8rem; font-weight: 600; color: #c4b5fd; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 14px; }
     h1 { font-family: var(--font-title); font-size: 2.4rem; font-weight: 800; margin-bottom: 10px; }
-    header p { color: var(--text-muted); max-width: 600px; margin: 0 auto 32px; }
+    header p { color: var(--text-muted); max-width: 640px; margin: 0 auto 32px; }
     .group { margin-bottom: 48px; }
     .group-heading {
       font-family: var(--font-title); font-size: 1.3rem; font-weight: 700; margin-bottom: 16px;
@@ -35,6 +35,7 @@
     .group-heading::after {
       content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(255,255,255,0.1), transparent);
     }
+    .group-sub { color: var(--text-muted); margin-bottom: 8px; font-size: 0.9rem; }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
     .card {
       background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px;
@@ -50,41 +51,81 @@
     .tag-green { background: rgba(16,185,129,0.15); color: #6ee7b7; border-color: rgba(16,185,129,0.2); }
     .tag-blue { background: rgba(59,130,246,0.15); color: #93c5fd; border-color: rgba(59,130,246,0.2); }
     .tag-yellow { background: rgba(251,191,36,0.15); color: #fde68a; border-color: rgba(251,191,36,0.2); }
+
+    /* ── Filter / selector bar (mirrors image_generator.html) ── */
+    .filter-card {
+      background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px;
+      padding: 24px; margin-bottom: 32px;
+    }
+    .selector-bar { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+    .selector-bar select {
+      background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px;
+      color: var(--text-main); padding: 12px 18px; font-size: 0.95rem; font-family: var(--font-body);
+      min-width: 240px; cursor: pointer;
+    }
+    .selector-bar select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(139,92,246,0.2); }
+    .badge-count {
+      background: rgba(255,255,255,0.1); color: var(--text-main); border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 12px; padding: 2px 8px; font-size: 0.78rem; margin-left: 8px; font-weight: 600;
+      display: inline-block; vertical-align: middle;
+    }
+    .stats-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+    .stat-badge {
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px;
+      padding: 7px 14px; font-size: 0.82rem; display: flex; align-items: center; gap: 6px;
+    }
+    .stat-badge .count { font-weight: 800; font-size: 1rem; }
+    .stat-badge.done .count { color: var(--accent); }
+    .stat-badge.pending .count { color: var(--text-muted); }
+    .stat-badge.search .count { color: var(--secondary); }
+
+    /* Script preview box */
+    .script-preview {
+      width: 100%; min-height: 150px; max-height: 360px; overflow-y: auto;
+      background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px;
+      padding: 20px; color: var(--text-muted); font-family: var(--font-body); resize: vertical;
+      line-height: 1.75; font-size: 0.9rem; white-space: pre-wrap;
+    }
+
+    /* Tables */
     .scoring-table {
       background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px;
       overflow: hidden; margin-bottom: 32px;
     }
+    .scoring-table .table-wrap { overflow-x: auto; }
     .scoring-table table { width: 100%; border-collapse: collapse; }
     .scoring-table th {
-      text-align: left; padding: 16px 20px; font-family: var(--font-title); font-weight: 700;
-      font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em;
-      border-bottom: 1px solid rgba(255,255,255,0.06); background: rgba(0,0,0,0.2);
+      text-align: left; padding: 14px 16px; font-family: var(--font-title); font-weight: 700;
+      font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em;
+      border-bottom: 1px solid rgba(255,255,255,0.06); background: rgba(0,0,0,0.2); white-space: nowrap;
     }
-    .scoring-table td { padding: 14px 20px; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.9rem; vertical-align: top; }
+    .scoring-table td { padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.88rem; vertical-align: top; }
     .scoring-table tr:last-child td { border-bottom: none; }
     .scoring-table tr:hover td { background: rgba(139,92,246,0.04); }
-    .score-status {
-      display: inline-flex; align-items: center; gap: 5px;
-      padding: 4px 12px; border-radius: 100px; font-size: 0.75rem; font-weight: 700;
-    }
+    .num-col { width: 40px; text-align: center; font-weight: 800; color: var(--primary); }
+    .sentence-col { min-width: 240px; }
+    .sentence-text { line-height: 1.5; }
+    .section-tag { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 0.66rem; font-weight: 600; background: rgba(59,130,246,0.12); color: var(--secondary); margin-right: 6px; }
+    .type-tag { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 0.66rem; font-weight: 600; background: rgba(139,92,246,0.15); color: var(--primary); }
+
+    .score-status { display: inline-flex; align-items: center; gap: 5px; padding: 4px 12px; border-radius: 100px; font-size: 0.74rem; font-weight: 700; }
     .status-done { background: rgba(16,185,129,0.15); color: #6ee7b7; }
     .status-pending { background: rgba(251,191,36,0.15); color: #fde68a; }
     .status-search { background: rgba(59,130,246,0.15); color: #93c5fd; }
     .audio-player { width: 100%; height: 36px; accent-color: var(--primary); border-radius: 6px; }
-    .inline-audio { display: flex; align-items: center; gap: 10px; }
     .cell-edit {
-      width: 100%; min-width: 130px; background: rgba(0,0,0,0.25); color: var(--text-main);
-      border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 8px 10px;
-      font-family: var(--font-body); font-size: 0.85rem; resize: vertical; line-height: 1.4;
+      width: 100%; min-width: 120px; background: rgba(0,0,0,0.25); color: var(--text-main);
+      border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 7px 9px;
+      font-family: var(--font-body); font-size: 0.82rem; resize: vertical; line-height: 1.4;
     }
-    textarea.cell-edit { min-height: 52px; }
+    textarea.cell-edit { min-height: 46px; }
+    select.cell-edit { cursor: pointer; }
     .cell-edit:focus { outline: none; border-color: var(--primary); background: rgba(139,92,246,0.08); }
-    .status-select { cursor: pointer; }
-    .row-actions { display: flex; flex-direction: column; gap: 8px; min-width: 132px; }
+    .row-actions { display: flex; flex-direction: column; gap: 7px; min-width: 132px; }
     .btn {
       display: inline-flex; align-items: center; justify-content: center; gap: 6px;
       padding: 7px 12px; border-radius: 8px; font-family: var(--font-body); font-weight: 600;
-      font-size: 0.78rem; cursor: pointer; border: 1px solid transparent; transition: all 0.2s;
+      font-size: 0.76rem; cursor: pointer; border: 1px solid transparent; transition: all 0.2s;
       white-space: nowrap; color: #fff;
     }
     .btn:disabled { opacity: 0.4; cursor: not-allowed; }
@@ -95,29 +136,46 @@
     .btn-music { background: rgba(139,92,246,0.18); border-color: rgba(139,92,246,0.4); color: #c4b5fd; }
     .btn-music:hover { background: rgba(139,92,246,0.3); }
     .conn-indicator { font-size: 0.78rem; color: var(--text-muted); margin-top: 8px; }
+
     /* Prompt modal */
     .modal-backdrop {
-      position: fixed; inset: 0; background: rgba(3,7,18,0.78); backdrop-filter: blur(4px);
+      position: fixed; inset: 0; background: rgba(3,7,18,0.82); backdrop-filter: blur(6px);
       display: none; align-items: center; justify-content: center; z-index: 1000; padding: 24px;
     }
     .modal-backdrop.open { display: flex; }
     .modal {
       background: #0b1120; border: 1px solid rgba(139,92,246,0.3); border-radius: 18px;
-      max-width: 640px; width: 100%; padding: 28px; box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+      max-width: 700px; width: 100%; max-height: 92vh; overflow-y: auto;
+      padding: 28px; box-shadow: 0 24px 64px rgba(0,0,0,0.5);
     }
     .modal h3 { font-family: var(--font-title); font-size: 1.2rem; margin-bottom: 6px; }
     .modal .modal-sub { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px; }
+    .prompt-context {
+      background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px;
+      padding: 14px 16px; margin-bottom: 14px; font-size: 0.82rem;
+    }
+    .prompt-context .ctx-row { display: flex; gap: 8px; padding: 2px 0; }
+    .prompt-context .ctx-key { color: var(--text-muted); min-width: 96px; font-weight: 600; }
+    .prompt-context .ctx-val { color: var(--text-main); }
+    .prompt-warn {
+      display: flex; gap: 8px; align-items: flex-start; background: rgba(139,92,246,0.1);
+      border: 1px solid rgba(139,92,246,0.3); border-radius: 10px; padding: 10px 12px;
+      margin-bottom: 12px; font-size: 0.8rem; color: #c4b5fd;
+    }
     .modal textarea {
-      width: 100%; min-height: 200px; background: rgba(0,0,0,0.3); color: var(--text-main);
-      border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 14px; font-size: 0.88rem;
+      width: 100%; min-height: 220px; background: rgba(0,0,0,0.3); color: var(--text-main);
+      border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 14px; font-size: 0.86rem;
       font-family: 'SF Mono', ui-monospace, monospace; line-height: 1.5; resize: vertical;
     }
-    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; flex-wrap: wrap; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; flex-wrap: wrap; align-items: center; }
     .btn-lg { padding: 10px 18px; font-size: 0.85rem; }
     .btn-ghost { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.12); color: var(--text-main); }
     .btn-ghost:hover { background: rgba(255,255,255,0.12); }
     .btn-primary { background: linear-gradient(135deg, var(--primary), var(--secondary)); }
     .btn-primary:hover { filter: brightness(1.1); }
+    .external-link { font-size: 0.78rem; color: var(--secondary); text-decoration: none; margin-right: auto; }
+    .external-link:hover { text-decoration: underline; }
+
     /* Toast */
     .toast {
       position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
@@ -127,6 +185,7 @@
     }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
     .toast.error { border-color: rgba(239,68,68,0.5); color: #fca5a5; }
+
     .resource-card {
       background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px;
       padding: 20px; display: flex; align-items: flex-start; gap: 16px; transition: all 0.2s; text-decoration: none; color: inherit;
@@ -137,11 +196,13 @@
     .resource-name { font-weight: 700; margin-bottom: 4px; }
     .resource-desc { font-size: 0.85rem; color: var(--text-muted); }
     .resources-list { display: flex; flex-direction: column; gap: 12px; }
+    .empty-state { text-align: center; padding: 40px; color: var(--text-muted); }
+    .empty-state .empty-icon { font-size: 2.5rem; margin-bottom: 10px; opacity: 0.4; }
     footer { text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
     @media (max-width: 768px) {
       .scoring-table table, .scoring-table thead, .scoring-table tbody, .scoring-table th, .scoring-table td, .scoring-table tr { display: block; }
       .scoring-table thead { display: none; }
-      .scoring-table td { padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+      .scoring-table td { padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.04); }
       .scoring-table td::before { content: attr(data-label); display: block; font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
       .scoring-table tr { margin-bottom: 12px; border-bottom: 2px solid rgba(255,255,255,0.06); }
     }
@@ -155,48 +216,100 @@
   <header style="padding: 60px 0 40px; text-align: center;">
     <div class="badge">Post-Production</div>
     <h1>Audio Scoring Board</h1>
-    <p>Find, audition, and assign sound effects and background music to every scene in the script.</p>
+    <p>Pick a module &amp; video to load its script, map the <strong>audio emotion</strong> per sentence, then spot SFX and background music across every scene.</p>
   </header>
 
-  <!-- Scoring Table -->
-  <div class="group">
-    <div class="group-heading">🎬 Scene Audio Map</div>
-    <p style="color: var(--text-muted); margin-bottom: 8px; font-size: 0.9rem;">
-      For each scene, log the <strong>scene change</strong> (transition in), the required SFX and background music, and the
-      <strong>rationale</strong> for why they fit. Edits save to Supabase. Use the 🎚️ / 🎵 buttons to generate an AI prompt
-      for sound-effect and music creation tools.
-    </p>
+  <!-- 1) Filter -->
+  <div class="filter-card">
+    <div class="selector-bar">
+      <select id="moduleSelect"><option value="">— Select Module —</option></select>
+      <select id="videoSelect"><option value="">— Select Video —</option></select>
+    </div>
     <div class="conn-indicator" id="connStatus">⏳ Connecting to Supabase…</div>
+  </div>
+
+  <!-- 2) Video Script -->
+  <div class="group" id="scriptGroup" style="display:none;">
+    <div class="group-heading">📝 Video Script <span id="countScript" class="badge-count" style="display:none;"></span></div>
+    <p class="group-sub">The full script for the selected video loads here — read it to plan your audio cues, then map the emotion per sentence below.</p>
+    <textarea id="scriptContent" class="script-preview" readonly placeholder="The video script (and its sentences) load here once a module and video are selected…"></textarea>
+    <div style="margin-top: 12px; text-align: right;">
+      <button class="btn btn-sfx" onclick="window.open('../preprod/scripts/index.html?module_id=' + (currentModuleId||'') + '&video_id=' + (currentVideoId||''), '_blank')">✏️ Edit Script</button>
+    </div>
+  </div>
+
+  <!-- 3) Sentence Audio Emotion Map (NEW — per-sentence, drives module+video roll-ups) -->
+  <div class="group" id="emotionGroup" style="display:none;">
+    <div class="group-heading">🎭 Sentence Audio Emotion Map <span id="countEmotion" class="badge-count" style="display:none;"></span></div>
+    <p class="group-sub">
+      For every sentence in this video, set the <strong>emotion</strong>, <strong>intensity</strong> and <strong>pace</strong> the audio should convey, plus suggested SFX and music.
+      Saved to the <code>sentences</code> table — because sentences roll up into scripts → videos → modules, this map covers the whole module and video.
+    </p>
+    <div id="emotionStats" class="stats-row" style="display:none;"></div>
+    <div class="scoring-table">
+      <div class="table-wrap" id="emotionWrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="num-col">#</th>
+              <th class="sentence-col">Sentence</th>
+              <th>Emotion / Mood</th>
+              <th>Intensity</th>
+              <th>Pace</th>
+              <th>SFX</th>
+              <th>Music</th>
+              <th>Rationale</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="emotionTableBody">
+            <!-- Populated by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4) Scene Audio Map (filtered by module) -->
+  <div class="group" id="sceneGroup" style="display:none;">
+    <div class="group-heading">🎬 Scene Audio Map <span id="countScenes" class="badge-count" style="display:none;"></span></div>
+    <p class="group-sub">
+      For each scene in <strong id="sceneScopeLabel">this module</strong>, log the <strong>scene change</strong> (transition in), the required SFX and background music, and the
+      <strong>rationale</strong> for why they fit. Edits save to Supabase. Use the 🎚️ / 🎵 buttons to view the AI prompt <em>before</em> you generate.
+    </p>
     <div class="scoring-table" style="margin-top: 14px;">
-      <table>
-        <thead>
-          <tr>
-            <th>Scene</th>
-            <th>Description</th>
-            <th>Scene Change</th>
-            <th>SFX Needed</th>
-            <th>Background Music</th>
-            <th>Rationale</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="scoreTableBody">
-          <!-- Populated by JS -->
-        </tbody>
-      </table>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Scene</th>
+              <th>Description</th>
+              <th>Scene Change</th>
+              <th>SFX Needed</th>
+              <th>Background Music</th>
+              <th>Rationale</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="scoreTableBody">
+            <!-- Populated by JS -->
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
   <!-- Reference Audio Library -->
-  <div class="group">
+  <div class="group" id="libraryGroup">
     <div class="group-heading">🎵 Reference Audio Library</div>
-    <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.9rem;">
+    <p class="group-sub">
       Uploaded reference tracks, temp music, and auditioned SFX files. Use the <a href="audio.html" style="color: var(--secondary);">Research Audio</a> page to upload new files.
     </p>
     <div id="audioLibrary">
-      <div class="empty-state" style="text-align: center; padding: 48px; color: var(--text-muted);">
-        <div style="font-size: 2.5rem; margin-bottom: 12px; opacity: 0.3;">🎵</div>
+      <div class="empty-state">
+        <div class="empty-icon">🎵</div>
         <p>No reference audio loaded yet. Upload tracks via the Research Audio page, then assign them to scenes above.</p>
       </div>
     </div>
@@ -205,7 +318,7 @@
   <!-- Royalty-Free Resources -->
   <div class="group">
     <div class="group-heading">🔍 Find Audio Resources</div>
-    <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.9rem;">
+    <p class="group-sub">
       Curated list of royalty-free / Creative Commons audio libraries for sourcing SFX and background music.
     </p>
     <div class="resources-list">
@@ -271,7 +384,7 @@
   <!-- Script Section Reference -->
   <div class="group">
     <div class="group-heading">📝 Script Reference</div>
-    <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.9rem;">
+    <p class="group-sub">
       Open the master script to review scene-by-scene dialogue and plan your audio cues.
     </p>
     <div class="grid">
@@ -310,15 +423,27 @@
   </footer>
 </div>
 
-<!-- Prompt Generator Modal -->
+<!-- Prompt Generator Modal (shows the prompt BEFORE you generate) -->
 <div class="modal-backdrop" id="promptModal">
   <div class="modal">
     <h3 id="promptTitle">🎚️ SFX Prompt</h3>
-    <div class="modal-sub" id="promptSub">Generated prompt — copy it into your AI sound-effect / music generator.</div>
+    <div class="modal-sub" id="promptSub">This is the exact prompt that will be sent to your AI sound / music generator — review it first.</div>
+
+    <!-- Emotion context used to build the prompt -->
+    <div class="prompt-context" id="promptContext"></div>
+
+    <div class="prompt-warn">
+      <span>💡</span>
+      <span>Review the prompt below before you generate. Edit it freely — your edits are saved back to the sentence's rationale when you press <strong>Use &amp; Save</strong>.</span>
+    </div>
+
     <textarea id="promptText" spellcheck="false"></textarea>
+
     <div class="modal-actions">
+      <a id="promptExternal" class="external-link" href="#" target="_blank" rel="noopener">🔗 Open audio generator ↗</a>
       <button class="btn btn-lg btn-ghost" onclick="closePromptModal()">Close</button>
-      <button class="btn btn-lg btn-primary" onclick="copyPromptText()">📋 Copy Prompt</button>
+      <button class="btn btn-lg btn-ghost" onclick="copyPromptText()">📋 Copy Prompt</button>
+      <button class="btn btn-lg btn-primary" id="promptUseBtn" onclick="useAndSavePrompt()">💾 Use &amp; Save</button>
     </div>
   </div>
 </div>
@@ -326,7 +451,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// ── Supabase credential bootstrap (matches production_shotlist.html) ──────────
+// ── Supabase credential bootstrap (matches production_shotlist.html / image_generator.html) ────
 const CRED_DEFAULTS = {
   supabase_url: 'https://rmekfsdhglyiralxvkwc.supabase.co',
   supabase_anon_key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZWtmc2RoZ2x5aXJhbHh2a3djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NzYzODgsImV4cCI6MjA5NjM1MjM4OH0.ay6HsmO_CbMGDXL_Dv4DT-paAIAOqlQPfmqqx_mexSU'
@@ -375,34 +500,29 @@ async function api(path, opts) {
   return ct.includes('json') ? res.json() : res.text();
 }
 
-// ── Fallback seed (rendered read-only when Supabase has no scored scenes) ─────
-const SEED_SCENES = [
-  { scene: 'M1 S1 S1', desc: 'Neural Network — Systems Architecture Intro',   sfx: 'Whoosh transition, click pop',   music: 'Ambient electronic, 80 bpm',   status: 'search' },
-  { scene: 'M1 S1 S2', desc: 'MCP Server — Client-Server Handshake',           sfx: 'Connection chime, data blip',     music: 'Tech groove, 90 bpm',           status: 'pending' },
-  { scene: 'M1 S1 S3', desc: 'GitHub Ecosystem — CI/CD Pipeline',              sfx: 'Git merge swoosh, success ding',  music: 'Upbeat coding, 100 bpm',        status: 'pending' },
-  { scene: 'M1 S2 S1', desc: 'Supabase — Database Schema Design',              sfx: 'Keyboard typing, SQL execute',    music: 'Lo-fi study, 75 bpm',           status: 'pending' },
-  { scene: 'M1 S2 S2', desc: 'RLS Policies — Row-Level Security',              sfx: 'Lock engage, key turn',           music: 'Cinematic tension, 60 bpm',     status: 'pending' },
-  { scene: 'M1 S2 S3', desc: 'Edge Functions — Serverless Logic',              sfx: 'Deploy whoosh, server hum',       music: 'Electronic pulse, 95 bpm',      status: 'pending' },
-  { scene: 'M1 S3 S1', desc: 'Fly.io — Container Deployment',                  sfx: 'Docker build, rocket launch',     music: 'Epic orchestral, 85 bpm',       status: 'pending' },
-  { scene: 'M1 S3 S2', desc: 'Azure Key Vault — Secrets Management',           sfx: 'Vault door, lock sequence',       music: 'Mysterious synth, 70 bpm',      status: 'pending' },
-  { scene: 'M1 S3 S3', desc: 'Axiom — Observability & Logging',               sfx: 'Data stream, alert ping',         music: 'Data pulse, 100 bpm',           status: 'pending' },
-];
-
+// ── State ─────────────────────────────────────────────────────────────────────
 const STATUS_OPTS = [
   { v: 'pending', label: '⏳ Pending' },
   { v: 'search',  label: '🔍 Searching' },
   { v: 'done',    label: '✅ Done' },
 ];
+const INTENSITY_OPTS = ['low', 'medium', 'high'];
+const PACE_OPTS = ['slow', 'normal', 'fast'];
 
-let SCENE_ROWS = [];     // DB-backed scene objects
+let dbModules = [];
+let dbVideos = [];
+let currentModuleId = null;
+let currentVideoId = null;
+let currentModuleNumber = null;
+let currentSentences = [];   // sentences for the selected video
+let SCENE_ROWS = [];         // scene audio map rows (filtered by module)
+
 const esc = s => (s ?? '').toString().replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-const attr = s => (s ?? '').toString().replace(/"/g, '&quot;');
 
 function setConn(msg, ok) {
   const el = document.getElementById('connStatus');
   if (el) { el.innerHTML = msg; el.style.color = ok ? '#6ee7b7' : 'var(--text-muted)'; }
 }
-
 function showToast(msg, isError) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.className = 'toast' + (isError ? ' error' : '');
@@ -410,30 +530,162 @@ function showToast(msg, isError) {
   setTimeout(() => t.classList.remove('show'), 3200);
 }
 
-// ── Load & render ─────────────────────────────────────────────────────────────
-async function loadScenes() {
+// ── Module / Video selectors ──────────────────────────────────────────────────
+async function loadModules() {
   try {
-    const rows = await api('scenes?select=id,module_number,section_number,scene_number,script,scene_change,sfx_needed,bg_music,audio_rationale,audio_status&order=module_number.asc,section_number.asc,scene_number.asc');
-    SCENE_ROWS = rows || [];
-    if (SCENE_ROWS.length) {
-      setConn(`💚 Connected — ${SCENE_ROWS.length} scene${SCENE_ROWS.length === 1 ? '' : 's'} loaded. Edits save to Supabase.`, true);
-      renderDbTable();
-    } else {
-      setConn('💚 Connected — no scenes scored yet. Showing the Module 1 starter template below (read-only until scenes exist in the DB).', true);
-      renderSeedTable();
+    dbModules = await api('modules?select=id,module_number,title&order=module_number.asc');
+    document.getElementById('moduleSelect').innerHTML = '<option value="">— Select Module —</option>' +
+      dbModules.map(m => `<option value="${m.id}">M${m.module_number}: ${esc(m.title)}</option>`).join('');
+  } catch (e) { showToast('Failed to load modules: ' + e.message, true); }
+}
+
+async function loadVideos(moduleId) {
+  if (!moduleId) { document.getElementById('videoSelect').innerHTML = '<option value="">— Select Video —</option>'; return; }
+  try {
+    dbVideos = await api(`videos?select=id,video_number,title,module_id&module_id=eq.${moduleId}&order=video_number.asc`);
+    document.getElementById('videoSelect').innerHTML = '<option value="">— Select Video —</option>' +
+      dbVideos.map(v => `<option value="${v.id}">V${v.video_number}: ${esc(v.title)}</option>`).join('');
+  } catch (e) { showToast('Failed to load videos: ' + e.message, true); }
+}
+
+// ── Load the script + sentences for a video (mirrors image_generator.html) ────
+async function fetchScriptForVideo(videoId) {
+  document.getElementById('countScript').style.display = 'none';
+  if (!videoId) return null;
+  try {
+    let fullScript = '';
+    const video = await api('videos?id=eq.' + videoId + '&select=script&limit=1');
+    if (video && video[0] && video[0].script) fullScript += video[0].script + '\n\n';
+    const scriptRecs = await api('scripts?video_id=eq.' + videoId + '&select=id,script_text&limit=1');
+    currentSentences = [];
+    if (scriptRecs && scriptRecs.length) {
+      if (scriptRecs[0].script_text && !fullScript.includes(scriptRecs[0].script_text)) fullScript += scriptRecs[0].script_text + '\n\n';
+      const AUDIO_COLS = 'audio_emotion,audio_intensity,audio_pace,audio_sfx,audio_music,audio_rationale,audio_status';
+      // Primary query includes the new audio_* columns. If the migration hasn't
+      // been applied yet (columns missing → HTTP 400), fall back to the core
+      // columns so the script + sentence list still render (emotion fields empty).
+      let sents;
+      try {
+        sents = await api('sentences?script_id=eq.' + scriptRecs[0].id +
+          '&select=id,sentence_text,sentence_type,section,visual_mode,sort_order,script_id,' + AUDIO_COLS + '&order=sort_order.asc');
+      } catch (_) {
+        sents = await api('sentences?script_id=eq.' + scriptRecs[0].id +
+          '&select=id,sentence_text,sentence_type,section,visual_mode,sort_order,script_id&order=sort_order.asc');
+      }
+      currentSentences = sents || [];
+      if (currentSentences.length) {
+        document.getElementById('countScript').textContent = currentSentences.length + ' sentences';
+        document.getElementById('countScript').style.display = 'inline-block';
+        fullScript += '=== Sentences ===\n';
+        currentSentences.forEach((s, i) => { fullScript += `[${i + 1}] ${s.sentence_text || ''}\n`; });
+      }
     }
+    return fullScript.trim() || null;
+  } catch (e) { return null; }
+}
+
+// ── Sentence Audio Emotion Map ────────────────────────────────────────────────
+function renderEmotionTable() {
+  const tbody = document.getElementById('emotionTableBody');
+  const wrap = document.getElementById('emotionGroup');
+  if (!currentSentences.length) {
+    wrap.style.display = 'none';
+    document.getElementById('countEmotion').style.display = 'none';
+    document.getElementById('emotionStats').style.display = 'none';
+    return;
+  }
+  wrap.style.display = 'block';
+  document.getElementById('countEmotion').textContent = currentSentences.length + ' sentences';
+  document.getElementById('countEmotion').style.display = 'inline-block';
+
+  tbody.innerHTML = currentSentences.map((s, i) => {
+    const sectionLabel = (s.section || '').replace(/_/g, ' ');
+    const typeLabel = (s.sentence_type || 'body').replace(/_/g, ' ');
+    const intensityOpts = INTENSITY_OPTS.map(o => `<option value="${o}" ${s.audio_intensity === o ? 'selected' : ''}>${o}</option>`).join('');
+    const paceOpts = PACE_OPTS.map(o => `<option value="${o}" ${s.audio_pace === o ? 'selected' : ''}>${o}</option>`).join('');
+    const statusOpts = STATUS_OPTS.map(o => `<option value="${o.v}" ${s.audio_status === o.v ? 'selected' : ''}>${o.label}</option>`).join('');
+    return `<tr data-sid="${s.id}">
+      <td class="num-col" data-label="#">${i + 1}</td>
+      <td class="sentence-col" data-label="Sentence"><div class="sentence-text">${s.section ? `<span class="section-tag">${esc(sectionLabel)}</span>` : ''}${s.sentence_type ? `<span class="type-tag">${esc(typeLabel)}</span>` : ''}${esc(s.sentence_text || '')}</div></td>
+      <td data-label="Emotion"><input class="cell-edit" data-f="audio_emotion" placeholder="e.g. curious, building tension" value="${esc(s.audio_emotion)}"></td>
+      <td data-label="Intensity"><select class="cell-edit" data-f="audio_intensity">${intensityOpts}</select></td>
+      <td data-label="Pace"><select class="cell-edit" data-f="audio_pace">${paceOpts}</select></td>
+      <td data-label="SFX"><textarea class="cell-edit" data-f="audio_sfx" placeholder="e.g. soft click, data blip">${esc(s.audio_sfx)}</textarea></td>
+      <td data-label="Music"><textarea class="cell-edit" data-f="audio_music" placeholder="e.g. ambient pad, 80 bpm">${esc(s.audio_music)}</textarea></td>
+      <td data-label="Rationale"><textarea class="cell-edit" data-f="audio_rationale" placeholder="Why these choices fit">${esc(s.audio_rationale)}</textarea></td>
+      <td data-label="Status"><select class="cell-edit" data-f="audio_status">${statusOpts}</select></td>
+      <td data-label="Actions"><div class="row-actions">
+        <button class="btn btn-save" onclick="saveSentenceRow(${s.id}, this)">💾 Save</button>
+        <button class="btn btn-sfx" onclick="genSentencePrompt(${s.id}, 'sfx')">🎚️ SFX Prompt</button>
+        <button class="btn btn-music" onclick="genSentencePrompt(${s.id}, 'music')">🎵 Music Prompt</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+  updateEmotionStats();
+}
+
+function updateEmotionStats() {
+  const total = currentSentences.length;
+  const done = currentSentences.filter(s => s.audio_status === 'done').length;
+  const search = currentSentences.filter(s => s.audio_status === 'search').length;
+  const mapped = currentSentences.filter(s => (s.audio_emotion || '').trim()).length;
+  const pending = total - done - search;
+  document.getElementById('emotionStats').innerHTML =
+    `<div class="stat-badge"><span>📊 Total</span><span class="count">${total}</span></div>
+     <div class="stat-badge"><span>🎭 Mapped</span><span class="count">${mapped}</span></div>
+     <div class="stat-badge pending"><span>⏳ Pending</span><span class="count">${pending}</span></div>
+     <div class="stat-badge search"><span>🔍 Searching</span><span class="count">${search}</span></div>
+     <div class="stat-badge done"><span>✅ Done</span><span class="count">${done}</span></div>`;
+  document.getElementById('emotionStats').style.display = 'flex';
+}
+
+async function saveSentenceRow(id, btn) {
+  const tr = btn.closest('tr');
+  const payload = {};
+  tr.querySelectorAll('[data-f]').forEach(el => { payload[el.dataset.f] = el.value; });
+  const orig = btn.textContent;
+  btn.disabled = true; btn.textContent = '⏳ Saving…';
+  try {
+    await api(`sentences?id=eq.${id}`, { method: 'PATCH', body: JSON.stringify(payload) });
+    const row = currentSentences.find(r => r.id === id);
+    if (row) Object.assign(row, payload);
+    btn.textContent = '✅ Saved';
+    showToast('Saved audio emotion for sentence #' + id);
+    updateEmotionStats();
+    setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 1400);
   } catch (e) {
-    setConn('🔴 Could not reach Supabase — showing the read-only starter template. Prompt generators still work.', false);
-    renderSeedTable();
+    btn.textContent = orig; btn.disabled = false;
+    showToast('Save failed: ' + e.message, true);
   }
 }
 
-function sceneLabel(s) {
-  return `M${s.module_number} S${s.section_number} S${s.scene_number}`;
+// ── Scene Audio Map (filtered by module) ──────────────────────────────────────
+async function loadScenesForModule(moduleNumber) {
+  if (!moduleNumber) { SCENE_ROWS = []; renderSceneTable(); return; }
+  try {
+    const rows = await api('scenes?select=id,module_number,section_number,scene_number,script,scene_change,sfx_needed,bg_music,audio_rationale,audio_status&module_number=eq.' + moduleNumber + '&order=section_number.asc,scene_number.asc');
+    SCENE_ROWS = rows || [];
+    document.getElementById('sceneScopeLabel').textContent = 'Module ' + moduleNumber;
+    renderSceneTable();
+  } catch (e) {
+    SCENE_ROWS = []; renderSceneTable();
+    showToast('Could not load scenes for module: ' + e.message, true);
+  }
 }
 
-function renderDbTable() {
+function sceneLabel(s) { return `M${s.module_number} S${s.section_number} S${s.scene_number}`; }
+
+function renderSceneTable() {
+  const group = document.getElementById('sceneGroup');
   const tbody = document.getElementById('scoreTableBody');
+  if (!SCENE_ROWS.length) {
+    group.style.display = 'none';
+    document.getElementById('countScenes').style.display = 'none';
+    return;
+  }
+  group.style.display = 'block';
+  document.getElementById('countScenes').textContent = SCENE_ROWS.length + ' scenes';
+  document.getElementById('countScenes').style.display = 'inline-block';
   tbody.innerHTML = SCENE_ROWS.map(s => {
     const label = sceneLabel(s);
     const desc = s.script ? esc(s.script.slice(0, 120)) + (s.script.length > 120 ? '…' : '') : '<span style="color:var(--text-muted)">—</span>';
@@ -445,39 +697,17 @@ function renderDbTable() {
       <td data-label="SFX Needed"><textarea class="cell-edit" data-f="sfx_needed" placeholder="e.g. Connection chime, data blip">${esc(s.sfx_needed)}</textarea></td>
       <td data-label="Background Music"><textarea class="cell-edit" data-f="bg_music" placeholder="e.g. Tech groove, 90 bpm">${esc(s.bg_music)}</textarea></td>
       <td data-label="Rationale"><textarea class="cell-edit" data-f="audio_rationale" placeholder="Why these choices fit the scene">${esc(s.audio_rationale)}</textarea></td>
-      <td data-label="Status"><select class="cell-edit status-select" data-f="audio_status">${statusOpts}</select></td>
+      <td data-label="Status"><select class="cell-edit" data-f="audio_status">${statusOpts}</select></td>
       <td data-label="Actions"><div class="row-actions">
-        <button class="btn btn-save" onclick="saveRow(${s.id}, this)">💾 Save</button>
-        <button class="btn btn-sfx" onclick="genPrompt(${s.id}, 'sfx')">🎚️ SFX Prompt</button>
-        <button class="btn btn-music" onclick="genPrompt(${s.id}, 'music')">🎵 Music Prompt</button>
+        <button class="btn btn-save" onclick="saveSceneRow(${s.id}, this)">💾 Save</button>
+        <button class="btn btn-sfx" onclick="genScenePrompt(${s.id}, 'sfx')">🎚️ SFX Prompt</button>
+        <button class="btn btn-music" onclick="genScenePrompt(${s.id}, 'music')">🎵 Music Prompt</button>
       </div></td>
     </tr>`;
   }).join('');
 }
 
-function renderSeedTable() {
-  const tbody = document.getElementById('scoreTableBody');
-  tbody.innerHTML = SEED_SCENES.map((s, i) => {
-    const st = STATUS_OPTS.find(o => o.v === s.status) || STATUS_OPTS[0];
-    return `<tr data-seed="${i}">
-      <td data-label="Scene"><strong>${s.scene}</strong></td>
-      <td data-label="Description">${esc(s.desc)}</td>
-      <td data-label="Scene Change"><span style="color:var(--text-muted);font-size:0.85rem">—</span></td>
-      <td data-label="SFX Needed">${esc(s.sfx)}</td>
-      <td data-label="Background Music">${esc(s.music)}</td>
-      <td data-label="Rationale"><span style="color:var(--text-muted);font-size:0.85rem">—</span></td>
-      <td data-label="Status"><span class="score-status status-${st.v === 'search' ? 'search' : st.v}">${st.label}</span></td>
-      <td data-label="Actions"><div class="row-actions">
-        <button class="btn btn-save" disabled title="Create scenes in Supabase to enable saving">💾 Save</button>
-        <button class="btn btn-sfx" onclick="genSeedPrompt(${i}, 'sfx')">🎚️ SFX Prompt</button>
-        <button class="btn btn-music" onclick="genSeedPrompt(${i}, 'music')">🎵 Music Prompt</button>
-      </div></td>
-    </tr>`;
-  }).join('');
-}
-
-// ── Save a row's edits back to Supabase ───────────────────────────────────────
-async function saveRow(id, btn) {
+async function saveSceneRow(id, btn) {
   const tr = btn.closest('tr');
   const payload = {};
   tr.querySelectorAll('[data-f]').forEach(el => { payload[el.dataset.f] = el.value; });
@@ -488,7 +718,7 @@ async function saveRow(id, btn) {
     const row = SCENE_ROWS.find(r => r.id === id);
     if (row && updated) Object.assign(row, updated);
     btn.textContent = '✅ Saved';
-    showToast(`Saved scoring for scene ${sceneLabel(row || updated)}`);
+    showToast('Saved scoring for scene ' + sceneLabel(row || updated));
     setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 1400);
   } catch (e) {
     btn.textContent = orig; btn.disabled = false;
@@ -496,41 +726,99 @@ async function saveRow(id, btn) {
   }
 }
 
-// ── Prompt generators ─────────────────────────────────────────────────────────
-function buildPrompt(kind, { label, desc, sceneChange, sfx, music, rationale }) {
+// ── Prompt builders (use sentence emotion when available) ──────────────────────
+function readSentenceFields(sid) {
+  const tr = document.querySelector(`tr[data-sid="${sid}"]`);
+  const row = currentSentences.find(r => r.id === sid) || {};
+  const get = f => tr?.querySelector(`[data-f="${f}"]`)?.value ?? row[f] ?? '';
+  return {
+    label: 'Sentence #' + sid,
+    text: row.sentence_text || '',
+    emotion: get('audio_emotion'),
+    intensity: get('audio_intensity'),
+    pace: get('audio_pace'),
+    sfx: get('audio_sfx'),
+    music: get('audio_music'),
+    rationale: get('audio_rationale')
+  };
+}
+
+function readSceneFields(id) {
+  const tr = document.querySelector(`tr[data-id="${id}"]`);
+  const row = SCENE_ROWS.find(r => r.id === id) || {};
+  const get = f => tr?.querySelector(`[data-f="${f}"]`)?.value ?? row[f] ?? '';
+  return {
+    label: sceneLabel(row),
+    text: row.script || '',
+    emotion: '', intensity: '', pace: '',
+    sfx: get('sfx_needed'),
+    music: get('bg_music'),
+    rationale: get('audio_rationale'),
+    sceneChange: get('scene_change')
+  };
+}
+
+function buildPrompt(kind, ctx) {
+  const moodLine = ctx.emotion ? `Desired emotion/mood: ${ctx.emotion}` : '';
+  const energyLine = (ctx.intensity || ctx.pace)
+    ? `Energy: ${ctx.intensity || '—'} intensity, ${ctx.pace || '—'} pace`
+    : '';
   if (kind === 'sfx') {
     return [
       `You are a sound designer creating royalty-free sound effects for a tech tutorial video.`,
       ``,
-      `Scene: ${label}`,
-      `On-screen action: ${desc || '(see scene script)'}`,
-      sceneChange ? `Transition into scene: ${sceneChange}` : null,
-      `SFX needed: ${sfx || '(decide based on the action above)'}`,
-      rationale ? `Why it should sound this way: ${rationale}` : null,
+      `${ctx.label}`,
+      ctx.text ? `On-screen line / action: "${ctx.text}"` : null,
+      ctx.sceneChange ? `Transition into this moment: ${ctx.sceneChange}` : null,
+      moodLine,
+      energyLine,
+      `SFX needed: ${ctx.sfx || '(decide based on the action and emotion above)'}`,
+      ctx.rationale ? `Why it should sound this way: ${ctx.rationale}` : null,
       ``,
-      `Produce a tight, generator-ready description for each distinct SFX hit: name it, give the sonic character (texture, length in ms, pitch/tone), and the on-screen moment it lands on. Keep it clean, modern, and non-distracting — these sit under narration. Output one bullet per SFX.`
+      `Produce a tight, generator-ready description for each distinct SFX hit: name it, give the sonic character (texture, length in ms, pitch/tone), and the exact on-screen moment it lands on. Match the emotion and energy. Keep it clean, modern, and non-distracting — these sit under narration. Output one bullet per SFX.`
     ].filter(Boolean).join('\n');
   }
   return [
     `You are a composer scoring a background music bed for a tech tutorial video.`,
     ``,
-    `Scene: ${label}`,
-    `On-screen action: ${desc || '(see scene script)'}`,
-    `Desired music (mood / tempo): ${music || '(decide based on the action above)'}`,
-    rationale ? `Why it should feel this way: ${rationale}` : null,
+    `${ctx.label}`,
+    ctx.text ? `On-screen line / action: "${ctx.text}"` : null,
+    moodLine,
+    energyLine,
+    `Desired music (mood / tempo): ${ctx.music || '(decide based on the emotion and energy above)'}`,
+    ctx.rationale ? `Why it should feel this way: ${ctx.rationale}` : null,
     ``,
     `Produce a generator-ready music prompt: genre, mood, instrumentation, BPM, key/energy arc, and how it should support (not overpower) the narration. Specify a loopable structure and a clean intro/outro. Keep it royalty-free and YouTube-safe in style. Output a single paragraph plus a short comma-separated tag list.`
   ].filter(Boolean).join('\n');
 }
 
-function openPromptModal(kind, label, text) {
-  document.getElementById('promptTitle').textContent = (kind === 'sfx' ? '🎚️ SFX Prompt' : '🎵 Music Prompt') + ' — ' + label;
+// ── Prompt modal (shows the prompt BEFORE you generate) ───────────────────────
+let activePrompt = null; // { kind, ctx, saveTarget: {type, id, rationaleField, sentenceId? } }
+
+function openPromptModal(kind, ctx, saveTarget) {
+  const text = buildPrompt(kind, ctx);
+  activePrompt = { kind, ctx, saveTarget };
+  document.getElementById('promptTitle').textContent = (kind === 'sfx' ? '🎚️ SFX Prompt' : '🎵 Music Prompt') + ' — ' + ctx.label;
+  document.getElementById('promptSub').textContent = 'This is the exact prompt that will be sent to your AI sound / music generator — review it first.';
+  // Context summary
+  const c = ctx;
+  document.getElementById('promptContext').innerHTML = [
+    ['On-screen', c.text ? '"' + (c.text.length > 110 ? c.text.slice(0, 110) + '…' : c.text) + '"' : '—'],
+    ['Emotion', c.emotion || '—'],
+    ['Energy', (c.intensity || '—') + ' / ' + (c.pace || '—')],
+    ['SFX', c.sfx || '—'],
+    ['Music', c.music || '—'],
+    ['Rationale', c.rationale || '—']
+  ].map(([k, v]) => `<div class="ctx-row"><span class="ctx-key">${k}</span><span class="ctx-val">${esc(v)}</span></div>`).join('');
   document.getElementById('promptText').value = text;
+  // External generator link
+  const ext = document.getElementById('promptExternal');
+  if (kind === 'sfx') { ext.textContent = '🔊 Open ElevenLabs SFX ↗'; ext.href = 'https://elevenlabs.io/app/sound-effects'; }
+  else { ext.textContent = '🎵 Open Suno (music) ↗'; ext.href = 'https://suno.com/create'; }
   document.getElementById('promptModal').classList.add('open');
-  // Best-effort clipboard copy on open
   copyText(text).then(ok => { if (ok) showToast('Prompt copied to clipboard'); });
 }
-function closePromptModal() { document.getElementById('promptModal').classList.remove('open'); }
+function closePromptModal() { document.getElementById('promptModal').classList.remove('open'); activePrompt = null; }
 async function copyText(text) {
   try { await navigator.clipboard.writeText(text); return true; } catch (_) { return false; }
 }
@@ -538,27 +826,45 @@ async function copyPromptText() {
   const ok = await copyText(document.getElementById('promptText').value);
   showToast(ok ? 'Prompt copied to clipboard' : 'Press ⌘/Ctrl+C to copy', !ok);
 }
-
-function genPrompt(id, kind) {
-  const tr = document.querySelector(`tr[data-id="${id}"]`);
-  const row = SCENE_ROWS.find(r => r.id === id) || {};
-  const get = f => tr?.querySelector(`[data-f="${f}"]`)?.value ?? '';
-  const label = sceneLabel(row);
-  const text = buildPrompt(kind, {
-    label, desc: row.script || '',
-    sceneChange: get('scene_change'), sfx: get('sfx_needed'),
-    music: get('bg_music'), rationale: get('audio_rationale')
-  });
-  openPromptModal(kind, label, text);
+async function useAndSavePrompt() {
+  if (!activePrompt || !activePrompt.saveTarget) { closePromptModal(); return; }
+  const edited = document.getElementById('promptText').value.trim();
+  const st = activePrompt.saveTarget;
+  const btn = document.getElementById('promptUseBtn');
+  const orig = btn.textContent; btn.disabled = true; btn.textContent = '⏳ Saving…';
+  try {
+    // Persist the edited prompt back to the rationale field of the row that owns it.
+    const payload = {}; payload[st.rationaleField] = edited;
+    const table = st.type === 'sentence' ? 'sentences' : 'scenes';
+    await api(`${table}?id=eq.${st.id}`, { method: 'PATCH', body: JSON.stringify(payload) });
+    // Keep local state in sync so the table reflects the saved rationale.
+    if (st.type === 'sentence') {
+      const row = currentSentences.find(r => r.id === st.id);
+      if (row) row[st.rationaleField] = edited;
+    } else {
+      const row = SCENE_ROWS.find(r => r.id === st.id);
+      if (row) row[st.rationaleField] = edited;
+      const tr = document.querySelector(`tr[data-id="${st.id}"] [data-f="${st.rationaleField}"]`);
+      if (tr) tr.value = edited;
+    }
+    const sentenceTr = document.querySelector(`tr[data-sid="${st.id}"] [data-f="${st.rationaleField}"]`);
+    if (sentenceTr) sentenceTr.value = edited;
+    showToast('Prompt saved as rationale — ready to generate in your tool.');
+    closePromptModal();
+  } catch (e) {
+    showToast('Save failed: ' + e.message, true);
+  } finally {
+    btn.disabled = false; btn.textContent = orig;
+  }
 }
 
-function genSeedPrompt(i, kind) {
-  const s = SEED_SCENES[i];
-  const text = buildPrompt(kind, {
-    label: s.scene, desc: s.desc, sceneChange: '',
-    sfx: s.sfx, music: s.music, rationale: ''
-  });
-  openPromptModal(kind, s.scene, text);
+function genSentencePrompt(sid, kind) {
+  const ctx = readSentenceFields(sid);
+  openPromptModal(kind, ctx, { type: 'sentence', id: sid, rationaleField: 'audio_rationale' });
+}
+function genScenePrompt(id, kind) {
+  const ctx = readSceneFields(id);
+  openPromptModal(kind, ctx, { type: 'scene', id, rationaleField: 'audio_rationale' });
 }
 
 // Close modal on backdrop click / Esc
@@ -567,8 +873,46 @@ document.getElementById('promptModal').addEventListener('click', e => {
 });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closePromptModal(); });
 
+// ── Selector handlers ─────────────────────────────────────────────────────────
+document.getElementById('moduleSelect').addEventListener('change', function () {
+  currentModuleId = parseInt(this.value) || null;
+  const mod = dbModules.find(m => m.id === currentModuleId);
+  currentModuleNumber = mod ? mod.module_number : null;
+  currentVideoId = null; currentSentences = [];
+  document.getElementById('videoSelect').value = '';
+  document.getElementById('scriptContent').value = '';
+  ['scriptGroup', 'emotionGroup'].forEach(id => document.getElementById(id).style.display = 'none');
+  // Scene map follows the selected module
+  loadVideos(currentModuleId);
+  loadScenesForModule(currentModuleNumber);
+  if (currentModuleNumber) {
+    setConn(`💚 Module ${currentModuleNumber} selected — pick a video to load its script &amp; sentence emotion map.`, true);
+  } else {
+    setConn('⏳ Select a module and video to load the script and sentence emotion map.', false);
+  }
+});
+
+document.getElementById('videoSelect').addEventListener('change', async function () {
+  currentVideoId = parseInt(this.value) || null;
+  if (!currentVideoId) {
+    document.getElementById('scriptGroup').style.display = 'none';
+    renderEmotionTable();
+    return;
+  }
+  const scriptText = await fetchScriptForVideo(currentVideoId);
+  document.getElementById('scriptContent').value = scriptText || '(No script found for this video.)';
+  document.getElementById('scriptGroup').style.display = 'block';
+  renderEmotionTable();
+  const v = dbVideos.find(x => x.id === currentVideoId);
+  setConn(`💚 Loaded ${currentSentences.length} sentence${currentSentences.length === 1 ? '' : 's'} for the selected video — map the audio emotion below.`, true);
+});
+
 // ── Init ──────────────────────────────────────────────────────────────────────
-(async () => { await bootstrapCreds(); await loadScenes(); })();
+(async () => {
+  await bootstrapCreds();
+  setConn('⏳ Select a module and video to load the script and sentence emotion map.', false);
+  await loadModules();
+})();
 </script>
 </body>
 </html>

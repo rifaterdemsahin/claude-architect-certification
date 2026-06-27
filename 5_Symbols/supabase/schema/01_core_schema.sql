@@ -133,6 +133,14 @@ CREATE TABLE IF NOT EXISTS sentences (
   section       TEXT    NOT NULL DEFAULT 'body',   -- intro | objectives | screenshare | outro | body
   visual_mode   TEXT             DEFAULT 'talking_head', -- talking_head | screenshare | b_roll
   sort_order    INTEGER          DEFAULT 0,
+  -- 🎭 Audio emotion map (audio_scoring.html, per-sentence; covers module+video roll-ups)
+  audio_emotion   TEXT             DEFAULT '',        -- desired emotion/mood for the audio
+  audio_intensity TEXT             DEFAULT 'medium',  -- low | medium | high
+  audio_pace      TEXT             DEFAULT 'normal',  -- slow | normal | fast
+  audio_sfx       TEXT             DEFAULT '',        -- suggested sound effects
+  audio_music     TEXT             DEFAULT '',        -- suggested background music / bed
+  audio_rationale TEXT             DEFAULT '',        -- why these audio choices fit
+  audio_status    TEXT             DEFAULT 'pending', -- pending | search | done
   created_at    TIMESTAMPTZ      DEFAULT NOW()
 );
 
