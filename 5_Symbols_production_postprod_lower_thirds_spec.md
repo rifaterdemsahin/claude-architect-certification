@@ -137,7 +137,7 @@ Single `.container` column with numbered panels. Each container should reveal it
 
 ## 🔀 Spec ↔ Implementation Drift {#spec_implementation_drift}
 
-> 🗓 Audited `2026-06-26` against `./5_Symbols/production/postprod/lower_thirds.html`. This section logs places where the live page diverged from this spec and how each was reconciled. Append a dated row whenever a future audit finds new drift.
+> 🗓 Audited `2026-06-26` against `./5_Symbols/production/postprod/lower_thirds.html`. This2section logs places where the live page diverged from this spec and how each was reconciled. Append a dated row whenever a future audit finds new drift.
 
 ### ✅ Reconciled (page edited to match spec)
 | 🐛 Drift | 📍 Location | 🛠 Fix applied |
