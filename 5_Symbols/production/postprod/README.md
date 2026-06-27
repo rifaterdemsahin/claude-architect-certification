@@ -18,6 +18,9 @@
 | `ai_script_gen.html` | ✍️ AI Script & Prompt Generation — per-sentence provenance (blueprint, LLM, prompt, output) → `ai_script_generations` table |
 | `ai_localization.html` | 🌍 AI Localization & Dubbing — per-sentence, per-language translation + voice-cloned dub → `ai_localizations` table |
 | `greenscreen_backgrounds.html` | 🎥 Greenscreen Backgrounds — configure and build background video loops per module → `greenscreen_backgrounds` table |
+| `linkedin_promotion.html` | 📣 LinkedIn Promotion Helper — auto-converts every module & video into a ready-to-paste LinkedIn post (clean text + image prompt + visual mockup) with the YouTube channel link embedded in the early-access CTA |
+| `linkedin_messaging.html` | 💼 LinkedIn Messaging — Journey / Announcement / Recruiter-reply templates with one-click copy |
+| `linkedin_controversial.html` | 🔥 Controversial Post Playbook — image-based debate posts for AI-transformation audience growth |
 | `business_plan.md` | Business plan, audience acquisition, and certification pipeline |
 | `module_1_plan.md` | Module 1 post-production plan |
 | `module-1/` through `module-5/` | Per-module post-production assets (scene lists, overlays, EDLs) |

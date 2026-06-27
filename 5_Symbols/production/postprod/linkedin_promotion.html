@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="../../../shared/redirect-to-live-site.js"></script>
+  <title>LinkedIn Promotion Helper | Claude AI Certification</title>
+  <meta name="description" content="Generate ready-to-paste LinkedIn posts for every module and video of the Claude AI Certification — text plus image prompt, with the YouTube channel link embedded.">
+  <link rel="icon" type="image/png" href="../../../favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #030712; --card: rgba(17,24,39,0.85); --border: rgba(255,255,255,0.07);
+      --text: #f3f4f6; --muted: #9ca3af; --primary: #8b5cf6; --green: #10b981;
+      --blue: #3b82f6; --red: #ef4444; --orange: #f97316; --yellow: #f59e0b;
+      --font-h: 'Outfit', sans-serif; --font-b: 'Plus Jakarta Sans', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      background-image: radial-gradient(circle at 15% 25%, rgba(139,92,246,0.07) 0%, transparent 50%),
+                        radial-gradient(circle at 85% 75%, rgba(59,130,246,0.06) 0%, transparent 50%);
+      color: var(--text); font-family: var(--font-b); line-height: 1.65; padding-bottom: 100px;
+    }
+    .container { max-width: 920px; margin: 0 auto; padding: 0 24px; }
+    .badge { display: inline-block; padding: 5px 14px; background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(139,92,246,0.2)); border: 1px solid rgba(59,130,246,0.35); border-radius: 100px; font-size: 0.75rem; font-weight: 700; color: #93c5fd; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 14px; }
+    h1 { font-family: var(--font-h); font-size: 2.3rem; font-weight: 800; margin-bottom: 8px; }
+    .subtitle { color: var(--muted); font-size: 0.95rem; margin-bottom: 28px; max-width: 720px; }
+    .back-link { display: inline-block; margin-bottom: 24px; color: var(--blue); text-decoration: none; font-size: 0.88rem; }
+    .back-link:hover { text-decoration: underline; }
+
+    /* Channel banner */
+    .channel-banner { display:flex; align-items:center; gap:14px; flex-wrap:wrap; background: rgba(239,68,68,0.07); border:1px solid rgba(239,68,68,0.25); border-radius:14px; padding:14px 20px; margin-bottom:28px; }
+    .channel-banner .ic { font-size:1.5rem; }
+    .channel-banner .txt { flex:1; min-width:200px; font-size:0.85rem; color:var(--muted); }
+    .channel-banner .txt strong { color:var(--text); }
+    .channel-banner a.chan { background:#ef4444; color:#fff; padding:8px 16px; border-radius:9px; text-decoration:none; font-size:0.82rem; font-weight:700; white-space:nowrap; }
+    .channel-banner a.chan:hover { background:#dc2626; }
+
+    /* Controls */
+    .controls { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom: 12px; }
+    .chip { background: var(--card); border:1px solid var(--border); color:var(--muted); padding:7px 15px; border-radius:100px; font-size:0.82rem; font-weight:600; cursor:pointer; font-family:var(--font-b); transition:all .15s; }
+    .chip:hover { color:var(--text); border-color: rgba(255,255,255,0.2); }
+    .chip.active { background: linear-gradient(135deg, var(--blue), var(--primary)); color:#fff; border-color:transparent; }
+    .toggle-row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:24px; font-size:0.82rem; color:var(--muted); }
+    .seg { display:inline-flex; background:var(--card); border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+    .seg button { background:none; border:none; color:var(--muted); padding:7px 14px; font-size:0.8rem; font-weight:600; cursor:pointer; font-family:var(--font-b); }
+    .seg button.active { background: rgba(59,130,246,0.18); color:#93c5fd; }
+    .count-note { margin-left:auto; font-size:0.78rem; color:var(--muted); }
+
+    /* Post card */
+    .post-card { background: var(--card); border:1px solid var(--border); border-radius:18px; margin-bottom:22px; overflow:hidden; }
+    .post-head { display:flex; align-items:center; gap:12px; padding:16px 22px; border-bottom:1px solid var(--border); flex-wrap:wrap; }
+    .post-head .mlabel { font-family:var(--font-h); font-size:0.72rem; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; color:#93c5fd; background:rgba(59,130,246,0.12); border:1px solid rgba(59,130,246,0.25); padding:4px 10px; border-radius:7px; }
+    .post-head h3 { font-family:var(--font-h); font-size:1.02rem; font-weight:700; flex:1; min-width:160px; }
+    .post-head .kind { font-size:0.7rem; font-weight:700; padding:3px 10px; border-radius:6px; text-transform:uppercase; letter-spacing:0.06em; }
+    .kind-video { background:rgba(16,185,129,0.15); color:#6ee7b7; border:1px solid rgba(16,185,129,0.25); }
+    .kind-module { background:rgba(249,115,22,0.15); color:#fdba74; border:1px solid rgba(249,115,22,0.25); }
+
+    .post-grid { display:grid; grid-template-columns: 320px 1fr; gap:0; }
+    @media (max-width: 720px){ .post-grid{ grid-template-columns:1fr; } }
+
+    /* Image side */
+    .img-side { padding:20px; border-right:1px solid var(--border); background:rgba(0,0,0,0.2); }
+    @media (max-width:720px){ .img-side{ border-right:none; border-bottom:1px solid var(--border);} }
+    .mockup {
+      aspect-ratio:1/1; border-radius:12px; display:flex; flex-direction:column;
+      justify-content:center; padding:26px; text-align:left; position:relative; overflow:hidden;
+      background: linear-gradient(140deg, #0a0e27, #2a1b4d 55%, #0f172a);
+    }
+    .mockup::before { content:''; position:absolute; inset:0; background: radial-gradient(circle at 80% 15%, rgba(59,130,246,0.18) 0%, transparent 55%); }
+    .mockup .eyebrow { font-family:var(--font-h); font-size:0.62rem; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:#93c5fd; margin-bottom:12px; position:relative; z-index:1; }
+    .mockup .claim { font-family:var(--font-h); font-size:1.35rem; font-weight:800; line-height:1.22; color:#fff; position:relative; z-index:1; }
+    .mockup .claim em { color:#fdba74; font-style:normal; }
+    .mockup .wm { position:absolute; bottom:16px; left:26px; right:26px; font-size:0.6rem; color:rgba(255,255,255,0.4); z-index:1; display:flex; justify-content:space-between; }
+    .img-actions { display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; }
+
+    /* Text side */
+    .txt-side { padding:18px 22px; }
+    .post-body { font-size:0.86rem; line-height:1.65; white-space:pre-wrap; color:var(--text); max-height:260px; overflow:auto; background:rgba(0,0,0,0.22); border:1px solid var(--border); border-radius:12px; padding:16px 18px; }
+    .post-body::-webkit-scrollbar{ width:8px; } .post-body::-webkit-scrollbar-thumb{ background:rgba(255,255,255,0.12); border-radius:8px; }
+    .txt-actions { display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; }
+
+    button.act { border:none; padding:9px 16px; border-radius:9px; font-size:0.8rem; font-weight:700; cursor:pointer; font-family:var(--font-b); transition:all .2s; }
+    .btn-copy { background: var(--green); color:#04130c; }
+    .btn-copy:hover { background:#34d399; transform:translateY(-1px); }
+    .btn-img { background: rgba(59,130,246,0.18); color:#93c5fd; border:1px solid rgba(59,130,246,0.3) !important; }
+    .btn-img:hover { background: rgba(59,130,246,0.28); }
+    .btn-yt { background:#ef4444; color:#fff; text-decoration:none; display:inline-flex; align-items:center; padding:9px 16px; border-radius:9px; font-size:0.8rem; font-weight:700; }
+    .btn-yt:hover { background:#dc2626; }
+    button.act.done { background: var(--blue); color:#fff; }
+
+    .empty { text-align:center; color:var(--muted); padding:40px; }
+    footer { text-align:center; color:var(--muted); font-size:0.8rem; margin-top:48px; padding-top:20px; border-top:1px solid rgba(255,255,255,0.05); }
+    footer a { color:#93c5fd; }
+  </style>
+  <script src="../../../shared/nav.js"></script>
+  <script src="../../../shared/debug-panel.js"></script>
+<script src="../../../shared/seo.js" defer></script></head>
+<body>
+<div class="container">
+
+  <header style="padding-top:36px; margin-bottom:8px;">
+    <a class="back-link" href="index.html">← Back to Post-Production</a>
+    <div class="badge">🤝 Outreach · LinkedIn</div>
+    <h1>LinkedIn Promotion Helper</h1>
+    <p class="subtitle">Every module and video, auto-converted into a ready-to-paste LinkedIn post — clean text and a matching image prompt, with your YouTube channel link already embedded. Pick a module, copy, and publish.</p>
+  </header>
+
+  <div class="channel-banner">
+    <div class="ic">📺</div>
+    <div class="txt"><strong>Channel link embedded in every post:</strong> the early-access CTA always points subscribers to your channel.</div>
+    <a class="chan" href="https://www.youtube.com/@RifatErdemSahin" target="_blank" rel="noopener">@RifatErdemSahin →</a>
+  </div>
+
+  <div class="controls" id="moduleChips"></div>
+  <div class="toggle-row">
+    <span>Show:</span>
+    <div class="seg" id="kindSeg">
+      <button data-kind="all" class="active">All</button>
+      <button data-kind="video">Per video</button>
+      <button data-kind="module">Module overviews</button>
+    </div>
+    <span class="count-note" id="countNote"></span>
+  </div>
+
+  <div id="posts"></div>
+
+  <footer>
+    <p style="margin-bottom:8px;"><a href="index.html" style="text-decoration:none;">← Back to Post-Production</a></p>
+    <p style="font-size:0.85rem; opacity:0.85;">
+      <a href="https://www.youtube.com/@RifatErdemSahin" target="_blank">YouTube</a> ·
+      <a href="https://www.linkedin.com/in/rifaterdemsahin" target="_blank">LinkedIn</a> ·
+      <a href="https://github.com/rifaterdemsahin/claude-architect-certification" target="_blank">GitHub</a>
+    </p>
+  </footer>
+</div>
+
+<script>
+const CHANNEL = "https://www.youtube.com/@RifatErdemSahin";
+const DIV = "─────────────";
+
+// Course data — modules + videos with promotion angles.
+const MODULES = [
+  {
+    m:1, title:"Claude Ecosystem & Flows",
+    hook:"Enterprise AI isn't about prompts. It's about architecture.",
+    intro:"If your enterprise AI strategy stops at tweaking a text prompt, you're missing the actual engine. Scalable, production-grade systems need engineering: API gateways, token-aware design, stateful orchestration, and clean message routing.",
+    points:["The Claude API anatomy — Messages API, streaming, and tool use","Token mechanics: context windows, caching, and rate limits","Stateful orchestration loops and multi-agent routing topologies"],
+    tags:"#ClaudeAI #AIEngineering #EnterpriseAI #CloudArchitecture #LLMOps",
+    videos:[
+      {v:1, title:"Architecture Overview",
+        hook:"The Claude API looks simple. Token mechanics are where systems live or die.",
+        intro:"Anyone can send a message to a model. Designing for the context window, streaming, tool use, caching, and rate limits is what separates a demo from a system that survives real traffic.",
+        points:["Claude API anatomy: Messages API, streaming, and tool use","Token mechanics: context window, caching, and rate limits","The mental model behind production-grade request design"]},
+      {v:2, title:"Stateful Orchestration",
+        hook:"A chatbot answers once. An agent runs a loop.",
+        intro:"The leap from one-shot prompts to real agents is state. Where the loop lives, where stateless middleware stops, and how requests get routed between agents is the whole game.",
+        points:["Loops vs stateless middleware boundaries","Multi-agent routing patterns that scale","Designing orchestration that stays debuggable"]},
+      {v:3, title:"Production Wiring",
+        hook:"Your AI works on your laptop. Production is a different planet.",
+        intro:"Connecting Claude to real enterprise data — with the right keys, networking, and identity controls — is where most pilots stall. This is the wiring that makes it deployable.",
+        points:["Connecting Claude to enterprise data sources","Environment configuration: API keys, VPC, IAM","Moving from prototype to a deployable footprint"]},
+    ]
+  },
+  {
+    m:2, title:"Model Context Protocol (MCP)",
+    hook:"Your AI is only as smart as the data it can reach.",
+    intro:"Prompts don't connect to your database — protocols do. MCP is how you give Claude secure, read-only access to private data bridges instead of pasting context into a prompt and hoping.",
+    points:["MCP protocol architecture and the client-server model","Building secure SQLite / PostgreSQL data bridges","Enterprise auth boundaries and multi-server orchestration"],
+    tags:"#MCP #ClaudeAI #AIEngineering #DataEngineering #EnterpriseAI",
+    videos:[
+      {v:1, title:"MCP Fundamentals",
+        hook:"Prompts don't connect to your database. Protocols do.",
+        intro:"The Model Context Protocol is the standard way to plug Claude into real systems. Understand the architecture and the transport choices before you build anything.",
+        points:["What MCP is and why the protocol exists","Client-server model: stdio vs SSE transports","Where MCP fits in an enterprise stack"]},
+      {v:2, title:"Building an MCP Server",
+        hook:"Stop pasting data into prompts. Build a bridge instead.",
+        intro:"A real MCP server gives Claude controlled access to your data with read-only boundaries. We build one end to end — SQLite first, then a PostgreSQL query layer.",
+        points:["SQLite data bridge implementation","PostgreSQL read-only query layer","Enforcing read-only boundaries by design"]},
+      {v:3, title:"Enterprise MCP",
+        hook:"One MCP server is a demo. Many, secured, is an enterprise.",
+        intro:"Scaling MCP means authentication, authorization, and orchestrating multiple servers without opening holes. This is the hardened, multi-server pattern.",
+        points:["Authentication and authorization boundaries","Multi-server orchestration","Securing access across data bridges"]},
+    ]
+  },
+  {
+    m:3, title:"Zero-Data Retention (ZDR)",
+    hook:"If your AI vendor keeps your data, you don't have a strategy. You have a liability.",
+    intro:"Zero-data retention isn't a policy slide — it's a network diagram. We restrict API endpoints with AWS Bedrock VPC Interface Endpoints (PrivateLink) and prove the data never leaves the boundary.",
+    points:["Why zero-data retention matters for regulated enterprises","Terraform blueprint for VPC Interface Endpoints (PrivateLink)","Testing, verifying, and responding to data-boundary incidents"],
+    tags:"#ZeroDataRetention #AICompliance #EnterpriseAI #ClaudeAI #CloudSecurity",
+    videos:[
+      {v:1, title:"ZDR Principles",
+        hook:"Zero-data retention isn't a checkbox. It's an architecture.",
+        intro:"Before the Terraform, the principles: why ZDR matters for compliance and how AWS Bedrock makes a private, no-retention path possible.",
+        points:["Why zero-data retention matters for enterprises","AWS Bedrock architecture overview","The compliance case for ZDR"]},
+      {v:2, title:"Implementing ZDR",
+        hook:"Compliance isn't a promise. It's a VPC endpoint.",
+        intro:"We build the real thing: a Terraform blueprint for VPC Interface Endpoints that restricts API access and keeps traffic private.",
+        points:["Terraform blueprint for VPC Interface Endpoints","Restricting API endpoint access","Infrastructure-as-code for compliance"]},
+      {v:3, title:"ZDR in Production",
+        hook:"Trusting your data boundary is not the same as testing it.",
+        intro:"A boundary you haven't tested is a boundary you don't have. We verify retention controls and plan for the day something leaks.",
+        points:["Testing and verifying data retention boundaries","Incident response for data leaks","Operating ZDR with confidence"]},
+    ]
+  },
+  {
+    m:4, title:"Deterministic Routers",
+    hook:"LLMs are creative. Production needs predictable.",
+    intro:"You can't ship \"it usually works.\" Deterministic routers add classifiers and circuit breakers in Python so rogue agent loops shut down cleanly instead of burning tokens and trust.",
+    points:["Agent classifier design patterns for deterministic routing","Loop detection, depth counting, and clean circuit breakers","Load testing and surviving malformed input and recursion attacks"],
+    tags:"#AIArchitecture #ClaudeAI #SystemDesign #AIEngineering #ProductionAI",
+    videos:[
+      {v:1, title:"Router Architecture",
+        hook:"You can't ship 'it usually works.'",
+        intro:"Deterministic routing is how you make agent behavior predictable. Start with why it matters and the classifier patterns behind it.",
+        points:["Why deterministic routing matters","Agent classifier design patterns","Designing for predictable behavior"]},
+      {v:2, title:"Building the Router",
+        hook:"An agent without a circuit breaker is an outage waiting to happen.",
+        intro:"We build router.py — loop detection, depth counting, and the circuit breakers that stop a rogue agent before it runs away.",
+        points:["Python implementation with router.py","Loop detection and depth counting","Circuit breakers that shut down clean"]},
+      {v:3, title:"Router in Production",
+        hook:"Your router works until someone sends malformed input on purpose.",
+        intro:"Production is adversarial. We load test the router and harden it against malformed input and recursion attacks.",
+        points:["Load testing and performance benchmarks","Edge cases: malformed input, recursion attacks","Hardening the router against abuse"]},
+    ]
+  },
+  {
+    m:5, title:"Financial Engineering",
+    hook:"Your AI bill isn't a model problem. It's an architecture problem.",
+    intro:"Enterprise AI cost is engineered, not accepted. With explicit, prefix-matching prompt cache points you can cut operational overhead by up to 90% — and prove the ROI to finance.",
+    points:["Claude pricing: input vs output tokens and caching mechanics","Explicit cache-point placement and hit-ratio optimization","A real 90% cost-reduction case study with monitoring"],
+    tags:"#FinOps #AIEngineering #ClaudeAI #CostOptimization #EnterpriseAI",
+    videos:[
+      {v:1, title:"Cost Optimization Fundamentals",
+        hook:"Your AI bill isn't a model problem. It's an architecture problem.",
+        intro:"Most teams overpay because they don't understand the pricing model. Input vs output tokens and prompt caching mechanics are where the savings start.",
+        points:["Claude pricing: input vs output tokens","Prompt caching mechanics and prefix matching","Where cost actually accumulates"]},
+      {v:2, title:"Implementing Caching",
+        hook:"The same prompt, 90% cheaper. The difference is where you cache.",
+        intro:"Cache points aren't automatic — placement is a design decision. We optimize cache-point placement and push the hit ratio up.",
+        points:["Explicit cache point placement strategies","Cache hit ratio optimization","Engineering prompts for cache reuse"]},
+      {v:3, title:"Enterprise ROI",
+        hook:"AI ROI isn't a vibe. It's a line on the P&L.",
+        intro:"Finance doesn't fund vibes. We walk a real 90%-savings case study and the monitoring that keeps the savings real.",
+        points:["Real-world cost reduction case study (90% savings)","Monitoring cache performance","Proving ROI to the business"]},
+    ]
+  },
+];
+
+// Build flat list of post items
+function buildItems(){
+  const items=[];
+  MODULES.forEach(mod=>{
+    items.push({kind:"module", m:mod.m, v:null, moduleTitle:mod.title, title:mod.title,
+      hook:mod.hook, intro:mod.intro, points:mod.points, tags:mod.tags});
+    mod.videos.forEach(vid=>{
+      items.push({kind:"video", m:mod.m, v:vid.v, moduleTitle:mod.title, title:vid.title,
+        hook:vid.hook, intro:vid.intro, points:vid.points, tags:mod.tags});
+    });
+  });
+  return items;
+}
+const ITEMS = buildItems();
+
+function buildPost(it){
+  const label = it.kind==="video"
+    ? `Module ${it.m}, Video ${it.v} — ${it.title}`
+    : `Module ${it.m}: ${it.moduleTitle}`;
+  const watch = it.kind==="video"
+    ? `Watch Module ${it.m} (this drops in it) fully to help us hit our watch-time milestone.`
+    : `Watch the Module ${it.m} drop fully to help us hit our watch-time milestone.`;
+  const pts = it.points.map(p=>`✅ ${p}`).join("\n");
+  return [
+`${it.hook} 💡`,
+``,
+it.intro,
+``,
+`That is exactly what we break down step-by-step in ${label} of the Claude AI Certification for Architects.`,
+``,
+DIV,
+``,
+`🎯 WHAT YOU'LL MASTER`,
+``,
+pts,
+``,
+DIV,
+``,
+`🚀 HELP US UNLOCK EARLY ACCESS (FREE FOR EARLY SUPPORTERS)`,
+``,
+`This complete architecture course is dropping on YouTube soon. We're rallying our core community to clear the final milestone — we need about 200 consistent, full-watch-time subscribers to activate the official channel Membership button.`,
+``,
+`Once the YouTube Partner Program goes live, this certification course moves behind a premium membership tier. But if you're part of the early wave that helps us cross the watch-time finish line, you secure your path to the certification before the monetization transition goes live.`,
+``,
+`HOW TO SECURE YOUR SPOT:`,
+``,
+`1. Subscribe to the channel today.`,
+`2. ${watch}`,
+`3. Be first in line when the join button goes live to lock in your early-bird access.`,
+``,
+`Stop engineering prompts. Start engineering systems.`,
+``,
+`👇 Subscribe to join the core group and get notified the second this drops! 👇`,
+``,
+CHANNEL,
+``,
+DIV,
+``,
+it.tags
+].join("\n");
+}
+
+function buildImagePrompt(it){
+  return `Minimalist dark corporate LinkedIn post image, 1080x1080px. Deep gradient background (midnight blue → violet-black → slate). Large bold white sans-serif headline, left-aligned: "${it.hook}". Small eyebrow label above in light blue: "CLAUDE AI CERTIFICATION · MODULE ${it.m}${it.v?(" · VIDEO "+it.v):""}". Subtle abstract architecture / circuit line motif, no people, no clutter, high contrast, scroll-stopping. Small grey watermark bottom-left: "@RifatErdemSahin · youtube.com". Style: clean, modern enterprise, tech-leadership aesthetic.`;
+}
+
+// Render
+let activeModule = "all";
+let activeKind = "all";
+
+function renderChips(){
+  const c = document.getElementById("moduleChips");
+  const mods = ["all",1,2,3,4,5];
+  c.innerHTML = mods.map(m=>{
+    const lbl = m==="all" ? "All modules" : `M${m} · ${MODULES[m-1].title}`;
+    return `<button class="chip ${m==activeModule?"active":""}" data-mod="${m}">${lbl}</button>`;
+  }).join("");
+  c.querySelectorAll(".chip").forEach(b=> b.onclick=()=>{ activeModule=b.dataset.mod; renderChips(); renderPosts(); });
+}
+
+function escapeHtml(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+function renderPosts(){
+  const wrap = document.getElementById("posts");
+  let list = ITEMS.filter(it=>{
+    const mOk = activeModule==="all" || String(it.m)===String(activeModule);
+    const kOk = activeKind==="all" || it.kind===activeKind;
+    return mOk && kOk;
+  });
+  document.getElementById("countNote").textContent = `${list.length} post${list.length!==1?"s":""}`;
+  if(!list.length){ wrap.innerHTML = `<div class="empty">No posts match this filter.</div>`; return; }
+
+  wrap.innerHTML = list.map((it,i)=>{
+    const id = `p${it.m}_${it.v||0}`;
+    const mlabel = it.kind==="video" ? `M${it.m} · V${it.v}` : `M${it.m} · Overview`;
+    const kind = it.kind==="video" ? `<span class="kind kind-video">Video</span>` : `<span class="kind kind-module">Module</span>`;
+    const claimHtml = escapeHtml(it.hook);
+    const eyebrow = `Claude AI Certification · Module ${it.m}${it.v?(" · Video "+it.v):""}`;
+    return `
+    <div class="post-card">
+      <div class="post-head">
+        <span class="mlabel">${mlabel}</span>
+        <h3>${escapeHtml(it.title)}</h3>
+        ${kind}
+      </div>
+      <div class="post-grid">
+        <div class="img-side">
+          <div class="mockup">
+            <div class="eyebrow">${escapeHtml(eyebrow)}</div>
+            <div class="claim">${claimHtml}</div>
+            <div class="wm"><span>@RifatErdemSahin</span><span>youtube.com</span></div>
+          </div>
+          <div class="img-actions">
+            <button class="act btn-img" data-act="img" data-id="${id}">🖼️ Copy image prompt</button>
+          </div>
+        </div>
+        <div class="txt-side">
+          <div class="post-body" id="body_${id}">${escapeHtml(buildPost(it))}</div>
+          <div class="txt-actions">
+            <button class="act btn-copy" data-act="text" data-id="${id}">📋 Copy post text</button>
+            <a class="btn-yt" href="${CHANNEL}" target="_blank" rel="noopener">📺 Open channel</a>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+
+  // wire buttons
+  wrap.querySelectorAll("button.act").forEach(btn=>{
+    btn.onclick=()=>{
+      const id = btn.dataset.id;
+      const it = list.find(x=>`p${x.m}_${x.v||0}`===id);
+      const payload = btn.dataset.act==="img" ? buildImagePrompt(it) : buildPost(it);
+      navigator.clipboard.writeText(payload).then(()=>{
+        const orig = btn.textContent;
+        btn.textContent = btn.dataset.act==="img" ? "✅ Prompt copied!" : "✅ Copied!";
+        btn.classList.add("done");
+        setTimeout(()=>{ btn.textContent=orig; btn.classList.remove("done"); }, 1800);
+      });
+    };
+  });
+}
+
+document.getElementById("kindSeg").querySelectorAll("button").forEach(b=>{
+  b.onclick=()=>{
+    activeKind=b.dataset.kind;
+    document.getElementById("kindSeg").querySelectorAll("button").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active");
+    renderPosts();
+  };
+});
+
+renderChips();
+renderPosts();
+</script>
+</body>
+</html>
