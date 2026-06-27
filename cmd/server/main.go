@@ -2842,6 +2842,30 @@ func adminLoginHandler(cfg config) http.HandlerFunc {
 	}
 }
 
+// adminLogoutHandler clears the `admin_logged_in` cookie so the visitor is no
+// longer trusted: /api/admin/status then returns {"admin":false} and every
+// destructive button hides again (shared/nav.js gate). Mirrors the login
+// handler's cookie shape so the browser drops exactly the same cookie.
+func adminLogoutHandler(cfg config) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+		http.SetCookie(w, &http.Cookie{
+			Name:     "admin_logged_in",
+			Value:    "",
+			Path:     "/",
+			MaxAge:   -1, // delete now
+			Expires:  time.Unix(0, 0),
+			HttpOnly: false,
+			SameSite: http.SameSiteLaxMode,
+		})
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(`{"success":true}`))
+	}
+}
+
 func adminGDriveCredentialsHandler(cfg config) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if !isAdminRequest(r) {
@@ -2957,6 +2981,7 @@ func main() {
 	mux.Handle("/api/ai/sanity-check", observe(cfg, sanityCheckHandler(cfg)))
 	mux.Handle("/api/ai/fix-grammar", observe(cfg, fixGrammarHandler(cfg)))
 	mux.Handle("/api/admin/login", observe(cfg, adminLoginHandler(cfg)))
+	mux.Handle("/api/admin/logout", observe(cfg, adminLogoutHandler(cfg)))
 	mux.Handle("/api/admin/status", observe(cfg, adminStatusHandler(cfg)))
 	mux.Handle("/api/admin/gdrive-credentials", observe(cfg, adminGDriveCredentialsHandler(cfg)))
 	mux.Handle("/admin/errors", observe(cfg, axiomErrorsHandler(tmpl, cfg, navConfigJS)))

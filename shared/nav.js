@@ -82,6 +82,7 @@
   function applyAdminStatus(admin) {
     window.isAdmin = !!admin;
     document.body.classList.toggle('is-admin', !!admin);
+    renderAdminChip(); // keep the nav chip in sync with the verdict
   }
   // Fail-closed immediately: destructive buttons start hidden via CSS.
   document.addEventListener('DOMContentLoaded', function () {
@@ -94,6 +95,72 @@
     }
     return true;
   };
+
+  /* 🧭 Admin login page (redirect target for the "Sign in" chip).
+     Admin / destructive actions are gated by the `admin_logged_in` cookie
+     (set by /api/admin/login) OR a localhost origin. The login page takes a
+     `?redirect=` so it can bounce back to the page the user was on. */
+  function adminLoginUrl() {
+    var base = window.API_BASE || '';
+    // The login UI lives on the admin page; pass the current path back.
+    var here = encodeURIComponent(window.location.pathname.slice(1) + window.location.search);
+    return base + '/5_Symbols/supabase/ui/admin.html?redirect=' + here;
+  }
+  // Sign out: clears the admin cookie server-side, then refreshes the gate
+  // so destructive buttons hide immediately (no full page reload needed).
+  window.signOut = function () {
+    fetch((window.API_BASE || '') + '/api/admin/logout', { method: 'POST' })
+      .catch(function () {})
+      .then(function () {
+        applyAdminStatus(false);
+        // localhost stays trusted by the server, so re-fetch the real verdict;
+        // on the deployed site this flips to unsigned-in.
+        return fetch((window.API_BASE || '') + '/api/admin/status', { cache: 'no-store' });
+      })
+      .then(function (r) { return r && r.ok ? r.json() : null; })
+      .then(function (d) { if (d && typeof d.admin === 'boolean') applyAdminStatus(d.admin); })
+      .catch(function () { applyAdminStatus(false); });
+  };
+
+  // Nav chip shown on every page: 🔓 Sign in (unsigned-in) / 🔑 Admin + Sign out.
+  function buildAdminChipHtml() {
+    var on = window.isAdmin;
+    var dot = on ? '#10b981' : '#9ca3af';
+    var label = on
+      ? '<span class="site-nav-admin-label">🔑 Admin</span>' +
+        '<button id="site-nav-admin-signout" class="site-nav-admin-signout" title="Sign out of admin mode">Sign out</button>'
+      : '<a href="' + adminLoginUrl() + '" id="site-nav-admin-signin" class="site-nav-admin-signin" title="Sign in as admin to unlock delete/upload buttons"><span class="site-nav-admin-label">🔓 Sign in</span></a>';
+    return '<span id="site-nav-admin" class="site-nav-admin" ' +
+      'style="display:inline-flex;align-items:center;gap:6px;margin-left:10px;padding:5px 10px;border-radius:20px;' +
+      'background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);font-size:0.85rem;white-space:nowrap;">' +
+      '<span class="site-nav-admin-dot" style="width:8px;height:8px;border-radius:50%;flex-shrink:0;background:' + dot + ';"></span>' +
+      label + '</span>';
+  }
+  function renderAdminChip() {
+    var host = document.getElementById('site-nav-admin');
+    if (!host) return; // nav not built yet — buildNav() will render it
+    var on = window.isAdmin;
+    var dot = host.querySelector('.site-nav-admin-dot');
+    if (dot) dot.style.background = on ? '#10b981' : '#9ca3af';
+    host.innerHTML =
+      '<span class="site-nav-admin-dot" style="width:8px;height:8px;border-radius:50%;flex-shrink:0;background:' + (on ? '#10b981' : '#9ca3af') + ';"></span>' +
+      (on
+        ? '<span class="site-nav-admin-label">🔑 Admin</span>' +
+          '<button id="site-nav-admin-signout" class="site-nav-admin-signout" title="Sign out of admin mode">Sign out</button>'
+        : '<a href="' + adminLoginUrl() + '" id="site-nav-admin-signin" class="site-nav-admin-signin" title="Sign in as admin to unlock delete/upload buttons"><span class="site-nav-admin-label">🔓 Sign in</span></a>');
+    bindAdminChip();
+  }
+  function bindAdminChip() {
+    var host = document.getElementById('site-nav-admin');
+    if (!host || host.dataset.bound === '1') return;
+    host.dataset.bound = '1';
+    host.addEventListener('click', function (e) {
+      var btn = e.target.closest('#site-nav-admin-signout');
+      if (!btn) return;
+      e.preventDefault();
+      window.signOut();
+    });
+  }
   fetch((window.API_BASE || '') + '/api/admin/status', { cache: 'no-store' })
     .then(function (r) { return r.ok ? r.json() : null; })
     .then(function (d) { if (d && typeof d.admin === 'boolean') applyAdminStatus(d.admin); })
@@ -636,6 +703,9 @@
     // login (Folder Creator) page where Google authentication happens.
     html += buildAuthChipHtml();
 
+    // 🔑 Admin sign-in / sign-out chip — toggles the destructive-button gate.
+    html += buildAdminChipHtml();
+
     html += '</div></div>';
 
     var nav = document.createElement('nav');
@@ -643,6 +713,10 @@
     nav.className = 'site-nav';
     nav.innerHTML = html;
     document.body.insertBefore(nav, document.body.firstChild);
+
+    // Wire the admin chip's Sign-out button (delegated). Built before the
+    // /api/admin/status fetch resolves; renderAdminChip() re-syncs it later.
+    bindAdminChip();
 
     // Single delegated listener for all star buttons
     nav.addEventListener('click', function (e) {

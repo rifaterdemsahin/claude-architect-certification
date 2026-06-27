@@ -624,3 +624,27 @@ body:not(.is-admin) [data-require-admin],
 body:not(.is-admin) .btn-del {
   display: none !important;
 }
+
+/* 🔑 Admin chip + sign-in/sign-out controls (rendered by shared/nav.js). */
+.site-nav-admin {
+  color: inherit;
+}
+.site-nav-admin-signin,
+.site-nav-admin-signout {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.18);
+  color: inherit;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.78rem;
+  cursor: pointer;
+  text-decoration: none;
+  line-height: 1.4;
+}
+.site-nav-admin-signin:hover,
+.site-nav-admin-signout:hover {
+  background: rgba(255,255,255,0.12);
+}
+.site-nav-admin-signout {
+  margin-left: 2px;
+}

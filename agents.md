@@ -63,6 +63,13 @@ This document defines how AI agents interact with the **Claude AI Certification 
     - **Documented the rule in `agents.md`** as a site-wide invariant next to the "One Top Nav" rule: every destructive control must be `data-require-admin` + `requireAdmin()`-guarded, and every destructive server handler must call `isAdminRequest(r)`.
 - **Verification:** `go build ./... && go vet ./...` green; `node -c shared/nav.js` + research inline-JS parse OK; local server serves root/research **HTTP 200**. **End-to-end auth proof** — localhost: `{"admin":true}` + DELETE passes the guard; unsigned-in visitor (LAN-IP instance, no cookie): `{"admin":false}` + DELETE → **401 Unauthorized**.
 - **Status:** IMPLEMENTED, COMMITTED, PUSHED.
+- **Task:** 🔑 Add a **Sign-out** control to the admin gate so the destructive-button behaviour can be tested.
+- **Action:**
+    - **Server (`cmd/server/main.go`):** added `POST /api/admin/logout` — clears the `admin_logged_in` cookie (`MaxAge:-1`, `Expires:epoch`), mirroring the login cookie shape so the browser drops the exact same cookie. Registered the route.
+    - **`shared/nav.js` (site-wide):** added a **🔑 admin chip** to the nav (next to the Drive chip). Shows `🔓 Sign in` (links to the admin login page with `?redirect=` back to the current page) when unsigned in, and `🔑 Admin` + a **Sign out** button when signed in. Added `window.signOut()` (POSTs `/api/admin/logout`, then re-fetches `/api/admin/status` and re-renders the chip + `body.is-admin`), and made `applyAdminStatus()` re-render the chip so login/logout is reflected live without a reload.
+    - **`shared/nav.css`:** styled `.site-nav-admin-signin` / `.site-nav-admin-signout`.
+- **Verification:** `go build/vet` green; `node -c shared/nav.js` OK; full **sign-out cycle proven on a non-loopback origin** (LAN-IP instance): unsigned-in `{"admin":false}` → login → `{"admin":true}` + DELETE passes guard → **logout** → `{"admin":false}` + DELETE → **401**. Served `nav.js` ships `window.signOut`/`buildAdminChipHtml`/`adminLoginUrl`; `nav.css` ships the chip styles. Opened the research page in Chrome (admin chip renders).
+- **Status:** IMPLEMENTED, COMMITTED, PUSHED.
 
 ### 2026-06-26
 - **Task:** 🥊 Create Competitive Analysis page and auto-generate HTML Specs.

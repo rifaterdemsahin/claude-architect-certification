@@ -22,6 +22,23 @@ Reuse the existing trust rule (localhost origin OR `admin_logged_in` cookie) —
 ### 📌 Adoption note
 The 25 other destructive pages now get the **UI hiding for free** the moment they add `data-require-admin` (CSS is global). Pages that drive deletes through Supabase `.delete()` should still add a `requireAdmin()` guard and rely on RLS server-side. The remaining pages will be retrofitted incrementally; the gate is already protecting them from showing `.btn-del` to unsigned-in visitors.
 
+## 2026-06-27 — 🔑 Sign-out control for the admin gate
+
+### 🎯 Objective
+The sign-in gate landed without a way to test sign-out: localhost is always trusted, so the only place the unsigned-in state is reachable is the deployed Fly.io origin (or a non-loopback bind). Add a visible **Sign in / Sign out** control so the destructive-button behaviour can be exercised.
+
+### 🛠 Changes
+- **`cmd/server/main.go`** — `POST /api/admin/logout` clears the `admin_logged_in` cookie (`MaxAge:-1`, `Expires:epoch`) using the exact same cookie shape as login, so the browser reliably drops it.
+- **`shared/nav.js`** — site-wide **🔑 admin chip** in the nav (next to the Drive chip): `🔓 Sign in` (→ admin login page with `?redirect=`) when unsigned in, `🔑 Admin` + **Sign out** when signed in. `window.signOut()` POSTs logout, re-fetches status, and re-renders the chip + `body.is-admin`; `applyAdminStatus()` now re-renders the chip so any state change is reflected live.
+- **`shared/nav.css`** — chip button styles.
+
+### ✅ Verification
+Full sign-out cycle on a non-loopback origin (LAN-IP instance): `{"admin":false}` → login → `{"admin":true}` + DELETE passes → **logout** → `{"admin":false}` + DELETE → **401**. Served `nav.js` ships `window.signOut`/`buildAdminChipHtml`/`adminLoginUrl`.
+
+### 🧪 How to test (for the user)
+- **localhost** is always trusted → the chip shows **🔑 Admin + Sign out** and destructive buttons are visible (localhost can't be "signed out" by design — it's trusted by origin).
+- To see the unsigned-in state locally, hit the **Sign in** link only matters on the **deployed site** (`claude-architect-certification.fly.dev`): open it, the chip shows **🔓 Sign in**, buttons are hidden; sign in, buttons appear; **Sign out**, buttons hide again. This script was validated against a LAN-IP bind that reproduces that exact behaviour.
+
 ## 2026-06-27 — 🔁 Make the autonomous error loop actually run (daily + full-loop)
 
 ### 🎯 Objective
