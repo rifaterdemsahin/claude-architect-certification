@@ -43,6 +43,8 @@
     .brand-strip { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 16px; }
     .brand-chip { display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: 999px; padding: 6px 14px; font-size: 0.78rem; color: var(--text-muted); }
     .brand-swatch { width: 16px; height: 16px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.25); }
+    .copy-chip { cursor: pointer; transition: all 0.15s; }
+    .copy-chip:hover { border-color: var(--primary); color: var(--text-main); }
     .btn { padding: 10px 20px; border-radius: 12px; font-weight: 700; cursor: pointer; border: none; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; font-size: 0.95rem; text-decoration: none; }
     .btn-primary { background: var(--primary); color: #fff; }
     .btn-secondary { background: var(--secondary); color: #fff; }
@@ -250,6 +252,7 @@
           <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;">
             <button class="btn btn-ghost btn-sm" id="copyPromptBtn">📋 Copy prompt</button>
             <a class="btn btn-secondary btn-sm" href="https://claude.ai/new" target="_blank" rel="noopener">🔗 Open Claude</a>
+            <a class="btn btn-warning btn-sm" href="https://gemini.google.com/app" target="_blank" rel="noopener">✨ Open Gemini</a>
             <button class="btn btn-ghost btn-sm" id="rebuildBtn">♻️ Rebuild from template</button>
           </div>
         </div>
@@ -260,6 +263,22 @@
         <button class="btn btn-ghost" id="modalCopySvgBtn">📋 Copy SVG</button>
         <button class="btn btn-secondary" id="modalDownloadBtn">⬇️ Download .svg</button>
         <button class="btn btn-success" id="modalSaveBtn">💾 Save to DB</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Prompt preview modal (before generating) -->
+  <div id="promptModal" class="modal" onclick="if(event.target===this) closePromptModal()">
+    <div class="modal-content" style="max-width:680px;">
+      <h3>👁️ Prompt Preview <span id="promptModalNo" style="font-size:0.9rem;color:var(--text-muted);font-weight:400;"></span></h3>
+      <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:10px;">📋 Copy this branded prompt and test it in Gemini / Claude before generating. Paste the returned <code>&lt;svg&gt;</code> back in the editor (✏️ Edit).</p>
+      <label style="margin-top:0;">🤖 Branded prompt</label>
+      <textarea id="promptModalText" spellcheck="false" readonly style="min-height:300px;"></textarea>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closePromptModal()">Close</button>
+        <a class="btn btn-secondary" href="https://claude.ai/new" target="_blank" rel="noopener">🔗 Open Claude</a>
+        <a class="btn btn-warning" href="https://gemini.google.com/app" target="_blank" rel="noopener">✨ Open Gemini</a>
+        <button class="btn btn-success" id="promptModalCopyBtn">📋 Copy prompt</button>
       </div>
     </div>
   </div>
@@ -354,10 +373,31 @@
     }
     function renderBrandStrip() {
       $('brandStrip').innerHTML =
-        `<span class="brand-chip">🎨 ${escHtml(BRAND.template_name)}</span>` +
-        `<span class="brand-chip"><span class="brand-swatch" style="background:${escHtml(BRAND.gradient_start)}"></span>${escHtml(BRAND.gradient_start)}</span>` +
-        `<span class="brand-chip"><span class="brand-swatch" style="background:${escHtml(BRAND.gradient_end)}"></span>${escHtml(BRAND.gradient_end)}</span>` +
-        `<span class="brand-chip">🔤 Fira Code · Plus Jakarta Sans</span>`;
+        `<a class="brand-chip" href="../preprod/tools/branding.html" target="_blank" rel="noopener" style="text-decoration:none;color:var(--primary);border-color:rgba(139,92,246,0.4);" title="Open the branding kit page">🎨 Open Branding Kit ↗</a>` +
+        `<span class="brand-chip">${escHtml(BRAND.template_name)}</span>` +
+        `<span class="brand-chip copy-chip" onclick="copyText('${escHtml(BRAND.gradient_start)}','Gradient start')" title="Click to copy"><span class="brand-swatch" style="background:${escHtml(BRAND.gradient_start)}"></span>${escHtml(BRAND.gradient_start)} 📋</span>` +
+        `<span class="brand-chip copy-chip" onclick="copyText('${escHtml(BRAND.gradient_end)}','Gradient end')" title="Click to copy"><span class="brand-swatch" style="background:${escHtml(BRAND.gradient_end)}"></span>${escHtml(BRAND.gradient_end)} 📋</span>` +
+        `<span class="brand-chip copy-chip" onclick="copyText('${escHtml(BRAND.accent_bar)}','Accent bar')" title="Click to copy"><span class="brand-swatch" style="background:${escHtml(BRAND.accent_bar)}"></span>${escHtml(BRAND.accent_bar)} 📋</span>` +
+        `<span class="brand-chip">🔤 Fira Code · Plus Jakarta Sans</span>` +
+        `<button class="btn btn-ghost btn-sm" onclick="copyBrandingKit()" title="Copy the whole branding kit as text">📋 Copy kit</button>`;
+    }
+    function copyText(text, label) {
+      navigator.clipboard.writeText(text).then(() => showToast('📋 Copied' + (label ? ' ' + label : '') + ': ' + text)).catch(() => showToast('Copy failed', true));
+    }
+    function copyBrandingKit() {
+      const kit = [
+        `Branding kit: ${BRAND.template_name}`,
+        `Background: ${BRAND.bg}`,
+        `Gradient start (deep blue): ${BRAND.gradient_start}`,
+        `Gradient end (bright yellow): ${BRAND.gradient_end}`,
+        `Accent bar: ${BRAND.accent_bar}`,
+        `Main text color: ${BRAND.main_color}`,
+        `Sub text color: ${BRAND.sub_color}`,
+        `Main font: ${BRAND.main_font}`,
+        `Sub font: ${BRAND.sub_font}`,
+        `Brand line: ${BRAND.tagline}`
+      ].join('\n');
+      copyText(kit, 'branding kit');
     }
 
     // ── Text helpers for SVG layout ──
@@ -606,9 +646,38 @@ Rules:
       if (!moduleId) { $('videoSelect').innerHTML = '<option value="">— Select Video —</option>'; return; }
       try {
         dbVideos = await api(`videos?select=id,video_number,title&module_id=eq.${moduleId}&order=video_number.asc`);
+        // Count already-generated SVGs per video for this module → dropdown notification badge.
+        let svgCounts = {};
+        if (currentModuleNumber != null) {
+          try {
+            const svgRows = await api(`sentence_svgs?select=video_number&module_number=eq.${currentModuleNumber}&generation_status=eq.completed`);
+            (svgRows || []).forEach(r => { svgCounts[r.video_number] = (svgCounts[r.video_number] || 0) + 1; });
+          } catch (_) { /* table may be missing — show videos without badges */ }
+        }
         $('videoSelect').innerHTML = '<option value="">— Select Video —</option>' +
-          dbVideos.map(v => `<option value="${v.id}">V${v.video_number}: ${escHtml(v.title)}</option>`).join('');
+          dbVideos.map(v => {
+            const n = svgCounts[v.video_number] || 0;
+            const badge = n > 0 ? `  🧬 ${n} SVG${n === 1 ? '' : 's'} ✅` : '';
+            return `<option value="${v.id}">V${v.video_number}: ${escHtml(v.title)}${badge}</option>`;
+          }).join('');
       } catch (e) { showToast('Failed to load videos: ' + e.message, true); }
+    }
+    // Refresh the badge counts in the video dropdown without reloading the list.
+    async function refreshVideoBadges() {
+      if (!dbVideos.length || currentModuleNumber == null) return;
+      let svgCounts = {};
+      try {
+        const svgRows = await api(`sentence_svgs?select=video_number&module_number=eq.${currentModuleNumber}&generation_status=eq.completed`);
+        (svgRows || []).forEach(r => { svgCounts[r.video_number] = (svgCounts[r.video_number] || 0) + 1; });
+      } catch (_) { return; }
+      const sel = $('videoSelect'); const prev = sel.value;
+      sel.innerHTML = '<option value="">— Select Video —</option>' +
+        dbVideos.map(v => {
+          const n = svgCounts[v.video_number] || 0;
+          const badge = n > 0 ? `  🧬 ${n} SVG${n === 1 ? '' : 's'} ✅` : '';
+          return `<option value="${v.id}">V${v.video_number}: ${escHtml(v.title)}${badge}</option>`;
+        }).join('');
+      sel.value = prev;
     }
 
     function resetView() {
@@ -670,10 +739,12 @@ Rules:
         let actions;
         if (status === 'completed') {
           actions = `<button class="btn btn-ghost btn-sm" onclick="openModal(${s.id})">🧬 Edit</button>
+            <button class="btn btn-ghost btn-sm" onclick="openPromptModal(${s.id})">👁️ Prompt</button>
             <button class="btn btn-ghost btn-sm" onclick="downloadOne(${s.id})">⬇️ SVG</button>
             <button class="btn btn-secondary btn-sm" onclick="generateSingle(${s.id})" ${isGenerating ? 'disabled' : ''}>♻️ Regen</button>`;
         } else {
-          actions = `<button class="btn btn-primary btn-sm" onclick="generateSingle(${s.id})" ${isGenerating ? 'disabled' : ''}>${status === 'failed' ? '🔄 Retry' : '🧬 Generate'}</button>
+          actions = `<button class="btn btn-ghost btn-sm" onclick="openPromptModal(${s.id})">👁️ Prompt</button>
+            <button class="btn btn-primary btn-sm" onclick="generateSingle(${s.id})" ${isGenerating ? 'disabled' : ''}>${status === 'failed' ? '🔄 Retry' : '🧬 Generate'}</button>
             <button class="btn btn-ghost btn-sm" onclick="openModal(${s.id})">✏️ Edit</button>`;
         }
 
@@ -773,7 +844,7 @@ Rules:
         showToast('Generation failed: ' + err.message, true);
       } finally {
         isGenerating = false;
-        renderSentences(); updateStats(); updateBulkButtons();
+        renderSentences(); updateStats(); updateBulkButtons(); refreshVideoBadges();
       }
     }
 
@@ -807,7 +878,7 @@ Rules:
         setProgress(i + 1, targets.length);
       }
       isGenerating = false;
-      renderSentences(); updateStats(); updateBulkButtons();
+      renderSentences(); updateStats(); updateBulkButtons(); refreshVideoBadges();
       showToast('✅ Bulk SVG generation complete!');
     }
 
@@ -827,7 +898,7 @@ Rules:
       if (!ids.length) { showToast('Nothing to reset.'); return; }
       for (const gid of ids) { try { await api(`sentence_svgs?id=eq.${gid}`, { method: 'DELETE' }); } catch (_) {} }
       currentSvgMap = {}; svgTypeMap = {};
-      renderSentences(); updateStats(); updateBulkButtons();
+      renderSentences(); updateStats(); updateBulkButtons(); refreshVideoBadges();
       showToast('🔄 All SVG entries reset to pending');
     }
 
@@ -880,6 +951,22 @@ Rules:
       $('svgModal').classList.add('show');
     }
     function closeModal() { $('svgModal').classList.remove('show'); activeModalSid = null; }
+
+    // ── Prompt preview modal (before generating) ──
+    function openPromptModal(sentenceId) {
+      const s = currentSentences.find(x => x.id === sentenceId);
+      if (!s) return;
+      const g = currentSvgMap[sentenceId] || {};
+      const svgType = chosenSvgType(s);
+      const prompt = g.custom_prompt || buildSvgPrompt(svgType, s.sentence_text);
+      $('promptModalNo').textContent = `· #${currentSentences.findIndex(x => x.id === sentenceId) + 1} · ${svgType.replace(/_/g, ' ')}`;
+      $('promptModalText').value = prompt;
+      $('promptModal').classList.add('show');
+    }
+    function closePromptModal() { $('promptModal').classList.remove('show'); }
+    $('promptModalCopyBtn').addEventListener('click', () => {
+      navigator.clipboard.writeText($('promptModalText').value).then(() => showToast('📋 Prompt copied — paste into Gemini / Claude')).catch(() => showToast('Copy failed', true));
+    });
     function refreshModalPreview() { $('modalPreview').innerHTML = $('modalSvgCode').value; }
 
     $('modalRefreshPreviewBtn').addEventListener('click', refreshModalPreview);
@@ -914,7 +1001,7 @@ Rules:
         });
         showToast('✅ Saved to DB');
         closeModal();
-        renderSentences(); updateStats(); updateBulkButtons();
+        renderSentences(); updateStats(); updateBulkButtons(); refreshVideoBadges();
       } catch (err) {
         showToast('Save failed: ' + err.message, true);
       } finally { btn.textContent = orig; btn.disabled = false; }

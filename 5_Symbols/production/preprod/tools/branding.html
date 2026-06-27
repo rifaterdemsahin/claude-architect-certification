@@ -228,12 +228,15 @@
               '<td class="key-col">' + escHtml(r.rule_key) + '</td>' +
               '<td>' + (r.color ? '<span class="swatch" style="background:' + escHtml(r.color) + '"></span>' : '') +
                 '<input class="val-input" value="' + escHtml(r.value) + '" data-id="' + r.id + '"></td>' +
-              '<td style="text-align:right"><button class="btn btn-sm save-btn" data-id="' + r.id + '">💾 Save</button></td>' +
+              '<td style="text-align:right"><button class="btn btn-sm copy-btn" data-val="' + escHtml(r.value) + '" title="Copy value">📋 Copy</button> <button class="btn btn-sm save-btn" data-id="' + r.id + '">💾 Save</button></td>' +
             '</tr>'
           ).join('') +
           '</tbody></table></div>';
       }).join('');
       container.querySelectorAll('.save-btn').forEach(b => b.addEventListener('click', () => saveRow(parseInt(b.dataset.id))));
+      container.querySelectorAll('.copy-btn').forEach(b => b.addEventListener('click', () => {
+        navigator.clipboard.writeText(b.dataset.val).then(() => showToast('📋 Copied: ' + b.dataset.val)).catch(() => showToast('Copy failed', true));
+      }));
       renderPreview();
     }
 
