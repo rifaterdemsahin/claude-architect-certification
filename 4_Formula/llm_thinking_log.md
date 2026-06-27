@@ -11,9 +11,8 @@ Create a Slide Generator page under `5_Symbols/production/postprod/slide_generat
 3. **Manual Generation**: Changed the trigger so the user clicks "Generate Slides (Basic) ⚡" explicitly to build the presentation, rather than generating automatically on every checkbox tick.
 4. **AI Prompt Preview Modal**: Added an "👁️ View AI Prompt" button that opens a modal containing a pre-engineered prompt to send to Claude/Gemini. This instructs the LLM to write minimalist "Steve Jobs" style Marp slides, complete with the Brand Kit frontmatter block and emojis. Includes a "📋 Copy Prompt" button and links to Claude/Gemini.
 5. **Download & Copy**: The UI builds the Marp markdown string dynamically in an editable `<textarea>`, providing a "📋 Copy" button alongside the "Download .md".
-6. **Side-by-Side Preview**: Recreated `marp.live` dual-pane layout. Left pane holds the markdown; right pane renders a visual mock of the current slide using HTML/CSS grid.
-7. **Supabase Tables (Proposed)**: 
-   - `presentations`: `id` (uuid, pk), `video_id` (uuid, FK), `markdown_content` (text), `created_at` (timestamp), `updated_at` (timestamp).
+6. **Side-by-Side Preview & Live Edit**: Recreated `marp.live` dual-pane layout. The right pane renders a visual mock of the current slide using HTML/CSS grid. The editor pane is tied to `oninput` with a custom Steve Jobs markdown parser, allowing live-preview syncing when users edit the markdown manually.
+7. **Database Saving**: Implemented full `UPSERT` logic for the `presentations` table in Supabase. Added a "💾 Save to DB" button. Existing presentations for a given video are auto-loaded when selected.
 5. **Navigation**: Wired into `navigation_config.json`, `index.html` fallback, `markdown_renderer.html` fallback, and `shared/nav.js` under `Post Prod > 2. Visuals & Graphics`.
 
 ### ✅ Verification
@@ -2149,3 +2148,21 @@ This guarantees uniqueness both among the new candidates and against existing no
 - `node -c shared/nav.js` passes; JS fallback blocks render identical groups.
 - `go build ./... && go vet ./...` pass.
 - Local server (port 8080) serves `navigation_config.json` and `index.html` HTTP 200; served config exposes the 6 Content Assembly groups.
+
+### 📅 2026-06-27 — Make Nav Menu Groups Visually Distinct (Per-Group Accent Colours)
+**Objective:** Make dropdown menu groups visually different so group boundaries — and any add/remove/reorder — are spotted with ease; commit, push, deploy.
+
+**Approach & Reasoning:**
+- The grouped menus (Content Assembly, Planning, Tools, etc.) rendered group headers as identical grey uppercase labels — adjacent groups were hard to tell apart. Needed strong, scannable per-group differentiation.
+- **Single renderer to change:** `shared/nav.js` is the universal top-nav renderer (it injects `shared/nav.css` on every page). The homepage's legacy card `#projectMenu` renderer in `index.html` is dead code (container removed in the double-menu fix; guarded by `if (projectMenuContainer)` which is always null), so no edit needed there. Confirmed the card block is skipped.
+- **Colour strategy — ordinal palette, not hash:** Defined `GROUP_PALETTE` (8 vivid, dark-bg-friendly colours: violet, cyan, emerald, amber, rose, blue, pink, lime) and assign each `{group:true}` node the next palette slot **by ordinal position among its group siblings**. This *guarantees* adjacent groups never share a colour (a label hash could collide), and the colours visually convey group order. Palette cycles if a menu has >8 groups.
+- **Refactor of `renderSubItem`:** Split into `renderChildren` (iterates siblings, assigns palette slots to groups), `renderGroup` (wraps header + children in a `.site-drop-group` block carrying the accent as inline CSS vars `--grp-accent`/`--grp-soft`/`--grp-bar`), and `renderNode` (plain links + nested subdropdowns). Visibility filtering moved into `renderChildren` via the existing `navItemVisible` helper. The search index is built independently from the data tree, so the DOM restructure doesn't affect search.
+- **CSS (`shared/nav.css`):** `.site-drop-group` block = coloured 3px left bar (`--grp-bar`) + tinted gradient background (`--grp-soft`); its header becomes a coloured banner (accent text + tinted pill background + solid accent count chip). Item rows and nested subdropdown triggers pick up the accent tint on hover, reinforcing the group the eye is tracking. Used higher-specificity selectors (`.site-drop-group > …`) so the existing grey base rules are overridden cleanly without `!important`.
+- Exposed `window.SITE_NAV_GROUP_PALETTE` so any future renderer can share the single source of truth.
+
+**Verification:**
+- `node -c shared/nav.js` OK; zero stale `renderSubItem` references.
+- `go build ./... && go vet ./...` pass.
+- Node dry-run against live `navigation_config.json`: all 6 Content Assembly groups get distinct accents (violet→cyan→emerald→amber→rose→blue); same logic auto-applies to the 6 Planning groups and all Tools groups globally.
+- Local server serves `shared/nav.js`, `shared/nav.css`, `index.html` all HTTP 200; served `nav.js` contains `GROUP_PALETTE`/`renderGroup`/`site-drop-group`.
+- Browser opened on `http://localhost:8080/index.html` for visual confirmation of the colour-coded group banners.

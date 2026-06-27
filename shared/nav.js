@@ -386,29 +386,66 @@
     return n;
   }
 
+  /* ---- per-group accent palette ------------------------------------------
+     Each group inside a dropdown gets a distinct accent colour by ordinal
+     position, so group boundaries (and any add/remove/reorder) are
+     instantly visible. Exposed on window so other renderers can share it. */
+  var GROUP_PALETTE = [
+    { solid: '#8b5cf6', soft: 'rgba(139,92,246,0.16)', bar: 'rgba(139,92,246,0.6)' }, // violet
+    { solid: '#06b6d4', soft: 'rgba(6,182,212,0.16)',  bar: 'rgba(6,182,212,0.6)' },  // cyan
+    { solid: '#10b981', soft: 'rgba(16,185,129,0.16)', bar: 'rgba(16,185,129,0.6)' }, // emerald
+    { solid: '#f59e0b', soft: 'rgba(245,158,11,0.16)', bar: 'rgba(245,158,11,0.6)' }, // amber
+    { solid: '#f43f5e', soft: 'rgba(244,63,94,0.16)',  bar: 'rgba(244,63,94,0.6)' },  // rose
+    { solid: '#3b82f6', soft: 'rgba(59,130,246,0.16)', bar: 'rgba(59,130,246,0.6)' }, // blue
+    { solid: '#ec4899', soft: 'rgba(236,72,153,0.16)', bar: 'rgba(236,72,153,0.6)' }, // pink
+    { solid: '#84cc16', soft: 'rgba(132,204,22,0.16)', bar: 'rgba(132,204,22,0.6)' }  // lime
+  ];
+  window.SITE_NAV_GROUP_PALETTE = GROUP_PALETTE;
+
   /* ---- recursively render a non-top-level menu item ---------------------
-     Items with children become nested subdropdowns; group headers are
-     rendered as non-interactive section labels inside the current menu.
-     The existing .site-subdrop-menu CSS (position:absolute; left:100%)
-     cascades, so a 4th level flies out to the right of the 3rd. ---------- */
-  function renderSubItem(item) {
-    if (item.hideAfterDays && daysSinceLaunch >= item.hideAfterDays) return '';
-    if (item.group) {
-      var grpLinks = countLeafLinks(item);
-      var grpBadge = grpLinks ? ' <span class="site-nav-count site-nav-count--group">' + grpLinks + '</span>' : '';
-      var h = '<div class="site-drop-group-header">' + item.label + grpBadge + '</div>';
-      if (item.children) {
-        var visible = item.children.filter(function (c) {
-          return !(c.hideAfterDays && daysSinceLaunch >= c.hideAfterDays);
-        });
-        visible.forEach(function (c) { h += renderSubItem(c); });
+     renderChildren() walks a list and hands each {group:true} node the next
+     palette slot (by ordinal), so adjacent groups never share a colour.
+     renderGroup() wraps the header + its children in a .site-drop-group
+     block that carries the accent as inline CSS variables
+     (--grp-accent / --grp-soft / --grp-bar); renderNode() handles plain
+     links and nested subdropdowns (which fly out to the right via
+     .site-subdrop-menu, so a 4th level still cascades). The search index is
+     built independently from the data tree, so these DOM changes never
+     affect search. -------------------------------------------------------- */
+  function visibleChildrenOf(node) {
+    if (!node || !node.children) return [];
+    return node.children.filter(navItemVisible);
+  }
+
+  function renderChildren(arr) {
+    var html = '', grpSlot = 0;
+    (arr || []).forEach(function (c) {
+      if (!navItemVisible(c)) return;
+      if (c.group) {
+        var accent = GROUP_PALETTE[grpSlot % GROUP_PALETTE.length];
+        grpSlot++;
+        html += renderGroup(c, accent);
+      } else {
+        html += renderNode(c);
       }
-      return h;
-    }
+    });
+    return html;
+  }
+
+  function renderGroup(item, accent) {
+    var grpLinks = countLeafLinks(item);
+    var grpBadge = grpLinks ? ' <span class="site-nav-count site-nav-count--group">' + grpLinks + '</span>' : '';
+    var vars = '--grp-accent:' + accent.solid + ';--grp-soft:' + accent.soft + ';--grp-bar:' + accent.bar + ';';
+    var h = '<div class="site-drop-group" style="' + vars + '">' +
+      '<div class="site-drop-group-header">' + item.label + grpBadge + '</div>';
+    h += renderChildren(visibleChildrenOf(item));
+    h += '</div>';
+    return h;
+  }
+
+  function renderNode(item) {
     if (item.children) {
-      var visible = item.children.filter(function (c) {
-        return !(c.hideAfterDays && daysSinceLaunch >= c.hideAfterDays);
-      });
+      var visible = visibleChildrenOf(item);
       if (!visible.length) return '';
       var active = isItemActive(item);
       var subLinks = countLeafLinks(item);
@@ -416,7 +453,7 @@
         '<span class="site-subdrop-trigger">' + item.label +
         ' <span class="site-nav-count">' + subLinks + '</span> &raquo;</span>' +
         '<div class="site-subdrop-menu">';
-      visible.forEach(function (c) { h += renderSubItem(c); });
+      h += renderChildren(visible);
       h += '</div></div>';
       return h;
     }
@@ -511,7 +548,7 @@
           ' <span class="site-nav-count">' + totalLinks + '</span> &#9662;</span>' +
           '<div class="site-drop-menu">';
         visible.forEach(function (child) {
-          html += renderSubItem(child);
+          html += renderNode(child);
         });
         html += '</div></div>';
       } else {

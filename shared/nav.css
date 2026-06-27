@@ -289,6 +289,52 @@
   margin-top: 0;
 }
 
+/* ── Group block: distinct accent per group ───────────────────────────────
+   Each .site-drop-group carries inline CSS vars (--grp-accent / --grp-soft
+   / --grp-bar) assigned by renderGroup() from GROUP_PALETTE, so every group
+   gets its own coloured left bar, tinted background, and banner header.
+   This makes group boundaries — and any add/remove/reorder — instantly
+   visible at a glance. ------------------------------------------------- */
+.site-drop-group {
+  margin: 6px 0;
+  padding: 2px 6px 4px 8px;
+  border-left: 3px solid var(--grp-bar, rgba(107, 114, 128, 0.45));
+  border-radius: 0 8px 8px 0;
+  background: linear-gradient(90deg, var(--grp-soft, rgba(107, 114, 128, 0.10)), transparent 75%);
+}
+.site-drop-menu > .site-drop-group:first-child { margin-top: 0; }
+.site-drop-menu > .site-drop-group:last-child { margin-bottom: 0; }
+
+/* Banner header inside a group block — coloured by the group accent */
+.site-drop-group > .site-drop-group-header {
+  color: var(--grp-accent, #9ca3af);
+  background: var(--grp-soft, transparent);
+  border-top: none;
+  border-radius: 6px;
+  padding: 6px 10px;
+  margin: 0 0 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.site-drop-group > .site-drop-group-header:first-child {
+  margin-top: 0;
+}
+/* Count chip becomes a solid pill in the accent colour */
+.site-drop-group > .site-drop-group-header .site-nav-count--group {
+  background: var(--grp-accent, #6b7280);
+  color: #0b1020;
+}
+/* Items + nested triggers pick up the accent tint on hover, reinforcing the
+   group colour the eye is already tracking */
+.site-drop-group .site-drop-item:hover {
+  background: var(--grp-soft);
+}
+.site-drop-group .site-nav-subdropdown:hover .site-subdrop-trigger {
+  background: var(--grp-soft);
+  color: var(--grp-accent, #f3f4f6);
+}
+
 /* Sub-dropdown (second level) */
 .site-nav-subdropdown {
   position: relative;
