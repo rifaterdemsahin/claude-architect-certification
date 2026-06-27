@@ -62,6 +62,43 @@
     document.head.appendChild(rev);
   }
 
+  /* ================================================================
+     🛡️ Sign-in gate (site-wide). Destructive UI (delete / upload / save
+     buttons) must NEVER be active for an unsigned-in visitor.
+
+     Rule (mirrors the server's isAdminRequest exactly): trusted = localhost
+     origin OR a valid `admin_logged_in` cookie. We ask the server once via
+     GET /api/admin/status and stamp the verdict on <body>:
+       body.is-admin  -> visitor is signed in  -> destructive UI visible
+       (no class)     -> unsigned in          -> destructive UI HIDDEN
+
+     Pages opt destructive elements out of visibility with a single attribute:
+       <button data-require-admin ...>🗑 Delete</button>
+     nav.css hides every [data-require-admin] unless body.is-admin, so the
+     fail-closed default holds even before this fetch resolves and for DOM
+     injected later (innerHTML cards, etc.).
+     ================================================================ */
+  window.isAdmin = false;
+  function applyAdminStatus(admin) {
+    window.isAdmin = !!admin;
+    document.body.classList.toggle('is-admin', !!admin);
+  }
+  // Fail-closed immediately: destructive buttons start hidden via CSS.
+  document.addEventListener('DOMContentLoaded', function () {
+    applyAdminStatus(false);
+  });
+  window.requireAdmin = function (action) {
+    if (!window.isAdmin) {
+      alert('🔒 Sign in as admin to ' + (action || 'do that') + '.\n\nUse the admin login, or open the app from localhost.');
+      return false;
+    }
+    return true;
+  };
+  fetch((window.API_BASE || '') + '/api/admin/status', { cache: 'no-store' })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (d) { if (d && typeof d.admin === 'boolean') applyAdminStatus(d.admin); })
+    .catch(function () { /* stay fail-closed */ });
+
   var LAUNCH_DATE = new Date('2026-06-07');
   var daysSinceLaunch = Math.floor((Date.now() - LAUNCH_DATE.getTime()) / (1000 * 60 * 60 * 24));
 

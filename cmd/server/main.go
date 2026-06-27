@@ -241,6 +241,21 @@ func (sw *statusWriter) WriteHeader(code int) {
 	sw.ResponseWriter.WriteHeader(code)
 }
 
+// isAdminRequest returns true when the caller is trusted: localhost origin OR a
+// valid `admin_logged_in` cookie (set by /api/admin/login). Every privileged
+// handler uses this so the rule is identical everywhere. UIs mirror it via
+// /api/admin/status and hide destructive buttons when it is false.
+func isAdminRequest(r *http.Request) bool {
+	remoteIP := r.RemoteAddr
+	if strings.HasPrefix(remoteIP, "127.0.0.1") || strings.HasPrefix(remoteIP, "[::1]") || strings.HasPrefix(remoteIP, "localhost") {
+		return true
+	}
+	if c, err := r.Cookie("admin_logged_in"); err == nil && c.Value == "true" {
+		return true
+	}
+	return false
+}
+
 func observe(cfg config, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
@@ -618,14 +633,7 @@ func envStatusHandler(cfg config) http.HandlerFunc {
 		Note   string `json:"note,omitempty"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		isAdmin := false
-		remoteIP := r.RemoteAddr
-		if strings.HasPrefix(remoteIP, "127.0.0.1") || strings.HasPrefix(remoteIP, "[::1]") || strings.HasPrefix(remoteIP, "localhost") {
-			isAdmin = true
-		} else if c, err := r.Cookie("admin_logged_in"); err == nil && c.Value == "true" {
-			isAdmin = true
-		}
-		if !isAdmin {
+		if !isAdminRequest(r) {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusUnauthorized)
 			w.Write([]byte(`{"error":"Unauthorized — sign in as admin or open from localhost."}`))
@@ -1166,6 +1174,12 @@ func researchFileHandler(cfg config) http.HandlerFunc {
 			io.Copy(w, resp.Body)
 
 		case http.MethodDelete:
+			// 🛡️ Destructive: require sign-in (localhost or admin cookie). Without
+			// this an unsigned-in visitor on the deployed site could delete blobs.
+			if !isAdminRequest(r) {
+				http.Error(w, "Unauthorized — sign in as admin to delete.", http.StatusUnauthorized)
+				return
+			}
 			sasQuery, err := generateContainerSAS(cfg.azureAccountName, cfg.azureAccountKey, container, "rdl", expiry)
 			if err != nil {
 				http.Error(w, "sas error", http.StatusInternalServerError)
@@ -2774,6 +2788,17 @@ TEXT TO FIX:
 
 // ── Admin Handlers ────────────────────────────────────────────────────────────
 
+// adminStatusHandler lets any page ask "am I signed in?" so destructive UI
+// (delete/upload buttons) can be hidden when the visitor is not trusted. The
+// rule mirrors every privileged handler: localhost origin OR admin cookie.
+func adminStatusHandler(cfg config) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Cache-Control", "no-store")
+		json.NewEncoder(w).Encode(map[string]any{"admin": isAdminRequest(r)})
+	}
+}
+
 func adminLoginHandler(cfg config) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
@@ -2819,18 +2844,7 @@ func adminLoginHandler(cfg config) http.HandlerFunc {
 
 func adminGDriveCredentialsHandler(cfg config) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		isAdmin := false
-		remoteIP := r.RemoteAddr
-		if strings.HasPrefix(remoteIP, "127.0.0.1") || strings.HasPrefix(remoteIP, "[::1]") || strings.HasPrefix(remoteIP, "localhost") {
-			isAdmin = true
-		} else {
-			cookie, err := r.Cookie("admin_logged_in")
-			if err == nil && cookie.Value == "true" {
-				isAdmin = true
-			}
-		}
-
-		if !isAdmin {
+		if !isAdminRequest(r) {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusUnauthorized)
 			w.Write([]byte(`{"error":"Unauthorized"}`))
@@ -2853,9 +2867,9 @@ func adminGDriveCredentialsHandler(cfg config) http.HandlerFunc {
 			apiKey = cfg.getSecret("GOOGLE_API_KEY")
 		}
 
-		if strings.HasPrefix(remoteIP, "127.0.0.1") || strings.HasPrefix(remoteIP, "[::1]") || strings.HasPrefix(remoteIP, "localhost") {
-			saveCredentialsToDotEnv(clientID, apiKey)
-		}
+		// .env is only ever written from a trusted (localhost) origin; the handler
+		// already requires isAdminRequest, so save unconditionally here.
+		saveCredentialsToDotEnv(clientID, apiKey)
 
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]string{
@@ -2943,6 +2957,7 @@ func main() {
 	mux.Handle("/api/ai/sanity-check", observe(cfg, sanityCheckHandler(cfg)))
 	mux.Handle("/api/ai/fix-grammar", observe(cfg, fixGrammarHandler(cfg)))
 	mux.Handle("/api/admin/login", observe(cfg, adminLoginHandler(cfg)))
+	mux.Handle("/api/admin/status", observe(cfg, adminStatusHandler(cfg)))
 	mux.Handle("/api/admin/gdrive-credentials", observe(cfg, adminGDriveCredentialsHandler(cfg)))
 	mux.Handle("/admin/errors", observe(cfg, axiomErrorsHandler(tmpl, cfg, navConfigJS)))
 	mux.Handle("/", observe(cfg, homeHandler(tmpl, cfg, navConfigJS)))

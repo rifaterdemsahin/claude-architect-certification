@@ -611,3 +611,16 @@
     display: none;
   }
 }
+
+/* ================================================================
+   🛡️ Sign-in gate (fail-closed) — shared/nav.js stamps <body> with
+   `.is-admin` once /api/admin/status confirms the visitor is signed in.
+   Until then (and for any unsigned-in visitor) every destructive control
+   is HIDDEN. Pages opt destructive UI out with [data-require-admin]; the
+   common `.btn-del` class is gated too. This is UI-only hardening — the
+   server re-checks admin on every destructive endpoint regardless.
+   ================================================================ */
+body:not(.is-admin) [data-require-admin],
+body:not(.is-admin) .btn-del {
+  display: none !important;
+}

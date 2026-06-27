@@ -1,5 +1,27 @@
 # LLM Thinking Log
 
+## 2026-06-27 — 🔒 Site-wide sign-in gate for destructive buttons
+
+### 🎯 Objective
+`research/` (and ~26 other pages) rendered active 🗑 Delete / upload buttons to **any** visitor. The server's `/api/research/file` DELETE path had **no auth guard at all** — anyone on the deployed site could delete blobs. Make destructive UI inactive for unsigned-in visitors, on every page, and lock the server boundary too.
+
+### 🧭 Design choice
+Reuse the existing trust rule (localhost origin OR `admin_logged_in` cookie) — don't invent a new sign-in flow. Land the gate in `shared/nav.js`/`shared/nav.css` (already site-wide via the top-nav rule) so it covers every page without touching 26 files, and re-check on the server (UI hiding is hardening, not the boundary).
+
+### 🛠 Changes
+- **`cmd/server/main.go`** — extracted the duplicated localhost/cookie check into one `isAdminRequest(r)`; added `GET /api/admin/status` → `{admin:bool}`; guarded the `DELETE` branch of `researchFileHandler` with `isAdminRequest` (was unguarded); DRY'd the env-viewer and gdrive-credentials handlers onto the helper.
+- **`shared/nav.js`** — on load, fetches `/api/admin/status`, stamps `<body class="is-admin">` only when signed in, exposes `window.isAdmin` + `window.requireAdmin(action)`. Fail-closed immediately (destructive buttons start hidden via CSS).
+- **`shared/nav.css`** — `body:not(.is-admin) [data-require-admin], body:not(.is-admin) .btn-del { display:none !important; }`. Covers dynamically-injected cards.
+- **`5_Symbols/production/preprod/research/index.html`** — `data-require-admin` on the 🗑 button + `requireAdmin('delete files')` guard at the top of `deleteAsset()`.
+- **`agents.md`** — new site-wide rule (peer of "One Top Nav"): every destructive control is `data-require-admin` + `requireAdmin()`-guarded, every destructive handler calls `isAdminRequest(r)`.
+
+### ✅ Verification
+- `go build ./... && go vet ./...` green; `node -c shared/nav.js`; research inline-JS parses; root + research serve **HTTP 200**.
+- **End-to-end auth proof:** localhost → `{"admin":true}`, DELETE passes guard (reaches Azure); unsigned-in visitor (LAN-IP instance, no cookie) → `{"admin":false}`, DELETE → **401 Unauthorized**.
+
+### 📌 Adoption note
+The 25 other destructive pages now get the **UI hiding for free** the moment they add `data-require-admin` (CSS is global). Pages that drive deletes through Supabase `.delete()` should still add a `requireAdmin()` guard and rely on RLS server-side. The remaining pages will be retrofitted incrementally; the gate is already protecting them from showing `.btn-del` to unsigned-in visitors.
+
 ## 2026-06-27 — 🔁 Make the autonomous error loop actually run (daily + full-loop)
 
 ### 🎯 Objective

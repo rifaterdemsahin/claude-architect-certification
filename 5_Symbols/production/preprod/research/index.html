@@ -275,15 +275,19 @@ function fileUrl(container, name) {
   return '/api/research/file?container=' + container + '&name=' + encodeURIComponent(name);
 }
 
-// Delete-button markup for an asset card
+// Delete-button markup for an asset card.
+// data-require-admin hides it unless signed in (gated by shared/nav.js + nav.css).
 function delBtn(container, name) {
   const safe = name.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-  return `<div class="del-row"><button class="btn-del" onclick="deleteAsset('${container}','${safe}',event)" title="Permanently delete this file">🗑 Delete</button></div>`;
+  return `<div class="del-row"><button class="btn-del" data-require-admin onclick="deleteAsset('${container}','${safe}',event)" title="Permanently delete this file">🗑 Delete</button></div>`;
 }
 
-// Permanently delete an asset from its Azure container, then refresh the list
+// Permanently delete an asset from its Azure container, then refresh the list.
+// Guarded twice: the button is hidden when not signed in (CSS), and this
+// handler re-checks requireAdmin() before doing anything (defense in depth).
 async function deleteAsset(container, name, e) {
   if (e) e.stopPropagation();
+  if (!window.requireAdmin || !window.requireAdmin('delete files')) return;
   if (!confirm('🗑 Permanently delete "' + name + '"?\n\nThis removes the file from storage and cannot be undone.')) return;
   const btn = e && e.target && e.target.closest ? e.target.closest('.btn-del') : null;
   if (btn) { btn.disabled = true; btn.textContent = '⏳ Deleting…'; }
