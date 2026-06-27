@@ -327,6 +327,38 @@
     return isUrlActive(item.url);
   }
 
+  /* ---- cumulative sub-menu stats -----------------------------------------
+     Recursively counts every clickable link (leaf) reachable from a node,
+     plus how many visible top-level sections sit inside it. Both honour the
+     hideAfterDays rule so the displayed number always matches what is
+     actually rendered. The figures are computed LIVE at render time, so any
+     add/remove in navigation_config.json (or FALLBACK) is reflected
+     automatically on every page load — there is no hardcoded number to
+     keep in sync. ---------------------------------------------------------- */
+  function navItemVisible(node) {
+    return !(node && node.hideAfterDays && daysSinceLaunch >= node.hideAfterDays);
+  }
+
+  function countLeafLinks(node) {
+    if (!node || !navItemVisible(node)) return 0;
+    if (node.children && node.children.length) {
+      var n = 0;
+      for (var i = 0; i < node.children.length; i++) n += countLeafLinks(node.children[i]);
+      return n;
+    }
+    return (node.url && node.url !== 'divider') ? 1 : 0;
+  }
+
+  function countVisibleSections(node) {
+    if (!node || !node.children) return 0;
+    var n = 0;
+    for (var i = 0; i < node.children.length; i++) {
+      var c = node.children[i];
+      if (navItemVisible(c) && c.url !== 'divider') n++;
+    }
+    return n;
+  }
+
   /* ---- recursively render a non-top-level menu item ---------------------
      Items with children become nested subdropdowns; group headers are
      rendered as non-interactive section labels inside the current menu.
@@ -335,7 +367,9 @@
   function renderSubItem(item) {
     if (item.hideAfterDays && daysSinceLaunch >= item.hideAfterDays) return '';
     if (item.group) {
-      var h = '<div class="site-drop-group-header">' + item.label + '</div>';
+      var grpLinks = countLeafLinks(item);
+      var grpBadge = grpLinks ? ' <span class="site-nav-count site-nav-count--group">' + grpLinks + '</span>' : '';
+      var h = '<div class="site-drop-group-header">' + item.label + grpBadge + '</div>';
       if (item.children) {
         var visible = item.children.filter(function (c) {
           return !(c.hideAfterDays && daysSinceLaunch >= c.hideAfterDays);
@@ -350,8 +384,10 @@
       });
       if (!visible.length) return '';
       var active = isItemActive(item);
+      var subLinks = countLeafLinks(item);
       var h = '<div class="site-nav-subdropdown' + (active ? ' active' : '') + '">' +
-        '<span class="site-subdrop-trigger">' + item.label + ' &raquo;</span>' +
+        '<span class="site-subdrop-trigger">' + item.label +
+        ' <span class="site-nav-count">' + subLinks + '</span> &raquo;</span>' +
         '<div class="site-subdrop-menu">';
       visible.forEach(function (c) { h += renderSubItem(c); });
       h += '</div></div>';
@@ -439,8 +475,13 @@
           return !(c.hideAfterDays && daysSinceLaunch >= c.hideAfterDays);
         });
         if (!visible.length) return;
+        var totalLinks = countLeafLinks(item);
+        var sections = countVisibleSections(item);
+        var statText = totalLinks + ' link' + (totalLinks === 1 ? '' : 's') +
+          ' \u00b7 ' + sections + ' section' + (sections === 1 ? '' : 's');
         html += '<div class="site-nav-dropdown' + activeClass + '">' +
-          '<span class="site-drop-trigger">' + item.label + ' &#9662;</span>' +
+          '<span class="site-drop-trigger" data-stat="' + statText + '">' + item.label +
+          ' <span class="site-nav-count">' + totalLinks + '</span> &#9662;</span>' +
           '<div class="site-drop-menu">';
         visible.forEach(function (child) {
           html += renderSubItem(child);

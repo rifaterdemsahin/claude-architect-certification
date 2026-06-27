@@ -75,6 +75,79 @@
   color: #f3f4f6;
 }
 
+/* ================================================================
+   Cumulative sub-menu count badge + hover stats tooltip.
+   The count + breakdown text are injected by shared/nav.js from the
+   LIVE menu data (data-stat attribute), so the number always tracks
+   whatever is currently in navigation_config.json — no manual sync.
+   ================================================================ */
+.site-nav-dropdown .site-drop-trigger {
+  position: relative;
+}
+
+.site-nav-count {
+  display: inline-block;
+  min-width: 1.4em;
+  padding: 1px 7px;
+  margin-left: 4px;
+  font-size: 0.66rem;
+  font-weight: 700;
+  line-height: 1.45;
+  color: #c4b5fd;
+  background: rgba(139, 92, 246, 0.18);
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  border-radius: 999px;
+  text-align: center;
+  vertical-align: 1px;
+}
+
+.site-nav-count:hover {
+  color: #ddd6fe;
+  background: rgba(139, 92, 246, 0.32);
+}
+
+/* ================================================================
+   Sub-menu count badges — every nested menu that holds pages shows
+   how many it contains. Same live-count source as the top-level
+   badge (countLeafLinks in shared/nav.js), so the number updates
+   automatically whenever navigation_config.json changes.
+   ================================================================ */
+.site-subdrop-trigger .site-nav-count {
+  margin-right: 4px;
+  vertical-align: 1px;
+}
+
+.site-nav-count--group {
+  min-width: 1.15em;
+  padding: 0 5px;
+  font-size: 0.6rem;
+  margin-left: 4px;
+  background: rgba(139, 92, 246, 0.12);
+  border-color: rgba(139, 92, 246, 0.25);
+}
+
+/* Stats tooltip — only when the dropdown is closed (once open the items
+   are directly visible). Appears just below the trigger label. */
+.site-nav-dropdown:not(.open) .site-drop-trigger[data-stat]:hover::after {
+  content: attr(data-stat);
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  padding: 6px 12px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #f3f4f6;
+  background: rgba(15, 23, 42, 0.98);
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  z-index: 10002;
+}
+
 .site-nav-dropdown .site-drop-menu {
   display: none;
   position: absolute;

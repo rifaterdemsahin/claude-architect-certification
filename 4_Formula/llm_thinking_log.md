@@ -1,5 +1,61 @@
 # LLM Thinking Log
 
+## 2026-06-27 — 🧮 Nested Sub-Menu Count Badges (Part 2)
+
+### 🎯 Objective
+Extend the cumulative sub-menu count to every **nested sub-menu that holds pages** — not just the top-level dropdowns. Flyout sub-dropdowns (e.g. “1. ❓ Problem ▸”, “6. 📋 Planning ▸”, “🛠️ Tools ▸”) and inline group headers (e.g. “🐙 Code & Repo”, “1. 🧭 Strategy & Research”) should each show how many pages they contain.
+
+### 📐 Implementation
+1. **`shared/nav.js` `renderSubItem()`:** reused the existing live `countLeafLinks()` helper:
+   - **Group headers** (`item.group`) now render a subtle inline badge `<span class="site-nav-count site-nav-count--group">N</span>` after the label (only when `N > 0`).
+   - **Flyout sub-dropdowns** (`item.children`) now render the badge between the label and the `»` arrow: `… <span class="site-nav-count">N</span> &raquo;`.
+   - Leaf pages are untouched (they hold no children), so no badge is added to them.
+2. **`shared/nav.css`:** added `.site-subdrop-trigger .site-nav-count` spacing and a `.site-nav-count--group` variant (smaller, more muted purple) for the inline group-header badges.
+3. **Auto-update:** identical to Part 1 — counts are recomputed live from the menu tree on every render, so any future add/remove updates all nested badges with zero manual edits.
+
+### 🔢 Sample live nested counts (computed, not stored)
+- 🎬 Preprod ▸ 6. 📋 Planning = **14** (group headers: Strategy 3, Method 3, Standards 1, Readiness 3, Schedule 2, Reference 1)
+- 🎬 Preprod ▸ 🛠️ Tools = **23**
+- 📦 Post Prod ▸ 🎬 Content Assembly = **18**, 🎓 Certification & Proof = **8**, 🤝 Outreach = **3**, 🛠️ Tools = **7**
+
+### ✅ Verification
+- `node -c shared/nav.js` OK; `go build ./... && go vet ./...` pass.
+- Render simulation confirms flyout sub-dropdowns, group headers, and top-level totals all emit the badge markup; leaf pages correctly get none.
+- Local server serves updated `nav.js` (HTTP 200, `subLinks`/`grpBadge` present) and `nav.css` (HTTP 200, `.site-nav-count--group` present).
+
+### 📦 Files Changed
+- `shared/nav.js` — `renderSubItem()` now injects count badges for group headers + flyout sub-dropdowns.
+- `shared/nav.css` — `.site-nav-count--group` + `.site-subdrop-trigger .site-nav-count` styles.
+- `4_Formula/llm_thinking_log.md` — this entry.
+
+## 2026-06-27 — 🧮 Cumulative Sub-Menu Count Badge + Hover Stats on Top Nav
+
+### 🎯 Objective
+When hovering over a top-level menu item (e.g. 🎬 Preprod, 🎥 Production, 📦 Post Prod), surface a **cumulative** stat of how many sub-menus/links live inside it. The number must **auto-update** whenever items are added/removed — never hardcoded.
+
+### 📐 Implementation
+1. **Live counting (no hardcoded numbers):** Added `countLeafLinks(node)` (recursively sums every clickable leaf reachable from a node, skipping dividers and `hideAfterDays` items) and `countVisibleSections(node)` (visible top-level section count) to `shared/nav.js`. Both honour `hideAfterDays` so the displayed number always matches what is actually rendered.
+2. **At render time** in `buildNav`, each top-level dropdown computes `totalLinks` + `sections` from the live `items`/`children` data and emits:
+   - a small pill badge `<span class="site-nav-count">N</span>` on the trigger (always visible), and
+   - a `data-stat="N links · M sections"` attribute powering a pure-CSS hover tooltip.
+3. **Styling (`shared/nav.css`):** `.site-nav-count` purple glassmorphic pill (matches the `#8b5cf6` accent); a pure-CSS `::after` tooltip that appears below the trigger on hover, but **only when the dropdown is closed** (`.site-nav-dropdown:not(.open)`) so it never overlaps the open menu.
+4. **Auto-update guarantee:** figures are recomputed on every page load from `navigation_config.json` (or `FALLBACK`), so any future add/remove updates the count with zero manual edits — the "remember that" requirement.
+
+### 🔢 Current live counts (computed, not stored)
+- 🎬 Preprod → **61 links · 11 sections**
+- 🎥 Production → **12 links · 8 sections**
+- 📦 Post Prod → **36 links · 4 sections**
+
+### ✅ Verification
+- `node -c shared/nav.js` syntax OK; `go build ./... && go vet ./...` pass.
+- Simulated render confirms `data-stat` + badge markup emit correctly for all three top-level menus.
+- Local Go server serves `shared/nav.js` (HTTP 200, `countLeafLinks` + `data-stat` present) and `shared/nav.css` (HTTP 200, `site-nav-count` present).
+
+### 📦 Files Changed
+- `shared/nav.js` — counting helpers + trigger badge/`data-stat` injection.
+- `shared/nav.css` — `.site-nav-count` pill + `.site-drop-trigger[data-stat]:hover::after` tooltip.
+- `4_Formula/llm_thinking_log.md` — this entry.
+
 ## 2026-06-22 — 🤖 Database-Driven Candidate Architecture & Prompt Copy
 
 ### 🎯 Objective
