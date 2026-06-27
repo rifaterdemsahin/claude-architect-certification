@@ -305,7 +305,8 @@
 .site-drop-menu > .site-drop-group:first-child { margin-top: 0; }
 .site-drop-menu > .site-drop-group:last-child { margin-bottom: 0; }
 
-/* Banner header inside a group block — coloured by the group accent */
+/* Banner header inside a group block — coloured by the group accent.
+   Clickable: toggles the group open/closed (collapsible sub-menus). */
 .site-drop-group > .site-drop-group-header {
   color: var(--grp-accent, #9ca3af);
   background: var(--grp-soft, transparent);
@@ -316,6 +317,34 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: filter 0.15s;
+}
+.site-drop-group > .site-drop-group-header:hover {
+  filter: brightness(1.25);
+}
+.site-drop-group > .site-drop-group-header:focus-visible {
+  outline: 2px solid var(--grp-accent, #8b5cf6);
+  outline-offset: 1px;
+}
+/* Caret rotates: pointing down = expanded, right = collapsed */
+.site-drop-group-caret {
+  display: inline-block;
+  font-size: 0.65rem;
+  line-height: 1;
+  transform: rotate(90deg);
+  transition: transform 0.18s ease;
+}
+.site-drop-group.collapsed > .site-drop-group-header .site-drop-group-caret {
+  transform: rotate(0deg);
+}
+.site-drop-group-label {
+  flex: 1;
+}
+/* Collapsed group hides its body (links / sub-dropdowns) */
+.site-drop-group.collapsed > .site-drop-group-body {
+  display: none;
 }
 .site-drop-group > .site-drop-group-header:first-child {
   margin-top: 0;

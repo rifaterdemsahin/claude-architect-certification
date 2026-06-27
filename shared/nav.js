@@ -403,6 +403,38 @@
   ];
   window.SITE_NAV_GROUP_PALETTE = GROUP_PALETTE;
 
+  /* ---- Collapsible group state ------------------------------------------
+     Each coloured group inside a dropdown can be collapsed/expanded by
+     clicking its header. The open/closed choice is remembered per-group in
+     localStorage ('navGroupCollapsed') so it survives reloads and navigation.
+     Groups default to EXPANDED; a group that contains the active page is
+     always forced open so the current location is never hidden. ----------- */
+  var GROUP_STATE_KEY = 'navGroupCollapsed';
+
+  function makeGroupKey(label) {
+    return String(label || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  }
+
+  function readGroupState() {
+    try {
+      var raw = localStorage.getItem(GROUP_STATE_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch (e) { return {}; }
+  }
+
+  function isGroupCollapsed(key) {
+    var map = readGroupState();
+    return key in map ? !!map[key] : false; // default: expanded
+  }
+
+  function setGroupCollapsed(key, collapsed) {
+    try {
+      var map = readGroupState();
+      map[key] = !!collapsed;
+      localStorage.setItem(GROUP_STATE_KEY, JSON.stringify(map));
+    } catch (e) {}
+  }
+
   /* ---- recursively render a non-top-level menu item ---------------------
      renderChildren() walks a list and hands each {group:true} node the next
      palette slot (by ordinal), so adjacent groups never share a colour.
@@ -437,10 +469,16 @@
     var grpLinks = countLeafLinks(item);
     var grpBadge = grpLinks ? ' <span class="site-nav-count site-nav-count--group">' + grpLinks + '</span>' : '';
     var vars = '--grp-accent:' + accent.solid + ';--grp-soft:' + accent.soft + ';--grp-bar:' + accent.bar + ';';
-    var h = '<div class="site-drop-group" style="' + vars + '">' +
-      '<div class="site-drop-group-header">' + item.label + grpBadge + '</div>';
+    // Active group is always forced open so the current page is never hidden.
+    var groupKey = makeGroupKey(item.label);
+    var collapsed = !isItemActive(item) && isGroupCollapsed(groupKey);
+    var h = '<div class="site-drop-group' + (collapsed ? ' collapsed' : '') + '" style="' + vars + '" data-group-key="' + groupKey + '">' +
+      '<div class="site-drop-group-header" role="button" tabindex="0" aria-expanded="' + (collapsed ? 'false' : 'true') + '">' +
+      '<span class="site-drop-group-caret" aria-hidden="true">&#9656;</span>' +
+      '<span class="site-drop-group-label">' + item.label + '</span>' + grpBadge + '</div>' +
+      '<div class="site-drop-group-body">';
     h += renderChildren(visibleChildrenOf(item));
-    h += '</div>';
+    h += '</div></div>';
     return h;
   }
 
@@ -811,6 +849,21 @@
 
     // Click trigger to toggle open/close
     nav.addEventListener('click', function (e) {
+      // Collapsible group header (inside a dropdown) — toggle + persist.
+      var grpHeader = e.target.closest('.site-drop-group-header');
+      if (grpHeader) {
+        e.preventDefault();
+        e.stopPropagation();
+        var grp = grpHeader.closest('.site-drop-group');
+        if (grp) {
+          var nowCollapsed = !grp.classList.contains('collapsed');
+          grp.classList.toggle('collapsed', nowCollapsed);
+          grpHeader.setAttribute('aria-expanded', nowCollapsed ? 'false' : 'true');
+          setGroupCollapsed(grp.getAttribute('data-group-key'), nowCollapsed);
+        }
+        return;
+      }
+
       // Handle subdropdown triggers first
       var subTrigger = e.target.closest('.site-subdrop-trigger');
       if (subTrigger) {
@@ -874,6 +927,15 @@
           }
         }
       }
+    });
+
+    // Keyboard toggle for collapsible group headers (Enter / Space).
+    nav.addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+      var grpHeader = e.target.closest('.site-drop-group-header');
+      if (!grpHeader) return;
+      e.preventDefault();
+      grpHeader.click();
     });
 
     // Close all when clicking outside the nav
