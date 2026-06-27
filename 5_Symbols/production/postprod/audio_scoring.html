@@ -197,6 +197,105 @@
     .resource-desc { font-size: 0.85rem; color: var(--text-muted); }
     .resources-list { display: flex; flex-direction: column; gap: 12px; }
     .empty-state { text-align: center; padding: 40px; color: var(--text-muted); }
+
+    /* ── 📖 Guide: first principles, scales, scoring, videos ── */
+    .guide-card {
+      background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 18px;
+      padding: 22px 24px; margin-bottom: 18px;
+    }
+    .guide-card h3 {
+      font-family: var(--font-title); font-size: 1.05rem; font-weight: 700; margin-bottom: 10px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .guide-card p, .guide-card li { font-size: 0.9rem; color: var(--text-muted); line-height: 1.7; }
+    .guide-card ul { padding-left: 20px; margin: 8px 0; }
+    .guide-card strong { color: var(--text-main); }
+    .guide-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; }
+    .pillars { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 10px 0; }
+    .pillar { background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 12px 14px; }
+    .pillar .p-icon { font-size: 1.3rem; }
+    .pillar .p-name { font-weight: 700; font-size: 0.9rem; margin: 2px 0; color: var(--text-main); }
+    .pillar .p-desc { font-size: 0.78rem; color: var(--text-muted); }
+
+    /* Scale note rows */
+    .scale-block { display: flex; flex-direction: column; gap: 10px; margin: 8px 0 4px; }
+    .scale-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .scale-label { font-weight: 700; font-size: 0.82rem; min-width: 92px; color: var(--text-main); }
+    .scale-feel { font-size: 0.74rem; color: var(--text-muted); font-style: italic; }
+    .notes { display: flex; gap: 6px; flex-wrap: wrap; }
+    .note-pill {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 34px; padding: 4px 8px; border-radius: 8px; font-size: 0.78rem; font-weight: 700;
+      font-family: 'SF Mono', ui-monospace, monospace; border: 1px solid rgba(255,255,255,0.12);
+    }
+    .note-major { background: rgba(16,185,129,0.16); color: #6ee7b7; border-color: rgba(16,185,129,0.3); }
+    .note-minor { background: rgba(59,130,246,0.16); color: #93c5fd; border-color: rgba(59,130,246,0.3); }
+    .note-root { outline: 2px solid rgba(245,158,11,0.6); }
+    .note-diff { background: rgba(245,158,11,0.18); color: #fde68a; border-color: rgba(245,158,11,0.4); }
+    .legend { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 10px; font-size: 0.74rem; color: var(--text-muted); }
+    .legend span { display: inline-flex; align-items: center; gap: 5px; }
+    .legend i { width: 12px; height: 12px; border-radius: 4px; display: inline-block; }
+
+    /* Scoring framework */
+    .framework { counter-reset: step; display: flex; flex-direction: column; gap: 10px; margin: 8px 0; }
+    .fw-step {
+      background: rgba(0,0,0,0.22); border: 1px solid rgba(255,255,255,0.06); border-left: 3px solid var(--primary);
+      border-radius: 10px; padding: 12px 14px; position: relative;
+    }
+    .fw-step::before { counter-increment: step; content: counter(step); position: absolute; left: -14px; top: 12px;
+      width: 26px; height: 26px; border-radius: 50%; background: var(--primary); color: #fff; font-weight: 800;
+      font-size: 0.8rem; display: flex; align-items: center; justify-content: center; }
+    .fw-step strong { display: block; margin-bottom: 2px; color: var(--text-main); }
+    .fw-step span { font-size: 0.82rem; color: var(--text-muted); }
+
+    .ref-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.82rem; }
+    .ref-table th, .ref-table td { padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,0.06); text-align: left; vertical-align: top; }
+    .ref-table th { color: var(--text-muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; }
+    .ref-table td:first-child { font-weight: 700; color: var(--text-main); }
+    .key-chip { display: inline-block; padding: 1px 8px; border-radius: 6px; font-size: 0.74rem; font-weight: 700; }
+    .key-major { background: rgba(16,185,129,0.15); color: #6ee7b7; }
+    .key-minor { background: rgba(59,130,246,0.15); color: #93c5fd; }
+
+    /* Prompt examples */
+    .prompt-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; margin-top: 10px; }
+    .prompt-example { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px 16px; }
+    .prompt-example .pe-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .prompt-example .pe-tag { font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 6px; }
+    .prompt-example .pe-tag.sfx { background: rgba(59,130,246,0.16); color: #93c5fd; }
+    .prompt-example .pe-tag.music { background: rgba(139,92,246,0.16); color: #c4b5fd; }
+    .prompt-example .pe-title { font-weight: 700; font-size: 0.86rem; color: var(--text-main); }
+    .prompt-example pre {
+      white-space: pre-wrap; word-break: break-word; margin: 0; padding: 10px 12px; background: rgba(0,0,0,0.4);
+      border-radius: 8px; font-size: 0.76rem; line-height: 1.55; color: #d1d5db;
+      font-family: 'SF Mono', ui-monospace, monospace;
+    }
+    .prompt-example .pe-actions { margin-top: 8px; display: flex; gap: 8px; }
+    .prompt-example .pe-actions .btn { font-size: 0.72rem; padding: 5px 10px; }
+
+    /* Embedded video lessons */
+    .video-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 10px; }
+    .video-card { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; overflow: hidden; transition: all 0.2s; }
+    .video-card:hover { border-color: var(--primary); transform: translateY(-2px); }
+    .video-embed { position: relative; width: 100%; aspect-ratio: 16/9; background: #000; }
+    .video-embed iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+    .video-card .v-meta { padding: 10px 12px; }
+    .video-card .v-title { font-weight: 700; font-size: 0.84rem; color: var(--text-main); line-height: 1.4; }
+    .video-card .v-channel { font-size: 0.74rem; color: var(--text-muted); margin-top: 3px; }
+    .channel-pills { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+    .channel-pills a { font-size: 0.76rem; padding: 5px 12px; border-radius: 100px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: var(--text-muted); text-decoration: none; transition: all 0.2s; }
+    .channel-pills a:hover { background: rgba(139,92,246,0.18); border-color: rgba(139,92,246,0.4); color: #c4b5fd; }
+
+    /* Collapsible group body */
+    .group.collapsed > *:not(.group-heading) { display: none; }
+    .group-heading { cursor: pointer; user-select: none; }
+    .collapse-icon { transition: transform 0.25s ease; font-size: 0.9rem; color: var(--text-muted); }
+    .group.collapsed .collapse-icon { transform: rotate(-90deg); }
+    .guide-btn {
+      display: inline-flex; align-items: center; gap: 6px; padding: 12px 18px; font-size: 0.9rem; font-weight: 700;
+      font-family: var(--font-body); border-radius: 12px; cursor: pointer; color: #c4b5fd;
+      background: rgba(139,92,246,0.14); border: 1px solid rgba(139,92,246,0.35); transition: all 0.2s; white-space: nowrap;
+    }
+    .guide-btn:hover { background: rgba(139,92,246,0.28); transform: translateY(-1px); }
     .empty-state .empty-icon { font-size: 2.5rem; margin-bottom: 10px; opacity: 0.4; }
     footer { text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
     @media (max-width: 768px) {
@@ -224,8 +323,96 @@
     <div class="selector-bar">
       <select id="moduleSelect"><option value="">— Select Module —</option></select>
       <select id="videoSelect"><option value="">— Select Video —</option></select>
+      <button class="guide-btn" onclick="toggleGuide(true)">📖 Guide</button>
     </div>
     <div class="conn-indicator" id="connStatus">⏳ Connecting to Supabase…</div>
+  </div>
+
+  <!-- 📖 Emotions & Music Scoring Guide (collapsible) -->
+  <div class="group collapsed" id="guideGroup">
+    <div class="group-heading" onclick="toggleGuide()">📖 Emotions &amp; Music Scoring Guide <span class="collapse-icon">▼</span></div>
+
+    <!-- First principles of music -->
+    <div class="guide-card">
+      <h3>1️⃣ First Principles — What Music Actually Is</h3>
+      <p>Music is <strong>organised sound moving through time</strong>. Every emotional feeling a score produces comes from just four raw ingredients. Master these and you can score any sentence to feel exactly the way you want.</p>
+      <div class="pillars">
+        <div class="pillar"><div class="p-icon">🎵</div><div class="p-name">Pitch</div><div class="p-desc">How high/low a note is (frequency in Hz). Notes are named A–G. Pitch + pitch relationships = melody &amp; harmony.</div></div>
+        <div class="pillar"><div class="p-icon">🥁</div><div class="p-name">Rhythm</div><div class="p-desc">When notes happen — the pulse. Tempo is measured in <strong>BPM</strong> (beats per minute). Faster = energy.</div></div>
+        <div class="pillar"><div class="p-icon">🔊</div><div class="p-name">Dynamics</div><div class="p-desc">How loud or soft. This is your <strong>intensity</strong> dial — sparse &amp; quiet feels intimate; loud &amp; full feels epic.</div></div>
+        <div class="pillar"><div class="p-icon">🌈</div><div class="p-name">Tonality (Key)</div><div class="p-desc">The emotional colour of the music — set by the <strong>scale</strong>. The big switch: <strong>major vs minor</strong> (see next card).</div></div>
+      </div>
+      <p style="margin-top:8px;">💡 <strong>Emotion = Tonality (key) × Intensity (dynamics) × Tempo (BPM).</strong> Change any one and the feeling flips. Scoring is just choosing these three deliberately per sentence.</p>
+    </div>
+
+    <!-- Major vs Minor -->
+    <div class="guide-card">
+      <h3>2️⃣ Major vs Minor — The Core Emotional Switch</h3>
+      <p>A <strong>scale</strong> is a ladder of 7 notes inside one octave. <strong>Major</strong> and <strong>minor</strong> use the same 7 letters but place the small steps (<em>half-steps</em>) in different spots — and that tiny shift is what flips bright → dark.</p>
+      <p style="font-size:0.8rem;"><strong>Interval recipe</strong> (W = whole step = 2 semitones, H = half step = 1 semitone):</p>
+      <div class="scale-block">
+        <div class="scale-row">
+          <span class="scale-label">C Major</span>
+          <span class="notes">
+            <span class="note-pill note-major note-root">C</span><span class="note-pill note-major">D</span><span class="note-pill note-major">E</span><span class="note-pill note-major">F</span><span class="note-pill note-major">G</span><span class="note-pill note-major">A</span><span class="note-pill note-major">B</span><span class="note-pill note-major note-root">C</span>
+          </span>
+          <span class="scale-feel">W-W-H-W-W-W-H → bright, resolved, happy, triumphant</span>
+        </div>
+        <div class="scale-row">
+          <span class="scale-label">C Minor</span>
+          <span class="notes">
+            <span class="note-pill note-minor note-root">C</span><span class="note-pill note-minor">D</span><span class="note-pill note-minor note-diff">E♭</span><span class="note-pill note-minor">F</span><span class="note-pill note-minor">G</span><span class="note-pill note-minor note-diff">A♭</span><span class="note-pill note-minor">B♭</span><span class="note-pill note-minor note-root">C</span>
+          </span>
+          <span class="scale-feel">W-H-W-W-H-W-W → dark, tense, serious, melancholic</span>
+        </div>
+      </div>
+      <div class="legend">
+        <span><i style="background:rgba(16,185,129,0.5);"></i> Major notes</span>
+        <span><i style="background:rgba(59,130,246,0.5);"></i> Minor notes</span>
+        <span><i style="background:rgba(245,158,11,0.6);"></i> The 3 lowered notes (E♭, A♭, B♭) that make it minor</span>
+        <span><i style="outline:2px solid rgba(245,158,11,0.6);"></i> Root (home note)</span>
+      </div>
+      <p style="margin-top:10px;"><strong>How to choose:</strong> positive, curious, optimistic, epic → <span class="key-chip key-major">MAJOR</span>. Serious, cautionary, reflective, mysterious, sad → <span class="key-chip key-minor">MINOR</span>. When unsure, minor is the safer bet for tech/explainer content — it sounds authoritative without being cheesy.</p>
+    </div>
+
+    <!-- Decision framework -->
+    <div class="guide-card">
+      <h3>3️⃣ How to Select &amp; Score Music (5-Step Framework)</h3>
+      <div class="framework">
+        <div class="fw-step"><strong>Name the emotion</strong><span>Read the sentence and write one feeling word in the <em>Emotion</em> field (e.g. “curious”, “cautionary”, “triumphant”).</span></div>
+        <div class="fw-step"><strong>Pick the key</strong><span>Map the emotion to major or minor using the table below.</span></div>
+        <div class="fw-step"><strong>Set the intensity</strong><span>Low → 1–2 instruments, sparse (piano, soft pad). Medium → 3–5 (add pulse/bass). High → full ensemble, loud, driving.</span></div>
+        <div class="fw-step"><strong>Set the pace (BPM)</strong><span>Slow 60–80 (calm, reflective) · Normal 90–110 (steady explainer) · Fast 120–140 (energetic, urgent).</span></div>
+        <div class="fw-step"><strong>Build the prompt</strong><span>Press 🎵 Music Prompt — the modal assembles key + intensity + pace + mood into a ready prompt. Review, edit, then generate.</span></div>
+      </div>
+      <table class="ref-table">
+        <thead><tr><th>Emotion</th><th>Key</th><th>Intensity</th><th>Pace (BPM)</th><th>Instrumentation cue</th></tr></thead>
+        <tbody>
+          <tr><td>Curious / learning</td><td><span class="key-chip key-major">Major</span></td><td>low–medium</td><td>normal 100</td><td>Light piano + soft synth pad</td></tr>
+          <tr><td>Triumphant / reveal</td><td><span class="key-chip key-major">Major</span></td><td>high</td><td>normal 110</td><td>Full orchestra / big synth brass</td></tr>
+          <tr><td>Cautionary / risk</td><td><span class="key-chip key-minor">Minor</span></td><td>medium–high</td><td>slow 80</td><td>Low strings + pulsing bass</td></tr>
+          <tr><td>Reflective / insight</td><td><span class="key-chip key-minor">Minor</span></td><td>low</td><td>slow 70</td><td>Solo piano, reverb</td></tr>
+          <tr><td>Mysterious / unknown</td><td><span class="key-chip key-minor">Minor</span></td><td>low–medium</td><td>slow 75</td><td>Drone + detuned pad</td></tr>
+          <tr><td>Urgent / action</td><td><span class="key-chip key-minor">Minor</span></td><td>high</td><td>fast 130</td><td>Driving percussion + arps</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Example prompts -->
+    <div class="guide-card">
+      <h3>4️⃣ Example Prompts You Can Copy</h3>
+      <p>These plug straight into the 🎚️ / 🎵 prompt modal. Swap the emotion/key to taste.</p>
+      <div class="prompt-grid" id="promptExampleGrid"></div>
+    </div>
+
+    <!-- Embedded video lessons -->
+    <div class="guide-card">
+      <h3>5️⃣ Learn to Score — Video Lessons</h3>
+      <p>Curated lessons on music first principles, major vs minor, and scoring for video. Embeds open inline; if a video is region-restricted, click the title to watch on YouTube.</p>
+      <div class="video-grid" id="videoLessonGrid"></div>
+      <p style="margin-top:14px;font-size:0.8rem;">📺 <strong>Follow these channels for more:</strong></p>
+      <div class="channel-pills" id="channelPills"></div>
+    </div>
   </div>
 
   <!-- 2) Video Script -->
@@ -908,9 +1095,108 @@ document.getElementById('videoSelect').addEventListener('change', async function
 });
 
 // ── Init ──────────────────────────────────────────────────────────────────────
+// ── 📖 Guide: example prompts + embedded video lessons + channels ──────────
+// Each video uses YouTube's search-embed player (listType=search) so the lesson
+// is ALWAYS on-topic and never breaks on a stale/region-locked video ID.
+// To pin one specific video instead, swap the iframe src to:
+//   'https://www.youtube-nocookie.com/embed/<VIDEO_ID>'
+const GUIDE_VIDEOS = [
+  { title: 'Music Theory First Principles (the basics)', channel: 'YouTube search', q: 'music theory basics explained for beginners' },
+  { title: 'Major vs Minor Keys — Why They Sound Different', channel: 'YouTube search', q: 'major vs minor keys why they sound different' },
+  { title: 'Scales, Notes & Intervals Explained', channel: 'YouTube search', q: 'musical scales notes and intervals explained' },
+  { title: 'How to Score Music for Film & Video', channel: 'YouTube search', q: 'how to score music for film and video beginners' },
+  { title: 'Matching Music Emotion to a Scene', channel: 'YouTube search', q: 'how to match music emotion mood to a film scene' },
+  { title: 'Sound Design & Foley for Video', channel: 'YouTube search', q: 'sound design and foley basics for video' }
+];
+
+// Real, well-known music-education & scoring channels (handles always resolve).
+const GUIDE_CHANNELS = [
+  { name: '🎵 Michael New (music theory)', href: 'https://www.youtube.com/@MichaelNew' },
+  { name: '🎸 Rick Beato', href: 'https://www.youtube.com/@RickBeato' },
+  { name: '🎼 12tone', href: 'https://www.youtube.com/@12tonevideos' },
+  { name: '🎹 Andrew Huang', href: 'https://www.youtube.com/@AndrewHuang' },
+  { name: '🎬 Soundfly (scoring)', href: 'https://www.youtube.com/@Soundfly' },
+  { name: '🔊 Indy Mogul (sound)', href: 'https://www.youtube.com/@IndyMogul' }
+];
+
+const GUIDE_PROMPTS = [
+  { tag: 'music', title: 'Curious explainer (major)', text: 'Background music bed for a tech tutorial. Key: C major. Mood: curious, optimistic, light. Tempo: ~100 BPM. Instrumentation: clean electric piano + soft sine pad, gentle fingerpicked motif. Loopable, low dynamics, sits under narration. Royalty-free, YouTube-safe. Tags: uplifting, minimal, explainer, 100bpm, C-major.' },
+  { tag: 'music', title: 'Cautionary risk (minor)', text: 'Background music bed for a tech tutorial. Key: C minor. Mood: cautionary, serious, building tension. Tempo: ~80 BPM. Instrumentation: low sustained strings + pulsing sub-bass + soft tick. Sparse, suspenseful, never overwhelms voice. Loopable, clean intro/outro. Tags: serious, tension, 80bpm, C-minor.' },
+  { tag: 'music', title: 'Triumphant reveal (major)', text: 'Short musical sting for a big reveal. Key: E♭ major. Mood: triumphant, bright, resolved. Tempo: ~110 BPM. Instrumentation: full synth-brass chord, orchestral hit, bright bell sparkle on the downbeat. ~3 seconds, clean tail. Royalty-free. Tags: reveal, stinger, 110bpm, Eb-major.' },
+  { tag: 'sfx', title: 'UI click + data blip', text: 'Two clean UI sound effects for a tech tutorial. (1) Soft mechanical click pop, ~40 ms, mid-pitch, gentle transient. (2) Bright data-blip chime, two ascending sine notes (C5→G5), ~120 ms, smooth decay. Modern, non-distracting, sit under narration. Output one bullet per SFX with exact timing.' },
+  { tag: 'sfx', title: 'Whoosh transition', text: 'One transition whoosh for a scene cut. ~600 ms, rising filtered noise sweep, low-to-high, subtle reverb tail, ends on a soft thud. Clean, modern, YouTube-safe.' },
+  { tag: 'sfx', title: 'Success / confirmation ding', text: 'One confirmation sound for a completed action. Bright ascending major arpeggio (C-E-G), bell-like, ~500 ms total, warm decay, optimistic. Non-intrusive, sits under voice.' }
+];
+
+function renderGuideVideos() {
+  const grid = document.getElementById('videoLessonGrid');
+  if (!grid) return;
+  grid.innerHTML = GUIDE_VIDEOS.map(v => {
+    const watchUrl = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(v.q);
+    const embedSrc = 'https://www.youtube.com/embed?listType=search&list=' + encodeURIComponent(v.q);
+    return `<div class="video-card">
+      <div class="video-embed"><iframe src="${embedSrc}" title="${esc(v.title)}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
+      <div class="v-meta">
+        <a href="${watchUrl}" target="_blank" rel="noopener" class="v-title" style="text-decoration:none;color:inherit;">${esc(v.title)} <span style="color:var(--secondary);font-size:0.7rem;">↗</span></a>
+        <div class="v-channel">${esc(v.channel)} · click title for full search</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderChannelPills() {
+  const el = document.getElementById('channelPills');
+  if (!el) return;
+  el.innerHTML = GUIDE_CHANNELS.map(c => `<a href="${c.href}" target="_blank" rel="noopener">${esc(c.name)}</a>`).join('');
+}
+
+function renderPromptExamples() {
+  const grid = document.getElementById('promptExampleGrid');
+  if (!grid) return;
+  grid.innerHTML = GUIDE_PROMPTS.map((p, i) => `<div class="prompt-example">
+    <div class="pe-head">
+      <span class="pe-title">${esc(p.title)}</span>
+      <span class="pe-tag ${p.tag}">${p.tag === 'sfx' ? '🎚️ SFX' : '🎵 MUSIC'}</span>
+    </div>
+    <pre>${esc(p.text)}</pre>
+    <div class="pe-actions">
+      <button class="btn btn-ghost" style="background:rgba(255,255,255,0.08);" onclick="copyGuidePrompt(${i}, this)">📋 Copy</button>
+      <a class="btn btn-sfx" href="${p.tag === 'sfx' ? 'https://elevenlabs.io/app/sound-effects' : 'https://suno.com/create'}" target="_blank" rel="noopener">${p.tag === 'sfx' ? '🔊 ElevenLabs ↗' : '🎵 Suno ↗'}</a>
+    </div>
+  </div>`).join('');
+}
+
+function copyGuidePrompt(i, btn) {
+  const text = GUIDE_PROMPTS[i].text;
+  navigator.clipboard.writeText(text).then(() => {
+    const orig = btn.innerHTML; btn.innerHTML = '✅ Copied';
+    setTimeout(() => { btn.innerHTML = orig; }, 1400);
+    showToast('Example prompt copied to clipboard');
+  }).catch(() => showToast('Press ⌘/Ctrl+C to copy', true));
+}
+
+function toggleGuide(forceOpen) {
+  const g = document.getElementById('guideGroup');
+  if (!g) return;
+  const willOpen = forceOpen === true ? true : g.classList.contains('collapsed');
+  g.classList.toggle('collapsed', !willOpen);
+  try { localStorage.setItem('audio_guide_collapsed', willOpen ? '0' : '1'); } catch (_) {}
+  if (willOpen) g.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
 (async () => {
   await bootstrapCreds();
   setConn('⏳ Select a module and video to load the script and sentence emotion map.', false);
+  // Render the guide content (it lives outside the filtered groups, so always available).
+  renderGuideVideos();
+  renderChannelPills();
+  renderPromptExamples();
+  // Restore the guide collapsed state (default collapsed).
+  try {
+    if (localStorage.getItem('audio_guide_collapsed') === '0') {
+      document.getElementById('guideGroup').classList.remove('collapsed');
+    }
+  } catch (_) {}
   await loadModules();
 })();
 </script>

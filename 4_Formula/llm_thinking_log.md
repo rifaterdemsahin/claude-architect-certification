@@ -1,5 +1,32 @@
 # LLM Thinking Log
 
+## 2026-06-27 — 📖 Audio Scoring: Emotions & Music Scoring Guide (first principles + videos)
+
+### 🎯 Objective
+On `audio_scoring.html`, add a guide for emotions that goes to **first principles of music**, shows **major and minor notes** and how to **select and score music**, gives **example prompts**, and **embeds YouTube videos** on the subject so the instructor can learn to score.
+
+### 📐 Implementation
+Added a collapsible **📖 Emotions & Music Scoring Guide** section (always available, regardless of module/video filter) plus a quick **📖 Guide** button in the filter bar. The guide has five cards:
+1. **First Principles** — music = organised sound through time; the 4 raw ingredients (Pitch, Rhythm, Dynamics, Tonality). The unifying formula: *Emotion = Tonality (key) × Intensity (dynamics) × Tempo (BPM)*.
+2. **Major vs Minor** — visual note-pill comparison of the C Major (C D E F G A B) and C Minor (C D E♭ F G A♭ B♭) scales, with the interval recipes (W-W-H-W-W-W-H vs W-H-W-W-H-W-W) and the 3 lowered notes (E♭/A♭/B♭) highlighted. Legend + a major/minor selection rule.
+3. **5-Step Scoring Framework** — name emotion → pick key → set intensity → set pace (BPM ranges) → build prompt; plus a reference table mapping common emotions → key → intensity → BPM → instrumentation cue.
+4. **Example Prompts** — 6 copy-ready prompts (3 music beds across major/minor + 3 SFX) rendered from a `GUIDE_PROMPTS` array, each with a 📋 Copy button and a deep link to ElevenLabs (SFX) / Suno (music).
+5. **Learn to Score — Video Lessons** — a responsive grid of **embedded YouTube players**. Used YouTube's `listType=search` embed (`youtube.com/embed?listType=search&list=<q>`) so each lesson is **always on-topic and never breaks** on a stale or region-locked video ID; each card also has a click-through to the full YouTube search. Plus a row of named-channel follow pills (Michael New, Rick Beato, 12tone, Andrew Huang, Soundfly, Indy Mogul) via @handle links that always resolve.
+
+### 🧠 Design notes
+- **Robust embeds without guessing IDs:** the `listType=search` player guarantees real, current videos on each exact lesson topic, sidestepping the risk of a wrong/hardcoded video ID showing "Video unavailable". A code comment documents how to pin a specific video by ID (`youtube-nocookie.com/embed/<ID>`) if desired.
+- **Collapsible + persisted:** the guide defaults to collapsed so it never buries the working table; the filter-bar button expands + smooth-scrolls to it; collapsed state is remembered in `localStorage`.
+- **Self-contained render:** videos, channels, and prompts render from JS arrays at load, so adding/removing a lesson is a one-line edit.
+
+### ✅ Verification
+- JS syntax OK (single inline block); `go build ./... && go vet ./...` pass.
+- Fresh local server serves the page HTTP 200 with all five guide headings, the guide button, and the embed player builder present.
+- Array sanity: 6 videos, 6 channels, 6 prompts; embed `src` + watch `url` builders correct; all 6 channel @handle hrefs resolve.
+
+### 📦 Files Changed
+- `5_Symbols/production/postprod/audio_scoring.html` — guide section (CSS + HTML + JS: videos/channels/prompts + toggle).
+- `4_Formula/llm_thinking_log.md` — this entry.
+
 ## 2026-06-27 — 🎭 Audio Scoring: Module/Video Filter + Sentence Audio Emotion Map
 
 ### 🎯 Objective
