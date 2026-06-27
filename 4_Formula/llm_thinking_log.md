@@ -1,5 +1,21 @@
 # LLM Thinking Log
 
+## 2026-06-27 — 📊 Marp Slide Generator Page
+
+### 🎯 Objective
+Create a Slide Generator page under `5_Symbols/production/postprod/slide_generator.html` using the Marp markdown presentation system. The UI should be inspired by the Image Generator page, allowing users to filter by module and video, and generate a `.md` file formatted for Marp.
+
+### 📐 Implementation
+1. **`slide_generator.html`**: A glassmorphic UI matching `image_generator.html`, reading `modules`, `videos`, and `sentences`.
+2. **Marp Generation**: Each sentence or scene can be generated into a slide (separated by `---`). Includes brand styling and background images from `sentence_graphics` if available.
+3. **Download**: The UI builds the Marp markdown string dynamically and offers a "Download .md" button.
+4. **Supabase Tables (Proposed)**: 
+   - `presentations`: `id` (uuid, pk), `video_id` (uuid, FK), `markdown_content` (text), `created_at` (timestamp), `updated_at` (timestamp).
+5. **Navigation**: Wired into `navigation_config.json`, `index.html` fallback, `markdown_renderer.html` fallback, and `shared/nav.js` under `Post Prod > 2. Visuals & Graphics`.
+
+### ✅ Verification
+- Page created and linked successfully.
+
 ## 2026-06-27 — 🤖 Axiom Error to GitHub Issue Pipeline
 
 ### 🎯 Objective
@@ -2091,3 +2107,29 @@ This guarantees uniqueness both among the new candidates and against existing no
   - Do: GitHub repo creation, hands-on implementation with explanations.
   - Apply: Reversal shots with lower thirds, graphics, and animations to ease learning.
 - Commit and push to GitHub.
+
+### 📅 2026-06-27 — Regroup Post Prod > Content Assembly Menu (Logical Groups, A-Z, Emojis)
+**Objective:** Reorganise the flat 18-item `📦 Post Prod > 🎬 Content Assembly` menu into logical, emoji-labelled groups with items sorted A-Z within each group; sync the change across `navigation_config.json` and every fallback config.
+
+**Approach & Reasoning:**
+- The Content Assembly menu had grown to 18 sequentially-numbered items (1–18) with no structure, making it hard to scan. Re-grouped them into 6 functional buckets, reusing the existing `{ "group": true, … }` nested-children pattern already proven by the Preprod `📋 Planning` menu (so `shared/nav.js` renders them natively as a sub-flyout — no new rendering code).
+- **Grouping logic (workflow order):**
+  1. 🎬 Editing & Assembly — the core deliverable (playlist, edit list, checklist).
+  2. 🎨 Visuals & Graphics — image/SVG/lower-thirds/greenscreen generation.
+  3. 🎵 Audio & Music — audio scoring + pre-edit music/SFX score.
+  4. 🤖 AI Generation — the five AI gen tools (avatar, localization, script, b-roll, voiceover).
+  5. 🧠 Memory & Learning — memory palace builder.
+  6. 🧰 Utilities & Ops — cost calculator, customer discovery, Google Drive sync (catch-all ops bucket).
+- Within each group, items are sorted **A–Z** (emoji ignored for sort order), and every group/item carries a scannable emoji per the project emoji rule.
+- Used the existing numbered-group convention (`1. 🎬 …`) for the group headers to match the Planning menu, while items dropped the old flat 1–18 numbering (consistent with how Planning items are un-numbered inside groups).
+- Synced the new structure to all 6 places the menu lives:
+  - JSON (full descriptions, multi-line): `navigation_config.json`, `index.html`, `home.html`, `markdown_renderer.html`.
+  - JS fallbacks (compact, description-free to match `nav.js` style): `shared/nav.js`, `5_Symbols/course_src/templates/markdown_renderer.html`.
+  - This also fixed pre-existing staleness — several fallbacks previously only carried 4 or 10 of the 18 items.
+- Implemented via a one-off Python script (`/tmp/regroup_content_assembly.py`) that brace-matches the `🎬 Content Assembly` object per file and re-emits the canonical grouped block in the right format/indentation, avoiding a whole-file reformat.
+
+**Verification:**
+- `navigation_config.json` parses as valid JSON; embedded `projectMenu` JSON in `index.html`/`home.html`/`markdown_renderer.html` parses cleanly — all show the same 6 groups with 3+4+2+5+1+3 = 18 items.
+- `node -c shared/nav.js` passes; JS fallback blocks render identical groups.
+- `go build ./... && go vet ./...` pass.
+- Local server (port 8080) serves `navigation_config.json` and `index.html` HTTP 200; served config exposes the 6 Content Assembly groups.

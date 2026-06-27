@@ -240,16 +240,36 @@
     ]},
     { label: '📦 Post Prod', children: [
       { label: '🎬 Content Assembly', children: [
-        { label: '1. 🎬 Edit List', url: '5_Symbols/production/postprod/edit_list.html' },
-        { label: '2. 📺 Course Playlist', url: 'https://www.youtube.com/watch?v=F8IBooe3bXY&list=PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy/' },
-        { label: '3. 🔍 Customer Discovery', url: '5_Symbols/production/postprod/customer_discovery.html' },
-        { label: '4. 🖼️ Image Generator', url: '5_Symbols/production/postprod/image_generator.html' },
-        { label: '5. 🎬 Lower Thirds Manager', url: '5_Symbols/production/postprod/lower_thirds.html' },
-        { label: '6. ✅ Post Production Checklist', url: '5_Symbols/production/postprod/post_production_checklist.html' },
-        { label: '7. 🎵 Audio Scoring', url: '5_Symbols/production/postprod/audio_scoring.html' },
-        { label: '8. 🎼 Sound & Music Score (Pre-Edit)', url: '5_Symbols/production/postprod/music_sfx_score.html' },
-        { label: '9. 🏛️ Memory Palace Builder', url: '5_Symbols/production/postprod/memory_palace.html' },
-        { label: '10. 📁 Google Drive Sync', url: '5_Symbols/production/postprod/gdrive_sync.html' }
+        { group: true, label: '1. 🎬 Editing & Assembly', children: [
+          { label: '📺 Course Playlist', url: 'https://www.youtube.com/watch?v=F8IBooe3bXY&list=PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy/' },
+          { label: '🎬 Edit List', url: '5_Symbols/production/postprod/edit_list.html' },
+          { label: '✅ Post Production Checklist', url: '5_Symbols/production/postprod/post_production_checklist.html' }
+        ]},
+        { group: true, label: '2. 🎨 Visuals & Graphics', children: [
+          { label: '🎥 Greenscreen Backgrounds', url: '5_Symbols/production/postprod/greenscreen_backgrounds.html' },
+          { label: '🖼️ Image Generator', url: '5_Symbols/production/postprod/image_generator.html' },
+          { label: '🎬 Lower Thirds Manager', url: '5_Symbols/production/postprod/lower_thirds.html' },
+          { label: '🎨 SVG Generator', url: '5_Symbols/production/postprod/graphics_generator.html' }
+        ]},
+        { group: true, label: '3. 🎵 Audio & Music', children: [
+          { label: '🎵 Audio Scoring', url: '5_Symbols/production/postprod/audio_scoring.html' },
+          { label: '🎼 Sound & Music Score (Pre-Edit)', url: '5_Symbols/production/postprod/music_sfx_score.html' }
+        ]},
+        { group: true, label: '4. 🤖 AI Generation', children: [
+          { label: '🧑‍💼 AI Avatar / Talking-Head', url: '5_Symbols/production/postprod/ai_avatar.html' },
+          { label: '🌍 AI Localization & Dubbing', url: '5_Symbols/production/postprod/ai_localization.html' },
+          { label: '✍️ AI Script & Prompt Gen', url: '5_Symbols/production/postprod/ai_script_gen.html' },
+          { label: '🎞️ AI Video B-Roll', url: '5_Symbols/production/postprod/ai_broll.html' },
+          { label: '🎙️ AI Voiceover (TTS)', url: '5_Symbols/production/postprod/ai_voiceover.html' }
+        ]},
+        { group: true, label: '5. 🧠 Memory & Learning', children: [
+          { label: '🏛️ Memory Palace Builder', url: '5_Symbols/production/postprod/memory_palace.html' }
+        ]},
+        { group: true, label: '6. 🧰 Utilities & Ops', children: [
+          { label: '💰 Cost Calculator', url: '5_Symbols/production/postprod/cost_calculator.html' },
+          { label: '🔍 Customer Discovery', url: '5_Symbols/production/postprod/customer_discovery.html' },
+          { label: '📁 Google Drive Sync', url: '5_Symbols/production/postprod/gdrive_sync.html' }
+        ]}
       ]},
       { label: '🎓 Certification & Proof', children: [
         { label: '5. 📜 Erdem\'s Certification', url: 'markdown_renderer.html?file=4_Formula/certification/erdems_certification.md' },
