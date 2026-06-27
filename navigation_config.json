@@ -552,9 +552,9 @@
               "description": "Idempotent course footage and asset synchronization to Google Drive."
             },
             {
-              "label": "11. 🎨 Graphics Generator",
+              "label": "11. 🎨 SVG Generator",
               "url": "5_Symbols/production/postprod/graphics_generator.html",
-              "description": "Per-sentence graphics generation with bulk mode, status tracking, and rationale for skipped assets."
+              "description": "Per-sentence branded SVG vector generation (title cards, lower thirds, callouts, diagrams) using the branding kit, with bulk mode, status tracking, inline editing, and rationale for skipped assets."
             },
             {
               "label": "12. 💰 Cost Calculator",

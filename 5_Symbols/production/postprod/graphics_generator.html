@@ -4,104 +4,65 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="../../../shared/redirect-to-live-site.js"></script>
-  <title>Sentence Graphics Generator | Claude AI Certification</title>
+  <title>Sentence SVG Generator | Claude AI Certification</title>
+  <meta name="description" content="Generate branded, editable inline SVG vector graphics per script sentence — title cards, lower thirds, callouts, diagrams — using the project branding kit. Tracked in Supabase (sentence_svgs).">
+  <link rel="icon" type="image/png" href="../../../favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-dark: #030712;
-      --bg-card: rgba(17, 24, 39, 0.9);
-      --border-glow: rgba(139, 92, 246, 0.3);
-      --text-main: #f3f4f6;
-      --text-muted: #9ca3af;
-      --primary: #8b5cf6;
-      --primary-glow: rgba(139, 92, 246, 0.6);
-      --secondary: #3b82f6;
-      --success: #10b981;
-      --danger: #ef4444;
-      --warning: #f59e0b;
-      --font-title: 'Outfit', sans-serif;
-      --font-body: 'Plus Jakarta Sans', sans-serif;
+      --bg-dark: #030712; --bg-card: rgba(17,24,39,0.9); --border-glow: rgba(139,92,246,0.3);
+      --text-main: #f3f4f6; --text-muted: #9ca3af; --primary: #8b5cf6; --primary-glow: rgba(139,92,246,0.6);
+      --secondary: #3b82f6; --success: #10b981; --danger: #ef4444; --warning: #f59e0b; --accent: #8b5cf6;
+      --brand-blue: #0f172a; --brand-yellow: #eab308;
+      --font-title: 'Outfit', sans-serif; --font-body: 'Plus Jakarta Sans', sans-serif;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       background-color: var(--bg-dark);
-      background-image: radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.12) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.12) 0%, transparent 40%);
-      color: var(--text-main);
-      font-family: var(--font-body);
-      line-height: 1.6;
+      background-image: radial-gradient(circle at 10% 20%, rgba(139,92,246,0.12) 0%, transparent 40%),
+                        radial-gradient(circle at 90% 80%, rgba(234,179,8,0.10) 0%, transparent 40%);
+      color: var(--text-main); font-family: var(--font-body); line-height: 1.6;
       padding: 100px 24px 60px;
     }
     .container { max-width: 1200px; margin: 0 auto; }
-    header { margin-bottom: 40px; text-align: center; }
+    header { margin-bottom: 32px; text-align: center; }
     header h1 { font-family: var(--font-title); font-size: 2.8rem; font-weight: 900; letter-spacing: -0.02em; margin-bottom: 8px; }
-    header p { font-size: 1.1rem; color: var(--text-muted); }
+    header p { font-size: 1.05rem; color: var(--text-muted); max-width: 760px; margin: 0 auto; }
+    .svg-note {
+      max-width: 880px; margin: 16px auto 0; background: rgba(234,179,8,0.08);
+      border: 1px solid rgba(234,179,8,0.3); border-radius: 14px; padding: 12px 18px;
+      font-size: 0.9rem; color: var(--text-main);
+    }
+    .svg-note b { color: var(--brand-yellow); }
     .glass-card {
-      background: var(--bg-card);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 24px;
-      padding: 28px;
-      margin-bottom: 32px;
-      box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(12px);
+      background: var(--bg-card); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px;
+      padding: 28px; margin-bottom: 28px; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.6); backdrop-filter: blur(12px);
     }
-    .btn {
-      padding: 10px 20px;
-      border-radius: 12px;
-      font-weight: 700;
-      cursor: pointer;
-      border: none;
-      transition: all 0.2s;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.95rem;
-    }
-    .btn-primary { background: var(--primary); color: white; }
-    .btn-secondary { background: var(--secondary); color: white; }
-    .btn-success { background: var(--success); color: white; }
+    .brand-strip { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 16px; }
+    .brand-chip { display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: 999px; padding: 6px 14px; font-size: 0.78rem; color: var(--text-muted); }
+    .brand-swatch { width: 16px; height: 16px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.25); }
+    .btn { padding: 10px 20px; border-radius: 12px; font-weight: 700; cursor: pointer; border: none; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; font-size: 0.95rem; text-decoration: none; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-secondary { background: var(--secondary); color: #fff; }
+    .btn-success { background: var(--success); color: #fff; }
     .btn-warning { background: var(--warning); color: #000; }
-    .btn-danger { background: var(--danger); color: white; }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-ghost { background: rgba(255,255,255,0.1); color: var(--text-main); }
     .btn-sm { padding: 6px 12px; font-size: 0.8rem; }
-    .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4); }
-    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-    .btn-group { display: flex; gap: 10px; flex-wrap: wrap; margin: 16px 0; }
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-    }
-    .form-group { margin-bottom: 16px; }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(139,92,246,0.35); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
     .form-group label { display: block; margin-bottom: 6px; font-weight: 600; color: var(--text-muted); font-size: 0.9rem; }
-    .form-group input, .form-group textarea, .form-group select {
-      width: 100%;
-      padding: 10px 14px;
-      background: rgba(0, 0, 0, 0.3);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 10px;
-      color: white;
-      font-family: inherit;
-      font-size: 0.95rem;
+    .form-group select, .form-group input {
+      width: 100%; padding: 10px 14px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px; color: #fff; font-family: inherit; font-size: 0.95rem;
     }
-    .form-group input:focus, .form-group select:focus { border-color: var(--primary); outline: none; }
+    .form-group select:focus { border-color: var(--primary); outline: none; }
 
-    .stats-row {
-      display: flex;
-      gap: 16px;
-      flex-wrap: wrap;
-      margin-bottom: 16px;
-    }
-    .stat-badge {
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 12px;
-      padding: 8px 16px;
-      font-size: 0.85rem;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
+    .stats-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+    .stat-badge { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 8px 16px; font-size: 0.85rem; display: flex; align-items: center; gap: 6px; }
     .stat-badge .count { font-weight: 800; font-size: 1.1rem; }
     .stat-badge.pending .count { color: var(--text-muted); }
     .stat-badge.completed .count { color: var(--success); }
@@ -109,191 +70,86 @@
     .stat-badge.failed .count { color: var(--danger); }
     .stat-badge.generating .count { color: var(--secondary); }
 
-    .sentence-table { width: 100%; border-collapse: separate; border-spacing: 0 6px; }
-    .sentence-table th {
-      text-align: left;
-      padding: 10px 12px;
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-    }
-    .sentence-table td {
-      padding: 12px;
-      background: rgba(255,255,255,0.03);
-      border-radius: 8px;
-      vertical-align: top;
-      font-size: 0.9rem;
-    }
-    .sentence-table tr td:first-child { border-radius: 8px 0 0 8px; }
-    .sentence-table tr td:last-child { border-radius: 0 8px 8px 0; }
-    .sentence-table .num-col { width: 40px; text-align: center; color: var(--text-muted); font-size: 0.8rem; }
-    .sentence-table .sentence-col { min-width: 300px; }
-    .sentence-table .type-col { width: 100px; }
-    .sentence-table .graphics-col { width: 140px; }
-    .sentence-table .status-col { width: 120px; }
-    .sentence-table .rationale-col { width: 180px; }
-    .sentence-table .action-col { width: 160px; text-align: center; }
+    .bulk-bar { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: rgba(255,255,255,0.03); border-radius: 12px; flex-wrap: wrap; }
+    .bulk-bar label { font-size: 0.85rem; color: var(--text-muted); }
+    .bulk-rationale-input { flex: 1; min-width: 200px; padding: 8px 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; color: #fff; font-family: inherit; font-size: 0.85rem; }
 
-    .type-tag {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 6px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      background: rgba(139, 92, 246, 0.15);
-      color: var(--primary);
-    }
-    .type-tag.hook { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
-    .type-tag.objective { background: rgba(59, 130, 246, 0.15); color: var(--secondary); }
-    .type-tag.takeaway { background: rgba(16, 185, 129, 0.15); color: var(--success); }
-    .type-tag.heading { background: rgba(139, 92, 246, 0.15); color: var(--primary); }
-    .type-tag.transition { background: rgba(156, 163, 175, 0.15); color: var(--text-muted); }
+    .svg-table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
+    .svg-table th { text-align: left; padding: 10px 12px; font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .svg-table td { padding: 12px; background: rgba(255,255,255,0.03); vertical-align: top; font-size: 0.9rem; }
+    .svg-table tr td:first-child { border-radius: 10px 0 0 10px; }
+    .svg-table tr td:last-child { border-radius: 0 10px 10px 0; }
+    .svg-table .num-col { width: 40px; text-align: center; color: var(--text-muted); font-size: 0.8rem; }
+    .svg-table .sentence-col { min-width: 240px; }
+    .svg-table .type-col { width: 96px; }
+    .svg-table .svgtype-col { width: 150px; }
+    .svg-table .preview-col { width: 200px; }
+    .svg-table .status-col { width: 110px; }
+    .svg-table .action-col { width: 180px; text-align: center; }
 
-    .status-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: 3px 10px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 700;
-    }
+    .type-tag { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 600; background: rgba(139,92,246,0.15); color: var(--primary); }
+    .type-tag.hook { background: rgba(245,158,11,0.15); color: var(--warning); }
+    .type-tag.objective { background: rgba(59,130,246,0.15); color: var(--secondary); }
+    .type-tag.takeaway { background: rgba(16,185,129,0.15); color: var(--success); }
+    .type-tag.transition { background: rgba(156,163,175,0.15); color: var(--text-muted); }
+
+    .svgtype-select { width: 100%; padding: 5px 8px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; font-family: inherit; font-size: 0.8rem; }
+    .svgtype-select:focus { outline: none; border-color: var(--primary); }
+    .reco-hint { font-size: 0.66rem; color: var(--text-muted); margin-top: 4px; }
+    .reco-hint b { color: var(--primary); }
+
+    .svg-preview { width: 192px; aspect-ratio: 16/9; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: #030712; overflow: hidden; cursor: pointer; display: flex; }
+    .svg-preview svg { width: 100%; height: 100%; display: block; }
+    .svg-preview.empty { align-items: center; justify-content: center; color: var(--text-muted); font-size: 0.75rem; cursor: default; }
+
+    .status-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; }
     .status-badge.pending { background: rgba(156,163,175,0.15); color: var(--text-muted); }
     .status-badge.generating { background: rgba(59,130,246,0.15); color: var(--secondary); }
     .status-badge.completed { background: rgba(16,185,129,0.15); color: var(--success); }
     .status-badge.skipped { background: rgba(245,158,11,0.15); color: var(--warning); }
     .status-badge.failed { background: rgba(239,68,68,0.15); color: var(--danger); }
 
-    .rationale-input {
-      width: 100%;
-      padding: 6px 10px;
-      background: rgba(0,0,0,0.3);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 8px;
-      color: white;
-      font-family: inherit;
-      font-size: 0.8rem;
-    }
-    .graphics-select {
-      width: 100%;
-      padding: 5px 8px;
-      background: rgba(0,0,0,0.3);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 8px;
-      color: white;
-      font-family: inherit;
-      font-size: 0.8rem;
-    }
+    .action-stack { display: flex; flex-direction: column; gap: 6px; align-items: center; }
 
-    .progress-panel { display: none; }
-    .progress-bar-wrap {
-      width: 100%;
-      height: 8px;
-      background: rgba(255,255,255,0.06);
-      border-radius: 4px;
-      overflow: hidden;
-      margin: 12px 0;
-    }
-    .progress-bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--primary), var(--secondary));
-      border-radius: 4px;
-      transition: width 0.4s ease;
-      width: 0%;
-    }
-    .progress-text { font-size: 0.85rem; color: var(--text-muted); }
-    .progress-log {
-      max-height: 200px;
-      overflow-y: auto;
-      margin-top: 12px;
-      font-size: 0.8rem;
-      font-family: monospace;
-    }
+    .progress-bar-wrap { width: 100%; height: 8px; background: rgba(255,255,255,0.06); border-radius: 4px; overflow: hidden; margin: 12px 0; }
+    .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--brand-blue), var(--brand-yellow)); border-radius: 4px; transition: width 0.4s ease; width: 0%; }
+    .progress-log { max-height: 180px; overflow-y: auto; margin-top: 12px; font-size: 0.8rem; font-family: monospace; }
     .progress-log .log-entry { padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
     .progress-log .log-entry.success { color: var(--success); }
     .progress-log .log-entry.fail { color: var(--danger); }
     .progress-log .log-entry.skip { color: var(--warning); }
 
-    .empty-state { text-align: center; padding: 60px 20px; }
-    .empty-state .empty-icon { font-size: 3rem; margin-bottom: 16px; }
-    .empty-state p { color: var(--text-muted); font-size: 1.1rem; }
+    .empty-state { text-align: center; padding: 56px 20px; }
+    .empty-state .empty-icon { font-size: 3rem; margin-bottom: 14px; }
+    .empty-state p { color: var(--text-muted); font-size: 1.05rem; }
 
-    .modal {
-      display: none;
-      position: fixed; z-index: 1000; inset: 0;
-      background: rgba(0,0,0,0.7);
-      backdrop-filter: blur(4px);
-      align-items: center; justify-content: center;
-    }
-    .modal.visible { display: flex; }
-    .modal-content {
-      background: var(--bg-card);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 24px;
-      padding: 32px;
-      max-width: 600px;
-      width: 90%;
-      max-height: 80vh;
-      overflow-y: auto;
-    }
-    .modal-header { font-family: var(--font-title); font-size: 1.5rem; font-weight: 700; margin-bottom: 16px; }
-    .modal-body { margin-bottom: 20px; }
-    .modal-footer { display: flex; gap: 10px; justify-content: flex-end; }
+    /* Modal */
+    .modal { display: none; position: fixed; inset: 0; z-index: 2000; background: rgba(0,0,0,0.8); backdrop-filter: blur(6px); align-items: center; justify-content: center; padding: 24px; }
+    .modal.show { display: flex; }
+    .modal-content { background: var(--bg-card); border: 1px solid rgba(255,255,255,0.1); border-radius: 22px; padding: 26px; width: 100%; max-width: 860px; max-height: 88vh; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.8); }
+    .modal-content h3 { font-family: var(--font-title); margin-bottom: 12px; font-size: 1.4rem; }
+    .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .modal-preview { aspect-ratio: 16/9; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: #030712; overflow: hidden; }
+    .modal-preview svg { width: 100%; height: 100%; display: block; }
+    .modal textarea { width: 100%; min-height: 160px; background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 12px; color: var(--text-main); font-family: 'Fira Code', monospace; font-size: 0.8rem; resize: vertical; }
+    .modal textarea:focus { outline: none; border-color: var(--primary); }
+    .modal label { display: block; font-size: 0.8rem; color: var(--text-muted); margin: 14px 0 6px; font-weight: 600; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; margin-top: 18px; }
 
-    .toast {
-      position: fixed;
-      bottom: 40px;
-      left: 50%;
-      transform: translateX(-50%) translateY(80px);
-      background: var(--bg-card);
-      border: 1px solid var(--success);
-      color: var(--text-main);
-      padding: 14px 28px;
-      border-radius: 16px font-weight 600;
-      opacity: 0;
-      transition: opacity 0.3s, transform 0.3s;
-      z-index:2000 pointer-events:none font-size 0.95rem; backdrop-filter blur(12px)
-    }
-    .toast.show { opacity:1; transform translateX(-50%) translateY(0); pointer-events: auto; }
+    .lightbox { display: none; position: fixed; inset: 0; z-index: 2100; background: rgba(0,0,0,0.9); backdrop-filter: blur(6px); align-items: center; justify-content: center; padding: 24px; }
+    .lightbox.show { display: flex; }
+    .lightbox .lb-frame { width: min(92vw, 1280px); aspect-ratio: 16/9; border-radius: 14px; border: 1px solid rgba(255,255,255,0.15); overflow: hidden; background: #030712; }
+    .lightbox .lb-frame svg { width: 100%; height: 100%; display: block; }
 
-    .scene-refresh-note { margin-top:8px; font-size:0.8rem; color:var(--text-muted); }
-    .sentence-text { line-height:1.5; }
-    .sentence-text .section-tag {
-      display: inline-block; padding:1px 6px; border-radius:4px;
-      font-size:0.7rem; font-weight:600; background:rgba(59,130,246,0.1); color:var(--secondary);
-      margin-right:6px;
-    }
-    .bulk-bar {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 16px;
-      background: rgba(255,255,255,0.03);
-      border-radius: 12px;
-      flex-wrap: wrap;
-    }
-    .bulk-bar label { font-size: 0.85rem; color: var(--text-muted); }
-    .bulk-rationale-input {
-      flex: 1;
-      min-width: 200px;
-      padding: 8px 12px;
-      background: rgba(0,0,0,0.3);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 8px;
-      color: white;
-      font-family: inherit;
-      font-size: 0.85rem;
-    }
-    .skip-selected-btn { background: rgba(245,158,11,0.15); color: var(--warning); border: 1px solid rgba(245,158,11,0.3); }
-    .skip-selected-btn:hover { background: rgba(245,158,11,0.25); }
+    .toast { position: fixed; top: 24px; right: 24px; background: var(--success); color: #000; padding: 14px 24px; border-radius: 12px; font-weight: 700; z-index: 3000; transform: translateX(120%); transition: transform 0.4s ease; max-width: 420px; }
+    .toast.show { transform: translateX(0); }
+    .toast.error { background: var(--danger); color: #fff; }
 
     @media (max-width: 900px) {
-      .sentence-table { font-size: 0.8rem; }
-      .sentence-table .sentence-col { min-width: 150px; }
       .form-grid { grid-template-columns: 1fr; }
+      .modal-grid { grid-template-columns: 1fr; }
       header h1 { font-size: 2rem; }
+      .svg-table .sentence-col { min-width: 140px; }
       .bulk-bar { flex-direction: column; align-items: stretch; }
     }
   </style>
@@ -304,8 +160,11 @@
 <body>
   <div class="container">
     <header>
-      <h1>🎨 Sentence Graphics Generator</h1>
-      <p>Per-sentence graphics generation, tracking, and rationale for skipped assets</p>
+      <h1>🎨 Sentence SVG Generator</h1>
+      <p>Per-sentence <strong>vector SVG</strong> generation, tracking, and editing. Builds branded, scalable graphics — title cards, lower thirds, callouts, diagrams — straight from your script.</p>
+      <div class="svg-note">
+        🧬 <b>This is the SVG generator.</b> Unlike the raster <em>AI Image Generator</em> it draws inspiration from, every asset here is crisp, editable <b>inline SVG</b> wired to the project <b>branding kit</b> — deep blue&nbsp;<code>#0f172a</code> → bright yellow&nbsp;<code>#eab308</code>, Fira&nbsp;Code / Plus&nbsp;Jakarta&nbsp;Sans.
+      </div>
     </header>
 
     <div class="glass-card">
@@ -319,6 +178,9 @@
           <select id="videoSelect"><option value="">— Select Video —</option></select>
         </div>
       </div>
+      <div class="brand-strip" id="brandStrip">
+        <span class="brand-chip">🎨 Loading branding kit…</span>
+      </div>
     </div>
 
     <div id="statsRow" class="stats-row" style="display:none"></div>
@@ -326,35 +188,34 @@
     <div class="glass-card" id="bulkBarCard" style="display:none">
       <div class="bulk-bar">
         <label>⚡ Bulk Actions:</label>
-        <button class="btn btn-success btn-sm" id="bulkGenerateBtn" disabled>🖼️ Generate All Pending</button>
-        <button class="btn btn-warning btn-sm" id="bulkSkipBtn" disabled>⏭️ Skip Selected</button>
-        <button class="btn btn-sm btn-secondary" id="bulkResetBtn" disabled>🔄 Reset All</button>
-        <input type="text" class="bulk-rationale-input" id="bulkRationaleInput" placeholder="Rationale for skipped sentences...">
+        <button class="btn btn-success btn-sm" id="bulkGenerateBtn" disabled>🧬 Generate All Pending</button>
+        <button class="btn btn-warning btn-sm" id="bulkSkipBtn" disabled>⏭️ Skip Pending</button>
+        <button class="btn btn-ghost btn-sm" id="bulkDownloadBtn" disabled>⬇️ Download All SVGs</button>
+        <button class="btn btn-ghost btn-sm" id="bulkResetBtn" disabled>🔄 Reset All</button>
+        <input type="text" class="bulk-rationale-input" id="bulkRationaleInput" placeholder="Rationale for skipped sentences…">
       </div>
     </div>
 
-    <div id="progressPanel" class="glass-card progress-panel">
+    <div id="progressPanel" class="glass-card" style="display:none">
       <div style="display:flex;justify-content:space-between;align-items:center;">
-        <strong>⏳ Generation Progress</strong>
-        <span class="progress-text" id="progressText">0 / 0</span>
+        <strong>🧬 Generation Progress</strong>
+        <span id="progressText" style="color:var(--text-muted);font-size:0.85rem;">0 / 0</span>
       </div>
-      <div class="progress-bar-wrap">
-        <div class="progress-bar-fill" id="progressBarFill"></div>
-      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBarFill"></div></div>
       <div class="progress-log" id="progressLog"></div>
     </div>
 
     <div class="glass-card" id="sentencesPanel" style="display:none;overflow-x:auto;">
-      <table class="sentence-table">
+      <table class="svg-table">
         <thead>
           <tr>
             <th class="num-col">#</th>
             <th class="sentence-col">Sentence</th>
             <th class="type-col">Type</th>
-            <th class="graphics-col">Graphics Type</th>
+            <th class="svgtype-col">SVG Template</th>
+            <th class="preview-col">Preview</th>
             <th class="status-col">Status</th>
-            <th class="rationale-col">Rationale</th>
-            <th class="action-col">Generate</th>
+            <th class="action-col">Action</th>
           </tr>
         </thead>
         <tbody id="sentencesBody"></tbody>
@@ -363,8 +224,8 @@
 
     <div id="emptyState" class="glass-card empty-state">
       <div class="empty-icon">🎨</div>
-      <h2 style="font-family:var(--font-title);margin-bottom:8px;">Select a Module & Video</h2>
-      <p>Choose a module and video to load sentences and manage graphics generation.</p>
+      <h2 style="font-family:var(--font-title);margin-bottom:8px;">Select a Module &amp; Video</h2>
+      <p>Choose a module and video to load its sentences and generate branded SVG graphics.</p>
     </div>
 
     <footer>
@@ -372,6 +233,38 @@
     </footer>
   </div>
 
+  <!-- Edit / View SVG modal -->
+  <div id="svgModal" class="modal" onclick="if(event.target===this) closeModal()">
+    <div class="modal-content">
+      <h3>🧬 SVG Editor <span id="modalSentenceNo" style="font-size:0.9rem;color:var(--text-muted);font-weight:400;"></span></h3>
+      <div class="modal-grid">
+        <div>
+          <label style="margin-top:0;">👁️ Live preview</label>
+          <div class="modal-preview" id="modalPreview"></div>
+          <label>🧩 SVG code (editable)</label>
+          <textarea id="modalSvgCode" spellcheck="false" placeholder="<svg>…</svg>"></textarea>
+        </div>
+        <div>
+          <label style="margin-top:0;">🤖 AI prompt (branded) — copy into Claude / Gemini for a custom SVG, then paste the result on the left</label>
+          <textarea id="modalPrompt" spellcheck="false"></textarea>
+          <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;">
+            <button class="btn btn-ghost btn-sm" id="copyPromptBtn">📋 Copy prompt</button>
+            <a class="btn btn-secondary btn-sm" href="https://claude.ai/new" target="_blank" rel="noopener">🔗 Open Claude</a>
+            <button class="btn btn-ghost btn-sm" id="rebuildBtn">♻️ Rebuild from template</button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-ghost" id="modalRefreshPreviewBtn">🔁 Refresh preview</button>
+        <button class="btn btn-ghost" id="modalCopySvgBtn">📋 Copy SVG</button>
+        <button class="btn btn-secondary" id="modalDownloadBtn">⬇️ Download .svg</button>
+        <button class="btn btn-success" id="modalSaveBtn">💾 Save to DB</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="lightbox" class="lightbox" onclick="this.classList.remove('show')"><div class="lb-frame" id="lightboxFrame"></div></div>
   <div id="toast" class="toast"></div>
 
   <script>
@@ -379,16 +272,52 @@
     const SUPABASE_ANON_KEY = localStorage.getItem('supabase_anon_key') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZWtmc2RoZ2x5aXJhbHh2a3djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NzYzODgsImV4cCI6MjA5NjM1MjM4OH0.ay6HsmO_CbMGDXL_Dv4DT-paAIAOqlQPfmqqx_mexSU';
     const HEADERS = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
 
-    const GRAPHICS_TYPES = ['explain','infographic','diagram','screenshot','b_roll','talking_head','lower_third','icon','thumbnail','title_card','callout','comparison','timeline','architecture','code_terminal','standalone_graphic','background_asset','analogy','table_matrix','transparent_png','icon_badge','none'];
+    // ── Branding kit (mirrors branding.html / business_rules category=branding) ──
+    // These define the values baked into every generated SVG. Fetched live from
+    // the business_rules table when available, with safe defaults.
+    const BRAND = {
+      template_name: 'Claude Architect — Deep Blue / Bright Yellow',
+      bg: '#030712',
+      gradient_start: '#0f172a',   // deep blue
+      gradient_end: '#eab308',     // bright yellow
+      accent_bar: '#eab308',
+      main_color: '#ffffff',
+      sub_color: 'rgba(255,255,255,0.95)',
+      main_font: 'Fira Code, monospace',
+      sub_font: 'Plus Jakarta Sans, sans-serif',
+      tagline: 'Claude Architect Certification'
+    };
+
+    // ── SVG template catalogue ──
+    const SVG_TYPES = ['title_card','lower_third','callout','quote','bullet_list','stat','comparison','diagram','timeline','icon_badge','section_divider','banner','code_block','none'];
+    const SVG_GUIDE = {
+      title_card: 'Centered bold title with branded top/bottom rails',
+      lower_third: 'Bottom name bar (gradient) — main + brand sub line',
+      callout: 'Big key-idea quote with accent bar',
+      quote: 'Quotation with opening mark + attribution',
+      bullet_list: 'Sentence split into branded bullet points',
+      stat: 'Hero number / keyword pulled from the sentence',
+      comparison: 'Two-column X vs Y split',
+      diagram: 'Three connected step boxes with arrows',
+      timeline: 'Horizontal milestone progression',
+      icon_badge: 'Circular badge glyph with short label',
+      section_divider: 'Full-bleed gradient chapter divider',
+      banner: 'Top banner strip headline',
+      code_block: 'Monospace terminal / code card',
+      none: 'No SVG — skip this sentence'
+    };
+    const SVG_TYPES_SORTED = [...SVG_TYPES].filter(t => t !== 'none').sort((a,b)=>a.localeCompare(b)).concat('none');
 
     let dbModules = [];
     let dbVideos = [];
     let currentSentences = [];
-    let currentGraphicsMap = {};
+    let currentSvgMap = {};       // sentence_id -> sentence_svgs row
+    let svgTypeMap = {};          // sentence_id -> chosen svg_type (string, before save)
     let currentModuleNumber = null;
     let currentVideoNumber = null;
     let currentScriptId = null;
     let isGenerating = false;
+    let activeModalSid = null;
 
     const $ = id => document.getElementById(id);
 
@@ -396,142 +325,384 @@
       const t = $('toast');
       t.textContent = msg; t.className = 'toast' + (isError ? ' error' : '');
       setTimeout(() => t.classList.add('show'), 10);
-      setTimeout(() => t.classList.remove('show'), ms || 3500);
+      setTimeout(() => t.classList.remove('show'), ms || 3200);
     }
-
-    function escHtml(s) { if (!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    function escHtml(s) { if (s == null) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    function svgEsc(s) { if (s == null) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
     async function api(path, opts) {
       const url = SUPABASE_URL + '/rest/v1/' + path;
       const res = await fetch(url, { ...opts, headers: { ...HEADERS, ...(opts?.headers || {}) } });
-      if (!res.ok) { const err = await res.text().catch(() => ''); throw new Error(res.status + ': ' + err); }
+      if (!res.ok) { const err = await res.text().catch(() => ''); const e = new Error(res.status + ': ' + err); e.status = res.status; throw e; }
       const ct = res.headers.get('content-type') || '';
       return ct.includes('json') ? res.json() : res.text();
     }
 
+    // ── Branding kit loader ──
+    async function loadBranding() {
+      try {
+        const rows = await api('business_rules?select=rule_key,value&category=eq.branding');
+        const map = {}; (rows || []).forEach(r => map[r.rule_key] = r.value);
+        if (map.gradient_start) BRAND.gradient_start = map.gradient_start;
+        if (map.gradient_end)   BRAND.gradient_end   = map.gradient_end;
+        if (map.accent_bar)     BRAND.accent_bar     = map.accent_bar;
+        if (map.main_color)     BRAND.main_color     = map.main_color;
+        if (map.sub_color)      BRAND.sub_color      = map.sub_color;
+        if (map.template_name)  BRAND.template_name  = map.template_name;
+      } catch (_) { /* keep defaults */ }
+      renderBrandStrip();
+    }
+    function renderBrandStrip() {
+      $('brandStrip').innerHTML =
+        `<span class="brand-chip">🎨 ${escHtml(BRAND.template_name)}</span>` +
+        `<span class="brand-chip"><span class="brand-swatch" style="background:${escHtml(BRAND.gradient_start)}"></span>${escHtml(BRAND.gradient_start)}</span>` +
+        `<span class="brand-chip"><span class="brand-swatch" style="background:${escHtml(BRAND.gradient_end)}"></span>${escHtml(BRAND.gradient_end)}</span>` +
+        `<span class="brand-chip">🔤 Fira Code · Plus Jakarta Sans</span>`;
+    }
+
+    // ── Text helpers for SVG layout ──
+    function wrapText(text, maxChars) {
+      const words = String(text || '').trim().split(/\s+/);
+      const lines = []; let cur = '';
+      for (const w of words) {
+        if ((cur + ' ' + w).trim().length > maxChars && cur) { lines.push(cur); cur = w; }
+        else cur = (cur + ' ' + w).trim();
+      }
+      if (cur) lines.push(cur);
+      return lines.length ? lines : [''];
+    }
+    function tspans(lines, x, startY, lineHeight) {
+      return lines.map((l, i) => `<tspan x="${x}" y="${startY + i * lineHeight}">${svgEsc(l)}</tspan>`).join('');
+    }
+    function splitClauses(text) {
+      let parts = String(text || '').split(/,| and | then |;|·/i).map(s => s.trim()).filter(Boolean);
+      if (parts.length < 2) parts = String(text || '').split(/\s+/).reduce((acc, w, i) => {
+        const idx = Math.floor(i / Math.max(2, Math.ceil(String(text).split(/\s+/).length / 3)));
+        acc[idx] = ((acc[idx] || '') + ' ' + w).trim(); return acc;
+      }, []);
+      return parts.filter(Boolean).slice(0, 4);
+    }
+    function firstStat(text) {
+      const m = String(text || '').match(/\$?\d[\d,\.]*\s*%?\+?|\b(?:zero|one|two|three|first|10x|100%)\b/i);
+      return m ? m[0] : (String(text || '').split(/\s+/)[0] || '★');
+    }
+
+    // ── Branded SVG templates ──
+    function svgHead(bg) {
+      return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080" role="img" aria-label="branded graphic">`
+        + `<defs>`
+        + `<linearGradient id="bg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="${BRAND.gradient_start}"/><stop offset="1" stop-color="${BRAND.gradient_end}"/></linearGradient>`
+        + `<linearGradient id="bv" x1="0" y1="0" x2="0.4" y2="1"><stop offset="0" stop-color="${BRAND.gradient_start}"/><stop offset="1" stop-color="${BRAND.gradient_end}"/></linearGradient>`
+        + `</defs>`
+        + `<rect width="1920" height="1080" fill="${bg || BRAND.bg}"/>`;
+    }
+    const SVG_TAIL = '</svg>';
+
+    const T = {
+      title_card(text) {
+        const lines = wrapText(text, 24).slice(0, 4);
+        const fs = lines.length > 2 ? 96 : 116;
+        const lh = fs * 1.18;
+        const blockH = lines.length * lh;
+        const startY = 540 - blockH / 2 + fs * 0.78;
+        return svgHead() +
+          `<rect x="0" y="0" width="1920" height="16" fill="url(#bg)"/>` +
+          `<rect x="0" y="1064" width="1920" height="16" fill="url(#bg)"/>` +
+          `<text font-family="${BRAND.main_font}" font-weight="700" font-size="${fs}" fill="${BRAND.main_color}" text-anchor="middle">${tspans(lines, 960, startY, lh)}</text>` +
+          `<rect x="860" y="${startY + blockH - fs * 0.4 + 40}" width="200" height="10" rx="5" fill="${BRAND.accent_bar}"/>` +
+          SVG_TAIL;
+      },
+      lower_third(text) {
+        const main = wrapText(text, 40)[0] || '';
+        const barY = 820, barH = 200;
+        return svgHead() +
+          `<rect x="0" y="${barY}" width="1920" height="${barH}" fill="url(#bg)" opacity="0.96"/>` +
+          `<rect x="0" y="${barY}" width="20" height="${barH}" fill="${BRAND.accent_bar}"/>` +
+          `<text x="80" y="${barY + 95}" font-family="${BRAND.main_font}" font-weight="500" font-size="58" fill="${BRAND.main_color}">${svgEsc(main)}</text>` +
+          `<text x="80" y="${barY + 150}" font-family="${BRAND.sub_font}" font-weight="400" font-size="36" fill="${BRAND.sub_color}">${svgEsc(BRAND.tagline)}</text>` +
+          SVG_TAIL;
+      },
+      callout(text) {
+        const lines = wrapText(text, 26).slice(0, 4);
+        const fs = 84, lh = fs * 1.2;
+        const startY = 540 - (lines.length * lh) / 2 + fs * 0.7;
+        return svgHead() +
+          `<text x="150" y="320" font-family="${BRAND.main_font}" font-weight="700" font-size="240" fill="${BRAND.accent_bar}" opacity="0.85">&#8220;</text>` +
+          `<rect x="150" y="${startY - fs}" width="12" height="${lines.length * lh + 20}" rx="6" fill="${BRAND.accent_bar}"/>` +
+          `<text x="210" font-family="${BRAND.sub_font}" font-weight="700" font-size="${fs}" fill="${BRAND.main_color}">${tspans(lines, 210, startY, lh)}</text>` +
+          SVG_TAIL;
+      },
+      quote(text) {
+        const lines = wrapText(text, 30).slice(0, 5);
+        const fs = 70, lh = fs * 1.25;
+        const startY = 460 - (lines.length * lh) / 2 + fs * 0.7;
+        return svgHead() +
+          `<text x="960" y="280" font-family="${BRAND.main_font}" font-weight="700" font-size="200" fill="${BRAND.accent_bar}" text-anchor="middle" opacity="0.7">&#8220;</text>` +
+          `<text x="960" font-family="${BRAND.sub_font}" font-style="italic" font-weight="500" font-size="${fs}" fill="${BRAND.main_color}" text-anchor="middle">${tspans(lines, 960, startY, lh)}</text>` +
+          `<rect x="810" y="${startY + lines.length * lh + 10}" width="300" height="6" rx="3" fill="url(#bg)"/>` +
+          `<text x="960" y="${startY + lines.length * lh + 70}" font-family="${BRAND.sub_font}" font-weight="600" font-size="34" fill="${BRAND.sub_color}" text-anchor="middle">— ${svgEsc(BRAND.tagline)}</text>` +
+          SVG_TAIL;
+      },
+      bullet_list(text) {
+        const items = splitClauses(text);
+        const rowH = 150, startY = 540 - (items.length * rowH) / 2 + 100;
+        const rows = items.map((it, i) => {
+          const y = startY + i * rowH;
+          const line = wrapText(it, 40)[0] || it;
+          return `<circle cx="200" cy="${y - 18}" r="20" fill="url(#bg)"/>` +
+            `<text x="194" y="${y - 6}" font-family="${BRAND.main_font}" font-weight="700" font-size="28" fill="${BRAND.main_color}">${i + 1}</text>` +
+            `<text x="270" y="${y}" font-family="${BRAND.sub_font}" font-weight="500" font-size="56" fill="${BRAND.main_color}">${svgEsc(line)}</text>`;
+        }).join('');
+        return svgHead() +
+          `<rect x="120" y="90" width="120" height="12" rx="6" fill="${BRAND.accent_bar}"/>` + rows + SVG_TAIL;
+      },
+      stat(text) {
+        const stat = firstStat(text);
+        const sub = wrapText(text, 46).slice(0, 2);
+        return svgHead() +
+          `<text x="960" y="520" font-family="${BRAND.main_font}" font-weight="700" font-size="320" fill="url(#bg)" text-anchor="middle">${svgEsc(stat)}</text>` +
+          `<text x="960" font-family="${BRAND.sub_font}" font-weight="500" font-size="54" fill="${BRAND.sub_color}" text-anchor="middle">${tspans(sub, 960, 660, 66)}</text>` +
+          SVG_TAIL;
+      },
+      comparison(text) {
+        let parts = String(text || '').split(/\s+vs\.?\s+|\sversus\s|\sor\s/i).map(s => s.trim()).filter(Boolean);
+        if (parts.length < 2) { const c = splitClauses(text); parts = [c[0] || text, c[1] || '']; }
+        const L = wrapText(parts[0] || '', 18).slice(0, 3), R = wrapText(parts[1] || '', 18).slice(0, 3);
+        return svgHead() +
+          `<rect x="120" y="240" width="740" height="600" rx="24" fill="${BRAND.gradient_start}" stroke="${BRAND.accent_bar}" stroke-width="3"/>` +
+          `<rect x="1060" y="240" width="740" height="600" rx="24" fill="${BRAND.gradient_start}" stroke="${BRAND.accent_bar}" stroke-width="3"/>` +
+          `<text x="490" font-family="${BRAND.sub_font}" font-weight="700" font-size="56" fill="${BRAND.main_color}" text-anchor="middle">${tspans(L, 490, 480, 70)}</text>` +
+          `<text x="1430" font-family="${BRAND.sub_font}" font-weight="700" font-size="56" fill="${BRAND.main_color}" text-anchor="middle">${tspans(R, 1430, 480, 70)}</text>` +
+          `<circle cx="960" cy="540" r="74" fill="url(#bg)"/>` +
+          `<text x="960" y="562" font-family="${BRAND.main_font}" font-weight="700" font-size="52" fill="${BRAND.gradient_start}" text-anchor="middle">VS</text>` +
+          SVG_TAIL;
+      },
+      diagram(text) {
+        const steps = splitClauses(text).slice(0, 3);
+        while (steps.length < 3) steps.push('');
+        const xs = [200, 760, 1320], boxW = 400, boxH = 280, y = 400;
+        let inner = '';
+        steps.forEach((st, i) => {
+          const lines = wrapText(st, 16).slice(0, 3);
+          inner += `<rect x="${xs[i]}" y="${y}" width="${boxW}" height="${boxH}" rx="22" fill="${BRAND.gradient_start}" stroke="${BRAND.accent_bar}" stroke-width="3"/>` +
+            `<text x="${xs[i] + boxW / 2}" font-family="${BRAND.sub_font}" font-weight="600" font-size="44" fill="${BRAND.main_color}" text-anchor="middle">${tspans(lines, xs[i] + boxW / 2, y + boxH / 2 - (lines.length - 1) * 26, 52)}</text>`;
+          if (i < 2) inner += `<path d="M ${xs[i] + boxW} ${y + boxH / 2} L ${xs[i + 1]} ${y + boxH / 2}" stroke="${BRAND.accent_bar}" stroke-width="8" marker-end="url(#arrow)"/>`;
+        });
+        return svgHead().replace('</defs>', `<marker id="arrow" markerWidth="12" markerHeight="12" refX="8" refY="6" orient="auto"><path d="M0,0 L12,6 L0,12 Z" fill="${BRAND.accent_bar}"/></marker></defs>`) +
+          inner + SVG_TAIL;
+      },
+      timeline(text) {
+        const nodes = splitClauses(text).slice(0, 4);
+        const startX = 240, gap = (1920 - 480) / Math.max(1, nodes.length - 1), y = 540;
+        let inner = `<line x1="240" y1="${y}" x2="1680" y2="${y}" stroke="url(#bg)" stroke-width="10"/>`;
+        nodes.forEach((n, i) => {
+          const x = nodes.length === 1 ? 960 : startX + i * gap;
+          const lines = wrapText(n, 16).slice(0, 2);
+          inner += `<circle cx="${x}" cy="${y}" r="28" fill="${BRAND.accent_bar}" stroke="${BRAND.bg}" stroke-width="6"/>` +
+            `<text x="${x}" font-family="${BRAND.sub_font}" font-weight="600" font-size="40" fill="${BRAND.main_color}" text-anchor="middle">${tspans(lines, x, i % 2 ? y + 90 : y - 70 - (lines.length - 1) * 46, 46)}</text>`;
+        });
+        return svgHead() + inner + SVG_TAIL;
+      },
+      icon_badge(text) {
+        const label = wrapText(text, 18).slice(0, 2);
+        const letter = (String(text || '★').trim()[0] || '★').toUpperCase();
+        return svgHead() +
+          `<circle cx="960" cy="430" r="220" fill="url(#bv)"/>` +
+          `<circle cx="960" cy="430" r="220" fill="none" stroke="${BRAND.accent_bar}" stroke-width="10"/>` +
+          `<text x="960" y="500" font-family="${BRAND.main_font}" font-weight="700" font-size="220" fill="${BRAND.main_color}" text-anchor="middle">${svgEsc(letter)}</text>` +
+          `<text x="960" font-family="${BRAND.sub_font}" font-weight="600" font-size="56" fill="${BRAND.main_color}" text-anchor="middle">${tspans(label, 960, 770, 70)}</text>` +
+          SVG_TAIL;
+      },
+      section_divider(text) {
+        const lines = wrapText(text, 22).slice(0, 3);
+        const fs = 104, lh = fs * 1.16;
+        const startY = 540 - (lines.length * lh) / 2 + fs * 0.75;
+        return svgHead('url(#bv)') +
+          `<rect width="1920" height="1080" fill="#030712" opacity="0.55"/>` +
+          `<text font-family="${BRAND.main_font}" font-weight="700" font-size="${fs}" fill="${BRAND.main_color}" text-anchor="middle">${tspans(lines, 960, startY, lh)}</text>` +
+          `<rect x="810" y="${startY + lines.length * lh + 6}" width="300" height="10" rx="5" fill="${BRAND.accent_bar}"/>` +
+          SVG_TAIL;
+      },
+      banner(text) {
+        const lines = wrapText(text, 34).slice(0, 2);
+        return svgHead() +
+          `<rect x="0" y="120" width="1920" height="${lines.length > 1 ? 360 : 260}" fill="url(#bg)"/>` +
+          `<text font-family="${BRAND.main_font}" font-weight="700" font-size="76" fill="${BRAND.gradient_start}" text-anchor="middle">${tspans(lines, 960, 250, 96)}</text>` +
+          `<text x="960" y="760" font-family="${BRAND.sub_font}" font-weight="500" font-size="44" fill="${BRAND.sub_color}" text-anchor="middle">${svgEsc(BRAND.tagline)}</text>` +
+          SVG_TAIL;
+      },
+      code_block(text) {
+        const lines = wrapText(text, 46).slice(0, 6);
+        const cardY = 220, cardH = Math.max(360, lines.length * 60 + 160);
+        let code = lines.map((l, i) => `<text x="200" y="${cardY + 150 + i * 60}" font-family="${BRAND.main_font}" font-weight="400" font-size="40" fill="${BRAND.main_color}">${svgEsc('// ' + l)}</text>`).join('');
+        return svgHead() +
+          `<rect x="160" y="${cardY}" width="1600" height="${cardH}" rx="20" fill="${BRAND.gradient_start}" stroke="rgba(255,255,255,0.12)" stroke-width="2"/>` +
+          `<rect x="160" y="${cardY}" width="1600" height="64" rx="20" fill="rgba(0,0,0,0.35)"/>` +
+          `<circle cx="210" cy="${cardY + 32}" r="11" fill="#ef4444"/><circle cx="250" cy="${cardY + 32}" r="11" fill="#eab308"/><circle cx="290" cy="${cardY + 32}" r="11" fill="#10b981"/>` +
+          `<text x="1700" y="${cardY + 42}" font-family="${BRAND.main_font}" font-size="28" fill="${BRAND.sub_color}" text-anchor="end">claude-architect</text>` +
+          code + SVG_TAIL;
+      },
+      none() { return ''; }
+    };
+
+    function buildSvg(svgType, sentenceText) {
+      const fn = T[svgType] || T.title_card;
+      try { return fn(sentenceText || ''); } catch (e) { return ''; }
+    }
+
+    // ── AI prompt (branded) for hand-off to Claude/Gemini ──
+    function buildSvgPrompt(svgType, sentenceText) {
+      const label = (svgType || 'title_card').replace(/_/g, ' ');
+      const guide = SVG_GUIDE[svgType] || '';
+      return `Generate clean, production-ready inline SVG markup (viewBox="0 0 1920 1080", 16:9) for a YouTube video graphic.
+
+SVG template: ${label}${guide ? ` — ${guide}` : ''}
+On-screen idea / text: "${sentenceText}"
+
+Branding kit (${BRAND.template_name}):
+- Background: near-black ${BRAND.bg}
+- Gradient: deep blue ${BRAND.gradient_start} → bright yellow ${BRAND.gradient_end}
+- Accent bar: ${BRAND.accent_bar}
+- Main text: ${BRAND.main_color}, font Fira Code (monospace)
+- Sub text: ${BRAND.sub_color}, font Plus Jakarta Sans
+- Brand line: ${BRAND.tagline}
+
+Rules:
+- Return ONLY a single valid standalone <svg>…</svg> element — no markdown, no commentary.
+- Use only system font families (Fira Code, Plus Jakarta Sans); no external images or fonts.
+- Keep the key subject within title-safe margins (central 90%), high contrast, leave the lower third clear for captions.
+- Wrap long text into <tspan> lines so nothing overflows.`;
+    }
+
+    // ── Recommended SVG type per sentence ──
+    function recommendSvgType(s) {
+      const vm = (s.visual_mode || '').toLowerCase();
+      const st = (s.sentence_type || '').toLowerCase();
+      if (vm === 'screenshare' || vm === 'code') return 'code_block';
+      if (st === 'hook') return 'banner';
+      if (st === 'objective') return 'bullet_list';
+      if (st === 'takeaway' || st === 'insight') return 'callout';
+      if (st === 'heading') return 'section_divider';
+      if (st === 'transition') return 'title_card';
+      if (st === 'step') return 'bullet_list';
+      if (st === 'cue') return 'diagram';
+      return 'title_card';
+    }
+    function chosenSvgType(s) {
+      if (svgTypeMap[s.id]) return svgTypeMap[s.id];
+      if (currentSvgMap[s.id]?.svg_type) return currentSvgMap[s.id].svg_type;
+      return recommendSvgType(s);
+    }
+
+    // ── Data loading ──
     async function loadModules() {
       try {
         dbModules = await api('modules?select=id,module_number,title&order=module_number.asc');
-        const sel = $('moduleSelect');
-        sel.innerHTML = '<option value="">— Select Module —</option>' +
-          dbModules.map(m => `<option value="${m.id}">M${m.module_number}: ${m.title}</option>`).join('');
+        $('moduleSelect').innerHTML = '<option value="">— Select Module —</option>' +
+          dbModules.map(m => `<option value="${m.id}">M${m.module_number}: ${escHtml(m.title)}</option>`).join('');
       } catch (e) { showToast('Failed to load modules: ' + e.message, true); }
     }
-
     async function loadVideos(moduleId) {
       if (!moduleId) { $('videoSelect').innerHTML = '<option value="">— Select Video —</option>'; return; }
       try {
         dbVideos = await api(`videos?select=id,video_number,title&module_id=eq.${moduleId}&order=video_number.asc`);
-        const sel = $('videoSelect');
-        sel.innerHTML = '<option value="">— Select Video —</option>' +
-          dbVideos.map(v => `<option value="${v.id}">V${v.video_number}: ${v.title}</option>`).join('');
+        $('videoSelect').innerHTML = '<option value="">— Select Video —</option>' +
+          dbVideos.map(v => `<option value="${v.id}">V${v.video_number}: ${escHtml(v.title)}</option>`).join('');
       } catch (e) { showToast('Failed to load videos: ' + e.message, true); }
     }
 
-    async function loadSentences(moduleNumber, videoNumber) {
-      if (!moduleNumber || !videoNumber) {
-        $('sentencesPanel').style.display = 'none';
-        $('emptyState').style.display = 'block';
-        $('statsRow').style.display = 'none';
-        $('bulkBarCard').style.display = 'none';
-        return;
-      }
+    function resetView() {
+      $('sentencesPanel').style.display = 'none';
+      $('emptyState').style.display = 'block';
+      $('statsRow').style.display = 'none';
+      $('bulkBarCard').style.display = 'none';
+    }
+
+    async function loadSentences(videoNumber) {
+      const videoId = dbVideos.find(v => v.video_number === videoNumber)?.id;
+      if (!videoId) { showToast('Video not found', true); return; }
       try {
-        const videoId = dbVideos.find(v => v.video_number === videoNumber)?.id;
-        if (!videoId) { showToast('Video not found', true); return; }
-        const scripts = await api(`scripts?select=id,script_text&video_id=eq.${videoId}`);
+        const scripts = await api(`scripts?select=id&video_id=eq.${videoId}&limit=1`);
         if (!scripts.length) {
+          currentSentences = []; currentScriptId = null;
           $('sentencesBody').innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-muted);">No script found for this video.</td></tr>';
-          $('sentencesPanel').style.display = 'block';
-          $('emptyState').style.display = 'none';
+          $('sentencesPanel').style.display = 'block'; $('emptyState').style.display = 'none';
           return;
         }
         currentScriptId = scripts[0].id;
-        const sents = await api(`sentences?select=id,sentence_text,sentence_type,section,visual_mode,sort_order,script_id&script_id=eq.${scripts[0].id}&order=sort_order.asc`);
-        currentSentences = sents;
-
-        const sids = sents.map(s => s.id);
-        let graphics = [];
+        currentSentences = await api(`sentences?select=id,sentence_text,sentence_type,section,visual_mode,sort_order,script_id&script_id=eq.${currentScriptId}&order=sort_order.asc`);
+        svgTypeMap = {};
+        currentSvgMap = {};
+        const sids = currentSentences.map(s => s.id);
         if (sids.length) {
-          const idsClause = sids.map(id => 'id=eq.' + id).join(',');
-          graphics = await api(`sentence_graphics?select=id,sentence_id,generation_status,rationale,graphics_type,graphics_url,prompt_used,error_message&sentence_id=in.(${sids.join(',')})`);
+          const rows = await api(`sentence_svgs?select=id,sentence_id,generation_status,rationale,svg_type,svg_code,custom_prompt,prompt_used,error_message&sentence_id=in.(${sids.join(',')})`);
+          for (const g of rows) currentSvgMap[g.sentence_id] = g;
         }
-        currentGraphicsMap = {};
-        for (const g of graphics) {
-          currentGraphicsMap[g.sentence_id] = g;
-        }
-        renderSentences();
-        updateStats();
+        renderSentences(); updateStats(); updateBulkButtons();
         $('bulkBarCard').style.display = 'block';
-        updateBulkButtons();
-      } catch (e) { showToast('Failed to load sentences: ' + e.message, true); }
+      } catch (e) {
+        if (e.status === 404) showToast('Table sentence_svgs missing — run migration_sentence_svgs.sql', true, 6000);
+        else showToast('Failed to load sentences: ' + e.message, true);
+      }
     }
 
     function renderSentences() {
       const body = $('sentencesBody');
       if (!currentSentences.length) {
         body.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-muted);">No sentences in this script.</td></tr>';
-        $('sentencesPanel').style.display = 'block';
-        $('emptyState').style.display = 'none';
+        $('sentencesPanel').style.display = 'block'; $('emptyState').style.display = 'none';
         return;
       }
       body.innerHTML = currentSentences.map((s, i) => {
-        const g = currentGraphicsMap[s.id] || {};
+        const g = currentSvgMap[s.id] || {};
         const status = g.generation_status || 'pending';
-        const rationale = g.rationale || '';
-        const graphicsType = g.graphics_type || 'explain';
+        const svgType = chosenSvgType(s);
+        const reco = recommendSvgType(s);
         const typeClass = s.sentence_type || 'body';
         const typeLabel = (s.sentence_type || 'body').replace(/_/g, ' ');
         const sectionLabel = (s.section || '').replace(/_/g, ' ');
-        return `<tr data-sentence-id="${s.id}">
+        const statusIcon = status === 'completed' ? '✅' : status === 'generating' ? '⏳' : status === 'skipped' ? '⏭️' : status === 'failed' ? '❌' : '⏸️';
+
+        const preview = (status === 'completed' && g.svg_code)
+          ? `<div class="svg-preview" onclick='openLightbox(${s.id})'>${g.svg_code}</div>`
+          : `<div class="svg-preview empty">—</div>`;
+
+        let actions;
+        if (status === 'completed') {
+          actions = `<button class="btn btn-ghost btn-sm" onclick="openModal(${s.id})">🧬 Edit</button>
+            <button class="btn btn-ghost btn-sm" onclick="downloadOne(${s.id})">⬇️ SVG</button>
+            <button class="btn btn-secondary btn-sm" onclick="generateSingle(${s.id})" ${isGenerating ? 'disabled' : ''}>♻️ Regen</button>`;
+        } else {
+          actions = `<button class="btn btn-primary btn-sm" onclick="generateSingle(${s.id})" ${isGenerating ? 'disabled' : ''}>${status === 'failed' ? '🔄 Retry' : '🧬 Generate'}</button>
+            <button class="btn btn-ghost btn-sm" onclick="openModal(${s.id})">✏️ Edit</button>`;
+        }
+
+        return `<tr data-sid="${s.id}">
           <td class="num-col">${i + 1}</td>
-          <td class="sentence-col">
-            <div class="sentence-text">
-              ${s.section ? `<span class="section-tag">${escHtml(sectionLabel)}</span>` : ''}
-              ${escHtml(s.sentence_text || '')}
-            </div>
-          </td>
+          <td class="sentence-col"><div>${s.section ? `<span class="type-tag transition" style="margin-right:6px;">${escHtml(sectionLabel)}</span>` : ''}${escHtml(s.sentence_text || '')}</div>${g.rationale ? `<div style="color:var(--warning);font-size:0.72rem;margin-top:4px;">⏭️ ${escHtml(g.rationale)}</div>` : ''}</td>
           <td class="type-col"><span class="type-tag ${typeClass}">${escHtml(typeLabel)}</span></td>
-          <td class="graphics-col">
-            <select class="graphics-select" data-sentence-id="${s.id}" ${status === 'completed' ? 'disabled' : ''}>
-              ${GRAPHICS_TYPES.map(t => `<option value="${t}" ${t === graphicsType ? 'selected' : ''}>${t.replace(/_/g, ' ')}</option>`).join('')}
+          <td class="svgtype-col">
+            <select class="svgtype-select" data-sid="${s.id}" ${status === 'completed' ? '' : ''}>
+              ${SVG_TYPES_SORTED.map(t => `<option value="${t}" ${t === svgType ? 'selected' : ''}>${t.replace(/_/g, ' ')}</option>`).join('')}
             </select>
+            <div class="reco-hint">⭐ Reco: <b>${reco.replace(/_/g, ' ')}</b></div>
           </td>
-          <td class="status-col">
-            <span class="status-badge ${status}">${status === 'generating' ? '⏳' : status === 'completed' ? '✅' : status === 'skipped' ? '⏭️' : status === 'failed' ? '❌' : '⏸️'} ${status}</span>
-            ${g.error_message ? `<br><small style="color:var(--danger);font-size:0.7rem;">${escHtml(g.error_message)}</small>` : ''}
-          </td>
-          <td class="rationale-col">
-            <input type="text" class="rationale-input" data-sentence-id="${s.id}" placeholder="Why skip? (optional)" value="${escHtml(rationale)}" ${status === 'completed' ? 'disabled' : ''}>
-          </td>
-          <td class="action-col">
-            ${status === 'completed'
-              ? (g.graphics_url ? `<a href="${escHtml(g.graphics_url)}" target="_blank" class="btn btn-success btn-sm">👁️ View</a>` : `<span style="color:var(--success);font-size:0.8rem;">✅ Done</span>`)
-              : `<button class="btn btn-primary btn-sm gen-single-btn" data-sentence-id="${s.id}" ${isGenerating || status === 'generating' ? 'disabled' : ''}>${status === 'failed' ? '🔄 Retry' : status === 'generating' ? '⏳...' : '🖼️ Gen'}</button>`
-            }
-          </td>
+          <td class="preview-col">${preview}</td>
+          <td class="status-col"><span class="status-badge ${status}">${statusIcon} ${status}</span>${g.error_message ? `<br><small style="color:var(--danger);font-size:0.68rem;">${escHtml(g.error_message)}</small>` : ''}</td>
+          <td class="action-col"><div class="action-stack">${actions}</div></td>
         </tr>`;
       }).join('');
-      $('sentencesPanel').style.display = 'block';
-      $('emptyState').style.display = 'none';
+      $('sentencesPanel').style.display = 'block'; $('emptyState').style.display = 'none';
 
-      document.querySelectorAll('.gen-single-btn').forEach(btn => {
-        btn.addEventListener('click', () => generateSingle(parseInt(btn.dataset.sentenceId)));
-      });
-      document.querySelectorAll('.graphics-select').forEach(sel => {
-        sel.addEventListener('change', () => updateGraphicsType(parseInt(sel.dataset.sentenceId), sel.value));
-      });
-      document.querySelectorAll('.rationale-input').forEach(inp => {
-        inp.addEventListener('change', () => updateRationale(parseInt(inp.dataset.sentenceId), inp.value));
+      document.querySelectorAll('.svgtype-select').forEach(sel => {
+        sel.addEventListener('change', () => updateSvgType(parseInt(sel.dataset.sid), sel.value));
       });
     }
 
     function updateStats() {
       const total = currentSentences.length;
-      const completed = currentSentences.filter(s => (currentGraphicsMap[s.id]?.generation_status) === 'completed').length;
-      const skipped = currentSentences.filter(s => (currentGraphicsMap[s.id]?.generation_status) === 'skipped').length;
-      const failed = currentSentences.filter(s => (currentGraphicsMap[s.id]?.generation_status) === 'failed').length;
-      const generating = currentSentences.filter(s => (currentGraphicsMap[s.id]?.generation_status) === 'generating').length;
+      const by = st => currentSentences.filter(s => (currentSvgMap[s.id]?.generation_status) === st).length;
+      const completed = by('completed'), skipped = by('skipped'), failed = by('failed'), generating = by('generating');
       const pending = total - completed - skipped - failed - generating;
       $('statsRow').innerHTML = `
         <div class="stat-badge"><span>📊 Total</span><span class="count">${total}</span></div>
@@ -544,211 +715,218 @@
     }
 
     function updateBulkButtons() {
-      const pendingCount = currentSentences.filter(s => (currentGraphicsMap[s.id]?.generation_status || 'pending') === 'pending').length;
-      const failedCount = currentSentences.filter(s => (currentGraphicsMap[s.id]?.generation_status) === 'failed').length;
-      $('bulkGenerateBtn').disabled = isGenerating || (pendingCount === 0 && failedCount === 0);
-      $('bulkGenerateBtn').textContent = `🖼️ Generate All (${pendingCount + failedCount})`;
-      const skipCandidateCount = currentSentences.filter(s => (currentGraphicsMap[s.id]?.generation_status || 'pending') === 'pending').length;
-      $('bulkSkipBtn').disabled = isGenerating || skipCandidateCount === 0;
-      $('bulkSkipBtn').textContent = `⏭️ Skip Pending (${skipCandidateCount})`;
-      const hasEntries = currentSentences.some(s => currentGraphicsMap[s.id]);
+      const pending = currentSentences.filter(s => (currentSvgMap[s.id]?.generation_status || 'pending') === 'pending').length;
+      const failed = currentSentences.filter(s => (currentSvgMap[s.id]?.generation_status) === 'failed').length;
+      const completed = currentSentences.filter(s => (currentSvgMap[s.id]?.generation_status) === 'completed').length;
+      const hasEntries = currentSentences.some(s => currentSvgMap[s.id]);
+      $('bulkGenerateBtn').disabled = isGenerating || (pending + failed === 0);
+      $('bulkGenerateBtn').textContent = `🧬 Generate All (${pending + failed})`;
+      $('bulkSkipBtn').disabled = isGenerating || pending === 0;
+      $('bulkSkipBtn').textContent = `⏭️ Skip Pending (${pending})`;
+      $('bulkDownloadBtn').disabled = completed === 0;
+      $('bulkDownloadBtn').textContent = `⬇️ Download All SVGs (${completed})`;
       $('bulkResetBtn').disabled = isGenerating || !hasEntries;
     }
 
-    async function upsertGraphics(sentenceId, data) {
-      const existing = currentGraphicsMap[sentenceId];
-      if (existing) {
-        const res = await api(`sentence_graphics?id=eq.${existing.id}`, {
-          method: 'PATCH',
-          headers: { ...HEADERS, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...data, updated_at: new Date().toISOString() })
-        });
+    // ── Upsert helper ──
+    async function upsertSvg(sentenceId, data) {
+      const existing = currentSvgMap[sentenceId];
+      if (existing && existing.id) {
+        const res = await api(`sentence_svgs?id=eq.${existing.id}`, { method: 'PATCH', body: JSON.stringify({ ...data, updated_at: new Date().toISOString() }) });
+        currentSvgMap[sentenceId] = Array.isArray(res) ? res[0] : { ...existing, ...data };
       } else {
-        const res = await api('sentence_graphics', {
+        const res = await api('sentence_svgs', {
           method: 'POST',
-          headers: { ...HEADERS, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            sentence_id: sentenceId,
-            module_number: currentModuleNumber,
-            video_number: currentVideoNumber,
-            script_id: currentScriptId,
-            ...data
-          })
+          body: JSON.stringify({ sentence_id: sentenceId, module_number: currentModuleNumber, video_number: currentVideoNumber, script_id: currentScriptId, ...data })
         });
-        currentGraphicsMap[sentenceId] = res;
+        currentSvgMap[sentenceId] = Array.isArray(res) ? res[0] : res;
       }
+      return currentSvgMap[sentenceId];
     }
 
-    async function updateGraphicsType(sentenceId, graphicsType) {
-      try {
-        await upsertGraphics(sentenceId, { graphics_type: graphicsType });
-      } catch (e) { showToast('Failed to update graphics type: ' + e.message, true); }
+    async function updateSvgType(sentenceId, svgType) {
+      svgTypeMap[sentenceId] = svgType;
+      const reco = recommendSvgType(currentSentences.find(s => s.id === sentenceId) || {});
+      const hint = document.querySelector(`tr[data-sid="${sentenceId}"] .reco-hint`);
+      if (hint) hint.innerHTML = `⭐ Reco: <b>${reco.replace(/_/g, ' ')}</b>`;
+      const g = currentSvgMap[sentenceId];
+      if (g && g.id) { try { await upsertSvg(sentenceId, { svg_type: svgType }); } catch (_) {} }
     }
 
-    async function updateRationale(sentenceId, rationale) {
-      try {
-        await upsertGraphics(sentenceId, { rationale, generation_status: 'skipped' });
-        currentGraphicsMap[sentenceId] = { ...(currentGraphicsMap[sentenceId] || {}), rationale, generation_status: 'skipped' };
-        renderSentences();
-        updateStats();
-        updateBulkButtons();
-      } catch (e) { showToast('Failed to update rationale: ' + e.message, true); }
-    }
-
+    // ── Generation (client-side, branded templates → DB) ──
     async function generateSingle(sentenceId) {
       if (isGenerating) return;
-      isGenerating = true;
-      updateBulkButtons();
-      const s = currentSentences.find(s => s.id === sentenceId);
-      if (!s) { isGenerating = false; updateBulkButtons(); return; }
+      const s = currentSentences.find(x => x.id === sentenceId);
+      if (!s) return;
+      isGenerating = true; updateBulkButtons();
       try {
-        const g = currentGraphicsMap[sentenceId] || {};
-        await upsertGraphics(sentenceId, { generation_status: 'generating' });
-        currentGraphicsMap[sentenceId] = { ...currentGraphicsMap[sentenceId], generation_status: 'generating' };
-        renderSentences(); updateStats(); updateBulkButtons();
-
-        const prompt = s.sentence_text;
-        const graphicsType = g.graphics_type || 'explain';
-
-        const res = await fetch('/api/images/generate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            prompt,
-            module_number: currentModuleNumber,
-            video_number: currentVideoNumber,
-            asset_types: [graphicsType]
-          })
-        });
-
-        if (!res.ok) {
-          const errData = await res.json().catch(() => ({}));
-          throw new Error(errData.error || 'Generation failed');
-        }
-
-        const data = await res.json();
-        let savedUrl = '';
-        try {
-          const saveRes = await fetch('/api/images/save', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              image_url: data.image_url,
-              module_number: currentModuleNumber,
-              video_number: currentVideoNumber,
-              prompt: s.sentence_text
-            })
-          });
-          if (saveRes.ok) { const sd = await saveRes.json(); savedUrl = `/api/research/file?container=research-images&name=${encodeURIComponent(sd.blob_name)}`; }
-        } catch (_) {}
-
-        await upsertGraphics(sentenceId, {
-          generation_status: 'completed',
-          graphics_url: savedUrl || data.image_url,
-          prompt_used: data.refined_prompt || data.original_prompt || prompt,
-          error_message: ''
-        });
-        currentGraphicsMap[sentenceId] = { ...currentGraphicsMap[sentenceId], generation_status: 'completed', graphics_url: savedUrl || data.image_url, prompt_used: data.refined_prompt || prompt };
-        addLogEntry('✅ Sentence #' + sentenceId + ' generated successfully', 'success');
+        const svgType = chosenSvgType(s);
+        if (svgType === 'none') { await skipOne(sentenceId, 'Marked as no-SVG'); return; }
+        await upsertSvg(sentenceId, { generation_status: 'generating', svg_type: svgType });
+        renderSentences();
+        const code = buildSvg(svgType, s.sentence_text);
+        if (!code) throw new Error('Template produced empty SVG');
+        await upsertSvg(sentenceId, { generation_status: 'completed', svg_type: svgType, svg_code: code, prompt_used: buildSvgPrompt(svgType, s.sentence_text), error_message: '' });
+        showToast('🧬 SVG generated');
       } catch (err) {
-        await upsertGraphics(sentenceId, { generation_status: 'failed', error_message: err.message });
-        currentGraphicsMap[sentenceId] = { ...currentGraphicsMap[sentenceId], generation_status: 'failed', error_message: err.message };
-        addLogEntry('❌ Sentence #' + sentenceId + ' failed: ' + err.message, 'fail');
+        try { await upsertSvg(sentenceId, { generation_status: 'failed', error_message: err.message }); } catch (_) {}
+        showToast('Generation failed: ' + err.message, true);
       } finally {
         isGenerating = false;
         renderSentences(); updateStats(); updateBulkButtons();
       }
     }
 
+    async function skipOne(sentenceId, rationale) {
+      await upsertSvg(sentenceId, { generation_status: 'skipped', rationale: rationale || 'Not needed for video flow' });
+    }
+
     async function bulkGenerate() {
       if (isGenerating) return;
-      const candidates = currentSentences.filter(s => {
-        const st = currentGraphicsMap[s.id]?.generation_status || 'pending';
-        return st === 'pending' || st === 'failed';
+      const targets = currentSentences.filter(s => {
+        const st = currentSvgMap[s.id]?.generation_status || 'pending';
+        return (st === 'pending' || st === 'failed') && chosenSvgType(s) !== 'none';
       });
-      if (!candidates.length) { showToast('No pending or failed sentences to generate.'); return; }
-      isGenerating = true;
-      $('progressPanel').style.display = 'block';
-      setProgress(0, candidates.length);
-      clearLog();
-
-      for (let i = 0; i < candidates.length; i++) {
-        if (!isGenerating) { addLogEntry('⏹️ Bulk generation cancelled', 'skip'); break; }
-        const s = candidates[i];
-        addLogEntry(`⏳ (${i+1}/${candidates.length}) Generating sentence #${s.id}...`, '');
+      if (!targets.length) { showToast('No pending sentences to generate.'); return; }
+      isGenerating = true; updateBulkButtons();
+      $('progressPanel').style.display = 'block'; $('progressLog').innerHTML = '';
+      setProgress(0, targets.length);
+      for (let i = 0; i < targets.length; i++) {
+        const s = targets[i];
+        addLog(`⏳ (${i + 1}/${targets.length}) Sentence #${s.id}…`, '');
         try {
-          const g = currentGraphicsMap[s.id] || {};
-          await upsertGraphics(s.id, { generation_status: 'generating' });
-          currentGraphicsMap[s.id] = { ...currentGraphicsMap[s.id], generation_status: 'generating' };
-          renderSentences(); updateStats(); updateBulkButtons();
-
-          const prompt = s.sentence_text;
-          const graphicsType = g.graphics_type || 'explain';
-          const res = await fetch('/api/images/generate', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prompt, module_number: currentModuleNumber, video_number: currentVideoNumber, asset_types: [graphicsType] })
-          });
-
-          if (!res.ok) { const ed = await res.json().catch(() => ({})); throw new Error(ed.error || 'Generation failed'); }
-          const data = await res.json();
-          let savedUrl = '';
-          try {
-            const sr = await fetch('/api/images/save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image_url: data.image_url, module_number: currentModuleNumber, video_number: currentVideoNumber, prompt: s.sentence_text }) });
-            if (sr.ok) { const sd = await sr.json(); savedUrl = `/api/research/file?container=research-images&name=${encodeURIComponent(sd.blob_name)}`; }
-          } catch (_) {}
-          await upsertGraphics(s.id, { generation_status: 'completed', graphics_url: savedUrl || data.image_url, prompt_used: data.refined_prompt || prompt, error_message: '' });
-          currentGraphicsMap[s.id] = { ...currentGraphicsMap[s.id], generation_status: 'completed', graphics_url: savedUrl || data.image_url, prompt_used: data.refined_prompt || prompt };
-          addLogEntry(`✅ Sentence #${s.id} completed`, 'success');
+          const svgType = chosenSvgType(s);
+          const code = buildSvg(svgType, s.sentence_text);
+          if (!code) throw new Error('empty SVG');
+          await upsertSvg(s.id, { generation_status: 'completed', svg_type: svgType, svg_code: code, prompt_used: buildSvgPrompt(svgType, s.sentence_text), error_message: '' });
+          addLog(`✅ Sentence #${s.id} (${svgType})`, 'success');
         } catch (err) {
-          await upsertGraphics(s.id, { generation_status: 'failed', error_message: err.message });
-          currentGraphicsMap[s.id] = { ...currentGraphicsMap[s.id], generation_status: 'failed', error_message: err.message };
-          addLogEntry(`❌ Sentence #${s.id} failed: ${err.message}`, 'fail');
+          try { await upsertSvg(s.id, { generation_status: 'failed', error_message: err.message }); } catch (_) {}
+          addLog(`❌ Sentence #${s.id}: ${err.message}`, 'fail');
         }
-        setProgress(i + 1, candidates.length);
-        renderSentences(); updateStats(); updateBulkButtons();
+        setProgress(i + 1, targets.length);
       }
       isGenerating = false;
       renderSentences(); updateStats(); updateBulkButtons();
-      showToast('✅ Bulk generation complete!');
+      showToast('✅ Bulk SVG generation complete!');
     }
 
     async function bulkSkip() {
       if (isGenerating) return;
       const rationale = $('bulkRationaleInput').value.trim() || 'Not needed for video flow';
-      const candidates = currentSentences.filter(s => {
-        const st = currentGraphicsMap[s.id]?.generation_status || 'pending';
-        return st === 'pending';
-      });
-      if (!candidates.length) { showToast('No pending sentences to skip.'); return; }
-      for (const s of candidates) {
-        await upsertGraphics(s.id, { generation_status: 'skipped', rationale });
-        currentGraphicsMap[s.id] = { ...currentGraphicsMap[s.id], generation_status: 'skipped', rationale };
-      }
+      const targets = currentSentences.filter(s => (currentSvgMap[s.id]?.generation_status || 'pending') === 'pending');
+      if (!targets.length) { showToast('No pending sentences to skip.'); return; }
+      for (const s of targets) { try { await skipOne(s.id, rationale); } catch (_) {} }
       renderSentences(); updateStats(); updateBulkButtons();
-      showToast(`⏭️ Skipped ${candidates.length} sentences with rationale: "${rationale}"`);
+      showToast(`⏭️ Skipped ${targets.length} sentences`);
     }
 
     async function bulkReset() {
       if (isGenerating) return;
-      const graphicsIds = Object.values(currentGraphicsMap).filter(g => g.id).map(g => g.id);
-      if (!graphicsIds.length) { showToast('Nothing to reset.'); return; }
-      for (const gid of graphicsIds) {
-        try { await api(`sentence_graphics?id=eq.${gid}`, { method: 'DELETE' }); } catch (_) {}
-      }
-      currentGraphicsMap = {};
+      const ids = Object.values(currentSvgMap).filter(g => g.id).map(g => g.id);
+      if (!ids.length) { showToast('Nothing to reset.'); return; }
+      for (const gid of ids) { try { await api(`sentence_svgs?id=eq.${gid}`, { method: 'DELETE' }); } catch (_) {} }
+      currentSvgMap = {}; svgTypeMap = {};
       renderSentences(); updateStats(); updateBulkButtons();
-      showToast('🔄 All graphics entries reset to pending');
+      showToast('🔄 All SVG entries reset to pending');
     }
 
-    function setProgress(current, total) {
-      const pct = total > 0 ? Math.round((current / total) * 100) : 0;
+    // ── Downloads ──
+    function downloadSvgString(code, filename) {
+      const blob = new Blob([code], { type: 'image/svg+xml' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+    function svgFileName(s) {
+      const idx = currentSentences.findIndex(x => x.id === s.id) + 1;
+      const type = chosenSvgType(s);
+      return `M${currentModuleNumber || 0}_V${currentVideoNumber || 0}_s${String(idx).padStart(2, '0')}_${type}.svg`;
+    }
+    function downloadOne(sentenceId) {
+      const s = currentSentences.find(x => x.id === sentenceId);
+      const g = currentSvgMap[sentenceId];
+      if (!s || !g?.svg_code) { showToast('Generate the SVG first.', true); return; }
+      downloadSvgString(g.svg_code, svgFileName(s));
+    }
+    function bulkDownload() {
+      const done = currentSentences.filter(s => currentSvgMap[s.id]?.svg_code);
+      if (!done.length) { showToast('No SVGs to download.', true); return; }
+      done.forEach((s, i) => setTimeout(() => downloadSvgString(currentSvgMap[s.id].svg_code, svgFileName(s)), i * 250));
+      showToast(`⬇️ Downloading ${done.length} SVGs…`);
+    }
+
+    // ── Lightbox ──
+    function openLightbox(sentenceId) {
+      const g = currentSvgMap[sentenceId];
+      if (!g?.svg_code) return;
+      $('lightboxFrame').innerHTML = g.svg_code;
+      $('lightbox').classList.add('show');
+    }
+
+    // ── Modal (edit / AI) ──
+    function openModal(sentenceId) {
+      const s = currentSentences.find(x => x.id === sentenceId);
+      if (!s) return;
+      activeModalSid = sentenceId;
+      const g = currentSvgMap[sentenceId] || {};
+      const svgType = chosenSvgType(s);
+      const code = g.svg_code || buildSvg(svgType, s.sentence_text);
+      $('modalSentenceNo').textContent = `· #${currentSentences.findIndex(x => x.id === sentenceId) + 1} · ${svgType.replace(/_/g, ' ')}`;
+      $('modalSvgCode').value = code;
+      $('modalPrompt').value = g.custom_prompt || buildSvgPrompt(svgType, s.sentence_text);
+      $('modalPreview').innerHTML = code;
+      $('svgModal').classList.add('show');
+    }
+    function closeModal() { $('svgModal').classList.remove('show'); activeModalSid = null; }
+    function refreshModalPreview() { $('modalPreview').innerHTML = $('modalSvgCode').value; }
+
+    $('modalRefreshPreviewBtn').addEventListener('click', refreshModalPreview);
+    $('rebuildBtn').addEventListener('click', () => {
+      const s = currentSentences.find(x => x.id === activeModalSid);
+      if (!s) return;
+      const code = buildSvg(chosenSvgType(s), s.sentence_text);
+      $('modalSvgCode').value = code; refreshModalPreview();
+    });
+    $('copyPromptBtn').addEventListener('click', () => {
+      navigator.clipboard.writeText($('modalPrompt').value).then(() => showToast('📋 Prompt copied — paste into Claude')).catch(() => showToast('Copy failed', true));
+    });
+    $('modalCopySvgBtn').addEventListener('click', () => {
+      navigator.clipboard.writeText($('modalSvgCode').value).then(() => showToast('📋 SVG copied')).catch(() => showToast('Copy failed', true));
+    });
+    $('modalDownloadBtn').addEventListener('click', () => {
+      const s = currentSentences.find(x => x.id === activeModalSid);
+      if (!s) return;
+      downloadSvgString($('modalSvgCode').value, svgFileName(s));
+    });
+    $('modalSaveBtn').addEventListener('click', async () => {
+      if (!activeModalSid) return;
+      const s = currentSentences.find(x => x.id === activeModalSid);
+      const code = $('modalSvgCode').value.trim();
+      const btn = $('modalSaveBtn'); const orig = btn.textContent;
+      btn.textContent = '💾 Saving…'; btn.disabled = true;
+      try {
+        await upsertSvg(activeModalSid, {
+          generation_status: code ? 'completed' : 'pending',
+          svg_type: chosenSvgType(s), svg_code: code,
+          custom_prompt: $('modalPrompt').value, error_message: ''
+        });
+        showToast('✅ Saved to DB');
+        closeModal();
+        renderSentences(); updateStats(); updateBulkButtons();
+      } catch (err) {
+        showToast('Save failed: ' + err.message, true);
+      } finally { btn.textContent = orig; btn.disabled = false; }
+    });
+
+    // ── Progress log ──
+    function setProgress(cur, total) {
+      const pct = total > 0 ? Math.round((cur / total) * 100) : 0;
       $('progressBarFill').style.width = pct + '%';
-      $('progressText').textContent = `${current} / ${total}`;
+      $('progressText').textContent = `${cur} / ${total}`;
     }
-
-    function clearLog() { $('progressLog').innerHTML = ''; }
-    function addLogEntry(msg, cls) {
+    function addLog(msg, cls) {
       const el = document.createElement('div');
       el.className = 'log-entry ' + (cls || '');
       el.textContent = msg;
@@ -756,32 +934,27 @@
       $('progressLog').scrollTop = $('progressLog').scrollHeight;
     }
 
+    // ── Wiring ──
     $('moduleSelect').addEventListener('change', () => {
       const mid = parseInt($('moduleSelect').value);
       const mod = dbModules.find(m => m.id === mid);
       currentModuleNumber = mod ? mod.module_number : null;
       loadVideos(mid);
-      if (!mid) { $('sentencesPanel').style.display = 'none'; $('emptyState').style.display = 'block'; $('statsRow').style.display = 'none'; $('bulkBarCard').style.display = 'none'; }
+      resetView();
     });
-
     $('videoSelect').addEventListener('change', () => {
-      const vid = $('videoSelect').value;
-      const video = dbVideos.find(v => v.id === parseInt(vid));
+      const vid = parseInt($('videoSelect').value);
+      const video = dbVideos.find(v => v.id === vid);
       currentVideoNumber = video ? video.video_number : null;
-      if (currentModuleNumber && currentVideoNumber) {
-        loadSentences(currentModuleNumber, currentVideoNumber);
-      } else {
-        $('sentencesPanel').style.display = 'none';
-        $('emptyState').style.display = 'block';
-        $('statsRow').style.display = 'none';
-        $('bulkBarCard').style.display = 'none';
-      }
+      if (currentModuleNumber && currentVideoNumber) loadSentences(currentVideoNumber);
+      else resetView();
     });
-
     $('bulkGenerateBtn').addEventListener('click', bulkGenerate);
     $('bulkSkipBtn').addEventListener('click', bulkSkip);
+    $('bulkDownloadBtn').addEventListener('click', bulkDownload);
     $('bulkResetBtn').addEventListener('click', bulkReset);
 
+    loadBranding();
     loadModules();
   </script>
 </body>
