@@ -89,7 +89,30 @@
     .btn-img:hover { background: rgba(59,130,246,0.28); }
     .btn-yt { background:#ef4444; color:#fff; text-decoration:none; display:inline-flex; align-items:center; padding:9px 16px; border-radius:9px; font-size:0.8rem; font-weight:700; }
     .btn-yt:hover { background:#dc2626; }
+    .btn-li { background:#0a66c2; color:#fff; text-decoration:none; display:inline-flex; align-items:center; padding:9px 16px; border-radius:9px; font-size:0.8rem; font-weight:700; border:none; cursor:pointer; font-family:var(--font-b); }
+    .btn-li:hover { background:#084b8f; }
+    .btn-dl { background: rgba(16,185,129,0.16); color:#6ee7b7; border:1px solid rgba(16,185,129,0.3) !important; }
+    .btn-dl:hover { background: rgba(16,185,129,0.26); }
+    .btn-dl:disabled { opacity:0.4; cursor:not-allowed; }
     button.act.done { background: var(--blue); color:#fff; }
+
+    /* Existing images gallery */
+    .gallery { display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; }
+    .gallery .thumb { width:58px; height:58px; border-radius:8px; object-fit:cover; cursor:pointer; border:2px solid transparent; background:#0b1220; transition:all .15s; }
+    .gallery .thumb:hover { transform:translateY(-2px); }
+    .gallery .thumb.sel { border-color: var(--green); box-shadow:0 0 0 2px rgba(16,185,129,0.3); }
+    .gallery-note { font-size:0.72rem; color:var(--muted); margin-top:10px; }
+    .gallery-empty { font-size:0.74rem; color:var(--muted); margin-top:10px; opacity:0.8; }
+
+    /* Saved posted link row */
+    .save-row { margin-top:16px; padding-top:14px; border-top:1px solid var(--border); }
+    .save-row label { display:block; font-size:0.74rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:7px; }
+    .save-input-wrap { display:flex; gap:8px; flex-wrap:wrap; }
+    .save-input-wrap input { flex:1; min-width:180px; background:rgba(0,0,0,0.3); border:1px solid var(--border); border-radius:9px; padding:9px 12px; color:var(--text); font-size:0.82rem; font-family:var(--font-b); }
+    .save-input-wrap input:focus { outline:none; border-color: var(--blue); }
+    .posted-badge { display:none; align-items:center; gap:8px; margin-top:10px; font-size:0.78rem; color:#6ee7b7; }
+    .posted-badge a { color:#93c5fd; word-break:break-all; }
+    .posted-badge.show { display:flex; }
 
     .empty { text-align:center; color:var(--muted); padding:40px; }
     footer { text-align:center; color:var(--muted); font-size:0.8rem; margin-top:48px; padding-top:20px; border-top:1px solid rgba(255,255,255,0.05); }
@@ -139,7 +162,20 @@
 
 <script>
 const CHANNEL = "https://www.youtube.com/@RifatErdemSahin";
+const LINKEDIN_FEED = "https://www.linkedin.com/feed/";
 const DIV = "─────────────";
+
+// ── Supabase (same project as the rest of post-prod) ──
+const SUPABASE_URL = localStorage.getItem('supabase_url') || 'https://rmekfsdhglyiralxvkwc.supabase.co';
+const SUPABASE_ANON_KEY = localStorage.getItem('supabase_anon_key') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZWtmc2RoZ2x5aXJhbHh2a3djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NzYzODgsImV4cCI6MjA5NjM1MjM4OH0.ay6HsmO_CbMGDXL_Dv4DT-paAIAOqlQPfmqqx_mexSU';
+const HEADERS = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
+async function api(path, opts) {
+  const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, { ...opts, headers: { ...HEADERS, ...(opts?.headers || {}) } });
+  if (!res.ok) { const err = await res.text().catch(() => ''); throw new Error(res.status + ': ' + err); }
+  const ct = res.headers.get('content-type') || '';
+  return ct.includes('json') ? res.json() : res.text();
+}
+const selectedImg = {}; // cardId -> image url chosen for download/save
 
 // Course data — modules + videos with promotion angles.
 const MODULES = [
@@ -362,15 +398,27 @@ function renderPosts(){
             <div class="claim">${claimHtml}</div>
             <div class="wm"><span>@RifatErdemSahin</span><span>youtube.com</span></div>
           </div>
+          <div class="gallery" id="gal_${id}"></div>
+          <div class="gallery-empty" id="galmsg_${id}">Loading existing images…</div>
           <div class="img-actions">
             <button class="act btn-img" data-act="img" data-id="${id}">🖼️ Copy image prompt</button>
+            <button class="act btn-dl" data-act="dl" data-id="${id}" disabled>⬇️ Download image</button>
           </div>
         </div>
         <div class="txt-side">
           <div class="post-body" id="body_${id}">${escapeHtml(buildPost(it))}</div>
           <div class="txt-actions">
             <button class="act btn-copy" data-act="text" data-id="${id}">📋 Copy post text</button>
+            <button class="act btn-li" data-act="post" data-id="${id}">🔗 Post on LinkedIn</button>
             <a class="btn-yt" href="${CHANNEL}" target="_blank" rel="noopener">📺 Open channel</a>
+          </div>
+          <div class="save-row">
+            <label>💾 Save the published post link</label>
+            <div class="save-input-wrap">
+              <input type="url" id="url_${id}" placeholder="https://www.linkedin.com/feed/update/...">
+              <button class="act btn-copy" data-act="save" data-id="${id}">💾 Save link</button>
+            </div>
+            <div class="posted-badge" id="badge_${id}"></div>
           </div>
         </div>
       </div>
@@ -378,19 +426,123 @@ function renderPosts(){
   }).join("");
 
   // wire buttons
-  wrap.querySelectorAll("button.act").forEach(btn=>{
-    btn.onclick=()=>{
-      const id = btn.dataset.id;
-      const it = list.find(x=>`p${x.m}_${x.v||0}`===id);
-      const payload = btn.dataset.act==="img" ? buildImagePrompt(it) : buildPost(it);
-      navigator.clipboard.writeText(payload).then(()=>{
-        const orig = btn.textContent;
-        btn.textContent = btn.dataset.act==="img" ? "✅ Prompt copied!" : "✅ Copied!";
-        btn.classList.add("done");
-        setTimeout(()=>{ btn.textContent=orig; btn.classList.remove("done"); }, 1800);
-      });
+  wrap.querySelectorAll("[data-act]").forEach(btn=>{
+    const id = btn.dataset.id;
+    const it = list.find(x=>`p${x.m}_${x.v||0}`===id);
+    const act = btn.dataset.act;
+    btn.onclick = async ()=>{
+      if (act==="text" || act==="img"){
+        const payload = act==="img" ? buildImagePrompt(it) : buildPost(it);
+        await navigator.clipboard.writeText(payload);
+        flash(btn, act==="img" ? "✅ Prompt copied!" : "✅ Copied!");
+      } else if (act==="post"){
+        try { await navigator.clipboard.writeText(buildPost(it)); } catch(e){}
+        window.open(LINKEDIN_FEED, "_blank", "noopener");
+        flash(btn, "📋 Text copied — paste it!");
+      } else if (act==="dl"){
+        const url = selectedImg[id];
+        if (!url) return;
+        downloadImage(url, `linkedin_M${it.m}${it.v?("_V"+it.v):"_overview"}.png`);
+        flash(btn, "⬇️ Downloading…");
+      } else if (act==="save"){
+        const url = (document.getElementById("url_"+id).value || "").trim();
+        if (!/^https?:\/\//i.test(url)){ flash(btn, "⚠️ Enter a URL"); return; }
+        try {
+          await saveLink(it, url, selectedImg[id]);
+          showBadge(id, url);
+          flash(btn, "✅ Saved!");
+        } catch(e){ flash(btn, "❌ Failed"); console.error(e); }
+      }
     };
   });
+
+  // async per-card loaders
+  list.forEach(it=>{ const id=`p${it.m}_${it.v||0}`; loadGallery(it, id); loadBadge(it, id); });
+}
+
+function flash(btn, msg){
+  const orig = btn.dataset.orig || btn.textContent;
+  btn.dataset.orig = orig;
+  btn.textContent = msg; btn.classList.add("done");
+  setTimeout(()=>{ btn.textContent = orig; btn.classList.remove("done"); }, 1900);
+}
+
+// Load existing generated images for this module/video from Supabase
+async function loadGallery(it, id){
+  const gal = document.getElementById("gal_"+id);
+  const msg = document.getElementById("galmsg_"+id);
+  if(!gal) return;
+  try{
+    const vq = it.kind==="video" ? `&video_number=eq.${it.v}` : "";
+    const rows = await api(`generated_images?select=id,image_url,thumbnail_url&module_number=eq.${it.m}${vq}&order=created_at.desc&limit=12`);
+    if(!rows || !rows.length){
+      msg.textContent = `No saved images yet for this ${it.kind==="video"?"video":"module"} — generate them in the Image Generator.`;
+      return;
+    }
+    gal.innerHTML = rows.map(r=>{
+      const thumb = escapeHtml(r.thumbnail_url || r.image_url || "");
+      const full = escapeHtml(r.image_url || r.thumbnail_url || "");
+      return `<img class="thumb" src="${thumb}" data-full="${full}" loading="lazy" alt="generated image">`;
+    }).join("");
+    msg.textContent = "👆 Click an image to select it for download / saving.";
+    gal.querySelectorAll("img.thumb").forEach(img=>{
+      img.onclick=()=>{
+        gal.querySelectorAll("img.thumb").forEach(x=>x.classList.remove("sel"));
+        img.classList.add("sel");
+        selectedImg[id] = img.dataset.full;
+        const dl = document.querySelector(`button[data-act="dl"][data-id="${id}"]`);
+        if(dl) dl.disabled = false;
+      };
+    });
+  }catch(e){ msg.textContent = "Couldn't load images: " + e.message; }
+}
+
+// Download an image (cross-origin falls back to opening in a new tab)
+async function downloadImage(url, filename){
+  try{
+    const r = await fetch(url, { mode:'cors' });
+    if(!r.ok) throw new Error('fetch failed');
+    const b = await r.blob();
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(b); a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+  }catch(e){ window.open(url, "_blank", "noopener"); }
+}
+
+// Upsert the published LinkedIn link into Supabase
+async function saveLink(it, postUrl, imgUrl){
+  const now = new Date().toISOString();
+  const payload = {
+    module_number: it.m, video_number: it.v || 0, kind: it.kind,
+    hook: it.hook, post_text: buildPost(it), image_url: imgUrl || "",
+    post_url: postUrl, posted_at: now, updated_at: now
+  };
+  return api('linkedin_posts?on_conflict=module_number,video_number', {
+    method:'POST',
+    headers:{ 'Prefer':'resolution=merge-duplicates,return=representation' },
+    body: JSON.stringify(payload)
+  });
+}
+
+// Load a previously saved link into the field + badge
+async function loadBadge(it, id){
+  try{
+    const rows = await api(`linkedin_posts?select=post_url,posted_at&module_number=eq.${it.m}&video_number=eq.${it.v||0}&limit=1`);
+    if(rows && rows.length){
+      const input = document.getElementById("url_"+id);
+      if(input) input.value = rows[0].post_url;
+      showBadge(id, rows[0].post_url, rows[0].posted_at);
+    }
+  }catch(e){ /* table may not exist yet — ignore */ }
+}
+
+function showBadge(id, url, ts){
+  const b = document.getElementById("badge_"+id);
+  if(!b) return;
+  const when = ts ? new Date(ts).toLocaleDateString() : "just now";
+  b.innerHTML = `✅ Posted (${when}) — <a href="${escapeHtml(url)}" target="_blank" rel="noopener">${escapeHtml(url)}</a>`;
+  b.classList.add("show");
 }
 
 document.getElementById("kindSeg").querySelectorAll("button").forEach(b=>{
