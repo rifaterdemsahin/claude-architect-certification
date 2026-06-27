@@ -344,8 +344,33 @@ Use the following AppleScript patterns (documented in `4_Formula/tools/vscode_te
 |-------|----------------|---------|
 | `gdrive-search` | `/gdrive-search` | Search Google Drive for reference documents |
 | `axiom-logs` | `./6_Semblance/tools/get_logs.sh [limit]` | Pull latest error logs from Axiom dataset to diagnose issues |
+| `error-loop-filer` | `python3 6_Semblance/tools/axiom_error_to_github_issue.py` | **Scan Axiom + file deduped `axiom-error` issues.** Run after pulling logs — never opens the same error twice (same-day dedup by `_rowId` + fingerprint). Prints a one-line summary: `Filed N · skipped M dup · skipped K noise`. |
+| `error-loop-resolver` | `python3 6_Semblance/tools/issue_fix_agent.py [--dry-run]` | **Resolve open `axiom-error` issues autonomously.** Verify-before-apply → scoped LLM fix → validate → `go build` gate → commit + close. Try `--dry-run` first. |
 | `video-transcribe` | `/video-transcribe` | Transcribe YouTube demos into markdown |
 | `image-generation` | `/image-generation` | Generate visual mockups in `3_Simulation/` |
+
+---
+
+## 🤖 Autonomous Error Loop — Run Reminder
+
+> 📖 **Spec:** [`4_Formula/autonomous_error_loop_formula.md`](4_Formula/autonomous_error_loop_formula.md) · 📋 **Run report:** [`6_Semblance/logs/autonomous_error_loop_report.md`](6_Semblance/logs/autonomous_error_loop_report.md)
+
+When an `axiom-error` issue exists, **run the loop** — don't triage manually:
+
+```bash
+# 1️⃣ File NEW (deduped) issues from the last 24h of Axiom logs
+export AXIOM_TOKEN=… OPENROUTER_API_KEY=… GITHUB_REPOSITORY=owner/repo
+python3 6_Semblance/tools/axiom_error_to_github_issue.py
+
+# 2️⃣ Resolve open issues (dry-run first, then live)
+python3 6_Semblance/tools/issue_fix_agent.py --dry-run
+python3 6_Semblance/tools/issue_fix_agent.py   # verify → fix → build → commit → close → push
+
+# 3️⃣ Display the run report in the terminal
+bat 6_Semblance/logs/autonomous_error_loop_report.md   # or: cat / glow
+```
+
+**Guarantees baked in:** stage 1 never re-files the same error (same-day dedup by `_rowId` + content fingerprint, scans open *and* closed issues); stage 2 never clobbers a working file or breaks the build (verify-before-apply + validate + build-gate).
 
 ---
 
