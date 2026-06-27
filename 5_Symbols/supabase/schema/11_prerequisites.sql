@@ -4,7 +4,9 @@ CREATE TABLE IF NOT EXISTS public.prerequisites (
     module_number INTEGER NOT NULL,
     video_number INTEGER NOT NULL,
     install_name TEXT NOT NULL,
-    install_command TEXT NOT NULL,
+    install_command TEXT NOT NULL,            -- legacy single command (fallback)
+    install_command_macos TEXT,               -- 🍎 macOS install command
+    install_command_windows TEXT,             -- 🪟 Windows install command
     verification_command TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );

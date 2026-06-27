@@ -42,6 +42,26 @@
     .btn-copy { background: rgba(139,92,246,0.15); color: var(--primary); border: 1px solid rgba(139,92,246,0.3); border-radius: 6px; padding: 4px 10px; cursor: pointer; font-size: 0.8rem; font-weight: 600; margin-left: 8px; transition: all 0.2s; white-space: nowrap; }
     .btn-copy:hover { background: rgba(139,92,246,0.25); }
 
+    /* OS tabs */
+    .os-tabs { display: inline-flex; gap: 6px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 6px; margin-bottom: 24px; }
+    .os-tab { background: transparent; color: var(--muted); border: none; border-radius: 8px; padding: 8px 18px; cursor: pointer; font-family: var(--font-b); font-size: 0.9rem; font-weight: 600; transition: all 0.2s; }
+    .os-tab:hover { color: var(--text); }
+    .os-tab.active { background: rgba(139,92,246,0.2); color: var(--text); box-shadow: inset 0 0 0 1px rgba(139,92,246,0.4); }
+    .copy-all-btn { background: rgba(16,185,129,0.12); color: var(--green); border: 1px solid rgba(16,185,129,0.35); border-radius: 8px; padding: 6px 12px; cursor: pointer; font-size: 0.8rem; font-weight: 600; transition: all 0.2s; }
+    .copy-all-btn:hover { background: rgba(16,185,129,0.22); }
+    .video-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+
+    /* One-click student install */
+    .install-all { background: linear-gradient(135deg, rgba(139,92,246,0.12), rgba(59,130,246,0.08)); border: 1px solid var(--border); border-radius: 16px; padding: 20px 24px; margin-bottom: 24px; }
+    .install-all-title { font-family: var(--font-h); font-weight: 700; font-size: 1.05rem; margin-bottom: 4px; }
+    .install-all-sub { color: var(--muted); font-size: 0.85rem; margin-bottom: 16px; }
+    .install-all-btns { display: flex; flex-wrap: wrap; gap: 12px; }
+    .install-all-btn { flex: 1 1 240px; display: flex; align-items: center; justify-content: center; gap: 8px; border-radius: 12px; padding: 16px 20px; cursor: pointer; font-family: var(--font-b); font-size: 1rem; font-weight: 700; transition: all 0.2s; color: var(--text); }
+    .install-all-btn.mac { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.18); }
+    .install-all-btn.mac:hover { background: rgba(255,255,255,0.12); }
+    .install-all-btn.win { background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.4); }
+    .install-all-btn.win:hover { background: rgba(59,130,246,0.25); }
+
     /* Toast */
     .toast { position: fixed; bottom: 24px; right: 24px; background: #1f2937; border: 1px solid rgba(16,185,129,0.4); padding: 12px 20px; border-radius: 12px; font-size: 0.88rem; z-index: 9999; opacity: 0; transform: translateY(10px); transition: all 0.3s; pointer-events: none; color: var(--green); }
     .toast.show { opacity: 1; transform: translateY(0); }
@@ -54,12 +74,28 @@
   <div id="nav-placeholder"></div>
   <div class="container">
     <h1>🛠️ Prerequisites</h1>
-    <p class="subtitle">Install prerequisites for each module and video. Use the copy button to grab commands easily.</p>
+    <p class="subtitle">Install guides for each module and video. Pick your operating system, then copy the commands.</p>
 
     <!-- Connection status -->
     <div class="config-panel" style="display:flex;align-items:center;gap:12px;padding:12px 18px;">
       <span style="font-size:0.85rem;color:var(--muted);">⚙️ Supabase</span>
       <span id="conn-status">🔴 connecting…</span>
+    </div>
+
+    <!-- One-click student install -->
+    <div class="install-all">
+      <div class="install-all-title">🎓 One-click install for students</div>
+      <div class="install-all-sub">Copy the full install script for your machine and paste it into a terminal — it installs every prerequisite at once.</div>
+      <div class="install-all-btns">
+        <button class="install-all-btn mac" onclick="copyAllForOS('macos')">🍎 macOS — Copy install script</button>
+        <button class="install-all-btn win" onclick="copyAllForOS('windows')">🪟 Windows — Copy install script</button>
+      </div>
+    </div>
+
+    <!-- OS selector -->
+    <div class="os-tabs" id="os-tabs" role="tablist">
+      <button class="os-tab" data-os="macos" onclick="setOS('macos')">🍎 macOS</button>
+      <button class="os-tab" data-os="windows" onclick="setOS('windows')">🪟 Windows</button>
     </div>
 
     <div id="prereq-list"></div>
@@ -73,6 +109,10 @@
   <script src="../../../shared/debug-panel.js"></script>
   <script>
     let SB_URL = '', SB_KEY = '';
+    let allData = [];
+    let currentOS = localStorage.getItem('prereq_os') || 'macos';
+    // Highlight the saved OS tab on load (tabs are rendered above this script).
+    document.querySelectorAll('.os-tab').forEach(t => t.classList.toggle('active', t.dataset.os === currentOS));
 
     fetch('/api/config')
       .then(r => {
@@ -120,12 +160,67 @@
       try {
         const r = await api('prerequisites?order=module_number.asc,video_number.asc');
         if (!r.ok) throw new Error(await r.text());
-        const data = await r.json();
-        renderList(data);
-      } catch(e) { 
-        toastError('Load error: ' + e.message); 
-        renderList([]); 
+        allData = await r.json();
+        renderList(allData);
+      } catch(e) {
+        toastError('Load error: ' + e.message);
+        renderList([]);
       }
+    }
+
+    // Pick the install command for the active OS, falling back to the legacy
+    // single command if the per-OS column is empty (e.g. before the migration).
+    function cmdFor(req) {
+      if (currentOS === 'windows') return req.install_command_windows || req.install_command || '';
+      return req.install_command_macos || req.install_command || '';
+    }
+
+    // Build one combined install script for the given OS from every row,
+    // de-duplicating identical commands while preserving order.
+    function buildAllScript(os) {
+      const cmds = [];
+      const seen = new Set();
+      for (const req of allData) {
+        const c = os === 'windows'
+          ? (req.install_command_windows || req.install_command)
+          : (req.install_command_macos || req.install_command);
+        if (c && !seen.has(c)) { seen.add(c); cmds.push(c); }
+      }
+      if (os === 'windows') {
+        return [
+          '# 🪟 Windows — install all course prerequisites',
+          '# Run in PowerShell. Requires winget (built-in on Win 10/11) and scoop.',
+          '# Install scoop first if needed:',
+          '#   Set-ExecutionPolicy -Scope CurrentUser RemoteSigned; irm get.scoop.sh | iex',
+          '',
+          ...cmds
+        ].join('\n');
+      }
+      return [
+        '#!/bin/bash',
+        '# 🍎 macOS — install all course prerequisites',
+        '# Installs Homebrew first if it is missing.',
+        'which brew >/dev/null 2>&1 || /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"',
+        '',
+        ...cmds
+      ].join('\n');
+    }
+
+    function copyAllForOS(os) {
+      if (!allData.length) { toastError('Prerequisites not loaded yet — try again in a moment.'); return; }
+      const label = os === 'windows' ? '🪟 Windows' : '🍎 macOS';
+      navigator.clipboard.writeText(buildAllScript(os))
+        .then(() => showToast(`${label} install script copied!`))
+        .catch(() => showToast('Failed to copy'));
+    }
+
+    function setOS(os) {
+      currentOS = os;
+      localStorage.setItem('prereq_os', os);
+      document.querySelectorAll('.os-tab').forEach(t => {
+        t.classList.toggle('active', t.dataset.os === os);
+      });
+      renderList(allData);
     }
 
     function renderList(data) {
@@ -148,25 +243,32 @@
         html += `<div class="module-card">
           <div class="module-header">📦 Module ${mNum}</div>`;
         
+        const osLabel = currentOS === 'windows' ? '🪟 Windows' : '🍎 macOS';
         for (const vNum of Object.keys(tree[mNum]).sort((a,b) => a-b)) {
+          const reqs = tree[mNum][vNum];
+          const allCmds = reqs.map(cmdFor).filter(Boolean).join('\n');
           html += `<div class="video-section">
-            <div class="video-title">🎥 Video ${vNum}</div>
+            <div class="video-head">
+              <div class="video-title">🎥 Video ${vNum}</div>
+              <button class="copy-all-btn" onclick="copyText('${escJs(allCmds)}')" title="Copy all ${osLabel} commands for this video">📋 Copy all (${osLabel})</button>
+            </div>
             <table class="req-table">
               <thead>
                 <tr>
                   <th style="width: 20%">Tool / Software</th>
-                  <th style="width: 60%">Install Command</th>
+                  <th style="width: 60%">${osLabel} Install Command</th>
                   <th style="width: 20%">Verify</th>
                 </tr>
               </thead>
               <tbody>`;
-              
-          for (const req of tree[mNum][vNum]) {
+
+          for (const req of reqs) {
+            const cmd = cmdFor(req);
             html += `<tr>
               <td><strong>${esc(req.install_name)}</strong></td>
               <td>
-                <span class="install-cmd">${esc(req.install_command)}</span>
-                <button class="btn-copy" onclick="copyText('${escJs(req.install_command)}')">📋 Copy</button>
+                <span class="install-cmd">${esc(cmd || '—')}</span>
+                ${cmd ? `<button class="btn-copy" onclick="copyText('${escJs(cmd)}')">📋 Copy</button>` : ''}
               </td>
               <td><span style="font-size:0.8rem;color:var(--muted)">${esc(req.verification_command || '-')}</span></td>
             </tr>`;
