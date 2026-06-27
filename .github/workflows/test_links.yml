@@ -100,7 +100,26 @@ jobs:
             --json number \
             --jq '.[].number')
           for num in $OPEN; do
-            gh issue close "$num" --comment "Superseded by a newer link-check run."
+            gh issue close "$num" --comment "Superseded by a newer link-check run that still found broken links."
+          done
+
+      - name: Close resolved broken-link issues on success
+        if: steps.link-check.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          OPEN=$(gh issue list \
+            --label "broken-links" \
+            --state open \
+            --json number \
+            --jq '.[].number')
+          if [ -z "$OPEN" ]; then
+            echo "No open broken-links issues to close."
+            exit 0
+          fi
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          for num in $OPEN; do
+            gh issue close "$num" --comment "✅ Link check passed on the latest deploy — all links are intact ($RUN_URL). Closing as resolved."
           done
 
       - name: Ensure labels exist

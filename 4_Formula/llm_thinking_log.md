@@ -2186,3 +2186,19 @@ This guarantees uniqueness both among the new candidates and against existing no
 - Node dry-run against live `navigation_config.json`: all 6 Content Assembly groups get distinct accents (violet→cyan→emerald→amber→rose→blue); same logic auto-applies to the 6 Planning groups and all Tools groups globally.
 - Local server serves `shared/nav.js`, `shared/nav.css`, `index.html` all HTTP 200; served `nav.js` contains `GROUP_PALETTE`/`renderGroup`/`site-drop-group`.
 - Browser opened on `http://localhost:8080/index.html` for visual confirmation of the colour-coded group banners.
+
+### 📅 2026-06-27 — Resolve Stale broken-links Issue #4 (root production_shotlist.html 404)
+**Objective:** Determine whether GitHub issue #4 (🚨 Broken links: root `/production_shotlist.html` → 404, opened 2026-06-09) still exists; fix if so; commit + push.
+
+**Investigation & Root Cause:**
+- Reproduced the live HTTP link checker (`7_Testing_Known/test_links.py --mode http`) → **0 broken links, exit 0**. The specific root-level `/production_shotlist.html` URL still 404s, but **nothing links to it anymore** — the offending reference was removed/changed since 2026-06-09.
+- Wrote a crawler-equivalent resolver (`urljoin(page_url, href)`) over every on-disk HTML href/src → confirmed **no link resolves to the repo-root `production_shotlist.html`**. The live homepage's raw HTML contains no such link either.
+- So the *link* is fixed, but the *issue* stayed OPEN. Root cause: `.github/workflows/test_links.yml` only closes open `broken-links` issues `if: steps.link-check.outcome == 'failure'` (as "Superseded"). On **success** it did nothing, so resolved issues are never auto-closed → stale issue #4.
+- Bonus latent bug found during the sweep: `5_Symbols/course_src/templates/markdown_renderer.html` still carried the stale URL `5_Symbols/production_shotlist.html` (the file moved to `_obsolete/` per refactor task P-07) — a broken link the HTTP crawler doesn't reach (no page links to that template) but still wrong. Every other nav config correctly points to `5_Symbols/production/postprod/production_shotlist.html`.
+
+**Fixes:**
+- `5_Symbols/course_src/templates/markdown_renderer.html` — corrected the Shot List & Assets URL to `5_Symbols/production/postprod/production_shotlist.html` (matches all other configs).
+- `.github/workflows/test_links.yml` — added a new step **"Close resolved broken-link issues on success"** (`if: outcome == 'success'`) that closes every open `broken-links` issue with a ✅ resolved comment + run link. Also clarified the failure-side close comment. This prevents future stale issues; resolved issues now auto-close on the next green deploy.
+- Did NOT create a root redirect page — that would violate the HTML-containment rule (only `index.html` + `markdown_renderer.html` may live at the repo root). The 404 is harmless now that nothing references it.
+
+**Verification:** `test_links.yml` parses as valid YAML; `go build`/`go vet` pass; HTTP link checker = 0 broken / exit 0; no stale `5_Symbols/production_shotlist.html` references remain (excluding `_obsolete/`). Manually closing issue #4 as resolved (it predates the workflow fix); future resolved issues auto-close.
