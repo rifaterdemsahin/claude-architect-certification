@@ -591,27 +591,31 @@
     }
 
     // ── AI prompt (branded) for hand-off to Claude/Gemini ──
+    // Produces a CONCEPTUAL vector ICON / ILLUSTRATION of the subject (e.g. a
+    // GitHub octocat-style mark, an MCP "Model Context Protocol" connector
+    // diagram, a database cylinder) — NOT a text slide / title card.
     function buildSvgPrompt(svgType, sentenceText) {
-      const label = (svgType || 'title_card').replace(/_/g, ' ');
-      const guide = SVG_GUIDE[svgType] || '';
-      return `Generate clean, production-ready inline SVG markup (viewBox="0 0 1920 1080", 16:9) for a YouTube video graphic.
+      const label = (svgType || 'concept').replace(/_/g, ' ');
+      return `Generate a clean, conceptual inline SVG ICON / ILLUSTRATION (viewBox="0 0 1920 1080", 16:9) that visually represents the CORE CONCEPT in the line below — a single iconographic vector graphic. Think: a GitHub octocat-style mark, an MCP "Model Context Protocol" client⇄server connector diagram, a database cylinder, a neural-net brain, a shield, connected nodes/flow. This is NOT a slide, title card, lower-third, or bullet layout — do NOT build a text layout.
 
-SVG template: ${label}${guide ? ` — ${guide}` : ''}
-On-screen idea / text: "${sentenceText}"
+Concept / subject to illustrate: "${sentenceText}"
+Style hint: ${label}
+
+Approach:
+- Identify the main noun / technology / idea in the line and draw a recognizable SYMBOLIC illustration of it (a logo-like glyph, metaphor, object, or simple connected diagram).
+- Flat, modern line + fill style: bold geometric shapes, clean strokes, generous negative space, one clear focal subject, centered.
+- Minimal or NO words — at most a 1–3 word label only if it's essential to read the concept.
 
 Branding kit (${BRAND.template_name}):
-- Background: near-black ${BRAND.bg}
-- Gradient: deep blue ${BRAND.gradient_start} → bright yellow ${BRAND.gradient_end}
-- Accent bar: ${BRAND.accent_bar}
-- Main text: ${BRAND.main_color}, font Fira Code (monospace)
-- Sub text: ${BRAND.sub_color}, font Plus Jakarta Sans
-- Brand line: ${BRAND.tagline}
+- Background: near-black ${BRAND.bg} (a subtle ${BRAND.gradient_start}→${BRAND.gradient_end} gradient or transparent background is fine)
+- Palette: deep blue ${BRAND.gradient_start} → bright yellow ${BRAND.gradient_end}
+- Accent: ${BRAND.accent_bar}
+- Any text: ${BRAND.main_color}, font Fira Code (monospace); small sub-labels Plus Jakarta Sans
 
 Rules:
 - Return ONLY a single valid standalone <svg>…</svg> element — no markdown, no commentary.
-- Use only system font families (Fira Code, Plus Jakarta Sans); no external images or fonts.
-- Keep the key subject within title-safe margins (central 90%), high contrast, leave the lower third clear for captions.
-- Wrap long text into <tspan> lines so nothing overflows.`;
+- Build the artwork from vector primitives only (<path>, <circle>, <rect>, <line>, <polygon>, gradients) — no external images, raster, or fonts.
+- Keep the subject within the central 90% (title-safe), high contrast against the background, crisp and scalable.`;
     }
 
     // ── Recommended SVG type per sentence ──
