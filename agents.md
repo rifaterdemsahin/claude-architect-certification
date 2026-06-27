@@ -457,3 +457,11 @@ Files that are the actual proof-of-concept product implementation:
 - `5_Symbols/sanity_checklist.html`, `5_Symbols/production/settings.html`
 - `5_Symbols/sql/` — all database schema and seed SQL files
 - `2_Environment/11_database.md`, `2_Environment/12_supabase_backup.md`, `2_Environment/12_supabase_stats.md`, `2_Environment/13_google_drive_setup.md`
+
+### 2026-06-27
+- **Task:** 🛡️ Add Certification Guarantee for live support and exam-fail sessions.
+- **Action:**
+    - Created `5_Symbols/production/postprod/certification_guarantee.html` featuring a 24h unlimited live answers guarantee and a fail-safe group session promise.
+    - Updated `navigation_config.json`, `index.html`, `markdown_renderer.html`, and `shared/nav.js` to insert the new guarantee page into the "Certification & Proof" dropdown menu.
+- **Verification:** `go build`/`go vet` passed; local server correctly serves the page and the top navigation links resolve successfully.
+- **Status:** IMPLEMENTED, COMMITTED, PUSHED, DEPLOYED.
