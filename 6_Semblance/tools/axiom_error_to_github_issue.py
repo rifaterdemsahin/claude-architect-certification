@@ -65,7 +65,8 @@ def analyze_error_with_openrouter(error_match):
     )
     
     payload = {
-        "model": "anthropic/claude-3-opus",
+        "model": "anthropic/claude-opus-4.6",
+        "max_tokens": 1500,
         "messages": [
             {"role": "system", "content": "You are a debugging assistant."},
             {"role": "user", "content": prompt}
@@ -111,7 +112,7 @@ def create_github_issue(error_match, analysis_text):
     body = (
         f"## 💥 Server Error Detected\n\n"
         f"An error was detected in Axiom logs in the past 24 hours.\n\n"
-        f"### 🤖 AI Analysis (Claude 3 Opus via OpenRouter)\n"
+        f"### 🤖 AI Analysis (Claude 4.6 Opus via OpenRouter)\n"
         f"{analysis_text}\n\n"
         f"### 📜 Raw Log Metadata\n"
         f"```json\n{json.dumps(error_match, indent=2)}\n```\n\n"
