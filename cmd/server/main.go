@@ -19,6 +19,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path"
 	"strings"
 	"time"
 )
@@ -857,6 +858,63 @@ func uploadBlobToAzure(ctx context.Context, cfg config, container, blobName, con
 	return nil
 }
 
+// downloadBlobFromAzure fetches a blob's bytes (and content type) via a
+// short-lived read SAS. Used by the rename flow, which re-uploads the same
+// bytes under a new name (Azure blobs cannot be renamed in place).
+func downloadBlobFromAzure(ctx context.Context, cfg config, container, blobName string) ([]byte, string, error) {
+	expiry := time.Now().UTC().Add(10 * time.Minute)
+	sasQuery, err := generateContainerSAS(cfg.azureAccountName, cfg.azureAccountKey, container, "rl", expiry)
+	if err != nil {
+		return nil, "", fmt.Errorf("sas: %w", err)
+	}
+	getURL := blobURL(cfg.azureAccountName, container, blobName, sasQuery)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, getURL, nil)
+	if err != nil {
+		return nil, "", err
+	}
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, "", err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode >= 400 {
+		return nil, "", fmt.Errorf("azure get %d", resp.StatusCode)
+	}
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, "", err
+	}
+	ct := resp.Header.Get("Content-Type")
+	if ct == "" {
+		ct = "application/octet-stream"
+	}
+	return data, ct, nil
+}
+
+// deleteBlobFromAzure removes a blob via a short-lived delete SAS. Best-effort
+// callers ignore the error (e.g. a missing thumbnail).
+func deleteBlobFromAzure(ctx context.Context, cfg config, container, blobName string) error {
+	expiry := time.Now().UTC().Add(10 * time.Minute)
+	sasQuery, err := generateContainerSAS(cfg.azureAccountName, cfg.azureAccountKey, container, "rdl", expiry)
+	if err != nil {
+		return fmt.Errorf("sas: %w", err)
+	}
+	delURL := blobURL(cfg.azureAccountName, container, blobName, sasQuery)
+	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, delURL, nil)
+	if err != nil {
+		return err
+	}
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+	resp.Body.Close()
+	if resp.StatusCode >= 400 {
+		return fmt.Errorf("azure delete %d", resp.StatusCode)
+	}
+	return nil
+}
+
 // thumbPrefix matches the convention used by the image gallery pages
 // (research/images.html, scripts/index.html): a thumbnail for blob "X" is the
 // blob "__thumb__X" in the same container. Keeping the original extension in
@@ -1134,6 +1192,94 @@ func researchFileHandler(cfg config) http.HandlerFunc {
 		default:
 			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		}
+	}
+}
+
+// researchRenameHandler renames a blob (and its __thumb__ companion) by copying
+// the bytes to the new name and deleting the old — Azure has no in-place rename.
+// It also repoints research_relationships.item_name so existing image↔video and
+// image↔sentence links survive the rename. The file extension (suffix) is
+// preserved: the new name must keep the original extension.
+func researchRenameHandler(cfg config) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+		var body struct {
+			Container string `json:"container"`
+			From      string `json:"from"`
+			To        string `json:"to"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			http.Error(w, "invalid body", http.StatusBadRequest)
+			return
+		}
+		container := body.Container
+		from := strings.TrimSpace(body.From)
+		to := strings.TrimSpace(body.To)
+		if !allowedResearchContainers[container] {
+			http.Error(w, "invalid container", http.StatusBadRequest)
+			return
+		}
+		if from == "" || to == "" {
+			http.Error(w, "from and to are required", http.StatusBadRequest)
+			return
+		}
+		// Disallow path separators and thumbnail-internal names.
+		if strings.ContainsAny(to, "/\\") || strings.HasPrefix(to, thumbPrefix) || strings.HasPrefix(from, thumbPrefix) {
+			http.Error(w, "invalid name", http.StatusBadRequest)
+			return
+		}
+		// The suffix must not change: the new name keeps the original extension.
+		if !strings.EqualFold(path.Ext(from), path.Ext(to)) {
+			http.Error(w, "file extension (suffix) must not change", http.StatusBadRequest)
+			return
+		}
+		if to == from {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(map[string]string{"ok": "true", "name": to})
+			return
+		}
+		if cfg.azureAccountName == "" {
+			http.Error(w, "Azure Storage not configured", http.StatusServiceUnavailable)
+			return
+		}
+		ctx := r.Context()
+
+		// Copy the original blob to the new name, then delete the old.
+		data, ct, err := downloadBlobFromAzure(ctx, cfg, container, from)
+		if err != nil {
+			http.Error(w, "source not found: "+err.Error(), http.StatusNotFound)
+			return
+		}
+		if err := uploadBlobToAzure(ctx, cfg, container, to, ct, data); err != nil {
+			http.Error(w, "azure copy: "+err.Error(), http.StatusBadGateway)
+			return
+		}
+		if err := deleteBlobFromAzure(ctx, cfg, container, from); err != nil {
+			log.Printf("research rename: original delete failed for %s: %v", from, err)
+		}
+
+		// Best-effort: move the thumbnail companion too.
+		oldThumb, newThumb := thumbBlobName(from), thumbBlobName(to)
+		if tData, tct, terr := downloadBlobFromAzure(ctx, cfg, container, oldThumb); terr == nil {
+			if uerr := uploadBlobToAzure(ctx, cfg, container, newThumb, tct, tData); uerr != nil {
+				log.Printf("research rename: thumbnail copy failed for %s: %v", newThumb, uerr)
+			} else if derr := deleteBlobFromAzure(ctx, cfg, container, oldThumb); derr != nil {
+				log.Printf("research rename: thumbnail delete failed for %s: %v", oldThumb, derr)
+			}
+		}
+
+		// Repoint any relationship rows so existing links keep resolving.
+		if err := supabasePatch(ctx, cfg, "research_relationships",
+			"item_name=eq."+url.QueryEscape(from),
+			map[string]string{"item_name": to}); err != nil {
+			log.Printf("research rename: relationship update failed %s→%s: %v", from, to, err)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{"ok": "true", "name": to, "thumbnail": newThumb})
 	}
 }
 
@@ -2782,6 +2928,7 @@ func main() {
 	mux.Handle("/api/research/upload", observe(cfg, researchUploadHandler(cfg)))
 	mux.Handle("/api/research/files", observe(cfg, researchFilesHandler(cfg)))
 	mux.Handle("/api/research/file", observe(cfg, researchFileHandler(cfg)))
+	mux.Handle("/api/research/rename", observe(cfg, researchRenameHandler(cfg)))
 	mux.Handle("/api/explanations/generate", observe(cfg, generateExplanationHandler(cfg)))
 	mux.Handle("/api/explanations", observe(cfg, explanationsHandler(cfg)))
 	mux.Handle("/api/images/generate", observe(cfg, imageGenerateHandler(cfg)))

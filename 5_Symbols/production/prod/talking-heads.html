@@ -175,7 +175,11 @@
     .carousel-counter { font-size: 0.8rem; color: var(--text-muted); }
     .carousel-empty { text-align: center; padding: 60px; color: var(--text-muted); }
     .carousel-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
-    .carousel-grid-item { background: rgba(0,0,0,0.3); border-radius: 10px; overflow: hidden; cursor: pointer; border: 2px solid transparent; transition: border-color 0.2s; }
+    .carousel-grid-item { position: relative; background: rgba(0,0,0,0.3); border-radius: 10px; overflow: hidden; cursor: pointer; border: 2px solid transparent; transition: border-color 0.2s; }
+    .carousel-dl-btn { position: absolute; top: 6px; right: 6px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; color: #fff; font-size: 0.8rem; line-height: 1; padding: 4px 6px; cursor: pointer; opacity: 0; transition: opacity 0.15s; }
+    .carousel-rename-btn { position: absolute; top: 6px; left: 6px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; color: #fff; font-size: 0.8rem; line-height: 1; padding: 4px 6px; cursor: pointer; opacity: 0; transition: opacity 0.15s; }
+    .carousel-grid-item:hover .carousel-dl-btn, .carousel-grid-item:hover .carousel-rename-btn { opacity: 1; }
+    .carousel-dl-btn:hover, .carousel-rename-btn:hover { background: rgba(0,0,0,0.85); }
     .carousel-grid-item:hover { border-color: var(--primary); }
     .carousel-grid-item img { width: 100%; height: 120px; object-fit: cover; display: block; }
     .carousel-grid-item .carousel-grid-name { padding: 6px 8px; font-size: 0.7rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -687,7 +691,157 @@
 let carouselData = [];
   let carouselIndex = 0;
   let carouselInterval = null;
+  let carouselRenaming = false;
   const CAROUSEL_PLAY_INTERVAL_MS = 2500;
+  const CAROUSEL_CONTAINER = 'research-images';
+
+  // carouselSuffix returns the file extension (including the dot), e.g. ".png".
+  // Used to keep the suffix locked during rename and to name downloads.
+  function carouselSuffix(name) {
+    const dot = (name || '').lastIndexOf('.');
+    return dot > 0 ? name.slice(dot) : '';
+  }
+
+  // Trigger a browser download of a same-origin blob without changing its name.
+  function triggerDownload(url, filename) {
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+
+  window.downloadCarouselImage = function() {
+    const item = carouselData[carouselIndex];
+    if (item) triggerDownload(item.url, item.name);
+  };
+  window.downloadCarouselImageAt = function(idx) {
+    const item = carouselData[idx];
+    if (item) triggerDownload(item.url, item.name);
+  };
+
+  // Bulk download: trigger each image sequentially with a small gap so the
+  // browser doesn't drop rapid-fire download clicks.
+  window.downloadAllCarouselImages = async function() {
+    const btn = document.getElementById('carousel-dl-all');
+    const original = btn ? btn.textContent : '';
+    if (btn) btn.disabled = true;
+    try {
+      for (let i = 0; i < carouselData.length; i++) {
+        if (btn) btn.textContent = `⏬ Downloading ${i + 1}/${carouselData.length}…`;
+        triggerDownload(carouselData[i].url, carouselData[i].name);
+        await new Promise(r => setTimeout(r, 400));
+      }
+    } finally {
+      if (btn) { btn.textContent = original; btn.disabled = false; }
+    }
+  };
+
+  window.startCarouselRenameAt = function(idx) {
+    carouselIndex = idx;
+    startCarouselRename();
+  };
+
+  // Re-encode any image blob as PNG via a canvas — the clipboard reliably
+  // accepts image/png across browsers, while JPEG/WebP support is spotty.
+  function carouselToPng(blob) {
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(blob);
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        canvas.getContext('2d').drawImage(img, 0, 0);
+        URL.revokeObjectURL(url);
+        canvas.toBlob(b => b ? resolve(b) : reject(new Error('toBlob failed')), 'image/png');
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('image load failed')); };
+      img.src = url;
+    });
+  }
+
+  window.copyCarouselImage = async function() {
+    const item = carouselData[carouselIndex];
+    if (!item) return;
+    const btn = document.getElementById('carousel-copy-btn');
+    const orig = btn ? btn.innerHTML : '';
+    if (!navigator.clipboard || !window.ClipboardItem) {
+      if (btn) { btn.innerHTML = '🔴 Unsupported'; setTimeout(() => { btn.innerHTML = orig; }, 1800); }
+      return;
+    }
+    try {
+      // Pass a promise to ClipboardItem so the write stays tied to the click
+      // gesture even while the image is fetched/converted (required by Safari).
+      const pngPromise = fetch(item.url)
+        .then(r => r.blob())
+        .then(blob => blob.type === 'image/png' ? blob : carouselToPng(blob));
+      await navigator.clipboard.write([new ClipboardItem({ 'image/png': pngPromise })]);
+      if (btn) { btn.innerHTML = '✅ Copied'; setTimeout(() => { btn.innerHTML = orig; }, 1500); }
+    } catch (e) {
+      if (btn) { btn.innerHTML = '🔴 Failed'; setTimeout(() => { btn.innerHTML = orig; }, 1800); }
+    }
+  };
+
+  window.startCarouselRename = function() {
+    stopCarouselPlay();
+    updateCarouselPlayBtn();
+    carouselRenaming = true;
+    renderCarousel();
+    const inp = document.getElementById('carousel-rename-input');
+    if (inp) { inp.focus(); inp.select(); }
+  };
+  window.cancelCarouselRename = function() {
+    carouselRenaming = false;
+    renderCarousel();
+  };
+  window.saveCarouselRename = async function() {
+    const item = carouselData[carouselIndex];
+    const inp = document.getElementById('carousel-rename-input');
+    if (!item || !inp) return;
+    const ext = carouselSuffix(item.name);
+    // Strip any extension the user retyped, then re-append the locked suffix so
+    // the file extension can never change.
+    let base = inp.value.trim().replace(/[\/\\]/g, '_');
+    if (ext && base.toLowerCase().endsWith(ext.toLowerCase())) {
+      base = base.slice(0, base.length - ext.length);
+    }
+    const newName = base + ext;
+    if (!base) { inp.focus(); return; }
+    if (newName === item.name) { cancelCarouselRename(); return; }
+
+    const saveBtn = document.querySelector('#carousel-body .mod-btn');
+    if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = '⏳ Saving…'; }
+    try {
+      const res = await fetch('/api/research/rename', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ container: CAROUSEL_CONTAINER, from: item.name, to: newName })
+      });
+      if (!res.ok) {
+        const msg = await res.text();
+        throw new Error(msg || res.status);
+      }
+      // Update local model so the carousel reflects the new name without a reload.
+      item.name = newName;
+      const thumbName = '__thumb__' + newName;
+      item.url = `/api/research/file?container=${CAROUSEL_CONTAINER}&name=${encodeURIComponent(newName)}`;
+      item.thumbUrl = `/api/research/file?container=${CAROUSEL_CONTAINER}&name=${encodeURIComponent(thumbName)}`;
+      carouselRenaming = false;
+      renderCarousel();
+    } catch (e) {
+      carouselRenaming = false;
+      renderCarousel();
+      const body = document.getElementById('carousel-body');
+      if (body) {
+        const note = document.createElement('div');
+        note.style.cssText = 'text-align:center; color:#ef4444; font-size:0.8rem; margin-top:10px;';
+        note.textContent = '🔴 Rename failed: ' + (e.message || e);
+        body.appendChild(note);
+      }
+    }
+  };
 
   window.showImageCarousel = async function(videoId, videoLabel) {
     let overlay = document.getElementById('carousel-modal');
@@ -847,14 +1001,40 @@ let carouselData = [];
     if (!carouselData.length) return;
 
     const item = carouselData[carouselIndex];
-    let html = `<div style="text-align:center; margin-bottom: 16px;">`;
+    const ext = carouselSuffix(item.name);
+    const base = ext ? item.name.slice(0, item.name.length - ext.length) : item.name;
+    // Top action bar: bulk-download every image in this video at once.
+    let html = `<div style="display:flex; justify-content:flex-end; align-items:center; gap:8px; margin-bottom:14px;">`;
+    html += `  <button class="mod-btn" id="carousel-dl-all" onclick="downloadAllCarouselImages()" title="Download all ${carouselData.length} images">📦 Download all (${carouselData.length})</button>`;
+    html += `</div>`;
+    html += `<div style="text-align:center; margin-bottom: 16px;">`;
     html += `<img class="carousel-img" src="${item.url}" alt="${esc(item.name)}" onerror="this.style.display='none'">`;
     html += `</div>`;
-    html += `<p style="text-align:center; font-size:0.85rem; color:var(--text-muted); margin-bottom: 16px;">${esc(item.name)}</p>`;
+    if (carouselRenaming) {
+      // Inline rename: only the base name is editable — the suffix is locked
+      // so the file extension never changes.
+      html += `<div style="display:flex; align-items:center; justify-content:center; gap:6px; flex-wrap:wrap; margin-bottom:14px;">`;
+      html += `  <input id="carousel-rename-input" type="text" value="${esc(base)}" spellcheck="false"`;
+      html += `    style="background:rgba(0,0,0,0.4); border:1px solid var(--accent,#6366f1); border-radius:6px; color:var(--text-main); padding:6px 10px; font-size:0.85rem; min-width:220px;"`;
+      html += `    onkeydown="if(event.key==='Enter'){saveCarouselRename();}else if(event.key==='Escape'){cancelCarouselRename();}">`;
+      html += `  <span style="font-size:0.85rem; color:var(--text-muted); font-family:monospace;">${esc(ext || '')}</span>`;
+      html += `  <button class="mod-btn" style="background:var(--success); border-color:var(--success); color:white;" onclick="saveCarouselRename()">💾 Save</button>`;
+      html += `  <button class="mod-btn" onclick="cancelCarouselRename()">Cancel</button>`;
+      html += `</div>`;
+    } else {
+      html += `<p style="text-align:center; font-size:0.85rem; color:var(--text-muted); margin-bottom: 10px;">${esc(item.name)}</p>`;
+      html += `<div style="display:flex; gap:8px; justify-content:center; margin-bottom:16px;">`;
+      html += `  <button class="mod-btn" onclick="downloadCarouselImage()" title="Download this image">📥 Download</button>`;
+      html += `  <button class="mod-btn" id="carousel-copy-btn" onclick="copyCarouselImage()" title="Copy this image to the clipboard">📋 Copy</button>`;
+      html += `  <button class="mod-btn" onclick="startCarouselRename()" title="Rename this image (keeps the file extension)">✏️ Rename</button>`;
+      html += `</div>`;
+    }
     html += `<div class="carousel-grid">`;
     carouselData.forEach((img, i) => {
       html += `<div class="carousel-grid-item ${i === carouselIndex ? 'active-thumb' : ''}" onclick="carouselGoTo(${i})">`;
       html += `  <img src="${img.thumbUrl}" alt="${esc(img.name)}" loading="lazy" onerror="this.src='${img.url}'">`;
+      html += `  <button class="carousel-rename-btn" title="Rename ${esc(img.name)}" onclick="event.stopPropagation();startCarouselRenameAt(${i})">✏️</button>`;
+      html += `  <button class="carousel-dl-btn" title="Download ${esc(img.name)}" onclick="event.stopPropagation();downloadCarouselImageAt(${i})">📥</button>`;
       html += `  <div class="carousel-grid-name">${esc(img.name)}</div>`;
       html += `</div>`;
     });
