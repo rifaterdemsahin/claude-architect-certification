@@ -25,7 +25,7 @@ def query_axiom_errors():
     # APL Query for the dataset, looking for ERROR or FATAL logs
     query = f"['{AXIOM_DATASET}'] | where _time > now(-24h) | where severity == 'ERROR' or severity == 'FATAL' or level == 'error' | limit 10"
     
-    url = f"{AXIOM_QUERY_URL}/v1/datasets/_apl"
+    url = f"{AXIOM_QUERY_URL}/v1/datasets/_apl?format=legacy"
     
     try:
         response = requests.post(url, headers=headers, json={"apl": query})
@@ -36,6 +36,8 @@ def query_axiom_errors():
         return matches
     except Exception as e:
         print(f"Error querying Axiom: {e}")
+        if hasattr(e, 'response') and e.response is not None:
+            print(f"Response: {e.response.text}")
         return []
 
 def analyze_error_with_openrouter(error_match):
@@ -77,6 +79,8 @@ def analyze_error_with_openrouter(error_match):
         return data["choices"][0]["message"]["content"]
     except Exception as e:
         print(f"Error analyzing with OpenRouter: {e}")
+        if hasattr(e, 'response') and e.response is not None:
+            print(f"Response: {e.response.text}")
         return f"Failed to analyze error with OpenRouter. Error: {e}"
 
 def create_github_issue(error_match, analysis_text):

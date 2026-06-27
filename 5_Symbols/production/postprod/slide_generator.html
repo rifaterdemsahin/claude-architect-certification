@@ -141,9 +141,10 @@
               <div>
                 <button class="btn btn-secondary btn-sm" onclick="copyMarkdown()">📋 Copy</button>
                 <button class="btn btn-success btn-sm" id="downloadBtn" onclick="downloadMarkdown()">⬇️ .md</button>
+                <button class="btn btn-sm" style="background:#4ade80; color:#000;" onclick="savePresentation()">💾 Save to DB</button>
               </div>
             </div>
-            <textarea id="marpPreview" class="preview-box" style="width:100%; height:320px; resize:vertical;" oninput="updateVisualPreview()"></textarea>
+            <textarea id="marpPreview" class="preview-box" style="width:100%; height:320px; resize:vertical;" oninput="parseMarkdownToPreview(this.value)"></textarea>
           </div>
 
           <div class="render-pane" style="flex:1; min-width:300px;">
@@ -280,6 +281,18 @@
         renderSentences();
         $('sentencesPanel').style.display = 'block';
         $('previewPanel').style.display = 'block';
+        
+        // Auto-load from DB if exists
+        const existing = await api(`presentations?video_id=eq.${videoId}&select=markdown_content`);
+        if (existing && existing.length > 0) {
+          $('marpPreview').value = existing[0].markdown_content;
+          parseMarkdownToPreview(existing[0].markdown_content);
+          showToast('Loaded existing presentation from DB.', false, 2000);
+        } else {
+          $('marpPreview').value = '';
+          generatedSlides = [];
+          updateVisualPreview();
+        }
       } catch (e) {
         showToast('Error: ' + e.message, true);
       }
@@ -395,6 +408,33 @@ style: |
       updateVisualPreview();
     }
 
+    function parseMarkdownToPreview(md) {
+      generatedSlides = [];
+      const sections = md.split('---').slice(2); // Skip frontmatter (split creates 3 pieces for the 2 dashes)
+      
+      sections.forEach(sec => {
+        if (!sec.trim()) return;
+        const bgMatch = sec.match(/!\[bg opacity:.+?\]\((.+?)\)/);
+        const bgImg = bgMatch ? bgMatch[1] : '';
+        const emojiMatch = sec.match(/##\s+([^\n]+)/);
+        const emoji = emojiMatch ? emojiMatch[1].trim() : '🔹';
+        const textMatch = sec.match(/#\s+([^\n]+)/);
+        const punchyText = textMatch ? textMatch[1].trim() : '';
+        
+        if (punchyText) {
+          generatedSlides.push({ bgImg, emoji, punchyText });
+        }
+      });
+      
+      // If we couldn't parse any Steve Jobs structure, just try to fallback
+      if (!generatedSlides.length && sections.length > 0) {
+         generatedSlides.push({ bgImg:'', emoji:'📝', punchyText: 'Custom Markdown (Preview disabled)' });
+      }
+      
+      previewIndex = 0;
+      updateVisualPreview();
+    }
+
     function updateVisualPreview() {
       const vp = $('visualPreview');
       const counter = $('previewCounter');
@@ -446,6 +486,36 @@ style: |
       a.click();
       URL.revokeObjectURL(url);
       showToast('✅ Downloaded successfully');
+    }
+
+    async function savePresentation() {
+      const videoId = $('videoSelect').value;
+      if (!videoId) { showToast('Select a video first.', true); return; }
+      
+      const markdown = $('marpPreview').value;
+      if (!markdown.trim()) { showToast('Markdown is empty!', true); return; }
+      
+      try {
+        const existing = await api(`presentations?video_id=eq.${videoId}&select=id`);
+        if (existing && existing.length > 0) {
+          const res = await fetch(SUPABASE_URL + `/rest/v1/presentations?id=eq.${existing[0].id}`, {
+            method: 'PATCH',
+            headers: { ...HEADERS, 'Prefer': 'return=minimal' },
+            body: JSON.stringify({ markdown_content: markdown, updated_at: new Date().toISOString() })
+          });
+          if (!res.ok) throw new Error('Failed to update DB');
+        } else {
+          const res = await fetch(SUPABASE_URL + '/rest/v1/presentations', {
+            method: 'POST',
+            headers: { ...HEADERS, 'Prefer': 'return=minimal' },
+            body: JSON.stringify({ video_id: parseInt(videoId), markdown_content: markdown })
+          });
+          if (!res.ok) throw new Error('Failed to insert into DB');
+        }
+        showToast('💾 Saved to Supabase successfully!');
+      } catch (e) {
+        showToast('Error saving: ' + e.message, true);
+      }
     }
 
     function openPromptModal() {
