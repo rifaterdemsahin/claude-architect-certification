@@ -81,19 +81,44 @@
     }
 
     /* Weekly schedule */
-    .weeks { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 18px; margin-bottom: 48px; }
+    .weeks { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 18px; margin-bottom: 24px; }
     .week {
       background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06);
       border-radius: 18px; padding: 20px; position: relative; overflow: hidden;
+      display: flex; flex-direction: column;
     }
     .week::before {
       content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
       background: linear-gradient(90deg, var(--primary), var(--teal));
     }
     .week .w-num { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); }
-    .week .w-mod { font-family: var(--font-title); font-weight: 700; font-size: 1.1rem; margin: 4px 0 8px; color: var(--text-main); }
-    .week .w-time { font-size: 0.8rem; color: var(--teal); font-weight: 600; margin-bottom: 8px; }
-    .week p { font-size: 0.85rem; color: var(--text-muted); }
+    .week .w-mod { font-family: var(--font-title); font-weight: 700; font-size: 1.1rem; margin: 4px 0 6px; color: var(--text-main); }
+    .week .w-date { font-size: 0.92rem; color: var(--accent); font-weight: 700; }
+    .week .w-time { font-size: 0.8rem; color: var(--teal); font-weight: 600; margin: 2px 0 8px; }
+    .week p { font-size: 0.85rem; color: var(--text-muted); flex: 1; }
+    .week .gcal {
+      display: inline-flex; align-items: center; gap: 6px; margin-top: 12px;
+      font-size: 0.78rem; font-weight: 700; color: #4285f4; text-decoration: none;
+      border: 1px solid rgba(66,133,244,0.35); background: rgba(66,133,244,0.1);
+      padding: 6px 12px; border-radius: 100px; align-self: flex-start;
+    }
+    .week .gcal:hover { background: rgba(66,133,244,0.2); }
+
+    /* Calendar actions */
+    .cal-actions {
+      display: flex; flex-wrap: wrap; gap: 14px; align-items: center;
+      background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px; padding: 18px 22px; margin-bottom: 48px;
+    }
+    .cal-actions .ca-label { font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
+    .cal-actions .ca-note { font-size: 0.82rem; color: var(--text-muted); }
+    .btn-ics {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: linear-gradient(135deg, var(--primary), var(--teal)); color: #fff;
+      font-weight: 700; font-size: 0.88rem; text-decoration: none;
+      padding: 10px 18px; border-radius: 100px;
+    }
+    .btn-ics:hover { opacity: 0.92; }
 
     /* Loop / flow */
     .loop {
@@ -173,13 +198,45 @@
     </div>
 
     <!-- Weekly schedule -->
-    <h2 class="section-title">🗓 The 5-Week Cohort</h2>
+    <h2 class="section-title">🗓 The 5-Week Cohort — Sundays at 9:00 PM</h2>
     <div class="weeks">
-      <div class="week"><div class="w-num">Week 1</div><div class="w-mod">📦 Module 1</div><div class="w-time">⏱ 2-hour live call</div><p>Walk the module together, surface first reactions, capture the initial pain.</p></div>
-      <div class="week"><div class="w-num">Week 2</div><div class="w-mod">📦 Module 2</div><div class="w-time">⏱ 2-hour live call</div><p>Q&amp;A, feedback collection, refine based on last week’s notes.</p></div>
-      <div class="week"><div class="w-num">Week 3</div><div class="w-mod">📦 Module 3</div><div class="w-time">⏱ 2-hour live call</div><p>Participants start teaching each other — peer feedback compounds.</p></div>
-      <div class="week"><div class="w-num">Week 4</div><div class="w-mod">📦 Module 4</div><div class="w-time">⏱ 2-hour live call</div><p>Stress-test the self-learning process; note where it breaks.</p></div>
-      <div class="week"><div class="w-num">Week 5</div><div class="w-mod">📦 Module 5</div><div class="w-time">⏱ 2-hour live call</div><p>Final module, wrap-up, and the whole cohort gets certified together. 🎓</p></div>
+      <div class="week">
+        <div class="w-num">Week 1</div><div class="w-mod">📦 Module 1</div>
+        <div class="w-date">📅 Sun, 28 Jun 2026</div><div class="w-time">⏰ 9:00–11:00 PM (London)</div>
+        <p>Walk the module together, surface first reactions, capture the initial pain.</p>
+        <a class="gcal" target="_blank" rel="noopener" href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Cohort%20Call%20%E2%80%94%20Week%201%20%2F%20Module%201%20(Claude%20AI%20Certification)&dates=20260628T200000Z/20260628T220000Z&details=Weekly%202-hour%20customer-discovery%20cohort%20call.%20Host%3A%20Rifat%20Erdem%20Sahin.%20Live%3A%20Google%20Meet%2C%20async%3A%20WhatsApp.%0Ahttps%3A%2F%2Fclaude-architect-certification.fly.dev%2F5_Symbols%2Fproduction%2Fpreprod%2Fcustomer_discovery_interviews.html&location=Google%20Meet">📅 Add to Google Calendar</a>
+      </div>
+      <div class="week">
+        <div class="w-num">Week 2</div><div class="w-mod">📦 Module 2</div>
+        <div class="w-date">📅 Sun, 5 Jul 2026</div><div class="w-time">⏰ 9:00–11:00 PM (London)</div>
+        <p>Q&amp;A, feedback collection, refine based on last week’s notes.</p>
+        <a class="gcal" target="_blank" rel="noopener" href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Cohort%20Call%20%E2%80%94%20Week%202%20%2F%20Module%202%20(Claude%20AI%20Certification)&dates=20260705T200000Z/20260705T220000Z&details=Weekly%202-hour%20customer-discovery%20cohort%20call.%20Host%3A%20Rifat%20Erdem%20Sahin.%20Live%3A%20Google%20Meet%2C%20async%3A%20WhatsApp.%0Ahttps%3A%2F%2Fclaude-architect-certification.fly.dev%2F5_Symbols%2Fproduction%2Fpreprod%2Fcustomer_discovery_interviews.html&location=Google%20Meet">📅 Add to Google Calendar</a>
+      </div>
+      <div class="week">
+        <div class="w-num">Week 3</div><div class="w-mod">📦 Module 3</div>
+        <div class="w-date">📅 Sun, 12 Jul 2026</div><div class="w-time">⏰ 9:00–11:00 PM (London)</div>
+        <p>Participants start teaching each other — peer feedback compounds.</p>
+        <a class="gcal" target="_blank" rel="noopener" href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Cohort%20Call%20%E2%80%94%20Week%203%20%2F%20Module%203%20(Claude%20AI%20Certification)&dates=20260712T200000Z/20260712T220000Z&details=Weekly%202-hour%20customer-discovery%20cohort%20call.%20Host%3A%20Rifat%20Erdem%20Sahin.%20Live%3A%20Google%20Meet%2C%20async%3A%20WhatsApp.%0Ahttps%3A%2F%2Fclaude-architect-certification.fly.dev%2F5_Symbols%2Fproduction%2Fpreprod%2Fcustomer_discovery_interviews.html&location=Google%20Meet">📅 Add to Google Calendar</a>
+      </div>
+      <div class="week">
+        <div class="w-num">Week 4</div><div class="w-mod">📦 Module 4</div>
+        <div class="w-date">📅 Sun, 19 Jul 2026</div><div class="w-time">⏰ 9:00–11:00 PM (London)</div>
+        <p>Stress-test the self-learning process; note where it breaks.</p>
+        <a class="gcal" target="_blank" rel="noopener" href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Cohort%20Call%20%E2%80%94%20Week%204%20%2F%20Module%204%20(Claude%20AI%20Certification)&dates=20260719T200000Z/20260719T220000Z&details=Weekly%202-hour%20customer-discovery%20cohort%20call.%20Host%3A%20Rifat%20Erdem%20Sahin.%20Live%3A%20Google%20Meet%2C%20async%3A%20WhatsApp.%0Ahttps%3A%2F%2Fclaude-architect-certification.fly.dev%2F5_Symbols%2Fproduction%2Fpreprod%2Fcustomer_discovery_interviews.html&location=Google%20Meet">📅 Add to Google Calendar</a>
+      </div>
+      <div class="week">
+        <div class="w-num">Week 5</div><div class="w-mod">📦 Module 5 🎓</div>
+        <div class="w-date">📅 Sun, 26 Jul 2026</div><div class="w-time">⏰ 9:00–11:00 PM (London)</div>
+        <p>Final module, wrap-up, and the whole cohort gets certified together.</p>
+        <a class="gcal" target="_blank" rel="noopener" href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Cohort%20Call%20%E2%80%94%20Week%205%20%2F%20Module%205%20%2B%20Certification%20(Claude%20AI%20Certification)&dates=20260726T200000Z/20260726T220000Z&details=Final%202-hour%20customer-discovery%20cohort%20call%20%E2%80%94%20cohort%20certified%20together.%20Host%3A%20Rifat%20Erdem%20Sahin.%20Live%3A%20Google%20Meet%2C%20async%3A%20WhatsApp.%0Ahttps%3A%2F%2Fclaude-architect-certification.fly.dev%2F5_Symbols%2Fproduction%2Fpreprod%2Fcustomer_discovery_interviews.html&location=Google%20Meet">📅 Add to Google Calendar</a>
+      </div>
+    </div>
+
+    <!-- Add all to calendar -->
+    <div class="cal-actions">
+      <span class="ca-label">🗓 Add the whole series</span>
+      <a class="btn-ics" href="customer_discovery_cohort.ics" download>⬇️ Download .ics (all 5 calls)</a>
+      <span class="ca-note">Imports into Google Calendar, Apple Calendar, or Outlook — 5 Sundays, 9:00–11:00 PM London time.</span>
     </div>
 
     <!-- Roles -->

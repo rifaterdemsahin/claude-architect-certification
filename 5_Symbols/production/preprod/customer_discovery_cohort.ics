@@ -1,0 +1,53 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Claude AI Certification//Customer Discovery Cohort//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:Customer-Discovery Cohort — Claude AI Certification
+X-WR-TIMEZONE:Europe/London
+BEGIN:VEVENT
+UID:cdc-week1-module1@claude-architect-certification.fly.dev
+DTSTAMP:20260627T000000Z
+DTSTART:20260628T200000Z
+DTEND:20260628T220000Z
+SUMMARY:Cohort Call — Week 1 / Module 1 (Claude AI Certification)
+DESCRIPTION:Weekly 2-hour customer-discovery cohort call. Walk through Module 1 together\, surface first reactions\, and capture the initial pain. Host: Rifat Erdem Sahin. Async channel: WhatsApp. Live: Google Meet.\n\nPage: https://claude-architect-certification.fly.dev/5_Symbols/production/preprod/customer_discovery_interviews.html
+LOCATION:Google Meet
+END:VEVENT
+BEGIN:VEVENT
+UID:cdc-week2-module2@claude-architect-certification.fly.dev
+DTSTAMP:20260627T000000Z
+DTSTART:20260705T200000Z
+DTEND:20260705T220000Z
+SUMMARY:Cohort Call — Week 2 / Module 2 (Claude AI Certification)
+DESCRIPTION:Weekly 2-hour customer-discovery cohort call. Q&A and feedback collection on Module 2\, refining based on last week's notes. Host: Rifat Erdem Sahin. Async channel: WhatsApp. Live: Google Meet.\n\nPage: https://claude-architect-certification.fly.dev/5_Symbols/production/preprod/customer_discovery_interviews.html
+LOCATION:Google Meet
+END:VEVENT
+BEGIN:VEVENT
+UID:cdc-week3-module3@claude-architect-certification.fly.dev
+DTSTAMP:20260627T000000Z
+DTSTART:20260712T200000Z
+DTEND:20260712T220000Z
+SUMMARY:Cohort Call — Week 3 / Module 3 (Claude AI Certification)
+DESCRIPTION:Weekly 2-hour customer-discovery cohort call. Participants start teaching each other — peer feedback compounds on Module 3. Host: Rifat Erdem Sahin. Async channel: WhatsApp. Live: Google Meet.\n\nPage: https://claude-architect-certification.fly.dev/5_Symbols/production/preprod/customer_discovery_interviews.html
+LOCATION:Google Meet
+END:VEVENT
+BEGIN:VEVENT
+UID:cdc-week4-module4@claude-architect-certification.fly.dev
+DTSTAMP:20260627T000000Z
+DTSTART:20260719T200000Z
+DTEND:20260719T220000Z
+SUMMARY:Cohort Call — Week 4 / Module 4 (Claude AI Certification)
+DESCRIPTION:Weekly 2-hour customer-discovery cohort call. Stress-test the self-learning process on Module 4 and note where it breaks. Host: Rifat Erdem Sahin. Async channel: WhatsApp. Live: Google Meet.\n\nPage: https://claude-architect-certification.fly.dev/5_Symbols/production/preprod/customer_discovery_interviews.html
+LOCATION:Google Meet
+END:VEVENT
+BEGIN:VEVENT
+UID:cdc-week5-module5@claude-architect-certification.fly.dev
+DTSTAMP:20260627T000000Z
+DTSTART:20260726T200000Z
+DTEND:20260726T220000Z
+SUMMARY:Cohort Call — Week 5 / Module 5 + Certification (Claude AI Certification)
+DESCRIPTION:Final 2-hour customer-discovery cohort call. Walk Module 5\, wrap up\, and the whole cohort gets certified together. Host: Rifat Erdem Sahin. Async channel: WhatsApp. Live: Google Meet.\n\nPage: https://claude-architect-certification.fly.dev/5_Symbols/production/preprod/customer_discovery_interviews.html
+LOCATION:Google Meet
+END:VEVENT
+END:VCALENDAR
