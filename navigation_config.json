@@ -263,6 +263,20 @@
           "children": [
             {
               "group": true,
+              "label": "🌍 Environments",
+              "children": [
+                {
+                  "label": "💻 Local (8080)",
+                  "url": "http://localhost:8080/5_Symbols/production/preprod/course_outline.html"
+                },
+                {
+                  "label": "☁️ Fly.io (Production)",
+                  "url": "https://claude-architect-certification.fly.dev/5_Symbols/production/preprod/course_outline.html"
+                }
+              ]
+            },
+            {
+              "group": true,
               "label": "🐙 Code & Repo",
               "children": [
                 {
