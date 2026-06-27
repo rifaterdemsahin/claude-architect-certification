@@ -79,18 +79,35 @@ The default window is **`DEDUP_WINDOW_DAYS=1`** = "today", directly implementing
 
 ## 🧹 Stage 2 — the resolver's safety gates
 
-The resolver (`issue_fix_agent.py`) is the dangerous half — it writes code. Four gates stop it from doing harm:
+The resolver (`issue_fix_agent.py`) is the dangerous half — it writes code. Five gates stop it from doing harm:
 
 | 🚦 Gate | 🧪 Check | ❌ On failure |
 |---------|----------|----------------|
-| 1. **Verify-before-apply** | Re-parse the named HTML file's inline `<script>` blocks (Node) | Error no longer reproduces → **close as *already-fixed***, don't touch code |
+| 1. **Verify-before-apply** | Re-parse the named HTML file's inline `<script>` blocks (Node) | Error no longer reproduces → **close as *already-fixed*** (`no-code-change`), don't touch code |
 | 2. **Validate output** | Generated HTML's inline JS must parse; generated Go must `gofmt -e` | **Refuse to write** the file (tree untouched) |
 | 3. **Build gate** | `go build ./... && go vet ./...` from the repo root | **`git restore .`** (revert) + leave issue open |
 | 4. **Scope** | Parse `file:line:col` from the issue; send focused context to the LLM | Avoids the generic, wrong full-file rewrites that #14 produced |
+| 5. **Duplicate fold** | Match the issue's `<!-- axiom-fp: -->` against every `axiom-error` issue (any state); if a lower-numbered *canonical* shares it, close onto that one | The same error filed on day N+2 (past stage 1's window) is **closed as `duplicate`** instead of being re-analysed |
 
 Run it safely first with `--dry-run` (no writes, no commits, no closes).
 
 > **Why gate 1 exists:** issues #10–#14 reported a `SyntaxError` that was *already fixed* in commit `5af0765` before the agent ever ran. Without the verify gate, the LLM would have overwritten a working file. The resolver now **proves the error still exists** before changing anything.
+
+---
+
+## 🏷️ Closed-issue label taxonomy
+
+Every issue the resolver closes gets **exactly one** taxonomy label (created automatically by `ensure_labels()` on each LIVE run), so the closed tracker is scannable at a glance — *why* was it closed?
+
+| 🏷 Label | 🎨 Colour | 📌 Meaning | 🚦 Applied when |
+|----------|-----------|-----------|----------------|
+| `auto-fixed` | `#2DA44E` (green) | A code fix was committed by the agent | The verify→fix→build-gate→commit path succeeded |
+| `no-code-change` | `#6E7781` (gray) | Closed without touching code | Verify-before-apply passed (file already parses) **or** the LLM returned `[]` (already resolved) |
+| `duplicate` | `#cfd3d7` (built-in) | Duplicates a canonical issue (same fingerprint) | Gate 5 found a lower-numbered issue with the same `<!-- axiom-fp: -->` |
+
+> 🧱 **Invariant:** an issue the agent closes always carries exactly one of these three. `auto-fixed` is mutually exclusive with `no-code-change` (a commit either happened or it didn't); `duplicate` short-circuits before either check runs. Legacy labels (`bug`, `axiom-error`, `ai-analyzed`) are left in place.
+>
+> 📅 **2026-06-27 back-fill:** the 7 closed `axiom-error` issues were tagged retroactively to match this contract — #10/#15/#16 → `no-code-change`; #11/#12/#13/#14 → `duplicate`.
 
 ---
 
@@ -194,6 +211,7 @@ A replay of any already-filed row/fingerprint prints `⏭️ Skip …` and is **
 | #11–#13 | "Failed to analyze… 404/402" issues | Skip-on-analysis-failure (no noise issues) |
 | #10–#13 | `anthropic/claude-opus-4.6` → 404; later `claude-3.5-sonnet` also removed (404) | Configurable `OPENROUTER_MODEL`, default pinned to a slug verified live (`claude-sonnet-4.6`); the daily CI sets it explicitly so a deprecation can't silently break the run |
 | #14 | LLM proposed a wrong generic `sed` fix | Verify-before-apply + validate-output + build gate in the resolver |
+| #10–#16 | Closed issues had no category — you couldn't tell *why* an issue was closed without reading comments | **Closed-issue label taxonomy**: `auto-fixed` / `no-code-change` / `duplicate` (auto-created by `ensure_labels()`); gate 5 folds cross-window dupes onto their canonical issue. Back-filled onto all 7 existing closed issues on 2026-06-27 |
 
 ---
 

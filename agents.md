@@ -46,6 +46,15 @@ This document defines how AI agents interact with the **Claude AI Certification 
     - Documented in `4_Formula/llm_thinking_log.md` and the `4_Formula/autonomous_error_loop_formula.md` (model default + a new **🔁 Daily CI** section).
 - **Verification:** `python3 -m py_compile` both scripts OK; `go build ./... && go vet ./...` green; workflow YAML valid; `explanations.html` inline JS parses; new model slug returns a live “OK”; `resolve_repo_path`/`parse_error_location` unit-checked (bare name, full path, prose body, garbage); issues #15/#16 confirmed **CLOSED** with the verify-before-apply verdict; tree has no stray root `prerequisites.html`.
 - **Status:** IMPLEMENTED, COMMITTED, PUSHED.
+- **Task:** 🏷️ Tag closed issues by *why* they were closed (no-code-change / duplicate / auto-fixed) + catch cross-window duplicates.
+- **Action:**
+    - Added a **closed-issue label taxonomy** to `6_Semblance/tools/issue_fix_agent.py`: `auto-fixed` (green, code fix committed), `no-code-change` (gray, already fixed/not reproducible), `duplicate` (built-in). `ensure_labels()` creates them idempotently at the start of every LIVE run.
+    - `close_as_already_fixed()` now adds `no-code-change`; the commit path adds `auto-fixed`; new `close_as_duplicate()` adds `duplicate` and closes with reason `not planned`.
+    - Added **gate 5 — duplicate fold**: `extract_fingerprint()` reads the `<!-- axiom-fp: -->` marker; `find_canonical_for_fingerprint()` scans ALL `axiom-error` issues (any state) and, if a lower-numbered issue shares the fingerprint, closes this one onto it. Catches duplicates that slip past stage 1's same-day dedup window.
+    - **Back-filled the 7 closed issues** retroactively: #10/#15/#16 → `no-code-change`; #11/#12/#13/#14 → `duplicate` (matched their existing `COMPLETED`/`DUPLICATE` state reasons).
+    - Updated the spec `4_Formula/autonomous_error_loop_formula.md`: resolver gate table (4→5 gates) + a new **🏷️ Closed-issue label taxonomy** section + a lessons row.
+- **Verification:** `python3 -m py_compile` OK; `extract_fingerprint`/`find_canonical_for_fingerprint` unit-checked (#15/#16 have distinct fingerprints → `canonical: None`, no false dupes); live label scan confirms every closed `axiom-error` issue now carries exactly one taxonomy label.
+- **Status:** IMPLEMENTED, COMMITTED, PUSHED.
 
 ### 2026-06-26
 - **Task:** 🥊 Create Competitive Analysis page and auto-generate HTML Specs.

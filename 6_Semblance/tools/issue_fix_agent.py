@@ -276,12 +276,101 @@ def apply_fixes(fixes):
         print(f"✏️  Patched {resolved}")
 
 
+# ─── Closed-issue label taxonomy ─────────────────────────────────────────────
+# Every issue the agent closes gets exactly ONE of these so the closed tracker
+# is scannable at a glance — *why* was it closed?
+#   auto-fixed     — a code fix was committed by the agent (work done).
+#   no-code-change — closed without touching code (already fixed / not reproducible).
+#   duplicate      — GitHub's built-in; same fingerprint as a canonical issue.
+LABEL_AUTO_FIXED = "auto-fixed"
+LABEL_NO_CODE_CHANGE = "no-code-change"
+LABEL_DUPLICATE = "duplicate"
+
+_LABEL_SPECS = [
+    (LABEL_AUTO_FIXED, "2DA44E",
+     "Closed automatically — a code fix was committed by the Issue Fix Agent."),
+    (LABEL_NO_CODE_CHANGE, "6E7781",
+     "Closed automatically — no code change was needed (already fixed / not reproducible)."),
+    # GitHub ships a built-in `duplicate` (#cfd3d7); --force keeps it consistent.
+    (LABEL_DUPLICATE, "cfd3d7",
+     "Closed automatically — duplicates another axiom-error issue (same fingerprint)."),
+]
+
+
+def ensure_labels():
+    """Idempotently create/refresh the closed-issue taxonomy labels."""
+    for name, color, desc in _LABEL_SPECS:
+        run_cmd(
+            f'gh label create "{name}" --color {color} '
+            f'--description {shell_quote(desc)} --force'
+        )
+
+
+def add_labels(number, labels):
+    if not labels:
+        return
+    if DRY_RUN:
+        print(f"[dry-run] would add label(s) {','.join(labels)} to #{number}")
+        return
+    run_cmd(f'gh issue edit {number} --add-label {shell_quote(",".join(labels))}')
+
+
+# ─── Duplicate detection (same fingerprint → canonical) ──────────────────────
+FP_MARKER_RESOLVER = re.compile(r"<!-- axiom-fp:\s*([0-9a-f]+)")
+
+
+def extract_fingerprint(body):
+    m = FP_MARKER_RESOLVER.search(body or "")
+    return m.group(1) if m else None
+
+
+def find_canonical_for_fingerprint(fingerprint, exclude_number):
+    """
+    Lowest issue number sharing this fingerprint (any state), else None.
+    Scans ALL axiom-error issues so a duplicate that slipped past stage 1's
+    dedup window (e.g. the same error re-appearing a few days later) is still
+    caught and folded onto its canonical issue.
+    """
+    stdout, rc, _ = run_cmd(
+        "gh issue list --label 'axiom-error' --state all "
+        "--json number,body --limit 500"
+    )
+    if rc != 0:
+        return None
+    try:
+        issues = json.loads(stdout)
+    except json.JSONDecodeError:
+        return None
+    same = [
+        it["number"] for it in issues
+        if it.get("number") != exclude_number
+        and extract_fingerprint(it.get("body", "") or "") == fingerprint
+    ]
+    return min(same) if same else None
+
+
+def close_as_duplicate(number, canonical):
+    comment = (
+        f"🔁 Closed by Issue Fix Agent — **duplicate** of #{canonical}.\n\n"
+        f"Same error fingerprint as #{canonical}; no separate action needed — "
+        f"see #{canonical} for the root-cause analysis and resolution."
+    )
+    add_labels(number, [LABEL_DUPLICATE])
+    if DRY_RUN:
+        print(f"[dry-run] would comment+close #{number} as duplicate of #{canonical}")
+        return
+    run_cmd(f'gh issue comment {number} --body {shell_quote(comment)}')
+    # `not planned`: we deliberately won't act on this one (the canonical carries it).
+    run_cmd(f'gh issue close {number} -r "not planned"')
+
+
 def close_as_already_fixed(number, reason):
     comment = (
         f"✅ Closed by Issue Fix Agent — **no code change needed**.\n\n"
         f"{reason}\n\n"
         f"_The agent verified the reported error no longer reproduces before closing._"
     )
+    add_labels(number, [LABEL_NO_CODE_CHANGE])
     if DRY_RUN:
         print(f"[dry-run] would comment+close #{number}:\n  {reason}")
         return
@@ -298,6 +387,14 @@ def process_issue(issue):
     title = issue["title"]
     body = issue.get("body", "") or ""
     print(f"\n🔍 Processing Issue #{number}: {title}")
+
+    # 0️⃣ DUPLICATE CHECK — same fingerprint as another (canonical) issue?
+    fp = extract_fingerprint(body)
+    if fp:
+        canonical = find_canonical_for_fingerprint(fp, number)
+        if canonical:
+            close_as_duplicate(number, canonical)
+            return
 
     file_path, line, col = parse_error_location(body)
     if not file_path:
@@ -359,6 +456,7 @@ def process_issue(issue):
         f'gh issue comment {number} --body '
         f'{shell_quote("✅ Automatically fixed by the Issue Fix Agent. Changes committed and verified (go build/vet green).")}'
     )
+    add_labels(number, [LABEL_AUTO_FIXED])
     run_cmd(f'gh issue close {number} -r completed')
     print(f"✅ #{number}: fixed, committed, closed.")
 
@@ -366,6 +464,8 @@ def process_issue(issue):
 def main():
     mode = "DRY-RUN" if DRY_RUN else "LIVE"
     print(f"Starting Issue Fix Agent [{mode}] (model={OPENROUTER_MODEL})...")
+    if not DRY_RUN:
+        ensure_labels()  # make sure the taxonomy labels exist before we tag anything
     issues = fetch_open_issues()
     if not issues:
         print("No open axiom-error issues found.")
