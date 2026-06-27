@@ -2202,3 +2202,32 @@ This guarantees uniqueness both among the new candidates and against existing no
 - Did NOT create a root redirect page — that would violate the HTML-containment rule (only `index.html` + `markdown_renderer.html` may live at the repo root). The 404 is harmless now that nothing references it.
 
 **Verification:** `test_links.yml` parses as valid YAML; `go build`/`go vet` pass; HTTP link checker = 0 broken / exit 0; no stale `5_Symbols/production_shotlist.html` references remain (excluding `_obsolete/`). Manually closing issue #4 as resolved (it predates the workflow fix); future resolved issues auto-close.
+
+## 2026-06-27 — 🤖 Hardening the Autonomous Error Loop (issues #10–#14)
+
+### 🎯 Objective
+Close the 5 duplicate `axiom-error` issues (#10–#14) and bake the root-cause learnings into both pipeline scripts so the loop never re-fires the same noise.
+
+### 🔍 Root Cause Analysis
+All 5 issues reported the **same** Axiom row (`_rowId 0djjrps84efwg-08aea3e08f00246e-00000d7f`, `2026-06-27T10:43:10Z`) — a `SyntaxError: Invalid or unexpected token` at `prerequisites.html:136:17`. Two compounding defects in the loop:
+
+1. **Underlying bug was already fixed.** Commit `5af0765` ("remove escaped backticks causing JS SyntaxError") fixed `prerequisites.html` at 11:53 — *before* the agent ever ran. The original `issue_fix_agent.py` would have blindly clobbered the working file with an LLM's full-file rewrite (issue #14 even proposed a wrong, generic `sed` sanitisation).
+2. **The creator spammed duplicates.** `axiom_error_to_github_issue.py` always filed an issue for `errors[0]` with no dedup, so every run re-filed the same row. Issues #11/#12/#13 also carried `"Failed to analyze … 404/402"` because `anthropic/claude-opus-4.6` is a non-existent model id on OpenRouter.
+
+### 📐 Implementation
+- **`6_Semblance/tools/axiom_error_to_github_issue.py`** (creator):
+  - 🛡️ **Dedup by `_rowId`** — embeds a hidden `<!-- axiom-row-id:… -->` marker in each issue body and skips rows that already have an open issue.
+  - 🤐 **Skip on analysis failure** — never files a "Failed to analyze…" noise issue (404/402/no-key).
+  - 🔧 **Configurable model** — `OPENROUTER_MODEL` env (default `anthropic/claude-3.5-sonnet`, a known-good slug).
+  - Processes **all** distinct rows in the window, not just `errors[0]`.
+- **`6_Semblance/tools/issue_fix_agent.py`** (resolver):
+  - 🔎 **Verify-before-apply** — re-parses the inline JS of the named HTML file; if the reported `SyntaxError` no longer reproduces, closes the issue as *already fixed* without touching code.
+  - 🧹 **Validate generated files** — refuses to write any LLM output whose inline JS wouldn't parse or whose Go wouldn't `gofmt`.
+  - 🧱 **Build gate** — runs `go build ./... && go vet ./...` from the repo root after patching; **reverts** (`git restore .`) and leaves the issue open if the tree breaks.
+  - 📍 **Scoped fixes** — extracts `file:line:col` and sends focused context instead of the whole body.
+  - 🛡️ **`--dry-run`** mode for safe trial runs.
+
+### ✅ Verification
+- `python3 -m py_compile` clean for both scripts.
+- Simulated resolver against `prerequisites.html`: location parsed (`prerequisites.html 136 17`), `html_inline_js_ok()` = `True` ⇒ would **close as already-fixed** (not patch), `go_build_ok()` = `True`.
+- `go build ./...` green from repo root.

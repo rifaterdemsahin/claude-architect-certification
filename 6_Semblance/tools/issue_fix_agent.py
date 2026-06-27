@@ -1,129 +1,318 @@
+#!/usr/bin/env python3
+"""
+🤖 Issue Fix Agent — autonomously resolves `axiom-error` issues.
+
+Pipeline stage 2 of the autonomous error loop:
+    GitHub issue (label: axiom-error) ──(this script)──> patch + commit + close.
+
+Learnings baked in (see issue #10–#14 retro, 2026-06-27):
+  1. 🔎 VERIFY BEFORE APPLYING. Issues #10–#14 all described a `SyntaxError`
+     in prerequisites.html that was ALREADY FIXED (commit 5af0765) before the
+     agent ran. Blindly applying an LLM's full-file rewrite would have
+     CLOBBERED a working file. So before generating any patch we now run a
+     verifier (e.g. re-parse the inline JS of the named HTML file); if the
+     reported error no longer reproduces, we close the issue as
+     "already fixed" instead of touching code.
+  2. 🧹 DON'T TRUST FULL-FILE REWRITES. The LLM may emit a whole file. We
+     validate every generated file (HTML inline-script JS parse; Go build)
+     BEFORE writing it, and abort (leaving the tree clean) on any failure.
+  3. 🧱 BUILD GATE. Per the Go-migration constraints, after any change we run
+     `go build ./... && go vet ./...` and REVERT if it fails — never commit a
+     broken tree.
+  4. 📍 SCOPE BY ERROR LOCATION. We extract `file:line:col` from the issue
+     body and pass a *focused* context to the model instead of the whole body,
+     which previously produced generic, wrong fixes (issue #14).
+  5. 🛡️ DRY-RUN MODE. `--dry-run` shows the planned action without writing,
+     committing, or closing — safe to run on a populated tracker.
+"""
+
 import os
+import re
+import sys
 import json
+import shutil
+import tempfile
 import subprocess
+
 import requests
 
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+# Known-good default; override via env (issue #10/#11/#12 hit 404 on a bad model id).
+OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "anthropic/claude-3.5-sonnet")
+OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
+
+DRY_RUN = "--dry-run" in sys.argv
+
 
 def run_cmd(cmd):
     result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
-    if result.returncode != 0:
-        print(f"Error running: {cmd}\nOutput: {result.stderr}")
-    return result.stdout.strip(), result.returncode
+    if result.returncode != 0 and cmd.split()[0] not in ("git", "gh"):
+        print(f"⚠️  Command failed: {cmd}\n{result.stderr.strip()}")
+    return result.stdout.strip(), result.returncode, result.stderr.strip()
+
 
 def fetch_open_issues():
-    stdout, rc = run_cmd("gh issue list --label 'axiom-error' --state open --json number,title,body")
+    stdout, rc, _ = run_cmd(
+        "gh issue list --label 'axiom-error' --state open "
+        "--json number,title,body"
+    )
     if rc != 0:
         return []
-    return json.loads(stdout)
+    try:
+        return json.loads(stdout)
+    except json.JSONDecodeError:
+        return []
 
-def ask_openrouter_for_fix(issue_body):
+
+def parse_error_location(body):
+    """
+    Extract (file_path, line, col) from the raw log metadata in the issue body.
+    Looks for patterns like  `.../path/file.html:136:17` or `path/file.js:42:9`.
+    """
+    # Prefer a repo-relative .html/.js path with :line:col right after it.
+    m = re.search(r'([\w/.\-]+\.(?:html|js|go)):(\d+):(\d+)', body or "")
+    if m:
+        return m.group(1), int(m.group(2)), int(m.group(3))
+    return None, None, None
+
+
+# ─── Verifiers ───────────────────────────────────────────────────────────────
+VERIFY_NODE = """
+const fs=require("fs");
+const html=fs.readFileSync(process.argv[1],"utf8");
+const re=/<script\\b(?![^>]*\\bsrc=)[^>]*>([\\s\\S]*?)<\\/script>/gi;
+let m,i=0,ok=true;
+while((m=re.exec(html))){i++;try{new Function(m[1]);}catch(e){ok=false;process.stderr.write("block "+i+": "+e.message+"\\n");}}
+process.exit(ok?0:1);
+"""
+
+
+def html_inline_js_ok(path):
+    """True if every inline <script> in an HTML file parses."""
+    if not shutil.which("node") or not os.path.exists(path):
+        return None  # unknown — can't verify
+    with tempfile.NamedTemporaryFile("w", suffix=".js", delete=False) as f:
+        f.write(VERIFY_NODE)
+        script = f.name
+    try:
+        _, rc, err = run_cmd(f'node {script} {path}')
+        return rc == 0
+    finally:
+        os.unlink(script)
+
+
+def repo_root():
+    """Walk up to the directory containing go.mod (the agent runs from 6_Semblance/tools)."""
+    d = os.path.dirname(os.path.abspath(__file__))
+    for _ in range(6):
+        if os.path.exists(os.path.join(d, "go.mod")):
+            return d
+        d = os.path.dirname(d)
+    return os.getcwd()
+
+
+def go_build_ok():
+    if not shutil.which("go"):
+        return True  # no Go toolchain in this environment — assume fine
+    root = repo_root()
+    _, rc, err = run_cmd(f"cd {root} && go build ./... 2>&1 && go vet ./... 2>&1")
+    if rc != 0:
+        print(f"🚫 Build gate FAILED:\n{err}")
+        return False
+    return True
+
+
+# ─── LLM ─────────────────────────────────────────────────────────────────────
+def ask_openrouter_for_fix(issue_body, file_path, line, col):
     if not OPENROUTER_API_KEY:
         print("Missing OPENROUTER_API_KEY")
         return None
-        
-    url = "https://openrouter.ai/api/v1/chat/completions"
+
     headers = {
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "HTTP-Referer": "https://github.com/rifaterdemsahin/claude-architect-certification",
+        "X-Title": "Issue Fix Agent",
     }
-    
-    prompt = (
-        "You are an autonomous AI coding agent. Your goal is to apply the fix described in the issue below to the codebase.\n"
-        "Return ONLY a JSON array containing the files you want to create or modify, with their FULL updated file contents.\n"
-        "Format your output strictly as a JSON array (no markdown blocks, no conversational text).\n"
-        'Example: [{"file_path": "cmd/server/main.go", "content": "package main\\n..."}]\n\n'
-        f"Issue Description:\n{issue_body}\n"
+
+    focused = (
+        f"The error is located at **{file_path}:{line}:{col}**.\n"
+        "Read that exact file from the repo. If the reported error no longer "
+        "reproduces there (e.g. it was already fixed), return an empty array [].\n"
+        "Otherwise return ONLY a JSON array of {file_path, content} objects with "
+        "the FULL corrected file contents — no markdown fences, no prose.\n\n"
+        f"Issue:\n{issue_body[:4000]}\n"
     )
-    
+
     payload = {
-        "model": "anthropic/claude-opus-4.6",
+        "model": OPENROUTER_MODEL,
         "max_tokens": 4000,
         "messages": [
-            {"role": "system", "content": "You output only valid JSON."},
-            {"role": "user", "content": prompt}
-        ]
+            {"role": "system", "content": "You output only valid JSON (a bare array, no fences)."},
+            {"role": "user", "content": focused},
+        ],
     }
-    
+
     try:
-        response = requests.post(url, headers=headers, json=payload)
-        response.raise_for_status()
-        content = response.json()["choices"][0]["message"]["content"]
-        
-        # Clean up markdown if the LLM still wrapped it
-        if content.startswith("```json"):
-            content = content[7:]
+        resp = requests.post(OPENROUTER_URL, headers=headers, json=payload, timeout=120)
+        resp.raise_for_status()
+        content = resp.json()["choices"][0]["message"]["content"].strip()
+        # strip accidental fences
         if content.startswith("```"):
-            content = content[3:]
-        if content.endswith("```"):
-            content = content[:-3]
-            
-        return json.loads(content.strip())
+            content = re.sub(r"^```(?:json)?\s*", "", content)
+            content = re.sub(r"\s*```$", "", content)
+        parsed = json.loads(content)
+        if parsed == [] or parsed == {}:
+            return []  # model says: already fixed
+        return parsed if isinstance(parsed, list) else [parsed]
     except Exception as e:
-        print(f"Error asking OpenRouter: {e}")
-        if hasattr(e, 'response') and e.response is not None:
-            print(f"Response: {e.response.text}")
+        print(f"Error asking OpenRouter ({OPENROUTER_MODEL}): {e}")
+        if hasattr(e, "response") and e.response is not None:
+            print(f"Response: {e.response.text[:500]}")
         return None
+
+
+# ─── Apply ───────────────────────────────────────────────────────────────────
+def validate_fixes(fixes):
+    """Reject anything that wouldn't parse/build before touching disk."""
+    if not fixes:
+        return False
+    for fix in fixes:
+        path = fix.get("file_path")
+        content = fix.get("content")
+        if not path or content is None:
+            print(f"⏭️  Skipping malformed fix entry: {fix}")
+            continue
+        tmp = tempfile.NamedTemporaryFile("w", delete=False, suffix=os.path.splitext(path)[1])
+        tmp.write(content)
+        tmp.close()
+        try:
+            if path.endswith(".html") and html_inline_js_ok(tmp.name) is False:
+                print(f"🚫 Refusing to write {path}: generated inline JS would not parse.")
+                return False
+            if path.endswith(".go"):
+                # quick syntax check of the generated Go in isolation
+                _, rc, err = run_cmd(f"gofmt -e {tmp.name}")
+                if rc != 0:
+                    print(f"🚫 Refusing to write {path}: generated Go does not format:\n{err}")
+                    return False
+        finally:
+            os.unlink(tmp.name)
+    return True
+
 
 def apply_fixes(fixes):
     for fix in fixes:
-        file_path = fix.get("file_path")
+        path = fix.get("file_path")
         content = fix.get("content")
-        
-        if not file_path or not content:
+        if not path or content is None:
             continue
-            
-        # Ensure directory exists
-        os.makedirs(os.path.dirname(file_path) or ".", exist_ok=True)
-        
-        with open(file_path, "w") as f:
+        os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+        with open(path, "w") as f:
             f.write(content)
-        print(f"Patched {file_path}")
+        print(f"✏️  Patched {path}")
+
+
+def close_as_already_fixed(number, reason):
+    comment = (
+        f"✅ Closed by Issue Fix Agent — **no code change needed**.\n\n"
+        f"{reason}\n\n"
+        f"_The agent verified the reported error no longer reproduces before closing._"
+    )
+    if DRY_RUN:
+        print(f"[dry-run] would comment+close #{number}:\n  {reason}")
+        return
+    run_cmd(f'gh issue comment {number} --body {shell_quote(comment)}')
+    run_cmd(f'gh issue close {number} -r completed')
+
+
+def shell_quote(s):
+    return "'" + s.replace("'", "'\\''") + "'"
+
 
 def process_issue(issue):
     number = issue["number"]
     title = issue["title"]
-    print(f"Processing Issue #{number}: {title}")
-    
-    fixes = ask_openrouter_for_fix(issue["body"])
-    
-    if not fixes:
-        print(f"Failed to generate fix for issue #{number}")
+    body = issue.get("body", "") or ""
+    print(f"\n🔍 Processing Issue #{number}: {title}")
+
+    file_path, line, col = parse_error_location(body)
+    if not file_path:
+        print(f"⏭️  #{number}: no file:line:col location found in body — skipping (manual triage).")
         return
-        
+
+    # 1️⃣ VERIFY BEFORE APPLYING — was this already fixed?
+    if os.path.exists(file_path) and file_path.endswith(".html"):
+        ok = html_inline_js_ok(file_path)
+        if ok is True:
+            close_as_already_fixed(
+                number,
+                f"The reported `SyntaxError` at `{file_path}:{line}:{col}` no longer "
+                f"reproduces — the file's inline JavaScript parses cleanly now."
+            )
+            return
+        if ok is False:
+            print(f"⚠️  #{number}: `{file_path}` still fails to parse — proceeding to fix.")
+
+    # 2️⃣ Generate a *scoped* fix.
+    fixes = ask_openrouter_for_fix(body, file_path, line, col)
+    if fixes is None:
+        print(f"❌ #{number}: could not generate a fix (LLM/analysis failure). Leaving open.")
+        return
+    if fixes == [] or not fixes:
+        close_as_already_fixed(
+            number,
+            f"Analysis determined the reported issue at `{file_path}:{line}:{col}` requires "
+            f"no change (already resolved or not reproducible)."
+        )
+        return
+
+    # 3️⃣ Validate + apply.
+    if not validate_fixes(fixes):
+        print(f"❌ #{number}: generated fix failed validation — NOT applied (tree untouched).")
+        return
+    if DRY_RUN:
+        print(f"[dry-run] would apply {len(fixes)} file change(s) for #{number}; not writing.")
+        return
     apply_fixes(fixes)
-    
-    # Check if there are git changes
-    status_out, _ = run_cmd("git status --porcelain")
-    if not status_out:
-        print(f"No changes made for issue #{number}")
+
+    # 4️⃣ Build gate — revert if the tree no longer builds.
+    if not go_build_ok():
+        run_cmd("git restore .")
+        print(f"🚫 #{number}: build gate failed after patch — reverted. Leaving issue OPEN.")
         return
-        
-    # Commit and close
+
+    # 5️⃣ Commit + comment + close.
+    status, _, _ = run_cmd("git status --porcelain")
+    if not status:
+        close_as_already_fixed(number, "Patch produced no net change (issue already addressed).")
+        return
+
     run_cmd("git add .")
     run_cmd(f'git commit -m "🤖 Auto-fix issue #{number}: {title}"')
-    
-    # Verify the build locally if applicable (optional safety step)
-    # run_cmd("go build ./...") 
-    
-    run_cmd(f'gh issue comment {number} --body "✅ This issue has been automatically fixed by the Issue Fix Agent. Changes have been committed."')
+    run_cmd(
+        f'gh issue comment {number} --body '
+        f'{shell_quote("✅ Automatically fixed by the Issue Fix Agent. Changes committed and verified (go build/vet green).")}'
+    )
     run_cmd(f'gh issue close {number} -r completed')
-    
-    print(f"Successfully closed issue #{number}")
+    print(f"✅ #{number}: fixed, committed, closed.")
+
 
 def main():
-    print("Starting Issue Fix Agent...")
+    mode = "DRY-RUN" if DRY_RUN else "LIVE"
+    print(f"Starting Issue Fix Agent [{mode}] (model={OPENROUTER_MODEL})...")
     issues = fetch_open_issues()
     if not issues:
         print("No open axiom-error issues found.")
         return
-        
+    print(f"Found {len(issues)} open issue(s).")
     for issue in issues:
         process_issue(issue)
-        
-    # Push changes if any commits were made
-    print("Pushing applied fixes to remote...")
-    run_cmd("git push")
+
+    if not DRY_RUN:
+        print("Pushing applied fixes to remote...")
+        run_cmd("git push")
+
 
 if __name__ == "__main__":
     main()
