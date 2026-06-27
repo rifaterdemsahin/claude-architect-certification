@@ -97,6 +97,7 @@ claude-architect-certification/
 ## 🤖 Gemini-Specific Instructions
 
 ### Behavior Guidelines
+- **🌐 Open HTML in Chrome Only** — Whenever you open any HTML page, local app, or preview/"open local" URL, ALWAYS open it in **Google Chrome**, never the default browser. Use `open -a "Google Chrome" <url>` (e.g. `open -a "Google Chrome" http://localhost:8080/path/to/page.html`).
 - Always follow the 7-stage structure when creating or organizing content
 - When adding files, place them in the appropriate numbered folder
 - **After every command, commit and push** — do not batch changes; each step gets its own commit. If any git errors occur, proactively troubleshoot and resolve them.
@@ -113,7 +114,7 @@ claude-architect-certification/
 - **Architecture Documentation Sync** — When the system architecture changes, immediately update the architecture overview document at `2_Environment/1_architecture.md` (with updated Mermaid diagrams) to keep it working.
 - **Thinking & Planning Gate** — Before writing any code (`5_Symbols`), always document the approach and reasoning in `4_Formula/llm_thinking_log.md`. After execution, append a summary of the LLM reasoning process. `4_Formula` is the mandatory planning stage that encapsulates thinking before action.
 - **Error & Fix Logging** — When any error occurs, append an entry to `6_Semblance/logs/error.log` (format: `[DATE] [STAGE] [SEVERITY] — Description`) AND automatically send the error to Axiom using the ingestion helper script: `./6_Semblance/tools/send_error.sh "<stage>" "<severity>" "<description>"`. When a fix is applied, append to `6_Semblance/logs/fix.log` (format: `[DATE] [STAGE] [STATUS] — Fix description`) with status `APPLIED`. After validation in `7_Testing_Known`, update the status to `VERIFIED`. Capture learnings in `6_Semblance/logs/lessons_learned.md`.
-- **🚀 Mandatory Post-Completion Workflow** — Upon task completion, always perform the following sequence: 1. Run `go build` to verify system integrity; 2. Start the local server (if not running); 3. Open the specific page(s) that were updated in the browser for final visual and functional verification.
+- **🚀 Mandatory Post-Completion Workflow** — Upon task completion, always perform the following sequence: 1. Run `go build` to verify system integrity; 2. Start the local server (if not running); 3. Open the specific page(s) that were updated in **Google Chrome** (`open -a "Google Chrome" <url>`) for final visual and functional verification.
 
 ### Code Standards
 - Use modern CSS (Flexbox/Grid) for responsive design

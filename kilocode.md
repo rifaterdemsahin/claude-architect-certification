@@ -84,6 +84,7 @@ claude-architect-certification/
 ## 🤖 Kilo Code-Specific Instructions
 
 ### Behavior Guidelines
+- **🌐 Open HTML in Chrome Only** — Whenever you open any HTML page, local app, or preview/"open local" URL, ALWAYS open it in **Google Chrome**, never the default browser. Use `open -a "Google Chrome" <url>` (e.g. `open -a "Google Chrome" http://localhost:8080/path/to/page.html`).
 - Always follow the 7-stage structure when creating or organizing content
 - When adding files, place them in the appropriate numbered folder
 - **After every command, commit and push** — do not batch changes; each step gets its own commit. If any git errors occur, proactively troubleshoot and resolve them.
