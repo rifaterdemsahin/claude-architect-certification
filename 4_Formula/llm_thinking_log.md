@@ -16,6 +16,19 @@ Create a Slide Generator page under `5_Symbols/production/postprod/slide_generat
 ### ✅ Verification
 - Page created and linked successfully.
 
+## 2026-06-27 — 🗄️ Presentations DB Schema
+
+### 🎯 Objective
+Create the Supabase schema migration for the `presentations` table used by the Slide Generator.
+
+### 📐 Implementation
+1. **Migration File**: Created `5_Symbols/supabase/migrations/migration_slide_presentations.sql` containing the table creation (`presentations` with `video_id`, `markdown_content`), RLS enablement, and anon CRUD policies.
+2. **Core Schema Sync**: Appended the exact table definition and RLS policies into `5_Symbols/supabase/schema/01_core_schema.sql` to keep the canonical schema up to date.
+
+### ✅ Verification
+- Both files properly formatted and schema mapped.
+
+
 ## 2026-06-27 — 🤖 Axiom Error to GitHub Issue Pipeline
 
 ### 🎯 Objective

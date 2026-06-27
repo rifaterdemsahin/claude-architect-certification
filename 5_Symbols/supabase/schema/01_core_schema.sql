@@ -245,6 +245,15 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_lower_thirds_content
 
 ALTER TABLE lower_thirds ENABLE ROW LEVEL SECURITY;
 
+-- 20. PRESENTATIONS (Marp markdown slide presentations)
+CREATE TABLE IF NOT EXISTS presentations (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  video_id INTEGER REFERENCES videos(id) ON DELETE CASCADE,
+  markdown_content TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- =============================================================================
 -- Row-Level Security (RLS) Configuration
 -- =============================================================================
@@ -269,6 +278,7 @@ ALTER TABLE milestone_progress ENABLE ROW LEVEL SECURITY;
 ALTER TABLE pricing ENABLE ROW LEVEL SECURITY;
 ALTER TABLE courses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE lower_thirds ENABLE ROW LEVEL SECURITY;
+ALTER TABLE presentations ENABLE ROW LEVEL SECURITY;
 
 -- Drop existing policies to allow clean re-runs
 DROP POLICY IF EXISTS anon_select_modules ON modules;
@@ -308,6 +318,10 @@ DROP POLICY IF EXISTS anon_select_lower_thirds ON lower_thirds;
 DROP POLICY IF EXISTS anon_insert_lower_thirds ON lower_thirds;
 DROP POLICY IF EXISTS anon_update_lower_thirds ON lower_thirds;
 DROP POLICY IF EXISTS anon_delete_lower_thirds ON lower_thirds;
+DROP POLICY IF EXISTS anon_select_presentations ON presentations;
+DROP POLICY IF EXISTS anon_insert_presentations ON presentations;
+DROP POLICY IF EXISTS anon_update_presentations ON presentations;
+DROP POLICY IF EXISTS anon_delete_presentations ON presentations;
 
 -- Public read access policies (SELECT)
 CREATE POLICY anon_select_modules ON modules FOR SELECT USING (true);
@@ -334,6 +348,7 @@ CREATE POLICY anon_select_milestone_progress ON milestone_progress FOR SELECT US
 CREATE POLICY anon_select_pricing ON pricing FOR SELECT USING (true);
 CREATE POLICY anon_select_courses ON courses FOR SELECT USING (true);
 CREATE POLICY anon_select_lower_thirds ON lower_thirds FOR SELECT USING (true);
+CREATE POLICY anon_select_presentations ON presentations FOR SELECT USING (true);
 
 -- Public write/update access policies
 CREATE POLICY anon_insert_checklist_progress ON checklist_progress FOR INSERT WITH CHECK (true);
@@ -351,6 +366,9 @@ CREATE POLICY anon_update_milestone_progress ON milestone_progress FOR UPDATE US
 CREATE POLICY anon_insert_lower_thirds ON lower_thirds FOR INSERT WITH CHECK (true);
 CREATE POLICY anon_update_lower_thirds ON lower_thirds FOR UPDATE USING (true);
 CREATE POLICY anon_delete_lower_thirds ON lower_thirds FOR DELETE USING (true);
+CREATE POLICY anon_insert_presentations ON presentations FOR INSERT WITH CHECK (true);
+CREATE POLICY anon_update_presentations ON presentations FOR UPDATE USING (true);
+CREATE POLICY anon_delete_presentations ON presentations FOR DELETE USING (true);
 
 -- =============================================================================
 -- Relationship FK Columns
