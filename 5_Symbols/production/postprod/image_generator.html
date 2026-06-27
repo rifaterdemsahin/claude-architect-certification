@@ -95,6 +95,7 @@
     .ig-table td { padding: 12px; background: rgba(0,0,0,0.18); vertical-align: top; font-size: 0.9rem; }
     .ig-table tr td:first-child { border-radius: 12px 0 0 12px; }
     .ig-table tr td:last-child { border-radius: 0 12px 12px 0; }
+    .ig-table .chk-col { width: 36px; text-align: center; }
     .ig-table .num-col { width: 42px; text-align: center; font-weight: 700; color: var(--accent); }
     .ig-table .sentence-col { min-width: 260px; }
     .ig-table .type-col { width: 92px; }
@@ -247,6 +248,7 @@
       <div class="glass-card-body">
         <div id="statsRow" class="stats-row" style="display:none;"></div>
         <div style="margin-bottom:14px;display:flex;gap:10px;flex-wrap:wrap;" id="candBulkBar">
+          <button class="btn btn-primary btn-sm" id="bulkGenSaveBtn" onclick="bulkGenerateAndSave()" style="background:var(--accent);">✨ Bulk Generate & Save Selected</button>
           <button class="btn btn-success btn-sm" id="saveAllAzureBtn">☁️ Save All Candidates to Azure</button>
         </div>
         <div id="candidatesWrap" style="overflow-x:auto;">
@@ -387,6 +389,7 @@
     let savedMap = {};       // sentence_id -> sentence_graphics row (status completed/etc.)
     let candidateMap = {};   // sentence_id -> { dataUrl, refinedPrompt, assetType, cost }
     let assetTypeMap = {};   // sentence_id -> chosen/recommended asset type (string)
+    let selectedCandidateIds = new Set(); // sentence_ids currently checked
     let activePromptSid = null; // currently editing prompt sentence ID
     let sessionCost = 0;
     let genCount = 0;
@@ -490,6 +493,7 @@
           if (scriptRecs[0].script_text && !fullScript.includes(scriptRecs[0].script_text)) fullScript += scriptRecs[0].script_text + '\n\n';
           const sents = await api('sentences?script_id=eq.' + currentScriptId + '&select=id,sentence_text,sentence_type,section,visual_mode,sort_order,script_id&order=sort_order.asc');
           currentSentences = sents || [];
+          selectedCandidateIds.clear(); // Reset selections on new video
           if (currentSentences.length) {
             $('countScript').textContent = currentSentences.length + ' sentences';
             $('countScript').style.display = 'inline-block';
@@ -581,6 +585,7 @@
         }
 
         return `<tr data-sid="${s.id}">
+          <td class="chk-col"><input type="checkbox" class="cand-chk" value="${s.id}" ${selectedCandidateIds.has(s.id) ? 'checked' : ''} onchange="toggleCandidateSelection(${s.id}, this.checked)"></td>
           <td class="num-col">${i + 1}</td>
           <td class="sentence-col"><div class="sentence-text">${s.section ? `<span class="section-tag">${escHtml(sectionLabel)}</span>` : ''}${escHtml(s.sentence_text || '')}</div></td>
           <td class="type-col"><span class="type-tag ${typeClass}">${escHtml(typeLabel)}</span></td>
@@ -602,6 +607,7 @@
       }).join('');
 
       wrap.innerHTML = `<table class="ig-table"><thead><tr>
+          <th class="chk-col"><input type="checkbox" id="selectAllCandidates" onchange="toggleSelectAllCandidates(this.checked)" title="Select All" ${currentSentences.length > 0 && selectedCandidateIds.size === currentSentences.length ? 'checked' : ''}></th>
           <th class="num-col">#</th>
           <th class="sentence-col">Sentence</th>
           <th class="type-col">Type</th>
@@ -631,6 +637,25 @@
       $('statsRow').style.display = 'flex';
       $('countCandidates').textContent = candidates + ' candidates';
       $('countCandidates').style.display = candidates ? 'inline-block' : 'none';
+      
+      const selectAll = $('selectAllCandidates');
+      if (selectAll) selectAll.checked = currentSentences.length > 0 && selectedCandidateIds.size === currentSentences.length;
+    }
+
+    function toggleCandidateSelection(sid, checked) {
+      if (checked) selectedCandidateIds.add(sid);
+      else selectedCandidateIds.delete(sid);
+      const selectAll = $('selectAllCandidates');
+      if (selectAll) selectAll.checked = currentSentences.length > 0 && selectedCandidateIds.size === currentSentences.length;
+    }
+
+    function toggleSelectAllCandidates(checked) {
+      if (checked) {
+        currentSentences.forEach(s => selectedCandidateIds.add(s.id));
+      } else {
+        selectedCandidateIds.clear();
+      }
+      renderCandidates();
     }
 
     async function updateAssetType(sentenceId, type) {
@@ -751,6 +776,45 @@
       $('genAllBtn').disabled = false;
       renderCandidates();
       showToast('✅ Candidate generation complete!');
+    }
+
+    async function bulkGenerateAndSave() {
+      if (isGenerating) return;
+      if (selectedCandidateIds.size === 0) {
+        showToast('Select at least one sentence to bulk generate & save.', true);
+        return;
+      }
+      isGenerating = true;
+      const sids = Array.from(selectedCandidateIds);
+      $('bulkGenSaveBtn').disabled = true;
+      $('progressWrap').style.display = 'block';
+      $('progressLog').innerHTML = '';
+      
+      for (let i = 0; i < sids.length; i++) {
+        const sid = sids[i];
+        setProgress(i, sids.length);
+        addLog(`⏳ (${i + 1}/${sids.length}) Generating & Saving sentence #${sid}…`, '');
+        
+        const genSuccess = await generateForSentence(sid, true);
+        if (genSuccess) {
+          try {
+            await saveToAzure(sid);
+            selectedCandidateIds.delete(sid);
+            addLog(`✅ Sentence #${sid} saved to Azure.`, 'success');
+          } catch (err) {
+            addLog(`❌ Sentence #${sid} save failed: ${err.message}`, 'fail');
+          }
+        } else {
+           addLog(`❌ Sentence #${sid} generation failed, skipping save.`, 'fail');
+        }
+        setProgress(i + 1, sids.length);
+      }
+      
+      isGenerating = false;
+      $('bulkGenSaveBtn').disabled = false;
+      renderCandidates();
+      loadExistingImages();
+      showToast('✅ Bulk generation & save complete!');
     }
 
     function setProgress(cur, total) {
