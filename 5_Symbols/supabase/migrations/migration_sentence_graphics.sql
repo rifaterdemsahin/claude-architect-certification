@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS sentence_graphics (
     CHECK (generation_status IN ('pending', 'generating', 'completed', 'skipped', 'failed')),
   rationale TEXT DEFAULT '',
   graphics_type TEXT DEFAULT 'explain'
-    CHECK (graphics_type IN ('explain','infographic','diagram','screenshot','b_roll','talking_head','lower_third','icon','thumbnail','title_card','callout','comparison','timeline','architecture','code_terminal','standalone_graphic','background_asset','analogy','table_matrix','transparent_png','icon_badge','none')),
+    CHECK (graphics_type IN ('explain','infographic','diagram','screenshot','b_roll','talking_head','lower_third','icon','thumbnail','title_card','callout','comparison','timeline','architecture','code_terminal','standalone_graphic','background_asset','analogy','table_matrix','transparent_png','icon_badge','linkedin_post','none')),
   graphics_url TEXT DEFAULT '',
   prompt_used TEXT DEFAULT '',
   error_message TEXT DEFAULT '',

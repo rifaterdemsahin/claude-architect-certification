@@ -249,6 +249,7 @@
         <div id="statsRow" class="stats-row" style="display:none;"></div>
         <div style="margin-bottom:14px;display:flex;gap:10px;flex-wrap:wrap;" id="candBulkBar">
           <button class="btn btn-primary btn-sm" id="bulkGenSaveBtn" onclick="bulkGenerateAndSave()" style="background:var(--accent);">✨ Bulk Generate & Save Selected</button>
+          <button class="btn btn-success btn-sm" id="saveSelectedBtn">💾 Save Selected Images</button>
           <button class="btn btn-success btn-sm" id="saveAllAzureBtn">☁️ Save All Candidates to Azure</button>
         </div>
         <div id="candidatesWrap" style="overflow-x:auto;">
@@ -331,8 +332,12 @@
   <div id="promptModal" class="prompt-modal" onclick="if(event.target===this) this.classList.remove('show')">
     <div class="prompt-modal-content">
       <h3>🔍 Edit Prompt for Image</h3>
-      <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:12px;">This prompt will be sent to the AI. You can edit it before generating or saving.</p>
-      <textarea id="promptEditor"></textarea>
+      <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:12px;">This prompt will be sent to the AI (1080p YouTube frame, branded). You can edit it before generating or saving.</p>
+      <textarea id="promptEditor" style="min-height:260px;font-family:var(--font-body);"></textarea>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap;">
+        <a href="https://gemini.google.com/app" target="_blank" rel="noopener" class="btn btn-secondary btn-sm" style="background:rgba(59,130,246,0.15);color:var(--secondary);text-decoration:none;" title="Open Gemini (Nano Banana) to run this prompt manually">🔗 Try in Gemini (Nano Banana)</a>
+        <button class="btn btn-secondary btn-sm" id="copyPromptBtn" style="background:rgba(255,255,255,0.1);" title="Copy the prompt so you can paste it into Gemini">📋 Copy prompt</button>
+      </div>
       <div class="prompt-actions">
         <button class="btn btn-secondary" style="background:rgba(255,255,255,0.1);" onclick="$('promptModal').classList.remove('show')">Cancel</button>
         <button class="btn btn-success" id="savePromptBtn">💾 Save to DB</button>
@@ -350,13 +355,13 @@
     const ASSET_TYPES = [
       'explain','infographic','diagram','screenshot','thumbnail','title_card','callout',
       'comparison','timeline','architecture','code_terminal','standalone_graphic',
-      'background_asset','analogy','table_matrix','transparent_png','icon_badge'
+      'background_asset','analogy','table_matrix','transparent_png','icon_badge','linkedin_post'
     ];
     // Map the DB vocabulary → the /api/images/generate asset_type keys (better Gemini styling).
     const DB_TO_API_ASSET = {
       code_terminal: 'code', standalone_graphic: 'graphic', background_asset: 'background',
       table_matrix: 'table', transparent_png: 'transparent', icon_badge: 'icon',
-      title_card: 'titlecard', screenshot: 'explain'
+      title_card: 'titlecard', screenshot: 'explain', linkedin_post: 'graphic'
     };
     const ASSET_GUIDE = {
       explain: 'Annotated concept with callouts, arrows, labels',
@@ -375,8 +380,12 @@
       analogy: 'Illustrative concept metaphor',
       table_matrix: 'Feature matrix, decision grid, tiers',
       transparent_png: 'No background, motion-overlay ready',
-      icon_badge: 'Single glyph, cert badge, visual language'
+      icon_badge: 'Single glyph, cert badge, visual language',
+      linkedin_post: 'Square/portrait social card for LinkedIn — bold hook headline, branded, share-ready'
     };
+    // Asset types sorted alphabetically by display name, for dropdowns/tables.
+    const ASSET_TYPES_SORTED = [...ASSET_TYPES].sort((a, b) =>
+      a.replace(/_/g, ' ').localeCompare(b.replace(/_/g, ' ')));
 
     let dbModules = [];
     let dbVideos = [];
@@ -436,7 +445,7 @@
       });
       // Build the asset type guide once.
       $('guideTable').innerHTML = '<tr><th>Type</th><th>Best for</th></tr>' +
-        ASSET_TYPES.map(t => `<tr><td><strong>${t.replace(/_/g,' ')}</strong></td><td>${escHtml(ASSET_GUIDE[t]||'')}</td></tr>`).join('');
+        ASSET_TYPES_SORTED.map(t => `<tr><td><strong>${t.replace(/_/g,' ')}</strong></td><td>${escHtml(ASSET_GUIDE[t]||'')}</td></tr>`).join('');
     });
 
     async function loadConfig() {
@@ -591,7 +600,7 @@
           <td class="type-col"><span class="type-tag ${typeClass}">${escHtml(typeLabel)}</span></td>
           <td class="asset-col">
             <select class="asset-select" data-sid="${s.id}">
-              ${ASSET_TYPES.map(t => `<option value="${t}" ${t === at ? 'selected' : ''}>${t.replace(/_/g,' ')}</option>`).join('')}
+              ${ASSET_TYPES_SORTED.map(t => `<option value="${t}" ${t === at ? 'selected' : ''}>${t.replace(/_/g,' ')}</option>`).join('')}
             </select>
             <div class="reco-hint">⭐ Recommended: <b>${reco.replace(/_/g,' ')}</b></div>
           </td>
@@ -671,14 +680,65 @@
     }
 
     // ── Custom Prompt Modal ──
+    // Wrap a sentence into a full 1080p YouTube image-generation prompt, tuned for
+    // Google Gemini "Nano Banana" (Gemini 2.5 Flash Image), including the asset
+    // type and the project branding/color template.
+    function buildVideoPrompt(sentenceText, assetType) {
+      const at = assetType || 'standalone_graphic';
+      const guide = ASSET_GUIDE[at] || '';
+      const atLabel = at.replace(/_/g, ' ');
+      return `Generate a 1920x1080 (16:9, 1080p) image for a YouTube video, optimized for Google Gemini "Nano Banana" (Gemini 2.5 Flash Image).
+
+Asset type: ${atLabel}${guide ? ` — ${guide}` : ''}
+Scene concept / on-screen idea: "${sentenceText}"
+
+Production spec:
+- Format: 1920x1080, 16:9, high detail, sharp focus, YouTube title-safe margins (keep the key subject within the central 90%).
+- Look: modern enterprise-AI / tech aesthetic, cinematic lighting, clean uncluttered composition, subtle depth (gradient mesh / soft bokeh).
+- Leave clear negative space in the lower third for captions and lower-thirds overlays.
+
+Branding & color template (Claude Architect Certification):
+- Background: near-black #030712 with a subtle dark-violet gradient
+- Primary: violet #8B5CF6
+- Secondary / accent: electric blue #3B82F6
+- Highlight: emerald #10B981
+- Typography vibe: bold geometric sans (Outfit / Plus Jakarta Sans) if any text appears
+
+Avoid: garbled or misspelled text, watermarks, logos, stock-photo clichés, busy clutter, low contrast.`;
+    }
+
     function openPromptModal(sentenceId) {
       const s = currentSentences.find(x => x.id === sentenceId);
       if (!s) return;
       activePromptSid = sentenceId;
-      const promptToUse = savedMap[sentenceId]?.custom_prompt || s.sentence_text || '';
+      // Use a saved custom prompt verbatim; otherwise build the branded
+      // 1080p prompt from the sentence + its chosen/recommended asset type.
+      const assetType = assetTypeMap[sentenceId] || savedMap[sentenceId]?.graphics_type;
+      const promptToUse = savedMap[sentenceId]?.custom_prompt
+        || buildVideoPrompt(s.sentence_text || '', assetType);
       $('promptEditor').value = promptToUse;
       $('promptModal').classList.add('show');
     }
+
+    $('copyPromptBtn').addEventListener('click', () => {
+      const btn = $('copyPromptBtn');
+      navigator.clipboard.writeText($('promptEditor').value)
+        .then(() => {
+          showToast('📋 Prompt copied — paste it into Gemini');
+          // Visual success feedback on the button itself.
+          if (btn._revert) clearTimeout(btn._revert);
+          btn.dataset.orig = btn.dataset.orig || btn.innerHTML;
+          btn.innerHTML = '✅ Copied!';
+          btn.style.background = 'var(--success)';
+          btn.style.color = '#fff';
+          btn._revert = setTimeout(() => {
+            btn.innerHTML = btn.dataset.orig;
+            btn.style.background = 'rgba(255,255,255,0.1)';
+            btn.style.color = '';
+          }, 1600);
+        })
+        .catch(() => showToast('❌ Failed to copy prompt', true));
+    });
 
     $('savePromptBtn').addEventListener('click', async () => {
       if (!activePromptSid) return;
@@ -883,6 +943,30 @@
       showToast(`☁️ Saved ${saved} image(s) to Azure.`);
     }
 
+    // Save only the checked candidates into the existing-images gallery.
+    async function saveSelectedToAzure() {
+      // Selected sentences that actually have a generated candidate to save.
+      const ids = Array.from(selectedCandidateIds).filter(id => candidateMap[id]);
+      if (!ids.length) {
+        showToast('No selected candidates to save — generate & select some first.', true);
+        return;
+      }
+      const btn = $('saveSelectedBtn');
+      btn.disabled = true; const orig = btn.textContent; btn.textContent = '💾 Saving…';
+      let saved = 0;
+      for (const id of ids) {
+        try {
+          await saveToAzure(id);   // saves to Azure + upserts into generated_images (existing images)
+          selectedCandidateIds.delete(id);
+          saved++;
+        } catch (_) {}
+      }
+      btn.disabled = false; btn.textContent = orig;
+      renderCandidates();
+      loadExistingImages();        // refresh the existing-images gallery
+      showToast(`💾 Saved ${saved} selected image(s) to existing images.`);
+    }
+
     // ── Existing images ──
     async function loadExistingImages() {
       if (!currentModuleNumber || !currentVideoNumber) return;
@@ -975,6 +1059,7 @@
     $('genAllBtn').addEventListener('click', generateAll);
     $('resetBtn').addEventListener('click', resetCandidates);
     $('saveAllAzureBtn').addEventListener('click', saveAllToAzure);
+    $('saveSelectedBtn').addEventListener('click', saveSelectedToAzure);
     $('refreshExistingBtn').addEventListener('click', loadExistingImages);
     $('testGeminiBtn').addEventListener('click', testGemini);
     $('guideBtn').addEventListener('click', () => { const p = $('guidePanel'); p.style.display = p.style.display === 'none' ? 'block' : 'none'; });
