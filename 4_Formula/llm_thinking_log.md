@@ -1,5 +1,23 @@
 # LLM Thinking Log
 
+## 2026-06-27 — 🤖 Axiom Error to GitHub Issue Pipeline
+
+### 🎯 Objective
+Create an automated pipeline that queries server-side errors from Axiom, analyzes the root cause with OpenRouter (Claude 3 Opus), and automatically creates an AI-analyzed GitHub Issue. This guarantees that errors aren't just logged into a void, but tracked with actionable AI feedback for local agents to pull, fix, and clean up.
+
+### 📐 Implementation
+1. **Python Script (`6_Semblance/tools/axiom_error_to_github_issue.py`)**:
+   - Queries `https://api.axiom.co/v1/datasets/_apl` for logs in the `videoproduction` dataset where `severity == 'ERROR' or severity == 'FATAL'` within the last 24 hours.
+   - Passes the raw error JSON to OpenRouter (`anthropic/claude-3-opus`) for a root cause analysis and a concrete, actionable fix.
+   - Triggers the GitHub API to create an Issue containing the AI analysis and the raw log metadata, tagged with `bug`, `axiom-error`, and `ai-analyzed`.
+2. **GitHub Action (`.github/workflows/axiom_issue_creator.yml`)**:
+   - Runs daily via cron (`0 2 * * *`) and supports manual triggering via `workflow_dispatch`.
+   - Injects the required secrets (`AXIOM_TOKEN`, `AXIOM_ORG_ID`, `OPENROUTER_API_KEY`, `GITHUB_TOKEN`).
+   
+### ✅ Verification
+- The python file correctly establishes the environment logic.
+- The github action triggers successfully.
+
 ## 2026-06-27 — 🚀 MVP Pivot Point page + 🔎 Value Proposition Test page
 
 ### 🎯 Objective
