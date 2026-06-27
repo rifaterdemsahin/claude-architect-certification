@@ -596,25 +596,29 @@
     // diagram, a database cylinder) — NOT a text slide / title card.
     function buildSvgPrompt(svgType, sentenceText) {
       const label = (svgType || 'concept').replace(/_/g, ' ');
-      return `Generate a clean, conceptual inline SVG ICON / ILLUSTRATION (viewBox="0 0 1920 1080", 16:9) that visually represents the CORE CONCEPT in the line below — a single iconographic vector graphic. Think: a GitHub octocat-style mark, an MCP "Model Context Protocol" client⇄server connector diagram, a database cylinder, a neural-net brain, a shield, connected nodes/flow. This is NOT a slide, title card, lower-third, or bullet layout — do NOT build a text layout.
+      return `Generate a clean, conceptual inline SVG ICON / ILLUSTRATION (viewBox="0 0 1920 1080", 16:9) that conveys the MAIN IDEA of the line below using GRAPHICS ONLY — no text whatsoever. Think: a GitHub octocat-style mark, an MCP "Model Context Protocol" client⇄server connector diagram, a database cylinder, a neural-net brain, a shield, connected nodes/flow. This is NOT a slide, title card, lower-third, or bullet layout.
 
-Concept / subject to illustrate: "${sentenceText}"
+Idea to illustrate: "${sentenceText}"
 Style hint: ${label}
 
 Approach:
-- Identify the main noun / technology / idea in the line and draw a recognizable SYMBOLIC illustration of it (a logo-like glyph, metaphor, object, or simple connected diagram).
+- Distil the line to ONE main idea (the key noun / technology / concept) and draw a recognizable SYMBOLIC illustration of it — a logo-like glyph, metaphor, object, or simple connected diagram.
 - Flat, modern line + fill style: bold geometric shapes, clean strokes, generous negative space, one clear focal subject, centered.
-- Minimal or NO words — at most a 1–3 word label only if it's essential to read the concept.
+- Communicate the idea PURELY through shapes, icons, and symbols.
+
+ABSOLUTELY NO TEXT:
+- Do NOT include any words, letters, numbers, labels, or captions.
+- Do NOT use <text>, <tspan>, or <textPath> elements anywhere in the SVG.
+- If you feel a label is needed, replace it with an icon or symbol instead.
 
 Branding kit (${BRAND.template_name}):
 - Background: near-black ${BRAND.bg} (a subtle ${BRAND.gradient_start}→${BRAND.gradient_end} gradient or transparent background is fine)
 - Palette: deep blue ${BRAND.gradient_start} → bright yellow ${BRAND.gradient_end}
 - Accent: ${BRAND.accent_bar}
-- Any text: ${BRAND.main_color}, font Fira Code (monospace); small sub-labels Plus Jakarta Sans
 
 Rules:
 - Return ONLY a single valid standalone <svg>…</svg> element — no markdown, no commentary.
-- Build the artwork from vector primitives only (<path>, <circle>, <rect>, <line>, <polygon>, gradients) — no external images, raster, or fonts.
+- Build the artwork from vector primitives only (<path>, <circle>, <rect>, <line>, <polygon>, gradients) — no external images, raster, fonts, or text elements.
 - Keep the subject within the central 90% (title-safe), high contrast against the background, crisp and scalable.`;
     }
 
