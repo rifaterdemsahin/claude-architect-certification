@@ -59,7 +59,7 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-          cache: true
+          cache: false # repo is stdlib-only (no go.sum) — caching warns every run
 
       - name: Set up Node
         uses: actions/setup-node@v4
