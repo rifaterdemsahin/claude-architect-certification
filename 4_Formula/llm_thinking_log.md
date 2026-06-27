@@ -2231,3 +2231,24 @@ All 5 issues reported the **same** Axiom row (`_rowId 0djjrps84efwg-08aea3e08f00
 - `python3 -m py_compile` clean for both scripts.
 - Simulated resolver against `prerequisites.html`: location parsed (`prerequisites.html 136 17`), `html_inline_js_ok()` = `True` ⇒ would **close as already-fixed** (not patch), `go_build_ok()` = `True`.
 - `go build ./...` green from repo root.
+
+## 2026-06-27 — 🛡️ Strengthen issue dedup (scan + fingerprint + same-day) + agent spec
+
+### 🎯 Objective
+Harden `axiom_error_to_github_issue.py` so it never opens the same error twice (especially on the same day), and write the spec for the autonomous error-loop agent in the formulas folder.
+
+### 🔍 Why
+The `_rowId`-only dedup added earlier had two gaps: (1) it scanned only **open** issues, so a *closed* error could be re-filed; (2) it deduped only on the exact row, so the same logical error arriving under a *different* `_rowId` (e.g. a second browser session, or a re-deploy to fly.io) still re-filed.
+
+### 📐 Implementation
+- **`6_Semblance/tools/axiom_error_to_github_issue.py`** (stage 1):
+  - **Double dedup key**: `_rowId` (exact row) **+** a content `fingerprint` = `sha1(stage|source|normalise(message))`. `normalise` strips `scheme://host[:port]` so localhost vs fly.io collapse; keeps `:line:col` (different line = different bug).
+  - **Scan open AND closed** issues with `state=all` + `since=<now-DEDUP_WINDOW_DAYS>`; default window = **1 day** ("today"), configurable, `0` disables.
+  - **Two hidden markers** embedded in every issue body (`<!-- axiom-row-id -->`, `<!-- axiom-fp -->`) as the stable dedup contract; legacy bodies (no markers) are handled by re-deriving the signature from the ```` ```json ```` metadata block — so the existing #10–#14 are recognised.
+  - `GITHUB_TOKEN` now falls back to `gh auth token` so the agent runs locally without a PAT.
+- **`4_Formula/autonomous_error_loop_formula.md`** (new spec): the how/why companion — 3-stage pipeline, the dedup algorithm, the resolver's 4 safety gates (verify-before-apply / validate-output / build-gate / scope), config table, the hidden-marker contract, lessons from #10–#14, and future enhancements.
+
+### ✅ Verification
+- `python3 -m py_compile` clean.
+- Unit suite passes: fingerprint stable across `_rowId`s; stable across localhost↔fly.io host; distinct for distinct errors; legacy-body re-derivation matches; same-day dup correctly skipped.
+- **Live scan** of the real tracker (last 1 day) recognised all 5 closed issues (#10–#14) by both row_id and fingerprint (`220e55e1f5a3…`); a replay of the identical error is reported as a duplicate and would be skipped.
