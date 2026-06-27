@@ -75,7 +75,10 @@
     let SB_URL = '', SB_KEY = '';
 
     fetch('/api/config')
-      .then(r => r.json())
+      .then(r => {
+        if (!r.ok) throw new Error('API not available');
+        return r.json();
+      })
       .then(cfg => {
         SB_URL = cfg.supabaseUrl;
         SB_KEY  = cfg.supabaseAnon;
@@ -83,8 +86,17 @@
         loadAll();
       })
       .catch(e => {
-        updateStatus(false);
-        toastError('Config fetch failed: ' + e.message);
+        console.warn('Local API config failed, falling back...', e.message);
+        SB_URL = localStorage.getItem('supabase_url') || 'https://rmekfsdhglyiralxvkwc.supabase.co';
+        SB_KEY = localStorage.getItem('supabase_anon_key') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZWtmc2RoZ2x5aXJhbHh2a3djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NzYzODgsImV4cCI6MjA5NjM1MjM4OH0.ay6HsmO_CbMGDXL_Dv4DT-paAIAOqlQPfmqqx_mexSU';
+        
+        if (SB_URL && SB_KEY) {
+          updateStatus(true);
+          loadAll();
+        } else {
+          updateStatus(false);
+          toastError('Config fetch failed: ' + e.message);
+        }
       });
 
     function updateStatus(ok) {
