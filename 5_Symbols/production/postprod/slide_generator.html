@@ -133,11 +133,34 @@
         <span class="collapse-icon">▼</span>
       </div>
       <div class="glass-card-body">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-          <p style="color:var(--text-muted);font-size:0.9rem;">Copy or download the generated Marp markdown to present in VS Code or export to PDF.</p>
-          <button class="btn btn-success" id="downloadBtn" onclick="downloadMarkdown()">⬇️ Download .md</button>
+        <div class="split-view" style="display:flex; gap: 24px; flex-wrap:wrap;">
+          
+          <div class="editor-pane" style="flex:1; min-width:300px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+              <p style="color:var(--text-muted);font-size:0.9rem;">Marp Markdown</p>
+              <div>
+                <button class="btn btn-secondary btn-sm" onclick="copyMarkdown()">📋 Copy</button>
+                <button class="btn btn-success btn-sm" id="downloadBtn" onclick="downloadMarkdown()">⬇️ .md</button>
+              </div>
+            </div>
+            <textarea id="marpPreview" class="preview-box" style="width:100%; height:320px; resize:vertical;" oninput="updateVisualPreview()"></textarea>
+          </div>
+
+          <div class="render-pane" style="flex:1; min-width:300px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+              <p style="color:var(--text-muted);font-size:0.9rem;">Slide Preview</p>
+            </div>
+            <div id="visualPreview" style="background:var(--bg-dark); color:var(--text-main); width:100%; aspect-ratio:16/9; border:1px solid rgba(255,255,255,0.1); border-radius:12px; position:relative; overflow:hidden; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding:2rem; font-family:var(--font-title); box-shadow:0 10px 30px rgba(0,0,0,0.5);">
+               <!-- Rendered slide -->
+            </div>
+            <div style="text-align:center; margin-top:12px;">
+              <button class="btn btn-secondary btn-sm" onclick="prevPreviewSlide()">◀</button>
+              <span id="previewCounter" style="margin:0 12px; font-size:0.9rem; font-weight:700;">1 / 1</span>
+              <button class="btn btn-secondary btn-sm" onclick="nextPreviewSlide()">▶</button>
+            </div>
+          </div>
+
         </div>
-        <div id="marpPreview" class="preview-box"></div>
         
         <div style="margin-top:14px; background:rgba(16,185,129,0.08); border:1px solid var(--success); border-radius:12px; padding:12px 16px;">
           <h4 style="color:var(--success); margin-bottom:4px; font-size:0.95rem;">Supabase Implementation Plan</h4>
@@ -171,6 +194,8 @@
     let dbVideos = [];
     let currentSentences = [];
     let sentenceGraphicsMap = {}; // sentence_id -> graphics row
+    let generatedSlides = []; // Holds structured slide data for preview
+    let previewIndex = 0;
 
     const $ = id => document.getElementById(id);
     
@@ -283,6 +308,11 @@
       generateMarp();
     }
 
+    const emojiMap = {
+      'hook': '🎣', 'objective': '🎯', 'transition': '🔄', 'step': '👣',
+      'insight': '💡', 'takeaway': '✨', 'cue': '🎬', 'heading': '📌', 'body': '🔹'
+    };
+
     function generateMarp() {
       let markdown = `---
 marp: true
@@ -293,15 +323,28 @@ color: #f3f4f6
 style: |
   section {
     font-family: 'Plus Jakarta Sans', sans-serif;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
   }
-  h1, h2, h3 {
+  h1 {
     font-family: 'Outfit', sans-serif;
     color: #8b5cf6;
+    font-size: 3.8rem;
+    font-weight: 800;
+    margin: 0.5rem 0;
+    line-height: 1.1;
+  }
+  h2 {
+    font-size: 4rem;
+    margin: 0;
   }
   .bg-image {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    z-index: -1; opacity: 0.3;
+    z-index: -1; opacity: 0.15;
     background-size: cover;
   }
 ---
@@ -311,26 +354,73 @@ style: |
       const selectedIds = Array.from(checkboxes).filter(cb => cb.checked).map(cb => parseInt(cb.value));
       
       const slides = currentSentences.filter(s => selectedIds.includes(s.id));
+      generatedSlides = [];
       
       slides.forEach((s, idx) => {
         if (idx > 0) markdown += `\n---\n\n`;
         
-        if (sentenceGraphicsMap[s.id]) {
-          markdown += `![bg opacity:.3](${sentenceGraphicsMap[s.id]})\n\n`;
-        }
+        let bgImg = sentenceGraphicsMap[s.id] || '';
+        if (bgImg) markdown += `![bg opacity:.15](${bgImg})\n\n`;
         
-        if (s.sentence_type === 'hook' || s.sentence_type === 'heading') {
-          markdown += `# ${s.sentence_text}\n`;
-        } else {
-          markdown += `### ${s.sentence_text}\n`;
-        }
+        // Steve Jobs style: Punchy, minimal text. (Extract first 5-8 words)
+        const words = (s.sentence_text || '').split(' ');
+        const punchyText = words.length > 8 ? words.slice(0, 8).join(' ') + '...' : words.join(' ');
+        const emoji = emojiMap[s.sentence_type] || '🔹';
+        
+        markdown += `## ${emoji}\n\n`;
+        markdown += `# ${punchyText}\n`;
+
+        generatedSlides.push({ bgImg, emoji, punchyText });
       });
       
-      $('marpPreview').textContent = markdown;
+      $('marpPreview').value = markdown;
+      previewIndex = 0;
+      updateVisualPreview();
+    }
+
+    function updateVisualPreview() {
+      const vp = $('visualPreview');
+      const counter = $('previewCounter');
+      
+      if (!generatedSlides.length) {
+        vp.innerHTML = '<p style="color:var(--text-muted);">No slides generated.</p>';
+        counter.textContent = '0 / 0';
+        return;
+      }
+      
+      if (previewIndex < 0) previewIndex = 0;
+      if (previewIndex >= generatedSlides.length) previewIndex = generatedSlides.length - 1;
+      
+      const slide = generatedSlides[previewIndex];
+      counter.textContent = `${previewIndex + 1} / ${generatedSlides.length}`;
+      
+      let html = '';
+      if (slide.bgImg) {
+        html += `<div style="position:absolute;top:0;left:0;right:0;bottom:0;background:url('${escHtml(slide.bgImg)}') center/cover; opacity:0.15; z-index:0;"></div>`;
+      }
+      html += `<div style="position:relative; z-index:1; padding:20px;">
+        <div style="font-size:3.5rem; margin-bottom:12px;">${slide.emoji}</div>
+        <div style="font-family:var(--font-title); font-size:2.8rem; font-weight:800; color:var(--primary); line-height:1.2; text-wrap:balance;">${escHtml(slide.punchyText)}</div>
+      </div>`;
+      
+      vp.innerHTML = html;
+    }
+
+    function prevPreviewSlide() {
+      if (previewIndex > 0) { previewIndex--; updateVisualPreview(); }
+    }
+    
+    function nextPreviewSlide() {
+      if (previewIndex < generatedSlides.length - 1) { previewIndex++; updateVisualPreview(); }
+    }
+
+    function copyMarkdown() {
+      const text = $('marpPreview').value;
+      navigator.clipboard.writeText(text).then(() => showToast('📋 Copied to clipboard!'));
     }
 
     function downloadMarkdown() {
-      const markdown = $('marpPreview').textContent;
+      const markdown = $('marpPreview').value;
       const blob = new Blob([markdown], { type: 'text/markdown' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');

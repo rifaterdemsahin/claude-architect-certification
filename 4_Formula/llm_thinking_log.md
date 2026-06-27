@@ -7,9 +7,10 @@ Create a Slide Generator page under `5_Symbols/production/postprod/slide_generat
 
 ### 📐 Implementation
 1. **`slide_generator.html`**: A glassmorphic UI matching `image_generator.html`, reading `modules`, `videos`, and `sentences`.
-2. **Marp Generation**: Each sentence or scene can be generated into a slide (separated by `---`). Includes brand styling and background images from `sentence_graphics` if available.
-3. **Download**: The UI builds the Marp markdown string dynamically and offers a "Download .md" button.
-4. **Supabase Tables (Proposed)**: 
+2. **Marp Generation**: Steve Jobs styling applied. Text is truncated (punchy, max 8 words), matched with a massive section emoji (e.g. 🎣, 🎯, 💡) and centered with brand colors/fonts.
+3. **Download & Copy**: The UI builds the Marp markdown string dynamically in an editable `<textarea>`, providing a "📋 Copy" button alongside the "Download .md".
+4. **Side-by-Side Preview**: Recreated `marp.live` dual-pane layout. Left pane holds the markdown; right pane renders a visual mock of the current slide using HTML/CSS grid.
+5. **Supabase Tables (Proposed)**: 
    - `presentations`: `id` (uuid, pk), `video_id` (uuid, FK), `markdown_content` (text), `created_at` (timestamp), `updated_at` (timestamp).
 5. **Navigation**: Wired into `navigation_config.json`, `index.html` fallback, `markdown_renderer.html` fallback, and `shared/nav.js` under `Post Prod > 2. Visuals & Graphics`.
 
