@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🛠️ Prerequisites | Claude AI Certification</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../../shared/nav.css">
+  <style>
+    :root {
+      --bg: #030712; --card: rgba(17,24,39,0.9); --border: rgba(139,92,246,0.2);
+      --text: #f3f4f6; --muted: #9ca3af; --primary: #8b5cf6; --green: #10b981;
+      --blue: #3b82f6;
+      --font-h: 'Outfit', sans-serif; --font-b: 'Plus Jakarta Sans', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: var(--font-b); line-height: 1.6; padding: 32px 24px 120px; }
+    .container { max-width: 900px; margin: 0 auto; }
+    h1 { font-family: var(--font-h); font-size: 2.4rem; font-weight: 800; margin-bottom: 6px; }
+    .subtitle { color: var(--muted); font-size: 1rem; margin-bottom: 28px; }
+
+    /* Config panel */
+    .config-panel { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px 24px; margin-bottom: 28px; }
+    #conn-status { font-size: 0.85rem; }
+
+    /* Cards */
+    .module-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; margin-bottom: 18px; overflow: hidden; }
+    .module-header { background: rgba(255,255,255,0.03); padding: 16px 22px; font-family: var(--font-h); font-size: 1.2rem; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .video-section { padding: 16px 22px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .video-section:last-child { border-bottom: none; }
+    .video-title { font-weight: 700; color: var(--blue); margin-bottom: 12px; font-size: 1.05rem; }
+
+    /* Table */
+    .req-table { width: 100%; border-collapse: collapse; margin-bottom: 8px; }
+    .req-table th { text-align: left; padding: 8px 12px; font-size: 0.8rem; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .req-table td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.9rem; }
+    .req-table tr:last-child td { border-bottom: none; }
+    .install-cmd { font-family: monospace; background: rgba(0,0,0,0.4); padding: 6px 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.08); color: #a5f3fc; display: inline-block; word-break: break-all; }
+    
+    /* Button */
+    .btn-copy { background: rgba(139,92,246,0.15); color: var(--primary); border: 1px solid rgba(139,92,246,0.3); border-radius: 6px; padding: 4px 10px; cursor: pointer; font-size: 0.8rem; font-weight: 600; margin-left: 8px; transition: all 0.2s; white-space: nowrap; }
+    .btn-copy:hover { background: rgba(139,92,246,0.25); }
+
+    /* Toast */
+    .toast { position: fixed; bottom: 24px; right: 24px; background: #1f2937; border: 1px solid rgba(16,185,129,0.4); padding: 12px 20px; border-radius: 12px; font-size: 0.88rem; z-index: 9999; opacity: 0; transform: translateY(10px); transition: all 0.3s; pointer-events: none; color: var(--green); }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    .empty { text-align: center; color: var(--muted); padding: 32px; font-size: 0.9rem; }
+  </style>
+  <script src="../../../shared/seo.js" defer></script>
+</head>
+<body>
+  <div id="nav-placeholder"></div>
+  <div class="container">
+    <h1>🛠️ Prerequisites</h1>
+    <p class="subtitle">Install prerequisites for each module and video. Use the copy button to grab commands easily.</p>
+
+    <!-- Connection status -->
+    <div class="config-panel" style="display:flex;align-items:center;gap:12px;padding:12px 18px;">
+      <span style="font-size:0.85rem;color:var(--muted);">⚙️ Supabase</span>
+      <span id="conn-status">🔴 connecting…</span>
+    </div>
+
+    <div id="prereq-list"></div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <div id="debug-panel-placeholder"></div>
+  <script src="../../../shared/nav.js"></script>
+  <script src="../../../shared/debug-panel.js"></script>
+  <script>
+    let SB_URL = '', SB_KEY = '';
+
+    fetch('/api/config')
+      .then(r => r.json())
+      .then(cfg => {
+        SB_URL = cfg.supabaseUrl;
+        SB_KEY  = cfg.supabaseAnon;
+        updateStatus(true);
+        loadAll();
+      })
+      .catch(e => {
+        updateStatus(false);
+        toastError('Config fetch failed: ' + e.message);
+      });
+
+    function updateStatus(ok) {
+      document.getElementById('conn-status').textContent = ok ? '🟢 connected' : '🔴 disconnected';
+    }
+
+    function api(path, opts = {}) {
+      return fetch(SB_URL + '/rest/v1/' + path, {
+        ...opts,
+        headers: {
+          'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY,
+          'Content-Type': 'application/json',
+          'Prefer': opts.prefer || 'return=representation',
+          ...(opts.headers || {})
+        }
+      });
+    }
+
+    async function loadAll() {
+      if (!SB_URL || !SB_KEY) { renderList([]); return; }
+      try {
+        const r = await api('prerequisites?order=module_number.asc,video_number.asc');
+        if (!r.ok) throw new Error(await r.text());
+        const data = await r.json();
+        renderList(data);
+      } catch(e) { 
+        toastError('Load error: ' + e.message); 
+        renderList([]); 
+      }
+    }
+
+    function renderList(data) {
+      const el = document.getElementById('prereq-list');
+      if (!data.length) {
+        el.innerHTML = '<div class="empty">📭 No prerequisites found. Wait for connection or seed data.</div>';
+        return;
+      }
+
+      // Group by module and video
+      const tree = {};
+      for (const item of data) {
+        if (!tree[item.module_number]) tree[item.module_number] = {};
+        if (!tree[item.module_number][item.video_number]) tree[item.module_number][item.video_number] = [];
+        tree[item.module_number][item.video_number].push(item);
+      }
+
+      let html = '';
+      for (const mNum of Object.keys(tree).sort((a,b) => a-b)) {
+        html += \`<div class="module-card">
+          <div class="module-header">📦 Module \${mNum}</div>\`;
+        
+        for (const vNum of Object.keys(tree[mNum]).sort((a,b) => a-b)) {
+          html += \`<div class="video-section">
+            <div class="video-title">🎥 Video \${vNum}</div>
+            <table class="req-table">
+              <thead>
+                <tr>
+                  <th style="width: 20%">Tool / Software</th>
+                  <th style="width: 60%">Install Command</th>
+                  <th style="width: 20%">Verify</th>
+                </tr>
+              </thead>
+              <tbody>\`;
+              
+          for (const req of tree[mNum][vNum]) {
+            html += \`<tr>
+              <td><strong>\${esc(req.install_name)}</strong></td>
+              <td>
+                <span class="install-cmd">\${esc(req.install_command)}</span>
+                <button class="btn-copy" onclick="copyText('\${escJs(req.install_command)}')">📋 Copy</button>
+              </td>
+              <td><span style="font-size:0.8rem;color:var(--muted)">\${esc(req.verification_command || '-')}</span></td>
+            </tr>\`;
+          }
+          html += \`</tbody></table></div>\`;
+        }
+        html += \`</div>\`;
+      }
+      el.innerHTML = html;
+    }
+
+    function copyText(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('Copied to clipboard!');
+      }).catch(err => {
+        showToast('Failed to copy');
+      });
+    }
+
+    function esc(str) {
+      return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+    
+    function escJs(str) {
+      return (str || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"');
+    }
+
+    let toastTimer;
+    function showToast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.style.borderColor = 'rgba(16,185,129,0.4)';
+      el.style.color = 'var(--green)';
+      el.className = 'toast show';
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.className = 'toast', 3000);
+    }
+    
+    function toastError(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.style.borderColor = 'rgba(239,68,68,0.4)';
+      el.style.color = 'var(--red)';
+      el.className = 'toast show';
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.className = 'toast', 3000);
+    }
+  </script>
+</body>
+</html>
