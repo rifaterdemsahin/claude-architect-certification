@@ -183,6 +183,21 @@
     </footer>
   </div>
 
+  <!-- Prompt preview modal (AI Marp Generator) -->
+  <div id="promptModal" class="modal" onclick="if(event.target===this) closePromptModal()" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; align-items:center; justify-content:center;">
+    <div class="modal-content" style="background:var(--bg-card); border:1px solid rgba(255,255,255,0.1); border-radius:16px; padding:32px; max-width:800px; width:90%; max-height:90vh; overflow-y:auto; box-shadow:0 20px 40px rgba(0,0,0,0.6);">
+      <h3 style="font-family:var(--font-title); font-size:1.4rem; margin-bottom:8px;">👁️ AI Prompt Preview</h3>
+      <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:16px;">📋 Copy this prompt and paste it into Claude or Gemini to generate high-impact, Steve Jobs-style slides using an LLM. Then paste the markdown back into the editor.</p>
+      <textarea id="promptModalText" spellcheck="false" readonly style="width:100%; min-height:400px; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:16px; color:var(--text-main); font-family:monospace; font-size:0.85rem; margin-bottom:16px; resize:vertical;"></textarea>
+      <div class="modal-actions" style="display:flex; gap:12px; justify-content:flex-end;">
+        <button class="btn" style="background:rgba(255,255,255,0.1);" onclick="closePromptModal()">Close</button>
+        <a class="btn" style="background:#d97757; color:#fff;" href="https://claude.ai/new" target="_blank" rel="noopener">🔗 Open Claude</a>
+        <a class="btn" style="background:#4285f4; color:#fff;" href="https://gemini.google.com/app" target="_blank" rel="noopener">✨ Open Gemini</a>
+        <button class="btn btn-success" onclick="copyAiPrompt()">📋 Copy Prompt</button>
+      </div>
+    </div>
+  </div>
+
   <div id="toast" class="toast"></div>
 
   <script>
@@ -300,8 +315,9 @@
         </tr></thead>
         <tbody>${rows}</tbody>
       </table>
-      <div style="text-align: right; margin-top: 16px;">
-        <button class="btn btn-primary" onclick="generateMarp()" style="background:var(--primary); color:#fff; border:none; padding:10px 24px; border-radius:12px; font-weight:700; font-size:1rem; cursor:pointer;">Generate Slides ⚡</button>
+      <div style="display:flex; justify-content:flex-end; gap:12px; margin-top: 16px;">
+        <button class="btn btn-secondary" onclick="openPromptModal()" style="border:1px solid rgba(255,255,255,0.2); background:rgba(255,255,255,0.05); color:#fff; border-radius:12px; padding:10px 20px; font-weight:600;">👁️ View AI Prompt</button>
+        <button class="btn btn-primary" onclick="generateMarp()" style="background:var(--primary); color:#fff; border:none; padding:10px 24px; border-radius:12px; font-weight:700; font-size:1rem; cursor:pointer;">Generate Slides (Basic) ⚡</button>
       </div>`;
     }
     
@@ -430,6 +446,69 @@ style: |
       a.click();
       URL.revokeObjectURL(url);
       showToast('✅ Downloaded successfully');
+    }
+
+    function openPromptModal() {
+      const checkboxes = document.querySelectorAll('.slide-chk');
+      const selectedIds = Array.from(checkboxes).filter(cb => cb.checked).map(cb => parseInt(cb.value));
+      const slides = currentSentences.filter(s => selectedIds.includes(s.id));
+      
+      if (!slides.length) {
+        showToast('Please select at least one sentence.', true);
+        return;
+      }
+      
+      const sentencesText = slides.map(s => `- [${s.sentence_type}] ${s.sentence_text}`).join('\n');
+      
+      const prompt = `You are an expert presentation designer known for creating minimalist, high-impact "Steve Jobs-style" slides. 
+I am providing you with a list of script sentences for a video module. Please convert these sentences into a Marp markdown presentation.
+
+# Rules
+1. Apply extreme minimalism. Extract only the absolute core message (max 3 to 8 words per slide). Make it punchy and impactful.
+2. Assign a single, highly relevant, massive emoji for each slide based on the content (e.g. 🎯, 🚀, 💡, 🎣).
+3. Structure each slide in Marp syntax.
+4. Include this exact Marp frontmatter block with my brand kit at the top (do not alter this block):
+
+\`\`\`markdown
+---
+marp: true
+theme: default
+class: lead
+backgroundColor: #030712
+color: #f3f4f6
+style: |
+  section { font-family: 'Plus Jakarta Sans', sans-serif; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+  h1 { font-family: 'Outfit', sans-serif; color: #8b5cf6; font-size: 3.8rem; font-weight: 800; margin: 0.5rem 0; line-height: 1.1; }
+  h2 { font-size: 4rem; margin: 0; }
+  .bg-image { position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: -1; opacity: 0.15; background-size: cover; }
+---
+\`\`\`
+
+5. Format each slide like this (separate with \`---\`):
+\`\`\`markdown
+## [Emoji]
+
+# [Punchy core message]
+\`\`\`
+
+# Input Sentences
+${sentencesText}
+
+Output ONLY the raw markdown.`;
+
+      $('promptModalText').value = prompt;
+      $('promptModal').style.display = 'flex';
+    }
+
+    function closePromptModal() {
+      $('promptModal').style.display = 'none';
+    }
+    
+    function copyAiPrompt() {
+      const text = $('promptModalText').value;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('📋 AI Prompt copied to clipboard!');
+      });
     }
 
     document.addEventListener('DOMContentLoaded', loadModules);
