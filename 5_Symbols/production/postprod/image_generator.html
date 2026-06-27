@@ -146,6 +146,15 @@
     .lightbox.show { display: flex; }
     .lightbox img { max-width: 92vw; max-height: 88vh; border-radius: 14px; border: 1px solid rgba(255,255,255,0.15); }
 
+    /* Prompt Modal */
+    .prompt-modal { display: none; position: fixed; inset: 0; z-index: 2000; background: rgba(0,0,0,0.88); backdrop-filter: blur(6px); align-items: center; justify-content: center; padding: 24px; }
+    .prompt-modal.show { display: flex; }
+    .prompt-modal-content { background: var(--bg-card); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 24px; width: 100%; max-width: 600px; box-shadow: 0 20px 40px rgba(0,0,0,0.8); }
+    .prompt-modal-content h3 { font-family: var(--font-title); margin-bottom: 12px; }
+    .prompt-modal-content textarea { width: 100%; min-height: 120px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 12px; color: var(--text-main); font-family: var(--font-body); font-size: 0.9rem; resize: vertical; margin-bottom: 16px; }
+    .prompt-modal-content textarea:focus { outline: none; border-color: var(--accent); }
+    .prompt-actions { display: flex; gap: 12px; justify-content: flex-end; }
+
     @media (max-width: 900px) {
       .ig-table { font-size: 0.8rem; }
       .ig-table .sentence-col { min-width: 140px; }
@@ -316,6 +325,20 @@
   <div id="toast" class="toast"></div>
   <div id="lightbox" class="lightbox" onclick="this.classList.remove('show')"><img id="lightboxImg" src="" alt="preview"></div>
 
+  <!-- Prompt Modal -->
+  <div id="promptModal" class="prompt-modal" onclick="if(event.target===this) this.classList.remove('show')">
+    <div class="prompt-modal-content">
+      <h3>🔍 Edit Prompt for Image</h3>
+      <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:12px;">This prompt will be sent to the AI. You can edit it before generating or saving.</p>
+      <textarea id="promptEditor"></textarea>
+      <div class="prompt-actions">
+        <button class="btn btn-secondary" style="background:rgba(255,255,255,0.1);" onclick="$('promptModal').classList.remove('show')">Cancel</button>
+        <button class="btn btn-success" id="savePromptBtn">💾 Save to DB</button>
+        <button class="btn" id="genPromptBtn">✨ Save & Generate</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const SUPABASE_URL = localStorage.getItem('supabase_url') || 'https://rmekfsdhglyiralxvkwc.supabase.co';
     const SUPABASE_ANON_KEY = localStorage.getItem('supabase_anon_key') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZWtmc2RoZ2x5aXJhbHh2a3djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NzYzODgsImV4cCI6MjA5NjM1MjM4OH0.ay6HsmO_CbMGDXL_Dv4DT-paAIAOqlQPfmqqx_mexSU';
@@ -364,6 +387,7 @@
     let savedMap = {};       // sentence_id -> sentence_graphics row (status completed/etc.)
     let candidateMap = {};   // sentence_id -> { dataUrl, refinedPrompt, assetType, cost }
     let assetTypeMap = {};   // sentence_id -> chosen/recommended asset type (string)
+    let activePromptSid = null; // currently editing prompt sentence ID
     let sessionCost = 0;
     let genCount = 0;
     let isGenerating = false;
@@ -482,7 +506,7 @@
       const sids = currentSentences.map(s => s.id);
       if (!sids.length) return;
       try {
-        const rows = await api(`sentence_graphics?select=id,sentence_id,generation_status,rationale,graphics_type,graphics_url,prompt_used,error_message&sentence_id=in.(${sids.join(',')})`);
+        const rows = await api(`sentence_graphics?select=id,sentence_id,generation_status,rationale,graphics_type,graphics_url,prompt_used,error_message,custom_prompt&sentence_id=in.(${sids.join(',')})`);
         for (const g of rows) savedMap[g.sentence_id] = g;
       } catch (_) {}
     }
@@ -545,12 +569,15 @@
         let actionCell;
         if (status === 'completed') {
           actionCell = `<a class="btn btn-success btn-sm" href="${escHtml(saved.graphics_url)}" target="_blank">👁️ View</a>
-            <button class="btn btn-secondary btn-sm" style="background:rgba(255,255,255,0.1);" onclick="generateForSentence(${s.id}, true)" ${isGenerating ? 'disabled' : ''}>🔄 Regen</button>`;
+            <button class="btn btn-secondary btn-sm" style="background:rgba(255,255,255,0.1);" onclick="generateForSentence(${s.id}, true)" ${isGenerating ? 'disabled' : ''}>🔄 Regen</button>
+            <button class="btn btn-secondary btn-sm" style="background:rgba(255,255,255,0.1);margin-top:4px;" onclick="openPromptModal(${s.id})">🔍 Prompt</button>`;
         } else if (status === 'candidate') {
           actionCell = `<button class="btn btn-success btn-sm" onclick="saveToAzure(${s.id})">☁️ Save Azure</button>
-            <button class="btn btn-secondary btn-sm" style="background:rgba(255,255,255,0.1);" onclick="generateForSentence(${s.id}, true)" ${isGenerating ? 'disabled' : ''}>🔄 Regen</button>`;
+            <button class="btn btn-secondary btn-sm" style="background:rgba(255,255,255,0.1);" onclick="generateForSentence(${s.id}, true)" ${isGenerating ? 'disabled' : ''}>🔄 Regen</button>
+            <button class="btn btn-secondary btn-sm" style="background:rgba(255,255,255,0.1);margin-top:4px;" onclick="openPromptModal(${s.id})">🔍 Prompt</button>`;
         } else {
-          actionCell = `<button class="btn btn-sm" onclick="generateForSentence(${s.id})" ${isGenerating ? 'disabled' : ''}>${status === 'failed' ? '🔄 Retry' : '✨ Generate'}</button>`;
+          actionCell = `<button class="btn btn-sm" onclick="generateForSentence(${s.id})" ${isGenerating ? 'disabled' : ''}>${status === 'failed' ? '🔄 Retry' : '✨ Generate'}</button>
+            <button class="btn btn-secondary btn-sm" style="background:rgba(255,255,255,0.1);margin-top:4px;" onclick="openPromptModal(${s.id})">🔍 Prompt</button>`;
         }
 
         return `<tr data-sid="${s.id}">
@@ -618,6 +645,56 @@
       if (row) row.innerHTML = `⭐ Recommended: <b>${reco.replace(/_/g,' ')}</b>`;
     }
 
+    // ── Custom Prompt Modal ──
+    function openPromptModal(sentenceId) {
+      const s = currentSentences.find(x => x.id === sentenceId);
+      if (!s) return;
+      activePromptSid = sentenceId;
+      const promptToUse = savedMap[sentenceId]?.custom_prompt || s.sentence_text || '';
+      $('promptEditor').value = promptToUse;
+      $('promptModal').classList.add('show');
+    }
+
+    $('savePromptBtn').addEventListener('click', async () => {
+      if (!activePromptSid) return;
+      const val = $('promptEditor').value.trim();
+      const s = currentSentences.find(x => x.id === activePromptSid);
+      if (!s) return;
+      
+      const btn = $('savePromptBtn');
+      const orig = btn.textContent;
+      btn.textContent = '💾 Saving...'; btn.disabled = true;
+      try {
+        await upsertGraphics(activePromptSid, { custom_prompt: val });
+        showToast('✅ Prompt saved to database');
+        $('promptModal').classList.remove('show');
+      } catch (err) {
+        showToast('❌ Failed to save prompt: ' + err.message, true);
+      } finally {
+        btn.textContent = orig; btn.disabled = false;
+      }
+    });
+
+    $('genPromptBtn').addEventListener('click', async () => {
+      if (!activePromptSid) return;
+      const val = $('promptEditor').value.trim();
+      const s = currentSentences.find(x => x.id === activePromptSid);
+      if (!s) return;
+      
+      const btn = $('genPromptBtn');
+      const orig = btn.textContent;
+      btn.textContent = '✨ Saving...'; btn.disabled = true;
+      try {
+        await upsertGraphics(activePromptSid, { custom_prompt: val });
+        $('promptModal').classList.remove('show');
+        await generateForSentence(activePromptSid, true);
+      } catch (err) {
+        showToast('❌ Failed to save prompt: ' + err.message, true);
+      } finally {
+        btn.textContent = orig; btn.disabled = false;
+      }
+    });
+
     // ── Image generation (candidate) ──
     function apiAssetKey(dbType) { return DB_TO_API_ASSET[dbType] || dbType; }
 
@@ -628,17 +705,19 @@
       const prevGenerating = isGenerating;
       isGenerating = true;
       const at = chosenAssetType(s);
+      const promptToUse = savedMap[sentenceId]?.custom_prompt || s.sentence_text;
+      
       // Show a transient generating state for this row.
       const badge = document.querySelector(`tr[data-sid="${sentenceId}"] .status-badge`);
       if (badge) { badge.className = 'status-badge generating'; badge.textContent = '⏳ generating'; }
       try {
         const res = await fetch('/api/images/generate', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt: s.sentence_text, module_number: currentModuleNumber, video_number: currentVideoNumber, asset_types: [apiAssetKey(at)] })
+          body: JSON.stringify({ prompt: promptToUse, module_number: currentModuleNumber, video_number: currentVideoNumber, asset_types: [apiAssetKey(at)] })
         });
         if (!res.ok) { const ed = await res.json().catch(() => ({})); throw new Error(ed.error || 'Generation failed'); }
         const data = await res.json();
-        candidateMap[sentenceId] = { dataUrl: data.image_url, refinedPrompt: data.refined_prompt || s.sentence_text, assetType: at, cost: typeof data.cost_usd === 'number' ? data.cost_usd : 0 };
+        candidateMap[sentenceId] = { dataUrl: data.image_url, refinedPrompt: data.refined_prompt || promptToUse, assetType: at, cost: typeof data.cost_usd === 'number' ? data.cost_usd : 0 };
         if (typeof data.cost_usd === 'number') { sessionCost += data.cost_usd; genCount++; updateCostBox(); }
         addLog(`✅ Sentence #${sentenceId} candidate generated`, 'success');
         return true;
