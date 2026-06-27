@@ -66,9 +66,8 @@
      🛡️ Sign-in gate (site-wide). Destructive UI (delete / upload / save
      buttons) must NEVER be active for an unsigned-in visitor.
 
-     Rule (mirrors the server's isAdminRequest exactly): trusted = localhost
-     origin OR a valid `admin_logged_in` cookie. We ask the server once via
-     GET /api/admin/status and stamp the verdict on <body>:
+     Rule (mirrors the server's isAdminRequest exactly): trusted = valid `admin_logged_in` cookie.
+     We ask the server once via GET /api/admin/status and stamp the verdict on <body>:
        body.is-admin  -> visitor is signed in  -> destructive UI visible
        (no class)     -> unsigned in          -> destructive UI HIDDEN
 
@@ -90,7 +89,7 @@
   });
   window.requireAdmin = function (action) {
     if (!window.isAdmin) {
-      alert('🔒 Sign in as admin to ' + (action || 'do that') + '.\n\nUse the admin login, or open the app from localhost.');
+      alert('🔒 Sign in as admin to ' + (action || 'do that') + '.\n\nUse the admin login.');
       return false;
     }
     return true;
@@ -98,7 +97,7 @@
 
   /* 🧭 Admin login page (redirect target for the "Sign in" chip).
      Admin / destructive actions are gated by the `admin_logged_in` cookie
-     (set by /api/admin/login) OR a localhost origin. The login page takes a
+     (set by /api/admin/login). The login page takes a
      `?redirect=` so it can bounce back to the page the user was on. */
   function adminLoginUrl() {
     var base = window.API_BASE || '';
@@ -113,8 +112,7 @@
       .catch(function () {})
       .then(function () {
         applyAdminStatus(false);
-        // localhost stays trusted by the server, so re-fetch the real verdict;
-        // on the deployed site this flips to unsigned-in.
+        // re-fetch the real verdict;
         return fetch((window.API_BASE || '') + '/api/admin/status', { cache: 'no-store' });
       })
       .then(function (r) { return r && r.ok ? r.json() : null; })
@@ -298,7 +296,8 @@
       { group: true, label: '2. 🎨 Method & Doctrine', children: [
         { label: '🎨 Ways of Working', url: '5_Symbols/production/preprod/ways_of_working.html', description: 'Visual script table read method with real-time image creation.' },
         { label: '🎯 Tell · Show · Do · Apply', url: '5_Symbols/production/preprod/tell_show_do_apply.html', description: 'Four-beat instructional design loop: Tell, Show, Do, Apply.' },
-        { label: '🎬 Production Doctrine', url: '5_Symbols/production/preprod/production_doctrine.html', description: 'Operating manual and doctrine: the recording is the process.' }
+        { label: '🎬 Production Doctrine', url: '5_Symbols/production/preprod/production_doctrine.html', description: 'Operating manual and doctrine: the recording is the process.' },
+        { label: '🤖 Prompt Writer', url: '5_Symbols/production/preprod/prompt_writer.html', description: 'Assemble a high-quality task prompt for LLM agents.' }
       ]},
       { group: true, label: '3. 📐 Standards & Config', children: [
         { label: '🎨 Branding & Business Rules', url: '5_Symbols/production/preprod/tools/branding.html', description: 'Branding configuration (colors, fonts) and core project business rules stored in the Supabase business_rules table — view, edit, and seed.' }
