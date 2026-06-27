@@ -35,6 +35,17 @@ This document defines how AI agents interact with the **Claude AI Certification 
     - Documented approach in `4_Formula/llm_thinking_log.md`.
 - **Verification:** `go build`/`go vet` pass; `navigation_config.json` valid JSON; `shared/nav.js` `node -c` OK; local server serves both pages **HTTP 200** with hero copy and both new `shared/nav.js` entries present.
 - **Status:** IMPLEMENTED, COMMITTED, PUSHED.
+- **Task:** 🔁 Run the autonomous error loop end-to-end (visit all pages → file issues → fix agent → fix) and make it **run daily**.
+- **Action:**
+    - **Visited all 102 HTML pages** via the local Go server (:8080): **96 return HTTP 200**; the 6 “non-200” are all **301 directory-index redirects** (`/foo/index.html` → `/foo/`), i.e. correct, not errors. Also proactively parsed every page’s inline `<script>` with the same Node verifier the fix agent uses.
+    - **Fixed a real client bug** — `5_Symbols/production/preprod/explanations.html:413` had a template literal opened with `` ` `` but closed with `'` (`…Error: ${err.message}</p>';`), a `SyntaxError` identical in class to sample issue #14. Closed the quote correctly; inline JS now parses clean.
+    - **Root-caused why the loop was silently dead**: both scripts defaulted to `anthropic/claude-3.5-sonnet`, which OpenRouter **removed** (404 “No endpoints found”). Stage 1 therefore skipped **8 errors as “unanalysable”** and filed 0. Changed the default in `axiom_error_to_github_issue.py` + `issue_fix_agent.py` to **`anthropic/claude-sonnet-4.6`** (verified live via `GET /api/v1/models` + a real completion).
+    - **Hardened the resolver** (`issue_fix_agent.py`): added `resolve_repo_path()` so a bare `prerequisites.html` from an issue body resolves to its real subdir path. Without this, `os.path.exists()` was False → **verify-before-apply was skipped** and the agent could write a bogus file at the repo root. Now verify fires for any file in the tree, and `apply_fixes()` resolves LLM paths before writing. Also tidied the “already-fixed” comment to drop `:None` colons.
+    - **Made it daily + full-loop**: upgraded `.github/workflows/axiom_issue_creator.yml` (daily 02:00 UTC cron) from stage-1-only to the **full loop** — stage 1 (file) → stage 2 (verify → fix → build-gate → commit → close → push). Pins `OPENROUTER_MODEL` **explicitly** so a future deprecation can’t silently zero the run; adds Go + Node + `contents:write`/`issues:write` perms + a `concurrency` guard so two loops never race.
+    - **Ran it live**: stage 1 created issues **#15 + #16** (previously unanalysable). Stage 2 resolved the paths, verified `prerequisites.html` parses clean (the rows were **stale** — already fixed in `5af0765`), and **closed both as already-fixed** with no code change and no bogus root file.
+    - Documented in `4_Formula/llm_thinking_log.md` and the `4_Formula/autonomous_error_loop_formula.md` (model default + a new **🔁 Daily CI** section).
+- **Verification:** `python3 -m py_compile` both scripts OK; `go build ./... && go vet ./...` green; workflow YAML valid; `explanations.html` inline JS parses; new model slug returns a live “OK”; `resolve_repo_path`/`parse_error_location` unit-checked (bare name, full path, prose body, garbage); issues #15/#16 confirmed **CLOSED** with the verify-before-apply verdict; tree has no stray root `prerequisites.html`.
+- **Status:** IMPLEMENTED, COMMITTED, PUSHED.
 
 ### 2026-06-26
 - **Task:** 🥊 Create Competitive Analysis page and auto-generate HTML Specs.

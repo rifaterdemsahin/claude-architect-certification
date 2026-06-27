@@ -47,8 +47,11 @@ AXIOM_TOKEN = os.getenv("AXIOM_TOKEN")
 AXIOM_DATASET = os.getenv("AXIOM_DATASET", "videoproduction")
 AXIOM_QUERY_URL = os.getenv("AXIOM_QUERY_URL", "https://api.axiom.co")
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
-# Known-good default; override with any OpenRouter model id (e.g. anthropic/claude-3.5-sonnet).
-OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "anthropic/claude-3.5-sonnet")
+# Known-good default; override with any OpenRouter model id.
+# NOTE: `anthropic/claude-3.5-sonnet` was REMOVED from OpenRouter (404 "No endpoints
+# found") and silently broke the loop — 8 rows skipped as 'unanalysable' on 2026-06-27.
+# `anthropic/claude-sonnet-4.6` is a live slug (verified via GET /api/v1/models).
+OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "anthropic/claude-sonnet-4.6")
 def _resolve_github_token():
     """GITHUB_TOKEN env, else fall back to the `gh` CLI's stored credentials."""
     tok = os.getenv("GITHUB_TOKEN")

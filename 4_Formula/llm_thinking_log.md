@@ -1,5 +1,32 @@
 # LLM Thinking Log
 
+## 2026-06-27 — 🔁 Make the autonomous error loop actually run (daily + full-loop)
+
+### 🎯 Objective
+The user asked to “visit all the pages, run the fix agent, and fix the issues that are created”, and to **run this process daily**. Investigation showed the loop was silently broken, so the real work was: validate every page, fix the loop, prove it end-to-end, then schedule it.
+
+### 🔍 What I found
+1. **Page health (visited all 102 HTML pages via :8080):** 96 → HTTP 200; the 6 “non-200” are **301 directory-index redirects** (`/foo/index.html` → `/foo/`) — correct, not errors.
+2. **One real client bug:** `5_Symbols/production/preprod/explanations.html:413` — a template literal opened with `` ` `` but closed with `'` (`…Error: ${err.message}</p>';`) → `SyntaxError`. Same class as issue #14.
+3. **The loop was dead:** both scripts defaulted to `anthropic/claude-3.5-sonnet`, which OpenRouter **removed** (404 “No endpoints found”). Stage 1 skipped **8 rows as “unanalysable”** and filed 0 — and the daily CI (`axiom_issue_creator.yml`) only ran stage 1, so it was a silent no-op every day.
+4. **A resolver foot-gun:** `parse_error_location` returned a bare `prerequisites.html` (no dir), so `os.path.exists()` was False → **verify-before-apply was skipped**, and the agent could write a bogus file at the repo root.
+
+### 🛠 Changes
+- **Real fix:** closed the mismatched quote in `explanations.html`; inline JS parses clean.
+- **Model fix:** default `anthropic/claude-3.5-sonnet` → **`anthropic/claude-sonnet-4.6`** in both `axiom_error_to_github_issue.py` and `issue_fix_agent.py` (verified live via `GET /api/v1/models` + a real completion). Kept the dead slug only in explanatory comments as a lesson.
+- **Resolver hardening (`issue_fix_agent.py`):** added `resolve_repo_path()` (exact → `git ls-files` exact → basename match) so verify-before-apply fires for **any** file in the tree; `parse_error_location` now returns a **resolved** path and falls back to scanning the body for an existing repo file + a “line N” hint (handles AI-analysis prose). `apply_fixes()` resolves LLM paths before writing so no bogus root file can appear. Cleaned the “already-fixed” comment to drop `:None`.
+- **Daily + full-loop CI:** rewrote `.github/workflows/axiom_issue_creator.yml` (daily 02:00 UTC) to run **stage 1 → stage 2**, pinning `OPENROUTER_MODEL` explicitly, adding Go + Node + `contents:write`/`issues:write` perms and a `concurrency: error-loop` guard so two loops never race.
+
+### ✅ Verification
+- `python3 -m py_compile` both scripts OK; `go build ./... && go vet ./...` green; workflow YAML valid; `explanations.html` parses.
+- `resolve_repo_path`/`parse_error_location` unit-checked: bare name → `5_Symbols/production/preprod/prerequisites.html`; full path → same; prose body → resolved + line; garbage → None.
+- **Ran it live:** stage 1 created **#15 + #16** (previously unanalysable); stage 2 verified `prerequisites.html` parses clean (rows were stale — already fixed in `5af0765`) and **closed both as already-fixed**, no code change, no stray root file.
+- All pages re-scanned: only the 2 `5_Symbols/templates/*.html` “errors” remain and they are **Go `html/template` placeholders** (`{{.NavFavsJSON}}`), server-rendered before reaching the browser — confirmed false positives.
+
+### 🔮 Notes / next
+- The daily cron now files *and* resolves automatically; a no-op run (no fresh Axiom errors / no open issues) is the healthy steady state.
+- If branch protection blocks stage-2’s push to `main`, the local commit remains and the issue stays open for the next run (could later be upgraded to open a PR on push failure — listed in the formula’s “Future enhancements”).
+
 ## 2026-06-27 — 🤖 Auto-Fix Agent & Issue Tracker Menu
 
 ### 🎯 Objective
@@ -2218,7 +2245,7 @@ All 5 issues reported the **same** Axiom row (`_rowId 0djjrps84efwg-08aea3e08f00
 - **`6_Semblance/tools/axiom_error_to_github_issue.py`** (creator):
   - 🛡️ **Dedup by `_rowId`** — embeds a hidden `<!-- axiom-row-id:… -->` marker in each issue body and skips rows that already have an open issue.
   - 🤐 **Skip on analysis failure** — never files a "Failed to analyze…" noise issue (404/402/no-key).
-  - 🔧 **Configurable model** — `OPENROUTER_MODEL` env (default `anthropic/claude-3.5-sonnet`, a known-good slug).
+  - 🔧 **Configurable model** — `OPENROUTER_MODEL` env (default `anthropic/claude-sonnet-4.6`, verified live via `GET /api/v1/models`; the earlier `claude-3.5-sonnet` default was removed from OpenRouter and silently 404'd the whole loop on 2026-06-27).
   - Processes **all** distinct rows in the window, not just `errors[0]`.
 - **`6_Semblance/tools/issue_fix_agent.py`** (resolver):
   - 🔎 **Verify-before-apply** — re-parses the inline JS of the named HTML file; if the reported `SyntaxError` no longer reproduces, closes the issue as *already fixed* without touching code.

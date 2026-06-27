@@ -105,7 +105,7 @@ All knobs are environment variables (no config file). The scripts auto-load from
 | `AXIOM_TOKEN` | — *(required)* | Query the dataset |
 | `AXIOM_DATASET` | `videoproduction` | Dataset name |
 | `OPENROUTER_API_KEY` | — *(required)* | LLM analysis |
-| `OPENROUTER_MODEL` | `anthropic/claude-3.5-sonnet` | Known-good slug (`opus-4.6` was a 404) |
+| `OPENROUTER_MODEL` | `anthropic/claude-sonnet-4.6` | Known-good slug (verified live via `GET /api/v1/models`). `claude-3.5-sonnet` and `opus-4.6` are both 404 now — a dead default silently zeroes the whole loop. |
 | `GITHUB_TOKEN` | `gh auth token` fallback | Issue read/write |
 | `GITHUB_REPOSITORY` | `owner/repo` | Target tracker |
 | `DEDUP_WINDOW_DAYS` | `1` | Scan window (open+closed). `0` = off |
@@ -115,7 +115,7 @@ All knobs are environment variables (no config file). The scripts auto-load from
 | 🔧 Var | 📌 Default | 💡 Purpose |
 |--------|-----------|------------|
 | `OPENROUTER_API_KEY` | — *(required)* | Generate the fix |
-| `OPENROUTER_MODEL` | `anthropic/claude-3.5-sonnet` | — |
+| `OPENROUTER_MODEL` | `anthropic/claude-sonnet-4.6` | — |
 | `--dry-run` | flag | Plan-only; no writes/commits/closes |
 
 ### Running
@@ -131,6 +131,26 @@ python3 6_Semblance/tools/issue_fix_agent.py            # live
 ```
 
 > 🔐 **Token hygiene:** `GITHUB_TOKEN` falls back to `gh auth token` so the agent runs locally without a separate PAT. Never commit secrets. The Supabase *service* key stays server-side only.
+
+---
+
+## 🔁 Daily CI (runs automatically)
+
+The whole loop runs **unattended every day at 02:00 UTC** via [`/.github/workflows/axiom_issue_creator.yml`](../.github/workflows/axiom_issue_creator.yml) (also manually triggerable via `workflow_dispatch`). It chains **both** stages in one job:
+
+1. **Stage 1** → `axiom_error_to_github_issue.py` (a no-op if Axiom has no fresh `ERROR`/`FATAL` rows, or all are deduped).
+2. **Stage 2** → `issue_fix_agent.py` → verify → fix → `go build` gate → commit → push → close (a no-op if no `axiom-error` issues are open).
+
+Design choices baked into the workflow:
+
+| 🔧 Knob | 💡 Why |
+|---------|--------|
+| `OPENROUTER_MODEL: anthropic/claude-sonnet-4.6` set **explicitly** | A dead model slug silently zeroes the loop (see the 2026-06-27 incident). Pinning it in CI means a deprecation is a one-line fix, not a silent 8-row skip. |
+| `permissions: contents: write, issues: write` | Stage 2 commits/pushes; both stages read/write issues. |
+| `setup-go` + `setup-node` | Stage 2 needs `go build` (build gate) and `node` (verify-before-apply JS parse). |
+| `persist-credentials: true` + git bot identity | Lets stage 2 push its fix commit to `main`. |
+| `continue-on-error` on stage 1 only | A flaky Axiom query must not block stage 2 from resolving issues filed earlier. |
+| `concurrency: error-loop` | Never two loops racing (which is what produced the #10–#14 duplicate spam). |
 
 ---
 
@@ -172,7 +192,7 @@ A replay of any already-filed row/fingerprint prints `⏭️ Skip …` and is **
 |---|------------------|-----------------|
 | #10–#14 | 5 issues for 1 Axiom row in 8 min | Double dedup (row_id + fingerprint) + scan open **and** closed + same-day window |
 | #11–#13 | "Failed to analyze… 404/402" issues | Skip-on-analysis-failure (no noise issues) |
-| #10–#13 | `anthropic/claude-opus-4.6` → 404 | Configurable `OPENROUTER_MODEL`, known-good default |
+| #10–#13 | `anthropic/claude-opus-4.6` → 404; later `claude-3.5-sonnet` also removed (404) | Configurable `OPENROUTER_MODEL`, default pinned to a slug verified live (`claude-sonnet-4.6`); the daily CI sets it explicitly so a deprecation can't silently break the run |
 | #14 | LLM proposed a wrong generic `sed` fix | Verify-before-apply + validate-output + build gate in the resolver |
 
 ---

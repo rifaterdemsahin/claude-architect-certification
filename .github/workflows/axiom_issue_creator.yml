@@ -1,32 +1,83 @@
-name: Axiom Error Analyzer
+name: Autonomous Error Loop (daily)
+
+# 🔁 Runs the FULL autonomous error loop every day at 02:00 UTC:
+#     Stage 1 (axiom_error_to_github_issue.py) — scan Axiom → dedup → file issues
+#     Stage 2 (issue_fix_agent.py)            — verify → fix → build-gate → close → push
+# Either stage is a safe no-op when there is nothing to do (no errors / no open issues).
+#
+# 🔧 The model is set EXPLICITLY here (not just the script default) so that a future
+#    OpenRouter deprecation can't silently turn the daily run into a stream of
+#    "analysis failed, skipped" no-ops (that's exactly what killed the loop when
+#    `anthropic/claude-3.5-sonnet` was removed — 8 rows went unanalysed on 2026-06-27).
+#
+# 🛡️ Stage 2 pushes straight to `main` (micro-commit per issue). The resolver's own
+#    safety gates protect the tree (verify-before-apply + validate + `go build` gate +
+#    `git restore` on failure). If branch protection blocks the push, the local commit
+#    remains and the issue stays open for the next run.
 
 on:
   schedule:
-    - cron: '0 2 * * *' # Run daily at 02:00 UTC
-  workflow_dispatch: # Allow manual triggering
+    - cron: '0 2 * * *' # daily at 02:00 UTC
+  workflow_dispatch: {} # manual trigger
+
+permissions:
+  contents: write # stage 2 commits + pushes fixes
+  issues: write   # both stages read/write `axiom-error` issues
+
+concurrency:
+  group: error-loop
+  cancel-in-progress: false
 
 jobs:
-  analyze-errors:
+  error-loop:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      # --- explicitly pinned, live slug (verified via GET /api/v1/models) ---
+      OPENROUTER_MODEL: anthropic/claude-sonnet-4.6
+      AXIOM_DATASET: videoproduction
+      AXIOM_QUERY_URL: https://api.axiom.co
+      AXIOM_API_URL: https://api.axiom.co
+      GITHUB_REPOSITORY: ${{ github.repository }}
+      AXIOM_TOKEN: ${{ secrets.AXIOM_TOKEN }}
+      AXIOM_ORG_ID: ${{ secrets.AXIOM_ORG_ID }}
+      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      DEDUP_WINDOW_DAYS: '1'
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
-        
-      - name: Set up Python
-        uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
-          
-      - name: Install dependencies
-        run: pip install requests
-        
-      - name: Run Axiom Error Analyzer
-        env:
-          AXIOM_TOKEN: ${{ secrets.AXIOM_TOKEN }}
-          AXIOM_ORG_ID: ${{ secrets.AXIOM_ORG_ID }}
-          AXIOM_DATASET: videoproduction
-          AXIOM_QUERY_URL: https://api.axiom.co
-          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
+          persist-credentials: true # needed for stage-2 `git push`
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # stage-2 verify-before-apply parses inline JS with node
+
+      - name: Install Python deps
+        run: pip install --quiet requests
+
+      - name: Configure git identity
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Stage 1 — scan Axiom, file deduped issues
+        # A no-op here (no errors / all deduped) must NOT abort the loop.
+        continue-on-error: true
         run: python 6_Semblance/tools/axiom_error_to_github_issue.py
+
+      - name: Stage 2 — resolve open issues (verify → fix → build → close → push)
+        run: python 6_Semblance/tools/issue_fix_agent.py

@@ -38,7 +38,9 @@ import requests
 
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 # Known-good default; override via env (issue #10/#11/#12 hit 404 on a bad model id).
-OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "anthropic/claude-3.5-sonnet")
+# `anthropic/claude-3.5-sonnet` was later REMOVED from OpenRouter (404 "No endpoints
+# found"), so the default is now a live slug verified via GET /api/v1/models.
+OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "anthropic/claude-sonnet-4.6")
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 DRY_RUN = "--dry-run" in sys.argv
@@ -64,15 +66,73 @@ def fetch_open_issues():
         return []
 
 
+def _git_ls_files():
+    """Return the set of tracked files (repo-relative) via `git ls-files`; empty on failure."""
+    out, rc, _ = run_cmd("git ls-files")
+    if rc != 0:
+        return set()
+    return {ln.strip() for ln in out.splitlines() if ln.strip()}
+
+
+_REPO_FILES_CACHE = None
+
+
+def resolve_repo_path(candidate):
+    """
+    Turn a bare/partial file name from an issue body into a real repo-relative
+    path that exists on disk. Returns None if nothing matches.
+
+    Why this exists: Axiom/browser errors usually carry just
+    `prerequisites.html:136:17` (no directory). Without resolution,
+    `os.path.exists('prerequisites.html')` is False, the verify-before-apply
+    gate is silently SKIPPED, and a later step can write a bogus file at the
+    repo root. Resolution makes the gate fire for ANY file in the tree.
+    """
+    global _REPO_FILES_CACHE
+    if not candidate:
+        return None
+    candidate = candidate.strip().lstrip("/")
+    # 1) exact, as-is
+    if os.path.exists(candidate):
+        return candidate
+    if _REPO_FILES_CACHE is None:
+        _REPO_FILES_CACHE = _git_ls_files()
+    files = _REPO_FILES_CACHE
+    # 2) exact path among tracked files
+    if candidate in files:
+        return candidate
+    # 3) basename match (deterministic: shortest path wins)
+    base = os.path.basename(candidate)
+    matches = sorted((f for f in files if os.path.basename(f) == base), key=lambda f: (len(f), f))
+    return matches[0] if matches else None
+
+
 def parse_error_location(body):
     """
-    Extract (file_path, line, col) from the raw log metadata in the issue body.
-    Looks for patterns like  `.../path/file.html:136:17` or `path/file.js:42:9`.
+    Extract (resolved_file_path, line, col) from the issue body.
+
+      1. `path/file.ext:line:col` (machine format, preferred) — path resolved in-repo.
+      2. Fallback: first existing repo file token in the body + a nearby
+         'line N' / 'Line `N`' hint (handles AI-analysis prose).
+
+    Returns (path, line, col); path is None when no repo file can be resolved.
+    line/col may be None when only the file is identifiable.
     """
-    # Prefer a repo-relative .html/.js path with :line:col right after it.
-    m = re.search(r'([\w/.\-]+\.(?:html|js|go)):(\d+):(\d+)', body or "")
-    if m:
-        return m.group(1), int(m.group(2)), int(m.group(3))
+    body = body or ""
+    # 1) machine-readable path:line:col
+    for m in re.finditer(r'([\w/.\-]+\.(?:html|js|go)):(\d+):(\d+)', body):
+        resolved = resolve_repo_path(m.group(1))
+        if resolved:
+            return resolved, int(m.group(2)), int(m.group(3))
+    # 2) fallback: first existing repo file token + a nearby line hint
+    line = None
+    lm = re.search(r'[Ll]ine\s*[`:]?\s*(\d+)', body)
+    if lm:
+        line = int(lm.group(1))
+    for m in re.finditer(r'([\w/.\-]+\.(?:html|js|go))\b', body):
+        resolved = resolve_repo_path(m.group(1))
+        if resolved:
+            return resolved, line, None
     return None, None, None
 
 
@@ -207,10 +267,13 @@ def apply_fixes(fixes):
         content = fix.get("content")
         if not path or content is None:
             continue
-        os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
-        with open(path, "w") as f:
+        # 🛡️ Never write a bogus file at the repo root: resolve the LLM's path
+        # (often a bare basename) to its real location in the tree first.
+        resolved = resolve_repo_path(path) or path
+        os.makedirs(os.path.dirname(resolved) or ".", exist_ok=True)
+        with open(resolved, "w") as f:
             f.write(content)
-        print(f"✏️  Patched {path}")
+        print(f"✏️  Patched {resolved}")
 
 
 def close_as_already_fixed(number, reason):
@@ -240,6 +303,8 @@ def process_issue(issue):
     if not file_path:
         print(f"⏭️  #{number}: no file:line:col location found in body — skipping (manual triage).")
         return
+    # Pretty location string (omit missing line/col, e.g. prose bodies have no col).
+    loc_str = file_path + (f":{line}" if line else "") + (f":{col}" if col else "")
 
     # 1️⃣ VERIFY BEFORE APPLYING — was this already fixed?
     if os.path.exists(file_path) and file_path.endswith(".html"):
@@ -247,7 +312,7 @@ def process_issue(issue):
         if ok is True:
             close_as_already_fixed(
                 number,
-                f"The reported `SyntaxError` at `{file_path}:{line}:{col}` no longer "
+                f"The reported `SyntaxError` at `{loc_str}` no longer "
                 f"reproduces — the file's inline JavaScript parses cleanly now."
             )
             return
@@ -262,7 +327,7 @@ def process_issue(issue):
     if fixes == [] or not fixes:
         close_as_already_fixed(
             number,
-            f"Analysis determined the reported issue at `{file_path}:{line}:{col}` requires "
+            f"Analysis determined the reported issue at `{loc_str}` requires "
             f"no change (already resolved or not reproducible)."
         )
         return
