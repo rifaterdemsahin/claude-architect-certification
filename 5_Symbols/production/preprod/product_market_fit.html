@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product–Market Fit | Claude AI Certification</title>
+  <meta name="description" content="From Problem–Solution Fit to Product–Market Fit — the staged validation journey for the Personal Brand & AI Certification Course.">
+  <link rel="icon" type="image/png" href="../../../favicon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #030712;
+      --bg-card: rgba(17, 24, 39, 0.85);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --primary: #8b5cf6;
+      --secondary: #3b82f6;
+      --accent: #f59e0b;
+      --success: #10b981;
+      --teal: #14b8a6;
+      --font-title: 'Outfit', sans-serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-dark);
+      background-image: radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.08) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(20, 184, 166, 0.06) 0%, transparent 40%);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      line-height: 1.6;
+      padding-top: 70px;
+      padding-bottom: 80px;
+    }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+    header { text-align: center; margin-bottom: 36px; }
+    .badge {
+      display: inline-block;
+      padding: 6px 16px;
+      background: linear-gradient(135deg, rgba(20, 184, 166, 0.2), rgba(139, 92, 246, 0.2));
+      border: 1px solid rgba(20, 184, 166, 0.3);
+      border-radius: 100px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--teal);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 14px;
+    }
+    h1 { font-family: var(--font-title); font-size: 2.8rem; font-weight: 900; margin-bottom: 10px; }
+    header p { color: var(--text-muted); max-width: 720px; margin: 0 auto; font-size: 1.1rem; }
+
+    /* Journey rail */
+    .journey {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin: 0 auto 48px;
+      max-width: 760px;
+    }
+    .journey-node {
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 14px 22px;
+      text-align: center;
+      min-width: 200px;
+    }
+    .journey-node .jn-step { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); }
+    .journey-node .jn-title { font-family: var(--font-title); font-weight: 700; font-size: 1.05rem; margin-top: 4px; }
+    .journey-node.psf { border-color: rgba(245, 158, 11, 0.4); }
+    .journey-node.psf .jn-title { color: var(--accent); }
+    .journey-node.pmf { border-color: rgba(16, 185, 129, 0.4); }
+    .journey-node.pmf .jn-title { color: var(--success); }
+    .journey-arrow { font-size: 1.6rem; color: var(--primary); }
+
+    /* Stage section */
+    .stage {
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 24px;
+      padding: 36px;
+      margin-bottom: 32px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.45);
+    }
+    .stage-head { display: flex; align-items: center; gap: 14px; margin-bottom: 8px; }
+    .stage-num {
+      width: 44px; height: 44px; border-radius: 14px;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-family: var(--font-title); font-weight: 800; font-size: 1.3rem; color: #fff;
+      flex-shrink: 0;
+    }
+    .stage.psf .stage-num { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .stage.pmf .stage-num { background: linear-gradient(135deg, #10b981, #059669); }
+    .stage h2 { font-family: var(--font-title); font-size: 1.8rem; font-weight: 800; }
+    .stage.psf h2 { color: var(--accent); }
+    .stage.pmf h2 { color: var(--success); }
+    .stage-tagline { color: var(--text-muted); font-size: 1rem; margin-bottom: 24px; padding-left: 58px; }
+    .stage-question {
+      font-style: italic; color: var(--text-main);
+      border-left: 3px solid var(--primary);
+      padding: 6px 0 6px 16px; margin: 0 0 24px 58px;
+      font-size: 0.98rem;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 22px;
+    }
+
+    .sub-card {
+      background: rgba(0,0,0,0.25);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px;
+      padding: 22px;
+    }
+    .sub-card h3 {
+      font-family: var(--font-title); font-size: 1.1rem; margin-bottom: 14px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .details-list { list-style: none; padding-left: 0; }
+    .details-list li { margin-bottom: 14px; position: relative; padding-left: 26px; }
+    .details-list li::before { content: '⚡'; position: absolute; left: 0; top: 1px; font-size: 0.85rem; }
+    .details-list strong { color: var(--text-main); display: block; margin-bottom: 2px; }
+    .details-list p { color: var(--text-muted); font-size: 0.88rem; }
+
+    .signal-list { list-style: none; padding-left: 0; }
+    .signal-list li { margin-bottom: 10px; position: relative; padding-left: 26px; color: var(--text-muted); font-size: 0.9rem; }
+    .signal-list li::before { content: '✅'; position: absolute; left: 0; top: 1px; font-size: 0.8rem; }
+
+    .badge-tag {
+      font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+      color: var(--accent); background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.2); padding: 3px 10px; border-radius: 100px;
+      display: inline-block; margin-bottom: 14px;
+    }
+    .badge-tag.green { color: var(--success); background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.25); }
+
+    .metric-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 18px; padding-left: 58px; }
+    .metric {
+      background: rgba(139, 92, 246, 0.08); border: 1px solid rgba(139, 92, 246, 0.2);
+      border-radius: 12px; padding: 10px 16px; min-width: 130px;
+    }
+    .metric .m-val { font-family: var(--font-title); font-weight: 800; font-size: 1.3rem; color: var(--primary); }
+    .metric .m-label { font-size: 0.75rem; color: var(--text-muted); }
+
+    footer {
+      text-align: center; color: var(--text-muted); font-size: 0.8rem;
+      margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05);
+    }
+    footer a { color: var(--secondary); text-decoration: none; }
+    @media (max-width: 640px) {
+      .stage-tagline, .stage-question, .metric-row { padding-left: 0; margin-left: 0; }
+    }
+  </style>
+  <script src="../../../shared/nav.js"></script>
+<script src="../../../shared/seo.js" defer></script></head>
+<body>
+  <div class="container">
+    <header>
+      <div class="badge">🎯 Validation Journey</div>
+      <h1>Product–Market Fit</h1>
+      <p>Fit is earned in order. First prove people have a problem worth solving and that our solution resonates — <strong>Problem–Solution Fit</strong> — then prove the market pulls the product out of our hands — <strong>Product–Market Fit</strong>.</p>
+    </header>
+
+    <!-- Journey rail -->
+    <div class="journey">
+      <div class="journey-node psf">
+        <div class="jn-step">Stage 1 · Start here</div>
+        <div class="jn-title">🧩 Problem–Solution Fit</div>
+      </div>
+      <div class="journey-arrow">→</div>
+      <div class="journey-node pmf">
+        <div class="jn-step">Stage 2 · Then</div>
+        <div class="jn-title">🚀 Product–Market Fit</div>
+      </div>
+    </div>
+
+    <!-- ===== STAGE 1: PROBLEM–SOLUTION FIT ===== -->
+    <section class="stage psf">
+      <div class="stage-head">
+        <span class="stage-num">1</span>
+        <h2>Problem–Solution Fit</h2>
+      </div>
+      <p class="stage-tagline">Do real people have this problem, and does our proposed solution actually relieve it?</p>
+      <p class="stage-question">“System architects can’t prove practical AI delivery skill — paper certificates don’t reflect real capability. Does a recorded, self-learning certification solve that pain?”</p>
+
+      <div class="grid-2">
+        <div class="sub-card">
+          <span class="badge-tag">🔍 Validate the problem</span>
+          <h3>🧩 Confirm the Pain Is Real</h3>
+          <ul class="details-list">
+            <li>
+              <strong>Define the persona &amp; core job</strong>
+              <p>The system architect who needs to demonstrate hands-on AI delivery, not memorized trivia.</p>
+            </li>
+            <li>
+              <strong>Run customer-discovery interviews</strong>
+              <p>Talk to the audience before building. Capture the pain in their own words.</p>
+            </li>
+            <li>
+              <strong>Ship an MVP (YouTube series)</strong>
+              <p>A high-value video series is the fastest probe to see if the problem resonates.</p>
+            </li>
+          </ul>
+        </div>
+        <div class="sub-card">
+          <span class="badge-tag">💡 Validate the solution</span>
+          <h3>🛠 Confirm the Solution Resonates</h3>
+          <ul class="details-list">
+            <li>
+              <strong>Test the value proposition</strong>
+              <p>Recorded, proof-of-work certification &gt; standard paper certificates — does it land?</p>
+            </li>
+            <li>
+              <strong>Gather prosumer feedback</strong>
+              <p>Engaged advocates pilot the format and tell us what’s missing.</p>
+            </li>
+            <li>
+              <strong>Pivot check</strong>
+              <p>If watch-time retention &lt; 40% by week 4, refine the message or pivot the format.</p>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="metric-row">
+        <div class="metric"><div class="m-val">&gt;40%</div><div class="m-label">Avg. watch-time retention</div></div>
+        <div class="metric"><div class="m-val">10+</div><div class="m-label">Discovery interviews</div></div>
+        <div class="metric"><div class="m-val">Qual.</div><div class="m-label">“I need this” quotes</div></div>
+      </div>
+    </section>
+
+    <!-- ===== STAGE 2: PRODUCT–MARKET FIT ===== -->
+    <section class="stage pmf">
+      <div class="stage-head">
+        <span class="stage-num">2</span>
+        <h2>Product–Market Fit</h2>
+      </div>
+      <p class="stage-tagline">A defined market pulls the product out of our hands — demand outpaces our ability to supply.</p>
+      <p class="stage-question">“Are people paying, returning, and referring — and would they be very disappointed if the certification disappeared?”</p>
+
+      <div class="grid-2">
+        <div class="sub-card">
+          <span class="badge-tag green">📈 Build the engine</span>
+          <h3>🚀 Scale What Works</h3>
+          <ul class="details-list">
+            <li>
+              <strong>Lock the business model</strong>
+              <p>Align pricing, memberships, and content cadence into a repeatable, sustainable loop.</p>
+            </li>
+            <li>
+              <strong>Scale sales &amp; marketing</strong>
+              <p>Paid memberships (LinkedIn, subscriptions) validate real financial commitment.</p>
+            </li>
+            <li>
+              <strong>Standardize delivery</strong>
+              <p>Productionize the pipeline so output stays high-fidelity as volume grows.</p>
+            </li>
+          </ul>
+        </div>
+        <div class="sub-card">
+          <span class="badge-tag green">🩺 Measure the pull</span>
+          <h3>📊 PMF Signals to Watch</h3>
+          <ul class="signal-list">
+            <li>≥ 40% of users would be “very disappointed” without it (Sean Ellis test)</li>
+            <li>Organic referrals and word-of-mouth growth</li>
+            <li>Strong retention &amp; repeat engagement cohort-over-cohort</li>
+            <li>Demand for enrollment outpaces our supply capacity</li>
+            <li>Falling CAC as reputation compounds</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="metric-row">
+        <div class="metric"><div class="m-val">≥40%</div><div class="m-label">“Very disappointed” score</div></div>
+        <div class="metric"><div class="m-val">↑</div><div class="m-label">Retention cohort-over-cohort</div></div>
+        <div class="metric"><div class="m-val">↓</div><div class="m-label">Customer acquisition cost</div></div>
+      </div>
+    </section>
+
+    <footer>
+      <p style="margin-bottom: 8px;">
+        <a href="planning.html">← Back to Planning Hub</a>
+        &nbsp;&nbsp;·&nbsp;&nbsp;
+        <a href="customer_development.html">Customer Development →</a>
+        &nbsp;&nbsp;·&nbsp;&nbsp;
+        <a href="../../../index.html">Go to Home</a>
+      </p>
+      <p style="font-size: 0.85rem; opacity: 0.8;">
+        Instructor: <a href="https://www.linkedin.com/in/rifaterdemsahin" target="_blank" style="color: #93c5fd; text-decoration: underline;">Rifat Erdem Sahin</a>
+      </p>
+    </footer>
+  </div>
+
+  <script src="../../../shared/debug-panel.js"></script>
+</body>
+</html>
