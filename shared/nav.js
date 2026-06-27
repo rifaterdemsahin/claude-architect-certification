@@ -257,6 +257,8 @@
         { label: '7. 📊 Business Plan', url: 'markdown_renderer.html?file=4_Formula/certification/business_plan.md' },
         { label: '8. 🎓 Paid vs Unpaid Certificates', url: '5_Symbols/production/postprod/paid_vs_unpaid_certificates.html' },
         { label: '9. 🛡️ Certification Guarantee', url: '5_Symbols/production/postprod/certification_guarantee.html' },
+        { label: '9b. 🚀 MVP Pivot Point (First 200 Free)', url: '5_Symbols/production/postprod/mvp_pivot.html' },
+        { label: '9c. 🔎 Test the Value Proposition', url: '5_Symbols/production/postprod/value_proposition_test.html' },
         { label: '10. 💼 Membership / Business', url: '5_Symbols/production/publish/membership.html' },
         { label: '11. 🔄 Flywheel System', url: '5_Symbols/production/postprod/flywheel.html' },
         { label: '12. ☁️ AWS GenAI Developer — Professional', url: '5_Symbols/production/postprod/aws_genai_cert.html' },

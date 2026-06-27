@@ -1,5 +1,29 @@
 # LLM Thinking Log
 
+## 2026-06-27 — 🚀 MVP Pivot Point page + 🔎 Value Proposition Test page
+
+### 🎯 Objective
+Two new conversion/MVP-strategy pages under `5_Symbols/production/postprod/`:
+1. **`mvp_pivot.html`** — "The Make-or-Break Probe": the YouTube-series MVP where the **first 200 course takers get full access FREE**, and the **certification is killed if we don't reach 4,000 public watch hours** (the YouTube monetisation gate). This is the declared pivot point.
+2. **`value_proposition_test.html`** — "Does It Land?": an explicit **test of the core value proposition** — *recorded, proof-of-work certification > standard paper certificate*. The page defines the experiment and the honest kill logic.
+
+### 🧠 Design reasoning
+- **`mvp_pivot.html`** frames the MVP as a *probe*, not a product launch. The 4,000-watch-hour gate is a literal kill switch (🔴 dashboard + animated progress bar) so the page reads as accountable, not hypey. The "first 200 free" is presented as the *engine* (free → watch time → survival), with an animated scarcity seat-counter (23/200 claimed) to give honest momentum without a fake countdown timer.
+- **`value_proposition_test.html`** formalises the user's fail logic into a falsifiable experiment:
+  - **Lands when:** Erdem passes the real exam (proof-of-work floor) → real audience members who use the videos pass (transfer) → a **$10** student passes (price doesn't dilute outcome).
+  - **Fails/killed when:** Erdem can't pass (method dead at the source), or the audience uses the videos but can't pass (no transfer), or a $10 student fails (guarantee broken).
+  - Visualised as a **Control (paper cert) vs Treatment (recorded proof-of-work)** A/B and a **4-rung "Ladder of Proof"** that escalates from "Erdem passes" to "proof-of-work beats paper."
+  - The **$10 → guaranteed to pass** offer is its own green banner ("$10 is commitment skin in the game, not the price of a course") linking to the deeper `certification_guarantee.html` for the fail-safe support terms.
+- Both pages reuse the established dark glassmorphic design system (CSS vars, Outfit/Plus Jakarta fonts, `shared/nav.js`, `shared/debug-panel.js`, `shared/seo.js`, `redirect-to-live-site.js`) for parity — no new dependencies.
+
+### 📐 Navigation wiring
+Inserted both pages into the **🎓 Certification & Proof** dropdown (as `9b` and `9c`, immediately after item 9 "Certification Guarantee") in all four nav sources: `navigation_config.json`, `index.html` inline fallback, `markdown_renderer.html` inline fallback, and `shared/nav.js` fallback. Kept numbering stable (didn't renumber 10–13) to avoid churn.
+
+### ✅ Verification
+- `go build ./... && go vet ./...` pass.
+- `navigation_config.json` valid JSON; `shared/nav.js` `node -c` OK.
+- Local server serves both new pages **HTTP 200** plus `certification_guarantee.html` 200; `shared/nav.js` serves both new entries; expected hero copy (`Make-or-Break`, `Does It`, `4,000`, `First 200`, `Pay $10`, `proof-of-work`, `Standard Paper`) present in rendered HTML.
+
 ## 2026-06-27 — 📖 Audio Scoring: Emotions & Music Scoring Guide (first principles + videos)
 
 ### 🎯 Objective

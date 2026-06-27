@@ -26,6 +26,16 @@ This document defines how AI agents interact with the **Claude AI Certification 
 
 ## 📅 Agent Activity Log
 
+### 2026-06-27
+- **Task:** 🚀 Create the MVP Pivot Point page (free for the first 200 course takers; certification killed if 4,000 watch hours isn't reached) + 🔎 create a Value Proposition test page (recorded proof-of-work certification > standard paper certificates). Commit + push.
+- **Action:**
+    - Created `5_Symbols/production/postprod/mvp_pivot.html` — frames the YouTube-series MVP as a make-or-break probe: the **first 200 course takers get full access FREE**, the **certification is killed if 4,000 public watch hours is not reached**. Includes a red kill-switch dashboard with an animated watch-hour progress bar, a free-seats scarcity counter, the "why free" mechanism cards, a 4-step flywheel, and an honesty verdict.
+    - Created `5_Symbols/production/postprod/value_proposition_test.html` — formalises the value-proposition test: **recorded proof-of-work certification > standard paper certificate**. Control-vs-treatment A/B, a 4-rung "Ladder of Proof", and explicit Lands/Killed logic: the proposition **fails if Erdem can't pass the exam, or if the audience that uses the videos can't pass**; it **lands when Erdem passes, real audience members pass, and a $10 student passes**. Includes a **$10 → guaranteed to pass** banner linking to `certification_guarantee.html`.
+    - Wired both pages into the 🎓 Certification & Proof dropdown (items `9b` and `9c`) across `navigation_config.json`, `index.html`, `markdown_renderer.html`, and `shared/nav.js`.
+    - Documented approach in `4_Formula/llm_thinking_log.md`.
+- **Verification:** `go build`/`go vet` pass; `navigation_config.json` valid JSON; `shared/nav.js` `node -c` OK; local server serves both pages **HTTP 200** with hero copy and both new `shared/nav.js` entries present.
+- **Status:** IMPLEMENTED, COMMITTED, PUSHED.
+
 ### 2026-06-26
 - **Task:** 🥊 Create Competitive Analysis page and auto-generate HTML Specs.
 - **Action:**

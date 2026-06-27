@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="../../../shared/redirect-to-live-site.js"></script>
+  <title>Does It Land? — Proof-of-Work vs. Paper Certificates | Claude AI Certification</title>
+  <meta name="description" content="We're testing the core value proposition: does a recorded, proof-of-work certification beat a standard paper certificate? Erdem passes the exam. The audience passes the exam. Pay $10 — guaranteed to pass. If real people can't pass, the proposition fails and we kill it.">
+  <meta name="keywords" content="value proposition test, proof of work certification, paper certificate vs recorded, exam pass guarantee, Claude AI Certification, MVP test">
+  <meta name="author" content="Rifat Erdem Sahin">
+  <link rel="icon" type="image/png" href="../../../favicon.png">
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://rifaterdemsahin.github.io/claude-architect-certification/5_Symbols/production/postprod/value_proposition_test.html">
+  <meta property="og:title" content="Does It Land? — Proof-of-Work vs. Paper Certificates">
+  <meta property="og:description" content="The core value-proposition test. Erdem passes. The audience passes. Pay $10, guaranteed to pass. If real people can't pass, we kill it.">
+  <meta property="og:image" content="https://rifaterdemsahin.github.io/claude-architect-certification/favicon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg-dark: #030712; --bg-card: rgba(17,24,39,0.85); --text-main: #f3f4f6; --text-muted: #9ca3af; --primary: #8b5cf6; --secondary: #3b82f6; --accent: #f59e0b; --success: #10b981; --danger: #ef4444; --teal: #14b8a6; --font-title: 'Outfit', sans-serif; --font-body: 'Plus Jakarta Sans', sans-serif; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background-color: var(--bg-dark); background-image: radial-gradient(circle at 12% 18%, rgba(20,184,166,0.10) 0%, transparent 42%), radial-gradient(circle at 88% 82%, rgba(139,92,246,0.08) 0%, transparent 42%); color: var(--text-main); font-family: var(--font-body); line-height: 1.6; padding-top: 70px; padding-bottom: 80px; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+    /* ===== Hero ===== */
+    header { text-align: center; margin-bottom: 44px; }
+    .badge { display: inline-flex; align-items: center; gap: 8px; padding: 7px 18px; background: linear-gradient(135deg, rgba(20,184,166,0.2), rgba(139,92,246,0.2)); border: 1px solid rgba(20,184,166,0.35); border-radius: 100px; font-size: 0.8rem; font-weight: 700; color: var(--teal); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 16px; }
+    .pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 0 0 rgba(20,184,166,0.7); animation: pulse 1.8s infinite; }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(20,184,166,0.6); } 70% { box-shadow: 0 0 0 12px rgba(20,184,166,0); } 100% { box-shadow: 0 0 0 0 rgba(20,184,166,0); } }
+    h1 { font-family: var(--font-title); font-size: 3rem; font-weight: 900; margin-bottom: 12px; line-height: 1.08; }
+    h1 .hl { background: linear-gradient(135deg, var(--teal), var(--primary)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+    header p.lead { color: var(--text-muted); max-width: 700px; margin: 0 auto; font-size: 1.12rem; }
+    header p.lead strong { color: var(--text-main); }
+
+    /* ===== Section helpers ===== */
+    .section-title { font-family: var(--font-title); font-size: 1.7rem; font-weight: 800; margin: 0 0 8px; text-align: center; }
+    .section-sub { color: var(--text-muted); text-align: center; max-width: 680px; margin: 0 auto 30px; font-size: 0.97rem; }
+    .block { margin-bottom: 56px; }
+
+    /* ===== Hypothesis card ===== */
+    .hypothesis { background: linear-gradient(135deg, rgba(20,184,166,0.06), rgba(139,92,246,0.06)); border: 1px solid rgba(20,184,166,0.25); border-radius: 28px; padding: 44px; text-align: center; position: relative; }
+    .hypothesis .h-tag { font-size: 0.74rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.14em; color: var(--teal); margin-bottom: 14px; }
+    .vs-line { font-family: var(--font-title); font-size: 1.7rem; font-weight: 800; margin-bottom: 6px; display: flex; align-items: center; justify-content: center; gap: 18px; flex-wrap: wrap; }
+    .vs-line .a { color: var(--teal); }
+    .vs-line .gt { color: var(--accent); font-size: 1.3rem; }
+    .vs-line .b { color: var(--text-muted); text-decoration: line-through; text-decoration-color: rgba(239,68,68,0.5); text-decoration-thickness: 2px; }
+    .hypothesis p { color: var(--text-muted); max-width: 700px; margin: 18px auto 0; }
+
+    /* ===== Experiment A/B ===== */
+    .ab-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+    .ab-card { background: var(--bg-card); border: 1px solid rgba(255,255,255,0.07); border-radius: 22px; padding: 30px; position: relative; }
+    .ab-card.control { border-color: rgba(156,163,175,0.25); }
+    .ab-card.treatment { border-color: rgba(20,184,166,0.4); box-shadow: 0 0 36px rgba(20,184,166,0.06); }
+    .ab-tag { display: inline-block; padding: 4px 12px; border-radius: 100px; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px; }
+    .ab-tag.control { background: rgba(156,163,175,0.15); color: var(--text-muted); }
+    .ab-tag.treatment { background: rgba(20,184,166,0.15); color: var(--teal); }
+    .ab-card h3 { font-family: var(--font-title); font-size: 1.25rem; font-weight: 700; margin-bottom: 8px; }
+    .ab-card p { color: var(--text-muted); font-size: 0.92rem; margin-bottom: 16px; }
+    .ab-list { list-style: none; }
+    .ab-list li { padding: 9px 0; font-size: 0.9rem; border-top: 1px solid rgba(255,255,255,0.05); display: flex; gap: 10px; align-items: flex-start; }
+    .ab-list li .ico { flex-shrink: 0; }
+    .ico-x { color: var(--danger); font-weight: 800; }
+    .ico-ok { color: var(--success); font-weight: 800; }
+
+    /* ===== Verdict logic ===== */
+    .verdict-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+    .verdict-card { background: var(--bg-card); border-radius: 22px; padding: 30px; border: 1px solid; }
+    .verdict-card.land { border-color: rgba(16,185,129,0.3); }
+    .verdict-card.kill { border-color: rgba(239,68,68,0.3); }
+    .vc-head { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .vc-head .em { font-size: 1.8rem; }
+    .vc-head h3 { font-family: var(--font-title); font-size: 1.25rem; font-weight: 800; }
+    .vc-head .pill { font-size: 0.68rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 10px; border-radius: 100px; }
+    .land .pill { background: rgba(16,185,129,0.15); color: var(--success); }
+    .kill .pill { background: rgba(239,68,68,0.15); color: var(--danger); }
+    .verdict-card .when { font-size: 0.82rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; font-weight: 700; }
+    .verdict-card ul { list-style: none; }
+    .verdict-card ul li { padding: 11px 0; font-size: 0.93rem; border-top: 1px solid rgba(255,255,255,0.05); display: flex; gap: 10px; align-items: flex-start; color: var(--text-main); }
+    .verdict-card ul li .mark { flex-shrink: 0; font-weight: 800; }
+    .land .mark { color: var(--success); }
+    .kill .mark { color: var(--danger); }
+    .verdict-card ul li strong { color: var(--text-main); }
+    .verdict-card ul li span { color: var(--text-muted); }
+
+    /* ===== $10 guarantee ===== */
+    .guarantee-banner { background: linear-gradient(135deg, var(--success), var(--teal)); border-radius: 28px; padding: 46px; text-align: center; color: #04221c; position: relative; overflow: hidden; box-shadow: 0 20px 60px rgba(16,185,129,0.18); }
+    .guarantee-banner::before { content: '🎟️'; position: absolute; font-size: 16rem; opacity: 0.08; top: -28px; right: -16px; transform: rotate(-10deg); }
+    .guarantee-banner .g-tag { display: inline-block; padding: 6px 18px; background: rgba(0,0,0,0.14); border-radius: 100px; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 14px; }
+    .guarantee-banner h2 { font-family: var(--font-title); font-size: 2.6rem; font-weight: 900; margin-bottom: 8px; position: relative; }
+    .guarantee-banner h2 .dollar { font-size: 1.4rem; vertical-align: super; }
+    .guarantee-banner .sub { font-family: var(--font-title); font-size: 1.25rem; font-weight: 700; margin-bottom: 16px; position: relative; }
+    .guarantee-banner p { max-width: 680px; margin: 0 auto 24px; position: relative; opacity: 0.95; }
+    .guarantee-banner p strong { color: #04221c; }
+    .g-cta { display: inline-block; padding: 16px 42px; background: #04221c; color: #6ee7b7; border-radius: 100px; font-weight: 900; font-size: 1.05rem; text-decoration: none; transition: all 0.25s; position: relative; }
+    .g-cta:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(0,0,0,0.35); }
+    .fineprint { font-size: 0.8rem; opacity: 0.85; margin-top: 14px; position: relative; }
+
+    /* ===== Truth ladder ===== */
+    .truth { background: var(--bg-card); border: 1px solid rgba(255,255,255,0.07); border-radius: 28px; padding: 40px; }
+    .truth h2 { font-family: var(--font-title); font-size: 1.6rem; font-weight: 800; margin-bottom: 6px; text-align: center; }
+    .truth .sub { color: var(--text-muted); text-align: center; max-width: 640px; margin: 0 auto 28px; font-size: 0.95rem; }
+    .rung { display: flex; align-items: stretch; gap: 16px; padding: 18px 0; border-top: 1px solid rgba(255,255,255,0.06); }
+    .rung:first-of-type { border-top: none; }
+    .rung .n { font-family: var(--font-title); font-size: 1.6rem; font-weight: 900; color: var(--accent); width: 44px; flex-shrink: 0; text-align: center; }
+    .rung .body h4 { font-family: var(--font-title); font-size: 1.08rem; font-weight: 700; margin-bottom: 4px; }
+    .rung .body p { color: var(--text-muted); font-size: 0.92rem; }
+    .rung .body p strong { color: var(--text-main); }
+    .rung .state { display: flex; align-items: center; padding-left: 14px; font-size: 0.74rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; }
+    .state.proves { color: var(--success); }
+    .state.proves::before { content: '✓ '; }
+
+    /* ===== Verdict / CTA ===== */
+    .verdict { background: linear-gradient(135deg, rgba(16,185,129,0.05), rgba(139,92,246,0.05)); border: 1px solid rgba(20,184,166,0.25); border-radius: 28px; padding: 40px; text-align: center; }
+    .verdict h2 { font-family: var(--font-title); font-size: 1.6rem; font-weight: 800; margin-bottom: 14px; }
+    .verdict p { color: var(--text-muted); max-width: 760px; margin: 0 auto 14px; font-size: 0.97rem; }
+    .verdict p strong { color: var(--text-main); }
+    .verdict .quote { font-style: italic; color: var(--teal); font-weight: 600; margin-top: 8px; }
+
+    footer { text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 44px; padding-top: 22px; border-top: 1px solid rgba(255,255,255,0.05); }
+    footer a { color: var(--secondary); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 820px) { .ab-grid, .verdict-grid { grid-template-columns: 1fr; } .rung .state { display: none; } }
+    @media (max-width: 600px) { h1 { font-size: 2.2rem; } .hypothesis, .guarantee-banner, .verdict, .truth { padding: 26px; } .guarantee-banner h2 { font-size: 2rem; } .vs-line { font-size: 1.3rem; } }
+  </style>
+  <script src="../../../shared/nav.js"></script>
+  <script src="../../../shared/seo.js" defer></script>
+</head>
+<body>
+  <div class="container">
+    <!-- ===== HERO ===== -->
+    <header>
+      <div class="badge"><span class="pulse"></span> Value Proposition · Test</div>
+      <h1>Does It <span class="hl">Land?</span></h1>
+      <p class="lead">We're running one honest test: does a <strong>recorded, proof-of-work certification</strong> actually beat a <strong>standard paper certificate</strong>? The only way to know is to watch real people take the real exam — and pass. Erdem passes first. Then you. <strong>Pay $10 — guaranteed to pass.</strong></p>
+    </header>
+
+    <!-- ===== HYPOTHESIS ===== -->
+    <div class="block">
+      <div class="hypothesis">
+        <div class="h-tag">🎯 The Hypothesis Under Test</div>
+        <div class="vs-line">
+          <span class="a">Recorded Proof-of-Work Certification</span>
+          <span class="gt">&gt;</span>
+          <span class="b">Standard Paper Certificate</span>
+        </div>
+        <p>A paper certificate says you <em>paid</em>. A recorded proof-of-work certification says you <strong>actually did it</strong> — and the exam result is the only receipt that matters. We believe proof-of-work wins. This page is how we find out if we're right.</p>
+      </div>
+    </div>
+
+    <!-- ===== EXPERIMENT ===== -->
+    <div class="block">
+      <h2 class="section-title">🧪 The Experiment</h2>
+      <p class="section-sub">Two groups, one real exam. The difference between them is the whole value proposition.</p>
+      <div class="ab-grid">
+        <div class="ab-card control">
+          <span class="ab-tag control">Control · Old Model</span>
+          <h3>Standard Paper Certificate</h3>
+          <p>The status quo. Buy a course, watch it, get a certificate of completion. No proof the knowledge transfers to a real exam.</p>
+          <ul class="ab-list">
+            <li><span class="ico ico-x">✕</span><span>Certificate of <em>completion</em>, not competence</span></li>
+            <li><span class="ico ico-x">✕</span><span>No exam result to show employers</span></li>
+            <li><span class="ico ico-x">✕</span><span>Instructors who may never have passed themselves</span></li>
+            <li><span class="ico ico-x">✕</span><span>Paper that proves you paid, not that you can do it</span></li>
+          </ul>
+        </div>
+        <div class="ab-card treatment">
+          <span class="ab-tag treatment">Treatment · Our Bet</span>
+          <h3>Recorded Proof-of-Work</h3>
+          <p>Recorded, repeatable lessons engineered around one outcome: you pass the real certification exam — with the score to prove it.</p>
+          <ul class="ab-list">
+            <li><span class="ico ico-ok">✓</span><span>Erdem passes the exam first (proof it's possible)</span></li>
+            <li><span class="ico ico-ok">✓</span><span>Recorded so it's repeatable by anyone, any pace</span></li>
+            <li><span class="ico ico-ok">✓</span><span>Your real exam score is the receipt, not our PDF</span></li>
+            <li><span class="ico ico-ok">✓</span><span>$10 in, guaranteed to pass — or we keep working with you</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== VERDICT LOGIC ===== -->
+    <div class="block">
+      <h2 class="section-title">⚖️ When Does It Land — or Get Killed?</h2>
+      <p class="section-sub">No vague metrics. The proposition either survives these conditions or it dies honestly.</p>
+      <div class="verdict-grid">
+        <div class="verdict-card kill">
+          <div class="vc-head">
+            <span class="em">💀</span>
+            <div><h3>The Proposition FAILS</h3></div>
+            <span class="pill" style="margin-left:auto;">Killed</span>
+          </div>
+          <div class="when">If any of these happen</div>
+          <ul>
+            <li><span class="mark">✕</span><span><strong>Erdem can't pass the exam.</strong> If the creator of the method can't clear it, the method is dead — proof-of-work disproved at the source.</span></li>
+            <li><span class="mark">✕</span><span><strong>The audience uses the videos but still can't pass.</strong> The recording doesn't transfer. No value delivered. Killed.</span></li>
+            <li><span class="mark">✕</span><span><strong>A $10 student follows the path and fails.</strong> The guarantee is broken and the proposition is false.</span></li>
+          </ul>
+        </div>
+        <div class="verdict-card land">
+          <div class="vc-head">
+            <span class="em">🎯</span>
+            <div><h3>The Proposition LANDS</h3></div>
+            <span class="pill" style="margin-left:auto;">Proven</span>
+          </div>
+          <div class="when">When all of these happen</div>
+          <ul>
+            <li><span class="mark">✓</span><span><strong>Erdem passes the real exam</strong> — baseline proof a human can do it through this method.</span></li>
+            <li><span class="mark">✓</span><span><strong>Real audience members pass too</strong> — the recording transfers the ability, not just the theory.</span></li>
+            <li><span class="mark">✓</span><span><strong>$10 students pass the exam</strong> — the low-friction price delivers the promised outcome.</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TRUTH LADDER ===== -->
+    <div class="block">
+      <div class="truth">
+        <h2>🪜 The Ladder of Proof</h2>
+        <p class="sub">Each rung must hold before the next one means anything. The bottom rung is non-negotiable.</p>
+        <div class="rung">
+          <div class="n">1</div>
+          <div class="body">
+            <h4>Erdem passes the exam</h4>
+            <p>If the instructor who built this can't pass, <strong>nothing below this matters</strong>. This is the proof-of-work floor.</p>
+          </div>
+          <div class="state proves" id="r1">If false → killed</div>
+        </div>
+        <div class="rung">
+          <div class="n">2</div>
+          <div class="body">
+            <h4>Real audience passes the exam</h4>
+            <p>People who <strong>don't</strong> use the videos mostly fail; people who <strong>do</strong> use them pass. That gap is the entire value proposition.</p>
+          </div>
+          <div class="state proves" id="r2">The difference is the proof</div>
+        </div>
+        <div class="rung">
+          <div class="n">3</div>
+          <div class="body">
+            <h4>A $10 student passes — guaranteed</h4>
+            <p>Anyone who pays <strong>$10</strong> and follows the path passes the exam. That's the promise, and it's how we measure success.</p>
+          </div>
+          <div class="state proves" id="r3">The guarantee holds</div>
+        </div>
+        <div class="rung">
+          <div class="n">4</div>
+          <div class="body">
+            <h4>Proof-of-work beats paper</h4>
+            <p>When the recorded cohort consistently passes and the paper-only cohort doesn't, the proposition lands. We double down.</p>
+          </div>
+          <div class="state proves" id="r4">Proposition proven</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== $10 GUARANTEE ===== -->
+    <div class="block">
+      <div class="guarantee-banner">
+        <div class="g-tag">🎟️ The Offer</div>
+        <h2><span class="dollar">$</span>10</h2>
+        <div class="sub">Pay $10 — Guaranteed to Pass</div>
+        <p>The $10 isn't the price of a course. It's your <strong>commitment skin in the game</strong> — the small, honest stake that says you'll actually show up. In return, we guarantee you'll pass the real certification exam. If you don't pass, we don't shrug and keep your $10: we escalate to live group sessions and 1:1 support until you do. <strong>The recorded method has to work for you, or it doesn't work at all.</strong></p>
+        <a href="https://www.youtube.com/@RifatErdemSahin" target="_blank" rel="noopener" class="g-cta">▶️ Start the $10 Path</a>
+        <div class="fineprint">Full pass-support terms on the <a href="certification_guarantee.html" style="color:#04221c; text-decoration:underline;">Certification Guarantee</a> page.</div>
+      </div>
+    </div>
+
+    <!-- ===== VERDICT ===== -->
+    <div class="block">
+      <div class="verdict">
+        <h2>🔎 The Only Receipt That Matters</h2>
+        <p>Every other certification page sells you a PDF and hopes you don't ask what it proves. We're betting the opposite: <strong>proof-of-work wins because the exam result is public, repeatable, and undeniable.</strong> Erdem passes first to prove the method. Then real people pass to prove it transfers. Then a $10 student passes to prove the price doesn't dilute the outcome.</p>
+        <p class="quote">"If you can't pass the real exam, we didn't build a certification — we printed a certificate. So we'll know, and we'll kill it."</p>
+      </div>
+    </div>
+
+    <footer>
+      <p style="margin-bottom: 8px;"><a href="../../../index.html">← Back to Home</a> &nbsp;·&nbsp; <a href="mvp_pivot.html">🚀 MVP Pivot Point →</a> &nbsp;·&nbsp; <a href="certification_guarantee.html">🛡️ Guarantee →</a></p>
+      <p style="margin-bottom: 12px; font-size: 0.85rem; opacity: 0.8;">
+        Instructor: <a href="https://www.linkedin.com/in/rifaterdemsahin" target="_blank" rel="noopener" style="color: #93c5fd; text-decoration: underline; margin-right: 16px;">Rifat Erdem Sahin LinkedIn</a>
+        YouTube: <a href="https://www.youtube.com/@RifatErdemSahin" target="_blank" rel="noopener" style="color: #93c5fd; text-decoration: underline;">@RifatErdemSahin</a>
+      </p>
+    </footer>
+  </div>
+
+  <script src="../../../shared/debug-panel.js"></script>
+</body>
+</html>

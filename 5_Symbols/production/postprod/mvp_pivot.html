@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="../../../shared/redirect-to-live-site.js"></script>
+  <title>MVP Pivot Point — First 200 Free | Claude AI Certification</title>
+  <meta name="description" content="The make-or-break MVP: a high-value YouTube series probe. The first 200 course takers get full access FREE. If we don't reach 4,000 watch hours, the certification gets killed. This is the pivot point.">
+  <meta name="keywords" content="MVP, YouTube series, 4000 watch hours, free certification, Claude AI Certification, pivot point, first 200 free">
+  <meta name="author" content="Rifat Erdem Sahin">
+  <link rel="icon" type="image/png" href="../../../favicon.png">
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://rifaterdemsahin.github.io/claude-architect-certification/5_Symbols/production/postprod/mvp_pivot.html">
+  <meta property="og:title" content="MVP Pivot Point — First 200 Free | Claude AI Certification">
+  <meta property="og:description" content="The make-or-break MVP. First 200 course takers get full access FREE. If we don't reach 4,000 watch hours, the certification gets killed.">
+  <meta property="og:image" content="https://rifaterdemsahin.github.io/claude-architect-certification/favicon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg-dark: #030712; --bg-card: rgba(17,24,39,0.85); --text-main: #f3f4f6; --text-muted: #9ca3af; --primary: #8b5cf6; --secondary: #3b82f6; --accent: #f59e0b; --success: #10b981; --danger: #ef4444; --teal: #14b8a6; --font-title: 'Outfit', sans-serif; --font-body: 'Plus Jakarta Sans', sans-serif; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background-color: var(--bg-dark); background-image: radial-gradient(circle at 10% 20%, rgba(245,158,11,0.10) 0%, transparent 42%), radial-gradient(circle at 90% 80%, rgba(239,68,68,0.08) 0%, transparent 42%); color: var(--text-main); font-family: var(--font-body); line-height: 1.6; padding-top: 70px; padding-bottom: 80px; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+    /* ===== Hero ===== */
+    header { text-align: center; margin-bottom: 44px; }
+    .badge { display: inline-flex; align-items: center; gap: 8px; padding: 7px 18px; background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(239,68,68,0.2)); border: 1px solid rgba(245,158,11,0.35); border-radius: 100px; font-size: 0.8rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 16px; }
+    .pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 0 rgba(245,158,11,0.7); animation: pulse 1.8s infinite; }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(245,158,11,0.6); } 70% { box-shadow: 0 0 0 12px rgba(245,158,11,0); } 100% { box-shadow: 0 0 0 0 rgba(245,158,11,0); } }
+    h1 { font-family: var(--font-title); font-size: 3rem; font-weight: 900; margin-bottom: 12px; line-height: 1.1; }
+    h1 .hl { background: linear-gradient(135deg, var(--accent), var(--danger)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+    header p.lead { color: var(--text-muted); max-width: 680px; margin: 0 auto; font-size: 1.12rem; }
+    .hero-stats { display: flex; justify-content: center; gap: 28px; flex-wrap: wrap; margin-top: 26px; }
+    .hero-stat { text-align: center; }
+    .hero-stat .num { font-family: var(--font-title); font-size: 2rem; font-weight: 900; color: var(--text-main); }
+    .hero-stat .lbl { font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
+
+    /* ===== Section helpers ===== */
+    .section-title { font-family: var(--font-title); font-size: 1.7rem; font-weight: 800; margin: 0 0 8px; text-align: center; }
+    .section-sub { color: var(--text-muted); text-align: center; max-width: 660px; margin: 0 auto 30px; font-size: 0.97rem; }
+    .block { margin-bottom: 56px; }
+
+    /* ===== Kill switch dashboard ===== */
+    .killswitch { background: linear-gradient(135deg, rgba(239,68,68,0.06), rgba(139,92,246,0.06)); border: 1px solid rgba(239,68,68,0.25); border-radius: 28px; padding: 40px; position: relative; overflow: hidden; }
+    .killswitch::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 80% 0%, rgba(239,68,68,0.08), transparent 50%); pointer-events: none; }
+    .killswitch-head { display: flex; align-items: center; gap: 14px; margin-bottom: 22px; position: relative; }
+    .killswitch-icon { font-size: 2.4rem; }
+    .killswitch-head h2 { font-family: var(--font-title); font-size: 1.5rem; font-weight: 800; }
+    .killswitch-head .tag { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: var(--danger); background: rgba(239,68,68,0.15); padding: 4px 12px; border-radius: 100px; }
+    .killswitch p { color: var(--text-muted); max-width: 820px; margin-bottom: 26px; position: relative; }
+    .killswitch p strong { color: var(--text-main); }
+
+    .progress-row { position: relative; margin-bottom: 18px; }
+    .progress-meta { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.85rem; }
+    .progress-meta .goal { color: var(--text-muted); }
+    .progress-meta .now { color: var(--text-main); font-weight: 700; }
+    .progress-track { height: 14px; background: rgba(255,255,255,0.06); border-radius: 100px; overflow: hidden; border: 1px solid rgba(255,255,255,0.06); }
+    .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--danger), var(--accent)); border-radius: 100px; transition: width 1.4s cubic-bezier(0.16,1,0.3,1); position: relative; }
+    .progress-fill::after { content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 40px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5)); animation: shimmer 2s infinite; }
+    @keyframes shimmer { 0% { opacity: 0.3; } 50% { opacity: 1; } 100% { opacity: 0.3; } }
+
+    .gate-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 28px; position: relative; }
+    .gate-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; padding: 18px; text-align: center; }
+    .gate-card .g-num { font-family: var(--font-title); font-size: 1.6rem; font-weight: 900; }
+    .gate-card .g-num.danger { color: var(--danger); }
+    .gate-card .g-num.accent { color: var(--accent); }
+    .gate-card .g-num.teal { color: var(--teal); }
+    .gate-card .g-lbl { font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 4px; }
+
+    /* ===== Promo / first 200 ===== */
+    .promo-banner { background: linear-gradient(135deg, var(--accent), var(--primary)); border-radius: 28px; padding: 44px; text-align: center; color: white; position: relative; overflow: hidden; box-shadow: 0 20px 60px rgba(245,158,11,0.18); }
+    .promo-banner::before { content: '🚀'; position: absolute; font-size: 16rem; opacity: 0.07; top: -30px; right: -20px; transform: rotate(-12deg); }
+    .promo-banner .free-tag { display: inline-block; padding: 6px 18px; background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3); border-radius: 100px; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 14px; }
+    .promo-banner h2 { font-family: var(--font-title); font-size: 2.4rem; font-weight: 900; margin-bottom: 8px; position: relative; }
+    .promo-banner .price-line { font-family: var(--font-title); font-size: 1.4rem; font-weight: 700; margin-bottom: 14px; position: relative; }
+    .promo-banner .price-line .old { text-decoration: line-through; opacity: 0.6; margin-right: 10px; }
+    .promo-banner .price-line .new { color: #fff; }
+    .promo-banner p { max-width: 640px; margin: 0 auto 24px; opacity: 0.95; position: relative; }
+
+    .seat-counter { max-width: 520px; margin: 0 auto; position: relative; }
+    .seat-counter .seats-left { font-family: var(--font-title); font-size: 3rem; font-weight: 900; }
+    .seat-counter .seats-left span { font-size: 1.2rem; font-weight: 600; opacity: 0.9; }
+    .seat-track { height: 12px; background: rgba(255,255,255,0.22); border-radius: 100px; overflow: hidden; margin-top: 12px; }
+    .seat-fill { height: 100%; width: 0%; background: white; border-radius: 100px; transition: width 1.4s cubic-bezier(0.16,1,0.3,1); }
+    .seat-note { font-size: 0.82rem; opacity: 0.85; margin-top: 8px; }
+
+    .cta-btn { display: inline-block; padding: 16px 42px; background: #fff; color: #b45309; border-radius: 100px; font-weight: 900; font-size: 1.05rem; text-decoration: none; transition: all 0.25s; position: relative; box-shadow: 0 8px 24px rgba(0,0,0,0.25); }
+    .cta-btn:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(0,0,0,0.35); }
+
+    /* ===== Why free / mechanism grid ===== */
+    .cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+    .card { background: var(--bg-card); border: 1px solid rgba(139,92,246,0.18); border-radius: 22px; padding: 28px; transition: all 0.3s; }
+    .card:hover { transform: translateY(-4px); border-color: rgba(245,158,11,0.4); box-shadow: 0 12px 34px rgba(139,92,246,0.12); }
+    .card .ico { font-size: 2.2rem; margin-bottom: 14px; }
+    .card h3 { font-family: var(--font-title); font-size: 1.18rem; font-weight: 700; margin-bottom: 8px; }
+    .card p { color: var(--text-muted); font-size: 0.93rem; }
+
+    /* ===== Steps ===== */
+    .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; counter-reset: step; }
+    .step { background: var(--bg-card); border: 1px solid rgba(255,255,255,0.07); border-radius: 20px; padding: 24px; position: relative; }
+    .step .step-n { font-family: var(--font-title); font-size: 0.78rem; font-weight: 800; color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 10px; }
+    .step h4 { font-family: var(--font-title); font-size: 1.05rem; font-weight: 700; margin-bottom: 6px; }
+    .step p { color: var(--text-muted); font-size: 0.88rem; }
+
+    /* ===== Verdict / honesty ===== */
+    .verdict { background: var(--bg-card); border: 1px solid rgba(255,255,255,0.08); border-radius: 28px; padding: 40px; text-align: center; }
+    .verdict h2 { font-family: var(--font-title); font-size: 1.6rem; font-weight: 800; margin-bottom: 14px; }
+    .verdict p { color: var(--text-muted); max-width: 760px; margin: 0 auto 14px; font-size: 0.97rem; }
+    .verdict p strong { color: var(--text-main); }
+    .verdict .quote { font-style: italic; color: var(--accent); font-weight: 600; margin-top: 8px; }
+
+    footer { text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 44px; padding-top: 22px; border-top: 1px solid rgba(255,255,255,0.05); }
+    footer a { color: var(--secondary); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 860px) { .gate-grid, .cards-grid { grid-template-columns: 1fr; } .steps { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 600px) { h1 { font-size: 2.2rem; } .steps { grid-template-columns: 1fr; } .killswitch, .promo-banner, .verdict { padding: 26px; } .promo-banner h2 { font-size: 1.8rem; } .hero-stats { gap: 18px; } }
+  </style>
+  <script src="../../../shared/nav.js"></script>
+  <script src="../../../shared/seo.js" defer></script>
+</head>
+<body>
+  <div class="container">
+    <!-- ===== HERO ===== -->
+    <header>
+      <div class="badge"><span class="pulse"></span> MVP · Pivot Point</div>
+      <h1>The <span class="hl">Make-or-Break</span> Probe</h1>
+      <p class="lead">We're shipping a high-value YouTube series as an MVP — the fastest way to learn if this problem truly resonates. The first <strong>200 course takers get full access FREE</strong>. And the entire certification lives or dies on one number: <strong>4,000 watch hours</strong>.</p>
+      <div class="hero-stats">
+        <div class="hero-stat"><div class="num">200</div><div class="lbl">Free seats</div></div>
+        <div class="hero-stat"><div class="num">4,000</div><div class="lbl">Watch-hour gate</div></div>
+        <div class="hero-stat"><div class="num">$0</div><div class="lbl">First takers</div></div>
+      </div>
+    </header>
+
+    <!-- ===== KILL SWITCH ===== -->
+    <div class="block">
+      <div class="killswitch">
+        <div class="killswitch-head">
+          <div class="killswitch-icon">🔴</div>
+          <div>
+            <h2>The Kill Switch: 4,000 Watch Hours</h2>
+            <span class="tag">Go / No-Go Gate</span>
+          </div>
+        </div>
+        <p>This is not a hobby project. The Claude AI Certification is a <strong>probe</strong>: a fast, honest test of whether real architects actually want this. YouTube monetization requires <strong>4,000 public watch hours</strong> in 12 months. That number is the verdict. <strong>If we do not reach it, the certification gets killed</strong> — not paused, not pivoted, killed. That is the whole point of an MVP: it must be allowed to fail.</p>
+
+        <div class="progress-row">
+          <div class="progress-meta">
+            <span class="goal">0 / 4,000 watch hours</span>
+            <span class="now" id="watchPct">0%</span>
+          </div>
+          <div class="progress-track"><div class="progress-fill" id="watchFill"></div></div>
+        </div>
+
+        <div class="gate-grid">
+          <div class="gate-card"><div class="g-num danger">4,000h</div><div class="g-lbl">Watch hours needed</div></div>
+          <div class="gate-card"><div class="g-num accent">200</div><div class="g-lbl">Free founding seats</div></div>
+          <div class="gate-card"><div class="g-num teal">1</div><div class="g-lbl">Shot to prove it</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== THE PROMO ===== -->
+    <div class="block">
+      <div class="promo-banner">
+        <div class="free-tag">🎁 Founding Cohort — Free</div>
+        <h2>First 200 In, Free Forever</h2>
+        <div class="price-line"><span class="old">$199</span><span class="new">$0</span></div>
+        <p>The first 200 people to claim a seat get the <strong>entire certification course, live support, and community — completely free</strong>. Always. This is a promotion with a purpose: early believers generate the watch time, comments, and momentum the MVP needs to clear the kill switch. You get certified free; we get the signal we need to keep going.</p>
+
+        <div class="seat-counter">
+          <div class="seats-left"><span id="seatsLeft">200</span><span> / 200 free seats</span></div>
+          <div class="seat-track"><div class="seat-fill" id="seatFill"></div></div>
+          <div class="seat-note" id="seatNote">Seats open — claim yours now</div>
+        </div>
+
+        <a href="https://www.youtube.com/@RifatErdemSahin" target="_blank" rel="noopener" class="cta-btn" style="margin-top: 26px;">▶️ Claim Your Free Seat</a>
+      </div>
+    </div>
+
+    <!-- ===== WHY FREE / MECHANISM ===== -->
+    <div class="block">
+      <h2 class="section-title">🧠 Why Free for the First 200?</h2>
+      <p class="section-sub">An MVP only works if the value exchange is real. Free isn't a discount — it's the engine.</p>
+      <div class="cards-grid">
+        <div class="card">
+          <div class="ico">📺</div>
+          <h3>Watch Time = Survival</h3>
+          <p>Every minute watched pushes us toward the 4,000-hour gate. Free access gives people a reason to watch the full series instead of skimming.</p>
+        </div>
+        <div class="card">
+          <div class="ico">💬</div>
+          <h3>Comments Drive Discovery</h3>
+          <p>Founding students ask real questions. YouTube's algorithm rewards engagement — those comments put the series in front of the next 1,000 architects.</p>
+        </div>
+        <div class="card">
+          <div class="ico">🤝</div>
+          <h3>Real Proof, Not Hype</h3>
+          <p>200 free certified students is the strongest possible proof that the problem is real and the solution lands. That signal decides everything.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== HOW IT WORKS ===== -->
+    <div class="block">
+      <h2 class="section-title">⚙️ How the Flywheel Works</h2>
+      <p class="section-sub">Four loops. Each one compounds the next toward the 4,000-hour gate.</p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-n">Step 1</div>
+          <h4>Watch the Series</h4>
+          <p>Full architecture deep-dives on YouTube. Every minute watched counts toward the kill switch.</p>
+        </div>
+        <div class="step">
+          <div class="step-n">Step 2</div>
+          <h4>Engage &amp; Share</h4>
+          <p>Comment, question, and share. This trains the algorithm to recommend the course.</p>
+        </div>
+        <div class="step">
+          <div class="step-n">Step 3</div>
+          <h4>Get Certified Free</h4>
+          <p>The first 200 unlock the full course, live support, and community — at no cost.</p>
+        </div>
+        <div class="step">
+          <div class="step-n">Step 4</div>
+          <h4>We Reach 4,000h</h4>
+          <p>Clear the gate and the certification lives. Miss it, and we kill it honestly.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== HONESTY / VERDICT ===== -->
+    <div class="block">
+      <div class="verdict">
+        <h2>🎯 This Is the Pivot Point</h2>
+        <p>Most courses launch with fake urgency and vague promises. We're doing the opposite: <strong>one real number, one real deadline, one real consequence.</strong> Free for the first 200 is the hook. 4,000 watch hours is the verdict. If the audience doesn't show up, the certification doesn't get a second life — it gets killed, cleanly.</p>
+        <p class="quote">"An MVP that can't fail isn't an experiment — it's a fantasy. This one can fail."</p>
+        <a href="https://www.youtube.com/@RifatErdemSahin" target="_blank" rel="noopener" class="cta-btn" style="margin-top: 22px;">▶️ Watch &amp; Claim a Free Seat</a>
+      </div>
+    </div>
+
+    <footer>
+      <p style="margin-bottom: 8px;"><a href="../../../index.html">← Back to Home</a> &nbsp;·&nbsp; <a href="certification_guarantee.html">🛡️ Certification Guarantee →</a> &nbsp;·&nbsp; <a href="../publish/membership.html">💼 Membership →</a></p>
+      <p style="margin-bottom: 12px; font-size: 0.85rem; opacity: 0.8;">
+        Instructor: <a href="https://www.linkedin.com/in/rifaterdemsahin" target="_blank" rel="noopener" style="color: #93c5fd; text-decoration: underline; margin-right: 16px;">Rifat Erdem Sahin LinkedIn</a>
+        YouTube: <a href="https://www.youtube.com/@RifatErdemSahin" target="_blank" rel="noopener" style="color: #93c5fd; text-decoration: underline;">@RifatErdemSahin</a>
+      </p>
+    </footer>
+  </div>
+
+  <script src="../../../shared/debug-panel.js"></script>
+  <script>
+    // Animated live-feel counters (visual only — no live backend gate on this page)
+    (function () {
+      function animateBar(id, toPct, delay) {
+        setTimeout(function () {
+          var el = document.getElementById(id);
+          if (el) el.style.width = toPct + '%';
+        }, delay);
+      }
+      // Watch-hour progress: start at 0, animate to a small early number to show momentum exists
+      animateBar('watchFill', 6, 250);
+      setTimeout(function () {
+        var pct = document.getElementById('watchPct');
+        if (pct) pct.textContent = '6% (~240h)';
+      }, 1700);
+
+      // Seat counter: visual scarcity — show a few already claimed to signal momentum
+      var TOTAL = 200, CLAIMED = 23, LEFT = TOTAL - CLAIMED;
+      setTimeout(function () {
+        var leftEl = document.getElementById('seatsLeft');
+        if (leftEl) {
+          var current = TOTAL, step = Math.ceil(TOTAL / 40);
+          var iv = setInterval(function () {
+            current -= step;
+            if (current <= LEFT) { current = LEFT; clearInterval(iv); }
+            leftEl.textContent = current;
+          }, 35);
+        }
+        animateBar('seatFill', Math.round((CLAIMED / TOTAL) * 100), 0);
+        var note = document.getElementById('seatNote');
+        if (note) note.textContent = CLAIMED + ' founding seats already claimed — ' + LEFT + ' left';
+      }, 300);
+    })();
+  </script>
+</body>
+</html>
