@@ -145,12 +145,12 @@
 
       let html = '';
       for (const mNum of Object.keys(tree).sort((a,b) => a-b)) {
-        html += \`<div class="module-card">
-          <div class="module-header">📦 Module \${mNum}</div>\`;
+        html += `<div class="module-card">
+          <div class="module-header">📦 Module ${mNum}</div>`;
         
         for (const vNum of Object.keys(tree[mNum]).sort((a,b) => a-b)) {
-          html += \`<div class="video-section">
-            <div class="video-title">🎥 Video \${vNum}</div>
+          html += `<div class="video-section">
+            <div class="video-title">🎥 Video ${vNum}</div>
             <table class="req-table">
               <thead>
                 <tr>
@@ -159,21 +159,21 @@
                   <th style="width: 20%">Verify</th>
                 </tr>
               </thead>
-              <tbody>\`;
+              <tbody>`;
               
           for (const req of tree[mNum][vNum]) {
-            html += \`<tr>
-              <td><strong>\${esc(req.install_name)}</strong></td>
+            html += `<tr>
+              <td><strong>${esc(req.install_name)}</strong></td>
               <td>
-                <span class="install-cmd">\${esc(req.install_command)}</span>
-                <button class="btn-copy" onclick="copyText('\${escJs(req.install_command)}')">📋 Copy</button>
+                <span class="install-cmd">${esc(req.install_command)}</span>
+                <button class="btn-copy" onclick="copyText('${escJs(req.install_command)}')">📋 Copy</button>
               </td>
-              <td><span style="font-size:0.8rem;color:var(--muted)">\${esc(req.verification_command || '-')}</span></td>
-            </tr>\`;
+              <td><span style="font-size:0.8rem;color:var(--muted)">${esc(req.verification_command || '-')}</span></td>
+            </tr>`;
           }
-          html += \`</tbody></table></div>\`;
+          html += `</tbody></table></div>`;
         }
-        html += \`</div>\`;
+        html += `</div>`;
       }
       el.innerHTML = html;
     }
