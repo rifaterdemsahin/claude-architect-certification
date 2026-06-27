@@ -1,5 +1,25 @@
 # LLM Thinking Log
 
+## 2026-06-27 — 🤖 Auto-Fix Agent & Issue Tracker Menu
+
+### 🎯 Objective
+1. Add the GitHub Issue Tracker to the Preprod > Tools > Code & Repo menu for quick access to the pipeline errors.
+2. Build a local AI Agent script (`issue_fix_agent.py`) capable of autonomously fetching open `axiom-error` issues, parsing the Claude-provided fixes, applying them to the codebase, and closing the issue.
+
+### 📐 Implementation
+1. **Navigation Menu Update**:
+   - Modified `navigation_config.json`, `index.html`, `home.html`, `markdown_renderer.html`, and `shared/nav.js`.
+   - Injected `{"label": "🐛 Issue Tracker", "url": "..."}` directly under `🐙 GitHub Repo`.
+2. **Issue Fix Agent (`6_Semblance/tools/issue_fix_agent.py`)**:
+   - Executes `gh issue list` to fetch actionable bugs.
+   - Pushes the issue body and error analysis back to OpenRouter (Claude 4.6 Opus) to generate the precise codebase diff required.
+   - Parses the JSON response to modify files in place on the local filesystem.
+   - Automates `git commit`, `gh issue comment`, `gh issue close`, and finally `git push`.
+
+### ✅ Verification
+- All JSON and legacy fallback configurations verified syntactically.
+- The Python script correctly integrates with `gh` CLI for seamless issue resolution.
+
 ## 2026-06-27 — 📊 Marp Slide Generator Page
 
 ### 🎯 Objective

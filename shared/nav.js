@@ -153,6 +153,7 @@
           children: [
             { group: true, label: '🐙 Code & Repo', children: [
               { label: '🐙 GitHub Repo', url: 'https://github.com/rifaterdemsahin/claude-architect-certification' },
+              { label: '🐛 Issue Tracker', url: 'https://github.com/rifaterdemsahin/claude-architect-certification/issues' },
               { label: '💳 GitHub Billing Usage', url: 'https://github.com/settings/billing/usage?period=3&group=0&customer=592572' }
             ]},
             { group: true, label: '🗄️ Data & Backend', children: [
