@@ -402,6 +402,27 @@
   }
   window.__dbgClear = clearLog;
 
+  // Hard cache clear: Cache Storage API, service workers, then hard-reload with a
+  // cache-busting param so navigation_config.json / nav.js / page HTML are re-fetched.
+  async function clearCache() {
+    try {
+      if (window.caches && caches.keys) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map(k => caches.delete(k)));
+      }
+      if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map(r => r.unregister()));
+      }
+    } catch (e) {
+      console.warn('[debug-panel] cache clear error', e);
+    }
+    const url = new URL(window.location.href);
+    url.searchParams.set('_cb', Date.now());
+    window.location.replace(url.toString());
+  }
+  window.__dbgClearCache = clearCache;
+
   async function sendAllToAxiom() {
     const btn = document.getElementById('_dbg_axiom_btn');
     if (btn) {
@@ -475,6 +496,7 @@
           ${headerBtn('🗄️ DB Tables', "window.__dbgToggleDb()", 'rgba(16,185,129,0.18)', 'rgba(16,185,129,0.4)')}
           <button id="_dbg_axiom_btn" onclick="event.stopPropagation(); window.sendAllToAxiom();" style="background:rgba(6,182,212,0.25);color:#81e6d9;border:1px solid rgba(6,182,212,0.4);padding:3px 10px;border-radius:6px;cursor:pointer;font-size:0.72rem;font-weight:700;">📡 Send to Axiom</button>
           <button id="_dbg_copy_btn" onclick="event.stopPropagation(); window.__dbgCopyAll()" style="background:rgba(139,92,246,0.3);color:#c4b5fd;border:1px solid rgba(139,92,246,0.4);padding:3px 10px;border-radius:6px;cursor:pointer;font-size:0.72rem;font-weight:700;">📋 Copy All</button>
+          <button id="_dbg_cache_btn" onclick="event.stopPropagation(); window.__dbgClearCache()" title="Clear caches & service workers, then hard-reload" style="background:rgba(245,158,11,0.22);color:#fcd34d;border:1px solid rgba(245,158,11,0.45);padding:3px 10px;border-radius:6px;cursor:pointer;font-size:0.72rem;font-weight:700;">♻️ Clear Cache</button>
           <button onclick="event.stopPropagation(); window.__dbgClear()" style="background:rgba(239,68,68,0.2);color:#fca5a5;border:1px solid rgba(239,68,68,0.3);padding:3px 8px;border-radius:6px;cursor:pointer;font-size:0.72rem;">🗑 Clear</button>
         </div>
       </div>
