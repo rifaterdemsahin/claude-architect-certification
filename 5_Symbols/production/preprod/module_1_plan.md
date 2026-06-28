@@ -10,7 +10,7 @@ Before recording, verify your workspace conforms to the following guidelines:
 
 ## 2. Terminal Baselines & Diagnostics
 Your local terminal must display a clean, functional state:
-1. **Repository Layout:** Open the file explorer to show `/src/mcp-server`. Confirm that `package.json`, `tsconfig.json`, and the compiled `dist/` directory are visible.
+1. **Repository Layout:** Open the file explorer to show `/src/module-2-mcp-server`. Confirm that `package.json`, `tsconfig.json`, and the compiled `dist/` directory are visible.
 2. **Standard Output Check:** Run the following commands to confirm clean dependencies and standard input/output behavior:
 
 ```bash

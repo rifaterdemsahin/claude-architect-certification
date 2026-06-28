@@ -706,11 +706,11 @@ The user requested:
 
 ### ❓ Problem Statement
 The GitHub Actions workflow runs failed with the error: "Some specified paths were not resolved, unable to cache dependencies" (e.g., in run https://github.com/rifaterdemsahin/claude-architect-certification/actions/runs/27233036485/job/80417859563).
-This was caused by `setup-node` trying to resolve `./src/mcp-server/package-lock.json` and build tasks attempting to `cd src/mcp-server` at the root level. However, the MCP server codebase is actually located in the stage folder `5_Symbols/course_src/mcp-server`.
+This was caused by `setup-node` trying to resolve `./src/module-2-mcp-server/package-lock.json` and build tasks attempting to `cd src/module-2-mcp-server` at the root level. However, the MCP server codebase is actually located in the stage folder `5_Symbols/course_src/module-2-mcp-server`.
 
 ### 📐 Approach & Strategy
 1. **🛠 Fix CI/CD configurations**:
-   - Update `.github/workflows/test_mcp.yml` to point `cache-dependency-path` to `5_Symbols/course_src/mcp-server/package-lock.json` and change all `cd src/mcp-server` to `cd 5_Symbols/course_src/mcp-server`.
+   - Update `.github/workflows/test_mcp.yml` to point `cache-dependency-path` to `5_Symbols/course_src/module-2-mcp-server/package-lock.json` and change all `cd src/module-2-mcp-server` to `cd 5_Symbols/course_src/module-2-mcp-server`.
    - Update `.github/workflows/deploy_fly.yml` to match the correct paths for `paths` triggers, `cache-dependency-path`, build steps (`cd`), and `working-directory`.
 2. **📝 Log error & fix**:
    - Append log entry to `6_Semblance/error.log`.
@@ -760,7 +760,7 @@ Specifically:
 2. **🛠️ Script Environment Fix**: Adjust path computation in `tools/send_error.sh` and `tools/get_logs.sh` to correctly look two levels up (`../..`) for `.env`.
 3. **⚙️ Navigation Updates**:
    - Update `navigation_config.json` Debug Menu paths to point to the new files (e.g. `6_Semblance/logs/error_log.md` instead of `6_Semblance/error_log.md`).
-   - Update fallback lists inside `index.html`, `markdown_renderer.html` (root), and `5_Symbols/course_src/templates/markdown_renderer.html`.
+   - Update fallback lists inside `index.html`, `markdown_renderer.html` (root), and `5_Symbols/course_src/shared-templates/markdown_renderer.html`.
 4. **📝 Documentation & Agents Reference Updates**:
    - Update pathing inside agent files `agents.md`, `claude.md`, `gemini.md`, `copilot.md`, `kilocode.md`, and `antigravity.md`.
    - Update internal link references in stage documentations (`1_Real_Unknown/6_kanban.md`, `1_Real_Unknown/7_sanity_check.md`, etc.).

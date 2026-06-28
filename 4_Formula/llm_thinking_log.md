@@ -805,7 +805,7 @@ Add `https://rifaterdemsahin.github.io/green-screen-helper/calculator.html` as "
    - `shared/nav.js`: Add matching element to the static fallback array inside `shared/nav.js`.
    - `index.html`: Update fallback array in the root sitemap/homepage navigation.
    - `markdown_renderer.html`: Update fallback array in the markdown rendering helper page.
-   - `5_Symbols/course_src/templates/markdown_renderer.html`: Update fallback array in the templates configuration.
+   - `5_Symbols/course_src/shared-templates/markdown_renderer.html`: Update fallback array in the templates configuration.
 2. **Commit and Push**: Perform atomic updates, verifying each modification.
 
 ## 2026-06-20 — 🖼️ Footage Mapping Image Hover Modal Preview
@@ -1009,7 +1009,7 @@ Eliminate the Google Drive dependency everywhere and standardize on Azure Blob S
 ### 📐 Design & Implementation Plan
 1. **scripts/index.html** (generated audio): replaced the GIS OAuth + Drive multipart upload (`uploadToDrive`, `findOrCreateDriveFolder`, `getGisToken`, the folder-ID modal, the Drive config panel/CSS, the `gsi/client` script) with `uploadAudioToAzure()` → `POST /api/research/upload?container=research-audio`; stored URL is the read proxy. `saveAudio()` now uploads directly (no folder prompt).
 2. **settings.html**: converted the "Google Drive" config card (folder ID + OAuth client ID inputs) into a read-only **Azure Blob Storage** status card that pings `/api/config` for the account name and links to the in-app asset browser.
-3. **Nav tool links**: `📁 Google Drive` → `☁️ Azure Portal` (`https://portal.azure.com/`) in `navigation_config.json`, `shared/nav.js`, `index.html`, `markdown_renderer.html`, `home.html`, `course_src/templates/markdown_renderer.html`.
+3. **Nav tool links**: `📁 Google Drive` → `☁️ Azure Portal` (`https://portal.azure.com/`) in `navigation_config.json`, `shared/nav.js`, `index.html`, `markdown_renderer.html`, `home.html`, `course_src/shared-templates/markdown_renderer.html`.
 4. **shared/debug-panel.js**: dropped the `google_client_id` auto-set + status line.
 5. **Go server**: removed `googleClientID` config field, the `GOOGLE_CLIENT_ID` env read, and `googleClientId` from `/api/config`.
 6. **Kept** the `toGDriveEmbedUrl` pass-through helper (pure string rewrite, no Google service) so legacy Drive URLs already stored in Supabase still render. Course-content docs about the producer's Drive folder structure were left untouched (documentation, not a code dependency).
@@ -1027,7 +1027,7 @@ Give each AI agent a dedicated, colour-coded VS Code: integrated terminal tab (G
 2. **One keybinding per agent**: Bind `workbench.action.terminal.newWithProfile` with `args.profileName` in `keybindings.json`.
 3. **Rename existing terminals**: Provide a POSIX shell script that emits the ANSI OSC 0 escape sequence (`\033]0;<name>\007`) so a running terminal can relabel itself from the shell.
 4. **Documentation**: Create `5_Symbols/tools/vscode_terminal_profiles/formula.md` with the formula, ready-to-paste JSON, colour reference, and a note that no extension is needed.
-5. **Menu sync**: Add the new guide to `navigation_config.json` under Production > Tools and mirror it in all fallback menus (`index.html`, `markdown_renderer.html`, `home.html`, `shared/nav.js`, `course_src/templates/markdown_renderer.html`).
+5. **Menu sync**: Add the new guide to `navigation_config.json` under Production > Tools and mirror it in all fallback menus (`index.html`, `markdown_renderer.html`, `home.html`, `shared/nav.js`, `course_src/shared-templates/markdown_renderer.html`).
 6. **Validation**: Check JSON validity of snippets and `navigation_config.json`; run `bash -n` on the rename script and make it executable.
 
 ### ✅ Outcome
@@ -1336,7 +1336,7 @@ Identify scaffolding risk in pre-production, specifically highlighting video pip
 ### 📐 Design & Implementation Plan
 1. **Create Document**: Create `5_Symbols/production/preprod/scaffolding_risk.md` with structured details on scaffolding risk and mitigations.
 2. **Navigation Config**: Add `8. ⚠️ Risk` as a category dropdown in `navigation_config.json` and a debug menu link for the new file.
-3. **Fallback Sync**: Update fallback arrays inside `index.html`, `markdown_renderer.html`, `home.html`, and `5_Symbols/course_src/templates/markdown_renderer.html` to reflect the new menu structures and prevent menu drift.
+3. **Fallback Sync**: Update fallback arrays inside `index.html`, `markdown_renderer.html`, `home.html`, and `5_Symbols/course_src/shared-templates/markdown_renderer.html` to reflect the new menu structures and prevent menu drift.
 
 ### ✅ Outcome
 Created scaffolding risk document and successfully synchronized navigation config and all fallbacks. Verified Go compilation.
@@ -2016,7 +2016,7 @@ GLM" table. Registered GLM in the `agents.md` Supported Agent Roles table.
     3. *Inline-config extraction* — regex `SUPABASE_URL` / `SUPABASE_ANON` constants from the page so the inspector can query even on static GitHub Pages (no `/api/config`).
   - Added a **`🗄️ DB Tables`** button to the debug header that toggles a panel listing the page's tables (with live hit counts). Each row has `👁 View` (runs `SELECT * LIMIT 50`, logs the result, and renders rows in a dark modal) and `⬇ JSON` (exports up to 1000 rows).
   - Refactored the badge update into `render()` and removed the fragile `LOG.push` override hack.
-  - Added `shared/debug-panel.js` to the few DB-connected pages that were missing it: `index.html`, `5_Symbols/timeline.html`, `5_Symbols/production/prod/screenshare.html`, `5_Symbols/production/prod/talking-heads.html`, `5_Symbols/production/postprod/post_production_checklist.html`. (Skipped the Go server template `course_src/problem-server/templates/problem.html`.)
+  - Added `shared/debug-panel.js` to the few DB-connected pages that were missing it: `index.html`, `5_Symbols/timeline.html`, `5_Symbols/production/prod/screenshare.html`, `5_Symbols/production/prod/talking-heads.html`, `5_Symbols/production/postprod/post_production_checklist.html`. (Skipped the Go server template `course_src/shared-problem-server/templates/problem.html`.)
 - **Verification:** `go build ./... && go vet ./...` pass; table detection + view tested locally.
 - **Status:** IMPLEMENTED, pending commit + push.
 
@@ -2225,7 +2225,7 @@ This guarantees uniqueness both among the new candidates and against existing no
 - Used the existing numbered-group convention (`1. 🎬 …`) for the group headers to match the Planning menu, while items dropped the old flat 1–18 numbering (consistent with how Planning items are un-numbered inside groups).
 - Synced the new structure to all 6 places the menu lives:
   - JSON (full descriptions, multi-line): `navigation_config.json`, `index.html`, `home.html`, `markdown_renderer.html`.
-  - JS fallbacks (compact, description-free to match `nav.js` style): `shared/nav.js`, `5_Symbols/course_src/templates/markdown_renderer.html`.
+  - JS fallbacks (compact, description-free to match `nav.js` style): `shared/nav.js`, `5_Symbols/course_src/shared-templates/markdown_renderer.html`.
   - This also fixed pre-existing staleness — several fallbacks previously only carried 4 or 10 of the 18 items.
 - Implemented via a one-off Python script (`/tmp/regroup_content_assembly.py`) that brace-matches the `🎬 Content Assembly` object per file and re-emits the canonical grouped block in the right format/indentation, avoiding a whole-file reformat.
 
@@ -2260,10 +2260,10 @@ This guarantees uniqueness both among the new candidates and against existing no
 - Reproduced the live HTTP link checker (`7_Testing_Known/test_links.py --mode http`) → **0 broken links, exit 0**. The specific root-level `/production_shotlist.html` URL still 404s, but **nothing links to it anymore** — the offending reference was removed/changed since 2026-06-09.
 - Wrote a crawler-equivalent resolver (`urljoin(page_url, href)`) over every on-disk HTML href/src → confirmed **no link resolves to the repo-root `production_shotlist.html`**. The live homepage's raw HTML contains no such link either.
 - So the *link* is fixed, but the *issue* stayed OPEN. Root cause: `.github/workflows/test_links.yml` only closes open `broken-links` issues `if: steps.link-check.outcome == 'failure'` (as "Superseded"). On **success** it did nothing, so resolved issues are never auto-closed → stale issue #4.
-- Bonus latent bug found during the sweep: `5_Symbols/course_src/templates/markdown_renderer.html` still carried the stale URL `5_Symbols/production_shotlist.html` (the file moved to `_obsolete/` per refactor task P-07) — a broken link the HTTP crawler doesn't reach (no page links to that template) but still wrong. Every other nav config correctly points to `5_Symbols/production/postprod/production_shotlist.html`.
+- Bonus latent bug found during the sweep: `5_Symbols/course_src/shared-templates/markdown_renderer.html` still carried the stale URL `5_Symbols/production_shotlist.html` (the file moved to `_obsolete/` per refactor task P-07) — a broken link the HTTP crawler doesn't reach (no page links to that template) but still wrong. Every other nav config correctly points to `5_Symbols/production/postprod/production_shotlist.html`.
 
 **Fixes:**
-- `5_Symbols/course_src/templates/markdown_renderer.html` — corrected the Shot List & Assets URL to `5_Symbols/production/postprod/production_shotlist.html` (matches all other configs).
+- `5_Symbols/course_src/shared-templates/markdown_renderer.html` — corrected the Shot List & Assets URL to `5_Symbols/production/postprod/production_shotlist.html` (matches all other configs).
 - `.github/workflows/test_links.yml` — added a new step **"Close resolved broken-link issues on success"** (`if: outcome == 'success'`) that closes every open `broken-links` issue with a ✅ resolved comment + run link. Also clarified the failure-side close comment. This prevents future stale issues; resolved issues now auto-close on the next green deploy.
 - Did NOT create a root redirect page — that would violate the HTML-containment rule (only `index.html` + `markdown_renderer.html` may live at the repo root). The 404 is harmless now that nothing references it.
 

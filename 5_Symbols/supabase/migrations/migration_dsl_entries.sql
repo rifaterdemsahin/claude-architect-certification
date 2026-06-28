@@ -223,7 +223,7 @@ INSERT INTO public.dsl_entries (term, definition, context, category, related_ter
     'Used to refer to the 5_Symbols/ directory and all executable code within it. The term comes from semiotics: symbols are the tangible representations of abstract ideas.',
     'data',
     '["7-Stage Framework", "5_Symbols", "Execution Stage", "Semblance"]',
-    '["5_Symbols/course_src/mcp-server/ - the MCP server implementation", "5_Symbols/production/ - all production HTML pages and assets"]',
+    '["5_Symbols/course_src/module-2-mcp-server/ - the MCP server implementation", "5_Symbols/production/ - all production HTML pages and assets"]',
     'DSL Glossary (4_Formula/delivery_pilot/dsl.md)'
 ),
 (

@@ -29,15 +29,15 @@ The CI run for the MCP Server failed at the setup stage when attempting to resol
 
 The GitHub Actions workflow files (`test_mcp.yml` and `deploy_fly.yml`) configured the `actions/setup-node@v4` action to cache npm dependencies by checking the package lockfile at:
 ```yaml
-cache-dependency-path: './src/mcp-server/package-lock.json'
+cache-dependency-path: './src/module-2-mcp-server/package-lock.json'
 ```
 However, following the project's **7-Stage Journey** folder structure, the MCP server codebase is actually located in:
-`5_Symbols/course_src/mcp-server/package-lock.json`
+`5_Symbols/course_src/module-2-mcp-server/package-lock.json`
 
-Because the relative path `./src/mcp-server/package-lock.json` could not be found at the repository root, the setup action aborted with the caching error:
+Because the relative path `./src/module-2-mcp-server/package-lock.json` could not be found at the repository root, the setup action aborted with the caching error:
 `Error: Some specified paths were not resolved, unable to cache dependencies.`
 
-Additionally, subsequent steps tried to execute `cd src/mcp-server` which would also fail because the directory is actually `5_Symbols/course_src/mcp-server`.
+Additionally, subsequent steps tried to execute `cd src/module-2-mcp-server` which would also fail because the directory is actually `5_Symbols/course_src/module-2-mcp-server`.
 
 ---
 
@@ -46,11 +46,11 @@ Additionally, subsequent steps tried to execute `cd src/mcp-server` which would 
 We updated both `.github/workflows/test_mcp.yml` and `.github/workflows/deploy_fly.yml` to reference the correct path of the MCP server:
 
 1. **📦 Caching Path**:
-   Updated `cache-dependency-path` to `5_Symbols/course_src/mcp-server/package-lock.json`.
+   Updated `cache-dependency-path` to `5_Symbols/course_src/module-2-mcp-server/package-lock.json`.
 2. **🏗️ Working Directories**:
-   Changed all `cd src/mcp-server` instructions to `cd 5_Symbols/course_src/mcp-server`.
+   Changed all `cd src/module-2-mcp-server` instructions to `cd 5_Symbols/course_src/module-2-mcp-server`.
 3. **🚀 Deploy Working Directory**:
-   Updated the deploy job's `working-directory` configuration in `deploy_fly.yml` to `./5_Symbols/course_src/mcp-server`.
+   Updated the deploy job's `working-directory` configuration in `deploy_fly.yml` to `./5_Symbols/course_src/module-2-mcp-server`.
 
 ---
 

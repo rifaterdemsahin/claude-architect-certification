@@ -1,9 +1,9 @@
 # Archive Log: 2026-06-06 README.md Update
 
-We are updating the `src/mcp-server/README.md` to add both native Stdio/Proxy and SSE deployment options for Fly.io.
+We are updating the `src/module-2-mcp-server/README.md` to add both native Stdio/Proxy and SSE deployment options for Fly.io.
 
 ## Source Files Modified
-- [/src/mcp-server/README.md](file:///C:/projects/claude-architect-certification/5_Symbols/course_src/mcp-server/README.md)
+- [/src/module-2-mcp-server/README.md](file:///C:/projects/claude-architect-certification/5_Symbols/course_src/module-2-mcp-server/README.md)
 
 ## Removed Content
 ```markdown
@@ -21,7 +21,7 @@ Deploying the MCP server to [Fly.io](https://fly.io) package-wraps the server in
 ### Deployment Steps
 
 1. **Initialize Fly App (First Time Only)**
-   Run this from `src/mcp-server`:
+   Run this from `src/module-2-mcp-server`:
    ```bash
    fly launch --no-deploy
    ```
@@ -61,7 +61,7 @@ Add this block to your `claude_desktop_config.json` (located at `%APPDATA%\Claud
   "mcpServers": {
     "enterprise-data-bridge-local": {
       "command": "node",
-      "args": ["C:/projects/claude-architect-certification/5_Symbols/course_src/mcp-server/dist/index.js"]
+      "args": ["C:/projects/claude-architect-certification/5_Symbols/course_src/module-2-mcp-server/dist/index.js"]
     }
   }
 }

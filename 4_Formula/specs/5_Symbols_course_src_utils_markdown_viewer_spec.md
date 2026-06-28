@@ -4,12 +4,12 @@
 > 📐 **Versioning rule** — `0.1` initial · `0.11` small update · `0.2` bigger update. Bump manually when you edit this spec.
 
 ## 📍 Path
-`./5_Symbols/course_src/utils/markdown_viewer.html`
+`./5_Symbols/course_src/shared-utils/markdown_viewer.html`
 
 ## 🎯 Purpose & Rationale
 **Description**: View the documentation, design topologies, pre-production guides, and certification exams for the Claude AI Certification for Architects.
 
-*Rationale*: This file exists to serve as the `Markdown Document Viewer | Claude AI Certification` page for the project. Its primary goal is to provide the UI and functionality described in the description above. It is placed in `./5_Symbols/course_src/utils` following the 7-stage folder structure framework.
+*Rationale*: This file exists to serve as the `Markdown Document Viewer | Claude AI Certification` page for the project. Its primary goal is to provide the UI and functionality described in the description above. It is placed in `./5_Symbols/course_src/shared-utils` following the 7-stage folder structure framework.
 
 ## 🧩 Functionality — Recreate the Page
 To rebuild this page from scratch, implement the following behaviours (derived from the page's interactive logic):

@@ -15,9 +15,9 @@
 ---
 
 ## 🎥 Section 3: The Tech Stack Setup (7:45 - 12:00)
-* **Visual Action:** Switch your screen to VS Code displaying `/src/mcp-server`. Expand the `/src` folder, open `index.ts`, open the terminal panel, run `cd src/mcp-server && npm run build`, and then execute `npm start` to show the silent diagnostics message.
+* **Visual Action:** Switch your screen to VS Code displaying `/src/module-2-mcp-server`. Expand the `/src` folder, open `index.ts`, open the terminal panel, run `cd src/module-2-mcp-server && npm run build`, and then execute `npm start` to show the silent diagnostics message.
 * **Speaking Script:**
-  > *"Let's look at the actual engineering layout in the IDE. Inside our project directory, under `src/mcp-server`, we’ve initialized a clean, container-ready TypeScript and SQLite foundation. When I run our build and initialize the process, notice that it outputs an isolated diagnostic indicator directly to standard error. This is critical because Model Context Protocol servers communicate over standard input and output streams (`stdio`). If your initialization code outputs random text or logs to standard out, it corrupts the JSON-RPC communication layer that Claude uses to execute local tools. This clean, read-only baseline is exactly where we will implement our custom enterprise database bridge in the very next module."*
+  > *"Let's look at the actual engineering layout in the IDE. Inside our project directory, under `src/module-2-mcp-server`, we’ve initialized a clean, container-ready TypeScript and SQLite foundation. When I run our build and initialize the process, notice that it outputs an isolated diagnostic indicator directly to standard error. This is critical because Model Context Protocol servers communicate over standard input and output streams (`stdio`). If your initialization code outputs random text or logs to standard out, it corrupts the JSON-RPC communication layer that Claude uses to execute local tools. This clean, read-only baseline is exactly where we will implement our custom enterprise database bridge in the very next module."*
 
 ---
 

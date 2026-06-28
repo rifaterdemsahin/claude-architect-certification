@@ -86,8 +86,8 @@
     '/5_Symbols/supabase/ui/admin.html': 'Supabase Admin — Claude AI Certification',
     '/5_Symbols/templates/index.html': 'Claude AI Certification for Architects',
     '/5_Symbols/templates/axiom_errors.html': 'Axiom Errors Admin — Claude AI Certification',
-    '/5_Symbols/course_src/templates/markdown_renderer.html': 'Markdown Renderer — Claude AI Certification',
-    '/5_Symbols/course_src/utils/markdown_viewer.html': 'Markdown Document Viewer — Claude AI Certification',
+    '/5_Symbols/course_src/shared-templates/markdown_renderer.html': 'Markdown Renderer — Claude AI Certification',
+    '/5_Symbols/course_src/shared-utils/markdown_viewer.html': 'Markdown Document Viewer — Claude AI Certification',
     '/5_Symbols/tools/sitemap.html': 'Project Sitemap — Claude AI Certification'
   };
 
@@ -136,8 +136,8 @@
     '/5_Symbols/supabase/ui/admin.html': 'Supabase database admin interface for managing the Claude AI Certification course data and seed operations.',
     '/5_Symbols/templates/index.html': 'Claude AI Certification for Architects — Enterprise Systems & Integration Masterclass Companion Workspace.',
     '/5_Symbols/templates/axiom_errors.html': 'Axiom error monitoring and admin dashboard for the Claude AI Certification production system.',
-    '/5_Symbols/course_src/templates/markdown_renderer.html': 'Render and view markdown documentation within the course source. Browse technical references and guides.',
-    '/5_Symbols/course_src/utils/markdown_viewer.html': 'View course documentation, design topologies, and architecture diagrams for the Claude AI Certification.',
+    '/5_Symbols/course_src/shared-templates/markdown_renderer.html': 'Render and view markdown documentation within the course source. Browse technical references and guides.',
+    '/5_Symbols/course_src/shared-utils/markdown_viewer.html': 'View course documentation, design topologies, and architecture diagrams for the Claude AI Certification.',
     '/5_Symbols/tools/sitemap.html': 'Complete sitemap of all project pages for the Claude AI Certification for Architects. Browse the full site structure.'
   };
 

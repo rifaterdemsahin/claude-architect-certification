@@ -3,10 +3,10 @@
 We are updating the MCP server implementation to include SQLite/PostgreSQL-based regional inventory querying, standard database seed capabilities, hybrid STDIO/SSE transport systems, and Fly.io deployment templates.
 
 ## Source Files Modified
-1. [/src/mcp-server/package.json](file:///C:/projects/claude-architect-certification/5_Symbols/course_src/mcp-server/package.json)
-2. [/src/mcp-server/tsconfig.json](file:///C:/projects/claude-architect-certification/5_Symbols/course_src/mcp-server/tsconfig.json)
-3. [/src/mcp-server/src/index.ts](file:///C:/projects/claude-architect-certification/5_Symbols/course_src/mcp-server/src/index.ts)
-4. [/src/mcp-server/Dockerfile](file:///C:/projects/claude-architect-certification/5_Symbols/course_src/mcp-server/Dockerfile)
+1. [/src/module-2-mcp-server/package.json](file:///C:/projects/claude-architect-certification/5_Symbols/course_src/module-2-mcp-server/package.json)
+2. [/src/module-2-mcp-server/tsconfig.json](file:///C:/projects/claude-architect-certification/5_Symbols/course_src/module-2-mcp-server/tsconfig.json)
+3. [/src/module-2-mcp-server/src/index.ts](file:///C:/projects/claude-architect-certification/5_Symbols/course_src/module-2-mcp-server/src/index.ts)
+4. [/src/module-2-mcp-server/Dockerfile](file:///C:/projects/claude-architect-certification/5_Symbols/course_src/module-2-mcp-server/Dockerfile)
 
 ---
 

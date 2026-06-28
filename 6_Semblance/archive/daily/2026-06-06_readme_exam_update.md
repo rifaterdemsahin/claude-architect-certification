@@ -7,7 +7,7 @@ We are updating the root `README.md` to add a new section pointing to the final 
 
 ## Removed Content
 ```markdown
-| Module 5 | Prompt Caching & Token-Throttling Microservices | `/src/optimization/` |
+| Module 5 | Prompt Caching & Token-Throttling Microservices | `/src/module-5-optimization/` |
 
 ---
 
@@ -16,7 +16,7 @@ We are updating the root `README.md` to add a new section pointing to the final 
 
 ## New Content
 ```markdown
-| Module 5 | Prompt Caching & Token-Throttling Microservices | `/src/optimization/` |
+| Module 5 | Prompt Caching & Token-Throttling Microservices | `/src/module-5-optimization/` |
 
 ---
 

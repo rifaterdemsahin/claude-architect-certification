@@ -153,7 +153,7 @@
   - Script, storyboard, prompts needed
   - Effort: 5h
 
-- [ ] **Scene 2.2** — Building a production MCP server (reference: `5_Symbols/course_src/mcp-server/`)
+- [ ] **Scene 2.2** — Building a production MCP server (reference: `5_Symbols/course_src/module-2-mcp-server/`)
   - Code samples, architecture diagram, prompts
   - Effort: 6h
 
@@ -165,7 +165,7 @@
 
 **Status: Not Started (0% scripts, 0% assets)**
 
-- [ ] **Scene 3.1** — ZDR principles & compliance (reference: `5_Symbols/course_src/security/ZDR_COMPLIANCE.md`)
+- [ ] **Scene 3.1** — ZDR principles & compliance (reference: `5_Symbols/course_src/module-3-security/ZDR_COMPLIANCE.md`)
   - Encryption at rest/transit, field-level control
   - Effort: 5h
 
@@ -182,7 +182,7 @@
 **Status: Not Started (0% scripts, 0% assets)**
 
 - [ ] **Scene 4.1** — Router architecture & circuit breakers
-  - Reference: `5_Symbols/course_src/multi-agent/`
+  - Reference: `5_Symbols/course_src/module-4-multi-agent/`
   - Effort: 5h
 
 - [ ] **Scene 4.2** — Max loop detection (max_loop_depth=3)
@@ -206,7 +206,7 @@
   - Effort: 4h
 
 - [ ] **Scene 5.3** — Microservice orchestration
-  - Reference: `5_Symbols/course_src/optimization/`
+  - Reference: `5_Symbols/course_src/module-5-optimization/`
   - Effort: 5h
 
 ---

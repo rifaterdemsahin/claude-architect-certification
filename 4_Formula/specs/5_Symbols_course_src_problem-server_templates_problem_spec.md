@@ -4,12 +4,12 @@
 > 📐 **Versioning rule** — `0.1` initial · `0.11` small update · `0.2` bigger update. Bump manually when you edit this spec.
 
 ## 📍 Path
-`./5_Symbols/course_src/problem-server/templates/problem.html`
+`./5_Symbols/course_src/shared-problem-server/templates/problem.html`
 
 ## 🎯 Purpose & Rationale
 **Description**: 0. Problem — Why professionals need the Claude Certified Architect certificate.
 
-*Rationale*: This file exists to serve as the `0. Problem — Claude Architect Certification` page for the project. Its primary goal is to provide the UI and functionality described in the description above. It is placed in `./5_Symbols/course_src/problem-server/templates` following the 7-stage folder structure framework.
+*Rationale*: This file exists to serve as the `0. Problem — Claude Architect Certification` page for the project. Its primary goal is to provide the UI and functionality described in the description above. It is placed in `./5_Symbols/course_src/shared-problem-server/templates` following the 7-stage folder structure framework.
 
 ## 🧩 Functionality — Recreate the Page
 To rebuild this page from scratch, implement the following behaviours (derived from the page's interactive logic):

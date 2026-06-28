@@ -1,9 +1,9 @@
 # Archive Log: 2026-06-06 router.py Update
 
-We are updating `src/multi-agent/router.py` to replace the simple keyword-based router with the more robust `EnterpriseAgentRouter` that connects directly to the Anthropic API, runs classifications, and manages agent cycles with step budgets.
+We are updating `src/module-4-multi-agent/router.py` to replace the simple keyword-based router with the more robust `EnterpriseAgentRouter` that connects directly to the Anthropic API, runs classifications, and manages agent cycles with step budgets.
 
 ## Source Files Modified
-- [/src/multi-agent/router.py](file:///C:/projects/claude-architect-certification/5_Symbols/course_src/multi-agent/router.py)
+- [/src/module-4-multi-agent/router.py](file:///C:/projects/claude-architect-certification/5_Symbols/course_src/module-4-multi-agent/router.py)
 
 ## Removed Content
 ```python

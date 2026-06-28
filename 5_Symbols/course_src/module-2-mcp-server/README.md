@@ -43,7 +43,7 @@ In a production environment, Claude (either on Desktop or hosted inside a VPC) i
 ## 🚀 Local Development Setup
 
 ### 1. Install Dependencies
-Ensure you are in the `/src/mcp-server` directory:
+Ensure you are in the `/src/module-2-mcp-server` directory:
 ```bash
 npm install
 ```
@@ -83,9 +83,9 @@ There are two primary ways to deploy your custom MCP server to [Fly.io](https://
 This architecture requires **no public HTTP services**. We strip the ports from `fly.toml` to keep the container fully isolated.
 
 #### 1. Setup Configuration (`fly.toml`)
-Ensure `/src/mcp-server/fly.toml` matches:
+Ensure `/src/module-2-mcp-server/fly.toml` matches:
 ```toml
-# src/mcp-server/fly.toml
+# src/module-2-mcp-server/fly.toml
 app = "claude-enterprise-data-bridge"
 primary_region = "lhr" # London (or your preferred region)
 
@@ -94,7 +94,7 @@ primary_region = "lhr" # London (or your preferred region)
 ```
 
 #### 2. Run the Command Line Deployment Flow
-Run these commands from `/src/mcp-server`:
+Run these commands from `/src/module-2-mcp-server`:
 ```bash
 # 1. Authenticate with Fly.io
 fly auth login
@@ -184,7 +184,7 @@ Add this block to your `claude_desktop_config.json` (located at `%APPDATA%\Claud
   "mcpServers": {
     "enterprise-data-bridge-local": {
       "command": "node",
-      "args": ["C:/projects/claude-architect-certification/5_Symbols/course_src/mcp-server/dist/index.js"]
+      "args": ["C:/projects/claude-architect-certification/5_Symbols/course_src/module-2-mcp-server/dist/index.js"]
     }
   }
 }

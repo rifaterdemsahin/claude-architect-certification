@@ -49,7 +49,7 @@ All content follows a structured **Pre-Production → Production → Post-Produc
 - Multi-server orchestration
 - Monitoring MCP traffic and latency
 
-> **Links:** [MCP Codebase](../../course_src/mcp-server/) | [Setup Guide](../../course_src/mcp-server/README.md) | [fly.toml](../../course_src/mcp-server/fly.toml)
+> **Links:** [MCP Codebase](../../course_src/module-2-mcp-server/) | [Setup Guide](../../course_src/module-2-mcp-server/README.md) | [fly.toml](../../course_src/module-2-mcp-server/fly.toml)
 
 ---
 
@@ -72,7 +72,7 @@ All content follows a structured **Pre-Production → Production → Post-Produc
 - Incident response for data leaks
 - Compliance certification walkthrough
 
-> **Links:** [ZDR Protocol](../../course_src/security/ZDR_COMPLIANCE.md) | [Terraform Blueprint](../../templates/aws-bedrock-private-link.tf)
+> **Links:** [ZDR Protocol](../../course_src/module-3-security/ZDR_COMPLIANCE.md) | [Terraform Blueprint](../../templates/aws-bedrock-private-link.tf)
 
 ---
 
@@ -95,7 +95,7 @@ All content follows a structured **Pre-Production → Production → Post-Produc
 - Edge cases: malformed input, recursion attacks
 - Integration with MCP and caching layers
 
-> **Links:** [router.py](../../course_src/multi-agent/router.py)
+> **Links:** [router.py](../../course_src/module-4-multi-agent/router.py)
 
 ---
 
@@ -118,7 +118,7 @@ All content follows a structured **Pre-Production → Production → Post-Produc
 - Monitoring cache performance
 - Scaling optimization across multiple workloads
 
-> **Links:** [cache_layer.py](../../course_src/optimization/cache_layer.py)
+> **Links:** [cache_layer.py](../../course_src/module-5-optimization/cache_layer.py)
 
 ---
 

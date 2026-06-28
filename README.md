@@ -29,10 +29,10 @@ This project adopts the **7-stage self-learning framework**, structured to guide
 | Stage / Module | Core Architecture Focus | Location / Links |
 | --- | --- | --- |
 | **Module 1** | Anatomy of the Claude Ecosystem & Token Mechanics | [4_Formula/topologies/](4_Formula/topologies/) |
-| **Module 2** | Model Context Protocol (MCP) & Enterprise Data Pipes | [src/mcp-server/](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/5_Symbols/course_src/mcp-server/) |
+| **Module 2** | Model Context Protocol (MCP) & Enterprise Data Pipes | [src/module-2-mcp-server/](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/5_Symbols/course_src/module-2-mcp-server/) |
 | **Module 3** | Zero-Data Retention (ZDR) & VPC Isolation Blueprints | [templates/](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/5_Symbols/templates/) |
-| **Module 4** | Autonomous Routing Layers & Deterministic Loops | [src/multi-agent/](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/5_Symbols/course_src/multi-agent/) |
-| **Module 5** | Prompt Caching & Token-Throttling Microservices | [src/optimization/](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/5_Symbols/course_src/optimization/) |
+| **Module 4** | Autonomous Routing Layers & Deterministic Loops | [src/module-4-multi-agent/](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/5_Symbols/course_src/module-4-multi-agent/) |
+| **Module 5** | Prompt Caching & Token-Throttling Microservices | [src/module-5-optimization/](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/5_Symbols/course_src/module-5-optimization/) |
 
 ---
 

@@ -20,7 +20,7 @@ Before recording Module 1, the local environment must be pre-configured to prese
 
 ## 🖥️ Workspace Visual Layout
 Your screen (terminal and file explorer) should show:
-1. **Clean Folder Trees:** `/src/mcp-server` displaying `package.json`, `tsconfig.json`, and the built `dist/` directory.
+1. **Clean Folder Trees:** `/src/module-2-mcp-server` displaying `package.json`, `tsconfig.json`, and the built `dist/` directory.
 2. **Deterministic Output:** Running `npm start` must output exactly one diagnostic log on standard error (`stderr`):
    ```
    🔒 Enterprise MCP Data Bridge active on STDIO transport layer.
@@ -86,7 +86,7 @@ Explain the metrics for picking a model based on execution cost, speed, and capa
 * **Audio:** Keep voice audio levels normalized between headshot video and screen recordings.
 
 ## 🎨 Visual Overlays & Cues
-* **File Paths:** Whenever referencing a file (e.g. `/src/mcp-server/src/index.ts`), overlay a clean on-screen text path.
+* **File Paths:** Whenever referencing a file (e.g. `/src/module-2-mcp-server/src/index.ts`), overlay a clean on-screen text path.
 * **Repository Link:** Keep a prominent graphic or card pointing to the GitHub repository:
   `github.com/rifaterdemsahin/claude-architect-certification`
 * **playlist Link:** Highlight the YouTube Playlist in the description and card overlays:

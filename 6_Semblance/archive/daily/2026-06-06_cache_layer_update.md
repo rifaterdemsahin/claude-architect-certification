@@ -1,9 +1,9 @@
 # Archive Log: 2026-06-06 cache_layer.py Update
 
-We are updating `src/optimization/cache_layer.py` to implement a real prompt caching optimization engine using the `anthropic` Python client to demonstrate explicit block caching and token usage tracking.
+We are updating `src/module-5-optimization/cache_layer.py` to implement a real prompt caching optimization engine using the `anthropic` Python client to demonstrate explicit block caching and token usage tracking.
 
 ## Source Files Modified
-- [/src/optimization/cache_layer.py](file:///C:/projects/claude-architect-certification/5_Symbols/course_src/optimization/cache_layer.py)
+- [/src/module-5-optimization/cache_layer.py](file:///C:/projects/claude-architect-certification/5_Symbols/course_src/module-5-optimization/cache_layer.py)
 
 ## Removed Content
 ```python

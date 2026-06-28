@@ -1,4 +1,4 @@
-# src/mcp-server/fly.toml
+# src/module-2-mcp-server/fly.toml
 app = "claude-enterprise-data-bridge"
 primary_region = "lhr"
 

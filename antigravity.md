@@ -125,7 +125,7 @@ To collaborate on production-ready AI workflows, ensuring:
 ### 2026-06-11 (Go Migration Scaffolding & CI Caching Fix)
 - **Action:** Scaffolded Go server (`cmd/server/main.go`) to render dynamic routes and proxy database assets.
 - **Action:** Set up `observe` handler middleware forwarding latency and recovery data to Axiom.
-- **Action:** Fixed the GitHub Actions path caching failures by updating package-lock and build routes pointing to the nested folder `5_Symbols/course_src/mcp-server/`.
+- **Action:** Fixed the GitHub Actions path caching failures by updating package-lock and build routes pointing to the nested folder `5_Symbols/course_src/module-2-mcp-server/`.
 - **Status:** Implemented and tested in CI/CD pipeline.
 
 ### 2026-06-07 (Project Initialization, Script Integration & Editor Page)

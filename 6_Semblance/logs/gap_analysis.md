@@ -26,7 +26,7 @@
 
 The original architecture (Stage 2) envisioned a pure static + Supabase frontend with Cloudflare Workers for auth. A Go SSR server was introduced to keep the Supabase service key server-side only and enable binary deployment on Fly.io.
 
-- **Why it occurred:** Security requirement — Supabase anon key appeared in browser network tab, violating ZDR principles documented in `5_Symbols/course_src/security/ZDR_COMPLIANCE.md`.
+- **Why it occurred:** Security requirement — Supabase anon key appeared in browser network tab, violating ZDR principles documented in `5_Symbols/course_src/module-3-security/ZDR_COMPLIANCE.md`.
 - **Impact:** Added `go.mod`, `fly.toml`, `Dockerfile`, `cmd/`, `PLAN.md`, `SESSION.md`, and a `server` binary (gitignored). Project now has two runtime modes: static GitHub Pages and Go server on Fly.io.
 - **Lessons learned:** Architecture decisions mid-project create dual-maintenance burden. ZDR compliance should be evaluated in Stage 2 before picking a static-only approach.
 

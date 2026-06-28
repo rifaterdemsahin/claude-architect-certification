@@ -1101,7 +1101,7 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
       html += `<div class="exam-section"><h3>🎓 ${data.exam.title}</h3>`;
       html += `<p>${data.exam.description}</p>`;
       html += `<ul class="exam-scenarios">${data.exam.scenarios.map(s => `<li>${s}</li>`).join('')}</ul>`;
-      html += `<a class="exam-link" href="../../../course_src/utils/markdown_viewer.html?md=${data.exam.link}" title="Open the exam walkthrough document">📝 Start Exam Walkthrough</a></div>`;
+      html += `<a class="exam-link" href="../../../course_src/shared-utils/markdown_viewer.html?md=${data.exam.link}" title="Open the exam walkthrough document">📝 Start Exam Walkthrough</a></div>`;
 
       area.innerHTML = html;
       window.showModule = function(idx, updateUrl = true) {

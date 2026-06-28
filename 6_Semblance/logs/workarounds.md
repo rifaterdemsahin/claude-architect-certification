@@ -51,7 +51,7 @@
 | Date | Workaround | Resolution |
 |------|-----------|-----------|
 | 2026-06-09 | Fly.io deploy secret named `FLYIO_TOKEN` not `FLY_API_TOKEN` | Updated `deploy_fly.yml` secret ref |
-| 2026-06-09 | CI cache-dependency-path wrong for MCP server | Corrected to `5_Symbols/src/mcp-server/` |
+| 2026-06-09 | CI cache-dependency-path wrong for MCP server | Corrected to `5_Symbols/src/module-2-mcp-server/` |
 | 2026-06-08 | `uc?export=view` Drive image interstitial | Replaced with `/thumbnail?id=&sz=w800` |
 | 2026-06-08 | renderScenes infinite recursion via hoisted wrapper | Merged wrapper into original function |
 | 2026-06-07 | favicon resolves outside repo on GitHub Pages | Fixed relative paths to `../favicon.png` |

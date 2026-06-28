@@ -72,22 +72,22 @@ INSERT INTO course_modules (module_number, title, description, links, sort_order
 (2,
  'Model Context Protocol (MCP)',
  'Connecting Claude to secure private databridges (SQLite/PostgreSQL) with read-only boundaries and stdio/SSE transports on Fly.io.',
- '[{"label":"MCP Codebase","url":"5_Symbols/src/mcp-server/"},{"label":"fly.toml","url":"5_Symbols/src/mcp-server/fly.toml"}]',
+ '[{"label":"MCP Codebase","url":"5_Symbols/src/module-2-mcp-server/"},{"label":"fly.toml","url":"5_Symbols/src/module-2-mcp-server/fly.toml"}]',
  20),
 (3,
  'Zero-Data Retention (ZDR)',
  'Restricting API endpoints using AWS Bedrock VPC Interface Endpoints (PrivateLink) and implementing strict compliance logs.',
- '[{"label":"ZDR Protocol","url":"5_Symbols/src/security/ZDR_COMPLIANCE.md"},{"label":"Terraform Blueprint","url":"5_Symbols/templates/aws-bedrock-private-link.tf"}]',
+ '[{"label":"ZDR Protocol","url":"5_Symbols/src/module-3-security/ZDR_COMPLIANCE.md"},{"label":"Terraform Blueprint","url":"5_Symbols/templates/aws-bedrock-private-link.tf"}]',
  30),
 (4,
  'Deterministic Routers',
  'Building specialized agent classifiers and execution circuit-breakers in Python to shut down rogue loops cleanly.',
- '[{"label":"router.py","url":"5_Symbols/src/multi-agent/router.py"}]',
+ '[{"label":"router.py","url":"5_Symbols/src/module-4-multi-agent/router.py"}]',
  40),
 (5,
  'Financial Engineering',
  'Minimizing enterprise operational overhead by up to 90% using explicit, prefix-matching prompt cache points.',
- '[{"label":"cache_layer.py","url":"5_Symbols/src/optimization/cache_layer.py"}]',
+ '[{"label":"cache_layer.py","url":"5_Symbols/src/module-5-optimization/cache_layer.py"}]',
  50);
 
 -- Seed Videos — Module 1
@@ -208,9 +208,9 @@ INSERT INTO outline (module_number, video_number, content_type, content, sort_or
 (2, 3, 'topic', 'Authentication and authorization boundaries', 1),
 (2, 3, 'topic', 'Multi-server orchestration', 2),
 (2, 3, 'topic', 'Monitoring MCP traffic and latency', 3),
-(2, 0, 'link', '{"label":"MCP Codebase","url":"../../src/mcp-server/"}', 99),
-(2, 0, 'link', '{"label":"Setup & Deploy Guide","url":"../../src/mcp-server/README.md"}', 100),
-(2, 0, 'link', '{"label":"fly.toml","url":"../../src/mcp-server/fly.toml"}', 101);
+(2, 0, 'link', '{"label":"MCP Codebase","url":"../../src/module-2-mcp-server/"}', 99),
+(2, 0, 'link', '{"label":"Setup & Deploy Guide","url":"../../src/module-2-mcp-server/README.md"}', 100),
+(2, 0, 'link', '{"label":"fly.toml","url":"../../src/module-2-mcp-server/fly.toml"}', 101);
 
 -- Seed: Module 3
 INSERT INTO outline (module_number, video_number, content_type, content, sort_order) VALUES
@@ -227,7 +227,7 @@ INSERT INTO outline (module_number, video_number, content_type, content, sort_or
 (3, 3, 'topic', 'Testing and verifying data retention boundaries', 1),
 (3, 3, 'topic', 'Incident response for data leaks', 2),
 (3, 3, 'topic', 'Compliance certification walkthrough', 3),
-(3, 0, 'link', '{"label":"ZDR Protocol","url":"../../src/security/ZDR_COMPLIANCE.md"}', 99),
+(3, 0, 'link', '{"label":"ZDR Protocol","url":"../../src/module-3-security/ZDR_COMPLIANCE.md"}', 99),
 (3, 0, 'link', '{"label":"Terraform Blueprint","url":"../../templates/aws-bedrock-private-link.tf"}', 100);
 
 -- Seed: Module 4
@@ -245,7 +245,7 @@ INSERT INTO outline (module_number, video_number, content_type, content, sort_or
 (4, 3, 'topic', 'Load testing and performance benchmarks', 1),
 (4, 3, 'topic', 'Edge cases: malformed input, recursion attacks', 2),
 (4, 3, 'topic', 'Integration with MCP and caching layers', 3),
-(4, 0, 'link', '{"label":"router.py","url":"../../src/multi-agent/router.py"}', 99);
+(4, 0, 'link', '{"label":"router.py","url":"../../src/module-4-multi-agent/router.py"}', 99);
 
 -- Seed: Module 5
 INSERT INTO outline (module_number, video_number, content_type, content, sort_order) VALUES
@@ -262,7 +262,7 @@ INSERT INTO outline (module_number, video_number, content_type, content, sort_or
 (5, 3, 'topic', 'Real-world cost reduction case study (90% savings)', 1),
 (5, 3, 'topic', 'Monitoring cache performance', 2),
 (5, 3, 'topic', 'Scaling optimization across multiple workloads', 3),
-(5, 0, 'link', '{"label":"cache_layer.py","url":"../../src/optimization/cache_layer.py"}', 99);
+(5, 0, 'link', '{"label":"cache_layer.py","url":"../../src/module-5-optimization/cache_layer.py"}', 99);
 
 -- Populate outline FK columns introduced in schema (safe to re-run)
 UPDATE outline o

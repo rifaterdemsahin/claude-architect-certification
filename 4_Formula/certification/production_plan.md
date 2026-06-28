@@ -21,13 +21,13 @@ To maintain momentum, every remaining video follows a 3-step cycle: **Learn & Te
 
 * **Step 1: Learn & Test (Local):**
   * Open terminal in the cloned repository workspace.
-  * Build the TypeScript code: `npm run build` inside `src/mcp-server`.
+  * Build the TypeScript code: `npm run build` inside `src/module-2-mcp-server`.
   * Start the server locally: `npm start`.
   * Configure your local Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS or `%APPDATA%\Claude\claude_desktop_config.json` on Windows) to point to the built `dist/index.js` using `stdio`.
   * Validate that local Claude Desktop can successfully retrieve simulated inventory data.
 
 * **Step 2: Deploy & Validate (Fly.io):**
-  * Execute `fly deploy` from `src/mcp-server`.
+  * Execute `fly deploy` from `src/module-2-mcp-server`.
   * Switch your Claude Desktop configuration to use the remote Fly proxy configuration:
     ```json
     "args": ["mcp", "proxy", "--app", "claude-enterprise-data-bridge"]
@@ -45,7 +45,7 @@ To maintain momentum, every remaining video follows a 3-step cycle: **Learn & Te
 
 * **Step 1: Learn & Test (Local):**
   * Review the Zero-Data Retention (ZDR) requirements for Anthropic API commercial contracts.
-  * Audit your [ZDR_COMPLIANCE.md](file:///C:/projects/claude-architect-certification/5_Symbols/course_src/security/ZDR_COMPLIANCE.md) layout.
+  * Audit your [ZDR_COMPLIANCE.md](file:///C:/projects/claude-architect-certification/5_Symbols/course_src/module-3-security/ZDR_COMPLIANCE.md) layout.
 
 * **Step 2: Capture Record (The Content):**
   * **The Visuals:** Walk through the official Anthropic data privacy terms.
@@ -57,7 +57,7 @@ To maintain momentum, every remaining video follows a 3-step cycle: **Learn & Te
 *Goal: Demonstrate how to stop an autonomous agent from running away with your API budget.*
 
 * **Step 1: Learn & Test (Local):**
-  * Navigate to `src/multi-agent/`.
+  * Navigate to `src/module-4-multi-agent/`.
   * Run the router script: `python router.py`.
   * **Intentional Error Simulation:** Change settings to set `max_loop_depth = 1` and run a query to watch the terminal throw the `CIRCUIT_BREAKER_TRIPPED` exception cleanly.
 
@@ -71,7 +71,7 @@ To maintain momentum, every remaining video follows a 3-step cycle: **Learn & Te
 *Goal: Prove you can scale an enterprise AI system without exploding the budget.*
 
 * **Step 1: Learn & Test (Local):**
-  * Execute the caching layer: `python src/optimization/cache_layer.py`.
+  * Execute the caching layer: `python src/module-5-optimization/cache_layer.py`.
   * Verify that subsequent executions show a massive drop in latency and record cache hits under the `cache_read_input_tokens` metrics block.
 
 * **Step 2: Capture Record (The Content):**
@@ -86,7 +86,7 @@ Do not spend days editing transitions. High-level technical audiences care about
 1. **The Raw Cut:** Edit your screen captures to remove typos, long pauses while files compile, or awkward silences. Keep the pacing fast.
 2. **The Visual Assembly:**
    * Drop in the dynamic intro video we generated at the beginning of the video, right after your initial 30-to-60 second live hook demonstration.
-   * When you mention a repository file path (e.g., `src/mcp-server/src/index.ts`), overlay a clean text element on screen showing that path so viewers can easily find it on your live GitHub index page.
+   * When you mention a repository file path (e.g., `src/module-2-mcp-server/src/index.ts`), overlay a clean text element on screen showing that path so viewers can easily find it on your live GitHub index page.
 3. **The Audio Check:** Ensure your voice audio remains completely consistent when switching between your direct camera view and your terminal screen recordings.
 
 ---
