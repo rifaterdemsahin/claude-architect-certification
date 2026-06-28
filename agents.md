@@ -26,6 +26,15 @@ This document defines how AI agents interact with the **Claude AI Certification 
 
 ## 📅 Agent Activity Log
 
+### 2026-06-28
+- **Task:** 📡 Add a collapsible **Axiom** control to the debug log bar — one inner button shows the Axiom logs, a second sends the current log to Axiom.
+- **Action:**
+    - **Server (`cmd/server/main.go`):** added admin-gated JSON endpoint **`GET /api/axiom/logs?limit=N`** (`axiomLogsHandler`) that reuses the same APL query as the `/admin/errors` HTML page (`['<dataset>'] | sort by _time desc | limit N`, last 24h) and returns `{events, count}`. Admin-gated because `AXIOM_TOKEN` is sensitive and logs carry request details; unsigned visitors get **401**. Found Axiom's `/query` endpoint ignores the APL `| limit N` clause (caps at 1000 — same as the existing errors page), so the handler **slices to the requested limit** server-side (events arrive newest-first). Registered the route under `observe` + added the `strconv` import.
+    - **Client (`shared/debug-panel.js`):** replaced the standalone **📡 Send to Axiom** header button with a collapsible **`📡 Axiom ▾` toggle** (`__dbgToggleAxiom`) that opens a `_dbg_axiom_wrap` sub-panel. The sub-panel holds the two inner actions the task asked for: **📊 Show Axiom Logs** (`showAxiomLogs` → fetches `/api/axiom/logs`, renders colour-coded rows inline via `renderAxiomLogs`) and **📡 Send to Axiom** (kept `id=_dbg_axiom_btn` so `sendAllToAxiom` is unchanged). Made the Axiom and 🗄️ DB sub-panels **mutually exclusive** (opening one closes the other) so they never stack; failures render a helpful inline hint (sign in as admin / run on localhost:8080).
+    - Documented approach in `4_Formula/llm_thinking_log.md`.
+- **Verification:** `go build ./... && go vet ./...` green; `node -c shared/debug-panel.js` OK. End-to-end on the local Go server: unsigned `GET /api/axiom/logs` → **401**; admin login → `GET /api/axiom/logs?limit=N` returns exactly N newest events (5→5, 50→50); homepage serves **200** and ships the new `📡 Axiom ▾` toggle + both inner buttons.
+- **Status:** IMPLEMENTED, COMMITTED, PUSHED.
+
 ### 2026-06-27
 - **Task:** 🚀 Create the MVP Pivot Point page (free for the first 200 course takers; certification killed if 4,000 watch hours isn't reached) + 🔎 create a Value Proposition test page (recorded proof-of-work certification > standard paper certificates). Commit + push.
 - **Action:**
