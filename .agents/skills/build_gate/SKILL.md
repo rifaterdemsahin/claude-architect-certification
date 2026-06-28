@@ -1,5 +1,5 @@
 ---
-name: build_gate
+name: build-gate
 description: Run the project's formal build and syntax gate to verify the integrity of the Go backend, JS syntax, and inline HTML scripts.
 ---
 

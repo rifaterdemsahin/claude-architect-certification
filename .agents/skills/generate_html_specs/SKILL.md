@@ -1,5 +1,5 @@
 ---
-name: generate_html_specs
+name: generate-html-specs
 description: Automatically scan 5_Symbols for modified HTML files and auto-generate their matching _spec.md documents in 4_Formula/specs/.
 ---
 

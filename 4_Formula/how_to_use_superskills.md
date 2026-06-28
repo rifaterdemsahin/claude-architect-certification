@@ -15,32 +15,32 @@ This guarantees the agent runs the correct commands (like starting the Go server
 
 Here are the superskills currently installed in this project and how you or an agent should use them:
 
-### 1. `autonomous_error_loop`
+### 1. `autonomous-error-loop`
 - **What it does**: Proactively searches for errors across all pages, queries Axiom, and generates/applies fixes via GitHub issues.
 - **When to use**: Run this daily or after a major deployment to ensure no new errors were introduced into production.
 - **Agent Prompt**: *"Run the autonomous error loop."*
 
-### 2. `link_crawler`
+### 2. `link-crawler`
 - **What it does**: Crawls the local Go server on port `8080` to find 404s, broken relative links, or missing assets across all 102+ HTML files.
 - **When to use**: Run this before publishing a new module or after renaming/moving files in `5_Symbols/`.
 - **Agent Prompt**: *"Run the link crawler superskill to check for broken links."*
 
-### 3. `generate_html_specs`
+### 3. `generate-html-specs`
 - **What it does**: Scans `5_Symbols/` for modified HTML files and generates matching `_spec.md` markdown documentation in `4_Formula/specs/`.
 - **When to use**: Run this after you finish a UI design session so that the documentation stays perfectly in sync with the codebase.
 - **Agent Prompt**: *"Run the generate html specs skill."*
 
-### 4. `build_gate`
+### 4. `build-gate`
 - **What it does**: A safety checklist that runs `go build`, `go vet`, and Node.js JavaScript syntax verification against the entire repository.
 - **When to use**: This should ideally be run automatically before pushing any destructive change, or manually to verify tree integrity.
 - **Agent Prompt**: *"Run the build gate superskill to verify the tree."*
 
-### 5. `db_sync`
+### 5. `db-sync`
 - **What it does**: Safely applies schema changes and migrations to the local Supabase instance while validating data drift.
 - **When to use**: Run this when introducing new Database tables (like `scenes`) to ensure unique constraints and schema match your local SQL definitions.
 - **Agent Prompt**: *"Run the db sync skill for the new SQL tables."*
 
-### 6. `generate_lower_thirds`
+### 6. `generate-lower-thirds`
 - **What it does**: Triggers the OpenRouter backend to generate branded lower-thirds titles for video production and standardizes their naming convention.
 - **When to use**: Run this during the post-production phase of a new video module.
 - **Agent Prompt**: *"Use the lower thirds skill to generate assets for Module 2."*

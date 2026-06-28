@@ -1,5 +1,5 @@
 ---
-name: autonomous_error_loop
+name: autonomous-error-loop
 description: Runs the autonomous error loop to check Axiom for errors, create GitHub issues, and automatically generate and apply fixes using the Issue Fix Agent.
 ---
 

@@ -7,7 +7,7 @@ This document outlines the **Autonomous Error Loop Superskill**, a custom AI age
 
 ## 🎯 What it does
 
-This superskill turns the two-stage autonomous error loop into a simple, callable agentic skill (`autonomous_error_loop`). By giving the agent this skill, the AI can perform end-to-end issue discovery, analysis, and resolution without human intervention.
+This superskill turns the two-stage autonomous error loop into a simple, callable agentic skill (`autonomous-error-loop`). By giving the agent this skill, the AI can perform end-to-end issue discovery, analysis, and resolution without human intervention.
 
 ## 🧱 The Superskill Workflow
 

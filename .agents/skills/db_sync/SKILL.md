@@ -1,5 +1,5 @@
 ---
-name: db_sync
+name: db-sync
 description: Safely synchronize and manage Supabase database drift when schema or data tables are modified.
 ---
 

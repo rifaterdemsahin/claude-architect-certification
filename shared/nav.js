@@ -11,6 +11,12 @@
      depth 5 (postprod/module-X/s/): ../../../../../shared/nav.js
    ================================================================ */
 (function () {
+  // ── 🌓 Theme initialization ──────────────────────────────
+  try {
+    if (localStorage.getItem('theme') === 'light') {
+      document.documentElement.classList.add('light-mode');
+    }
+  } catch (e) {}
   /* ================================================================
      Backend routing: GitHub Pages is static (display-only). The Go
      backend runs on Fly.io. When this page is served from *.github.io
@@ -705,6 +711,17 @@
     // 🔑 Admin sign-in / sign-out chip — toggles the destructive-button gate.
     html += buildAdminChipHtml();
 
+    // 🌓 Theme toggle chip
+    var currentTheme = 'dark';
+    try { if (localStorage.getItem('theme') === 'light') currentTheme = 'light'; } catch(e){}
+    var themeIcon = currentTheme === 'light' ? '🌙 Dark' : '☀️ Light';
+    html += '<button id="site-nav-theme-toggle" class="site-nav-theme-toggle" ' +
+      'style="display:inline-flex;align-items:center;gap:6px;margin-left:10px;padding:4px 10px;border-radius:20px;' +
+      'background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:inherit;' +
+      'font-size:0.85rem;white-space:nowrap;cursor:pointer;transition:all 0.2s;" ' +
+      'title="Toggle Light/Dark Mode">' +
+      '<span class="site-nav-theme-label">' + themeIcon + '</span></button>';
+
     html += '</div></div>';
 
     var nav = document.createElement('nav');
@@ -716,6 +733,18 @@
     // Wire the admin chip's Sign-out button (delegated). Built before the
     // /api/admin/status fetch resolves; renderAdminChip() re-syncs it later.
     bindAdminChip();
+
+    // Theme toggle listener
+    var themeToggle = document.getElementById('site-nav-theme-toggle');
+    if (themeToggle) {
+      themeToggle.addEventListener('click', function(e) {
+        e.preventDefault();
+        var isLight = document.documentElement.classList.toggle('light-mode');
+        try { localStorage.setItem('theme', isLight ? 'light' : 'dark'); } catch(e){}
+        var label = themeToggle.querySelector('.site-nav-theme-label');
+        if (label) label.textContent = isLight ? '🌙 Dark' : '☀️ Light';
+      });
+    }
 
     // Single delegated listener for all star buttons
     nav.addEventListener('click', function (e) {

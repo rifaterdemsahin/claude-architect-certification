@@ -1,5 +1,5 @@
 ---
-name: generate_lower_thirds
+name: generate-lower-thirds
 description: Automate the production task of generating video lower-thirds assets via OpenRouter and uploading them to cloud storage.
 ---
 

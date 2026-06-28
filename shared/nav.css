@@ -648,3 +648,130 @@ body:not(.is-admin) .btn-del {
 .site-nav-admin-signout {
   margin-left: 2px;
 }
+
+/* ================================================================
+   Light Mode System Overrides
+   ================================================================ */
+html.light-mode {
+  --bg-dark: #f8fafc !important;
+  --bg-card: #ffffff !important;
+  --bg-glass: rgba(255, 255, 255, 0.8) !important;
+  --border-color: rgba(0, 0, 0, 0.1) !important;
+  --border-glow: rgba(139, 92, 246, 0.1) !important;
+  
+  --text-main: #0f172a !important;
+  --text-primary: #0f172a !important;
+  --text-muted: #475569 !important;
+  
+  --accent-violet: #7c3aed !important;
+  --accent-cyan: #0891b2 !important;
+  --accent-green: #059669 !important;
+  --accent-red: #dc2626 !important;
+}
+
+html.light-mode body {
+  background-color: var(--bg-dark) !important;
+  color: var(--text-main) !important;
+  background-image: 
+    radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.05) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(6, 182, 212, 0.05) 0%, transparent 40%) !important;
+}
+
+html.light-mode h1,
+html.light-mode h2,
+html.light-mode h3,
+html.light-mode h4,
+html.light-mode h5,
+html.light-mode h6,
+html.light-mode p,
+html.light-mode .card,
+html.light-mode .panel,
+html.light-mode .badge {
+  color: var(--text-main);
+}
+
+html.light-mode .card,
+html.light-mode .panel {
+  background-color: var(--bg-card);
+  border-color: var(--border-color);
+}
+
+/* Site Navigation specific light mode */
+html.light-mode .site-nav {
+  background: rgba(255, 255, 255, 0.85) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+html.light-mode .site-nav-logo {
+  color: #0f172a !important;
+}
+
+html.light-mode .site-nav-links a {
+  color: #475569 !important;
+}
+
+html.light-mode .site-nav-links a:hover {
+  color: #0f172a !important;
+}
+
+html.light-mode .site-drop-trigger,
+html.light-mode .site-subdrop-trigger {
+  color: #475569 !important;
+}
+
+html.light-mode .site-drop-trigger:hover,
+html.light-mode .site-subdrop-trigger:hover {
+  color: #0f172a !important;
+  background: rgba(139, 92, 246, 0.08) !important;
+}
+
+html.light-mode .site-drop-menu,
+html.light-mode .site-subdrop-menu,
+html.light-mode .site-nav-search-results {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+}
+
+html.light-mode .site-drop-item > a,
+html.light-mode .site-subdrop-menu a {
+  color: #475569 !important;
+}
+
+html.light-mode .site-drop-item:hover,
+html.light-mode .site-subdrop-menu a:hover {
+  background: rgba(139, 92, 246, 0.08) !important;
+}
+
+html.light-mode .site-drop-item:hover > a,
+html.light-mode .site-subdrop-menu a:hover {
+  color: #0f172a !important;
+}
+
+html.light-mode .site-nav-admin-signin,
+html.light-mode .site-nav-admin-signout,
+html.light-mode .site-nav-theme-toggle {
+  border-color: rgba(0,0,0,0.15) !important;
+  color: #475569 !important;
+}
+
+html.light-mode .site-nav-theme-toggle:hover {
+  background: rgba(0,0,0,0.05) !important;
+}
+
+html.light-mode .site-nav-search-container::after {
+  color: #475569 !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+  background: rgba(0, 0, 0, 0.02) !important;
+}
+
+html.light-mode #site-nav-search {
+  color: #0f172a !important;
+  background: rgba(255, 255, 255, 0.6) !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+html.light-mode #site-nav-search:focus {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: #8b5cf6 !important;
+}

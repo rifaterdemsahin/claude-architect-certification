@@ -1,5 +1,5 @@
 ---
-name: link_crawler
+name: link-crawler
 description: Autonomously verify that no broken links or missing assets exist across the HTML files in 5_Symbols.
 ---
 
