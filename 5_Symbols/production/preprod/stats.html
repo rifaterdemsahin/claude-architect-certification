@@ -45,6 +45,12 @@
     .row-count { font-family: monospace; color: var(--secondary); font-weight: 700; }
     .row-words { font-family: monospace; color: var(--accent); font-weight: 700; }
 
+    th.sortable { cursor: pointer; user-select: none; transition: color 0.2s; white-space: nowrap; }
+    th.sortable:hover { color: var(--text-main); }
+    th.sortable .arrow { opacity: 0.35; font-size: 0.7rem; margin-left: 4px; }
+    th.sortable.active { color: var(--primary); }
+    th.sortable.active .arrow { opacity: 1; }
+
     .loading-overlay { position: fixed; inset: 0; background: var(--bg-dark); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; transition: opacity 0.5s; }
     .spinner { width: 40px; height: 40px; border: 3px solid rgba(139,92,246,0.1); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 16px; }
     @keyframes spin { to { transform: rotate(360deg); } }
@@ -91,9 +97,9 @@
       <table>
         <thead>
           <tr>
-            <th>Table Name</th>
-            <th style="text-align: right;">Rows</th>
-            <th style="text-align: right;">Words</th>
+            <th class="sortable" data-sort="name" onclick="sortBy('name')">Table Name<span class="arrow"></span></th>
+            <th class="sortable" data-sort="rows" style="text-align: right;" onclick="sortBy('rows')">Rows<span class="arrow"></span></th>
+            <th class="sortable" data-sort="words" style="text-align: right;" onclick="sortBy('words')">Words<span class="arrow"></span></th>
           </tr>
         </thead>
         <tbody id="stats-body">
@@ -121,20 +127,24 @@
       { name: 'scenes', column: 'script' }
     ];
 
+    let statsData = [];           // [{ name, rows, words }]
+    let sortKey = 'rows';         // default sort column
+    let sortDir = 'desc';         // 'asc' | 'desc'
+
     async function fetchStats() {
       if (!SUPABASE_ANON_KEY) {
         showError("Supabase configuration missing. Please set URL and Anon Key in Settings.");
         return;
       }
 
-      const statsBody = document.getElementById('stats-body');
       const totalRowsEl = document.getElementById('total-rows');
       const totalWordsEl = document.getElementById('total-words');
       const tableCountEl = document.getElementById('table-count');
-      
+
       let totalRows = 0;
       let totalWords = 0;
       let activeTables = 0;
+      statsData = [];
 
       try {
         for (const table of TABLES) {
@@ -142,12 +152,12 @@
           const countRes = await fetch(`${SUPABASE_URL}/rest/v1/${table.name}?select=count`, {
             headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Prefer': 'count=exact' }
           });
-          
+
           if (!countRes.ok) continue;
-          
+
           const countRange = countRes.headers.get('Content-Range');
           const rowCount = parseInt(countRange ? countRange.split('/')[1] : 0);
-          
+
           // Fetch word count if column specified
           let wordCount = 0;
           if (table.column) {
@@ -163,19 +173,13 @@
             }
           }
 
-          // Update UI
-          const row = document.createElement('tr');
-          row.innerHTML = `
-            <td class="row-name">${table.name}</td>
-            <td class="row-count" style="text-align: right;">${rowCount.toLocaleString()}</td>
-            <td class="row-words" style="text-align: right;">${wordCount > 0 ? wordCount.toLocaleString() : '-'}</td>
-          `;
-          statsBody.appendChild(row);
-
+          statsData.push({ name: table.name, rows: rowCount, words: wordCount });
           totalRows += rowCount;
           totalWords += wordCount;
           activeTables++;
         }
+
+        renderTable();
 
         totalRowsEl.textContent = totalRows.toLocaleString();
         totalWordsEl.textContent = totalWords.toLocaleString();
@@ -189,6 +193,44 @@
       }
     }
 
+    function sortBy(key) {
+      // Click the active column to flip direction; a new column starts on a
+      // sensible default (Z→A / high→low for everything except the name).
+      if (sortKey === key) {
+        sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+      } else {
+        sortKey = key;
+        sortDir = key === 'name' ? 'asc' : 'desc';
+      }
+      renderTable();
+    }
+
+    function renderTable() {
+      const sorted = [...statsData].sort((a, b) => {
+        let cmp;
+        if (sortKey === 'name') cmp = a.name.localeCompare(b.name);
+        else cmp = a[sortKey] - b[sortKey];
+        return sortDir === 'asc' ? cmp : -cmp;
+      });
+
+      const statsBody = document.getElementById('stats-body');
+      statsBody.innerHTML = sorted.map(t => `
+        <tr>
+          <td class="row-name">${t.name}</td>
+          <td class="row-count" style="text-align: right;">${t.rows.toLocaleString()}</td>
+          <td class="row-words" style="text-align: right;">${t.words > 0 ? t.words.toLocaleString() : '-'}</td>
+        </tr>
+      `).join('');
+
+      // Reflect the active column + direction in the header arrows.
+      document.querySelectorAll('th.sortable').forEach(th => {
+        const active = th.dataset.sort === sortKey;
+        th.classList.toggle('active', active);
+        const arrow = th.querySelector('.arrow');
+        if (arrow) arrow.textContent = active ? (sortDir === 'asc' ? '▲' : '▼') : '⇅';
+      });
+    }
+
     function showError(msg) {
       const errEl = document.getElementById('error');
       errEl.textContent = msg;
@@ -196,7 +238,15 @@
       document.getElementById('loading').style.display = 'none';
     }
 
-    document.addEventListener('DOMContentLoaded', fetchStats);
+    document.addEventListener('DOMContentLoaded', () => {
+      // Paint idle sort indicators before data arrives.
+      document.querySelectorAll('th.sortable').forEach(th => {
+        const arrow = th.querySelector('.arrow');
+        if (arrow) arrow.textContent = th.dataset.sort === sortKey ? (sortDir === 'asc' ? '▲' : '▼') : '⇅';
+        th.classList.toggle('active', th.dataset.sort === sortKey);
+      });
+      fetchStats();
+    });
   </script>
 <script src="../../../shared/debug-panel.js"></script>
 </body>
