@@ -120,17 +120,19 @@
     shownFor = null;
   }
 
-  // Inspect a failed response body; returns true if it handled a missing table.
+  // Inspect a failed response body; returns true if it handled a missing
+  // table OR a missing RPC function (PostgREST PGRST205 / PGRST202).
   function detect(status, bodyText) {
     if (!bodyText) return false;
-    if (status !== 404 && status !== 400 && !/PGRST205|does not exist|schema cache/i.test(bodyText)) return false;
+    if (status !== 404 && status !== 400 && !/PGRST20[25]|does not exist|schema cache/i.test(bodyText)) return false;
     var m = bodyText.match(/Could not find the table '([\w.]+)'/i) ||
-            bodyText.match(/relation "([\w.]+)" does not exist/i);
-    var table = m ? m[1].replace(/^public\./, '') : '';
-    if (!table) return false;
-    if (shownFor === table && document.getElementById('sharedSchemaModal') &&
+            bodyText.match(/relation "([\w.]+)" does not exist/i) ||
+            bodyText.match(/Could not find the function (?:public\.)?(\w+)/i);
+    var name = m ? m[1].replace(/^public\./, '') : '';
+    if (!name) return false;
+    if (shownFor === name && document.getElementById('sharedSchemaModal') &&
         document.getElementById('sharedSchemaModal').style.display === 'flex') return true; // already up
-    show(table, MIGRATIONS[table]);
+    show(name, MIGRATIONS[name]);
     return true;
   }
 

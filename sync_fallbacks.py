@@ -13,11 +13,6 @@ def replace_fallback(filename):
         print(f"Could not find start in {filename}")
         return
         
-    # Find the next `};` after start_idx
-    # This might match the wrong one if there are nested ones, but the JSON format is just a big dict, so we can find the matching brace.
-    # Actually, simpler: find the next `    // --- Menu Construction ---` or something similar, but let's just find the first `};\n` after start_idx + 100
-    
-    # Let's write a simple brace matcher
     brace_count = 0
     in_str = False
     escape = False
@@ -43,7 +38,6 @@ def replace_fallback(filename):
                     end_idx = i
                     break
     
-    # The end of the statement is probably `};`
     end_idx = content.find(';', end_idx)
     
     new_content = content[:start_idx] + "let navigationData = " + nav_str.strip() + ";" + content[end_idx+1:]

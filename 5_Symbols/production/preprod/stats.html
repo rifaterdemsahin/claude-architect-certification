@@ -117,19 +117,32 @@
     const SUPABASE_URL = localStorage.getItem('supabase_url') || 'https://rmekfsdhglyiralxvkwc.supabase.co';
     const SUPABASE_ANON_KEY = localStorage.getItem('supabase_anon_key') || '';
 
-    const TABLES = [
-      { name: 'modules', column: null },
-      { name: 'videos', column: null },
-      { name: 'scripts', column: 'script_text' },
-      { name: 'sentences', column: 'sentence_text' },
-      { name: 'outline', column: 'content' },
-      { name: 'checklist_items', column: null },
-      { name: 'scenes', column: 'script' }
-    ];
+    // Skip word counting on very large tables to avoid huge downloads.
+    const WORD_COUNT_ROW_CAP = 20000;
 
     let statsData = [];           // [{ name, rows, words }]
     let sortKey = 'rows';         // default sort column
     let sortDir = 'desc';         // 'asc' | 'desc'
+
+    const sbHeaders = (extra) => ({ 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, ...(extra || {}) });
+
+    // A PostgREST format that represents free text (so we count words for it).
+    function isTextFormat(fmt) { return fmt === 'text' || /character/.test(fmt || ''); }
+
+    // Enumerate every table/view the anon role can see from the PostgREST
+    // OpenAPI spec at the REST root. PostgREST only exposes the public schema,
+    // so pg_* / information_schema system tables are excluded automatically.
+    async function discoverTables() {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/`, { headers: sbHeaders() });
+      if (!res.ok) throw new Error('Failed to list tables (HTTP ' + res.status + ')');
+      const spec = await res.json();
+      const defs = spec.definitions || {};
+      return Object.keys(defs).sort().map(name => {
+        const props = (defs[name] && defs[name].properties) || {};
+        const textCols = Object.keys(props).filter(c => isTextFormat(props[c].format));
+        return { name, textCols };
+      });
+    }
 
     async function fetchStats() {
       if (!SUPABASE_ANON_KEY) {
@@ -147,10 +160,12 @@
       statsData = [];
 
       try {
-        for (const table of TABLES) {
+        const tables = await discoverTables();
+
+        for (const table of tables) {
           // Fetch row count
           const countRes = await fetch(`${SUPABASE_URL}/rest/v1/${table.name}?select=count`, {
-            headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Prefer': 'count=exact' }
+            headers: sbHeaders({ 'Prefer': 'count=exact' })
           });
 
           if (!countRes.ok) continue;
@@ -158,17 +173,19 @@
           const countRange = countRes.headers.get('Content-Range');
           const rowCount = parseInt(countRange ? countRange.split('/')[1] : 0);
 
-          // Fetch word count if column specified
+          // Sum words across all free-text columns (skip empty / oversized tables)
           let wordCount = 0;
-          if (table.column) {
-            const dataRes = await fetch(`${SUPABASE_URL}/rest/v1/${table.name}?select=${table.column}`, {
-              headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+          if (table.textCols.length && rowCount > 0 && rowCount <= WORD_COUNT_ROW_CAP) {
+            const dataRes = await fetch(`${SUPABASE_URL}/rest/v1/${table.name}?select=${table.textCols.join(',')}`, {
+              headers: sbHeaders()
             });
             if (dataRes.ok) {
               const data = await dataRes.json();
               data.forEach(row => {
-                const text = row[table.column] || '';
-                wordCount += text.split(/\s+/).filter(w => w.length > 0).length;
+                table.textCols.forEach(c => {
+                  const text = row[c];
+                  if (typeof text === 'string') wordCount += text.split(/\s+/).filter(w => w.length > 0).length;
+                });
               });
             }
           }

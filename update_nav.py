@@ -1,5 +1,4 @@
 import json
-import copy
 
 with open('navigation_config.json', 'r') as f:
     nav = json.load(f)
@@ -104,6 +103,10 @@ add_to_menu("📦 Post Prod", {
 add_to_menu("🛠️ Tools", {
     "label": "⚙️ Settings",
     "url": "5_Symbols/production/settings.html"
+})
+add_to_menu("🎥 Production", {
+    "label": "🌐 Production Overview Hub",
+    "url": "5_Symbols/production/production_hub.html"
 })
 
 with open('navigation_config.json', 'w') as f:
