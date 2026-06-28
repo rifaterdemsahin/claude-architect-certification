@@ -53,8 +53,19 @@
 
     .module-milestones { margin-bottom: 24px; }
     .module-milestones h3 { font-family: var(--font-title); font-size: 1.1rem; font-weight: 700; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; gap: 10px; }
-    .milestone-row { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: rgba(0,0,0,0.2); border-radius: 10px; margin-bottom: 8px; transition: all 0.2s; }
+    .milestone-row { display: flex; flex-direction: column; padding: 14px 18px; background: rgba(0,0,0,0.2); border-radius: 12px; margin-bottom: 12px; transition: all 0.2s; }
     .milestone-row:hover { background: rgba(0,0,0,0.35); }
+    .milestone-header { display: flex; align-items: center; gap: 12px; width: 100%; }
+    .milestone-body { margin-left: 32px; margin-top: 12px; display: flex; flex-direction: column; gap: 12px; }
+    .milestone-subtasks { display: flex; flex-wrap: wrap; gap: 14px; }
+    .subtask-label { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-muted); cursor: pointer; transition: color 0.2s; }
+    .subtask-label:hover { color: var(--text-main); }
+    .subtask-check { appearance: none; width: 16px; height: 16px; border: 1px solid rgba(255,255,255,0.3); border-radius: 4px; cursor: pointer; position: relative; transition: all 0.2s; }
+    .subtask-check:checked { background: var(--secondary); border-color: var(--secondary); }
+    .subtask-check:checked::after { content: '✓'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 10px; font-weight: 900; }
+    .milestone-mini-progress { display: flex; align-items: center; gap: 12px; font-size: 0.8rem; color: var(--text-muted); }
+    .mini-bar { flex: 1; height: 6px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden; }
+    .mini-fill { height: 100%; background: linear-gradient(90deg, var(--secondary), var(--primary)); transition: width 0.3s; width: 0%; border-radius: 3px; }
     .milestone-check { appearance: none; width: 20px; height: 20px; border: 2px solid var(--text-muted); border-radius: 5px; cursor: pointer; flex-shrink: 0; transition: all 0.2s; position: relative; }
     .milestone-check:checked { background: var(--success); border-color: var(--success); }
     .milestone-check:checked::after { content: '✓'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-weight: 900; font-size: 12px; }
@@ -185,6 +196,15 @@
       } catch { return null; }
     }
 
+    const SUBTASKS = [
+      "Creating the presentation",
+      "Creating the images",
+      "Adding them to Gamba",
+      "Presenting to the test audience",
+      "Headshots",
+      "Screen captures"
+    ];
+
     function renderMilestones(modules) {
       const container = document.getElementById('milestones-list');
       let html = '';
@@ -192,15 +212,36 @@
 
       modules.forEach(m => {
         const milestones = m.milestones || [];
-        total += milestones.length;
-        done += milestones.filter(s => s.checked).length;
+        total += milestones.length * SUBTASKS.length;
         html += `<div class="module-milestones"><h3>🎬 Module ${m.module_number}: ${m.title}</h3>`;
         milestones.forEach(s => {
-          const cls = s.checked ? 'milestone-row milestone-done' : 'milestone-row';
-          html += `<div class="${cls}">
-            <input type="checkbox" class="milestone-check" data-id="${s.id}" ${s.checked ? 'checked' : ''} onchange="toggleMilestone(${s.id}, this)">
-            <div style="flex:1"><div class="milestone-title">${s.title}</div><div class="milestone-desc">${s.description}</div></div>
-            <span class="milestone-type">${s.type}</span>
+          const st = s.subtasks || [];
+          done += st.length;
+          const pct = Math.round((st.length / SUBTASKS.length) * 100);
+          const isDone = st.length === SUBTASKS.length;
+          const cls = isDone ? 'milestone-row milestone-done' : 'milestone-row';
+          
+          html += `<div class="${cls}" id="row-${s.id}">
+            <div class="milestone-header">
+              <input type="checkbox" class="milestone-check" data-id="${s.id}" ${isDone ? 'checked' : ''} onchange="toggleAllSubtasks(${s.id}, this)">
+              <div style="flex:1"><div class="milestone-title">${s.title}</div><div class="milestone-desc">${s.description}</div></div>
+              <span class="milestone-type">${s.type}</span>
+            </div>
+            <div class="milestone-body">
+              <div class="milestone-mini-progress">
+                <span>Progress: <span id="mini-pct-${s.id}">${pct}%</span></span>
+                <div class="mini-bar"><div class="mini-fill" id="mini-fill-${s.id}" style="width:${pct}%"></div></div>
+                <span id="mini-count-${s.id}">${st.length}/${SUBTASKS.length}</span>
+              </div>
+              <div class="milestone-subtasks">
+                ${SUBTASKS.map((taskName, i) => `
+                  <label class="subtask-label">
+                    <input type="checkbox" class="subtask-check" data-milestone="${s.id}" data-idx="${i}" ${st.includes(i) ? 'checked' : ''} onchange="toggleSubtask(${s.id}, ${i}, this)">
+                    ${taskName}
+                  </label>
+                `).join('')}
+              </div>
+            </div>
           </div>`;
         });
         html += `</div>`;
@@ -216,7 +257,68 @@
       document.getElementById('progress-pct').textContent = pct + '%';
     }
 
-    async function toggleMilestone(id, checkbox) {
+    async function toggleSubtask(id, idx, checkbox) {
+      let subtasks = [];
+      try {
+        const stored = localStorage.getItem('milestone_subtasks_' + id);
+        if (stored) subtasks = JSON.parse(stored);
+      } catch(e) {}
+      
+      if (checkbox.checked) {
+        if (!subtasks.includes(idx)) subtasks.push(idx);
+      } else {
+        subtasks = subtasks.filter(i => i !== idx);
+      }
+      localStorage.setItem('milestone_subtasks_' + id, JSON.stringify(subtasks));
+      
+      const isDone = subtasks.length === SUBTASKS.length;
+      
+      const pct = Math.round((subtasks.length / SUBTASKS.length) * 100);
+      document.getElementById('mini-fill-' + id).style.width = pct + '%';
+      document.getElementById('mini-pct-' + id).textContent = pct + '%';
+      document.getElementById('mini-count-' + id).textContent = \`\${subtasks.length}/\${SUBTASKS.length}\`;
+      
+      const row = document.getElementById('row-' + id);
+      const mainCheck = row.querySelector('.milestone-check');
+      mainCheck.checked = isDone;
+      row.classList.toggle('milestone-done', isDone);
+      
+      const allSubtasks = document.querySelectorAll('.subtask-check').length;
+      const checkedSubtasks = document.querySelectorAll('.subtask-check:checked').length;
+      updateProgress(checkedSubtasks, allSubtasks);
+      
+      const wasDone = localStorage.getItem('milestone_' + id) === 'true';
+      if (wasDone !== isDone) {
+        localStorage.setItem('milestone_' + id, isDone);
+        if (IS_CONNECTED) {
+          await supFetch('milestone_progress', {
+            method: 'POST',
+            headers: { 'Prefer': 'resolution=merge-duplicates' },
+            body: JSON.stringify({ milestone_id: id, user_id: 'default', checked: isDone })
+          });
+        }
+      }
+    }
+
+    async function toggleAllSubtasks(id, checkbox) {
+      const row = document.getElementById('row-' + id);
+      const subChecks = row.querySelectorAll('.subtask-check');
+      subChecks.forEach(chk => { chk.checked = checkbox.checked; });
+      
+      let subtasks = checkbox.checked ? SUBTASKS.map((_, i) => i) : [];
+      localStorage.setItem('milestone_subtasks_' + id, JSON.stringify(subtasks));
+      
+      const pct = checkbox.checked ? 100 : 0;
+      document.getElementById('mini-fill-' + id).style.width = pct + '%';
+      document.getElementById('mini-pct-' + id).textContent = pct + '%';
+      document.getElementById('mini-count-' + id).textContent = \`\${subtasks.length}/\${SUBTASKS.length}\`;
+      
+      row.classList.toggle('milestone-done', checkbox.checked);
+      
+      const allSubtasks = document.querySelectorAll('.subtask-check').length;
+      const checkedSubtasks = document.querySelectorAll('.subtask-check:checked').length;
+      updateProgress(checkedSubtasks, allSubtasks);
+      
       localStorage.setItem('milestone_' + id, checkbox.checked);
       if (IS_CONNECTED) {
         await supFetch('milestone_progress', {
@@ -225,13 +327,6 @@
           body: JSON.stringify({ milestone_id: id, user_id: 'default', checked: checkbox.checked })
         });
       }
-      // Recalculate progress
-      const checked = document.querySelectorAll('.milestone-check:checked').length;
-      const all = document.querySelectorAll('.milestone-check').length;
-      updateProgress(checked, all);
-      document.querySelectorAll('.milestone-row').forEach((r, i) => {
-        r.classList.toggle('milestone-done', r.querySelector('.milestone-check')?.checked);
-      });
     }
 
     (async () => {
@@ -252,7 +347,24 @@
           const byModule = {};
           milestones.forEach(m => {
             if (!byModule[m.module_number]) byModule[m.module_number] = [];
-            byModule[m.module_number].push({ ...m, checked: progressMap[m.id] || localStorage.getItem('milestone_' + m.id) === 'true' });
+            let subtasks = [];
+            try {
+              const stored = localStorage.getItem('milestone_subtasks_' + m.id);
+              if (stored) subtasks = JSON.parse(stored);
+            } catch(e) {}
+            
+            // If main checkbox is marked done in DB but subtasks array is empty, auto-fill subtasks
+            const isChecked = progressMap[m.id] || localStorage.getItem('milestone_' + m.id) === 'true';
+            if (isChecked && subtasks.length === 0) {
+              subtasks = SUBTASKS.map((_, i) => i);
+              localStorage.setItem('milestone_subtasks_' + m.id, JSON.stringify(subtasks));
+            }
+            
+            byModule[m.module_number].push({ 
+              ...m, 
+              checked: isChecked,
+              subtasks: subtasks
+            });
           });
 
           const modules = Object.keys(byModule).sort().map(k => ({
