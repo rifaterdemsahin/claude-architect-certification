@@ -570,6 +570,11 @@
               "label": "\ud83c\udfa8 Visuals",
               "children": [
                 {
+                  "label": "\ud83d\udcca Slide Generator",
+                  "url": "5_Symbols/production/postprod/slide_generator.html",
+                  "description": "Generate Marp markdown presentations from your video script sentences (basic + AI napkin-style)."
+                },
+                {
                   "label": "\ud83c\udfa8 Thumbnail Assembly (Canva)",
                   "url": "https://www.canva.com/design/DAGJhH098do/7a-TDVcjX482MetGV3HLPA/edit"
                 }
@@ -653,11 +658,6 @@
                   "label": "\ud83c\udfa8 SVG Generator",
                   "url": "5_Symbols/production/postprod/graphics_generator.html",
                   "description": "Per-sentence branded SVG vector generation (title cards, lower thirds, callouts, diagrams) using the branding kit, with bulk mode, status tracking, inline editing, and rationale for skipped assets."
-                },
-                {
-                  "label": "\ud83d\udcca Slide Generator",
-                  "url": "5_Symbols/production/postprod/slide_generator.html",
-                  "description": "Generate Marp markdown presentations from your video script sentences."
                 },
                 {
                   "label": "\ud83d\uddbc\ufe0f Visual Asset Gallery",

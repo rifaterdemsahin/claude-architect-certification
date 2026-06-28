@@ -88,6 +88,8 @@
       white-space: pre-wrap; font-size: 0.85rem; overflow-y: auto; max-height: 400px;
     }
   </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="../../../shared/nav.js"></script>
   <script src="../../../shared/debug-panel.js"></script>
   <script src="../../../shared/seo.js" defer></script>
@@ -96,7 +98,7 @@
   <div class="container">
     <header>
       <h1>📊 Marp Slide Generator</h1>
-      <p>Convert your script sentences into a <strong>Marp markdown presentation</strong>. Select a module and video, pick sentences to include, and download the `.md` file.</p>
+      <p>Convert your script sentences into a <strong>Marp markdown presentation</strong>. Pick a module &amp; video, choose sentences, then <strong>Generate Basic</strong> or <strong>✨ Generate Complex (AI, napkin.ai-style)</strong>. Save to DB, download <code>.md</code>, or export slides as <strong>PNG</strong> / <strong>bulk ZIP</strong>.</p>
     </header>
 
     <!-- 1) Filter -->
@@ -141,6 +143,8 @@
               <div>
                 <button class="btn btn-secondary btn-sm" onclick="copyMarkdown()">📋 Copy</button>
                 <button class="btn btn-success btn-sm" id="downloadBtn" onclick="downloadMarkdown()">⬇️ .md</button>
+                <button class="btn btn-sm" style="background:#f59e0b; color:#000;" onclick="downloadCurrentSlidePng()">🖼️ PNG</button>
+                <button class="btn btn-sm" style="background:#3b82f6; color:#fff;" id="bulkPngBtn" onclick="bulkDownloadPng()">📦 Bulk PNG</button>
                 <button class="btn btn-sm" style="background:#4ade80; color:#000;" onclick="savePresentation()">💾 Save to DB</button>
               </div>
             </div>
@@ -164,10 +168,11 @@
         </div>
         
         <div style="margin-top:14px; background:rgba(16,185,129,0.08); border:1px solid var(--success); border-radius:12px; padding:12px 16px;">
-          <h4 style="color:var(--success); margin-bottom:4px; font-size:0.95rem;">Supabase Implementation Plan</h4>
+          <h4 style="color:var(--success); margin-bottom:4px; font-size:0.95rem;">💾 Persistence & Export</h4>
           <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:0;">
-            Currently, this generates slides on the fly. To persist presentations, a new <code>presentations</code> table should be created in Supabase:<br>
-            <code>id (uuid, pk), video_id (uuid, fk), markdown_content (text), created_at (timestamp), updated_at (timestamp)</code>.
+            <strong>Save to DB</strong> upserts this markdown into the Supabase <code>presentations</code> table (keyed by <code>video_id</code>); it auto-loads on revisit.
+            <strong>🖼️ PNG</strong> exports the current slide and <strong>📦 Bulk PNG</strong> zips every slide at 1280×720 for editing.
+            Use <strong>✨ Generate Slides Complex (AI)</strong> for napkin.ai-style visual slides via OpenRouter.
           </p>
         </div>
       </div>
@@ -197,6 +202,11 @@
         <button class="btn btn-success" onclick="copyAiPrompt()">📋 Copy Prompt</button>
       </div>
     </div>
+  </div>
+
+  <!-- Offscreen high-res renderer (1280x720) used by html2canvas for PNG export -->
+  <div id="pngStage" style="position:fixed; left:-9999px; top:0; width:1280px; height:720px; pointer-events:none;">
+    <div id="pngSlide" style="width:1280px; height:720px; background:#030712; color:#f3f4f6; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; position:relative; overflow:hidden; font-family:'Plus Jakarta Sans',sans-serif; padding:80px;"></div>
   </div>
 
   <div id="toast" class="toast"></div>
@@ -330,7 +340,8 @@
       </table>
       <div style="display:flex; justify-content:flex-end; gap:12px; margin-top: 16px;">
         <button class="btn btn-secondary" onclick="openPromptModal()" style="border:1px solid rgba(255,255,255,0.2); background:rgba(255,255,255,0.05); color:#fff; border-radius:12px; padding:10px 20px; font-weight:600;">👁️ View AI Prompt</button>
-        <button class="btn btn-primary" onclick="generateMarp()" style="background:var(--primary); color:#fff; border:none; padding:10px 24px; border-radius:12px; font-weight:700; font-size:1rem; cursor:pointer;">Generate Slides (Basic) ⚡</button>
+        <button class="btn btn-primary" onclick="generateMarp()" style="background:rgba(139,92,246,0.25); color:#fff; border:1px solid var(--primary); padding:10px 24px; border-radius:12px; font-weight:700; font-size:1rem; cursor:pointer;">Generate Slides (Basic) ⚡</button>
+        <button class="btn btn-primary" id="complexBtn" onclick="generateMarpComplex()" style="background:linear-gradient(135deg,#8b5cf6,#3b82f6); color:#fff; border:none; padding:10px 24px; border-radius:12px; font-weight:700; font-size:1rem; cursor:pointer;">✨ Generate Slides Complex (AI)</button>
       </div>`;
     }
     
@@ -400,7 +411,7 @@ style: |
         markdown += `## ${emoji}\n\n`;
         markdown += `# ${punchyText}\n`;
 
-        generatedSlides.push({ bgImg, emoji, punchyText });
+        generatedSlides.push({ bgImg, emoji, punchyText, points: [] });
       });
       
       $('marpPreview').value = markdown;
@@ -418,11 +429,15 @@ style: |
         const bgImg = bgMatch ? bgMatch[1] : '';
         const emojiMatch = sec.match(/##\s+([^\n]+)/);
         const emoji = emojiMatch ? emojiMatch[1].trim() : '🔹';
-        const textMatch = sec.match(/#\s+([^\n]+)/);
+        const textMatch = sec.match(/(?:^|\n)#\s+([^\n]+)/);
         const punchyText = textMatch ? textMatch[1].trim() : '';
-        
+        // Napkin-style supporting points: markdown bullet lines (- / *)
+        const points = (sec.match(/^[\t ]*[-*]\s+(.+)$/gm) || [])
+          .map(l => l.replace(/^[\t ]*[-*]\s+/, '').trim())
+          .filter(Boolean);
+
         if (punchyText) {
-          generatedSlides.push({ bgImg, emoji, punchyText });
+          generatedSlides.push({ bgImg, emoji, punchyText, points });
         }
       });
       
@@ -450,17 +465,28 @@ style: |
       
       const slide = generatedSlides[previewIndex];
       counter.textContent = `${previewIndex + 1} / ${generatedSlides.length}`;
-      
+      vp.innerHTML = buildSlideInner(slide, 1);
+    }
+
+    // Shared slide markup builder used by both the on-page preview and the
+    // offscreen 1280x720 PNG stage. `scale` lets the PNG stage use larger fonts.
+    function buildSlideInner(slide, scale) {
+      scale = scale || 1;
       let html = '';
       if (slide.bgImg) {
         html += `<div style="position:absolute;top:0;left:0;right:0;bottom:0;background:url('${escHtml(slide.bgImg)}') center/cover; opacity:0.15; z-index:0;"></div>`;
       }
-      html += `<div style="position:relative; z-index:1; padding:20px;">
-        <div style="font-size:3.5rem; margin-bottom:12px;">${slide.emoji}</div>
-        <div style="font-family:var(--font-title); font-size:2.8rem; font-weight:800; color:var(--primary); line-height:1.2; text-wrap:balance;">${escHtml(slide.punchyText)}</div>
+      const pointsHtml = (slide.points && slide.points.length)
+        ? `<ul style="position:relative; z-index:1; list-style:none; padding:0; margin:${1.4 * scale}rem 0 0; display:flex; flex-direction:column; gap:${0.6 * scale}rem; text-align:left;">`
+          + slide.points.map(p => `<li style="font-size:${1.5 * scale}rem; color:#e5e7eb; line-height:1.35;"><span style="color:#8b5cf6; font-weight:800; margin-right:0.5rem;">▸</span>${escHtml(p)}</li>`).join('')
+          + `</ul>`
+        : '';
+      html += `<div style="position:relative; z-index:1; padding:${1.2 * scale}rem; max-width:90%; display:flex; flex-direction:column; align-items:center;">
+        <div style="font-size:${3.5 * scale}rem; margin-bottom:${0.75 * scale}rem;">${escHtml(slide.emoji)}</div>
+        <div style="font-family:var(--font-title), 'Outfit', sans-serif; font-size:${2.8 * scale}rem; font-weight:800; color:#8b5cf6; line-height:1.2; text-wrap:balance;">${escHtml(slide.punchyText)}</div>
+        ${pointsHtml}
       </div>`;
-      
-      vp.innerHTML = html;
+      return html;
     }
 
     function prevPreviewSlide() {
@@ -486,6 +512,124 @@ style: |
       a.click();
       URL.revokeObjectURL(url);
       showToast('✅ Downloaded successfully');
+    }
+
+    // ✨ Generate Slides Complex — calls the server-side OpenRouter proxy which
+    // uses the best design model (Claude Sonnet) to produce napkin.ai-style
+    // visual slides (icon + headline + supporting points), then loads the
+    // returned Marp markdown into the editor and visual preview.
+    async function generateMarpComplex() {
+      const checkboxes = document.querySelectorAll('.slide-chk');
+      const selectedIds = Array.from(checkboxes).filter(cb => cb.checked).map(cb => parseInt(cb.value));
+      const slides = currentSentences.filter(s => selectedIds.includes(s.id));
+      if (!slides.length) { showToast('Select at least one sentence first.', true); return; }
+
+      const btn = $('complexBtn');
+      const original = btn ? btn.textContent : '';
+      if (btn) { btn.disabled = true; btn.textContent = '⏳ Generating with AI…'; }
+
+      const sentencesText = slides.map(s => `- [${s.sentence_type || 'body'}] ${s.sentence_text || ''}`).join('\n');
+      const moduleName = (dbModules.find(m => String(m.id) === $('moduleSelect').value) || {}).title || '';
+      const videoName = (dbVideos.find(v => String(v.id) === $('videoSelect').value) || {}).title || '';
+
+      try {
+        const res = await fetch('/api/slides/openrouter', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sentences: sentencesText,
+            courseName: 'Claude Architect Certification',
+            moduleName, videoName, brandFrontmatter: ''
+          })
+        });
+        if (!res.ok) {
+          const errBody = await res.text();
+          throw new Error(errBody || ('HTTP ' + res.status));
+        }
+        const data = await res.json();
+        let md = (data.content || '').trim();
+        // Strip accidental markdown fences if the model added them.
+        md = md.replace(/^```(?:markdown|md)?\s*/i, '').replace(/\s*```$/, '').trim();
+        if (!md) throw new Error('Empty response from model.');
+        $('marpPreview').value = md;
+        parseMarkdownToPreview(md);
+        showToast(`✨ AI slides generated (${data.model || 'OpenRouter'})`);
+      } catch (e) {
+        let msg = e.message || 'Unknown error';
+        if (msg.includes('404')) {
+          msg = 'Server route /api/slides/openrouter not found — restart the Go server (it must be recompiled). Local: stop and run `go run cmd/server/main.go`.';
+        }
+        showToast('AI generation failed: ' + msg, true, 7000);
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = original; }
+      }
+    }
+
+    // Render a slide (by index) into the offscreen 1280x720 stage and rasterize
+    // it with html2canvas. Returns a Promise<HTMLCanvasElement>.
+    async function renderSlidePng(index) {
+      if (typeof html2canvas === 'undefined') throw new Error('html2canvas not loaded');
+      const slide = generatedSlides[index];
+      const stage = $('pngSlide');
+      stage.innerHTML = buildSlideInner(slide, 1.35);
+      // Give the browser a tick to lay out fonts/images before capture.
+      await new Promise(r => setTimeout(r, 60));
+      return html2canvas(stage, { width: 1280, height: 720, backgroundColor: '#030712', scale: 1, useCORS: true });
+    }
+
+    function canvasToBlob(canvas) {
+      return new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+    }
+
+    async function downloadCurrentSlidePng() {
+      if (!generatedSlides.length) { showToast('Generate slides first.', true); return; }
+      try {
+        showToast('🖼️ Rendering PNG…', false, 1500);
+        const canvas = await renderSlidePng(previewIndex);
+        const blob = await canvasToBlob(canvas);
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `slide_${String(previewIndex + 1).padStart(2, '0')}_m${$('moduleSelect').value || '0'}_v${$('videoSelect').value || '0'}.png`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('✅ PNG downloaded');
+      } catch (e) {
+        showToast('PNG export failed: ' + e.message, true);
+      }
+    }
+
+    // 📦 Bulk download — render every slide to PNG and bundle them into a single
+    // .zip via JSZip so the editor doesn't get hit with N download prompts.
+    async function bulkDownloadPng() {
+      if (!generatedSlides.length) { showToast('Generate slides first.', true); return; }
+      if (typeof JSZip === 'undefined') { showToast('JSZip not loaded.', true); return; }
+      const btn = $('bulkPngBtn');
+      const original = btn ? btn.textContent : '';
+      if (btn) { btn.disabled = true; }
+      try {
+        const zip = new JSZip();
+        const mod = $('moduleSelect').value || '0';
+        const vid = $('videoSelect').value || '0';
+        for (let i = 0; i < generatedSlides.length; i++) {
+          if (btn) btn.textContent = `📦 ${i + 1}/${generatedSlides.length}…`;
+          const canvas = await renderSlidePng(i);
+          const blob = await canvasToBlob(canvas);
+          zip.file(`slide_${String(i + 1).padStart(2, '0')}.png`, blob);
+        }
+        const content = await zip.generateAsync({ type: 'blob' });
+        const url = URL.createObjectURL(content);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `slides_m${mod}_v${vid}.zip`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast(`✅ ${generatedSlides.length} slides zipped`);
+      } catch (e) {
+        showToast('Bulk export failed: ' + e.message, true);
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = original; }
+      }
     }
 
     async function savePresentation() {
@@ -530,14 +674,17 @@ style: |
       
       const sentencesText = slides.map(s => `- [${s.sentence_type}] ${s.sentence_text}`).join('\n');
       
-      const prompt = `You are an expert presentation designer known for creating minimalist, high-impact "Steve Jobs-style" slides. 
-I am providing you with a list of script sentences for a video module. Please convert these sentences into a Marp markdown presentation.
+      const prompt = `You are a world-class visual presentation designer in the style of napkin.ai:
+you turn raw script text into clean, visual, scannable slides where each idea is a tiny "visual" — a bold icon, a punchy headline, and a few supporting points (or a simple left-to-right flow using arrows).
+I am providing you with a list of script sentences for a video module. Convert them into a Marp markdown presentation.
 
-# Rules
-1. Apply extreme minimalism. Extract only the absolute core message (max 3 to 8 words per slide). Make it punchy and impactful.
-2. Assign a single, highly relevant, massive emoji for each slide based on the content (e.g. 🎯, 🚀, 💡, 🎣).
-3. Structure each slide in Marp syntax.
-4. Include this exact Marp frontmatter block with my brand kit at the top (do not alter this block):
+# Design rules (napkin.ai style)
+1. One core idea per slide. Lead with a single large, highly relevant emoji icon (e.g. 🎯, 🚀, 💡, 🎣).
+2. Headline = the punchy core message in 3–8 words. No full sentences.
+3. Add 2–4 short supporting bullet points (max ~6 words each), OR a simple flow line using arrows (->) when the idea is a process.
+4. Merge closely-related sentences into one visual slide instead of one slide per sentence. High signal, low noise.
+5. Open with a title slide and close with a single takeaway slide.
+6. Include this exact Marp frontmatter block with my brand kit at the top (do not alter this block):
 
 \`\`\`markdown
 ---
@@ -548,17 +695,20 @@ backgroundColor: #030712
 color: #f3f4f6
 style: |
   section { font-family: 'Plus Jakarta Sans', sans-serif; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
-  h1 { font-family: 'Outfit', sans-serif; color: #8b5cf6; font-size: 3.8rem; font-weight: 800; margin: 0.5rem 0; line-height: 1.1; }
+  h1 { font-family: 'Outfit', sans-serif; color: #8b5cf6; font-size: 3.4rem; font-weight: 800; margin: 0.4rem 0; line-height: 1.1; }
   h2 { font-size: 4rem; margin: 0; }
-  .bg-image { position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: -1; opacity: 0.15; background-size: cover; }
+  ul { font-size: 1.5rem; text-align: left; line-height: 1.5; }
 ---
 \`\`\`
 
-5. Format each slide like this (separate with \`---\`):
+7. Format each slide like this (separate with \`---\`):
 \`\`\`markdown
 ## [Emoji]
 
-# [Punchy core message]
+# [Punchy headline]
+
+- [supporting point]
+- [supporting point]
 \`\`\`
 
 # Input Sentences

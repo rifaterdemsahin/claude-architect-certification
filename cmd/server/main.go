@@ -2589,6 +2589,165 @@ Return ONLY a JSON array, in scene order, with no markdown fences:
 	}
 }
 
+// slideGenerateHandler powers the "Generate Slides Complex" button on the Marp
+// Slide Generator. It builds a napkin.ai-style visual-slide prompt from the
+// selected script sentences and proxies to OpenRouter. The model is chosen for
+// design/structure reasoning quality (see below), keeping the API key server-side.
+func slideGenerateHandler(cfg config) http.HandlerFunc {
+	type SlideRequest struct {
+		Sentences        string `json:"sentences"`
+		CourseName       string `json:"courseName"`
+		ModuleName       string `json:"moduleName"`
+		VideoName        string `json:"videoName"`
+		BrandFrontmatter string `json:"brandFrontmatter"`
+	}
+
+	// Best model for the job: napkin.ai-style slides need strong layout/visual
+	// reasoning and reliable structured-markdown output. Anthropic's Claude
+	// Sonnet 4.6 leads on design-structured generation at a sensible cost, so we
+	// use it here (vs. the cheaper gemini-2.5-flash used for bulk lower-thirds).
+	const slideModel = "anthropic/claude-sonnet-4.6"
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		if r.Method != http.MethodPost {
+			http.Error(w, `{"error":"method not allowed"}`, http.StatusMethodNotAllowed)
+			return
+		}
+
+		var req SlideRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, `{"error":"invalid request body"}`, http.StatusBadRequest)
+			return
+		}
+
+		apiKey := cfg.getSecret("OPENROUTER_API_KEY")
+		if apiKey == "" {
+			log.Printf("OPENROUTER_API_KEY unavailable: not in Key Vault and not in env")
+			http.Error(w, `{"error":"OPENROUTER_API_KEY missing from server configuration"}`, http.StatusServiceUnavailable)
+			return
+		}
+
+		brand := req.BrandFrontmatter
+		if strings.TrimSpace(brand) == "" {
+			brand = `---
+marp: true
+theme: default
+class: lead
+backgroundColor: #030712
+color: #f3f4f6
+style: |
+  section { font-family: 'Plus Jakarta Sans', sans-serif; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+  h1 { font-family: 'Outfit', sans-serif; color: #8b5cf6; font-size: 3.4rem; font-weight: 800; margin: 0.4rem 0; line-height: 1.1; }
+  h2 { font-size: 4rem; margin: 0; }
+  ul { font-size: 1.5rem; text-align: left; line-height: 1.5; }
+---`
+		}
+
+		prompt := fmt.Sprintf(`You are a world-class visual presentation designer in the style of napkin.ai:
+you turn raw script text into clean, visual, scannable slides where each idea is
+expressed as a tiny "visual" — a bold icon, a punchy headline, and a few
+supporting points or a simple left-to-right flow (e.g. "Idea -> Build -> Ship").
+
+Course: %s
+Module: %s
+Video: %s
+
+# Design rules (napkin.ai style)
+1. One core idea per slide. Lead with a single large, highly relevant emoji icon
+   that visually represents the idea.
+2. Headline = the punchy core message in 3-8 words. No full sentences.
+3. Add 2-4 short supporting bullet points (max ~6 words each) OR a simple flow
+   line using arrows (->) when the idea is a process or sequence.
+4. Group the sentences intelligently: merge closely-related sentences into one
+   visual slide instead of one slide per sentence. Aim for high signal, low noise.
+5. Open with a title slide and close with a single takeaway slide.
+6. Keep it visual and minimal — think keynote, not a document.
+
+# Output format
+Return ONLY raw Marp markdown (no markdown fences, no commentary).
+Start with EXACTLY this frontmatter block (do not alter it):
+
+%s
+
+Then one slide per idea, separated by a line containing only ---, each formatted as:
+
+## [single big emoji]
+
+# [Punchy headline]
+
+- [supporting point]
+- [supporting point]
+
+# Input script sentences
+%s
+`, req.CourseName, req.ModuleName, req.VideoName, brand, req.Sentences)
+
+		ctx, cancel := context.WithTimeout(r.Context(), 60*time.Second)
+		defer cancel()
+
+		orURL := "https://openrouter.ai/api/v1/chat/completions"
+		reqBody := map[string]any{
+			"model": slideModel,
+			"messages": []map[string]string{
+				{"role": "user", "content": prompt},
+			},
+			// A slide deck's markdown is small; cap output so the request stays
+			// well within account credits (an unbounded ceiling triggers HTTP 402).
+			"max_tokens": 4000,
+		}
+
+		b, _ := json.Marshal(reqBody)
+		hreq, err := http.NewRequestWithContext(ctx, "POST", orURL, bytes.NewReader(b))
+		if err != nil {
+			http.Error(w, `{"error":"failed to build request"}`, http.StatusInternalServerError)
+			return
+		}
+
+		hreq.Header.Set("Content-Type", "application/json")
+		hreq.Header.Set("Authorization", "Bearer "+apiKey)
+		hreq.Header.Set("HTTP-Referer", "https://claude-architect-certification.com")
+		hreq.Header.Set("X-Title", "Claude Architect Certification")
+
+		hresp, err := http.DefaultClient.Do(hreq)
+		if err != nil {
+			http.Error(w, `{"error":"OpenRouter API call failed"}`, http.StatusBadGateway)
+			return
+		}
+		defer hresp.Body.Close()
+
+		if hresp.StatusCode >= 400 {
+			body, _ := io.ReadAll(hresp.Body)
+			http.Error(w, fmt.Sprintf(`{"error":"OpenRouter API returned HTTP %d: %s"}`, hresp.StatusCode, body), http.StatusBadGateway)
+			return
+		}
+
+		var orResp struct {
+			Choices []struct {
+				Message struct {
+					Content string `json:"content"`
+				} `json:"message"`
+			} `json:"choices"`
+		}
+
+		if err := json.NewDecoder(hresp.Body).Decode(&orResp); err != nil {
+			http.Error(w, `{"error":"failed to decode response"}`, http.StatusInternalServerError)
+			return
+		}
+
+		content := ""
+		if len(orResp.Choices) > 0 {
+			content = orResp.Choices[0].Message.Content
+		}
+
+		json.NewEncoder(w).Encode(map[string]string{
+			"content": content,
+			"prompt":  prompt,
+			"model":   slideModel,
+		})
+	}
+}
+
 // setCORS allows the static GitHub Pages site (and local dev) to call this
 // backend cross-origin. The GitHub Pages site diverts /api calls here because
 // Pages cannot run the Go backend that proxies to Gemini.
@@ -2878,7 +3037,7 @@ func adminGDriveCredentialsHandler(cfg config) http.HandlerFunc {
 		if clientID == "" {
 			clientID = cfg.getSecret("GOOGLE_CLIENT_ID")
 		}
-		
+
 		apiKey := cfg.getSecret("GOOGLE-IMAGEN-API-KEY")
 		if apiKey == "" {
 			apiKey = cfg.getSecret("GOOGLE-SEARCH-API-KEY")
@@ -2974,6 +3133,7 @@ func main() {
 	mux.Handle("/api/infographics/save", observe(cfg, infographicSaveHandler(cfg)))
 	mux.Handle("/api/lowerthirds/generate", observe(cfg, lowerThirdGenerateHandler(cfg)))
 	mux.Handle("/api/lowerthirds/openrouter", observe(cfg, openRouterGenerateHandler(cfg)))
+	mux.Handle("/api/slides/openrouter", observe(cfg, slideGenerateHandler(cfg)))
 	mux.Handle("/api/ai/sanity-check", observe(cfg, sanityCheckHandler(cfg)))
 	mux.Handle("/api/ai/fix-grammar", observe(cfg, fixGrammarHandler(cfg)))
 	mux.Handle("/api/admin/login", observe(cfg, adminLoginHandler(cfg)))
