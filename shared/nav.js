@@ -633,14 +633,7 @@
   }
 
   function refreshAuthChip() {
-    var el = document.getElementById('site-nav-auth');
-    if (!el) return;
-    var on = isDriveLoggedIn();
-    el.title = on ? 'Google Drive connected — click to manage sign-in' : 'Sign in to Google Drive';
-    var dot = el.querySelector('.site-nav-auth-dot');
-    if (dot) dot.style.background = on ? '#10b981' : '#9ca3af';
-    var label = el.querySelector('.site-nav-auth-label');
-    if (label) label.textContent = on ? '🔐 Drive' : '🔓 Sign in';
+    // Left for backwards compatibility if pages call window.SiteAuth.setLoggedIn
   }
 
   window.SiteAuth = {
@@ -651,7 +644,6 @@
         if (v) localStorage.setItem('gdrive_logged_in', 'true');
         else localStorage.removeItem('gdrive_logged_in');
       } catch (e) {}
-      refreshAuthChip();
     }
   };
 
@@ -704,9 +696,7 @@
       }
     });
 
-    // 🔐 Google Drive login chip — visible on every page; click redirects to the
-    // login (Folder Creator) page where Google authentication happens.
-    html += buildAuthChipHtml();
+    // 🔐 Google Drive login has been consolidated into the Admin section.
 
     // 🔑 Admin sign-in / sign-out chip — toggles the destructive-button gate.
     html += buildAdminChipHtml();

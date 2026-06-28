@@ -352,55 +352,17 @@
         <div class="card">
           <div class="card-title">⚙️ API Config</div>
           
-          <div class="form-group">
-            <label for="client-id">Google Client ID</label>
-            <input type="text" id="client-id" placeholder="Paste Client ID...">
-          </div>
-
-          <div class="form-group">
-            <label for="api-key">Google API Key</label>
-            <div style="position: relative;">
-              <input type="password" id="api-key" placeholder="Paste API Key..." style="padding-right: 38px;">
-              <button type="button" id="toggle-api-key" onclick="toggleApiKeyVisibility()"
-                title="Show / hide API Key" aria-label="Show or hide API Key"
-                style="position: absolute; right: 6px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-muted); padding: 4px; font-size: 0.9rem;">
-                <i class="fa-solid fa-eye"></i>
-              </button>
-            </div>
-          </div>
-
-          <p style="font-size: 0.8rem; line-height: 1.5; margin: 0 0 14px;">
-            <i class="fa-solid fa-circle-question"></i>
-            <strong>Need credentials?</strong>
-            <a href="https://github.com/rifaterdemsahin/claude-architect-certification/blob/main/2_Environment/13_google_drive_setup.md" target="_blank" rel="noopener">
-              How to create the Google credentials &rarr;
-            </a>
-            <br>
-            <span style="color: var(--text-muted);">
-              Create the
-              <a href="https://console.cloud.google.com/apis/credentials?project=gen-lang-client-0369583419" target="_blank" rel="noopener">OAuth Client ID &amp; API Key</a>
-              in the GCP console, then enable the
-              <a href="https://console.cloud.google.com/apis/library/drive.googleapis.com?project=gen-lang-client-0369583419" target="_blank" rel="noopener">Drive API</a>
-              and
-              <a href="https://console.cloud.google.com/apis/library/picker.googleapis.com?project=gen-lang-client-0369583419" target="_blank" rel="noopener">Picker API</a>.
-            </span>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">
+            Google Drive credentials and account login are now managed centrally in the Admin settings.
           </p>
 
-          <button class="btn btn-primary" onclick="saveCredentials()" style="margin-bottom: 12px;">
-            <i class="fa-solid fa-floppy-disk"></i> Save Credentials
-          </button>
-
-          <button class="btn btn-secondary" id="btn-login" style="display:none;" onclick="handleAuthClick()">
-            <i class="fa-brands fa-google"></i> Connect Google Account
-          </button>
-
-          <button class="btn btn-secondary" id="btn-logout" style="display:none;" onclick="handleSignoutClick()">
-            <i class="fa-solid fa-arrow-right-from-bracket"></i> Unlink Drive
-          </button>
+          <a href="../../supabase/ui/admin.html?redirect=5_Symbols/production/prod/google_drive_folder_creator.html" class="btn btn-secondary" style="text-decoration: none; margin-bottom: 16px;">
+            <i class="fa-solid fa-gear"></i> Configure in Admin
+          </a>
 
           <div class="status-badge">
             <span class="dot dot-offline" id="auth-dot"></span>
-            <span id="auth-text">Missing Credentials</span>
+            <span id="auth-text">Checking credentials...</span>
           </div>
         </div>
 
@@ -541,8 +503,6 @@
       // Prefer cookie-stored credentials, then fall back to localStorage
       const savedClientId = getCookie("gdrive_client_id") || localStorage.getItem("gdrive_client_id") || "";
       const savedApiKey = getCookie("gdrive_api_key") || localStorage.getItem("gdrive_api_key") || "";
-      document.getElementById("client-id").value = savedClientId;
-      document.getElementById("api-key").value = savedApiKey;
 
       // Initialize Supabase Client
       if (window.supabase) {
@@ -566,7 +526,7 @@
         // Keep localStorage in sync for legacy code paths
         localStorage.setItem("gdrive_client_id", savedClientId);
         localStorage.setItem("gdrive_api_key", savedApiKey);
-        initGapi();
+        initGapi(savedApiKey);
       } else {
         // Trigger Azure Key Vault auto-load
         autoloadCredentials();
@@ -588,14 +548,12 @@
         if (!res.ok) throw new Error('Backend credentials request failed.');
         const data = await res.json();
         if (data.clientId && data.apiKey) {
-          document.getElementById("client-id").value = data.clientId;
-          document.getElementById("api-key").value = data.apiKey;
           localStorage.setItem("gdrive_client_id", data.clientId);
           localStorage.setItem("gdrive_api_key", data.apiKey);
           saveCredentialsToCookie(data.clientId, data.apiKey);
           log('success', '✓ Auto-loaded credentials from Key Vault.');
           showAdminWarningBanner(false);
-          initGapi();
+          initGapi(data.apiKey);
         }
       } catch (err) {
         log('warn', 'Key Vault check bypassed: ' + err.message);
@@ -627,13 +585,11 @@
           }
 
           if (clientIdSetting && apiKeySetting && clientIdSetting.value && apiKeySetting.value) {
-            document.getElementById("client-id").value = clientIdSetting.value;
-            document.getElementById("api-key").value = apiKeySetting.value;
             localStorage.setItem("gdrive_client_id", clientIdSetting.value);
             localStorage.setItem("gdrive_api_key", apiKeySetting.value);
             saveCredentialsToCookie(clientIdSetting.value, apiKeySetting.value);
             log('success', '✓ Auto-loaded credentials from Supabase project_settings table.');
-            initGapi();
+            initGapi(apiKeySetting.value);
           } else {
             fallbackToLocalStorage();
           }
@@ -651,7 +607,7 @@
       const savedApiKey = localStorage.getItem("gdrive_api_key") || "";
       if (savedClientId && savedApiKey) {
         log('info', 'Loaded credentials from LocalStorage fallback.');
-        initGapi();
+        initGapi(savedApiKey);
       }
     }
 
@@ -688,41 +644,7 @@
       banner.style.display = show ? 'block' : 'none';
     }
 
-    function toggleApiKeyVisibility() {
-      const input = document.getElementById("api-key");
-      const icon = document.querySelector("#toggle-api-key i");
-      const show = input.type === "password";
-      input.type = show ? "text" : "password";
-      icon.className = show ? "fa-solid fa-eye-slash" : "fa-solid fa-eye";
-    }
-
-    async function saveCredentials() {
-      const clientId = document.getElementById("client-id").value.trim();
-      const apiKey = document.getElementById("api-key").value.trim();
-      localStorage.setItem("gdrive_client_id", clientId);
-      localStorage.setItem("gdrive_api_key", apiKey);
-      // Persist to cookie so the user is not re-prompted on return visits
-      saveCredentialsToCookie(clientId, apiKey);
-
-      log('info', 'Saving credentials locally and to cookie...');
-      showAdminWarningBanner(false);
-      initGapi();
-
-      if (db) {
-        log('info', 'Saving credentials configuration to Supabase project_settings table...');
-        try {
-          await upsertSetting('gdrive_client_id', clientId);
-          await upsertSetting('gdrive_api_key', apiKey);
-          log('success', '✓ Saved configuration to Supabase project_settings table.');
-          showToast("Credentials saved locally and to Supabase!");
-        } catch (err) {
-          log('error', 'Failed saving to Supabase settings: ' + err.message);
-          showToast("Saved locally, but Supabase save failed.");
-        }
-      } else {
-        showToast("Credentials saved to localStorage.");
-      }
-    }
+    // (Removed UI toggles and save buttons that were moved to admin.html)
 
     async function saveRootFolderUrl() {
       const input = document.getElementById("root-folder-url");
@@ -868,13 +790,13 @@
 
     // ── GOOGLE CLIENT INITIALIZATION ──
     function gapiLoaded() {
-      gapi.load('client', initGapi);
+      gapi.load('client', () => initGapi());
     }
 
-    async function initGapi() {
-      const apiKey = document.getElementById("api-key").value || "";
+    async function initGapi(apiKeyParam) {
+      const apiKey = apiKeyParam || localStorage.getItem('gdrive_api_key') || getCookie('gdrive_api_key') || "";
       if (!apiKey) {
-        log('warn', 'Enter Google API Key in settings to connect.');
+        log('warn', 'Google API Key not found. Please configure in Admin settings.');
         updateAuthUI(false, 'Missing API Key');
         return;
       }
@@ -891,7 +813,16 @@
         });
         gapiInited = true;
         log('success', 'Google API Client loaded.');
-        checkAuthInits();
+
+        // Check if we have an access token already (from admin page)
+        const token = localStorage.getItem('gdrive_access_token');
+        if (token) {
+          gapi.client.setToken({ access_token: token });
+          accessToken = token;
+          updateAuthUI(true, 'Google Connected');
+          document.getElementById('btn-sync').disabled = false;
+        }
+
       } catch (err) {
         const msg = (err && (err.message || err.details || (err.result && err.result.error && err.result.error.message))) || JSON.stringify(err);
         log('error', 'GAPI Client initialization error: ' + msg);
@@ -900,80 +831,22 @@
     }
 
     function gisLoaded() {
-      ginit = true;
-      checkAuthInits();
+      // GIS is no longer used for login on this page. Left for backwards compatibility.
     }
 
     function checkAuthInits() {
-      if (gapiInited && ginit) {
-        const clientId = document.getElementById("client-id").value || "";
-        if (!clientId) {
-          log('warn', 'Enter Client ID to connect Google Identity Services.');
-          updateAuthUI(false, 'Missing Client ID');
-          return;
-        }
-        try {
-          tokenClient = google.accounts.oauth2.initTokenClient({
-            client_id: clientId,
-            scope: SCOPES,
-            callback: (resp) => {
-              if (resp.error !== undefined) {
-                log('error', 'Authentication error: ' + resp.error);
-                return;
-              }
-              accessToken = resp.access_token;
-              log('success', 'Google Drive scope authorized.');
-              updateAuthUI(true, 'Google Connected');
-              document.getElementById('btn-sync').disabled = false;
-              
-              // Share token with Supabase for CLI access
-              saveTokenToSupabase(resp.access_token);
-            },
-          });
-          updateAuthUI(false, 'API Ready. Connect Drive Account.');
-          document.getElementById('btn-login').style.display = 'block';
-        } catch (err) {
-          log('error', 'Token client init failed: ' + err.message);
-          updateAuthUI(false, 'OAuth init error');
-        }
-      }
-    }
-
-    function handleAuthClick() {
-      if (!tokenClient) {
-        log('error', 'Google API Identity Client is not ready.');
-        return;
-      }
-      tokenClient.requestAccessToken({ prompt: 'consent' });
-    }
-
-    function handleSignoutClick() {
-      const token = gapi.client.getToken();
-      if (token !== null) {
-        google.accounts.oauth2.revokeToken(token.access_token);
-        gapi.client.setToken(null);
-        accessToken = null;
-        log('info', 'Disconnected Google Drive account.');
-        updateAuthUI(false, 'Drive Unlinked');
-        document.getElementById('btn-sync').disabled = true;
-      }
+      // Logic moved to admin.html
     }
 
     function updateAuthUI(connected, text) {
       const dot = document.getElementById('auth-dot');
       const label = document.getElementById('auth-text');
-      const loginBtn = document.getElementById('btn-login');
-      const logoutBtn = document.getElementById('btn-logout');
 
       label.innerText = text;
       if (connected) {
         dot.className = 'dot dot-online';
-        loginBtn.style.display = 'none';
-        logoutBtn.style.display = 'block';
       } else {
         dot.className = 'dot dot-offline';
-        loginBtn.style.display = 'block';
-        logoutBtn.style.display = 'none';
       }
     }
 

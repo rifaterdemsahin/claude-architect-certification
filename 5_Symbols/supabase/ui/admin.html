@@ -34,7 +34,11 @@
   </style>
   <script src="../../shared/schema-modal.js"></script>
   <script src="../../shared/nav.js"></script>
-<script src="../../../shared/seo.js" defer></script></head>
+  <script src="../../../shared/seo.js" defer></script>
+  <!-- Google Auth & API Library Scripts -->
+  <script src="https://accounts.google.com/gsi/client" onload="gisLoaded()" async defer></script>
+  <script src="https://apis.google.com/js/api.js" onload="gapiLoaded()" async defer></script>
+</head>
 <body>
   <div class="container">
     <h1>🚀 Supabase Database Seed & Admin</h1>
@@ -80,6 +84,36 @@
       <button class="btn btn-primary" id="btn-save-axiom" onclick="saveAxiomConfig()">Save Axiom Config</button>
       <button class="btn btn-danger" id="btn-test-error" onclick="triggerTestError()" style="margin-left:12px;">💥 Send Test Error</button>
       <span id="axiom-status" style="margin-left:12px;font-size:0.85rem;"></span>
+    </div>
+
+    <!-- Google Drive Authorization -->
+    <div class="card" id="gdrive-auth-card">
+      <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.4rem; margin-bottom: 16px;">📁 Google Drive API Config</h2>
+      <label for="client-id">Google Client ID</label>
+      <input type="text" id="client-id" placeholder="Paste Client ID...">
+
+      <label for="api-key">Google API Key</label>
+      <div style="position: relative;">
+        <input type="password" id="api-key" placeholder="Paste API Key..." style="padding-right: 38px;">
+        <button type="button" id="toggle-api-key" onclick="toggleApiKeyVisibility()"
+          style="position: absolute; right: 6px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--muted); padding: 4px; font-size: 0.9rem;">
+          <svg style="width:16px;height:16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+        </button>
+      </div>
+
+      <button class="btn btn-primary" onclick="saveGoogleCredentials()" style="margin-bottom: 12px; margin-top: 12px;">
+        Save Google Credentials
+      </button>
+
+      <button class="btn" id="btn-login" style="display:none; width: 100%; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.1); color: white; padding: 12px; border-radius: 10px; cursor: pointer; font-weight: bold; margin-bottom: 8px;" onclick="handleAuthClick()">
+        Connect Google Account
+      </button>
+
+      <button class="btn" id="btn-logout" style="display:none; width: 100%; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.1); color: white; padding: 12px; border-radius: 10px; cursor: pointer; font-weight: bold; margin-bottom: 8px;" onclick="handleSignoutClick()">
+        Unlink Drive
+      </button>
+
+      <div class="status-badge status-pending" id="gauth-status" style="margin-top: 12px; display: block;">Missing Credentials</div>
     </div>
 
     <div class="card">
@@ -149,6 +183,14 @@
       if (savedOrg) document.getElementById('axiom-org').value = savedOrg;
       if (savedDataset) document.getElementById('axiom-dataset').value = savedDataset;
       if (savedAxiomUrl) document.getElementById('axiom-url').value = savedAxiomUrl;
+      
+      const savedClientId = localStorage.getItem('gdrive_client_id') || getCookie('gdrive_client_id') || '';
+      const savedApiKey = localStorage.getItem('gdrive_api_key') || getCookie('gdrive_api_key') || '';
+      if (savedClientId) document.getElementById('client-id').value = savedClientId;
+      if (savedApiKey) document.getElementById('api-key').value = savedApiKey;
+      if (savedClientId && savedApiKey) {
+        initGapi();
+      }
     });
 
     function log(msg, cls = 'info') {
@@ -443,6 +485,170 @@
     }
 
     checkAdminAuth();
+
+    // ── GOOGLE DRIVE AUTHENTICATION ──
+    let gapiInited = false;
+    let ginit = false;
+    let tokenClient;
+    const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
+    const SCOPES = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive';
+
+    function toggleApiKeyVisibility() {
+      const input = document.getElementById("api-key");
+      const show = input.type === "password";
+      input.type = show ? "text" : "password";
+    }
+
+    async function saveGoogleCredentials() {
+      const clientId = document.getElementById("client-id").value.trim();
+      const apiKey = document.getElementById("api-key").value.trim();
+      localStorage.setItem("gdrive_client_id", clientId);
+      localStorage.setItem("gdrive_api_key", apiKey);
+      // save to cookie
+      const expires = new Date(Date.now() + 365 * 864e5).toUTCString();
+      document.cookie = `gdrive_client_id=${encodeURIComponent(clientId)}; expires=${expires}; path=/; SameSite=Lax`;
+      document.cookie = `gdrive_api_key=${encodeURIComponent(apiKey)}; expires=${expires}; path=/; SameSite=Lax`;
+
+      log('Google credentials saved locally and to cookie.', 'ok');
+      
+      // Save to Supabase
+      if (getSupabaseUrl() && getAnonKey()) {
+        try {
+          await fetch(`${getSupabaseUrl()}/rest/v1/project_settings`, {
+            method: 'POST',
+            headers: {
+              'apikey': getAnonKey(),
+              'Authorization': `Bearer ${getAnonKey()}`,
+              'Content-Type': 'application/json',
+              'Prefer': 'resolution=merge-duplicates,return=minimal'
+            },
+            body: JSON.stringify({ key: 'gdrive_client_id', value: clientId })
+          });
+          await fetch(`${getSupabaseUrl()}/rest/v1/project_settings`, {
+            method: 'POST',
+            headers: {
+              'apikey': getAnonKey(),
+              'Authorization': `Bearer ${getAnonKey()}`,
+              'Content-Type': 'application/json',
+              'Prefer': 'resolution=merge-duplicates,return=minimal'
+            },
+            body: JSON.stringify({ key: 'gdrive_api_key', value: apiKey })
+          });
+          log('Google credentials saved to Supabase project_settings.', 'ok');
+        } catch (err) {
+          log('Failed to save Google credentials to Supabase.', 'err');
+        }
+      }
+
+      initGapi();
+    }
+
+    function gapiLoaded() {
+      gapi.load('client', initGapi);
+    }
+
+    async function initGapi() {
+      const apiKey = document.getElementById("api-key").value || "";
+      if (!apiKey) return;
+      if (!window.gapi || !gapi.client || typeof gapi.client.init !== 'function') return;
+      try {
+        await gapi.client.init({
+          apiKey: apiKey,
+          discoveryDocs: [DISCOVERY_DOC],
+        });
+        gapiInited = true;
+        checkAuthInits();
+      } catch (err) {
+        log('GAPI init failed: ' + err.message, 'err');
+      }
+    }
+
+    function gisLoaded() {
+      ginit = true;
+      checkAuthInits();
+    }
+
+    function checkAuthInits() {
+      if (gapiInited && ginit) {
+        const clientId = document.getElementById("client-id").value || "";
+        if (!clientId) return;
+        try {
+          tokenClient = google.accounts.oauth2.initTokenClient({
+            client_id: clientId,
+            scope: SCOPES,
+            callback: async (resp) => {
+              if (resp.error !== undefined) {
+                log('Auth error: ' + resp.error, 'err');
+                return;
+              }
+              log('Google Drive connected!', 'ok');
+              updateAuthUI(true, 'Google Connected');
+              localStorage.setItem('gdrive_access_token', resp.access_token);
+              if (window.SiteAuth) window.SiteAuth.setLoggedIn(true);
+              
+              // save token to supabase
+              if (getSupabaseUrl() && getAnonKey()) {
+                try {
+                  await fetch(`${getSupabaseUrl()}/rest/v1/project_settings`, {
+                    method: 'POST',
+                    headers: {
+                      'apikey': getAnonKey(),
+                      'Authorization': `Bearer ${getAnonKey()}`,
+                      'Content-Type': 'application/json',
+                      'Prefer': 'resolution=merge-duplicates,return=minimal'
+                    },
+                    body: JSON.stringify({ key: 'gdrive_access_token', value: resp.access_token })
+                  });
+                  log('Token saved to Supabase.', 'ok');
+                } catch (e) {}
+              }
+            },
+          });
+          
+          const token = localStorage.getItem('gdrive_access_token');
+          if (token && window.SiteAuth && window.SiteAuth.isLoggedIn()) {
+             updateAuthUI(true, 'Google Connected');
+          } else {
+             updateAuthUI(false, 'API Ready. Connect Drive Account.');
+          }
+        } catch (err) {
+          log('Token client init failed: ' + err.message, 'err');
+        }
+      }
+    }
+
+    function handleAuthClick() {
+      if (!tokenClient) return;
+      tokenClient.requestAccessToken({ prompt: 'consent' });
+    }
+
+    function handleSignoutClick() {
+      const token = localStorage.getItem('gdrive_access_token');
+      if (token) {
+        google.accounts.oauth2.revokeToken(token);
+      }
+      localStorage.removeItem('gdrive_access_token');
+      if (window.SiteAuth) window.SiteAuth.setLoggedIn(false);
+      updateAuthUI(false, 'Drive Unlinked');
+      log('Disconnected Google Drive.', 'info');
+    }
+
+    function updateAuthUI(connected, text) {
+      const status = document.getElementById('gauth-status');
+      const loginBtn = document.getElementById('btn-login');
+      const logoutBtn = document.getElementById('btn-logout');
+
+      status.innerText = text;
+      if (connected) {
+        status.className = 'status-badge status-ready';
+        loginBtn.style.display = 'none';
+        logoutBtn.style.display = 'block';
+      } else {
+        status.className = 'status-badge status-pending';
+        loginBtn.style.display = 'block';
+        logoutBtn.style.display = 'none';
+      }
+    }
   </script>
 <script src="../../../shared/debug-panel.js"></script>
 </body>
