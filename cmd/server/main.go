@@ -20,6 +20,7 @@ import (
 	"net/url"
 	"os"
 	"path"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -575,6 +576,120 @@ func axiomErrorsHandler(tmpl *template.Template, cfg config, navConfigJS templat
 		if err := tmpl.ExecuteTemplate(w, "axiom_errors.html", data); err != nil {
 			log.Printf("axiom_errors template: %v", err)
 		}
+	}
+}
+
+// axiomLogsHandler returns the latest Axiom events as JSON for the debug
+// panel's "📊 Show Axiom Logs" button. Admin-gated (AXIOM_TOKEN is sensitive
+// and logs may carry request details); reuses the same APL query as the
+// /admin/errors HTML page.
+func axiomLogsHandler(cfg config) http.HandlerFunc {
+	type axiomLogEvent struct {
+		Time     string `json:"_time"`
+		Level    string `json:"level"`
+		Stage    string `json:"stage"`
+		Method   string `json:"method"`
+		Path     string `json:"path"`
+		Status   int    `json:"status"`
+		Duration int64  `json:"duration_ms"`
+		Err      string `json:"err"`
+		Message  string `json:"message"`
+		URL      string `json:"url"`
+	}
+	return func(w http.ResponseWriter, r *http.Request) {
+		setCORS(w, r)
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		if !isAdminRequest(r) {
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(map[string]any{"error": "unauthorized — sign in as admin", "events": []any{}})
+			return
+		}
+		limit := 50
+		if l := r.URL.Query().Get("limit"); l != "" {
+			if n, err := strconv.Atoi(l); err == nil && n > 0 && n <= 500 {
+				limit = n
+			}
+		}
+		if cfg.axiomToken == "" {
+			json.NewEncoder(w).Encode(map[string]any{"error": "AXIOM_TOKEN not set on server", "events": []any{}})
+			return
+		}
+		apl := fmt.Sprintf(`['%s'] | sort by _time desc | limit %d`, cfg.axiomDataset, limit)
+		body, _ := json.Marshal(map[string]any{
+			"apl":       apl,
+			"startTime": "now-24h",
+		})
+		queryURL := fmt.Sprintf("%s/v1/datasets/%s/query", cfg.axiomQueryURL, cfg.axiomDataset)
+		log.Printf("axiom logs -> %s (apl: %s)", queryURL, apl)
+		ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
+		defer cancel()
+		req, err := http.NewRequestWithContext(ctx, http.MethodPost, queryURL, bytes.NewReader(body))
+		if err != nil {
+			json.NewEncoder(w).Encode(map[string]any{"error": err.Error(), "events": []any{}})
+			return
+		}
+		req.Header.Set("Authorization", "Bearer "+cfg.axiomToken)
+		req.Header.Set("Content-Type", "application/json")
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			json.NewEncoder(w).Encode(map[string]any{"error": err.Error(), "events": []any{}})
+			return
+		}
+		defer resp.Body.Close()
+		respBody, _ := io.ReadAll(resp.Body)
+		if resp.StatusCode >= 300 {
+			json.NewEncoder(w).Encode(map[string]any{"error": fmt.Sprintf("Axiom API %d: %s", resp.StatusCode, string(respBody)), "events": []any{}})
+			return
+		}
+		var qr axiomQueryResp
+		if err := json.Unmarshal(respBody, &qr); err != nil {
+			json.NewEncoder(w).Encode(map[string]any{"error": "decode: " + err.Error(), "events": []any{}})
+			return
+		}
+		events := []axiomLogEvent{}
+		for _, m := range qr.Matches {
+			ev := axiomLogEvent{Time: m.Time}
+			if v, ok := m.Data["level"].(string); ok {
+				ev.Level = v
+			}
+			if v, ok := m.Data["stage"].(string); ok {
+				ev.Stage = v
+			}
+			if v, ok := m.Data["method"].(string); ok {
+				ev.Method = v
+			}
+			if v, ok := m.Data["path"].(string); ok {
+				ev.Path = v
+			}
+			if v, ok := m.Data["status"].(float64); ok {
+				ev.Status = int(v)
+			}
+			if v, ok := m.Data["duration_ms"].(float64); ok {
+				ev.Duration = int64(v)
+			}
+			if v, ok := m.Data["err"].(string); ok {
+				ev.Err = v
+			}
+			if v, ok := m.Data["message"].(string); ok {
+				ev.Message = v
+			}
+			if v, ok := m.Data["url"].(string); ok {
+				ev.URL = v
+			}
+			events = append(events, ev)
+		}
+		log.Printf("axiom logs query returned %d events", len(events))
+		// Axiom's /query endpoint ignores the APL `| limit N` clause (it caps at
+		// 1000 matches), so enforce the requested limit here. Events are already
+		// newest-first from the APL `sort by _time desc`.
+		if len(events) > limit {
+			events = events[:limit]
+		}
+		json.NewEncoder(w).Encode(map[string]any{"events": events, "count": len(events)})
 	}
 }
 
@@ -3139,6 +3254,7 @@ func main() {
 	mux.Handle("/api/admin/login", observe(cfg, adminLoginHandler(cfg)))
 	mux.Handle("/api/admin/logout", observe(cfg, adminLogoutHandler(cfg)))
 	mux.Handle("/api/admin/status", observe(cfg, adminStatusHandler(cfg)))
+	mux.Handle("/api/axiom/logs", observe(cfg, axiomLogsHandler(cfg)))
 	mux.Handle("/api/admin/gdrive-credentials", observe(cfg, adminGDriveCredentialsHandler(cfg)))
 	mux.Handle("/admin/errors", observe(cfg, axiomErrorsHandler(tmpl, cfg, navConfigJS)))
 	mux.Handle("/", observe(cfg, homeHandler(tmpl, cfg, navConfigJS)))

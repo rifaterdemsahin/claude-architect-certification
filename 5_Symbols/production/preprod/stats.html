@@ -126,22 +126,25 @@
 
     const sbHeaders = (extra) => ({ 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, ...(extra || {}) });
 
-    // A PostgREST format that represents free text (so we count words for it).
-    function isTextFormat(fmt) { return fmt === 'text' || /character/.test(fmt || ''); }
-
-    // Enumerate every table/view the anon role can see from the PostgREST
-    // OpenAPI spec at the REST root. PostgREST only exposes the public schema,
-    // so pg_* / information_schema system tables are excluded automatically.
-    async function discoverTables() {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/`, { headers: sbHeaders() });
-      if (!res.ok) throw new Error('Failed to list tables (HTTP ' + res.status + ')');
-      const spec = await res.json();
-      const defs = spec.definitions || {};
-      return Object.keys(defs).sort().map(name => {
-        const props = (defs[name] && defs[name].properties) || {};
-        const textCols = Object.keys(props).filter(c => isTextFormat(props[c].format));
-        return { name, textCols };
+    // Ask the server-side get_table_stats() RPC for the full public-schema
+    // inventory (table name + EXACT row count + free-text columns) in one call.
+    // We can't read the PostgREST OpenAPI root as anon (HTTP 401) and can't see
+    // pg_catalog either, so a SECURITY DEFINER function is the only way to list
+    // EVERY non-system table with a true count. If the RPC isn't installed yet,
+    // the central schema-modal (shared/schema-modal.js) catches the 404/PGRST202
+    // and shows the migration SQL to run, then offers a Retry.
+    async function fetchTableInventory() {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_table_stats`, {
+        method: 'POST',
+        headers: sbHeaders({ 'Content-Type': 'application/json' }),
+        body: '{}'
       });
+      if (!res.ok) {
+        throw new Error(res.status === 404
+          ? 'The get_table_stats() RPC is not installed yet \u2014 use the dialog to run the migration, then retry.'
+          : 'get_table_stats() failed (HTTP ' + res.status + ')');
+      }
+      return res.json(); // [{ table_name, row_count, text_columns }]
     }
 
     async function fetchStats() {
@@ -160,29 +163,23 @@
       statsData = [];
 
       try {
-        const tables = await discoverTables();
+        const tables = await fetchTableInventory();
 
-        for (const table of tables) {
-          // Fetch row count
-          const countRes = await fetch(`${SUPABASE_URL}/rest/v1/${table.name}?select=count`, {
-            headers: sbHeaders({ 'Prefer': 'count=exact' })
-          });
-
-          if (!countRes.ok) continue;
-
-          const countRange = countRes.headers.get('Content-Range');
-          const rowCount = parseInt(countRange ? countRange.split('/')[1] : 0);
+        for (const t of tables) {
+          const name = String(t.table_name || '');
+          const rowCount = Number(t.row_count) || 0;
+          const textCols = Array.isArray(t.text_columns) ? t.text_columns : [];
 
           // Sum words across all free-text columns (skip empty / oversized tables)
           let wordCount = 0;
-          if (table.textCols.length && rowCount > 0 && rowCount <= WORD_COUNT_ROW_CAP) {
-            const dataRes = await fetch(`${SUPABASE_URL}/rest/v1/${table.name}?select=${table.textCols.join(',')}`, {
+          if (textCols.length && rowCount > 0 && rowCount <= WORD_COUNT_ROW_CAP) {
+            const dataRes = await fetch(`${SUPABASE_URL}/rest/v1/${name}?select=${textCols.join(',')}`, {
               headers: sbHeaders()
             });
             if (dataRes.ok) {
               const data = await dataRes.json();
               data.forEach(row => {
-                table.textCols.forEach(c => {
+                textCols.forEach(c => {
                   const text = row[c];
                   if (typeof text === 'string') wordCount += text.split(/\s+/).filter(w => w.length > 0).length;
                 });
@@ -190,7 +187,7 @@
             }
           }
 
-          statsData.push({ name: table.name, rows: rowCount, words: wordCount });
+          statsData.push({ name, rows: rowCount, words: wordCount });
           totalRows += rowCount;
           totalWords += wordCount;
           activeTables++;

@@ -2318,3 +2318,46 @@ The `_rowId`-only dedup added earlier had two gaps: (1) it scanned only **open**
 - `python3 -m py_compile` clean.
 - Unit suite passes: fingerprint stable across `_rowId`s; stable across localhost↔fly.io host; distinct for distinct errors; legacy-body re-derivation matches; same-day dup correctly skipped.
 - **Live scan** of the real tracker (last 1 day) recognised all 5 closed issues (#10–#14) by both row_id and fingerprint (`220e55e1f5a3…`); a replay of the identical error is reported as a duplicate and would be skipped.
+
+## 2026-06-28 — 📡 Collapsible Axiom controls in the debug log bar
+
+### 🎯 Objective
+Replace the single "📡 Send to Axiom" button in `shared/debug-panel.js` with a **collapsible "📡 Axiom" button group** that contains two inner actions: **📊 Show Axiom Logs** (read live events from the server) and **📡 Send to Axiom** (ship the current debug log).
+
+### 🔍 Why
+The debug bar already had Send-to-Axiom, but no way to *read* what was logged. A collapsible group mirrors the existing 🗄️ DB Tables pattern (toggle → inline sub-panel) so both Axiom actions live together without cluttering the always-visible header.
+
+### 📐 Implementation
+- **Server (`cmd/server/main.go`)**: added admin-gated JSON endpoint **`GET /api/axiom/logs?limit=N`** (`axiomLogsHandler`) that reuses the same APL query as the `/admin/errors` HTML page (`['<dataset>'] | sort by _time desc | limit N`, last 24h) and returns `{events, count}`. Admin-gated because `AXIOM_TOKEN` is sensitive and logs carry request details; unsigned visitors get 401. Registered route + added `strconv` import for the limit param.
+- **Client (`shared/debug-panel.js`)**:
+  - Swapped the standalone Send button for an **`📡 Axiom ▾` toggle** (`__dbgToggleAxiom`) that opens a `_dbg_axiom_wrap` sub-panel.
+  - Sub-panel holds the two inner buttons: **📊 Show Axiom Logs** (`__dbgShowAxiomLogs` → fetches `/api/axiom/logs`, renders colour-coded rows inline) and **📡 Send to Axiom** (keeps `id=_dbg_axiom_btn` so `sendAllToAxiom` is unchanged).
+  - Made the Axiom and DB sub-panels **mutually exclusive** (opening one closes the other) to avoid stacking; the toggle expands a collapsed panel and shrinks the log body, exactly like the DB toggle.
+  - Failures render a helpful inline hint (sign in as admin / run on localhost:8080).
+
+### ✅ Verification
+- `go build ./... && go vet ./...` green; `node -c shared/debug-panel.js` OK.
+- Local server: `GET /api/axiom/logs` returns 401 for unsigned, 200 + events for admin; route logged via `observe`.
+
+## 2026-06-28 — 🗄️ Stats page: enumerate EVERY public table via a SECURITY DEFINER RPC
+
+### 🎯 Objective
+The Database Stats page (`5_Symbols/production/preprod/stats.html`) had to show **every** user table — not a hardcoded list of 7 — while **excluding** system tables (`pg_*`, `information_schema`).
+
+### 🔍 Why the OpenAPI approach failed
+The previous attempt discovered tables from the PostgREST OpenAPI spec at the REST root (`GET /rest/v1/`). Verified live: **that endpoint returns HTTP 401 to the `anon` role**, so the page can never read the table list. `anon` also can't read `pg_catalog`/`information_schema`, so there's no client-side way to list tables at all.
+
+### 📐 Implementation
+- **`5_Symbols/supabase/migrations/migration_get_table_stats_rpc.sql`** (new): a **`SECURITY DEFINER`** function `public.get_table_stats()` that:
+  - walks `pg_class`/`pg_namespace` filtered to `nspname = 'public'` (this alone drops all `pg_*`/`information_schema` system tables),
+  - excludes Supabase/ORM internal prefixes (`pg_%`, `_prisma%`, `_realtime%`, `_graphql%`, `_timescaledb%`, `schema_migrations`),
+  - returns `table_name`, an **exact** `count(*)` (dynamic SQL, `SECURITY DEFINER` bypasses RLS → true totals), and the **free-text columns** (`text`/`character varying`/`character`) used for word counting.
+  - `SET search_path = public, pg_catalog` to harden the definer against search-path injection; `GRANT EXECUTE` to `anon, authenticated`.
+- **`stats.html`**: replaced the 401'ing `discoverTables()` + per-table `count=exact` loop with a single `POST /rest/v1/rpc/get_table_stats` call (`fetchTableInventory()`). One round-trip now yields the whole inventory + counts; the per-text-column word fetch is retained with the existing 20k-row cap.
+- **`shared/schema-modal.js`**: registered `get_table_stats` in `MIGRATIONS`. The existing `detect()` already catches `PGRST202 / "Could not find the function public.<name>"`, so if the RPC isn't installed the central modal pops the migration SQL (📋 copy + 🔗 SQL editor + ✅ Retry) instead of a silent failure.
+
+### ✅ Verification
+- `go build ./... && go vet ./...` green; `node -c shared/schema-modal.js` OK; `stats.html` inline JS parses clean (no leftover `isTextFormat`/`discoverTables`/`Content-Range`).
+- Live probes: `/rest/v1/` → **401** (confirms the OpenAPI route is blocked for anon); `modules?select=count` → **206** (data still readable); `rpc/get_table_stats` → **404 PGRST202** before the user runs the migration (schema-modal will surface it).
+- Local server serves `stats.html` + `schema-modal.js` **HTTP 200**; page opens in Chrome.
+- DDL can't run via REST (no `exec_sql`), so the migration was copied to the clipboard for the user to run in the Supabase SQL Editor, then Retry.

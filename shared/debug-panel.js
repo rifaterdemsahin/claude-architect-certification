@@ -375,15 +375,38 @@
     const panel = document.getElementById('_dbg_panel');
     const wrap = document.getElementById('_dbg_db_wrap');
     const body = document.getElementById('_dbg_panel_body');
+    const axiomWrap = document.getElementById('_dbg_axiom_wrap');
     const btn = document.getElementById('_dbg_db_btn');
     if (!panel || !wrap) return;
     if (panel.style.height === '36px') panel.style.height = '380px'; // expand if collapsed
     const open = wrap.style.display === 'none';
+    if (open && axiomWrap) axiomWrap.style.display = 'none'; // mutual exclusion with Axiom panel
     wrap.style.display = open ? 'block' : 'none';
     if (body) body.style.height = open ? '180px' : '300px';
     if (btn) {
       btn.textContent = open ? '🗄️ DB ✦' : '🗄️ DB Tables';
       btn.style.background = open ? 'rgba(16,185,129,0.4)' : 'rgba(16,185,129,0.18)';
+    }
+  };
+
+  // Collapsible Axiom group — mirrors the DB panel: opens a sub-panel with two
+  // inner actions (📊 Show Axiom Logs · 📡 Send to Axiom). Mutually exclusive
+  // with the DB panel so they never stack.
+  window.__dbgToggleAxiom = function () {
+    const panel = document.getElementById('_dbg_panel');
+    const wrap = document.getElementById('_dbg_axiom_wrap');
+    const body = document.getElementById('_dbg_panel_body');
+    const dbWrap = document.getElementById('_dbg_db_wrap');
+    const btn = document.getElementById('_dbg_axiom_toggle');
+    if (!panel || !wrap) return;
+    if (panel.style.height === '36px') panel.style.height = '380px'; // expand if collapsed
+    const open = wrap.style.display === 'none';
+    if (open && dbWrap) dbWrap.style.display = 'none'; // mutual exclusion with DB panel
+    wrap.style.display = open ? 'block' : 'none';
+    if (body) body.style.height = open ? '180px' : '300px';
+    if (btn) {
+      btn.textContent = open ? '📡 Axiom ▴' : '📡 Axiom ▾';
+      btn.style.background = open ? 'rgba(6,182,212,0.45)' : 'rgba(6,182,212,0.25)';
     }
   };
 
@@ -473,6 +496,65 @@
   }
   window.sendAllToAxiom = sendAllToAxiom;
 
+  // 📊 Show Axiom Logs — fetches the latest events from the Go server
+  // (GET /api/axiom/logs, admin-gated) and renders them inline in the Axiom
+  // sub-panel. Reuses the wrapped _fetch so the request shows in the log.
+  async function showAxiomLogs() {
+    const btn = document.getElementById('_dbg_axiom_show_btn');
+    const list = document.getElementById('_dbg_axiom_list');
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ Loading…'; }
+    if (list) list.innerHTML = `<div style="color:#9ca3af;font-size:0.72rem;padding:6px 0;">⏳ Fetching latest events from Axiom…</div>`;
+    try {
+      const res = await _fetch('/api/axiom/logs?limit=50');
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data.error || `HTTP ${res.status}`);
+      }
+      const events = Array.isArray(data.events) ? data.events : [];
+      renderAxiomLogs(events);
+      push('ok', `📡 Axiom logs: ${events.length} event(s) fetched`);
+    } catch (e) {
+      if (list) list.innerHTML = `<div style="color:#fca5a5;font-size:0.72rem;padding:6px 0;">❌ ${escapeHtml(String(e.message || e))}<br><span style="color:#9ca3af;">Sign in as admin (🔑 Admin → Sign in) and run on the Go server (localhost:8080) to read Axiom logs.</span></div>`;
+      push('error', `📡 Axiom logs fetch failed: ${e.message}`);
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = '📊 Show Axiom Logs'; }
+    }
+  }
+  window.__dbgShowAxiomLogs = showAxiomLogs;
+
+  // Render Axiom events as colour-coded rows (error=red, warn=amber, else green).
+  function renderAxiomLogs(events) {
+    const list = document.getElementById('_dbg_axiom_list');
+    if (!list) return;
+    if (!events.length) {
+      list.innerHTML = `<div style="color:#6b7280;font-size:0.72rem;padding:6px 0;">No events in Axiom (last 24h).</div>`;
+      return;
+    }
+    const colorFor = (lvl) => {
+      const s = String(lvl || '').toLowerCase();
+      if (/(error|fatal|panic|crit)/.test(s)) return '#fca5a5';
+      if (/warn/.test(s)) return '#fde68a';
+      return '#86efac';
+    };
+    list.innerHTML = events.map(ev => {
+      const t = String(ev._time || '').replace('T', ' ').replace(/\..*/, '');
+      const lvl = ev.level || 'info';
+      const parts = [];
+      const req = [ev.method, ev.path, ev.status].filter(Boolean).join(' ').trim();
+      if (req) parts.push(req);
+      if (ev.duration) parts.push(`${ev.duration}ms`);
+      if (ev.err) parts.push(ev.err);
+      if (ev.message) parts.push(ev.message);
+      if (ev.stage) parts.push(`[${ev.stage}]`);
+      if (ev.url) parts.push(ev.url);
+      const text = parts.filter(Boolean).join(' · ') || '(no detail)';
+      return `<div style="color:${colorFor(lvl)};padding:2px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:0.74rem;">
+        <span style="opacity:0.5;margin-right:6px;">${escapeHtml(t)}</span>
+        <span style="font-weight:700;text-transform:uppercase;font-size:0.62rem;margin-right:6px;">${escapeHtml(lvl)}</span>${escapeHtml(text)}
+      </div>`;
+    }).join('');
+  }
+
   // ── Inject panel HTML after DOM ready ────────────────────────────────────
   window.addEventListener('DOMContentLoaded', () => {
     const el = document.createElement('div');
@@ -494,7 +576,7 @@
         <span id="_dbg_count" style="font-size:0.7rem;color:#6b7280;">(click to expand)</span>
         <div style="margin-left:auto;display:flex;gap:8px;">
           ${headerBtn('🗄️ DB Tables', "window.__dbgToggleDb()", 'rgba(16,185,129,0.18)', 'rgba(16,185,129,0.4)')}
-          <button id="_dbg_axiom_btn" onclick="event.stopPropagation(); window.sendAllToAxiom();" style="background:rgba(6,182,212,0.25);color:#81e6d9;border:1px solid rgba(6,182,212,0.4);padding:3px 10px;border-radius:6px;cursor:pointer;font-size:0.72rem;font-weight:700;">📡 Send to Axiom</button>
+          <button id="_dbg_axiom_toggle" onclick="event.stopPropagation(); window.__dbgToggleAxiom()" title="Show Axiom controls" style="background:rgba(6,182,212,0.25);color:#81e6d9;border:1px solid rgba(6,182,212,0.4);padding:3px 10px;border-radius:6px;cursor:pointer;font-size:0.72rem;font-weight:700;">📡 Axiom ▾</button>
           <button id="_dbg_copy_btn" onclick="event.stopPropagation(); window.__dbgCopyAll()" style="background:rgba(139,92,246,0.3);color:#c4b5fd;border:1px solid rgba(139,92,246,0.4);padding:3px 10px;border-radius:6px;cursor:pointer;font-size:0.72rem;font-weight:700;">📋 Copy All</button>
           <button id="_dbg_cache_btn" onclick="event.stopPropagation(); window.__dbgClearCache()" title="Clear caches & service workers, then hard-reload" style="background:rgba(245,158,11,0.22);color:#fcd34d;border:1px solid rgba(245,158,11,0.45);padding:3px 10px;border-radius:6px;cursor:pointer;font-size:0.72rem;font-weight:700;">♻️ Clear Cache</button>
           <button onclick="event.stopPropagation(); window.__dbgClear()" style="background:rgba(239,68,68,0.2);color:#fca5a5;border:1px solid rgba(239,68,68,0.3);padding:3px 8px;border-radius:6px;cursor:pointer;font-size:0.72rem;">🗑 Clear</button>
@@ -503,6 +585,16 @@
       <div id="_dbg_db_wrap" style="display:none;padding:8px 16px;border-bottom:1px solid rgba(139,92,246,0.2);background:rgba(16,185,129,0.05);">
         <div style="font-size:0.68rem;font-weight:800;color:#6ee7b7;letter-spacing:0.08em;margin-bottom:2px;">🗄️ DATABASE TABLES · this page · click 👁 View to dump rows</div>
         <div id="_dbg_db_list"></div>
+      </div>
+      <div id="_dbg_axiom_wrap" style="display:none;padding:8px 16px;border-bottom:1px solid rgba(6,182,212,0.2);background:rgba(6,182,212,0.05);">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+          <span style="font-size:0.68rem;font-weight:800;color:#81e6d9;letter-spacing:0.08em;">📡 AXIOM · live events from the server (admin)</span>
+          <div style="margin-left:auto;display:flex;gap:6px;">
+            <button id="_dbg_axiom_show_btn" onclick="event.stopPropagation(); window.__dbgShowAxiomLogs()" style="background:rgba(6,182,212,0.25);color:#81e6d9;border:1px solid rgba(6,182,212,0.4);padding:3px 10px;border-radius:6px;cursor:pointer;font-size:0.72rem;font-weight:700;">📊 Show Axiom Logs</button>
+            <button id="_dbg_axiom_btn" onclick="event.stopPropagation(); window.sendAllToAxiom()" style="background:rgba(6,182,212,0.25);color:#81e6d9;border:1px solid rgba(6,182,212,0.4);padding:3px 10px;border-radius:6px;cursor:pointer;font-size:0.72rem;font-weight:700;">📡 Send to Axiom</button>
+          </div>
+        </div>
+        <div id="_dbg_axiom_list" style="max-height:180px;overflow-y:auto;"></div>
       </div>
       <div id="_dbg_panel_body" style="height:300px;overflow-y:auto;padding:8px 16px;"></div>
     `;

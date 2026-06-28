@@ -23,8 +23,50 @@
 
   var SQL_EDITOR = 'https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/sql/05ea76ba-cb44-44c6-b83a-f85a226bc315';
 
-  // Known migrations keyed by table name. Pages can add more via register().
+  // Known migrations keyed by table name (or RPC function name). Pages can
+  // add more via register().
   var MIGRATIONS = {
+    get_table_stats:
+'-- =============================================================================\n' +
+'-- Migration: get_table_stats() RPC for the Database Stats dashboard\n' +
+'-- Lists EVERY public-schema table with an exact row count + free-text cols.\n' +
+'-- Run in the Supabase SQL Editor, then come back and click Retry.\n' +
+'-- =============================================================================\n' +
+'\n' +
+'CREATE OR REPLACE FUNCTION public.get_table_stats()\n' +
+'RETURNS TABLE (table_name text, row_count bigint, text_columns text[])\n' +
+'LANGUAGE plpgsql SECURITY DEFINER\n' +
+'SET search_path = public, pg_catalog AS $$\n' +
+'DECLARE rec record; cnt bigint; cols text[];\n' +
+'BEGIN\n' +
+'  FOR rec IN\n' +
+'    SELECT n.nspname AS nsp, c.relname AS rel\n' +
+'    FROM pg_catalog.pg_class c\n' +
+'    JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace\n' +
+'    WHERE n.nspname = \'public\'\n' +
+'      AND c.relkind IN (\'r\', \'p\', \'v\')\n' +
+'      AND c.relname NOT LIKE \'pg_%\'\n' +
+'      AND c.relname NOT LIKE \'_prisma%\'\n' +
+'      AND c.relname NOT LIKE \'_realtime%\'\n' +
+'      AND c.relname NOT LIKE \'_graphql%\'\n' +
+'      AND c.relname <> \'schema_migrations\'\n' +
+'    ORDER BY c.relname\n' +
+'  LOOP\n' +
+'    BEGIN\n' +
+'      EXECUTE format(\'SELECT count(*)::bigint FROM %I.%I\', rec.nsp, rec.rel) INTO cnt;\n' +
+'    EXCEPTION WHEN OTHERS THEN cnt := NULL; END;\n' +
+'    IF cnt IS NULL THEN CONTINUE; END IF;\n' +
+'    SELECT COALESCE(array_agg(a.attname ORDER BY a.attnum), ARRAY[]::text[]) INTO cols\n' +
+'    FROM pg_catalog.pg_attribute a\n' +
+'    WHERE a.attrelid = (format(\'%I.%I\', rec.nsp, rec.rel))::regclass\n' +
+'      AND a.attnum > 0 AND NOT a.attisdropped\n' +
+'      AND pg_catalog.format_type(a.atttypid, a.atttypmod) ~ \'^(text|character)\';\n' +
+'    table_name := rec.rel; row_count := cnt; text_columns := cols; RETURN NEXT;\n' +
+'  END LOOP;\n' +
+'END; $$;\n' +
+'\n' +
+'REVOKE ALL ON FUNCTION public.get_table_stats() FROM PUBLIC;\n' +
+'GRANT EXECUTE ON FUNCTION public.get_table_stats() TO anon, authenticated;',
     presentations:
 '-- =============================================================================\n' +
 '-- Migration: Add \'presentations\' table for Marp Slide Generator\n' +
