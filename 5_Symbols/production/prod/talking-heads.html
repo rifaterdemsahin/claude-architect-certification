@@ -857,14 +857,15 @@ let carouselData = [];
       return;
     }
     document.querySelectorAll('#carousel-body .mod-btn').forEach(b => { b.disabled = true; });
-    const saveBtn = document.getElementById('carousel-save-order');
+    const saveBtns = document.querySelectorAll('#carousel-body .js-save-order');
+    const setSaveText = (t) => saveBtns.forEach(b => { b.textContent = t; });
     try {
       // Two-phase rename: move every changing file to a unique temp name first,
       // then to its final ordered name, so swapped names never collide.
       const temps = [];
       for (let i = 0; i < carouselData.length; i++) {
         if (targets[i] === carouselData[i].name) { temps.push(null); continue; }
-        if (saveBtn) saveBtn.textContent = `⏳ Saving ${i + 1}/${carouselData.length}…`;
+        setSaveText(`⏳ Saving ${i + 1}/${carouselData.length}…`);
         const tmp = `__reorder__${Date.now()}_${i}_${stripOrderPrefix(carouselData[i].name)}`;
         await doRename(carouselData[i].name, tmp);
         temps.push(tmp);
@@ -1106,7 +1107,7 @@ let carouselData = [];
     let html = `<div style="display:flex; justify-content:flex-end; align-items:center; gap:8px; margin-bottom:14px;">`;
     if (carouselSorting) {
       html += `  <span style="margin-right:auto; font-size:0.8rem; color:var(--text-muted);">↕ Reorder mode — use ▲▼, then save. Names become 1_, 2_, …</span>`;
-      html += `  <button class="mod-btn" id="carousel-save-order" style="background:var(--success); border-color:var(--success); color:white;" onclick="saveCarouselOrder()">💾 Save order</button>`;
+      html += `  <button class="mod-btn js-save-order" style="background:var(--success); border-color:var(--success); color:white;" onclick="saveCarouselOrder()">💾 Save order</button>`;
       html += `  <button class="mod-btn" onclick="cancelCarouselSort()">Cancel</button>`;
     } else {
       html += `  <button class="mod-btn" onclick="startCarouselSort()" title="Reorder images — saving prefixes filenames with 1_, 2_, …">↕ Sort</button>`;
@@ -1155,6 +1156,15 @@ let carouselData = [];
       html += `</div>`;
     });
     html += `</div>`;
+
+    // Bottom save bar — mirrors the top controls so the user can save after
+    // scrolling through a long grid without scrolling back up.
+    if (carouselSorting) {
+      html += `<div style="display:flex; justify-content:center; gap:8px; margin-top:18px;">`;
+      html += `  <button class="mod-btn js-save-order" style="background:var(--success); border-color:var(--success); color:white;" onclick="saveCarouselOrder()">💾 Save order</button>`;
+      html += `  <button class="mod-btn" onclick="cancelCarouselSort()">Cancel</button>`;
+      html += `</div>`;
+    }
 
     body.innerHTML = html;
     document.getElementById('carousel-counter').textContent = `${carouselIndex + 1} / ${carouselData.length}`;
