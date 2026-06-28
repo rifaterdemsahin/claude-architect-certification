@@ -246,10 +246,6 @@ func (sw *statusWriter) WriteHeader(code int) {
 // handler uses this so the rule is identical everywhere. UIs mirror it via
 // /api/admin/status and hide destructive buttons when it is false.
 func isAdminRequest(r *http.Request) bool {
-	remoteIP := r.RemoteAddr
-	if strings.HasPrefix(remoteIP, "127.0.0.1") || strings.HasPrefix(remoteIP, "[::1]") || strings.HasPrefix(remoteIP, "localhost") {
-		return true
-	}
 	if c, err := r.Cookie("admin_logged_in"); err == nil && c.Value == "true" {
 		return true
 	}

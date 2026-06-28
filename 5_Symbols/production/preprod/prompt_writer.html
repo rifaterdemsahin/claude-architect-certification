@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prompt Writer | Claude AI Certification</title>
+  <meta name="description" content="Assemble a high-quality task prompt for LLM agents on the Claude AI Certification project — delivery-pilot framework, tech stack, rules, and verification gate included as toggleable sections.">
+  <link rel="icon" type="image/png" href="../../../favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #030712; --bg-card: rgba(17,24,39,0.8); --text-main: #f3f4f6; --text-muted: #9ca3af;
+      --primary: #8b5cf6; --secondary: #3b82f6; --accent: #f59e0b; --good: #10b981; --danger: #ef4444;
+      --font-title: 'Outfit', sans-serif; --font-body: 'Plus Jakarta Sans', sans-serif; --font-mono: 'Fira Code', monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-dark);
+      background-image: radial-gradient(circle at 10% 20%, rgba(139,92,246,0.08) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(59,130,246,0.08) 0%, transparent 40%);
+      color: var(--text-main); font-family: var(--font-body); line-height: 1.6; padding-bottom: 80px;
+    }
+    .container { max-width: 1400px; margin: 0 auto; padding: 0 24px; }
+    header { text-align: center; padding: 40px 0 8px; }
+    .badge { display: inline-block; padding: 6px 16px; background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(139,92,246,0.2)); border: 1px solid rgba(245,158,11,0.3); border-radius: 100px; font-size: 0.8rem; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 14px; }
+    h1 { font-family: var(--font-title); font-size: 2.2rem; font-weight: 800; margin-bottom: 10px; }
+    header p { color: var(--text-muted); max-width: 760px; margin: 0 auto; }
+
+    .goal-banner {
+      background: linear-gradient(160deg, rgba(139,92,246,0.1), rgba(59,130,246,0.06));
+      border: 1px solid rgba(139,92,246,0.28); border-radius: 16px; padding: 14px 20px; margin: 22px auto 0;
+      max-width: 900px; font-size: 0.9rem; text-align: center;
+    }
+    .goal-banner strong { color: #c084fc; }
+
+    .builder { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-top: 30px; align-items: start; }
+    @media (max-width: 980px) { .builder { grid-template-columns: 1fr; } }
+
+    .panel { background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px; padding: 22px; }
+    .panel.sticky { position: sticky; top: 16px; }
+
+    .panel-title { font-family: var(--font-title); font-size: 0.78rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+
+    label.field { display: block; margin-bottom: 14px; }
+    label.field > span { display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 6px; color: var(--text-main); }
+    input[type=text], textarea, select {
+      width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px;
+      color: var(--text-main); padding: 10px 12px; font-family: var(--font-body); font-size: 0.9rem; resize: vertical;
+    }
+    input[type=text]:focus, textarea:focus, select:focus { outline: none; border-color: var(--primary); }
+    textarea { min-height: 72px; }
+    textarea.tall { min-height: 120px; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .group-head { font-family: var(--font-title); font-size: 0.72rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.08em; margin: 18px 0 8px; padding-bottom: 6px; border-bottom: 1px solid rgba(245,158,11,0.15); }
+
+    .check {
+      display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.07); background: rgba(0,0,0,0.18); margin-bottom: 8px; cursor: pointer; transition: all 0.15s;
+    }
+    .check:hover { border-color: rgba(139,92,246,0.4); }
+    .check.on { border-color: rgba(16,185,129,0.5); background: rgba(16,185,129,0.08); }
+    .check input[type=checkbox] { margin-top: 3px; accent-color: var(--good); width: 16px; height: 16px; flex-shrink: 0; cursor: pointer; }
+    .check-body { flex: 1; min-width: 0; }
+    .check-title { font-weight: 600; font-size: 0.88rem; display: flex; align-items: center; gap: 6px; }
+    .check-desc { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; line-height: 1.45; }
+
+    .presets { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+    .preset-btn {
+      background: rgba(139,92,246,0.12); border: 1px solid rgba(139,92,246,0.3); color: #c4b5fd;
+      padding: 6px 12px; border-radius: 100px; font-size: 0.78rem; font-weight: 600; cursor: pointer; font-family: var(--font-body); transition: all 0.15s;
+    }
+    .preset-btn:hover { background: rgba(139,92,246,0.25); border-color: var(--primary); }
+
+    .toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+    .btn {
+      background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; border: none;
+      padding: 9px 16px; border-radius: 10px; font-weight: 700; font-size: 0.85rem; cursor: pointer; font-family: var(--font-body); transition: opacity 0.15s;
+    }
+    .btn:hover { opacity: 0.9; }
+    .btn.ghost { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: var(--text-main); }
+    .btn.danger { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.4); color: #fca5a5; }
+    .meta { font-size: 0.76rem; color: var(--text-muted); margin-left: auto; }
+    .copied { color: var(--good); font-weight: 700; font-size: 0.78rem; opacity: 0; transition: opacity 0.2s; }
+    .copied.show { opacity: 1; }
+
+    .preview-wrap {
+      background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 16px;
+      max-height: 68vh; overflow: auto; position: sticky; top: 16px;
+    }
+    .preview {
+      font-family: var(--font-mono); font-size: 0.78rem; line-height: 1.6; white-space: pre-wrap; word-break: break-word; color: #d1d5db;
+    }
+    .preview:empty::before { content: 'Your assembled prompt will appear here…'; color: var(--text-muted); font-style: italic; }
+
+    .hint { font-size: 0.76rem; color: var(--text-muted); margin-top: 10px; }
+    .hint code { background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px; font-family: var(--font-mono); }
+
+    footer { text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
+    footer a { color: var(--secondary); text-decoration: none; }
+    .scroll-fade { opacity: 0.6; }
+  </style>
+  <script src="../../../shared/nav.js"></script>
+<script src="../../../shared/seo.js" defer></script></head>
+<body>
+
+  <div class="container">
+    <header>
+      <div class="badge">Phase 1 · Planning · Prompt Engineering</div>
+      <h1>✍️ Prompt Writer</h1>
+      <p>Assemble the best possible task prompt <strong>before</strong> handing work to an LLM agent. Toggle the project context, framework, tech stack, and rules you actually need — then copy a clean, ready-to-paste prompt.</p>
+    </header>
+
+    <div class="goal-banner">
+      🎯 <strong>Main goal:</strong> assign tasks better. Every prompt carries just enough shared context so an agent acts correctly the first time — no silent scope violations, no broken builds, no missed conventions.
+    </div>
+
+    <div class="builder">
+      <!-- ───────────── CONFIG PANEL ───────────── -->
+      <div class="panel" id="config">
+        <div class="panel-title">⚙️ Task configuration</div>
+
+        <label class="field">
+          <span>📝 Task title (one line)</span>
+          <input type="text" id="f-title" placeholder="e.g. Add a 'prompt writer' page under Preprod > Planning">
+        </label>
+
+        <div class="field-row">
+          <label class="field">
+            <span>🤖 Target agent</span>
+            <select id="f-agent">
+              <option value="claude">Claude — full-stack dev, DevOps, 7-stage</option>
+              <option value="glm">GLM (Zhipu) — long-context, SQL/schema, bilingual</option>
+              <option value="deepseek">DeepSeek — precision code, efficiency</option>
+              <option value="kimi">Kimi — long-context code synthesis</option>
+              <option value="grok">xAI Grok — real-time info, bold reasoning</option>
+              <option value="antigravity">AntiGravity — high-performance reasoning</option>
+              <option value="copilot">Copilot — inline autocompletion</option>
+              <option value="any">Any / model-agnostic</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>🏷️ Task type</span>
+            <select id="f-type">
+              <option value="feature">✨ Feature / new page</option>
+              <option value="bugfix">🐛 Bug fix</option>
+              <option value="docs">📚 Documentation</option>
+              <option value="migration">🗄️ SQL / migration</option>
+              <option value="refactor">♻️ Refactor</option>
+              <option value="chore">🧹 Chore / tooling</option>
+            </select>
+          </label>
+        </div>
+
+        <label class="field">
+          <span>📋 What to do (the actual ask)</span>
+          <textarea id="f-what" class="tall" placeholder="Describe the task in plain language. What should exist when this is done? Who/what does it serve? Any non-obvious constraints?"></textarea>
+        </label>
+
+        <div class="field-row">
+          <label class="field">
+            <span>📂 Files in scope (one per line)</span>
+            <textarea id="f-files" placeholder="5_Symbols/production/preprod/prompt_writer.html&#10;navigation_config.json&#10;agents.md"></textarea>
+          </label>
+          <label class="field">
+            <span>✅ Definition of Done (one per line)</span>
+            <textarea id="f-dod" placeholder="Page loads at /5_Symbols/.../prompt_writer.html (HTTP 200)&#10;go build ./... &amp;&amp; go vet ./... green&#10;Copied to clipboard &amp; committed"></textarea>
+          </label>
+        </div>
+
+        <div class="group-head">🧩 Sections to include (toggle)</div>
+        <div id="sections"></div>
+
+        <div class="group-head">⚡ Quick presets</div>
+        <div class="presets">
+          <button class="preset-btn" data-preset="feature">✨ New feature</button>
+          <button class="preset-btn" data-preset="bugfix">🐛 Bug fix</button>
+          <button class="preset-btn" data-preset="docs">📚 Docs</button>
+          <button class="preset-btn" data-preset="migration">🗄️ SQL/migration</button>
+          <button class="preset-btn" data-preset="minimal">Minimal</button>
+        </div>
+
+        <div class="hint">💾 Your configuration autosaves to this browser. Use <code>Reset</code> on the right to start over.</div>
+      </div>
+
+      <!-- ───────────── PREVIEW PANEL ───────────── -->
+      <div>
+        <div class="toolbar">
+          <button class="btn" id="btn-copy">📋 Copy prompt</button>
+          <button class="btn ghost" id="btn-selectall">Select all</button>
+          <button class="btn danger" id="btn-reset">Reset</button>
+          <span class="copied" id="copied">✅ Copied!</span>
+          <span class="meta" id="meta"></span>
+        </div>
+        <div class="preview-wrap">
+          <div class="preview" id="preview"></div>
+        </div>
+        <div class="hint">👁️ This is exactly what the agent receives. Check it includes only what this task needs — the goal is <strong>precision, not volume</strong>.</div>
+      </div>
+    </div>
+
+    <footer>
+      Part of <a href="planning.html">📋 Planning Hub</a> · 🤖 Assign tasks better — context in, quality out. &nbsp;Instructor: <a href="https://www.linkedin.com/in/rifaterdemsahin" target="_blank" rel="noopener">Rifat Erdem Sahin</a>
+    </footer>
+  </div>
+
+  <script src="../../../shared/debug-panel.js"></script>
+  <script>
+  (function () {
+    'use strict';
+
+    /* ─── Section library: each toggle injects this exact content ─── */
+    var SECTIONS = [
+      {
+        key: 'context', icon: '🏗️', title: 'Project context',
+        desc: 'What this project is and where this task fits.',
+        body: '## 🏗️ Project context\n' +
+              'You are working on **Claude AI Certification for Architects** — a YouTube course + self-learning system that turns unproven ideas into tested, recorded outcomes.\n' +
+              '- **Repo:** `claude-architect-certification` (single repo, served on GitHub Pages as a static mirror and on Fly.io as the live backend).\n' +
+              '- **Owner/instructor:** Rifat Erdem Sahin.\n' +
+              '- The codebase is mid-migration from static HTML → a **Go server-rendered** app (`html/template`, stdlib only).'
+      },
+      {
+        key: 'framework', icon: '🗺️', title: 'Delivery Pilot framework (7-stage)',
+        desc: 'The folder structure every file and change must align to.',
+        body: '## 🗺️ Delivery Pilot — Project Self-Learning System (7 stages)\n' +
+              'Align every file/update to the 7-stage structure:\n' +
+              '| Stage | Folder | Purpose |\n' +
+              '|-------|--------|---------|\n' +
+              '| 1 | `1_Real_Unknown` | The "Why" — problem, OKRs, questions |\n' +
+              '| 2 | `2_Environment` | The "Context" — roadmaps, constraints, setup |\n' +
+              '| 3 | `3_Simulation` | The "Vision" — UI mockups |\n' +
+              '| 4 | `4_Formula` | The "Thinking & Planning" — reasoning, decisions, recipes |\n' +
+              '| 5 | `5_Symbols` | The "Reality" — source code, implementation |\n' +
+              '| 6 | `6_Semblance` | The "Scars" — error logs, workarounds |\n' +
+              '| 7 | `7_Testing_Known` | The "Proof" — validation, outcomes |'
+      },
+      {
+        key: 'tech', icon: '🧰', title: 'Tech stack & components',
+        desc: 'Go + Supabase + Azure + Axiom + Fly.io. Know what you are working with.',
+        body: '## 🧰 Tech stack\n' +
+              '- **Backend:** Go, stdlib only (ask before adding a dependency), `html/template` server-render, single static binary.\n' +
+              '- **Deploy:** Scratch Docker image → Fly.io (auto-stop machine). GitHub Pages mirrors the static site; Fly.io is the live backend (`/api/…`).\n' +
+              '- **Database:** Supabase (Postgres + REST). The **anon key** is browser-safe; the **service key is server-side only**.\n' +
+              '- **Storage:** Azure Blob Storage via short-lived SAS URLs (served through `/api/research/file`).\n' +
+              '- **Secrets:** Azure Key Vault (`dp-kv-deliverypilot`), read at runtime via `cfg.getSecret(...)`.\n' +
+              '- **Observability:** Axiom (`videoproduction` dataset). Every handler is wrapped by `observe`; errors funnel there.\n' +
+              '- **LLM gateway:** OpenRouter. Google Drive OAuth for upload features.\n' +
+              '- **Local dev:** `go run cmd/server/main.go` on **http://localhost:8080**.'
+      },
+      {
+        key: 'invariants', icon: '🔒', title: 'Non-negotiable invariants',
+        desc: 'Hard rules that must never be broken.',
+        body: '## 🔒 Non-negotiable invariants\n' +
+              '1. **No secret reaches the browser** — Supabase service key stays server-side.\n' +
+              '2. **Every HTTP handler is wrapped by `observe`** — all errors funnel to Axiom.\n' +
+              '3. **After every change:** `go build ./... && go vet ./... && go test ./...` must pass before continuing.\n' +
+              '4. **Parity, not redesign** — behaviour identical to the current site.\n' +
+              '5. **🚫 HTML containment** — all `.html` lives inside `5_Symbols/` (only exceptions: root `index.html` and `markdown_renderer.html`).'
+      },
+      {
+        key: 'rules', icon: '🛡️', title: 'Rules to respect',
+        desc: 'Conventions: verify-before-push, Chrome-only, menu sync, sign-in gate, etc.',
+        body: '## 🛡️ Rules to respect\n' +
+              '- **Verify locally before push:** run the app on :8080, confirm the page serves HTTP 200 (and Supabase pages round-trip against live tables) before committing.\n' +
+              '- **Open every HTML/URL in Google Chrome only:** `open -a "Google Chrome" <url>`.\n' +
+              '- **Thinking & planning gate:** before writing code in `5_Symbols`, document the approach in `4_Formula/llm_thinking_log.md`.\n' +
+              '- **Micro-commits:** commit + push after every incremental task.\n' +
+              '- **Menu sync:** when adding/removing a page, update `navigation_config.json` AND the fallbacks in `index.html`, `markdown_renderer.html`, and `shared/nav.js`.\n' +
+              '- **One top nav:** never hardcode a `<header>`/`<nav>` — the top nav is rendered exclusively by `shared/nav.js`.\n' +
+              '- **🔒 No destructive button when unsigned in:** every delete/upload control needs `data-require-admin` + a `requireAdmin()` guard; every destructive server handler calls `isAdminRequest(r)`.\n' +
+              '- **SQL canonical location:** all Supabase SQL lives in `5_Symbols/supabase/`; after a migration, `pbcopy` it so it can be pasted into the SQL Editor.\n' +
+              '- **Emoji rule:** use emojis in markdown headings/list items/status for scannability.\n' +
+              '- **README every folder:** every directory has a `README.md`.'
+      },
+      {
+        key: 'persona', icon: '🤖', title: 'Agent persona & role',
+        desc: 'Sets the role + mindset for the chosen agent.',
+        body: '## 🤖 Your role\n' +
+              'You are an expert Full-Stack Developer and DevOps Engineer operating within the Project Self-Learning System. Transform unknowns into proven, tested solutions through the structured 7-stage journey. Ask before adding dependencies or going out of scope. Think before you code; verify before you push.'
+      },
+      {
+        key: 'output', icon: '📤', title: 'Output format & commit',
+        desc: 'How the agent should respond and commit.',
+        body: '## 📤 Output format\n' +
+              '- Document your reasoning, then make the change.\n' +
+              '- Show the exact files touched and a short verification log.\n' +
+              '- Commit with Conventional Commits; keep the subject line clean (no emojis), emojis welcome in the body.\n' +
+              '- After changes: `go build ./... && go vet ./...` green, then commit + push.'
+      },
+      {
+        key: 'verify', icon: '🧪', title: 'Verification gate',
+        desc: 'The mandatory check before declaring done.',
+        body: '## 🧪 Verification gate (do this before marking done)\n' +
+              '1. `go build ./... && go vet ./...` (and `go test ./...` if tests exist).\n' +
+              '2. Run the local server on :8080 and open the affected page in **Chrome** — HTTP 200, data round-trips.\n' +
+              '3. If you added a page: it appears in the menu (local nav fallback) and links resolve.\n' +
+              '4. Commit + push.'
+      },
+      {
+        key: 'classification', icon: '🏷️', title: 'File classification',
+        desc: 'Label files so agents know what they are touching.',
+        body: '## 🏷️ File classification (annotate mentally)\n' +
+              '- 🎓 **COURSE CONTENT** — scripts, outlines, production files (the training material).\n' +
+              '- 🚀 **DELIVERY PILOT** — the reusable framework (agent guides, 7-stage, nav, CI/CD).\n' +
+              '- 🔬 **POC** — working app code, Supabase integrations, MCP server.'
+      },
+      {
+        key: 'refs', icon: '📚', title: 'Reference docs',
+        desc: 'Pointers the agent should read first.',
+        body: '## 📚 Read first\n' +
+              '- `agents.md` — agent guidelines & rules (the source of truth for conventions).\n' +
+              '- `claude.md` — persona, 7-stage journey, folder logic.\n' +
+              '- `SESSION.md` + `PLAN.md` — active migration context & slice tracking.\n' +
+              '- `4_Formula/llm_thinking_log.md` — prior reasoning (avoid re-deciding solved problems).'
+      }
+    ];
+
+    /* Stage scope chips (which 7-stage stages are relevant) */
+    var STAGES = [
+      { key: '1', label: '1 Real Unknown' },
+      { key: '2', label: '2 Environment' },
+      { key: '3', label: '3 Simulation' },
+      { key: '4', label: '4 Formula' },
+      { key: '5', label: '5 Symbols' },
+      { key: '6', label: '6 Semblance' },
+      { key: '7', label: '7 Testing Known' }
+    ];
+
+    var AGENT_LABEL = {
+      claude: 'Claude', glm: 'GLM (Zhipu AI)', deepseek: 'DeepSeek',
+      kimi: 'Kimi', grok: 'xAI Grok', antigravity: 'AntiGravity',
+      copilot: 'GitHub Copilot', any: 'the assigned agent'
+    };
+    var TYPE_LABEL = {
+      feature: 'Feature / new page', bugfix: 'Bug fix', docs: 'Documentation',
+      migration: 'SQL / migration', refactor: 'Refactor', chore: 'Chore / tooling'
+    };
+
+    var STORE = 'prompt_writer_v1';
+
+    /* Default state */
+    var DEFAULT = {
+      title: '', agent: 'claude', type: 'feature',
+      what: '', files: '', dod: '',
+      sections: { context: true, framework: false, tech: true, invariants: true, rules: true, persona: true, output: true, verify: true, classification: false, refs: true },
+      stages: { '1': false, '2': false, '3': false, '4': true, '5': true, '6': false, '7': true }
+    };
+
+    var PRESETS = {
+      feature:   { sections: { context: true, framework: true, tech: true, invariants: true, rules: true, persona: true, output: true, verify: true, classification: false, refs: true }, stages: { '4': true, '5': true, '7': true }, type: 'feature' },
+      bugfix:    { sections: { context: true, framework: false, tech: true, invariants: true, rules: true, persona: false, output: true, verify: true, classification: false, refs: false }, stages: { '5': true, '6': true, '7': true }, type: 'bugfix' },
+      docs:      { sections: { context: true, framework: true, tech: false, invariants: false, rules: true, persona: false, output: true, verify: true, classification: true, refs: true }, stages: { '4': true }, type: 'docs' },
+      migration: { sections: { context: true, framework: false, tech: true, invariants: true, rules: true, persona: false, output: true, verify: true, classification: false, refs: false }, stages: { '4': true, '5': true, '7': true }, type: 'migration' },
+      minimal:   { sections: { context: false, framework: false, tech: false, invariants: false, rules: true, persona: false, output: false, verify: true, classification: false, refs: false }, stages: {}, type: 'feature' }
+    };
+
+    var state;
+
+    /* ─── Persistence ─── */
+    function load() {
+      try {
+        var raw = localStorage.getItem(STORE);
+        if (raw) { state = JSON.parse(raw); return; }
+      } catch (e) {}
+      state = JSON.parse(JSON.stringify(DEFAULT));
+    }
+    function save() {
+      try { localStorage.setItem(STORE, JSON.stringify(state)); } catch (e) {}
+    }
+
+    /* ─── Build the section checkboxes into the DOM ─── */
+    function renderSections() {
+      var host = document.getElementById('sections');
+      var html = '';
+      SECTIONS.forEach(function (s) {
+        var on = state.sections[s.key] ? ' on' : '';
+        var checked = state.sections[s.key] ? 'checked' : '';
+        html += '<label class="check' + on + '" data-sec="' + s.key + '">' +
+                  '<input type="checkbox" data-sec="' + s.key + '" ' + checked + '>' +
+                  '<span class="check-body">' +
+                    '<span class="check-title">' + s.icon + ' ' + s.title + '</span>' +
+                    '<span class="check-desc">' + s.desc + '</span>' +
+                  '</span>' +
+                '</label>';
+      });
+      /* Stage scope chips */
+      html += '<div class="group-head" style="margin-top:18px;">🗺️ Stage scope (which 7-stage folders are relevant)</div>';
+      STAGES.forEach(function (st) {
+        var on = state.stages[st.key] ? ' on' : '';
+        var checked = state.stages[st.key] ? 'checked' : '';
+        html += '<label class="check' + on + '" style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;">' +
+                  '<input type="checkbox" data-stage="' + st.key + '" ' + checked + '>' +
+                  '<span style="font-size:0.8rem;font-weight:600;">' + st.label + '</span>' +
+                '</label>';
+      });
+      host.innerHTML = html;
+    }
+
+    /* ─── Read the simple inputs back into state ─── */
+    function readInputs() {
+      state.title = val('f-title');
+      state.agent = val('f-agent');
+      state.type = val('f-type');
+      state.what = val('f-what');
+      state.files = val('f-files');
+      state.dod = val('f-dod');
+    }
+    function val(id) { var el = document.getElementById(id); return el ? el.value : ''; }
+    function setVal(id, v) { var el = document.getElementById(id); if (el) el.value = v || ''; }
+
+    function syncInputUI() {
+      setVal('f-title', state.title);
+      setVal('f-agent', state.agent);
+      setVal('f-type', state.type);
+      setVal('f-what', state.what);
+      setVal('f-files', state.files);
+      setVal('f-dod', state.dod);
+    }
+
+    /* ─── Assemble the prompt ─── */
+    function nonEmpty(s) { return s && s.replace(/\s+/g, '') !== ''; }
+    function lines(s) {
+      if (!s) return [];
+      return s.split(/\r?\n/).map(function (l) { return l.trim(); }).filter(nonEmpty);
+    }
+
+    function assemble() {
+      readInputs();
+      var out = [];
+      var agent = AGENT_LABEL[state.agent] || 'the assigned agent';
+      var type = TYPE_LABEL[state.type] || 'Task';
+
+      /* Header */
+      out.push('# 🤖 Task for ' + agent);
+      out.push('');
+      out.push('**Type:** ' + type + (state.title ? '  ·  **Title:** ' + state.title : ''));
+      out.push('');
+
+      /* The ask (always present) */
+      if (nonEmpty(state.what)) {
+        out.push('## 🎯 What to do');
+        out.push(state.what.trim());
+        out.push('');
+      }
+
+      /* Stage scope */
+      var activeStages = STAGES.filter(function (st) { return state.stages[st.key]; });
+      if (activeStages.length) {
+        out.push('## 🗺️ Stage scope');
+        out.push('This task touches stage(s): ' + activeStages.map(function (st) { return '`' + st.label + '`'; }).join(', ') + '. Keep changes inside these folders unless told otherwise.');
+        out.push('');
+      }
+
+      /* Toggleable sections in defined order */
+      SECTIONS.forEach(function (s) {
+        if (state.sections[s.key]) {
+          out.push(s.body);
+          out.push('');
+        }
+      });
+
+      /* Files in scope */
+      var files = lines(state.files);
+      if (files.length) {
+        out.push('## 📂 Files in scope');
+        files.forEach(function (f) { out.push('- `' + f + '`'); });
+        out.push('');
+      }
+
+      /* Definition of done */
+      var dod = lines(state.dod);
+      if (dod.length) {
+        out.push('## ✅ Definition of Done');
+        dod.forEach(function (d) { out.push('- [ ] ' + d.replace(/^\s*-\s*/, '')); });
+        out.push('');
+      }
+
+      /* Sign-off */
+      out.push('---');
+      out.push('_Think first, then act. Verify before you push. If anything is ambiguous or out of scope, ask before changing it._');
+
+      return out.join('\n');
+    }
+
+    function render() {
+      var prompt = assemble();
+      document.getElementById('preview').textContent = prompt;
+      var words = prompt.trim() ? prompt.trim().split(/\s+/).length : 0;
+      document.getElementById('meta').textContent = words + ' words · ' + prompt.length + ' chars';
+      save();
+    }
+
+    function flashCopied() {
+      var el = document.getElementById('copied');
+      el.classList.add('show');
+      setTimeout(function () { el.classList.remove('show'); }, 1400);
+    }
+
+    /* ─── Events ─── */
+    function bind() {
+      var config = document.getElementById('config');
+      config.addEventListener('input', function (e) {
+        if (e.target.matches('input[type=text], textarea, select')) render();
+      });
+      config.addEventListener('change', function (e) {
+        var sec = e.target.getAttribute('data-sec');
+        var stage = e.target.getAttribute('data-stage');
+        if (sec) {
+          state.sections[sec] = e.target.checked;
+          var wrap = e.target.closest('.check');
+          if (wrap) wrap.classList.toggle('on', e.target.checked);
+          render();
+        } else if (stage) {
+          state.stages[stage] = e.target.checked;
+          var wrap2 = e.target.closest('.check');
+          if (wrap2) wrap2.classList.toggle('on', e.target.checked);
+          render();
+        }
+      });
+
+      document.querySelectorAll('.preset-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var p = PRESETS[btn.getAttribute('data-preset')];
+          if (!p) return;
+          if (p.sections) state.sections = Object.assign({}, DEFAULT.sections, p.sections);
+          if (p.stages) state.stages = Object.assign({}, DEFAULT.stages, p.stages);
+          if (p.type) state.type = p.type;
+          syncInputUI();
+          renderSections();
+          render();
+        });
+      });
+
+      document.getElementById('btn-copy').addEventListener('click', function () {
+        var prompt = document.getElementById('preview').textContent;
+        if (!prompt.trim()) return;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(prompt).then(flashCopied).catch(function () { fallbackCopy(prompt); });
+        } else { fallbackCopy(prompt); }
+      });
+
+      document.getElementById('btn-selectall').addEventListener('click', function () {
+        var el = document.getElementById('preview');
+        var range = document.createRange(); range.selectNodeContents(el);
+        var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
+      });
+
+      document.getElementById('btn-reset').addEventListener('click', function () {
+        if (!confirm('Reset the prompt writer to defaults? Your current task text will be cleared.')) return;
+        state = JSON.parse(JSON.stringify(DEFAULT));
+        syncInputUI();
+        renderSections();
+        render();
+      });
+    }
+
+    function fallbackCopy(text) {
+      var ta = document.createElement('textarea');
+      ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); flashCopied(); } catch (e) {}
+      document.body.removeChild(ta);
+    }
+
+    /* ─── Init ─── */
+    load();
+    syncInputUI();
+    renderSections();
+    bind();
+    render();
+  })();
+  </script>
+</body>
+</html>
