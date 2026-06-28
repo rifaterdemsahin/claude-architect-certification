@@ -184,6 +184,13 @@
     .carousel-grid-item img { width: 100%; height: 120px; object-fit: cover; display: block; }
     .carousel-grid-item .carousel-grid-name { padding: 6px 8px; font-size: 0.7rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .carousel-grid-item.active-thumb { border-color: var(--primary); background: rgba(139,92,246,0.15); }
+    .carousel-grid-item.sorting { cursor: default; }
+    .carousel-sort-badge { position: absolute; top: 6px; left: 6px; background: var(--primary, #8b5cf6); color: #fff; font-size: 0.72rem; font-weight: 700; line-height: 1; padding: 4px 7px; border-radius: 6px; min-width: 16px; text-align: center; }
+    .carousel-sort-btn { position: absolute; right: 6px; background: rgba(0,0,0,0.7); border: 1px solid rgba(255,255,255,0.25); border-radius: 6px; color: #fff; font-size: 0.85rem; line-height: 1; padding: 4px 7px; cursor: pointer; }
+    .carousel-sort-btn:hover:not(:disabled) { background: rgba(0,0,0,0.9); }
+    .carousel-sort-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    .carousel-sort-up { top: 6px; }
+    .carousel-sort-down { top: 38px; }
   </style>
   <script src="../../../shared/nav.js"></script>
 </head>
@@ -692,6 +699,7 @@ let carouselData = [];
   let carouselIndex = 0;
   let carouselInterval = null;
   let carouselRenaming = false;
+  let carouselSorting = false;
   const CAROUSEL_PLAY_INTERVAL_MS = 2500;
   const CAROUSEL_CONTAINER = 'research-images';
 
@@ -700,6 +708,22 @@ let carouselData = [];
   function carouselSuffix(name) {
     const dot = (name || '').lastIndexOf('.');
     return dot > 0 ? name.slice(dot) : '';
+  }
+
+  // stripOrderPrefix removes any existing "<n>_" ordering prefix so that
+  // re-sorting never stacks prefixes (e.g. "2_1_cat.png").
+  function stripOrderPrefix(name) {
+    return (name || '').replace(/^\d+_/, '');
+  }
+
+  // doRename renames a single blob in the carousel container.
+  async function doRename(from, to) {
+    const res = await fetch('/api/research/rename', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ container: CAROUSEL_CONTAINER, from, to })
+    });
+    if (!res.ok) throw new Error((await res.text()) || res.status);
   }
 
   // Trigger a browser download of a same-origin blob without changing its name.
@@ -795,6 +819,79 @@ let carouselData = [];
   window.cancelCarouselRename = function() {
     carouselRenaming = false;
     renderCarousel();
+  };
+
+  // ── Reorder mode ──────────────────────────────────────────────
+  // Lets the user arrange the video images with ▲▼; saving prefixes each
+  // filename with its position (1_, 2_, … padded to the count) so the order
+  // sticks across reloads.
+  window.startCarouselSort = function() {
+    stopCarouselPlay();
+    updateCarouselPlayBtn();
+    carouselRenaming = false;
+    carouselSorting = true;
+    renderCarousel();
+  };
+  window.cancelCarouselSort = function() {
+    carouselSorting = false;
+    renderCarousel();
+  };
+  window.carouselMove = function(idx, delta) {
+    const j = idx + delta;
+    if (j < 0 || j >= carouselData.length) return;
+    const tmp = carouselData[idx];
+    carouselData[idx] = carouselData[j];
+    carouselData[j] = tmp;
+    // Keep the highlighted image following the item it was on.
+    if (carouselIndex === idx) carouselIndex = j;
+    else if (carouselIndex === j) carouselIndex = idx;
+    renderCarousel();
+  };
+  window.saveCarouselOrder = async function() {
+    const width = String(carouselData.length).length;
+    const targets = carouselData.map((item, i) =>
+      `${String(i + 1).padStart(width, '0')}_${stripOrderPrefix(item.name)}`);
+    if (targets.every((t, i) => t === carouselData[i].name)) {
+      carouselSorting = false;
+      renderCarousel();
+      return;
+    }
+    document.querySelectorAll('#carousel-body .mod-btn').forEach(b => { b.disabled = true; });
+    const saveBtn = document.getElementById('carousel-save-order');
+    try {
+      // Two-phase rename: move every changing file to a unique temp name first,
+      // then to its final ordered name, so swapped names never collide.
+      const temps = [];
+      for (let i = 0; i < carouselData.length; i++) {
+        if (targets[i] === carouselData[i].name) { temps.push(null); continue; }
+        if (saveBtn) saveBtn.textContent = `⏳ Saving ${i + 1}/${carouselData.length}…`;
+        const tmp = `__reorder__${Date.now()}_${i}_${stripOrderPrefix(carouselData[i].name)}`;
+        await doRename(carouselData[i].name, tmp);
+        temps.push(tmp);
+      }
+      for (let i = 0; i < carouselData.length; i++) {
+        if (temps[i] === null) continue;
+        await doRename(temps[i], targets[i]);
+      }
+      // Update local model so the carousel reflects the new names without a reload.
+      carouselData.forEach((item, i) => {
+        item.name = targets[i];
+        item.url = `/api/research/file?container=${CAROUSEL_CONTAINER}&name=${encodeURIComponent(targets[i])}`;
+        item.thumbUrl = `/api/research/file?container=${CAROUSEL_CONTAINER}&name=${encodeURIComponent('__thumb__' + targets[i])}`;
+      });
+      carouselSorting = false;
+      renderCarousel();
+    } catch (e) {
+      carouselSorting = false;
+      renderCarousel();
+      const body = document.getElementById('carousel-body');
+      if (body) {
+        const note = document.createElement('div');
+        note.style.cssText = 'text-align:center; color:#ef4444; font-size:0.8rem; margin-top:10px;';
+        note.textContent = '🔴 Save order failed: ' + (e.message || e);
+        body.appendChild(note);
+      }
+    }
   };
   window.saveCarouselRename = async function() {
     const item = carouselData[carouselIndex];
@@ -987,6 +1084,8 @@ let carouselData = [];
         };
       });
       carouselIndex = 0;
+      carouselRenaming = false;
+      carouselSorting = false;
       stopCarouselPlay();
       updateCarouselPlayBtn();
       renderCarousel();
@@ -1003,9 +1102,16 @@ let carouselData = [];
     const item = carouselData[carouselIndex];
     const ext = carouselSuffix(item.name);
     const base = ext ? item.name.slice(0, item.name.length - ext.length) : item.name;
-    // Top action bar: bulk-download every image in this video at once.
+    // Top action bar: reorder + bulk-download every image in this video at once.
     let html = `<div style="display:flex; justify-content:flex-end; align-items:center; gap:8px; margin-bottom:14px;">`;
-    html += `  <button class="mod-btn" id="carousel-dl-all" onclick="downloadAllCarouselImages()" title="Download all ${carouselData.length} images">📦 Download all (${carouselData.length})</button>`;
+    if (carouselSorting) {
+      html += `  <span style="margin-right:auto; font-size:0.8rem; color:var(--text-muted);">↕ Reorder mode — use ▲▼, then save. Names become 1_, 2_, …</span>`;
+      html += `  <button class="mod-btn" id="carousel-save-order" style="background:var(--success); border-color:var(--success); color:white;" onclick="saveCarouselOrder()">💾 Save order</button>`;
+      html += `  <button class="mod-btn" onclick="cancelCarouselSort()">Cancel</button>`;
+    } else {
+      html += `  <button class="mod-btn" onclick="startCarouselSort()" title="Reorder images — saving prefixes filenames with 1_, 2_, …">↕ Sort</button>`;
+      html += `  <button class="mod-btn" id="carousel-dl-all" onclick="downloadAllCarouselImages()" title="Download all ${carouselData.length} images">📦 Download all (${carouselData.length})</button>`;
+    }
     html += `</div>`;
     html += `<div style="text-align:center; margin-bottom: 16px;">`;
     html += `<img class="carousel-img" src="${item.url}" alt="${esc(item.name)}" onerror="this.style.display='none'">`;
@@ -1023,18 +1129,28 @@ let carouselData = [];
       html += `</div>`;
     } else {
       html += `<p style="text-align:center; font-size:0.85rem; color:var(--text-muted); margin-bottom: 10px;">${esc(item.name)}</p>`;
-      html += `<div style="display:flex; gap:8px; justify-content:center; margin-bottom:16px;">`;
-      html += `  <button class="mod-btn" onclick="downloadCarouselImage()" title="Download this image">📥 Download</button>`;
-      html += `  <button class="mod-btn" id="carousel-copy-btn" onclick="copyCarouselImage()" title="Copy this image to the clipboard">📋 Copy</button>`;
-      html += `  <button class="mod-btn" onclick="startCarouselRename()" title="Rename this image (keeps the file extension)">✏️ Rename</button>`;
-      html += `</div>`;
+      if (!carouselSorting) {
+        html += `<div style="display:flex; gap:8px; justify-content:center; margin-bottom:16px;">`;
+        html += `  <button class="mod-btn" onclick="downloadCarouselImage()" title="Download this image">📥 Download</button>`;
+        html += `  <button class="mod-btn" id="carousel-copy-btn" onclick="copyCarouselImage()" title="Copy this image to the clipboard">📋 Copy</button>`;
+        html += `  <button class="mod-btn" onclick="startCarouselRename()" title="Rename this image (keeps the file extension)">✏️ Rename</button>`;
+        html += `</div>`;
+      }
     }
     html += `<div class="carousel-grid">`;
     carouselData.forEach((img, i) => {
-      html += `<div class="carousel-grid-item ${i === carouselIndex ? 'active-thumb' : ''}" onclick="carouselGoTo(${i})">`;
+      const cls = `carousel-grid-item ${i === carouselIndex ? 'active-thumb' : ''} ${carouselSorting ? 'sorting' : ''}`;
+      const click = carouselSorting ? '' : ` onclick="carouselGoTo(${i})"`;
+      html += `<div class="${cls.trim()}"${click}>`;
       html += `  <img src="${img.thumbUrl}" alt="${esc(img.name)}" loading="lazy" onerror="this.src='${img.url}'">`;
-      html += `  <button class="carousel-rename-btn" title="Rename ${esc(img.name)}" onclick="event.stopPropagation();startCarouselRenameAt(${i})">✏️</button>`;
-      html += `  <button class="carousel-dl-btn" title="Download ${esc(img.name)}" onclick="event.stopPropagation();downloadCarouselImageAt(${i})">📥</button>`;
+      if (carouselSorting) {
+        html += `  <div class="carousel-sort-badge">${i + 1}</div>`;
+        html += `  <button class="carousel-sort-btn carousel-sort-up" title="Move earlier" onclick="event.stopPropagation();carouselMove(${i},-1)" ${i === 0 ? 'disabled' : ''}>▲</button>`;
+        html += `  <button class="carousel-sort-btn carousel-sort-down" title="Move later" onclick="event.stopPropagation();carouselMove(${i},1)" ${i === carouselData.length - 1 ? 'disabled' : ''}>▼</button>`;
+      } else {
+        html += `  <button class="carousel-rename-btn" title="Rename ${esc(img.name)}" onclick="event.stopPropagation();startCarouselRenameAt(${i})">✏️</button>`;
+        html += `  <button class="carousel-dl-btn" title="Download ${esc(img.name)}" onclick="event.stopPropagation();downloadCarouselImageAt(${i})">📥</button>`;
+      }
       html += `  <div class="carousel-grid-name">${esc(img.name)}</div>`;
       html += `</div>`;
     });
