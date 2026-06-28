@@ -173,6 +173,17 @@
     const IS_CONNECTED = SUPABASE_URL.includes('supabase.co') && SUPABASE_ANON_KEY;
 
     const statusEl = document.getElementById('db-status');
+    
+    if (window.SchemaModal) {
+      SchemaModal.register('milestone_progress',
+`-- =============================================================================
+-- Migration: Add 'subtasks' column to milestone_progress
+-- Run this in the Supabase SQL Editor to support granular subtask progress.
+-- =============================================================================
+
+ALTER TABLE milestone_progress ADD COLUMN IF NOT EXISTS subtasks JSONB DEFAULT '[]'::jsonb;`);
+    }
+
     if (IS_CONNECTED) {
       statusEl.textContent = '☁️ Connected';
       statusEl.style.background = 'rgba(16,185,129,0.15)';
@@ -290,13 +301,14 @@
       const wasDone = localStorage.getItem('milestone_' + id) === 'true';
       if (wasDone !== isDone) {
         localStorage.setItem('milestone_' + id, isDone);
-        if (IS_CONNECTED) {
-          await supFetch('milestone_progress', {
-            method: 'POST',
-            headers: { 'Prefer': 'resolution=merge-duplicates' },
-            body: JSON.stringify({ milestone_id: id, user_id: 'default', checked: isDone })
-          });
-        }
+      }
+      
+      if (IS_CONNECTED) {
+        await supFetch('milestone_progress', {
+          method: 'POST',
+          headers: { 'Prefer': 'resolution=merge-duplicates' },
+          body: JSON.stringify({ milestone_id: id, user_id: 'default', checked: isDone, subtasks: subtasks })
+        });
       }
     }
 
@@ -324,7 +336,7 @@
         await supFetch('milestone_progress', {
           method: 'POST',
           headers: { 'Prefer': 'resolution=merge-duplicates' },
-          body: JSON.stringify({ milestone_id: id, user_id: 'default', checked: checkbox.checked })
+          body: JSON.stringify({ milestone_id: id, user_id: 'default', checked: checkbox.checked, subtasks: subtasks })
         });
       }
     }
@@ -333,10 +345,14 @@
       if (IS_CONNECTED) {
         // Load from Supabase
         const milestones = await supFetch('milestones?select=*&order=module_number.asc,sort_order.asc');
-        const progress = await supFetch('milestone_progress?user_id=eq.default&select=milestone_id,checked');
+        const progress = await supFetch('milestone_progress?user_id=eq.default&select=milestone_id,checked,subtasks');
         if (milestones && milestones.length) {
           const progressMap = {};
-          (progress || []).forEach(p => progressMap[p.milestone_id] = p.checked);
+          const dbSubtasksMap = {};
+          (progress || []).forEach(p => {
+            progressMap[p.milestone_id] = p.checked;
+            if (p.subtasks) dbSubtasksMap[p.milestone_id] = p.subtasks;
+          });
 
           // Get module names from existing data
           const modulesData = await supFetch('modules?select=module_number,title&order=module_number.asc');
@@ -347,11 +363,14 @@
           const byModule = {};
           milestones.forEach(m => {
             if (!byModule[m.module_number]) byModule[m.module_number] = [];
-            let subtasks = [];
-            try {
-              const stored = localStorage.getItem('milestone_subtasks_' + m.id);
-              if (stored) subtasks = JSON.parse(stored);
-            } catch(e) {}
+            let subtasks = dbSubtasksMap[m.id];
+            if (!subtasks) {
+              subtasks = [];
+              try {
+                const stored = localStorage.getItem('milestone_subtasks_' + m.id);
+                if (stored) subtasks = JSON.parse(stored);
+              } catch(e) {}
+            }
             
             // If main checkbox is marked done in DB but subtasks array is empty, auto-fill subtasks
             const isChecked = progressMap[m.id] || localStorage.getItem('milestone_' + m.id) === 'true';

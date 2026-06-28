@@ -125,10 +125,12 @@
   function detect(status, bodyText) {
     if (!bodyText) return false;
     if (status !== 404 && status !== 400 && !/PGRST20[25]|does not exist|schema cache/i.test(bodyText)) return false;
-    var m = bodyText.match(/Could not find the table '([\w.]+)'/i) ||
+    var colMatch = bodyText.match(/Could not find the column '([\w.]+)' in '([\w.]+)'/i);
+    var m = colMatch ||
+            bodyText.match(/Could not find the table '([\w.]+)'/i) ||
             bodyText.match(/relation "([\w.]+)" does not exist/i) ||
             bodyText.match(/Could not find the function (?:public\.)?(\w+)/i);
-    var name = m ? m[1].replace(/^public\./, '') : '';
+    var name = colMatch ? colMatch[2] : (m ? m[1].replace(/^public\./, '') : '');
     if (!name) return false;
     if (shownFor === name && document.getElementById('sharedSchemaModal') &&
         document.getElementById('sharedSchemaModal').style.display === 'flex') return true; // already up
