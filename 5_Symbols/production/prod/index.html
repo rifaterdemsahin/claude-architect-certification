@@ -276,7 +276,7 @@
       const pct = Math.round((subtasks.length / SUBTASKS.length) * 100);
       document.getElementById('mini-fill-' + id).style.width = pct + '%';
       document.getElementById('mini-pct-' + id).textContent = pct + '%';
-      document.getElementById('mini-count-' + id).textContent = \`\${subtasks.length}/\${SUBTASKS.length}\`;
+      document.getElementById('mini-count-' + id).textContent = `${subtasks.length}/${SUBTASKS.length}`;
       
       const row = document.getElementById('row-' + id);
       const mainCheck = row.querySelector('.milestone-check');
@@ -311,7 +311,7 @@
       const pct = checkbox.checked ? 100 : 0;
       document.getElementById('mini-fill-' + id).style.width = pct + '%';
       document.getElementById('mini-pct-' + id).textContent = pct + '%';
-      document.getElementById('mini-count-' + id).textContent = \`\${subtasks.length}/\${SUBTASKS.length}\`;
+      document.getElementById('mini-count-' + id).textContent = `${subtasks.length}/${SUBTASKS.length}`;
       
       row.classList.toggle('milestone-done', checkbox.checked);
       
