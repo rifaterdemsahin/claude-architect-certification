@@ -184,6 +184,22 @@
       <p>Choose a module and video above to load its script and start building your presentation.</p>
     </div>
 
+    <!-- Saved Presentations (from Supabase presentations table) -->
+    <div class="glass-card" id="savedPanel">
+      <div class="glass-card-header" onclick="togglePanel(this)">
+        <h2>💾 Saved Presentations</h2>
+        <span class="collapse-icon">▼</span>
+      </div>
+      <div class="glass-card-body">
+        <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
+          <button class="btn btn-secondary btn-sm" onclick="loadSavedPresentations()">🔄 Refresh</button>
+        </div>
+        <div id="savedWrap" style="overflow-x:auto;">
+          <div class="empty-state"><p>Loading saved presentations…</p></div>
+        </div>
+      </div>
+    </div>
+
     <footer>
       <p><a href="index.html" style="color:var(--secondary);text-decoration:none;">← Back to Post-Production</a></p>
     </footer>
@@ -657,8 +673,121 @@ style: |
           if (!res.ok) throw new Error('Failed to insert into DB');
         }
         showToast('💾 Saved to Supabase successfully!');
+        loadSavedPresentations();
       } catch (e) {
         showToast('Error saving: ' + e.message, true);
+      }
+    }
+
+    // ---- Saved Presentations table (bottom of page) -------------------------
+    // Pull all rows from the presentations table, joined to their video/module
+    // for readable labels, and surface any images embedded in the markdown.
+    function extractImagesFromMarkdown(md) {
+      const urls = [];
+      const re = /!\[[^\]]*\]\(([^)]+)\)/g;
+      let m;
+      while ((m = re.exec(md || '')) !== null) {
+        const u = m[1].trim();
+        if (u && !urls.includes(u)) urls.push(u);
+      }
+      return urls;
+    }
+
+    function countSlides(md) {
+      return ((md || '').match(/^#\s+/gm) || []).length;
+    }
+
+    async function loadSavedPresentations() {
+      const wrap = $('savedWrap');
+      try {
+        let rows;
+        try {
+          rows = await api('presentations?select=id,video_id,markdown_content,created_at,updated_at,videos(video_number,title,modules(module_number,title))&order=updated_at.desc');
+        } catch (_) {
+          // Fallback if the embedded join isn't available.
+          rows = await api('presentations?select=id,video_id,markdown_content,created_at,updated_at&order=updated_at.desc');
+        }
+
+        if (!rows || !rows.length) {
+          wrap.innerHTML = '<div class="empty-state"><p>No presentations saved yet. Generate slides and hit 💾 Save to DB.</p></div>';
+          return;
+        }
+
+        const body = rows.map(r => {
+          const v = r.videos || {};
+          const mod = v.modules || {};
+          const label = (mod.module_number != null ? `M${mod.module_number}` : '') +
+                        (v.video_number != null ? ` · V${v.video_number}` : '') +
+                        (v.title ? `: ${escHtml(v.title)}` : (`video #${r.video_id}`));
+          const when = (r.updated_at || r.created_at || '').slice(0, 16).replace('T', ' ');
+          const imgs = extractImagesFromMarkdown(r.markdown_content);
+          const thumbs = imgs.length
+            ? imgs.slice(0, 6).map(u => `<img src="${escHtml(u)}" title="${escHtml(u)}" style="width:64px; height:36px; object-fit:cover; border-radius:5px; border:1px solid rgba(255,255,255,0.1);" loading="lazy" onerror="this.style.display='none'">`).join('')
+              + (imgs.length > 6 ? `<span style="font-size:0.75rem; color:var(--text-muted);">+${imgs.length - 6}</span>` : '')
+            : '<span style="font-size:0.75rem; color:var(--text-muted);">No images</span>';
+
+          return `<tr>
+            <td><strong style="color:var(--text-main);">${label}</strong></td>
+            <td class="num-col">${countSlides(r.markdown_content)}</td>
+            <td><div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">${thumbs}</div></td>
+            <td style="white-space:nowrap; color:var(--text-muted); font-size:0.8rem;">${escHtml(when)}</td>
+            <td style="white-space:nowrap;">
+              <button class="btn btn-secondary btn-sm" onclick="loadSavedPresentation('${r.id}')">📂 Load</button>
+              <button class="btn btn-sm" style="background:var(--danger); color:#fff;" onclick="deleteSavedPresentation('${r.id}')">🗑</button>
+            </td>
+          </tr>`;
+        }).join('');
+
+        wrap.innerHTML = `<table class="ig-table">
+          <thead><tr>
+            <th>Module · Video</th>
+            <th class="num-col">Slides</th>
+            <th>Images</th>
+            <th>Updated</th>
+            <th>Actions</th>
+          </tr></thead>
+          <tbody>${body}</tbody>
+        </table>`;
+      } catch (e) {
+        wrap.innerHTML = `<div class="empty-state" style="color:var(--danger);"><p>Failed to load saved presentations: ${escHtml(e.message)}</p></div>`;
+      }
+    }
+
+    async function loadSavedPresentation(id) {
+      try {
+        const rows = await api(`presentations?id=eq.${id}&select=video_id,markdown_content,videos(module_id,video_number)`);
+        if (!rows || !rows.length) { showToast('Presentation not found.', true); return; }
+        const r = rows[0];
+        const moduleId = r.videos && r.videos.module_id;
+        // Sync the selectors so a subsequent Save targets the same video.
+        if (moduleId) {
+          $('moduleSelect').value = String(moduleId);
+          await loadVideos(String(moduleId));
+          $('videoSelect').value = String(r.video_id);
+          await fetchSentences(String(r.video_id));
+        }
+        $('marpPreview').value = r.markdown_content || '';
+        parseMarkdownToPreview(r.markdown_content || '');
+        $('previewPanel').style.display = 'block';
+        $('previewPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        showToast('📂 Loaded presentation into editor.');
+      } catch (e) {
+        showToast('Error loading: ' + e.message, true);
+      }
+    }
+
+    async function deleteSavedPresentation(id) {
+      if (!confirm('Delete this saved presentation? This cannot be undone.')) return;
+      try {
+        const res = await fetch(SUPABASE_URL + `/rest/v1/presentations?id=eq.${id}`, {
+          method: 'DELETE',
+          headers: { ...HEADERS, 'Prefer': 'return=minimal' }
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        showToast('🗑 Deleted.');
+        loadSavedPresentations();
+      } catch (e) {
+        showToast('Error deleting: ' + e.message, true);
       }
     }
 
@@ -731,7 +860,7 @@ Output ONLY the raw markdown.`;
       });
     }
 
-    document.addEventListener('DOMContentLoaded', loadModules);
+    document.addEventListener('DOMContentLoaded', () => { loadModules(); loadSavedPresentations(); });
   </script>
 </body>
 </html>
