@@ -475,6 +475,7 @@ bat 6_Semblance/logs/autonomous_error_loop_report.md   # or: cat / glow
 - **Architecture Sync:** When architecture changes, update [1_architecture.md](file:///Users/rifaterdemsahin/Projects/claude-architect-certification/2_Environment/1_architecture.md).
 - **🎨 Emoji Rule:** Use emojis generously in all markdown content to maximise scannability. Every `##`/`###` heading, list item with a clear category, status indicator, and log entry should carry an emoji. See the Emoji & Visual Style table in each agent guide.
 - **📖 README.md Every Folder:** Every directory in the project MUST have a `README.md` explaining its purpose. This is critical for AI agent context — it lets any agent instantly understand what a folder contains without scanning every file. When creating a new directory, create a matching `README.md`. Keep them concise: purpose, what belongs here, files table, and rules.
+- **🔍 Unique DOM Identifiers:** Always build HTML elements with unique identifiers (`id` attributes) wherever possible. This makes it easier to identify them with the DOM identifier tool, reducing ambiguity when providing feedback or prompting AI agents.
 
 ---
 
