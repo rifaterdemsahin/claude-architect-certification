@@ -481,7 +481,11 @@
     } else {
       let path = [];
       let curr = e.target;
-      while (curr && curr !== document.body && path.length < 3) {
+      while (curr && curr !== document.body && path.length < 4) {
+        if (curr.id && !curr.id.startsWith('_dbg_')) {
+          path.unshift('#' + curr.id);
+          break;
+        }
         let p = curr.tagName.toLowerCase();
         if (curr.className && typeof curr.className === 'string') {
           const classes = curr.className.trim().split(/\s+/).filter(c => c && !c.includes(':'));

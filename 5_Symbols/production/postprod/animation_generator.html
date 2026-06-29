@@ -119,19 +119,19 @@
 </head>
 <body>
   <div class="container">
-    <header>
-      <h1>🎞️ Animation Generator</h1>
-      <p>Turn each script sentence into a <strong>Remotion</strong> animation rendered on <strong>RunPod serverless</strong>, then stored in <strong>Azure</strong>. Pick a module &amp; video, choose one of <strong>10 animation types</strong> per sentence, preview the <strong>Remotion prompt</strong>, then <strong>▶️ Generate</strong>. Renders land back here automatically.</p>
+    <header id="page_header">
+      <h1 id="page_title">🎞️ Animation Generator</h1>
+      <p id="page_description">Turn each script sentence into a <strong>Remotion</strong> animation rendered on <strong>RunPod serverless</strong>, then stored in <strong>Azure</strong>. Pick a module &amp; video, choose one of <strong>10 animation types</strong> per sentence, preview the <strong>Remotion prompt</strong>, then <strong>▶️ Generate</strong>. Renders land back here automatically.</p>
     </header>
 
     <!-- 1) Filter -->
     <div class="glass-card" id="filterPanel">
-      <div class="glass-card-header" onclick="togglePanel(this)">
-        <h2>1) Filter</h2>
-        <span class="collapse-icon">▼</span>
+      <div id="filterPanelHeader" class="glass-card-header" onclick="togglePanel(this)">
+        <h2 id="filterPanelTitle">1) Filter</h2>
+        <span id="filterPanelIcon" class="collapse-icon">▼</span>
       </div>
       <div class="glass-card-body">
-        <div class="selector-bar">
+        <div id="filterSelectorBar" class="selector-bar">
           <select id="moduleSelect" onchange="loadVideos(this.value)"><option value="">— Select Module —</option></select>
           <select id="videoSelect" onchange="fetchSentences(this.value)"><option value="">— Select Video —</option></select>
         </div>
@@ -140,23 +140,23 @@
 
     <!-- 2) Sentence / Animation Setup -->
     <div class="glass-card" id="sentencesPanel" style="display:none;">
-      <div class="glass-card-header" onclick="togglePanel(this)">
-        <h2>2) Sentence → Animation Setup &amp; Preview</h2>
-        <span class="collapse-icon">▼</span>
+      <div id="sentencesPanelHeader" class="glass-card-header" onclick="togglePanel(this)">
+        <h2 id="sentencesPanelTitle">2) Sentence → Animation Setup &amp; Preview</h2>
+        <span id="sentencesPanelIcon" class="collapse-icon">▼</span>
       </div>
       <div class="glass-card-body">
         <div id="sentencesWrap" style="overflow-x:auto;"></div>
         <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-top:14px;">
-          <div class="legend" style="margin-top:0;">
+          <div id="animationTypeLegend" class="legend" style="margin-top:0;">
             <span class="chip">🏛️ architecture</span><span class="chip">🌊 data flow</span>
             <span class="chip">💻 code typing</span><span class="chip">💡 concept reveal</span>
             <span class="chip">📅 timeline</span><span class="chip">⚖️ comparison</span>
             <span class="chip">👣 process steps</span><span class="chip">🔢 metric counter</span>
             <span class="chip">🔀 flowchart</span><span class="chip">🔍 callout zoom</span>
           </div>
-          <div style="display:flex; align-items:center;">
-            <button class="btn btn-sm" data-require-admin style="background:#fbbf24; color:#000; margin-left:16px; white-space:nowrap;" onclick="bulkPrepareSentences()">⚙️ Bulk Prepare</button>
-            <button class="btn btn-sm" data-require-admin style="background:#4ade80; color:#000; margin-left:16px; white-space:nowrap;" onclick="bulkGenerateSentences()">▶️ Bulk Generate</button>
+          <div id="bulkActionsWrap" style="display:flex; align-items:center;">
+            <button id="btnBulkPrepare" class="btn btn-sm" data-require-admin style="background:#fbbf24; color:#000; margin-left:16px; white-space:nowrap;" onclick="bulkPrepareSentences()">⚙️ Bulk Prepare</button>
+            <button id="btnBulkGenerate" class="btn btn-sm" data-require-admin style="background:#4ade80; color:#000; margin-left:16px; white-space:nowrap;" onclick="bulkGenerateSentences()">▶️ Bulk Generate</button>
           </div>
         </div>
 
@@ -167,8 +167,8 @@
             <!-- Column 2: RunPod API Call -->
             <div style="flex:1; min-width:320px;">
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-                <p style="color:var(--text-muted);font-size:0.9rem;">RunPod API Call (cURL)</p>
-                <button class="btn btn-sm" style="background:#f59e0b; color:#000;" onclick="copyRunpodCurl()">📦 Copy cURL</button>
+                <p id="labelRunpodCurl" style="color:var(--text-muted);font-size:0.9rem;">RunPod API Call (cURL)</p>
+                <button id="btnCopyCurl" class="btn btn-sm" style="background:#f59e0b; color:#000;" onclick="copyRunpodCurl()">📦 Copy cURL</button>
               </div>
               <div style="margin-bottom:8px; display:flex; gap:8px;">
                 <input type="text" id="runpodEndpointId" placeholder="Endpoint ID (e.g. s13kv6t...)" style="flex:1; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.2); color:#fff; border-radius:6px; padding:6px 10px; font-size:0.8rem;" oninput="updateCurlPreview()">
@@ -179,7 +179,7 @@
             <!-- Column 3: Video -->
             <div style="flex:1; min-width:280px;">
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-                <p style="color:var(--text-muted);font-size:0.9rem;">Rendered Animation (Azure)</p>
+                <p id="labelRenderedAnimation" style="color:var(--text-muted);font-size:0.9rem;">Rendered Animation (Azure)</p>
                 <span id="jobStatus" class="status-pill st-pending">idle</span>
               </div>
               <div class="video-stage" id="videoStage">
@@ -208,13 +208,13 @@
 
     <!-- Saved Animations -->
     <div class="glass-card" id="savedPanel">
-      <div class="glass-card-header" onclick="togglePanel(this)">
-        <h2>💾 Saved Animations</h2>
-        <span class="collapse-icon">▼</span>
+      <div id="savedPanelHeader" class="glass-card-header" onclick="togglePanel(this)">
+        <h2 id="savedPanelTitle">💾 Saved Animations</h2>
+        <span id="savedPanelIcon" class="collapse-icon">▼</span>
       </div>
-      <div class="glass-card-body">
+      <div id="savedPanelBody" class="glass-card-body">
         <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
-          <button class="btn btn-secondary btn-sm" onclick="loadSavedAnimations()">🔄 Refresh</button>
+          <button id="btnRefreshSaved" class="btn btn-secondary btn-sm" onclick="loadSavedAnimations()">🔄 Refresh</button>
         </div>
         <div id="savedWrap" style="overflow-x:auto;">
           <div class="empty-state"><p>Loading saved animations…</p></div>
@@ -236,9 +236,9 @@
       <textarea id="promptModalText" spellcheck="false" readonly style="width:100%; min-height:280px; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:16px; color:var(--text-main); font-family:monospace; font-size:0.82rem; margin-bottom:16px; resize:vertical;"></textarea>
       <p style="color:var(--secondary);font-size:0.8rem;margin-bottom:6px;font-weight:700;">RUNPOD SERVERLESS PAYLOAD</p>
       <textarea id="payloadModalText" spellcheck="false" readonly style="width:100%; min-height:180px; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:16px; color:var(--text-main); font-family:monospace; font-size:0.82rem; margin-bottom:16px; resize:vertical;"></textarea>
-      <div class="modal-actions" style="display:flex; gap:12px; justify-content:flex-end; flex-wrap:wrap;">
-        <button class="btn" style="background:rgba(255,255,255,0.1);" onclick="closePromptModal()">Close</button>
-        <button class="btn btn-success" onclick="copyAiPrompt()">📋 Copy Prompt</button>
+      <div id="promptModalActions" class="modal-actions" style="display:flex; gap:12px; justify-content:flex-end; flex-wrap:wrap;">
+        <button id="btnPromptModalClose" class="btn" style="background:rgba(255,255,255,0.1);" onclick="closePromptModal()">Close</button>
+        <button id="btnPromptModalCopy" class="btn btn-success" onclick="copyAiPrompt()">📋 Copy Prompt</button>
       </div>
     </div>
   </div>
