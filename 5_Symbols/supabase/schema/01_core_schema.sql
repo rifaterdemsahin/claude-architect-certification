@@ -195,6 +195,10 @@ CREATE TABLE IF NOT EXISTS milestone_progress (
   user_id TEXT DEFAULT 'default',
   checked BOOLEAN DEFAULT FALSE,
   notes TEXT DEFAULT '',
+  -- JSON array of completed subtask indices, e.g. [0,1,3].
+  -- Written by 5_Symbols/production/prod/index.html (subtask sync).
+  -- Drift-fixed 2026-06-29: see migrations/migration_milestone_progress_subtasks.sql
+  subtasks JSONB NOT NULL DEFAULT '[]'::jsonb,
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   UNIQUE(milestone_id, user_id)
 );

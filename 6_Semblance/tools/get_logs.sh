@@ -22,7 +22,7 @@ DATASET=${AXIOM_DATASET:-videoproduction}
 API_URL=${AXIOM_QUERY_URL:-${AXIOM_API_URL:-https://api.axiom.co}}
 
 # Construct APL query to select latest entries
-APL_QUERY="['$DATASET'] | order by timestamp desc | limit $LIMIT"
+APL_QUERY="['$DATASET'] | sort by _time desc | limit $LIMIT"
 
 JSON_PAYLOAD=$(cat <<EOF
 {
@@ -35,17 +35,26 @@ EOF
 echo "🔍 Fetching last $LIMIT events from Axiom (dataset: $DATASET via $API_URL)..."
 
 # Axiom APL query endpoint requires format parameter (legacy or tabular)
-RESPONSE_BODY=$(curl -s -X POST "$API_URL/v1/query/_apl?format=legacy" \
+RESPONSE_BODY=$(curl -s -X POST "$API_URL/v1/datasets/_apl?format=legacy" \
   -H "Authorization: Bearer $AXIOM_TOKEN" \
   -H "Content-Type: application/json" \
   -H "X-Axiom-Org-Id: $AXIOM_ORG_ID" \
   -d "$JSON_PAYLOAD")
 
-# Check if response indicates error
-if echo "$RESPONSE_BODY" | grep -q '"message"'; then
+# Check if response indicates an Axiom API error.
+# Real errors come back as a top-level envelope: {"code":404,"message":"..."}
+# (no "matches" array). NOTE: grepping for '"message"' is wrong — every log
+# event has a data.message field, so the old check always false-positived.
+if echo "$RESPONSE_BODY" | grep -Eq '^\{"code":[0-9]+'; then
   echo "❌ Failed to query logs from Axiom."
   echo "Response: $RESPONSE_BODY"
   echo "Tip: Make sure the API Token has the 'Query' permission role enabled in Axiom Settings."
+  exit 1
+fi
+
+if ! echo "$RESPONSE_BODY" | grep -q '"matches"'; then
+  echo "❌ Unexpected response (no 'matches' array)."
+  echo "Response: $RESPONSE_BODY"
   exit 1
 fi
 

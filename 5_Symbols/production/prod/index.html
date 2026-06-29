@@ -194,6 +194,12 @@ ALTER TABLE milestone_progress ADD COLUMN IF NOT EXISTS subtasks JSONB DEFAULT '
       statusEl.style.color = '#f59e0b';
     }
 
+    // 🛡️ Hardened: an earlier version did `return res.json();` WITHOUT await,
+    // which defeats this try/catch — a JSON-parse rejection (empty/non-JSON
+    // body from Supabase) escaped as an unhandled promise rejection and was
+    // logged to Axiom (issues #17/#18). Now: read text, guard empty bodies,
+    // then JSON.parse (sync throw, caught here). Returns null on any failure
+    // — every caller already null-guards (|| / && .length).
     async function supFetch(endpoint, opts = {}) {
       if (!IS_CONNECTED) return null;
       try {
@@ -203,7 +209,9 @@ ALTER TABLE milestone_progress ADD COLUMN IF NOT EXISTS subtasks JSONB DEFAULT '
           'Content-Type': 'application/json', ...(opts.headers || {})
         }});
         if (!res.ok) return null;
-        return res.json();
+        const text = await res.text();          // awaited → failures caught here
+        if (!text) return null;                  // 204 / empty body → nothing to parse
+        return JSON.parse(text);                 // sync throw on bad JSON → caught
       } catch { return null; }
     }
 
