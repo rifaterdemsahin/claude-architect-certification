@@ -19,6 +19,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"os/exec"
 	"path"
 	"strconv"
 	"strings"
@@ -369,6 +370,37 @@ func supabasePost(ctx context.Context, cfg config, table string, body any) error
 	resp.Body.Close()
 	if resp.StatusCode >= 400 {
 		return fmt.Errorf("supabase POST %s: %s", table, resp.Status)
+	}
+	return nil
+}
+
+// supabaseUpsert POSTs a row with the merge-duplicates Prefer header so it
+// inserts-or-updates keyed on the given onConflict column(s). Requires the
+// table to expose the onConflict set via a unique constraint (e.g.
+// sentence_animations(sentence_id, animation_type)).
+func supabaseUpsert(ctx context.Context, cfg config, table string, body any, onConflict string) error {
+	u := fmt.Sprintf("%s/rest/v1/%s?select=", cfg.supabaseURL, table)
+	if onConflict != "" {
+		u += "&on_conflict=" + url.QueryEscape(onConflict)
+	}
+	b, _ := json.Marshal(body)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, u, bytes.NewReader(b))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("apikey", cfg.supabaseAnon)
+	req.Header.Set("Authorization", "Bearer "+cfg.supabaseAnon)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
+	// merge-duplicates = upsert; return=minimal keeps the payload tiny.
+	req.Header.Set("Prefer", "resolution=merge-duplicates,return=minimal")
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+	resp.Body.Close()
+	if resp.StatusCode >= 400 {
+		return fmt.Errorf("supabase UPSERT %s: %s", table, resp.Status)
 	}
 	return nil
 }
@@ -778,6 +810,9 @@ func envStatusHandler(cfg config) http.HandlerFunc {
 			show("AZURE_STORAGE (account name)", "Azure", cfg.azureAccountName, false, "Parsed from AZURE_STORAGE_CONN_STR"),
 			show("AZURE_STORAGE (account key)", "Azure", cfg.azureAccountKey, true, "Parsed from AZURE_STORAGE_CONN_STR"),
 			show("GOOGLE_CLIENT_ID", "Google", cfg.googleClientID, false, "OAuth client ID (public; served via /api/config)"),
+			show("RUNPOD_API_KEY", "RunPod", cfg.getSecret("RUNPOD_API_KEY"), true, "Key Vault 'runpod-api-key' or env; powers the Animation Generator render"),
+			show("RUNPOD_ENDPOINT_ID", "RunPod", os.Getenv("RUNPOD_ENDPOINT_ID"), false, "Serverless endpoint id for the Remotion worker"),
+			show("REMOTION_SERVE_URL", "RunPod", os.Getenv("REMOTION_SERVE_URL"), false, "Deployed Remotion bundle URL the worker renders"),
 		}
 
 		w.Header().Set("Content-Type", "application/json")
@@ -906,10 +941,11 @@ func generateContainerSAS(accountName, accountKey, container, permissions string
 }
 
 var allowedResearchContainers = map[string]bool{
-	"research-images": true,
-	"research-audio":  true,
-	"research-videos": true,
-	"research-notes":  true,
+	"research-images":     true,
+	"research-audio":      true,
+	"research-videos":     true,
+	"research-notes":      true,
+	"research-animations": true, // Remotion MP4s from the Animation Generator
 }
 
 type blobInfo struct {
@@ -2863,6 +2899,636 @@ Then one slide per idea, separated by a line containing only ---, each formatted
 	}
 }
 
+// ── Animation Generator (RunPod serverless + Remotion) ───────────────────────
+//
+// Three handlers back 5_Symbols/production/postprod/animation_generator.html:
+//  1. POST /api/animations/generate-prompt  — builds the Remotion composition
+//     prompt + inputProps + RunPod payload for a (sentence, animationType).
+//     Open (no cost, no secret leaked — only the prompt text is returned).
+//  2. POST /api/animations/runpod/run       — admin-gated. Submits the job to
+//     RunPod serverless and upserts a `sentence_animations` row (status=generating).
+//  3. GET  /api/animations/runpod/status    — admin-gated. Polls RunPod; on
+//     COMPLETED downloads the MP4, uploads it to Azure `research-animations`,
+//     and patches the row (status=completed + animation_url). Idempotent.
+
+// animationTypeMeta describes one of the 10 course-content animation types:
+// its slug, display label, emoji, and the Remotion composition prompt builder.
+// The prompt is a complete spec an LLM or developer can turn straight into a
+// Remotion <Composition> — it encodes the animation choreography + the sentence
+type AnimationTypeMeta struct {
+	Slug        string
+	Label       string
+	Emoji       string
+	BuildPrompt func(sentence, sentenceType, moduleTitle, videoTitle string) string
+}
+
+func clampLen(s string, n int) string {
+	s = strings.TrimSpace(s)
+	if len(s) > n {
+		return s[:n]
+	}
+	return s
+}
+
+// animationTypeMetas is the single source of truth for the 10 animation types
+// and their Remotion prompt templates. The page mirrors this list for its
+// <select> options; the prompt handler renders the chosen template.
+func animationTypeMetas() []AnimationTypeMeta {
+	brand := `BRAND KIT: background #030712 → deep navy; primary #8b5cf6 (violet); secondary #3b82f6 (blue); success #10b981; text #f3f4f6; muted #9ca3af. Fonts: 'Outfit' (headings, 800/900), 'Plus Jakarta Sans' (body). 1920x1080, 30fps. Easing: Remotion spring() for entrances, interpolate() with Easing.inOut for exits. Always export h264 MP4.`
+	mk := func(name, goal, choreography string) string {
+		return fmt.Sprintf(`# Remotion composition: %s
+
+GOAL: %s
+
+%s
+
+CONSTRAINTS:
+- React + Remotion only (@remotion/player, useCurrentFrame, useVideoConfig, spring, interpolate, AbsoluteFill, Sequence, Img, Audio). No external chart libs.
+- Read every value from `+"`inputProps`"+` (props.title, props.subtitle, props.items[], props.metric, props.brandColor…) — NEVER hard-code the sentence text in the component; the same <Composition> renders every sentence via props.
+- 1920x1080, props.fps || 30, props.durationInFrames || 150.
+- One focal point at a time; text must be legible at 1280px wide.
+- %s
+
+OUTPUT: a single self-contained React+Remotion <Composition id="Main"> whose defaultProps match the inputProps below. Return ONLY the component source + defaultProps, no prose.`, name, goal, choreography, brand)
+	}
+
+	return []AnimationTypeMeta{
+		{
+			Slug: "architecture_diagram", Label: "Architecture Diagram", Emoji: "🏛️",
+			BuildPrompt: func(s, st, m, v string) string {
+				return mk("ArchitectureDiagram", "Animate a system architecture building up node-by-node so the viewer sees how the pieces connect (e.g. Claude + MCP + Supabase + Azure Key Vault).",
+					fmt.Sprintf(`CHOREOGRAPHY (150 frames):
+- f0–30: title "%s" fades in top-center (spring scale 0.8→1).
+- f30–135: each node (props.nodes[] = {id,label,x,y}) pops in with spring() staggered 12 frames apart, connectors (SVG <path>) draw via pathLength interpolate after both endpoints exist.
+- f135–150: the active node (props.activeNode) gets a violet glow pulse (boxShadow animate) + its label scales 1.1.
+INPUT PROPS: title="%s" (from module %q / video %q), subtitle=derived from sentence, nodes[]=from sentence entities, sentenceType=%q.
+SENTENCE (authoritative content): %q`, "System Architecture", clampLen(s, 90), m, v, st, s))
+			},
+		},
+		{
+			Slug: "data_flow", Label: "Data Flow", Emoji: "🌊",
+			BuildPrompt: func(s, st, m, v string) string {
+				return mk("DataFlow", "Show data flowing left-to-right through pipeline stages (e.g. Request → Auth → LLM → Storage → Response).",
+					fmt.Sprintf(`CHOREOGRAPHY (150 frames):
+- f0–20: stage boxes (props.stages[] = string[]) slide up in a row, staggered 10 frames.
+- f20–140: a packet (small rounded square, props.color) travels stage→stage via interpolate on x, looping every 30 frames; each stage glows violet while the packet is inside it.
+- f140–150: final stage gets a green check + success flash.
+INPUT PROPS: title="Data Flow", stages[]=stages parsed from the sentence, sentence="%s", sentenceType=%q, module=%q, video=%q.
+SENTENCE: %q`, clampLen(s, 90), st, m, v, s))
+			},
+		},
+		{
+			Slug: "code_typing", Label: "Code Typing", Emoji: "💻",
+			BuildPrompt: func(s, st, m, v string) string {
+				return mk("CodeTyping", "Reveal a code snippet with a typewriter effect + a blinking caret + simple syntax highlighting (keyword/string/comment colors).",
+					fmt.Sprintf(`CHOREOGRAPHY (180 frames):
+- Use a monospaced font (Fira Code / monospace). Show one extra character per frame (Math.min(frame, code.length)); a 2px violet caret blinks at the cursor position (visible when frame %% 30 < 15).
+- Keyword tokens (#3b82f6), strings (#10b981), comments (#9ca3af), default (#f3f4f6).
+- f150–180: after the snippet is fully typed, a violet underline sweeps under it + a caption (props.caption) fades in.
+INPUT PROPS: code=props.code (the snippet to type), language=props.language, caption="%s", sentence="%s".
+SENTENCE (context for caption): %q`, clampLen(s, 60), clampLen(s, 90), s))
+			},
+		},
+		{
+			Slug: "concept_reveal", Label: "Concept Reveal", Emoji: "💡",
+			BuildPrompt: func(s, st, m, v string) string {
+				return mk("ConceptReveal", "Kinetic typography: a single big idea punches in with scale + fade + blur-out exit (Steve Jobs keynote style).",
+					fmt.Sprintf(`CHOREOGRAPHY (120 frames):
+- f0–25: headline "%s" scales 1.4→1 with spring(bounce) + opacity 0→1 + blur 20px→0.
+- f25–95: hold, a violet accent bar wipes left-to-right under the text (interpolate width 0→100%%).
+- f95–120: blur 0→16px + scale 1→1.08 + opacity 1→0.
+- One concept only; max 8 words in the headline. Background subtle radial violet glow.
+INPUT PROPS: headline="%s", subheadline=optional, sentence="%s".
+SENTENCE: %q`, clampLen(s, 64), clampLen(s, 64), clampLen(s, 90), s))
+			},
+		},
+		{
+			Slug: "timeline", Label: "Timeline", Emoji: "📅",
+			BuildPrompt: func(s, st, m, v string) string {
+				return mk("Timeline", "Animate a horizontal milestone timeline building left-to-right, one milestone at a time.",
+					fmt.Sprintf(`CHOREOGRAPHY (150 frames):
+- f0–20: a horizontal axis line draws across the screen (interpolate width 0→100%%).
+- f20–140: each milestone (props.milestones[] = {at,label}) pops: a dot drops via spring, a label fades in above, staggered 18 frames.
+- f140–150: the last milestone gets a violet ring pulse.
+INPUT PROPS: title="%s", milestones[]=from sentence, sentence="%s", module=%q.
+SENTENCE: %q`, clampLen(s, 60), clampLen(s, 90), m, s))
+			},
+		},
+		{
+			Slug: "comparison", Label: "Comparison", Emoji: "⚖️",
+			BuildPrompt: func(s, st, m, v string) string {
+				return mk("Comparison", "Split-screen comparison: two panels slide in from left/right and the differences highlight (e.g. Option A vs Option B, before vs after).",
+					fmt.Sprintf(`CHOREOGRAPHY (150 frames):
+- f0–40: left panel (props.left={title,points[]}) slides from -50%% + right panel (props.right) from +50%%; a center divider draws vertically.
+- f40–130: points in each panel fade in staggered, one per side alternately; matching rows get a subtle violet link line.
+- f130–150: the winning side (props.winner) lifts up + green border.
+INPUT PROPS: left={title,points[]}, right={title,points[]}, winner="left"|"right"|null, sentence="%s".
+SENTENCE (the comparison being made): %q`, clampLen(s, 90), s))
+			},
+		},
+		{
+			Slug: "process_steps", Label: "Process Steps", Emoji: "👣",
+			BuildPrompt: func(s, st, m, v string) string {
+				return mk("ProcessSteps", "Sequential numbered steps that animate in one-by-one with green checkmarks completing each.",
+					fmt.Sprintf(`CHOREOGRAPHY (props.steps.length*24 + 30 frames):
+- Each step card (props.steps[] = {n,title}) slides in from the right staggered 24 frames; a large step number (violet) counts up.
+- 18 frames after a step appears, a green ✓ check scales in (spring) to mark it done.
+- A progress bar at the bottom fills proportionally to completed steps.
+INPUT PROPS: title="%s", steps[]=from sentence, sentence="%s".
+SENTENCE (the procedure described): %q`, clampLen(s, 60), clampLen(s, 90), s))
+			},
+		},
+		{
+			Slug: "metric_counter", Label: "Metric Counter", Emoji: "🔢",
+			BuildPrompt: func(s, st, m, v string) string {
+				return mk("MetricCounter", "Animate a number counting up to a target value with a big reveal + supporting caption (cost, %, count, latency…).",
+					fmt.Sprintf(`CHOREOGRAPHY (120 frames):
+- f0–90: the number interpolates 0→props.target with an ease-out (use interpolate(frame,[0,90],[0,target],{extrapolateRight:'clamp',easing:Easing.out(Easing.cubic)})); format with props.prefix/suffix and props.decimals.
+- f90–120: the value pulses once (scale 1→1.06→1) + a violet ring expands outward + caption "%s" fades in below.
+INPUT PROPS: target=props.target (number), prefix, suffix, decimals, caption="%s", sentence="%s".
+SENTENCE (the metric being stated): %q`, clampLen(s, 80), clampLen(s, 80), clampLen(s, 90), s))
+			},
+		},
+		{
+			Slug: "flowchart", Label: "Flowchart", Emoji: "🔀",
+			BuildPrompt: func(s, st, m, v string) string {
+				return mk("Flowchart", "Decision flowchart: rectangular process nodes + diamond decision nodes, branches revealing conditionally.",
+					fmt.Sprintf(`CHOREOGRAPHY (180 frames):
+- Build the graph top-down from props.nodes[] = {id,type:'process'|'decision'|'terminal',label,y} and props.edges[] = {from,to,label}.
+- Nodes appear via spring staggered 18 frames; edges (SVG paths) draw after both endpoints exist (pathLength interpolate).
+- At decision diamonds, the YES branch highlights green and NO branch highlights muted, 20 frames after the diamond appears.
+INPUT PROPS: title="%s", nodes[]=parsed from sentence, edges[], sentence="%s".
+SENTENCE (the logic/decision being mapped): %q`, clampLen(s, 60), clampLen(s, 90), s))
+			},
+		},
+		{
+			Slug: "callout_zoom", Label: "Callout Zoom", Emoji: "🔍",
+			BuildPrompt: func(s, st, m, v string) string {
+				return mk("CalloutZoom", "Zoom into a region of a screenshot/diagram and a callout label points at the highlighted element.",
+					fmt.Sprintf(`CHOREOGRAPHY (120 frames):
+- f0–40: full image (props.image) scales 1→props.zoom (e.g. 2.2) toward props.focusPoint {x,y} (transform-origin set to focus point), ease-in-out.
+- f40–100: a violet rounded rectangle border pulses around the focus region; an SVG leader line draws from it to a callout pill (props.callout) that fades in.
+- f100–120: hold; callout text typed/fully visible.
+INPUT PROPS: image=props.image (URL), focusPoint={x,y} in 0–1, zoom=props.zoom||2, callout="%s", sentence="%s".
+SENTENCE (what is being pointed out): %q`, clampLen(s, 70), clampLen(s, 90), s))
+			},
+		},
+	}
+}
+
+// findAnimationType resolves a slug to its meta (case-insensitive). Returns nil
+// when the slug is not one of the 10 known types.
+func findAnimationType(slug string) *AnimationTypeMeta {
+	slug = strings.ToLower(strings.TrimSpace(slug))
+	for i := range animationTypeMetas() {
+		m := animationTypeMetas()[i]
+		if m.Slug == slug {
+			return &m
+		}
+	}
+	return nil
+}
+
+// suggestAnimationType maps a script sentence_type to a sensible default
+// animation type so the page can pre-select the <select> for the user.
+func suggestAnimationType(sentenceType string) string {
+	switch strings.ToLower(strings.TrimSpace(sentenceType)) {
+	case "hook", "heading", "title":
+		return "concept_reveal"
+	case "objective", "takeaway", "insight":
+		return "callout_zoom"
+	case "step", "transition":
+		return "process_steps"
+	case "cue":
+		return "code_typing"
+	default:
+		return "concept_reveal"
+	}
+}
+
+// animationDefaultProps returns the inputProps the Remotion <Composition>
+// consumes for the given (type, sentence). This is what gets baked into the
+// RunPod serverless render payload AND stored in remotion_props.
+func animationDefaultProps(animType, sentence, sentenceType, moduleTitle, videoTitle string) map[string]any {
+	base := map[string]any{
+		"title":        clampLen(sentence, 64),
+		"subtitle":     clampLen(moduleTitle+" · "+videoTitle, 80),
+		"sentence":     sentence,
+		"sentenceType": sentenceType,
+		"module":       moduleTitle,
+		"video":        videoTitle,
+		"fps":           30,
+		"durationInFrames": 150,
+		"brandColor":   "#8b5cf6",
+		"secondaryColor": "#3b82f6",
+		"bgColor":      "#030712",
+	}
+	switch animType {
+	case "code_typing":
+		base["code"] = "// paste the snippet to type here\nconst result = await call({ model: 'claude' });"
+		base["language"] = "javascript"
+		base["durationInFrames"] = 180
+	case "comparison":
+		base["left"] = map[string]any{"title": "Option A", "points": []string{"point one", "point two"}}
+		base["right"] = map[string]any{"title": "Option B", "points": []string{"point one", "point two"}}
+		base["winner"] = "left"
+	case "process_steps":
+		base["steps"] = []map[string]any{{"n": 1, "title": "First step"}, {"n": 2, "title": "Second step"}, {"n": 3, "title": "Third step"}}
+		base["durationInFrames"] = 102
+	case "metric_counter":
+		base["target"] = 100
+		base["prefix"] = ""
+		base["suffix"] = "%"
+		base["decimals"] = 0
+	case "timeline":
+		base["milestones"] = []map[string]any{{"at": 0, "label": "Start"}, {"at": 50, "label": "Middle"}, {"at": 100, "label": "Now"}}
+	case "data_flow":
+		base["stages"] = []string{"Input", "Process", "Store", "Output"}
+	case "architecture_diagram":
+		base["nodes"] = []map[string]any{
+			{"id": "a", "label": "Client", "x": 200, "y": 540},
+			{"id": "b", "label": "API", "x": 700, "y": 540},
+			{"id": "c", "label": "Database", "x": 1200, "y": 540},
+		}
+		base["activeNode"] = "b"
+	case "flowchart":
+		base["nodes"] = []map[string]any{
+			{"id": "s", "type": "terminal", "label": "Start", "y": 200},
+			{"id": "d", "type": "decision", "label": "Valid?", "y": 480},
+			{"id": "e", "type": "process", "label": "Handle", "y": 760},
+		}
+		base["edges"] = []map[string]any{{"from": "s", "to": "d"}, {"from": "d", "to": "e", "label": "YES"}}
+	case "callout_zoom":
+		base["image"] = ""
+		base["focusPoint"] = map[string]any{"x": 0.5, "y": 0.5}
+		base["zoom"] = 2
+	}
+	return base
+}
+
+// animationPromptHandler builds the Remotion composition prompt + inputProps +
+// the full RunPod serverless payload for a (sentence, animationType). Open: it
+// returns only prompt text + non-secret config, never the API key.
+func animationPromptHandler(cfg config) http.HandlerFunc {
+	type Req struct {
+		Sentence      string `json:"sentence"`
+		SentenceType  string `json:"sentenceType"`
+		AnimationType string `json:"animationType"`
+		ModuleName    string `json:"moduleName"`
+		VideoName     string `json:"videoName"`
+		CustomPrompt  string `json:"customPrompt"`
+	}
+	return func(w http.ResponseWriter, r *http.Request) {
+		setCORS(w, r)
+		w.Header().Set("Content-Type", "application/json")
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+		if r.Method != http.MethodPost {
+			http.Error(w, `{"error":"method not allowed"}`, http.StatusMethodNotAllowed)
+			return
+		}
+		var req Req
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, `{"error":"invalid request body"}`, http.StatusBadRequest)
+			return
+		}
+		meta := findAnimationType(req.AnimationType)
+		if meta == nil {
+			http.Error(w, `{"error":"unknown animation type"}`, http.StatusBadRequest)
+			return
+		}
+		sentence := strings.TrimSpace(req.Sentence)
+		if sentence == "" {
+			sentence = "(no sentence provided)"
+		}
+		prompt := strings.TrimSpace(req.CustomPrompt)
+		if prompt == "" {
+			prompt = meta.BuildPrompt(sentence, req.SentenceType, req.ModuleName, req.VideoName)
+		}
+		props := animationDefaultProps(meta.Slug, sentence, req.SentenceType, req.ModuleName, req.VideoName)
+
+		// Build the RunPod serverless payload (the exact body POSTed to
+		// /v2/{endpoint}/run). serveUrl is filled at submit time from env so the
+		// secret-free preview is still useful to copy/paste into RunPod manually.
+		serveURL := os.Getenv("REMOTION_SERVE_URL")
+		dur, _ := props["durationInFrames"].(int)
+		if dur == 0 {
+			dur = 150
+		}
+		runpodPayload := map[string]any{
+			"input": map[string]any{
+				"serveUrl":         serveURL,
+				"composition":      "Main",
+				"codec":            "h264",
+				"imageFormat":      "jpeg",
+				"crf":              18,
+				"inputProps":       props,
+				"durationInFrames": dur,
+				"fps":              30,
+				"width":            1920,
+				"height":           1080,
+			},
+		}
+
+		json.NewEncoder(w).Encode(map[string]any{
+			"animationType":  meta.Slug,
+			"label":          meta.Label,
+			"emoji":          meta.Emoji,
+			"prompt":         prompt,
+			"inputProps":     props,
+			"runpodPayload":  runpodPayload,
+			"serveUrl":       serveURL,
+			"runpodConfigured": cfg.getSecret("RUNPOD_API_KEY") != "" && os.Getenv("RUNPOD_ENDPOINT_ID") != "" && serveURL != "",
+		})
+	}
+}
+
+// animationRunpodRunHandler submits a render job to RunPod serverless and
+// records a generating row in sentence_animations. Admin-gated (paid render).
+func animationRunpodRunHandler(cfg config) http.HandlerFunc {
+	type Req struct {
+		SentenceID    int    `json:"sentenceId"`
+		ModuleNumber  int    `json:"moduleNumber"`
+		VideoNumber   int    `json:"videoNumber"`
+		ScriptID      int    `json:"scriptId"`
+		AnimationType string `json:"animationType"`
+		Prompt        string `json:"prompt"`
+		InputProps    map[string]any `json:"inputProps"`
+		CustomPrompt  string `json:"customPrompt"`
+		Duration      int    `json:"durationInFrames"`
+	}
+	return func(w http.ResponseWriter, r *http.Request) {
+		setCORS(w, r)
+		w.Header().Set("Content-Type", "application/json")
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+		if !isAdminRequest(r) {
+			http.Error(w, `{"error":"Unauthorized — sign in as admin or open from localhost."}`, http.StatusUnauthorized)
+			return
+		}
+		if r.Method != http.MethodPost {
+			http.Error(w, `{"error":"method not allowed"}`, http.StatusMethodNotAllowed)
+			return
+		}
+		apiKey := cfg.getSecret("RUNPOD_API_KEY")
+		endpointID := os.Getenv("RUNPOD_ENDPOINT_ID")
+		serveURL := os.Getenv("REMOTION_SERVE_URL")
+		if apiKey == "" || endpointID == "" || serveURL == "" {
+			http.Error(w, `{"error":"RunPod not configured. Set RUNPOD_API_KEY (Key Vault/Azure secret 'runpod-api-key' or env), RUNPOD_ENDPOINT_ID, and REMOTION_SERVE_URL on the server."}`, http.StatusServiceUnavailable)
+			return
+		}
+		var req Req
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, `{"error":"invalid request body"}`, http.StatusBadRequest)
+			return
+		}
+		if req.SentenceID == 0 {
+			http.Error(w, `{"error":"sentenceId is required"}`, http.StatusBadRequest)
+			return
+		}
+		if findAnimationType(req.AnimationType) == nil {
+			http.Error(w, `{"error":"unknown animation type"}`, http.StatusBadRequest)
+			return
+		}
+		if req.InputProps == nil {
+			req.InputProps = animationDefaultProps(req.AnimationType, "", "", "", "")
+		}
+		dur := req.Duration
+		if dur == 0 {
+			if v, ok := req.InputProps["durationInFrames"].(float64); ok {
+				dur = int(v)
+			}
+			if v, ok := req.InputProps["durationInFrames"].(int); ok {
+				dur = v
+			}
+		}
+		if dur == 0 {
+			dur = 150
+		}
+		req.InputProps["durationInFrames"] = dur
+
+		payload := map[string]any{
+			"input": map[string]any{
+				"serveUrl":         serveURL,
+				"composition":      "Main",
+				"codec":            "h264",
+				"imageFormat":      "jpeg",
+				"crf":              18,
+				"inputProps":       req.InputProps,
+				"durationInFrames": dur,
+				"fps":              30,
+				"width":            1920,
+				"height":           1080,
+			},
+		}
+		body, _ := json.Marshal(payload)
+
+		ctx, cancel := context.WithTimeout(r.Context(), 30*time.Second)
+		defer cancel()
+		runURL := "https://api.runpod.ai/v2/" + endpointID + "/run"
+		hreq, err := http.NewRequestWithContext(ctx, http.MethodPost, runURL, bytes.NewReader(body))
+		if err != nil {
+			http.Error(w, `{"error":"failed to build runpod request"}`, http.StatusInternalServerError)
+			return
+		}
+		hreq.Header.Set("Content-Type", "application/json")
+		hreq.Header.Set("Authorization", "Bearer "+apiKey)
+
+		hresp, err := http.DefaultClient.Do(hreq)
+		if err != nil {
+			http.Error(w, `{"error":"RunPod submit failed"}`, http.StatusBadGateway)
+			return
+		}
+		defer hresp.Body.Close()
+		rb, _ := io.ReadAll(hresp.Body)
+		if hresp.StatusCode >= 400 {
+			http.Error(w, fmt.Sprintf(`{"error":"RunPod submit HTTP %d: %s"}`, hresp.StatusCode, strings.TrimSpace(string(rb))), http.StatusBadGateway)
+			return
+		}
+		var rpResp struct {
+			ID     string `json:"id"`
+			Status string `json:"status"`
+		}
+		if err := json.Unmarshal(rb, &rpResp); err != nil || rpResp.ID == "" {
+			http.Error(w, `{"error":"RunPod response missing job id"}`, http.StatusBadGateway)
+			return
+		}
+
+		// Upsert a generating row keyed on (sentence_id, animation_type).
+		row := map[string]any{
+			"sentence_id":     req.SentenceID,
+			"module_number":   req.ModuleNumber,
+			"video_number":    req.VideoNumber,
+			"script_id":       req.ScriptID,
+			"animation_type":  req.AnimationType,
+			"generation_status": "generating",
+			"prompt_used":     strings.TrimSpace(req.CustomPrompt),
+			"remotion_props":  req.InputProps,
+			"runpod_job_id":   rpResp.ID,
+			"runpod_status":   rpResp.Status,
+			"codec":           "h264",
+			"duration_in_frames": dur,
+			"fps":             30,
+			"width":           1920,
+			"height":          1080,
+			"error_message":   "",
+		}
+		if strings.TrimSpace(req.CustomPrompt) == "" {
+			row["prompt_used"] = req.Prompt
+		}
+		// Upsert via the unique (sentence_id, animation_type) index.
+		if err := supabaseUpsert(ctx, cfg, "sentence_animations", row, "sentence_id,animation_type"); err != nil {
+			log.Printf("sentence_animations upsert: %v", err)
+		}
+
+		w.WriteHeader(http.StatusAccepted)
+		json.NewEncoder(w).Encode(map[string]any{
+			"jobId":     rpResp.ID,
+			"status":    rpResp.Status,
+			"endpoint":  endpointID,
+		})
+	}
+}
+
+// animationRunpodStatusHandler polls a RunPod job. On COMPLETED it downloads
+// the rendered MP4, uploads it to Azure `research-animations`, and patches the
+// sentence_animations row. Idempotent: once a row is completed, re-polling is a
+// no-op. Admin-gated (it performs the Azure write).
+func animationRunpodStatusHandler(cfg config) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		setCORS(w, r)
+		w.Header().Set("Content-Type", "application/json")
+		if !isAdminRequest(r) {
+			http.Error(w, `{"error":"Unauthorized — sign in as admin or open from localhost."}`, http.StatusUnauthorized)
+			return
+		}
+		jobID := r.URL.Query().Get("id")
+		sentenceID := r.URL.Query().Get("sentence_id")
+		if jobID == "" || sentenceID == "" {
+			http.Error(w, `{"error":"id and sentence_id are required"}`, http.StatusBadRequest)
+			return
+		}
+		apiKey := cfg.getSecret("RUNPOD_API_KEY")
+		endpointID := os.Getenv("RUNPOD_ENDPOINT_ID")
+		if apiKey == "" || endpointID == "" {
+			http.Error(w, `{"error":"RunPod not configured"}`, http.StatusServiceUnavailable)
+			return
+		}
+
+		ctx, cancel := context.WithTimeout(r.Context(), 30*time.Second)
+		defer cancel()
+		statusURL := "https://api.runpod.ai/v2/" + endpointID + "/status/" + jobID
+		hreq, _ := http.NewRequestWithContext(ctx, http.MethodGet, statusURL, nil)
+		hreq.Header.Set("Authorization", "Bearer "+apiKey)
+		hresp, err := http.DefaultClient.Do(hreq)
+		if err != nil {
+			http.Error(w, `{"error":"RunPod status poll failed"}`, http.StatusBadGateway)
+			return
+		}
+		defer hresp.Body.Close()
+		rb, _ := io.ReadAll(hresp.Body)
+		var rpResp struct {
+			Status string `json:"status"`
+			Output any    `json:"output"`
+			Error  string `json:"error"`
+		}
+		_ = json.Unmarshal(rb, &rpResp)
+
+		status := strings.ToUpper(strings.TrimSpace(rpResp.Status))
+		out := map[string]any{"status": status, "runpodStatus": status}
+
+		switch status {
+		case "COMPLETED":
+			videoURL := runPodOutputVideoURL(rpResp.Output)
+			if videoURL == "" {
+				out["status"] = "COMPLETED_NO_URL"
+				out["error"] = "render completed but no output video URL was returned"
+				if e := supabasePatch(ctx, cfg, "sentence_animations",
+					"runpod_job_id=eq."+jobID,
+					map[string]any{"generation_status": "failed", "error_message": out["error"].(string), "runpod_status": status}); e != nil {
+					log.Printf("sentence_animations patch failed(no-url): %v", e)
+				}
+				json.NewEncoder(w).Encode(out)
+				return
+			}
+			// Download the rendered MP4 from RunPod.
+			dl, derr := http.Get(videoURL)
+			if derr != nil {
+				out["error"] = "failed to download render: " + derr.Error()
+				json.NewEncoder(w).Encode(out)
+				return
+			}
+			videoBytes, _ := io.ReadAll(dl.Body)
+			dl.Body.Close()
+			if len(videoBytes) == 0 {
+				out["error"] = "rendered video was empty"
+				json.NewEncoder(w).Encode(out)
+				return
+			}
+			// Upload to Azure `research-animations`.
+			blobName := fmt.Sprintf("m%d_v%d_%d.mp4", queryInt(r, "module_number"), queryInt(r, "video_number"), time.Now().Unix())
+			if uerr := uploadBlobToAzure(ctx, cfg, "research-animations", blobName, "video/mp4", videoBytes); uerr != nil {
+				log.Printf("animation azure upload failed: %v", uerr)
+				out["error"] = "azure upload failed: " + uerr.Error()
+				json.NewEncoder(w).Encode(out)
+				return
+			}
+			proxyURL := researchFileProxyURL("research-animations", blobName)
+			if e := supabasePatch(ctx, cfg, "sentence_animations",
+				"runpod_job_id=eq."+jobID,
+				map[string]any{
+					"generation_status": "completed",
+					"runpod_status":    status,
+					"azure_blob_name":  blobName,
+					"animation_url":    proxyURL,
+					"error_message":    "",
+				}); e != nil {
+				log.Printf("sentence_animations patch failed(completed): %v", e)
+			}
+			out["url"] = proxyURL
+			out["blobName"] = blobName
+		case "FAILED", "CANCELLED", "TIMED_OUT":
+			errMsg := rpResp.Error
+			if errMsg == "" {
+				errMsg = "render " + strings.ToLower(status)
+			}
+			if e := supabasePatch(ctx, cfg, "sentence_animations",
+				"runpod_job_id=eq."+jobID,
+				map[string]any{"generation_status": "failed", "runpod_status": status, "error_message": errMsg}); e != nil {
+				log.Printf("sentence_animations patch failed(%s): %v", status, e)
+			}
+			out["error"] = errMsg
+		}
+		json.NewEncoder(w).Encode(out)
+	}
+}
+
+// queryInt reads an int query param, 0 when missing/invalid.
+func queryInt(r *http.Request, key string) int {
+	v, _ := strconv.Atoi(r.URL.Query().Get(key))
+	return v
+}
+
+// runPodOutputVideoURL tolerates the output shapes different RunPod Remotion
+// workers return: {url}, {output}, {video}, {url, ...}, or a bare string.
+func runPodOutputVideoURL(output any) string {
+	switch o := output.(type) {
+	case string:
+		return o
+	case map[string]any:
+		for _, k := range []string{"url", "output", "video", "file"} {
+			if s, ok := o[k].(string); ok && s != "" {
+				return s
+			}
+		}
+	}
+	return ""
+}
+
 // setCORS allows the static GitHub Pages site (and local dev) to call this
 // backend cross-origin. The GitHub Pages site diverts /api calls here because
 // Pages cannot run the Go backend that proxies to Gemini.
@@ -3058,6 +3724,59 @@ TEXT TO FIX:
 
 // ── Admin Handlers ────────────────────────────────────────────────────────────
 
+func adminBackupSupabaseHandler(cfg config) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if !isAdminRequest(r) {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		dbURL := cfg.getSecret("SUPABASE_DB_URL")
+		if dbURL == "" {
+			dbURL = os.Getenv("SUPABASE_DB_URL")
+		}
+		if dbURL == "" {
+			http.Error(w, "SUPABASE_DB_URL not configured in Azure Key Vault or Env", http.StatusInternalServerError)
+			return
+		}
+
+		cmd := exec.Command("pg_dump", dbURL, "--no-owner", "--no-acl", "--schema=public")
+		w.Header().Set("Content-Type", "application/octet-stream")
+		w.Header().Set("Content-Disposition", "attachment; filename=\"supabase_backup.sql\"")
+		
+		cmd.Stdout = w
+		cmd.Stderr = os.Stderr
+		
+		if err := cmd.Run(); err != nil {
+			log.Printf("pg_dump failed: %v", err)
+		}
+	}
+}
+
+func adminBackupAzureHandler(cfg config) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if !isAdminRequest(r) {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		secrets := map[string]string{
+			"SUPABASE_DB_URL": cfg.getSecret("SUPABASE_DB_URL"),
+			"OPENROUTER_API_KEY": cfg.getSecret("OPENROUTER_API_KEY"),
+			"GEMINI_API_KEY": cfg.getSecret("GEMINI_API_KEY"),
+			"claude-architect-GOOGLE-CLIENT-ID": cfg.getSecret("claude-architect-GOOGLE-CLIENT-ID"),
+			"GOOGLE-IMAGEN-API-KEY": cfg.getSecret("GOOGLE-IMAGEN-API-KEY"),
+			"AXIOM_TOKEN": cfg.getSecret("AXIOM_TOKEN"),
+			"AXIOM_ORG_ID": cfg.getSecret("AXIOM_ORG_ID"),
+			"AdminPassword": cfg.getSecret("AdminPassword"),
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Content-Disposition", "attachment; filename=\"azure_secrets_backup.json\"")
+		json.NewEncoder(w).Encode(secrets)
+	}
+}
+
 // adminStatusHandler lets any page ask "am I signed in?" so destructive UI
 // (delete/upload buttons) can be hidden when the visitor is not trusted. The
 // rule mirrors every privileged handler: localhost origin OR admin cookie.
@@ -3249,11 +3968,16 @@ func main() {
 	mux.Handle("/api/lowerthirds/generate", observe(cfg, lowerThirdGenerateHandler(cfg)))
 	mux.Handle("/api/lowerthirds/openrouter", observe(cfg, openRouterGenerateHandler(cfg)))
 	mux.Handle("/api/slides/openrouter", observe(cfg, slideGenerateHandler(cfg)))
+	mux.Handle("/api/animations/generate-prompt", observe(cfg, animationPromptHandler(cfg)))
+	mux.Handle("/api/animations/runpod/run", observe(cfg, animationRunpodRunHandler(cfg)))
+	mux.Handle("/api/animations/runpod/status", observe(cfg, animationRunpodStatusHandler(cfg)))
 	mux.Handle("/api/ai/sanity-check", observe(cfg, sanityCheckHandler(cfg)))
 	mux.Handle("/api/ai/fix-grammar", observe(cfg, fixGrammarHandler(cfg)))
 	mux.Handle("/api/admin/login", observe(cfg, adminLoginHandler(cfg)))
 	mux.Handle("/api/admin/logout", observe(cfg, adminLogoutHandler(cfg)))
 	mux.Handle("/api/admin/status", observe(cfg, adminStatusHandler(cfg)))
+	mux.Handle("/api/admin/backup/supabase", observe(cfg, adminBackupSupabaseHandler(cfg)))
+	mux.Handle("/api/admin/backup/azure", observe(cfg, adminBackupAzureHandler(cfg)))
 	mux.Handle("/api/axiom/logs", observe(cfg, axiomLogsHandler(cfg)))
 	mux.Handle("/api/admin/gdrive-credentials", observe(cfg, adminGDriveCredentialsHandler(cfg)))
 	mux.Handle("/admin/errors", observe(cfg, axiomErrorsHandler(tmpl, cfg, navConfigJS)))

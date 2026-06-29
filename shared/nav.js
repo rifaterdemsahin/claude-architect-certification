@@ -360,7 +360,8 @@
           { label: '🖼️ Image Generator', url: '5_Symbols/production/postprod/image_generator.html' },
           { label: '🎬 Lower Thirds Manager', url: '5_Symbols/production/postprod/lower_thirds.html' },
           { label: '🎨 SVG Generator', url: '5_Symbols/production/postprod/graphics_generator.html' },
-          { label: '📊 Slide Generator', url: '5_Symbols/production/postprod/slide_generator.html', description: 'Generate Marp markdown presentations from your video script sentences.' }
+          { label: '📊 Slide Generator', url: '5_Symbols/production/postprod/slide_generator.html', description: 'Generate Marp markdown presentations from your video script sentences.' },
+          { label: '🎞️ Animation Generator', url: '5_Symbols/production/postprod/animation_generator.html', description: 'Generate per-sentence Remotion animations rendered on RunPod serverless, uploaded to Azure.' }
         ]},
         { group: true, label: '3. 🎵 Audio & Music', children: [
           { label: '🎵 Audio Scoring', url: '5_Symbols/production/postprod/audio_scoring.html' },

@@ -585,6 +585,11 @@
                   "description": "Generate Marp markdown presentations from your video script sentences (basic + AI napkin-style)."
                 },
                 {
+                  "label": "\ud83c\udf9e\ufe0f Animation Generator",
+                  "url": "5_Symbols/production/postprod/animation_generator.html",
+                  "description": "Generate per-sentence Remotion animations rendered on RunPod serverless, uploaded to Azure. 10 course-content animation types linked to sentences."
+                },
+                {
                   "label": "\ud83c\udfa8 Thumbnail Assembly (Canva)",
                   "url": "https://www.canva.com/design/DAGJhH098do/7a-TDVcjX482MetGV3HLPA/edit"
                 }

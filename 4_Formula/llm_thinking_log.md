@@ -1,5 +1,29 @@
 # LLM Thinking Log
 
+## 2026-06-28 — 🎞️ Animation Generator (RunPod serverless + Remotion)
+
+### 🎯 Objective
+Create a per-sentence **Animation Generator** page (mirroring the Marp `slide_generator.html` structure) that defines **10 reusable animation types** for the course, builds the **Remotion** prompt + composition props for each, renders the video on **RunPod serverless**, **uploads the MP4 to Azure**, links the result back to the sentence in **Supabase**, and wires it into the Production menu. Commit + push + deploy.
+
+### 🧭 Architecture / design choices
+- **Infra split = stateless render farm.** Rendering Remotion is CPU-heavy (FFmpeg + headless Chromium) and must not run on the Fly.io Go server (stdlib-only, single small machine). **RunPod serverless** is the render farm: the Go server only (a) builds the prompt/props, (b) submits the job, (c) polls, (d) downloads the MP4 + uploads to Azure + updates Supabase. Each HTTP request stays short — the heavy work is async on RunPod.
+- **RunPod async pattern.** `POST /v2/{endpoint}/run` → `{id, status}`; `GET /v2/{endpoint}/status/{id}` → `{status, output:{url}}`. The browser polls our `/status` shim every few seconds; the shim does the final Azure upload only once (idempotent — guarded by the row already being `completed`).
+- **Secret hygiene.** `RUNPOD_API_KEY` via `cfg.getSecret(...)` (Key Vault `runpod-api-key` → env fallback), exactly like `OPENROUTER_API_KEY`. `RUNPOD_ENDPOINT_ID` + `REMOTION_SERVE_URL` are non-secret config → plain env. **No key reaches the browser.**
+- **Auth gate.** Both render handlers (`/runpod/run` submit + `/runpod/status` poll-that-uploads) are **admin-gated** (`isAdminRequest`) because a render is a paid, state-changing op that writes a blob — same rule as every destructive control. `data-require-admin` + `requireAdmin('render animations')` on the button.
+- **Storage.** New Azure container `research-animations` (added to `allowedResearchContainers` so the existing `/api/research/file` SAS proxy serves the MP4s to the `<video>` tag). Blob name mirrors the brand file-prefix convention.
+- **10 animation types** (CHECK-constrained in the table), each with a server-side Remotion prompt template that bakes the sentence + brand kit into `inputProps` + a React/Remotion composition spec an LLM or developer can turn straight into a `<Composition>`.
+
+### 🛠 Changes
+- **`5_Symbols/supabase/migrations/migration_sentence_animations.sql`** — new `sentence_animations` table (modeled on `sentence_svgs`): `sentence_id` FK, `module/video/script`, `animation_type` CHECK (10 types), `generation_status`, `prompt_used`, `remotion_props` JSONB, `runpod_job_id/status`, `azure_blob_name`, `animation_url`, codec/duration/fps/dimensions, `error_message`; RLS anon-open (mirror the SVG table); unique `(sentence_id, animation_type)`.
+- **`cmd/server/main.go`** — 3 handlers: `animationPromptHandler` (`POST /api/animations/generate-prompt`, open), `animationRunpodRunHandler` (`POST /api/animations/runpod/run`, admin-gated → submits + upserts row), `animationRunpodStatusHandler` (`GET /api/animations/runpod/status`, admin-gated → polls, on COMPLETED downloads MP4 → Azure → Supabase). Added `research-animations` to `allowedResearchContainers`; added RUNPOD/REMOTION env rows to `envStatusHandler`; `runPodOutputVideoURL` helper that tolerates the 3 output shapes RunPod workers return.
+- **`5_Symbols/production/postprod/animation_generator.html`** — new page, cloned from `slide_generator.html`'s glassmorphic shell: module/video filter → sentence table with per-row animation-type `<select>` (auto-suggested from `sentence_type`) + status badge + 🔍 prompt + ▶️ render buttons → prompt preview modal (Remotion prompt + RunPod payload, copyable) → live job status + `<video>` preview once rendered → saved animations table from Supabase.
+- **Nav wiring** — `navigation_config.json` + `index.html` + `markdown_renderer.html` (Production → Tools → Visuals, beside Slide Generator) + `shared/nav.js` (Post Prod → Visuals & Graphics).
+
+### ✅ Verification plan
+- `go build ./... && go vet ./...`; `node -c` the page JS; local server serves the page **HTTP 200** with the 3 routes resolving.
+- Prompt endpoint returns a full Remotion spec + RunPod payload for each of the 10 types (no key needed).
+- Render handlers return **401** unsigned, **202/200** admin (when RunPod configured) or a clear "not configured" message (when not).
+
 ## 2026-06-27 — 🔒 Site-wide sign-in gate for destructive buttons
 
 ### 🎯 Objective

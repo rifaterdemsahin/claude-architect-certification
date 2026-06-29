@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="../../../shared/redirect-to-live-site.js"></script>
+  <title>Animation Generator (Remotion + RunPod) | Claude AI Certification</title>
+  <meta name="description" content="Generate per-sentence Remotion animations rendered on RunPod serverless, uploaded to Azure. 10 course-content animation types.">
+  <link rel="icon" type="image/png" href="../../../favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #030712; --bg-card: rgba(17,24,39,0.9); --border-glow: rgba(139,92,246,0.3);
+      --text-main: #f3f4f6; --text-muted: #9ca3af; --primary: #8b5cf6; --primary-glow: rgba(139,92,246,0.6);
+      --secondary: #3b82f6; --success: #10b981; --danger: #ef4444; --warning: #f59e0b; --accent: #8b5cf6;
+      --font-title: 'Outfit', sans-serif; --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-dark);
+      background-image: radial-gradient(circle at 10% 20%, rgba(139,92,246,0.12) 0%, transparent 40%),
+                        radial-gradient(circle at 90% 80%, rgba(59,130,246,0.12) 0%, transparent 40%);
+      color: var(--text-main); font-family: var(--font-body); line-height: 1.6;
+      padding: 100px 24px 60px;
+    }
+    .container { max-width: 1200px; margin: 0 auto; }
+    header { text-align: center; margin-bottom: 48px; }
+    header h1 { font-family: var(--font-title); font-size: 2.6rem; font-weight: 900; letter-spacing: -0.02em; margin-bottom: 10px; }
+    header p { color: var(--text-muted); font-size: 1.05rem; }
+    header code { background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 5px; font-size: 0.9em; }
+
+    .selector-bar { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+    .selector-bar select {
+      background: var(--bg-card); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px;
+      color: var(--text-main); padding: 12px 20px; font-size: 1rem; font-family: var(--font-body);
+      min-width: 220px; cursor: pointer;
+    }
+    .selector-bar select:focus { outline: none; border-color: var(--accent); }
+
+    .glass-card {
+      background: var(--bg-card); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px;
+      padding: 32px; margin-bottom: 32px; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.6); backdrop-filter: blur(12px);
+    }
+    .glass-card h2 { font-family: var(--font-title); font-weight: 700; font-size: 1.3rem; margin-bottom: 0; }
+    .glass-card-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+    .glass-card-body { margin-top: 20px; }
+    .glass-card-body.collapsed { display: none; }
+    .collapse-icon { transition: transform 0.3s ease; font-size: 1.2rem; }
+
+    .btn {
+      background: var(--primary); color: #fff; border: none; border-radius: 10px; padding: 10px 22px;
+      font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; text-decoration: none;
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(139,92,246,0.3); }
+    .btn-secondary { background: var(--secondary); color: #fff; }
+    .btn-success { background: var(--success); color: #000; }
+    .btn-sm { padding: 6px 14px; font-size: 0.8rem; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    .empty-state { text-align: center; padding: 48px 24px; color: var(--text-muted); }
+    .empty-state .empty-icon { font-size: 3rem; margin-bottom: 12px; }
+
+    .toast {
+      position: fixed; top: 24px; right: 24px; background: var(--success); color: #000;
+      padding: 14px 24px; border-radius: 12px; font-weight: 700; z-index: 1000;
+      transform: translateX(120%); transition: transform 0.4s ease; max-width: 400px;
+    }
+    .toast.show { transform: translateX(0); }
+    .toast.error { background: var(--danger); color: #fff; }
+
+    .ig-table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
+    .ig-table th { text-align: left; color: var(--text-muted); font-size: 0.78rem; font-weight: 600; padding: 8px 12px; text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .ig-table td { padding: 12px; background: rgba(0,0,0,0.18); vertical-align: top; font-size: 0.9rem; }
+    .ig-table tr td:first-child { border-radius: 12px 0 0 12px; }
+    .ig-table tr td:last-child { border-radius: 0 12px 12px 0; }
+    .ig-table .num-col { width: 42px; text-align: center; font-weight: 700; color: var(--accent); }
+    .ig-table .sentence-col { min-width: 260px; }
+    .ig-table .type-col { width: 200px; }
+    .ig-table .status-col { width: 110px; text-align: center; }
+    .ig-table .action-col { width: 220px; text-align: right; white-space: nowrap; }
+
+    select.anim-select {
+      background: rgba(0,0,0,0.4); border: 1px solid rgba(139,92,246,0.35); color: var(--text-main);
+      border-radius: 8px; padding: 6px 8px; font-size: 0.82rem; font-family: var(--font-body); width: 100%; cursor: pointer;
+    }
+    select.anim-select:focus { outline: none; border-color: var(--accent); }
+
+    .status-pill { display: inline-block; padding: 3px 9px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; }
+    .st-pending   { background: rgba(156,163,175,0.2); color: #d1d5db; }
+    .st-generating{ background: rgba(245,158,11,0.18); color: var(--warning); }
+    .st-completed { background: rgba(16,185,129,0.18); color: var(--success); }
+    .st-failed    { background: rgba(239,68,68,0.18); color: var(--danger); }
+    .st-skipped   { background: rgba(156,163,175,0.12); color: var(--text-muted); }
+
+    .preview-box {
+      width: 100%; min-height: 250px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px; padding: 20px; color: var(--text-main); font-family: monospace;
+      white-space: pre-wrap; font-size: 0.82rem; overflow-y: auto; max-height: 420px;
+    }
+
+    .video-stage {
+      width: 100%; aspect-ratio: 16/9; background: #000; border: 1px solid rgba(139,92,246,0.3);
+      border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center;
+    }
+    .video-stage video { width: 100%; height: 100%; object-fit: contain; background: #000; }
+    .video-stage .placeholder { color: var(--text-muted); font-size: 0.9rem; }
+
+    .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 14px; font-size: 0.8rem; color: var(--text-muted); }
+    .legend .chip { display: inline-flex; align-items: center; gap: 6px; background: rgba(0,0,0,0.3); padding: 4px 10px; border-radius: 20px; }
+  </style>
+  <script src="../../../shared/schema-modal.js"></script>
+  <script src="../../../shared/nav.js"></script>
+  <script src="../../../shared/debug-panel.js"></script>
+  <script src="../../../shared/seo.js" defer></script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🎞️ Animation Generator</h1>
+      <p>Turn each script sentence into a <strong>Remotion</strong> animation rendered on <strong>RunPod serverless</strong>, then stored in <strong>Azure</strong>. Pick a module &amp; video, choose one of <strong>10 animation types</strong> per sentence, preview the <strong>Remotion prompt</strong>, then <strong>▶️ Generate</strong>. Renders land back here automatically.</p>
+    </header>
+
+    <!-- 1) Filter -->
+    <div class="glass-card" id="filterPanel">
+      <div class="glass-card-header" onclick="togglePanel(this)">
+        <h2>1) Filter</h2>
+        <span class="collapse-icon">▼</span>
+      </div>
+      <div class="glass-card-body">
+        <div class="selector-bar">
+          <select id="moduleSelect" onchange="loadVideos(this.value)"><option value="">— Select Module —</option></select>
+          <select id="videoSelect" onchange="fetchSentences(this.value)"><option value="">— Select Video —</option></select>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2) Sentence / Animation Setup -->
+    <div class="glass-card" id="sentencesPanel" style="display:none;">
+      <div class="glass-card-header" onclick="togglePanel(this)">
+        <h2>2) Sentence → Animation Setup</h2>
+        <span class="collapse-icon">▼</span>
+      </div>
+      <div class="glass-card-body">
+        <div id="sentencesWrap" style="overflow-x:auto;"></div>
+        <div class="legend">
+          <span class="chip">🏛️ architecture</span><span class="chip">🌊 data flow</span>
+          <span class="chip">💻 code typing</span><span class="chip">💡 concept reveal</span>
+          <span class="chip">📅 timeline</span><span class="chip">⚖️ comparison</span>
+          <span class="chip">👣 process steps</span><span class="chip">🔢 metric counter</span>
+          <span class="chip">🔀 flowchart</span><span class="chip">🔍 callout zoom</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3) Preview & Generate -->
+    <div class="glass-card" id="previewPanel" style="display:none;">
+      <div class="glass-card-header" onclick="togglePanel(this)">
+        <h2>3) Preview &amp; Generate</h2>
+        <span class="collapse-icon">▼</span>
+      </div>
+      <div class="glass-card-body">
+        <div style="display:flex; gap: 24px; flex-wrap:wrap;">
+          <div style="flex:1; min-width:300px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+              <p style="color:var(--text-muted);font-size:0.9rem;">Remotion Composition Prompt</p>
+              <div>
+                <button class="btn btn-secondary btn-sm" onclick="copyPrompt()">📋 Copy Prompt</button>
+                <button class="btn btn-sm" style="background:#f59e0b; color:#000;" onclick="copyRunpodPayload()">📦 Copy RunPod Payload</button>
+              </div>
+            </div>
+            <textarea id="promptPreview" class="preview-box" spellcheck="false" style="width:100%; height:260px; resize:vertical;"></textarea>
+            <textarea id="runpodPayloadPreview" spellcheck="false" style="display:none;"></textarea>
+          </div>
+          <div style="flex:1; min-width:300px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+              <p style="color:var(--text-muted);font-size:0.9rem;">Rendered Animation</p>
+              <span id="jobStatus" class="status-pill st-pending">idle</span>
+            </div>
+            <div class="video-stage" id="videoStage">
+              <span class="placeholder">No render yet. Pick a sentence and ▶️ Generate.</span>
+            </div>
+          </div>
+        </div>
+        <div id="configNotice" style="margin-top:14px; background:rgba(245,158,11,0.08); border:1px solid var(--warning); border-radius:12px; padding:12px 16px;">
+          <h4 style="color:var(--warning); margin-bottom:4px; font-size:0.95rem;">⚙️ Infrastructure</h4>
+          <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:0;">
+            <strong>Prompt generation always works.</strong> Live rendering needs <code>RUNPOD_API_KEY</code>, <code>RUNPOD_ENDPOINT_ID</code>, and <code>REMOTION_SERVE_URL</code> on the server (see admin → Environment). Checking RunPod configuration…
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div id="emptyState" class="glass-card empty-state">
+      <div class="empty-icon">🎞️</div>
+      <h2 style="font-family:var(--font-title);margin-bottom:8px;">Select a Module &amp; Video</h2>
+      <p>Choose a module and video above to load its script sentences and start generating animations.</p>
+    </div>
+
+    <!-- Saved Animations -->
+    <div class="glass-card" id="savedPanel">
+      <div class="glass-card-header" onclick="togglePanel(this)">
+        <h2>💾 Saved Animations</h2>
+        <span class="collapse-icon">▼</span>
+      </div>
+      <div class="glass-card-body">
+        <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
+          <button class="btn btn-secondary btn-sm" onclick="loadSavedAnimations()">🔄 Refresh</button>
+        </div>
+        <div id="savedWrap" style="overflow-x:auto;">
+          <div class="empty-state"><p>Loading saved animations…</p></div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <p><a href="index.html" style="color:var(--secondary);text-decoration:none;">← Back to Post-Production</a></p>
+    </footer>
+  </div>
+
+  <!-- Prompt modal -->
+  <div id="promptModal" class="modal" onclick="if(event.target===this) closePromptModal()" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; align-items:center; justify-content:center;">
+    <div class="modal-content" style="background:var(--bg-card); border:1px solid rgba(255,255,255,0.1); border-radius:16px; padding:32px; max-width:820px; width:90%; max-height:90vh; overflow-y:auto; box-shadow:0 20px 40px rgba(0,0,0,0.6);">
+      <h3 style="font-family:var(--font-title); font-size:1.4rem; margin-bottom:8px;">👁️ Remotion Prompt &amp; RunPod Payload</h3>
+      <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:16px;">📋 The exact composition spec + serverless render request. Copy the prompt into your LLM to generate the Remotion <code>&lt;Composition&gt;</code>, or paste the RunPod payload into your serverless endpoint.</p>
+      <p style="color:var(--success);font-size:0.8rem;margin-bottom:6px;font-weight:700;">REMOTION PROMPT</p>
+      <textarea id="promptModalText" spellcheck="false" readonly style="width:100%; min-height:280px; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:16px; color:var(--text-main); font-family:monospace; font-size:0.82rem; margin-bottom:16px; resize:vertical;"></textarea>
+      <p style="color:var(--secondary);font-size:0.8rem;margin-bottom:6px;font-weight:700;">RUNPOD SERVERLESS PAYLOAD</p>
+      <textarea id="payloadModalText" spellcheck="false" readonly style="width:100%; min-height:180px; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:16px; color:var(--text-main); font-family:monospace; font-size:0.82rem; margin-bottom:16px; resize:vertical;"></textarea>
+      <div class="modal-actions" style="display:flex; gap:12px; justify-content:flex-end; flex-wrap:wrap;">
+        <button class="btn" style="background:rgba(255,255,255,0.1);" onclick="closePromptModal()">Close</button>
+        <button class="btn btn-success" onclick="copyAiPrompt()">📋 Copy Prompt</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const SUPABASE_URL = localStorage.getItem('supabase_url') || 'https://rmekfsdhglyiralxvkwc.supabase.co';
+    const SUPABASE_ANON_KEY = localStorage.getItem('supabase_anon_key') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZWtmc2RoZ2x5aXJhbHh2a3djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NzYzODgsImV4cCI6MjA5NjM1MjM4OH0.ay6HsmO_CbMGDXL_Dv4DT-paAIAOqlQPfmqqx_mexSU';
+    const HEADERS = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
+
+    // The 10 animation types — mirrors the server CHECK constraint + the
+    // prompt builder. Slugs MUST match cmd/server/main.go animationTypeMetas().
+    const ANIM_TYPES = [
+      { slug:'architecture_diagram', label:'🏛️ Architecture Diagram' },
+      { slug:'data_flow',            label:'🌊 Data Flow' },
+      { slug:'code_typing',          label:'💻 Code Typing' },
+      { slug:'concept_reveal',       label:'💡 Concept Reveal' },
+      { slug:'timeline',             label:'📅 Timeline' },
+      { slug:'comparison',           label:'⚖️ Comparison' },
+      { slug:'process_steps',        label:'👣 Process Steps' },
+      { slug:'metric_counter',       label:'🔢 Metric Counter' },
+      { slug:'flowchart',            label:'🔀 Flowchart' },
+      { slug:'callout_zoom',         label:'🔍 Callout Zoom' },
+    ];
+
+    let dbModules = [];
+    let dbVideos = [];
+    let currentSentences = [];
+    let sentenceAnimMap = {};      // sentence_id -> {animation_type, status, url}
+    let selectedSentenceId = null; // the sentence currently shown in the preview panel
+    let runpodConfigured = null;   // tri-state from /api/animations/generate-prompt
+    const pollTimers = {};         // sentenceId -> interval id
+
+    const $ = id => document.getElementById(id);
+
+    function showToast(msg, isError, ms) {
+      const t = $('toast');
+      t.textContent = msg; t.className = 'toast' + (isError ? ' error' : '');
+      setTimeout(() => t.classList.add('show'), 10);
+      setTimeout(() => t.classList.remove('show'), ms || 3500);
+    }
+
+    function escHtml(s) { if (!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+    function togglePanel(header) {
+      const body = header.nextElementSibling;
+      const icon = header.querySelector('.collapse-icon');
+      if (body.classList.contains('collapsed')) {
+        body.classList.remove('collapsed'); icon.style.transform = 'rotate(0deg)';
+      } else {
+        body.classList.add('collapsed'); icon.style.transform = 'rotate(-90deg)';
+      }
+    }
+
+    function statusPillClass(status) {
+      switch ((status||'').toLowerCase()) {
+        case 'completed': return 'st-completed';
+        case 'generating': return 'st-generating';
+        case 'failed': return 'st-failed';
+        case 'skipped': return 'st-skipped';
+        default: return 'st-pending';
+      }
+    }
+
+    async function api(path) {
+      const url = SUPABASE_URL + '/rest/v1/' + path;
+      const res = await fetch(url, { headers: HEADERS });
+      if (!res.ok) throw new Error(res.status);
+      return res.json();
+    }
+
+    async function loadModules() {
+      try {
+        dbModules = await api('modules?select=id,module_number,title&order=module_number.asc');
+        $('moduleSelect').innerHTML = '<option value="">— Select Module —</option>' +
+          dbModules.map(m => `<option value="${m.id}">M${m.module_number}: ${escHtml(m.title)}</option>`).join('');
+      } catch (e) { showToast('Failed to load modules: ' + e.message, true); }
+    }
+
+    async function loadVideos(moduleId) {
+      if (!moduleId) { $('videoSelect').innerHTML = '<option value="">— Select Video —</option>'; return; }
+      try {
+        dbVideos = await api(`videos?select=id,video_number,title&module_id=eq.${moduleId}&order=video_number.asc`);
+        $('videoSelect').innerHTML = '<option value="">— Select Video —</option>' +
+          dbVideos.map(v => `<option value="${v.id}">V${v.video_number}: ${escHtml(v.title)}</option>`).join('');
+      } catch (e) { showToast('Failed to load videos: ' + e.message, true); }
+    }
+
+    async function fetchSentences(videoId) {
+      // stop any active polling when the video changes
+      Object.values(pollTimers).forEach(t => clearInterval(t));
+      Object.keys(pollTimers).forEach(k => delete pollTimers[k]);
+      if (!videoId) {
+        $('sentencesPanel').style.display = 'none';
+        $('previewPanel').style.display = 'none';
+        $('emptyState').style.display = 'block';
+        return;
+      }
+      $('emptyState').style.display = 'none';
+      try {
+        const scripts = await api(`scripts?video_id=eq.${videoId}&select=id&limit=1`);
+        if (!scripts.length) throw new Error('No script found for this video');
+        currentSentences = await api(`sentences?script_id=eq.${scripts[0].id}&select=id,sentence_text,sentence_type,section,sort_order&order=sort_order.asc`);
+
+        // Load any existing animation rows for these sentences.
+        sentenceAnimMap = {};
+        const sids = currentSentences.map(s => s.id);
+        if (sids.length) {
+          const rows = await api(`sentence_animations?sentence_id=in.(${sids.join(',')})&select=sentence_id,animation_type,generation_status,animation_url,error_message,runpod_job_id`);
+          rows.forEach(r => { sentenceAnimMap[r.sentence_id] = r; });
+        }
+        renderSentences();
+        $('sentencesPanel').style.display = 'block';
+        $('previewPanel').style.display = 'block';
+
+        // resume polling for any sentence still mid-render
+        currentSentences.forEach(s => {
+          const a = sentenceAnimMap[s.id];
+          if (a && a.generation_status === 'generating' && a.runpod_job_id) startPolling(s.id, a.runpod_job_id);
+        });
+      } catch (e) {
+        showToast('Error: ' + e.message, true);
+      }
+    }
+
+    // Server-side suggestion mirrors suggestAnimationType in main.go so the
+    // page pre-selects a sensible type from the script's sentence_type.
+    function suggestType(sentenceType) {
+      switch ((sentenceType||'').toLowerCase()) {
+        case 'hook': case 'heading': case 'title': return 'concept_reveal';
+        case 'objective': case 'takeaway': case 'insight': return 'callout_zoom';
+        case 'step': case 'transition': return 'process_steps';
+        case 'cue': return 'code_typing';
+        default: return 'concept_reveal';
+      }
+    }
+
+    function renderSentences() {
+      const wrap = $('sentencesWrap');
+      if (!currentSentences.length) {
+        wrap.innerHTML = '<div class="empty-state"><p>No sentences found.</p></div>';
+        return;
+      }
+      const opts = ANIM_TYPES.map(t => `<option value="${t.slug}">${t.label}</option>`).join('');
+      const rows = currentSentences.map((s, i) => {
+        const existing = sentenceAnimMap[s.id];
+        const chosen = (existing && existing.animation_type) || suggestType(s.sentence_type);
+        const status = existing ? existing.generation_status : 'pending';
+        const pill = `<span class="status-pill ${statusPillClass(status)}">${escHtml(status)}</span>`;
+        const viewBtn = existing
+          ? `<button class="btn btn-secondary btn-sm" onclick="selectSentence(${s.id})">👁️</button>`
+          : `<button class="btn btn-secondary btn-sm" onclick="selectSentence(${s.id})" disabled title="No render yet">👁️</button>`;
+        const renderBtn = `<button class="btn btn-sm" data-require-admin style="background:#4ade80; color:#000;" onclick="generateForSentence(${s.id})">▶️</button>`;
+        return `<tr>
+          <td class="num-col">${i + 1}</td>
+          <td class="sentence-col">${escHtml(s.sentence_text || '')}
+            <div style="font-size:0.7rem;color:var(--text-muted);margin-top:2px;">type: ${escHtml(s.sentence_type||'body')}</div></td>
+          <td class="type-col"><select class="anim-select" id="anim_${s.id}" onchange="onTypeChange(${s.id})">${opts}</select></td>
+          <td class="status-col">${pill}</td>
+          <td class="action-col">
+            <button class="btn btn-secondary btn-sm" onclick="openPromptModal(${s.id})">🔍 Prompt</button>
+            ${viewBtn}
+            ${renderBtn}
+          </td>
+        </tr>`;
+      }).join('');
+
+      wrap.innerHTML = `<table class="ig-table">
+        <thead><tr>
+          <th class="num-col">#</th>
+          <th class="sentence-col">Sentence</th>
+          <th class="type-col">Animation Type</th>
+          <th class="status-col">Status</th>
+          <th class="action-col">Actions</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+
+      // set the chosen option per row AFTER injecting (the <select> is shared markup)
+      currentSentences.forEach(s => {
+        const sel = $('anim_' + s.id);
+        const existing = sentenceAnimMap[s.id];
+        if (sel) sel.value = (existing && existing.animation_type) || suggestType(s.sentence_type);
+      });
+    }
+
+    function onTypeChange(sentenceId) {
+      // record the manual choice in-memory so the preview/prompt use it
+      const sel = $('anim_' + sentenceId);
+      if (!sentenceAnimMap[sentenceId]) sentenceAnimMap[sentenceId] = { sentence_id: sentenceId };
+      sentenceAnimMap[sentenceId].animation_type = sel.value;
+      sentenceAnimMap[sentenceId].generation_status = sentenceAnimMap[sentenceId].generation_status || 'pending';
+      // if this row is the selected sentence, refresh its prompt preview
+      if (sentenceId === selectedSentenceId) selectSentence(sentenceId);
+    }
+
+    function moduleTitle() { return (dbModules.find(m => String(m.id) === $('moduleSelect').value) || {}).title || ''; }
+    function videoTitle() { return (dbVideos.find(v => String(v.id) === $('videoSelect').value) || {}).title || ''; }
+    function moduleNumber() { return (dbModules.find(m => String(m.id) === $('moduleSelect').value) || {}).module_number || 0; }
+    function videoNumber() { return (dbVideos.find(v => String(v.id) === $('videoSelect').value) || {}).video_number || 0; }
+
+    async function getScriptIdForVideo(videoId) {
+      const rows = await api(`scripts?video_id=eq.${videoId}&select=id&limit=1`);
+      return rows && rows.length ? rows[0].id : 0;
+    }
+
+    // Build the Remotion prompt + RunPod payload for a sentence via the server
+    // (single source of truth — no client drift from main.go).
+    async function fetchPrompt(sentenceId) {
+      const s = currentSentences.find(x => x.id === sentenceId);
+      if (!s) throw new Error('sentence not found');
+      const animType = ($('anim_' + sentenceId) || {}).value || suggestType(s.sentence_type);
+      const res = await fetch('/api/animations/generate-prompt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sentence: s.sentence_text,
+          sentenceType: s.sentence_type,
+          animationType: animType,
+          moduleName: moduleTitle(),
+          videoName: videoTitle()
+        })
+      });
+      if (!res.ok) {
+        const errBody = await res.text();
+        throw new Error(errBody || ('HTTP ' + res.status));
+      }
+      const data = await res.json();
+      runpodConfigured = data.runpodConfigured;
+      updateConfigNotice(data.runpodConfigured, data.serveUrl);
+      return data;
+    }
+
+    function updateConfigNotice(configured, serveUrl) {
+      const box = $('configNotice');
+      if (configured) {
+        box.style.background = 'rgba(16,185,129,0.08)';
+        box.style.borderColor = 'var(--success)';
+        box.innerHTML = `<h4 style="color:var(--success); margin-bottom:4px; font-size:0.95rem;">✅ RunPod configured</h4>
+          <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:0;">Live rendering is enabled. ▶️ Generate submits a job to RunPod serverless, polls until complete, then uploads the MP4 to Azure <code>research-animations</code> and links it to this sentence.</p>`;
+      } else {
+        box.style.background = 'rgba(245,158,11,0.08)';
+        box.style.borderColor = 'var(--warning)';
+        box.innerHTML = `<h4 style="color:var(--warning); margin-bottom:4px; font-size:0.95rem;">⚙️ Render not configured</h4>
+          <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:0;">Prompt generation works. Live render needs <code>RUNPOD_API_KEY</code>, <code>RUNPOD_ENDPOINT_ID</code>${serveUrl ? '' : ' and <code>REMOTION_SERVE_URL</code>'} on the server (admin → Environment). The ▶️ Generate button is hidden until configured.</p>`;
+      }
+    }
+
+    async function selectSentence(sentenceId) {
+      selectedSentenceId = sentenceId;
+      const a = sentenceAnimMap[sentenceId];
+      setJobStatus(a ? a.generation_status : 'idle');
+      // show existing render if any
+      if (a && a.animation_url) {
+        setVideo(a.animation_url);
+      } else {
+        setVideo(null);
+      }
+      // load the prompt for this sentence/type
+      try {
+        const data = await fetchPrompt(sentenceId);
+        $('promptPreview').value = data.prompt || '';
+        $('runpodPayloadPreview').value = JSON.stringify(data.runpodPayload, null, 2);
+      } catch (e) {
+        $('promptPreview').value = 'Failed to build prompt: ' + e.message;
+      }
+      $('previewPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function setJobStatus(status) {
+      const el = $('jobStatus');
+      const s = (status || 'idle').toLowerCase();
+      el.textContent = s;
+      el.className = 'status-pill ' + statusPillClass(s === 'idle' ? 'pending' : s);
+    }
+
+    function setVideo(url) {
+      const stage = $('videoStage');
+      if (url) {
+        stage.innerHTML = `<video src="${escHtml(url)}" controls autoplay loop muted playsinline></video>`;
+      } else {
+        stage.innerHTML = `<span class="placeholder">No render yet. Pick a sentence and ▶️ Generate.</span>`;
+      }
+    }
+
+    async function openPromptModal(sentenceId) {
+      try {
+        const data = await fetchPrompt(sentenceId);
+        $('promptModalText').value = data.prompt || '';
+        $('payloadModalText').value = JSON.stringify(data.runpodPayload, null, 2);
+        $('promptModal').style.display = 'flex';
+      } catch (e) {
+        showToast('Prompt build failed: ' + e.message, true);
+      }
+    }
+
+    function closePromptModal() { $('promptModal').style.display = 'none'; }
+
+    function copyPrompt() {
+      navigator.clipboard.writeText($('promptPreview').value).then(() => showToast('📋 Prompt copied!'));
+    }
+    function copyRunpodPayload() {
+      navigator.clipboard.writeText($('runpodPayloadPreview').value).then(() => showToast('📦 RunPod payload copied!'));
+    }
+    function copyAiPrompt() {
+      navigator.clipboard.writeText($('promptModalText').value).then(() => showToast('📋 Prompt copied!'));
+    }
+
+    // ▶️ Generate — submit a RunPod serverless render for this sentence.
+    async function generateForSentence(sentenceId) {
+      if (!window.requireAdmin || !requireAdmin('render animations')) return;
+      const s = currentSentences.find(x => x.id === sentenceId);
+      if (!s) { showToast('Sentence not found.', true); return; }
+      if (runpodConfigured === false) {
+        showToast('RunPod not configured on the server. See the Infrastructure note.', true, 5000);
+        return;
+      }
+      const animType = ($('anim_' + sentenceId) || {}).value || suggestType(s.sentence_type);
+      selectedSentenceId = sentenceId;
+
+      try {
+        // build the prompt/payload first (so we can store prompt_used)
+        const promptData = await fetchPrompt(sentenceId);
+        const scriptId = await getScriptIdForVideo($('videoSelect').value);
+        setJobStatus('generating');
+        const res = await fetch('/api/animations/runpod/run', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sentenceId, moduleNumber: moduleNumber(), videoNumber: videoNumber(),
+            scriptId, animationType: animType,
+            prompt: promptData.prompt,
+            inputProps: promptData.inputProps,
+            durationInFrames: (promptData.inputProps && promptData.inputProps.durationInFrames) || 150
+          })
+        });
+        if (res.status === 401) { showToast('Sign in as admin to render.', true); return; }
+        if (res.status === 503) { showToast('RunPod not configured on the server.', true, 5000); updateConfigNotice(false, ''); return; }
+        if (!res.ok) { const t = await res.text(); throw new Error(t || ('HTTP ' + res.status)); }
+        const data = await res.json();
+        // optimistic row update
+        sentenceAnimMap[sentenceId] = Object.assign(sentenceAnimMap[sentenceId] || {}, {
+          sentence_id: sentenceId, animation_type: animType, generation_status: 'generating',
+          runpod_job_id: data.jobId, animation_url: null
+        });
+        renderSentences();
+        $('previewPanel').style.display = 'block';
+        $('previewPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        showToast(`▶️ Render submitted (job ${data.jobId.slice(0,8)}…). Polling…`);
+        startPolling(sentenceId, data.jobId);
+      } catch (e) {
+        let msg = e.message || 'Unknown error';
+        if (msg.includes('404')) msg = 'Server route not found — restart the Go server (go run cmd/server/main.go).';
+        showToast('Render failed: ' + msg, true, 7000);
+        setJobStatus('failed');
+      }
+    }
+
+    // Poll the server-side status shim until the job completes (or fails). The
+    // server does the final Azure upload + Supabase patch on COMPLETED.
+    function startPolling(sentenceId, jobId) {
+      if (pollTimers[sentenceId]) clearInterval(pollTimers[sentenceId]);
+      const tick = async () => {
+        try {
+          const mod = moduleNumber(), vid = videoNumber();
+          const url = `/api/animations/runpod/status?id=${encodeURIComponent(jobId)}&sentence_id=${sentenceId}&module_number=${mod}&video_number=${vid}`;
+          const res = await fetch(url);
+          if (res.status === 401) { stopPoll(sentenceId); setJobStatus('failed'); showToast('Sign in as admin to poll renders.', true); return; }
+          if (!res.ok) return; // transient — keep polling
+          const data = await res.json();
+          const status = (data.status || '').toUpperCase();
+          if (sentenceId === selectedSentenceId) setJobStatus(status === 'COMPLETED_NO_URL' ? 'failed' : status.toLowerCase());
+          if (status === 'COMPLETED' && data.url) {
+            stopPoll(sentenceId);
+            sentenceAnimMap[sentenceId] = Object.assign(sentenceAnimMap[sentenceId] || {}, {
+              generation_status: 'completed', animation_url: data.url, runpod_job_id: jobId
+            });
+            if (sentenceId === selectedSentenceId) setVideo(data.url);
+            renderSentences();
+            loadSavedAnimations();
+            showToast('✅ Animation rendered & uploaded!');
+          } else if (status === 'COMPLETED_NO_URL') {
+            stopPoll(sentenceId);
+            sentenceAnimMap[sentenceId] = Object.assign(sentenceAnimMap[sentenceId] || {}, { generation_status: 'failed' });
+            renderSentences();
+            showToast('Render finished but no video URL returned.', true);
+          } else if (['FAILED', 'CANCELLED', 'TIMED_OUT'].includes(status)) {
+            stopPoll(sentenceId);
+            sentenceAnimMap[sentenceId] = Object.assign(sentenceAnimMap[sentenceId] || {}, { generation_status: 'failed' });
+            renderSentences();
+            showToast('Render failed: ' + (data.error || status), true, 6000);
+          }
+          // IN_QUEUE / IN_PROGRESS → keep polling
+        } catch (e) { /* network blip — keep polling */ }
+      };
+      tick(); // immediate first poll
+      pollTimers[sentenceId] = setInterval(tick, 5000);
+    }
+
+    function stopPoll(sentenceId) {
+      if (pollTimers[sentenceId]) { clearInterval(pollTimers[sentenceId]); delete pollTimers[sentenceId]; }
+    }
+
+    // ---- Saved Animations table (bottom of page) ----------------------------
+    async function loadSavedAnimations() {
+      const wrap = $('savedWrap');
+      try {
+        let rows;
+        try {
+          rows = await api('sentence_animations?select=id,sentence_id,module_number,video_number,animation_type,generation_status,animation_url,runpod_job_id,runpod_status,duration_in_frames,fps,created_at,updated_at&order=updated_at.desc&limit=200');
+        } catch (_) {
+          rows = [];
+        }
+        if (!rows || !rows.length) {
+          wrap.innerHTML = '<div class="empty-state"><p>No animations saved yet. Generate one above.</p></div>';
+          return;
+        }
+        const typeLabel = slug => (ANIM_TYPES.find(t => t.slug === slug) || {}).label || slug;
+        const body = rows.map(r => {
+          const when = (r.updated_at || r.created_at || '').slice(0, 16).replace('T', ' ');
+          const vid = r.video_url ? '' : '';
+          const thumb = r.animation_url
+            ? `<video src="${escHtml(r.animation_url)}" muted preload="metadata" style="width:96px;height:54px;object-fit:cover;border-radius:6px;border:1px solid rgba(255,255,255,0.1);" onmouseover="this.play()" onmouseout="this.pause();this.currentTime=0"></video>`
+            : '<span style="font-size:0.72rem;color:var(--text-muted);">no file</span>';
+          return `<tr>
+            <td><strong style="color:var(--text-main);">M${r.module_number}·V${r.video_number}</strong> <span style="color:var(--text-muted);font-size:0.78rem;">#${r.sentence_id}</span><br><span style="font-size:0.78rem;color:var(--accent);">${escHtml(typeLabel(r.animation_type))}</span></td>
+            <td class="status-col"><span class="status-pill ${statusPillClass(r.generation_status)}">${escHtml(r.generation_status)}</span></td>
+            <td>${thumb}</td>
+            <td style="color:var(--text-muted);font-size:0.8rem;">${r.duration_in_frames||'?'}f · ${r.fps||30}fps</td>
+            <td style="white-space:nowrap; color:var(--text-muted); font-size:0.8rem;">${escHtml(when)}</td>
+            <td style="white-space:nowrap;">
+              ${r.animation_url ? `<a class="btn btn-secondary btn-sm" href="${escHtml(r.animation_url)}" target="_blank" rel="noopener">▶️ Play</a>` : ''}
+            </td>
+          </tr>`;
+        }).join('');
+
+        wrap.innerHTML = `<table class="ig-table">
+          <thead><tr>
+            <th>Module · Video · Type</th>
+            <th class="status-col">Status</th>
+            <th>Preview</th>
+            <th>Spec</th>
+            <th>Updated</th>
+            <th>Actions</th>
+          </tr></thead>
+          <tbody>${body}</tbody>
+        </table>`;
+      } catch (e) {
+        wrap.innerHTML = `<div class="empty-state" style="color:var(--danger);"><p>Failed to load saved animations: ${escHtml(e.message)}</p></div>`;
+      }
+    }
+
+    // Friendly retry for the shared missing-table modal: reload the lists once
+    // the user runs the migration in the Supabase SQL Editor.
+    if (window.SchemaModal) window.SchemaModal.onRetry = () => { loadModules(); loadSavedAnimations(); };
+
+    document.addEventListener('DOMContentLoaded', () => { loadModules(); loadSavedAnimations(); });
+  </script>
+</body>
+</html>
