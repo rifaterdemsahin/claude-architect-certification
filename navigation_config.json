@@ -715,6 +715,11 @@
                   "description": "Per-sentence branded SVG vector generation (title cards, lower thirds, callouts, diagrams) using the branding kit, with bulk mode, status tracking, inline editing, and rationale for skipped assets."
                 },
                 {
+                  "label": "\ud83c\udfa8 Drawing Generator",
+                  "url": "5_Symbols/production/postprod/drawing_generator.html",
+                  "description": "Draw a per-sentence Excalidraw diagram by hand or seed it with AI; saves the editable scene to Supabase (sentence_drawings) and a flattened PNG to Azure Blob Storage."
+                },
+                {
                   "label": "\ud83d\uddbc\ufe0f Visual Asset Gallery",
                   "url": "5_Symbols/production/postprod/visual_gallery.html"
                 },

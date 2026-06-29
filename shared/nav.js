@@ -370,7 +370,7 @@
           { label: '🖼️ Image Generator', url: '5_Symbols/production/postprod/image_generator.html' },
           { label: '🎬 Lower Thirds Manager', url: '5_Symbols/production/postprod/lower_thirds.html' },
           { label: '🎨 SVG Generator', url: '5_Symbols/production/postprod/graphics_generator.html' },
-          { label: '🎨 Drawing Generator', url: '5_Symbols/production/postprod/drawing_generator.html', description: 'Generate Excalidraw diagrams from your video script sentences using AI.' },
+          { label: '🎨 Drawing Generator', url: '5_Symbols/production/postprod/drawing_generator.html', description: 'Draw a per-sentence Excalidraw diagram by hand or seed it with AI; saves the scene to Supabase + a PNG to Azure Blob.' },
           { label: '📊 Slide Generator', url: '5_Symbols/production/postprod/slide_generator.html', description: 'Generate Marp markdown presentations from your video script sentences.' },
           { label: '🎞️ Animation Generator', url: '5_Symbols/production/postprod/animation_generator.html', description: 'Generate per-sentence Remotion animations rendered on RunPod serverless, uploaded to Azure.' }
         ]},
