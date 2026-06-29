@@ -266,18 +266,50 @@
 
   // ── Intercept fetch ──────────────────────────────────────────────────────
   const _fetch = window.fetch.bind(window);
+  // ⚡ Retry transient network failures before reporting an error. A browser
+  // `Failed to fetch` (a TypeError thrown on network-level failures: connection
+  // reset, DNS hiccup, aborted, CORS-preflight fail, Supabase cold-start race)
+  // is almost always transient. Previously the wrapper logged `error` on the
+  // FIRST attempt → reported to Axiom → could file a spurious axiom-error
+  // issue, even though every page's supFetch null-guards the result. Now: up to
+  // 2 retries with backoff on SAFE methods (GET/HEAD) only; the error is only
+  // logged/reported if ALL attempts fail. POST/PUT/PATCH/DELETE are NEVER
+  // retried automatically (could double-write). HTTP errors (4xx/5xx) arrive
+  // as a resolved Response and are untouched (handled via res.ok by callers).
+  const FETCH_RETRIES = 2;          // → 3 attempts total
+  const FETCH_BACKOFF_MS = 300;     // 300ms, 600ms
+  function isTransientNetError(e) {
+    return e instanceof TypeError ||
+      (e && /failed to fetch|networkerror|load failed/i.test(e.message || ''));
+  }
+  function isRetryableMethod(opts) {
+    const m = ((opts && opts.method) || 'GET').toUpperCase();
+    return m === 'GET' || m === 'HEAD';
+  }
+  const _sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
   window.fetch = async function (url, opts) {
     detectFromFetch(url, opts);
     const short = String(url).replace(/^https?:\/\/[^/]+/, '').substring(0, 80);
-    push('fetch', `→ ${opts && opts.method ? opts.method : 'GET'} ${short}`);
-    try {
-      const res = await _fetch(url, opts);
-      push(res.ok ? 'ok' : 'warn', `← ${res.status} ${res.statusText} ${short}`);
-      return res;
-    } catch (e) {
-      push('error', `✗ FETCH FAILED ${short}: ${e.message}`);
-      throw e;
+    const method = (opts && opts.method) || 'GET';
+    push('fetch', `→ ${method} ${short}`);
+    const canRetry = isRetryableMethod(opts);
+    let lastErr;
+    for (let attempt = 0; attempt <= FETCH_RETRIES; attempt++) {
+      try {
+        const res = await _fetch(url, opts);
+        push(res.ok ? 'ok' : 'warn', `← ${res.status} ${res.statusText} ${short}`);
+        return res;
+      } catch (e) {
+        lastErr = e;
+        // Only retry transient network failures on safe methods; report at once otherwise.
+        if (!canRetry || !isTransientNetError(e) || attempt === FETCH_RETRIES) break;
+        push('warn', `↻ retry ${attempt + 1}/${FETCH_RETRIES} ${method} ${short}: ${e.message}`);
+        await _sleep(FETCH_BACKOFF_MS * (attempt + 1));
+      }
     }
+    push('error', `✗ FETCH FAILED ${short}: ${lastErr.message}`);
+    throw lastErr;
   };
 
   // ── Log page metadata + DB scan on load ──────────────────────────────────
