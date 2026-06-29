@@ -76,6 +76,7 @@
     .ig-table td { padding: 12px; background: rgba(0,0,0,0.18); vertical-align: top; font-size: 0.9rem; }
     .ig-table tr td:first-child { border-radius: 12px 0 0 12px; }
     .ig-table tr td:last-child { border-radius: 0 12px 12px 0; }
+    .ig-table .check-col { width: 36px; text-align: center; }
     .ig-table .num-col { width: 42px; text-align: center; font-weight: 700; color: var(--accent); }
     .ig-table .sentence-col { min-width: 260px; }
     .ig-table .type-col { width: 200px; }
@@ -145,25 +146,21 @@
       </div>
       <div class="glass-card-body">
         <div id="sentencesWrap" style="overflow-x:auto;"></div>
-        <div class="legend">
-          <span class="chip">🏛️ architecture</span><span class="chip">🌊 data flow</span>
-          <span class="chip">💻 code typing</span><span class="chip">💡 concept reveal</span>
-          <span class="chip">📅 timeline</span><span class="chip">⚖️ comparison</span>
-          <span class="chip">👣 process steps</span><span class="chip">🔢 metric counter</span>
-          <span class="chip">🔀 flowchart</span><span class="chip">🔍 callout zoom</span>
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-top:14px;">
+          <div class="legend" style="margin-top:0;">
+            <span class="chip">🏛️ architecture</span><span class="chip">🌊 data flow</span>
+            <span class="chip">💻 code typing</span><span class="chip">💡 concept reveal</span>
+            <span class="chip">📅 timeline</span><span class="chip">⚖️ comparison</span>
+            <span class="chip">👣 process steps</span><span class="chip">🔢 metric counter</span>
+            <span class="chip">🔀 flowchart</span><span class="chip">🔍 callout zoom</span>
+          </div>
+          <button class="btn btn-sm" data-require-admin style="background:#4ade80; color:#000; margin-left:16px; white-space:nowrap;" onclick="bulkGenerateSentences()">▶️ Bulk Generate</button>
         </div>
 
         <!-- Integrated Preview Area -->
         <div id="previewArea" style="display:none; margin-top:32px; padding-top:24px; border-top:1px solid rgba(255,255,255,0.1);">
           <div style="display:flex; gap: 24px; flex-wrap:wrap;">
-            <!-- Column 1: Prompt -->
-            <div style="flex:1; min-width:280px;">
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-                <p style="color:var(--text-muted);font-size:0.9rem;">Remotion Composition Prompt</p>
-                <button class="btn btn-secondary btn-sm" onclick="copyPrompt()">📋 Copy Prompt</button>
-              </div>
-              <textarea id="promptPreview" class="preview-box" spellcheck="false" style="width:100%; height:320px; resize:vertical;"></textarea>
-            </div>
+            <!-- Column 1: Removed Prompt Preview -->
             <!-- Column 2: RunPod API Call -->
             <div style="flex:1; min-width:320px;">
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
@@ -395,6 +392,7 @@
           : `<button class="btn btn-secondary btn-sm" onclick="selectSentence(${s.id})" disabled title="No render yet">👁️</button>`;
         const renderBtn = `<button class="btn btn-sm" data-require-admin style="background:#4ade80; color:#000;" onclick="generateForSentence(${s.id})">▶️</button>`;
         return `<tr>
+          <td class="check-col"><input type="checkbox" class="sentence-cb" value="${s.id}"></td>
           <td class="num-col">${i + 1}</td>
           <td class="sentence-col">${escHtml(s.sentence_text || '')}
             <div style="font-size:0.7rem;color:var(--text-muted);margin-top:2px;">type: ${escHtml(s.sentence_type||'body')}</div></td>
@@ -410,6 +408,7 @@
 
       wrap.innerHTML = `<table class="ig-table">
         <thead><tr>
+          <th class="check-col"><input type="checkbox" id="selectAllSentences" onchange="toggleAllSentences(this.checked)"></th>
           <th class="num-col">#</th>
           <th class="sentence-col">Sentence</th>
           <th class="type-col">Animation Type</th>
@@ -435,6 +434,26 @@
       sentenceAnimMap[sentenceId].generation_status = sentenceAnimMap[sentenceId].generation_status || 'pending';
       // if this row is the selected sentence, refresh its prompt preview
       if (sentenceId === selectedSentenceId) selectSentence(sentenceId);
+    }
+
+    function toggleAllSentences(checked) {
+      document.querySelectorAll('.sentence-cb').forEach(cb => cb.checked = checked);
+    }
+
+    async function bulkGenerateSentences() {
+      if (!window.requireAdmin || !requireAdmin('render animations')) return;
+      if (runpodConfigured === false) {
+        showToast('RunPod not configured on the server. See the Infrastructure note.', true, 5000);
+        return;
+      }
+      const cbs = document.querySelectorAll('.sentence-cb:checked');
+      if (!cbs.length) { showToast('No sentences selected.'); return; }
+      
+      showToast(`▶️ Starting bulk render for ${cbs.length} sentence(s)…`);
+      for (let cb of cbs) {
+        await generateForSentence(parseInt(cb.value));
+        await new Promise(r => setTimeout(r, 500));
+      }
     }
 
     function moduleTitle() { return (dbModules.find(m => String(m.id) === $('moduleSelect').value) || {}).title || ''; }
@@ -502,11 +521,10 @@
       // load the prompt for this sentence/type
       try {
         const data = await fetchPrompt(sentenceId);
-        $('promptPreview').value = data.prompt || '';
         currentRunpodPayload = data.runpodPayload;
         updateCurlPreview();
       } catch (e) {
-        $('promptPreview').value = 'Failed to build prompt: ' + e.message;
+        // gracefully handle error
       }
       $('previewArea').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
@@ -539,10 +557,6 @@
     }
 
     function closePromptModal() { $('promptModal').style.display = 'none'; }
-
-    function copyPrompt() {
-      navigator.clipboard.writeText($('promptPreview').value).then(() => showToast('📋 Prompt copied!'));
-    }
     
     function updateCurlPreview() {
       if (!currentRunpodPayload) return;
