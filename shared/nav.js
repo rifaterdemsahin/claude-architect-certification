@@ -352,6 +352,7 @@
             { label: '☁️ RunPod Serverless', url: 'https://console.runpod.io/serverless' },
             { label: '☁️ RunPod Requests', url: 'https://console.runpod.io/serverless/user/endpoint/s13kv6t2jg78lk?tab=requests' },
             { label: '☁️ RunPod MFA', url: 'https://console.runpod.io/user/settings?open=login-settings' },
+            { label: '⚡ Performance GPU', url: 'https://github.com/rifaterdemsahin/my-claude-animations/blob/main/PERFORMANCE_RATIONALE.md', description: 'Rationale for GPU rendering performance.' },
             { label: '⚡ Performance GPU', url: 'https://github.com/rifaterdemsahin/my-claude-animations/blob/main/PERFORMANCE_RATIONALE.md', description: 'Rationale for GPU rendering performance.' }
           ]}
         ]
