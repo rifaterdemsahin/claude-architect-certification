@@ -349,6 +349,7 @@
           { group: true, label: '☁️ Cloud', children: [
             { label: '☁️ Azure Portal', url: 'https://portal.azure.com/' },
             { label: '☁️ RunPod Serverless', url: 'https://console.runpod.io/serverless' },
+            { label: '☁️ RunPod Requests', url: 'https://console.runpod.io/serverless/user/endpoint/s13kv6t2jg78lk?tab=requests' },
             { label: '☁️ RunPod MFA', url: 'https://console.runpod.io/user/settings?open=login-settings' }
           ]}
         ]

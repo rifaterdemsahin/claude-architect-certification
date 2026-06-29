@@ -2740,6 +2740,128 @@ Return ONLY a JSON array, in scene order, with no markdown fences:
 	}
 }
 
+func drawingGenerateHandler(cfg config) http.HandlerFunc {
+	type DrawingRequest struct {
+		Sentences  string `json:"sentences"`
+		CourseName string `json:"courseName"`
+		ModuleName string `json:"moduleName"`
+		VideoName  string `json:"videoName"`
+	}
+
+	const model = "anthropic/claude-sonnet-4.6"
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		if r.Method != http.MethodPost {
+			http.Error(w, `{"error":"method not allowed"}`, http.StatusMethodNotAllowed)
+			return
+		}
+
+		var req DrawingRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, `{"error":"invalid request body"}`, http.StatusBadRequest)
+			return
+		}
+
+		apiKey := cfg.getSecret("OPENROUTER_API_KEY")
+		if apiKey == "" {
+			http.Error(w, `{"error":"OPENROUTER_API_KEY missing from server configuration"}`, http.StatusServiceUnavailable)
+			return
+		}
+
+		prompt := fmt.Sprintf(`You are a technical architect drawing an Excalidraw diagram.
+Create a valid Excalidraw JSON object that visually represents the core architecture, data flow, or concepts in the following script.
+
+Course: %s
+Module: %s
+Video: %s
+
+Script:
+%s
+
+# Output format
+Return ONLY valid JSON (no markdown fences, no commentary). The JSON must have this exact structure (do not deviate):
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "https://excalidraw.com",
+  "elements": [
+    { "type": "rectangle", "x": 100, "y": 100, "width": 200, "height": 100, "strokeColor": "#000000", "backgroundColor": "transparent", "fillStyle": "hachure", "strokeWidth": 1, "strokeStyle": "solid", "roughness": 1, "opacity": 100, "id": "rect1" },
+    { "type": "text", "x": 120, "y": 120, "text": "Example Text", "fontSize": 20, "fontFamily": 1, "textAlign": "left", "verticalAlign": "top", "strokeColor": "#000000", "id": "text1" }
+  ]
+}
+
+Make sure x and y coordinates are laid out logically so elements do not overlap.
+Use sensible colors and ensure text fits within rectangles.
+`, req.CourseName, req.ModuleName, req.VideoName, req.Sentences)
+
+		ctx, cancel := context.WithTimeout(r.Context(), 60*time.Second)
+		defer cancel()
+
+		orURL := "https://openrouter.ai/api/v1/chat/completions"
+		reqBody := map[string]any{
+			"model": model,
+			"messages": []map[string]string{
+				{"role": "user", "content": prompt},
+			},
+			"max_tokens": 4000,
+		}
+
+		b, _ := json.Marshal(reqBody)
+		hreq, err := http.NewRequestWithContext(ctx, "POST", orURL, bytes.NewReader(b))
+		if err != nil {
+			http.Error(w, `{"error":"failed to build request"}`, http.StatusInternalServerError)
+			return
+		}
+
+		hreq.Header.Set("Content-Type", "application/json")
+		hreq.Header.Set("Authorization", "Bearer "+apiKey)
+		hreq.Header.Set("HTTP-Referer", "https://claude-architect-certification.com")
+		hreq.Header.Set("X-Title", "Claude Architect Certification")
+
+		hresp, err := http.DefaultClient.Do(hreq)
+		if err != nil {
+			http.Error(w, `{"error":"OpenRouter API call failed"}`, http.StatusBadGateway)
+			return
+		}
+		defer hresp.Body.Close()
+
+		if hresp.StatusCode >= 400 {
+			body, _ := io.ReadAll(hresp.Body)
+			http.Error(w, fmt.Sprintf(`{"error":"OpenRouter API returned HTTP %d: %s"}`, hresp.StatusCode, body), http.StatusBadGateway)
+			return
+		}
+
+		var orResp struct {
+			Choices []struct {
+				Message struct {
+					Content string `json:"content"`
+				} `json:"message"`
+			} `json:"choices"`
+		}
+
+		if err := json.NewDecoder(hresp.Body).Decode(&orResp); err != nil {
+			http.Error(w, `{"error":"failed to decode response"}`, http.StatusInternalServerError)
+			return
+		}
+
+		content := ""
+		if len(orResp.Choices) > 0 {
+			content = strings.TrimSpace(orResp.Choices[0].Message.Content)
+			content = strings.TrimPrefix(content, "```json")
+			content = strings.TrimPrefix(content, "```")
+			content = strings.TrimSuffix(content, "```")
+			content = strings.TrimSpace(content)
+		}
+
+		json.NewEncoder(w).Encode(map[string]string{
+			"content": content,
+			"prompt":  prompt,
+			"model":   model,
+		})
+	}
+}
+
 // slideGenerateHandler powers the "Generate Slides Complex" button on the Marp
 // Slide Generator. It builds a napkin.ai-style visual-slide prompt from the
 // selected script sentences and proxies to OpenRouter. The model is chosen for
@@ -3529,6 +3651,209 @@ func runPodOutputVideoURL(output any) string {
 	return ""
 }
 
+// runPodLLMText extracts the generated text from a RunPod serverless LLM
+// endpoint (vLLM/TGI, OpenAI-compatible) completion response. The endpoint can
+// return the OpenAI shape (output is an array of {choices:[{message:{content}}]})
+// OR a single object. We tolerate both, plus a bare string and the legacy
+// {choices:[{text}]} format.
+func runPodLLMText(output any) string {
+	switch o := output.(type) {
+	case string:
+		return o
+	case map[string]any:
+		if arr, ok := o["choices"].([]any); ok && len(arr) > 0 {
+			return firstChoiceText(arr[0])
+		}
+		if data, ok := o["data"].([]any); ok && len(data) > 0 {
+			return firstChoiceText(data[0])
+		}
+		if s, ok := o["content"].(string); ok {
+			return s
+		}
+	case []any:
+		if len(o) > 0 {
+			return firstChoiceText(o[0])
+		}
+	}
+	return ""
+}
+
+func firstChoiceText(v any) string {
+	m, ok := v.(map[string]any)
+	if !ok {
+		return ""
+	}
+	if msg, ok := m["message"].(map[string]any); ok {
+		if s, ok := msg["content"].(string); ok {
+			return s
+		}
+	}
+	if s, ok := m["text"].(string); ok {
+		return s
+	}
+	if arr, ok := m["choices"].([]any); ok && len(arr) > 0 {
+		return firstChoiceText(arr[0])
+	}
+	return ""
+}
+
+// animationRunpodGenerateCodeHandler uses the RunPod serverless LLM endpoint
+// (the existing endpoint rsplhkl473fnsa is an OpenAI-compatible text model) to
+// turn a (sentence, animationType) into a complete, deployable Remotion
+// <Composition> source. The server builds the Remotion prompt (reusing the
+// same builder the preview uses), sends it to the LLM as a chat message,
+// polls until COMPLETED, and returns the generated React/Remotion code.
+//
+// Why this path: the RunPod key in the Azure Key Vault (runpod-api-key) backs
+// an LLM endpoint today, not a Remotion render farm. Generating the Remotion
+// component code is the productive, real use of that key for the Animation
+// Generator — the code it returns is exactly what a Remotion serve URL would
+// bundle. Admin-gated (paid LLM call). The key never reaches the browser.
+func animationRunpodGenerateCodeHandler(cfg config) http.HandlerFunc {
+	type Req struct {
+		AnimationType string `json:"animationType"`
+		Sentence      string `json:"sentence"`
+		SentenceType  string `json:"sentenceType"`
+		ModuleName    string `json:"moduleName"`
+		VideoName     string `json:"videoName"`
+	}
+	return func(w http.ResponseWriter, r *http.Request) {
+		setCORS(w, r)
+		w.Header().Set("Content-Type", "application/json")
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+		if !isAdminRequest(r) {
+			http.Error(w, `{"error":"Unauthorized — sign in as admin or open from localhost."}`, http.StatusUnauthorized)
+			return
+		}
+		if r.Method != http.MethodPost {
+			http.Error(w, `{"error":"method not allowed"}`, http.StatusMethodNotAllowed)
+			return
+		}
+		apiKey := cfg.getSecret("RUNPOD_API_KEY")
+		endpointID := os.Getenv("RUNPOD_ENDPOINT_ID")
+		if apiKey == "" || endpointID == "" {
+			http.Error(w, `{"error":"RunPod not configured. Set RUNPOD_API_KEY (Key Vault 'runpod-api-key' or env) and RUNPOD_ENDPOINT_ID on the server."}`, http.StatusServiceUnavailable)
+			return
+		}
+		var req Req
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, `{"error":"invalid request body"}`, http.StatusBadRequest)
+			return
+		}
+		meta := findAnimationType(req.AnimationType)
+		if meta == nil {
+			http.Error(w, `{"error":"unknown animation type"}`, http.StatusBadRequest)
+			return
+		}
+		sentence := strings.TrimSpace(req.Sentence)
+		if sentence == "" {
+			sentence = meta.Label + " demo for the Claude Architect Certification course."
+		}
+		prompt := meta.BuildPrompt(sentence, req.SentenceType, req.ModuleName, req.VideoName)
+		props := animationDefaultProps(meta.Slug, sentence, req.SentenceType, req.ModuleName, req.VideoName)
+
+		// Submit the prompt to the RunPod serverless LLM endpoint in OpenAI
+		// chat format (the endpoint validated `messages` as required).
+		payload := map[string]any{
+			"input": map[string]any{
+				"messages": []map[string]string{
+					{"role": "user", "content": prompt},
+				},
+				"max_tokens":  4000,
+				"temperature": 0.3,
+			},
+		}
+		body, _ := json.Marshal(payload)
+		submitCtx, submitCancel := context.WithTimeout(r.Context(), 30*time.Second)
+		defer submitCancel()
+		runURL := "https://api.runpod.ai/v2/" + endpointID + "/run"
+		hreq, err := http.NewRequestWithContext(submitCtx, http.MethodPost, runURL, bytes.NewReader(body))
+		if err != nil {
+			http.Error(w, `{"error":"failed to build runpod request"}`, http.StatusInternalServerError)
+			return
+		}
+		hreq.Header.Set("Content-Type", "application/json")
+		hreq.Header.Set("Authorization", "Bearer "+apiKey)
+		hresp, err := http.DefaultClient.Do(hreq)
+		if err != nil {
+			http.Error(w, `{"error":"RunPod submit failed"}`, http.StatusBadGateway)
+			return
+		}
+		rb, _ := io.ReadAll(hresp.Body)
+		hresp.Body.Close()
+		if hresp.StatusCode >= 400 {
+			http.Error(w, fmt.Sprintf(`{"error":"RunPod submit HTTP %d: %s"}`, hresp.StatusCode, strings.TrimSpace(string(rb))), http.StatusBadGateway)
+			return
+		}
+		var rpRun struct {
+			ID     string `json:"id"`
+			Status string `json:"status"`
+		}
+		if err := json.Unmarshal(rb, &rpRun); err != nil || rpRun.ID == "" {
+			http.Error(w, `{"error":"RunPod response missing job id"}`, http.StatusBadGateway)
+			return
+		}
+
+		// Poll for completion. LLM generation of a full composition can take
+		// 20-60s on a cold worker; allow up to ~120s total.
+		jobID := rpRun.ID
+		deadline := time.Now().Add(120 * time.Second)
+		for time.Now().Before(deadline) {
+			pollCtx, pollCancel := context.WithTimeout(r.Context(), 30*time.Second)
+			statusURL := "https://api.runpod.ai/v2/" + endpointID + "/status/" + jobID
+			preq, _ := http.NewRequestWithContext(pollCtx, http.MethodGet, statusURL, nil)
+			preq.Header.Set("Authorization", "Bearer "+apiKey)
+			presp, perr := http.DefaultClient.Do(preq)
+			if perr != nil {
+				pollCancel()
+				time.Sleep(3 * time.Second)
+				continue
+			}
+			pb, _ := io.ReadAll(presp.Body)
+			presp.Body.Close()
+			pollCancel()
+			var st struct {
+				Status string `json:"status"`
+				Output any    `json:"output"`
+				Error  string `json:"error"`
+			}
+			_ = json.Unmarshal(pb, &st)
+			status := strings.ToUpper(strings.TrimSpace(st.Status))
+			switch status {
+			case "COMPLETED":
+				code := strings.TrimSpace(runPodLLMText(st.Output))
+				if code == "" {
+					http.Error(w, `{"error":"RunPod completed but returned no generated text"}`, http.StatusBadGateway)
+					return
+				}
+				json.NewEncoder(w).Encode(map[string]any{
+					"animationType": meta.Slug,
+					"label":         meta.Label,
+					"emoji":         meta.Emoji,
+					"prompt":        prompt,
+					"inputProps":    props,
+					"code":          code,
+					"jobId":         jobID,
+					"endpoint":      endpointID,
+				})
+				return
+			case "FAILED", "CANCELLED", "TIMED_OUT":
+				errMsg := st.Error
+				if errMsg == "" {
+					errMsg = "RunPod LLM job " + strings.ToLower(status)
+				}
+				http.Error(w, fmt.Sprintf(`{"error":"RunPod LLM failed: %s"}`, errMsg), http.StatusBadGateway)
+				return
+			}
+			time.Sleep(3 * time.Second)
+		}
+		http.Error(w, `{"error":"RunPod LLM timed out (120s)"}`, http.StatusGatewayTimeout)
+	}
+}
+
 // setCORS allows the static GitHub Pages site (and local dev) to call this
 // backend cross-origin. The GitHub Pages site diverts /api calls here because
 // Pages cannot run the Go backend that proxies to Gemini.
@@ -3967,10 +4292,12 @@ func main() {
 	mux.Handle("/api/infographics/save", observe(cfg, infographicSaveHandler(cfg)))
 	mux.Handle("/api/lowerthirds/generate", observe(cfg, lowerThirdGenerateHandler(cfg)))
 	mux.Handle("/api/lowerthirds/openrouter", observe(cfg, openRouterGenerateHandler(cfg)))
+	mux.Handle("/api/drawings/openrouter", observe(cfg, drawingGenerateHandler(cfg)))
 	mux.Handle("/api/slides/openrouter", observe(cfg, slideGenerateHandler(cfg)))
 	mux.Handle("/api/animations/generate-prompt", observe(cfg, animationPromptHandler(cfg)))
 	mux.Handle("/api/animations/runpod/run", observe(cfg, animationRunpodRunHandler(cfg)))
 	mux.Handle("/api/animations/runpod/status", observe(cfg, animationRunpodStatusHandler(cfg)))
+	mux.Handle("/api/animations/runpod/generate-code", observe(cfg, animationRunpodGenerateCodeHandler(cfg)))
 	mux.Handle("/api/ai/sanity-check", observe(cfg, sanityCheckHandler(cfg)))
 	mux.Handle("/api/ai/fix-grammar", observe(cfg, fixGrammarHandler(cfg)))
 	mux.Handle("/api/admin/login", observe(cfg, adminLoginHandler(cfg)))

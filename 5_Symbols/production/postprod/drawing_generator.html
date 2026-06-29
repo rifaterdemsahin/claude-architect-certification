@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="../../../shared/redirect-to-live-site.js"></script>
+  <title>Drawing Generator (Excalidraw) | Claude AI Certification</title>
+  <meta name="description" content="Generate a Excalidraw diagram from your video script sentences.">
+  <link rel="icon" type="image/png" href="../../../favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #030712; --bg-card: rgba(17,24,39,0.9); --border-glow: rgba(139,92,246,0.3);
+      --text-main: #f3f4f6; --text-muted: #9ca3af; --primary: #8b5cf6; --primary-glow: rgba(139,92,246,0.6);
+      --secondary: #3b82f6; --success: #10b981; --danger: #ef4444; --warning: #f59e0b; --accent: #8b5cf6;
+      --font-title: 'Outfit', sans-serif; --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-dark);
+      background-image: radial-gradient(circle at 10% 20%, rgba(139,92,246,0.12) 0%, transparent 40%),
+                        radial-gradient(circle at 90% 80%, rgba(59,130,246,0.12) 0%, transparent 40%);
+      color: var(--text-main); font-family: var(--font-body); line-height: 1.6;
+      padding: 100px 24px 60px;
+    }
+    .container { max-width: 1200px; margin: 0 auto; }
+    header { text-align: center; margin-bottom: 48px; }
+    header h1 { font-family: var(--font-title); font-size: 2.6rem; font-weight: 900; letter-spacing: -0.02em; margin-bottom: 10px; }
+    header p { color: var(--text-muted); font-size: 1.05rem; }
+    
+    .selector-bar { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+    .selector-bar select {
+      background: var(--bg-card); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px;
+      color: var(--text-main); padding: 12px 20px; font-size: 1rem; font-family: var(--font-body);
+      min-width: 220px; cursor: pointer;
+    }
+    .selector-bar select:focus { outline: none; border-color: var(--accent); }
+    
+    .glass-card {
+      background: var(--bg-card); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px;
+      padding: 32px; margin-bottom: 32px; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.6); backdrop-filter: blur(12px);
+    }
+    .glass-card h2 { font-family: var(--font-title); font-weight: 700; font-size: 1.3rem; margin-bottom: 0; }
+    .glass-card-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+    .glass-card-body { margin-top: 20px; }
+    .glass-card-body.collapsed { display: none; }
+    .collapse-icon { transition: transform 0.3s ease; font-size: 1.2rem; }
+    
+    .btn {
+      background: var(--primary); color: #fff; border: none; border-radius: 10px; padding: 10px 22px;
+      font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; text-decoration: none;
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(139,92,246,0.3); }
+    .btn-secondary { background: var(--secondary); color: #fff; }
+    .btn-success { background: var(--success); color: #000; }
+    .btn-sm { padding: 6px 14px; font-size: 0.8rem; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+    
+    .empty-state { text-align: center; padding: 48px 24px; color: var(--text-muted); }
+    .empty-state .empty-icon { font-size: 3rem; margin-bottom: 12px; }
+    
+    .toast {
+      position: fixed; top: 24px; right: 24px; background: var(--success); color: #000;
+      padding: 14px 24px; border-radius: 12px; font-weight: 700; z-index: 1000;
+      transform: translateX(120%); transition: transform 0.4s ease; max-width: 400px;
+    }
+    .toast.show { transform: translateX(0); }
+    .toast.error { background: var(--danger); color: #fff; }
+
+    .ig-table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
+    .ig-table th { text-align: left; color: var(--text-muted); font-size: 0.78rem; font-weight: 600; padding: 8px 12px; text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .ig-table td { padding: 12px; background: rgba(0,0,0,0.18); vertical-align: top; font-size: 0.9rem; }
+    .ig-table tr td:first-child { border-radius: 12px 0 0 12px; }
+    .ig-table tr td:last-child { border-radius: 0 12px 12px 0; }
+    .ig-table .chk-col { width: 36px; text-align: center; }
+    .ig-table .num-col { width: 42px; text-align: center; font-weight: 700; color: var(--accent); }
+    .ig-table .sentence-col { min-width: 260px; }
+    .ig-table .type-col { width: 120px; }
+    .ig-table .bg-col { width: 120px; text-align: center; }
+    .type-tag { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 600; background: rgba(139,92,246,0.15); color: var(--primary); }
+    
+    .preview-box {
+      width: 100%; min-height: 250px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px; padding: 20px; color: var(--text-main); font-family: monospace;
+      white-space: pre-wrap; font-size: 0.85rem; overflow-y: auto; max-height: 400px;
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="../../../shared/schema-modal.js"></script>
+  <script src="../../../shared/nav.js"></script>
+  <script src="../../../shared/debug-panel.js"></script>
+  <script src="../../../shared/seo.js" defer></script>
+  <script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@excalidraw/excalidraw@0.17.3/dist/excalidraw.production.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>📊 AI Drawing Generator</h1>
+      <p>Convert your script sentences into a <strong>Excalidraw diagram</strong>. Pick a module &amp; video, choose sentences, then <strong>Generate Basic</strong> or <strong>✨ Generate Complex (AI, napkin.ai-style)</strong>. Save to DB, download <code>.md</code>, or export slides as <strong>PNG</strong> / <strong>bulk ZIP</strong>.</p>
+    </header>
+
+    <!-- 1) Filter -->
+    <div class="glass-card" id="filterPanel">
+      <div class="glass-card-header" onclick="togglePanel(this)">
+        <h2>1) Filter</h2>
+        <span class="collapse-icon">▼</span>
+      </div>
+      <div class="glass-card-body">
+        <div class="selector-bar">
+          <select id="moduleSelect" onchange="loadVideos(this.value)"><option value="">— Select Module —</option></select>
+          <select id="videoSelect" onchange="fetchSentences(this.value)"><option value="">— Select Video —</option></select>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2) Sentences / Slide Setup -->
+    <div class="glass-card" id="sentencesPanel" style="display:none;">
+      <div class="glass-card-header" onclick="togglePanel(this)">
+        <h2>2) Slide Setup</h2>
+        <span class="collapse-icon">▼</span>
+      </div>
+      <div class="glass-card-body">
+        <div id="sentencesWrap" style="overflow-x:auto;">
+          <!-- Table injected here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- 3) Preview & Download -->
+    <div class="glass-card" id="previewPanel" style="display:none;">
+      <div class="glass-card-header" onclick="togglePanel(this)">
+        <h2>3) Excalidraw JSON</h2>
+        <span class="collapse-icon">▼</span>
+      </div>
+      <div class="glass-card-body">
+        <div class="split-view" style="display:flex; gap: 24px; flex-wrap:wrap;">
+          
+          <div class="editor-pane" style="flex:1; min-width:300px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+              <p style="color:var(--text-muted);font-size:0.9rem;">Excalidraw JSON</p>
+              <div>
+                <button class="btn btn-secondary btn-sm" onclick="copyMarkdown()">📋 Copy</button>
+                <button class="btn btn-success btn-sm" id="downloadBtn" onclick="downloadMarkdown()">⬇️ .md</button>
+                
+                <button class="btn btn-sm" style="background:#4ade80; color:#000;" onclick="savePresentation()">💾 Save to DB</button>
+              </div>
+            </div>
+            <textarea id="excalidrawJSON" class="preview-box" style="width:100%; height:320px; resize:vertical;" oninput="updateExcalidraw(this.value)"></textarea>
+          </div>
+
+          <div class="render-pane" style="flex:1; min-width:300px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+              <p style="color:var(--text-muted);font-size:0.9rem;">Slide Preview</p>
+            </div>
+            <div id="excalidrawWrap" style="background:var(--bg-dark); width:100%; height:400px; border:1px solid rgba(255,255,255,0.1); border-radius:12px; position:relative; overflow:hidden;"></div>
+            <div style="text-align:center; margin-top:12px;">
+              <button class="btn btn-secondary btn-sm" onclick="prevPreviewSlide()">◀</button>
+              <span id="previewCounter" style="margin:0 12px; font-size:0.9rem; font-weight:700;">1 / 1</span>
+              <button class="btn btn-secondary btn-sm" onclick="nextPreviewSlide()">▶</button>
+            </div>
+          </div>
+
+        </div>
+        
+        <div style="margin-top:14px; background:rgba(16,185,129,0.08); border:1px solid var(--success); border-radius:12px; padding:12px 16px;">
+          <h4 style="color:var(--success); margin-bottom:4px; font-size:0.95rem;">💾 Persistence & Export</h4>
+          <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:0;">
+            <strong>Save to DB</strong> upserts this markdown into the Supabase <code>video_drawings</code> table (keyed by <code>video_id</code>); it auto-loads on revisit.
+            <strong>🖼️ PNG</strong> exports the current slide and <strong>📦 Bulk PNG</strong> zips every slide at 1280×720 for editing.
+            Use <strong>✨ Generate Slides Complex (AI)</strong> for napkin.ai-style visual slides via OpenRouter.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div id="emptyState" class="glass-card empty-state">
+      <div class="empty-icon">🎬</div>
+      <h2 style="font-family:var(--font-title);margin-bottom:8px;">Select a Module &amp; Video</h2>
+      <p>Choose a module and video above to load its script and start building your presentation.</p>
+    </div>
+
+    <!-- Saved Presentations (from Supabase video_drawings table) -->
+    <div class="glass-card" id="savedPanel">
+      <div class="glass-card-header" onclick="togglePanel(this)">
+        <h2>💾 Saved Presentations</h2>
+        <span class="collapse-icon">▼</span>
+      </div>
+      <div class="glass-card-body">
+        <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
+          <button class="btn btn-secondary btn-sm" onclick="loadSavedPresentations()">🔄 Refresh</button>
+        </div>
+        <div id="savedWrap" style="overflow-x:auto;">
+          <div class="empty-state"><p>Loading saved video_drawings…</p></div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <p><a href="index.html" style="color:var(--secondary);text-decoration:none;">← Back to Post-Production</a></p>
+    </footer>
+  </div>
+
+  <!-- Prompt preview modal (AI Drawing Generator) -->
+  <div id="promptModal" class="modal" onclick="if(event.target===this) closePromptModal()" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; align-items:center; justify-content:center;">
+    <div class="modal-content" style="background:var(--bg-card); border:1px solid rgba(255,255,255,0.1); border-radius:16px; padding:32px; max-width:800px; width:90%; max-height:90vh; overflow-y:auto; box-shadow:0 20px 40px rgba(0,0,0,0.6);">
+      <h3 style="font-family:var(--font-title); font-size:1.4rem; margin-bottom:8px;">👁️ AI Prompt Preview</h3>
+      <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:16px;">📋 Copy this prompt and paste it into Claude or Gemini to generate high-impact, Steve Jobs-style slides using an LLM. Then paste the markdown back into the editor.</p>
+      <textarea id="promptModalText" spellcheck="false" readonly style="width:100%; min-height:400px; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:16px; color:var(--text-main); font-family:monospace; font-size:0.85rem; margin-bottom:16px; resize:vertical;"></textarea>
+      <div class="modal-actions" style="display:flex; gap:12px; justify-content:flex-end;">
+        <button class="btn" style="background:rgba(255,255,255,0.1);" onclick="closePromptModal()">Close</button>
+        <a class="btn" style="background:#d97757; color:#fff;" href="https://claude.ai/new" target="_blank" rel="noopener">🔗 Open Claude</a>
+        <a class="btn" style="background:#4285f4; color:#fff;" href="https://gemini.google.com/app" target="_blank" rel="noopener">✨ Open Gemini</a>
+        <button class="btn btn-success" onclick="copyAiPrompt()">📋 Copy Prompt</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Offscreen high-res renderer (1280x720) used by html2canvas for PNG export -->
+  <div id="pngStage" style="position:fixed; left:-9999px; top:0; width:1280px; height:720px; pointer-events:none;">
+    <div id="pngSlide" style="width:1280px; height:720px; background:#030712; color:#f3f4f6; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; position:relative; overflow:hidden; font-family:'Plus Jakarta Sans',sans-serif; padding:80px;"></div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const SUPABASE_URL = localStorage.getItem('supabase_url') || 'https://rmekfsdhglyiralxvkwc.supabase.co';
+    const SUPABASE_ANON_KEY = localStorage.getItem('supabase_anon_key') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZWtmc2RoZ2x5aXJhbHh2a3djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NzYzODgsImV4cCI6MjA5NjM1MjM4OH0.ay6HsmO_CbMGDXL_Dv4DT-paAIAOqlQPfmqqx_mexSU';
+    const HEADERS = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
+
+    let dbModules = [];
+    let dbVideos = [];
+    let currentSentences = [];
+    let sentenceGraphicsMap = {}; // sentence_id -> graphics row
+    let generatedSlides = []; // Holds structured slide data for preview
+    let previewIndex = 0;
+
+    const $ = id => document.getElementById(id);
+    
+    function showToast(msg, isError, ms) {
+      const t = $('toast');
+      t.textContent = msg; t.className = 'toast' + (isError ? ' error' : '');
+      setTimeout(() => t.classList.add('show'), 10);
+      setTimeout(() => t.classList.remove('show'), ms || 3500);
+    }
+    
+    function escHtml(s) { if (!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+    function togglePanel(header) {
+      const body = header.nextElementSibling;
+      const icon = header.querySelector('.collapse-icon');
+      if (body.classList.contains('collapsed')) {
+        body.classList.remove('collapsed'); icon.style.transform = 'rotate(0deg)';
+      } else {
+        body.classList.add('collapsed'); icon.style.transform = 'rotate(-90deg)';
+      }
+    }
+
+    async function api(path) {
+      const url = SUPABASE_URL + '/rest/v1/' + path;
+      const res = await fetch(url, { headers: HEADERS });
+      if (!res.ok) throw new Error(res.status);
+      return res.json();
+    }
+
+    async function loadModules() {
+      try {
+        dbModules = await api('modules?select=id,module_number,title&order=module_number.asc');
+        $('moduleSelect').innerHTML = '<option value="">— Select Module —</option>' +
+          dbModules.map(m => `<option value="${m.id}">M${m.module_number}: ${escHtml(m.title)}</option>`).join('');
+      } catch (e) { showToast('Failed to load modules: ' + e.message, true); }
+    }
+
+    async function loadVideos(moduleId) {
+      if (!moduleId) { $('videoSelect').innerHTML = '<option value="">— Select Video —</option>'; return; }
+      try {
+        dbVideos = await api(`videos?select=id,video_number,title&module_id=eq.${moduleId}&order=video_number.asc`);
+        $('videoSelect').innerHTML = '<option value="">— Select Video —</option>' +
+          dbVideos.map(v => `<option value="${v.id}">V${v.video_number}: ${escHtml(v.title)}</option>`).join('');
+      } catch (e) { showToast('Failed to load videos: ' + e.message, true); }
+    }
+
+    async function fetchSentences(videoId) {
+      if (!videoId) {
+        $('sentencesPanel').style.display = 'none';
+        $('previewPanel').style.display = 'none';
+        $('emptyState').style.display = 'block';
+        return;
+      }
+      $('emptyState').style.display = 'none';
+      try {
+        const scripts = await api(`scripts?video_id=eq.${videoId}&select=id&limit=1`);
+        if (!scripts.length) throw new Error("No script found for this video");
+        
+        currentSentences = await api(`sentences?script_id=eq.${scripts[0].id}&select=id,sentence_text,sentence_type,section,sort_order&order=sort_order.asc`);
+        
+        const sids = currentSentences.map(s => s.id);
+        if (sids.length) {
+          const graphics = await api(`sentence_graphics?sentence_id=in.(${sids.join(',')})&select=sentence_id,graphics_url,generation_status`);
+          graphics.forEach(g => { if (g.generation_status === 'completed') sentenceGraphicsMap[g.sentence_id] = g.graphics_url; });
+        }
+        
+        renderSentences();
+        $('sentencesPanel').style.display = 'block';
+        $('previewPanel').style.display = 'block';
+        
+        // Auto-load from DB if exists
+        const existing = await api(`video_drawings?video_id=eq.${videoId}&select=excalidraw_json`);
+        if (existing && existing.length > 0) {
+          $('excalidrawJSON').value = existing[0].excalidraw_json;
+          parseMarkdownToPreview(existing[0].excalidraw_json);
+          showToast('Loaded existing presentation from DB.', false, 2000);
+        } else {
+          $('excalidrawJSON').value = '';
+          generatedSlides = [];
+          updateVisualPreview();
+        }
+      } catch (e) {
+        showToast('Error: ' + e.message, true);
+      }
+    }
+
+    function renderSentences() {
+      const wrap = $('sentencesWrap');
+      if (!currentSentences.length) {
+        wrap.innerHTML = '<div class="empty-state"><p>No sentences found.</p></div>';
+        return;
+      }
+      const rows = currentSentences.map((s, i) => {
+        const bgImg = sentenceGraphicsMap[s.id] 
+          ? `<img src="${escHtml(sentenceGraphicsMap[s.id])}" style="width:100px; height:56px; object-fit:cover; border-radius:6px;" alt="bg">` 
+          : '<span style="font-size:0.75rem; color:var(--text-muted);">None</span>';
+        
+        return `<tr>
+          <td class="chk-col"><input type="checkbox" class="slide-chk" value="${s.id}" checked></td>
+          <td class="num-col">${i + 1}</td>
+          <td class="sentence-col">${escHtml(s.sentence_text || '')}</td>
+          <td class="type-col"><span class="type-tag">${escHtml((s.sentence_type || 'body').replace(/_/g,' '))}</span></td>
+          <td class="bg-col">${bgImg}</td>
+        </tr>`;
+      }).join('');
+      
+      wrap.innerHTML = `<table class="ig-table">
+        <thead><tr>
+          <th class="chk-col"><input type="checkbox" id="selectAll" checked onchange="toggleAll(this.checked)"></th>
+          <th class="num-col">#</th>
+          <th class="sentence-col">Sentence</th>
+          <th class="type-col">Type</th>
+          <th class="bg-col">Background</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div style="display:flex; justify-content:flex-end; gap:12px; margin-top: 16px;">
+        <button class="btn btn-secondary" onclick="openPromptModal()" style="border:1px solid rgba(255,255,255,0.2); background:rgba(255,255,255,0.05); color:#fff; border-radius:12px; padding:10px 20px; font-weight:600;">👁️ View AI Prompt</button>
+        <button class="btn btn-primary" id="complexBtn" onclick="generateDrawingAI()" style="background:linear-gradient(135deg,#8b5cf6,#3b82f6); color:#fff; border:none; padding:10px 24px; border-radius:12px; font-weight:700; font-size:1rem; cursor:pointer;">✨ Generate Drawing (AI)</button>
+      </div>`;
+    }
+    
+    function toggleAll(checked) {
+      document.querySelectorAll('.slide-chk').forEach(cb => cb.checked = checked);
+    }
+
+    let excalidrawAPI = null;
+    const App = () => {
+        return React.createElement(
+          React.Fragment,
+          null,
+          React.createElement(ExcalidrawLib.Excalidraw, {
+            initialData: { elements: [] },
+            excalidrawAPI: (api) => excalidrawAPI = api
+          })
+        );
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const root = ReactDOM.createRoot($('excalidrawWrap'));
+        root.render(React.createElement(App));
+        loadModules(); 
+        loadSavedPresentations();
+    });
+
+    function updateExcalidraw(jsonStr) {
+        try {
+            const data = JSON.parse(jsonStr);
+            if (excalidrawAPI && data.elements) {
+                excalidrawAPI.updateScene({ elements: data.elements });
+            }
+        } catch (e) {
+            // Ignored
+        }
+    }
+
+    function copyMarkdown() {
+      const text = $('excalidrawJSON').value;
+      navigator.clipboard.writeText(text).then(() => showToast('📋 Copied to clipboard!'));
+    }
+
+    function downloadMarkdown() {
+      const markdown = $('excalidrawJSON').value;
+      const blob = new Blob([markdown], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `drawing_m${$('moduleSelect').value || '0'}_v${$('videoSelect').value || '0'}.excalidraw`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('✅ Downloaded successfully');
+    }
+
+    async function generateDrawingAI() {
+      const checkboxes = document.querySelectorAll('.slide-chk');
+      const selectedIds = Array.from(checkboxes).filter(cb => cb.checked).map(cb => parseInt(cb.value));
+      const slides = currentSentences.filter(s => selectedIds.includes(s.id));
+      if (!slides.length) { showToast('Select at least one sentence first.', true); return; }
+
+      const btn = $('complexBtn');
+      const original = btn ? btn.textContent : '';
+      if (btn) { btn.disabled = true; btn.textContent = '⏳ Generating with AI…'; }
+
+      const sentencesText = slides.map(s => `- [${s.sentence_type || 'body'}] ${s.sentence_text || ''}`).join('\n');
+      const moduleName = (dbModules.find(m => String(m.id) === $('moduleSelect').value) || {}).title || '';
+      const videoName = (dbVideos.find(v => String(v.id) === $('videoSelect').value) || {}).title || '';
+
+      try {
+        const res = await fetch('/api/drawings/openrouter', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sentences: sentencesText,
+            courseName: 'Claude Architect Certification',
+            moduleName, videoName
+          })
+        });
+        if (!res.ok) {
+          const errBody = await res.text();
+          throw new Error(errBody || ('HTTP ' + res.status));
+        }
+        const data = await res.json();
+        let md = (data.content || '').trim();
+        $('excalidrawJSON').value = md;
+        updateExcalidraw(md);
+        showToast(`✨ AI drawing generated (${data.model || 'OpenRouter'})`);
+      } catch (e) {
+        let msg = e.message || 'Unknown error';
+        if (msg.includes('404')) {
+          msg = 'Server route /api/drawings/openrouter not found — restart the Go server.';
+        }
+        showToast('AI generation failed: ' + msg, true, 7000);
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = original; }
+      }
+    }
+
+    async function savePresentation() {
+      const videoId = $('videoSelect').value;
+      if (!videoId) { showToast('Select a video first.', true); return; }
+      
+      const markdown = $('excalidrawJSON').value;
+      if (!markdown.trim()) { showToast('Markdown is empty!', true); return; }
+      
+      try {
+        const existing = await api(`video_drawings?video_id=eq.${videoId}&select=id`);
+        if (existing && existing.length > 0) {
+          const res = await fetch(SUPABASE_URL + `/rest/v1/video_drawings?id=eq.${existing[0].id}`, {
+            method: 'PATCH',
+            headers: { ...HEADERS, 'Prefer': 'return=minimal' },
+            body: JSON.stringify({ excalidraw_json: markdown, updated_at: new Date().toISOString() })
+          });
+          if (!res.ok) throw new Error('Failed to update DB');
+        } else {
+          const res = await fetch(SUPABASE_URL + '/rest/v1/video_drawings', {
+            method: 'POST',
+            headers: { ...HEADERS, 'Prefer': 'return=minimal' },
+            body: JSON.stringify({ video_id: parseInt(videoId), excalidraw_json: markdown })
+          });
+          if (!res.ok) throw new Error('Failed to insert into DB');
+        }
+        showToast('💾 Saved to Supabase successfully!');
+        loadSavedPresentations();
+      } catch (e) {
+        showToast('Error saving: ' + e.message, true);
+      }
+    }
+
+    // ---- Saved Presentations table (bottom of page) -------------------------
+    // Pull all rows from the video_drawings table, joined to their video/module
+    // for readable labels, and surface any images embedded in the markdown.
+    /* removed */ function extractImagesFromMarkdown(md) {
+      const urls = [];
+      const re = /!\[[^\]]*\]\(([^)]+)\)/g;
+      let m;
+      while ((m = re.exec(md || '')) !== null) {
+        const u = m[1].trim();
+        if (u && !urls.includes(u)) urls.push(u);
+      }
+      return urls;
+    }
+
+    /* removed */ function countSlides(md) {
+      return ((md || '').match(/^#\s+/gm) || []).length;
+    }
+
+    async function loadSavedPresentations() {
+      const wrap = $('savedWrap');
+      try {
+        let rows;
+        try {
+          rows = await api('video_drawings?select=id,video_id,excalidraw_json,created_at,updated_at,videos(video_number,title,modules(module_number,title))&order=updated_at.desc');
+        } catch (_) {
+          // Fallback if the embedded join isn't available.
+          rows = await api('video_drawings?select=id,video_id,excalidraw_json,created_at,updated_at&order=updated_at.desc');
+        }
+
+        if (!rows || !rows.length) {
+          wrap.innerHTML = '<div class="empty-state"><p>No video_drawings saved yet. Generate slides and hit 💾 Save to DB.</p></div>';
+          return;
+        }
+
+        const body = rows.map(r => {
+          const v = r.videos || {};
+          const mod = v.modules || {};
+          const label = (mod.module_number != null ? `M${mod.module_number}` : '') +
+                        (v.video_number != null ? ` · V${v.video_number}` : '') +
+                        (v.title ? `: ${escHtml(v.title)}` : (`video #${r.video_id}`));
+          const when = (r.updated_at || r.created_at || '').slice(0, 16).replace('T', ' ');
+          const imgs = extractImagesFromMarkdown(r.excalidraw_json);
+          const thumbs = imgs.length
+            ? imgs.slice(0, 6).map(u => `<img src="${escHtml(u)}" title="${escHtml(u)}" style="width:64px; height:36px; object-fit:cover; border-radius:5px; border:1px solid rgba(255,255,255,0.1);" loading="lazy" onerror="this.style.display='none'">`).join('')
+              + (imgs.length > 6 ? `<span style="font-size:0.75rem; color:var(--text-muted);">+${imgs.length - 6}</span>` : '')
+            : '<span style="font-size:0.75rem; color:var(--text-muted);">No images</span>';
+
+          return `<tr>
+            <td><strong style="color:var(--text-main);">${label}</strong></td>
+            <td class="num-col">1</td>
+            <td>Excalidraw</td>
+            <td style="white-space:nowrap; color:var(--text-muted); font-size:0.8rem;">${escHtml(when)}</td>
+            <td style="white-space:nowrap;">
+              <button class="btn btn-secondary btn-sm" onclick="loadSavedPresentation('${r.id}')">📂 Load</button>
+              <button class="btn btn-sm" style="background:var(--danger); color:#fff;" onclick="deleteSavedPresentation('${r.id}')">🗑</button>
+            </td>
+          </tr>`;
+        }).join('');
+
+        wrap.innerHTML = `<table class="ig-table">
+          <thead><tr>
+            <th>Module · Video</th>
+            <th class="num-col">Slides</th>
+            <th>Images</th>
+            <th>Updated</th>
+            <th>Actions</th>
+          </tr></thead>
+          <tbody>${body}</tbody>
+        </table>`;
+      } catch (e) {
+        wrap.innerHTML = `<div class="empty-state" style="color:var(--danger);"><p>Failed to load saved video_drawings: ${escHtml(e.message)}</p></div>`;
+      }
+    }
+
+    async function loadSavedPresentation(id) {
+      try {
+        const rows = await api(`video_drawings?id=eq.${id}&select=video_id,excalidraw_json,videos(module_id,video_number)`);
+        if (!rows || !rows.length) { showToast('Presentation not found.', true); return; }
+        const r = rows[0];
+        const moduleId = r.videos && r.videos.module_id;
+        // Sync the selectors so a subsequent Save targets the same video.
+        if (moduleId) {
+          $('moduleSelect').value = String(moduleId);
+          await loadVideos(String(moduleId));
+          $('videoSelect').value = String(r.video_id);
+          await fetchSentences(String(r.video_id));
+        }
+        $('excalidrawJSON').value = r.excalidraw_json || '';
+        parseMarkdownToPreview(r.excalidraw_json || '');
+        $('previewPanel').style.display = 'block';
+        $('previewPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        showToast('📂 Loaded presentation into editor.');
+      } catch (e) {
+        showToast('Error loading: ' + e.message, true);
+      }
+    }
+
+    async function deleteSavedPresentation(id) {
+      if (!confirm('Delete this saved presentation? This cannot be undone.')) return;
+      try {
+        const res = await fetch(SUPABASE_URL + `/rest/v1/video_drawings?id=eq.${id}`, {
+          method: 'DELETE',
+          headers: { ...HEADERS, 'Prefer': 'return=minimal' }
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        showToast('🗑 Deleted.');
+        loadSavedPresentations();
+      } catch (e) {
+        showToast('Error deleting: ' + e.message, true);
+      }
+    }
+
+    function openPromptModal() {
+      const checkboxes = document.querySelectorAll('.slide-chk');
+      const selectedIds = Array.from(checkboxes).filter(cb => cb.checked).map(cb => parseInt(cb.value));
+      const slides = currentSentences.filter(s => selectedIds.includes(s.id));
+      
+      if (!slides.length) {
+        showToast('Please select at least one sentence.', true);
+        return;
+      }
+      
+      const sentencesText = slides.map(s => `- [${s.sentence_type}] ${s.sentence_text}`).join('\n');
+      
+      const prompt = `You are a technical architect drawing an Excalidraw diagram.
+Create a valid Excalidraw JSON object that visually represents the core architecture, data flow, or concepts in the following script.
+
+# Output format
+Return ONLY valid JSON (no markdown fences). Structure:
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "https://excalidraw.com",
+  "elements": [...]
+}
+
+# Input Sentences
+${sentencesText}
+`;
+
+      $('promptModalText').value = prompt;
+      $('promptModal').style.display = 'flex';
+    }
+
+    function closePromptModal() {
+      $('promptModal').style.display = 'none';
+    }
+    
+    function copyAiPrompt() {
+      const text = $('promptModalText').value;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('📋 AI Prompt copied to clipboard!');
+      });
+    }
+
+    // Friendly retry for the shared missing-table modal: reload the saved list
+    // instead of a full page reload once the user runs the migration.
+    if (window.SchemaModal) window.SchemaModal.onRetry = () => { loadModules(); loadSavedPresentations(); };
+
+    
+  </script>
+</body>
+</html>
