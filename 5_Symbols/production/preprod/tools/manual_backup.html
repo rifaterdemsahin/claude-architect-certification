@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual Backup | Claude Architect Certification</title>
+    <link rel="stylesheet" href="../../../../index.css">
+    <style>
+        .backup-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: rgba(20, 20, 25, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+        .backup-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .backup-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .backup-card {
+            background: rgba(30, 30, 40, 0.8);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            text-align: center;
+        }
+        .backup-card h3 {
+            margin-top: 0;
+            color: #4facfe;
+        }
+        .backup-card p {
+            color: #a0a0b0;
+            font-size: 0.9em;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+        .backup-btn {
+            background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+        .backup-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(79, 172, 254, 0.4);
+        }
+        .backup-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .log-container {
+            margin-top: 30px;
+            background: #0d0d12;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.85em;
+            color: #00ff00;
+            height: 200px;
+            overflow-y: auto;
+            display: none;
+        }
+        .log-line { margin: 4px 0; }
+        .log-error { color: #ff4444; }
+        .log-success { color: #00ff00; }
+    </style>
+</head>
+<body>
+    <div class="backup-container">
+        <div class="backup-header">
+            <h2>📦 Manual Backup Hub</h2>
+            <p>Download snapshots of your Supabase database and Azure Key Vault configuration locally.</p>
+        </div>
+
+        <div class="backup-cards">
+            <div class="backup-card">
+                <h3>🗄️ Supabase Backup</h3>
+                <p>Downloads a full PostgreSQL dump of the Supabase database. Uses credentials from Azure Key Vault.</p>
+                <button class="backup-btn" id="btnBackupSupabase" onclick="triggerBackup('supabase')">Download DB Backup</button>
+            </div>
+            
+            <div class="backup-card">
+                <h3>🔐 Azure Key Vault Backup</h3>
+                <p>Downloads a JSON snapshot of the current environment and configuration secrets from Azure.</p>
+                <button class="backup-btn" id="btnBackupAzure" onclick="triggerBackup('azure')">Download Config Backup</button>
+            </div>
+        </div>
+
+        <div class="log-container" id="logContainer"></div>
+    </div>
+
+    <script>
+        function log(msg, type = 'info') {
+            const container = document.getElementById('logContainer');
+            container.style.display = 'block';
+            const line = document.createElement('div');
+            line.className = `log-line ${type === 'error' ? 'log-error' : type === 'success' ? 'log-success' : ''}`;
+            line.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            container.appendChild(line);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        async function triggerBackup(type) {
+            const btn = document.getElementById(type === 'supabase' ? 'btnBackupSupabase' : 'btnBackupAzure');
+            btn.disabled = true;
+            btn.textContent = 'Processing...';
+            
+            log(`Initiating ${type} backup...`);
+            
+            try {
+                // We use requireAdmin from shared/nav.js logic implicitly via the endpoint protecting itself,
+                // but we explicitly call our API.
+                const response = await fetch(`/api/admin/backup/${type}`, {
+                    method: 'GET'
+                });
+                
+                if (!response.ok) {
+                    const err = await response.text();
+                    throw new Error(`Server returned ${response.status}: ${err}`);
+                }
+                
+                // Read as blob for download
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                
+                // Create appropriate filename
+                const dateStr = new Date().toISOString().replace(/[:.]/g, '-');
+                const ext = type === 'supabase' ? 'sql' : 'json';
+                a.download = `${type}_backup_${dateStr}.${ext}`;
+                
+                document.body.appendChild(a);
+                a.click();
+                
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                
+                log(`${type} backup downloaded successfully!`, 'success');
+            } catch (err) {
+                log(`Backup failed: ${err.message}`, 'error');
+                console.error(err);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = type === 'supabase' ? 'Download DB Backup' : 'Download Config Backup';
+            }
+        }
+    </script>
+    <script src="../../../../shared/nav.js"></script>
+    <script src="../../../../shared/debug-panel.js"></script>
+</body>
+</html>
