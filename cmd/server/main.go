@@ -2035,6 +2035,101 @@ func imageSaveHandler(cfg config) http.HandlerFunc {
 	}
 }
 
+// DrawingSaveRequest is the payload from drawing_generator.html when the user
+// hits 💾 Save Drawing: the editable Excalidraw scene plus a flattened PNG
+// (data URL) of the same drawing, tied to a single sentence.
+type DrawingSaveRequest struct {
+	SentenceID     int             `json:"sentence_id"`
+	ModuleNumber   int             `json:"module_number"`
+	VideoNumber    int             `json:"video_number"`
+	ExcalidrawJSON json.RawMessage `json:"excalidraw_json"`
+	PNG            string          `json:"png"` // data URL (image/png;base64,...)
+	Prompt         string          `json:"prompt"`
+}
+
+// drawingSaveHandler persists one per-sentence Excalidraw drawing: it uploads
+// the flattened PNG to Azure Blob Storage (research-images container) and
+// upserts the editable scene + blob reference into the sentence_drawings table,
+// keyed on sentence_id. Mirrors imageSaveHandler's Azure path.
+// POST /api/drawings/save
+func drawingSaveHandler(cfg config) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		if r.Method != http.MethodPost {
+			http.Error(w, `{"error":"method not allowed"}`, http.StatusMethodNotAllowed)
+			return
+		}
+
+		var req DrawingSaveRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, `{"error":"invalid request"}`, http.StatusBadRequest)
+			return
+		}
+		if req.SentenceID == 0 {
+			http.Error(w, `{"error":"sentence_id is required"}`, http.StatusBadRequest)
+			return
+		}
+
+		ctx := r.Context()
+		var blobName, imageURL string
+
+		// PNG is optional — a scene can be saved without a rendered image — but
+		// when present we push it to Azure so the drawing has a flat thumbnail.
+		if strings.HasPrefix(req.PNG, "data:") {
+			if cfg.azureAccountName == "" {
+				http.Error(w, `{"error":"Azure Storage not configured"}`, http.StatusServiceUnavailable)
+				return
+			}
+			meta, b64, found := strings.Cut(strings.TrimPrefix(req.PNG, "data:"), ",")
+			if !found {
+				http.Error(w, `{"error":"invalid data URL"}`, http.StatusBadRequest)
+				return
+			}
+			contentType := "image/png"
+			if mime, _, ok := strings.Cut(meta, ";"); ok && mime != "" {
+				contentType = mime
+			}
+			imageData, err := base64.StdEncoding.DecodeString(b64)
+			if err != nil {
+				http.Error(w, `{"error":"failed to decode image data"}`, http.StatusBadRequest)
+				return
+			}
+			blobName = fmt.Sprintf("drawing_s%d_%d.png", req.SentenceID, time.Now().Unix())
+			if err := uploadBlobToAzure(ctx, cfg, "research-images", blobName, contentType, imageData); err != nil {
+				http.Error(w, fmt.Sprintf(`{"error":"azure upload failed: %s"}`, err.Error()), http.StatusBadGateway)
+				return
+			}
+			imageURL = researchFileProxyURL("research-images", blobName)
+		}
+
+		// Upsert the editable scene + blob reference keyed on sentence_id.
+		row := map[string]any{
+			"sentence_id":   req.SentenceID,
+			"module_number": req.ModuleNumber,
+			"video_number":  req.VideoNumber,
+			"prompt_used":   req.Prompt,
+			"updated_at":    time.Now().UTC().Format(time.RFC3339),
+		}
+		if len(req.ExcalidrawJSON) > 0 {
+			row["excalidraw_json"] = req.ExcalidrawJSON
+		}
+		if blobName != "" {
+			row["azure_blob_name"] = blobName
+			row["image_url"] = imageURL
+		}
+		if err := supabaseUpsert(ctx, cfg, "sentence_drawings", row, "sentence_id"); err != nil {
+			http.Error(w, fmt.Sprintf(`{"error":"supabase save failed: %s"}`, err.Error()), http.StatusBadGateway)
+			return
+		}
+
+		json.NewEncoder(w).Encode(map[string]any{
+			"ok":        true,
+			"blob_name": blobName,
+			"image_url": imageURL,
+		})
+	}
+}
+
 // generatedImageRow is a minimal view of generated_images for the backfill job.
 type generatedImageRow struct {
 	ID            int64  `json:"id"`
@@ -4293,6 +4388,7 @@ func main() {
 	mux.Handle("/api/lowerthirds/generate", observe(cfg, lowerThirdGenerateHandler(cfg)))
 	mux.Handle("/api/lowerthirds/openrouter", observe(cfg, openRouterGenerateHandler(cfg)))
 	mux.Handle("/api/drawings/openrouter", observe(cfg, drawingGenerateHandler(cfg)))
+	mux.Handle("/api/drawings/save", observe(cfg, drawingSaveHandler(cfg)))
 	mux.Handle("/api/slides/openrouter", observe(cfg, slideGenerateHandler(cfg)))
 	mux.Handle("/api/animations/generate-prompt", observe(cfg, animationPromptHandler(cfg)))
 	mux.Handle("/api/animations/runpod/run", observe(cfg, animationRunpodRunHandler(cfg)))

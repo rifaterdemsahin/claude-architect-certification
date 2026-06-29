@@ -102,7 +102,7 @@
   <div class="container">
     <header>
       <h1>📊 AI Drawing Generator</h1>
-      <p>Convert your script sentences into a <strong>Excalidraw diagram</strong>. Pick a module &amp; video, choose sentences, then <strong>Generate Basic</strong> or <strong>✨ Generate Complex (AI, napkin.ai-style)</strong>. Save to DB, download <code>.md</code>, or export slides as <strong>PNG</strong> / <strong>bulk ZIP</strong>.</p>
+      <p>Draw a <strong>Excalidraw diagram per sentence</strong>. Pick a module &amp; video, click <strong>✏️ Draw</strong> on a sentence, then sketch by hand or hit <strong>✨ AI Generate</strong> to seed the canvas. <strong>💾 Save Drawing</strong> stores the editable scene in Supabase (<code>sentence_drawings</code>) and a flattened <strong>PNG to Azure Blob</strong>.</p>
     </header>
 
     <!-- 1) Filter -->
@@ -139,8 +139,13 @@
         <span class="collapse-icon">▼</span>
       </div>
       <div class="glass-card-body">
+        <div id="activeDrawingBar" style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-bottom:18px; background:rgba(139,92,246,0.08); border:1px solid var(--border-glow); border-radius:12px; padding:12px 16px;">
+          <span id="activeSentenceLabel" style="flex:1; min-width:200px; font-size:0.9rem; color:var(--text-muted);">✏️ Click <strong>Draw</strong> on a sentence above to start a drawing.</span>
+          <button class="btn btn-primary btn-sm" id="aiGenBtn" onclick="generateDrawingAI()" style="background:linear-gradient(135deg,#8b5cf6,#3b82f6); color:#fff;" disabled>✨ AI Generate</button>
+          <button class="btn btn-sm" id="saveDrawingBtn" onclick="saveDrawing()" style="background:#4ade80; color:#000;" disabled>💾 Save Drawing</button>
+        </div>
         <div class="split-view" style="display:flex; gap: 24px; flex-wrap:wrap;">
-          
+
           <div class="editor-pane" style="flex:1; min-width:300px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
               <p style="color:var(--text-muted);font-size:0.9rem;">Excalidraw JSON</p>
@@ -156,14 +161,9 @@
 
           <div class="render-pane" style="flex:1; min-width:300px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-              <p style="color:var(--text-muted);font-size:0.9rem;">Slide Preview</p>
+              <p style="color:var(--text-muted);font-size:0.9rem;">🖌️ Draw here — pen, shapes, text, colours</p>
             </div>
-            <div id="excalidrawWrap" style="background:var(--bg-dark); width:100%; height:400px; border:1px solid rgba(255,255,255,0.1); border-radius:12px; position:relative; overflow:hidden;"></div>
-            <div style="text-align:center; margin-top:12px;">
-              <button class="btn btn-secondary btn-sm" onclick="prevPreviewSlide()">◀</button>
-              <span id="previewCounter" style="margin:0 12px; font-size:0.9rem; font-weight:700;">1 / 1</span>
-              <button class="btn btn-secondary btn-sm" onclick="nextPreviewSlide()">▶</button>
-            </div>
+            <div id="excalidrawWrap" style="background:#fff; width:100%; height:460px; border:1px solid rgba(255,255,255,0.1); border-radius:12px; position:relative; overflow:hidden;"></div>
           </div>
 
         </div>
@@ -237,6 +237,8 @@
     let dbVideos = [];
     let currentSentences = [];
     let sentenceGraphicsMap = {}; // sentence_id -> graphics row
+    let sentenceDrawingsMap = {}; // sentence_id -> { excalidraw_json, image_url }
+    let currentDrawingSentenceId = null; // sentence the canvas is currently bound to
     let generatedSlides = []; // Holds structured slide data for preview
     let previewIndex = 0;
 
@@ -300,26 +302,29 @@
         currentSentences = await api(`sentences?script_id=eq.${scripts[0].id}&select=id,sentence_text,sentence_type,section,sort_order&order=sort_order.asc`);
         
         const sids = currentSentences.map(s => s.id);
+        sentenceDrawingsMap = {};
         if (sids.length) {
           const graphics = await api(`sentence_graphics?sentence_id=in.(${sids.join(',')})&select=sentence_id,graphics_url,generation_status`);
           graphics.forEach(g => { if (g.generation_status === 'completed') sentenceGraphicsMap[g.sentence_id] = g.graphics_url; });
+
+          // Load any per-sentence drawings already saved for these sentences.
+          try {
+            const drawings = await api(`sentence_drawings?sentence_id=in.(${sids.join(',')})&select=sentence_id,excalidraw_json,image_url`);
+            drawings.forEach(d => { sentenceDrawingsMap[d.sentence_id] = d; });
+          } catch (_) { /* table may not exist yet */ }
         }
-        
+
         renderSentences();
         $('sentencesPanel').style.display = 'block';
         $('previewPanel').style.display = 'block';
-        
-        // Auto-load from DB if exists
-        const existing = await api(`video_drawings?video_id=eq.${videoId}&select=excalidraw_json`);
-        if (existing && existing.length > 0) {
-          $('excalidrawJSON').value = existing[0].excalidraw_json;
-          parseMarkdownToPreview(existing[0].excalidraw_json);
-          showToast('Loaded existing presentation from DB.', false, 2000);
-        } else {
-          $('excalidrawJSON').value = '';
-          generatedSlides = [];
-          updateVisualPreview();
-        }
+
+        // Reset the canvas binding for the freshly loaded video.
+        currentDrawingSentenceId = null;
+        $('aiGenBtn').disabled = true;
+        $('saveDrawingBtn').disabled = true;
+        $('activeSentenceLabel').innerHTML = '✏️ Click <strong>Draw</strong> on a sentence above to start a drawing.';
+        $('excalidrawJSON').value = '';
+        if (excalidrawAPI) excalidrawAPI.updateScene({ elements: [] });
       } catch (e) {
         showToast('Error: ' + e.message, true);
       }
@@ -332,37 +337,30 @@
         return;
       }
       const rows = currentSentences.map((s, i) => {
-        const bgImg = sentenceGraphicsMap[s.id] 
-          ? `<img src="${escHtml(sentenceGraphicsMap[s.id])}" style="width:100px; height:56px; object-fit:cover; border-radius:6px;" alt="bg">` 
-          : '<span style="font-size:0.75rem; color:var(--text-muted);">None</span>';
-        
-        return `<tr>
-          <td class="chk-col"><input type="checkbox" class="slide-chk" value="${s.id}" checked></td>
+        const drawing = sentenceDrawingsMap[s.id];
+        const thumb = drawing && drawing.image_url
+          ? `<img src="${escHtml(drawing.image_url)}" style="width:90px; height:50px; object-fit:contain; background:#fff; border-radius:6px; border:1px solid rgba(255,255,255,0.1);" alt="drawing" onerror="this.style.display='none'">`
+          : (drawing ? '<span style="font-size:0.72rem; color:var(--success);">✏️ scene saved</span>' : '<span style="font-size:0.75rem; color:var(--text-muted);">None</span>');
+        const isActive = currentDrawingSentenceId === s.id;
+        return `<tr${isActive ? ' style="outline:2px solid var(--accent);"' : ''}>
           <td class="num-col">${i + 1}</td>
           <td class="sentence-col">${escHtml(s.sentence_text || '')}</td>
           <td class="type-col"><span class="type-tag">${escHtml((s.sentence_type || 'body').replace(/_/g,' '))}</span></td>
-          <td class="bg-col">${bgImg}</td>
+          <td class="bg-col">${thumb}</td>
+          <td class="bg-col"><button class="btn btn-sm ${isActive ? 'btn-success' : 'btn-secondary'}" onclick="openDrawingForSentence(${s.id})">${isActive ? '🎯 Active' : '✏️ Draw'}</button></td>
         </tr>`;
       }).join('');
-      
+
       wrap.innerHTML = `<table class="ig-table">
         <thead><tr>
-          <th class="chk-col"><input type="checkbox" id="selectAll" checked onchange="toggleAll(this.checked)"></th>
           <th class="num-col">#</th>
           <th class="sentence-col">Sentence</th>
           <th class="type-col">Type</th>
-          <th class="bg-col">Background</th>
+          <th class="bg-col">Drawing</th>
+          <th class="bg-col">Action</th>
         </tr></thead>
         <tbody>${rows}</tbody>
-      </table>
-      <div style="display:flex; justify-content:flex-end; gap:12px; margin-top: 16px;">
-        <button class="btn btn-secondary" onclick="openPromptModal()" style="border:1px solid rgba(255,255,255,0.2); background:rgba(255,255,255,0.05); color:#fff; border-radius:12px; padding:10px 20px; font-weight:600;">👁️ View AI Prompt</button>
-        <button class="btn btn-primary" id="complexBtn" onclick="generateDrawingAI()" style="background:linear-gradient(135deg,#8b5cf6,#3b82f6); color:#fff; border:none; padding:10px 24px; border-radius:12px; font-weight:700; font-size:1rem; cursor:pointer;">✨ Generate Drawing (AI)</button>
-      </div>`;
-    }
-    
-    function toggleAll(checked) {
-      document.querySelectorAll('.slide-chk').forEach(cb => cb.checked = checked);
+      </table>`;
     }
 
     let excalidrawAPI = null;
@@ -395,6 +393,105 @@
         }
     }
 
+    // Bind the canvas to one sentence: load its saved scene (if any), enable the
+    // AI Generate / Save Drawing buttons, and scroll the editor into view.
+    function openDrawingForSentence(sentenceId) {
+      currentDrawingSentenceId = sentenceId;
+      const s = currentSentences.find(x => x.id === sentenceId) || {};
+      const idx = currentSentences.findIndex(x => x.id === sentenceId);
+      $('activeSentenceLabel').innerHTML = `🎯 Drawing for sentence <strong>#${idx + 1}</strong>: <span style="color:var(--text-main);">${escHtml((s.sentence_text || '').slice(0, 90))}</span>`;
+      $('aiGenBtn').disabled = false;
+      $('saveDrawingBtn').disabled = false;
+
+      const drawing = sentenceDrawingsMap[sentenceId];
+      let elements = [];
+      if (drawing && drawing.excalidraw_json) {
+        const scene = typeof drawing.excalidraw_json === 'string' ? safeParse(drawing.excalidraw_json) : drawing.excalidraw_json;
+        if (scene && Array.isArray(scene.elements)) elements = scene.elements;
+        $('excalidrawJSON').value = JSON.stringify(scene || { type: 'excalidraw', version: 2, elements }, null, 2);
+      } else {
+        $('excalidrawJSON').value = '';
+      }
+      if (excalidrawAPI) excalidrawAPI.updateScene({ elements });
+      renderSentences(); // refresh active-row highlight
+      $('previewPanel').style.display = 'block';
+      $('previewPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function safeParse(str) { try { return JSON.parse(str); } catch (_) { return null; } }
+
+    function moduleVideoNumbers() {
+      const mod = dbModules.find(m => String(m.id) === $('moduleSelect').value) || {};
+      const vid = dbVideos.find(v => String(v.id) === $('videoSelect').value) || {};
+      return { moduleNumber: mod.module_number || 1, videoNumber: vid.video_number || 1 };
+    }
+
+    // Flatten the live Excalidraw scene to a PNG data URL via the bundled
+    // exportToBlob helper. Returns null on empty canvas / export failure.
+    async function exportCanvasPng(elements, files) {
+      try {
+        if (!elements.length || !ExcalidrawLib.exportToBlob) return null;
+        const blob = await ExcalidrawLib.exportToBlob({
+          elements,
+          appState: { exportBackground: true, viewBackgroundColor: '#ffffff', exportWithDarkMode: false },
+          files: files || {},
+          mimeType: 'image/png',
+          getDimensions: (w, h) => ({ width: w, height: h, scale: 2 })
+        });
+        return await new Promise((resolve) => {
+          const fr = new FileReader();
+          fr.onloadend = () => resolve(fr.result);
+          fr.onerror = () => resolve(null);
+          fr.readAsDataURL(blob);
+        });
+      } catch (e) { return null; }
+    }
+
+    // Capture the live canvas, render a PNG, and upsert both to the server
+    // (/api/drawings/save → Azure blob + sentence_drawings table).
+    async function saveDrawing() {
+      if (!currentDrawingSentenceId) { showToast('Pick a sentence to draw first.', true); return; }
+      if (!excalidrawAPI) { showToast('Canvas not ready yet.', true); return; }
+
+      const elements = excalidrawAPI.getSceneElements ? excalidrawAPI.getSceneElements() : [];
+      const files = excalidrawAPI.getFiles ? excalidrawAPI.getFiles() : {};
+      if (!elements.length) { showToast('Canvas is empty — draw or AI Generate first.', true); return; }
+
+      const scene = { type: 'excalidraw', version: 2, source: 'https://excalidraw.com', elements };
+      $('excalidrawJSON').value = JSON.stringify(scene, null, 2);
+
+      const btn = $('saveDrawingBtn');
+      const original = btn.textContent;
+      btn.disabled = true; btn.textContent = '⏳ Saving…';
+
+      try {
+        const png = await exportCanvasPng(elements, files);
+        const { moduleNumber, videoNumber } = moduleVideoNumbers();
+        const res = await fetch('/api/drawings/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sentence_id: currentDrawingSentenceId,
+            module_number: moduleNumber,
+            video_number: videoNumber,
+            excalidraw_json: scene,
+            png: png || ''
+          })
+        });
+        if (!res.ok) throw new Error(await res.text() || ('HTTP ' + res.status));
+        const data = await res.json();
+        sentenceDrawingsMap[currentDrawingSentenceId] = { excalidraw_json: scene, image_url: data.image_url || '' };
+        renderSentences();
+        showToast(data.image_url ? '💾 Saved + ☁️ PNG to Azure!' : '💾 Scene saved to Supabase.');
+      } catch (e) {
+        let msg = e.message || 'Unknown error';
+        if (msg.includes('404')) msg = 'Route /api/drawings/save not found — restart the Go server.';
+        showToast('Save failed: ' + msg, true, 7000);
+      } finally {
+        btn.disabled = false; btn.textContent = original;
+      }
+    }
+
     function copyMarkdown() {
       const text = $('excalidrawJSON').value;
       navigator.clipboard.writeText(text).then(() => showToast('📋 Copied to clipboard!'));
@@ -413,16 +510,15 @@
     }
 
     async function generateDrawingAI() {
-      const checkboxes = document.querySelectorAll('.slide-chk');
-      const selectedIds = Array.from(checkboxes).filter(cb => cb.checked).map(cb => parseInt(cb.value));
-      const slides = currentSentences.filter(s => selectedIds.includes(s.id));
-      if (!slides.length) { showToast('Select at least one sentence first.', true); return; }
+      if (!currentDrawingSentenceId) { showToast('Pick a sentence to draw first.', true); return; }
+      const s = currentSentences.find(x => x.id === currentDrawingSentenceId);
+      if (!s) { showToast('Sentence not found.', true); return; }
 
-      const btn = $('complexBtn');
+      const btn = $('aiGenBtn');
       const original = btn ? btn.textContent : '';
-      if (btn) { btn.disabled = true; btn.textContent = '⏳ Generating with AI…'; }
+      if (btn) { btn.disabled = true; btn.textContent = '⏳ Generating…'; }
 
-      const sentencesText = slides.map(s => `- [${s.sentence_type || 'body'}] ${s.sentence_text || ''}`).join('\n');
+      const sentencesText = `- [${s.sentence_type || 'body'}] ${s.sentence_text || ''}`;
       const moduleName = (dbModules.find(m => String(m.id) === $('moduleSelect').value) || {}).title || '';
       const videoName = (dbVideos.find(v => String(v.id) === $('videoSelect').value) || {}).title || '';
 
@@ -441,10 +537,16 @@
           throw new Error(errBody || ('HTTP ' + res.status));
         }
         const data = await res.json();
-        let md = (data.content || '').trim();
-        $('excalidrawJSON').value = md;
-        updateExcalidraw(md);
-        showToast(`✨ AI drawing generated (${data.model || 'OpenRouter'})`);
+        let raw = (data.content || '').trim().replace(/^```(?:json)?/i, '').replace(/```$/,'').trim();
+        const scene = safeParse(raw);
+        if (scene && Array.isArray(scene.elements)) {
+          if (excalidrawAPI) excalidrawAPI.updateScene({ elements: scene.elements });
+          $('excalidrawJSON').value = JSON.stringify(scene, null, 2);
+          showToast(`✨ AI seeded the canvas (${data.model || 'OpenRouter'}) — refine, then 💾 Save.`);
+        } else {
+          $('excalidrawJSON').value = raw;
+          showToast('AI returned non-scene JSON — check the editor.', true, 5000);
+        }
       } catch (e) {
         let msg = e.message || 'Unknown error';
         if (msg.includes('404')) {
@@ -575,7 +677,7 @@
           await fetchSentences(String(r.video_id));
         }
         $('excalidrawJSON').value = r.excalidraw_json || '';
-        parseMarkdownToPreview(r.excalidraw_json || '');
+        updateExcalidraw(r.excalidraw_json || '');
         $('previewPanel').style.display = 'block';
         $('previewPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
         showToast('📂 Loaded presentation into editor.');
@@ -600,16 +702,12 @@
     }
 
     function openPromptModal() {
-      const checkboxes = document.querySelectorAll('.slide-chk');
-      const selectedIds = Array.from(checkboxes).filter(cb => cb.checked).map(cb => parseInt(cb.value));
-      const slides = currentSentences.filter(s => selectedIds.includes(s.id));
-      
-      if (!slides.length) {
-        showToast('Please select at least one sentence.', true);
+      const s = currentSentences.find(x => x.id === currentDrawingSentenceId);
+      if (!s) {
+        showToast('Pick a sentence to draw first.', true);
         return;
       }
-      
-      const sentencesText = slides.map(s => `- [${s.sentence_type}] ${s.sentence_text}`).join('\n');
+      const sentencesText = `- [${s.sentence_type}] ${s.sentence_text}`;
       
       const prompt = `You are a technical architect drawing an Excalidraw diagram.
 Create a valid Excalidraw JSON object that visually represents the core architecture, data flow, or concepts in the following script.
