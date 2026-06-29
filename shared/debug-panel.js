@@ -413,6 +413,8 @@
     if (panel.style.height === '36px') panel.style.height = '380px'; // expand if collapsed
     const open = wrap.style.display === 'none';
     if (open && axiomWrap) axiomWrap.style.display = 'none'; // mutual exclusion with Axiom panel
+    const identWrap = document.getElementById('_dbg_identifier_wrap');
+    if (open && identWrap) window.__dbgCloseIdentifier(); // close identifier if open
     wrap.style.display = open ? 'block' : 'none';
     if (body) body.style.height = open ? '180px' : '300px';
     if (btn) {
@@ -434,12 +436,130 @@
     if (panel.style.height === '36px') panel.style.height = '380px'; // expand if collapsed
     const open = wrap.style.display === 'none';
     if (open && dbWrap) dbWrap.style.display = 'none'; // mutual exclusion with DB panel
+    const identWrap = document.getElementById('_dbg_identifier_wrap');
+    if (open && identWrap) window.__dbgCloseIdentifier(); // close identifier if open
     wrap.style.display = open ? 'block' : 'none';
     if (body) body.style.height = open ? '180px' : '300px';
     if (btn) {
       btn.textContent = open ? '📡 Axiom ▴' : '📡 Axiom ▾';
       btn.style.background = open ? 'rgba(6,182,212,0.45)' : 'rgba(6,182,212,0.25)';
     }
+  };
+
+  // ── DOM Identifier ───────────────────────────────────────────────────────
+  let inspectorActive = false;
+  let hoveredEl = null;
+  let savedOutline = '';
+  let savedBackground = '';
+
+  function handleInspectorMouseOver(e) {
+    if (!inspectorActive) return;
+    hoveredEl = e.target;
+    savedOutline = hoveredEl.style.outline;
+    savedBackground = hoveredEl.style.background;
+    hoveredEl.style.outline = '2px solid #f9a8d4';
+    hoveredEl.style.background = 'rgba(236,72,153,0.2)';
+  }
+  function handleInspectorMouseOut(e) {
+    if (!inspectorActive) return;
+    if (hoveredEl) {
+      hoveredEl.style.outline = savedOutline;
+      hoveredEl.style.background = savedBackground;
+      hoveredEl = null;
+    }
+  }
+  function handleInspectorClick(e) {
+    if (!inspectorActive) return;
+    if (e.target.closest('#_dbg_panel')) return; // ignore clicks inside debug panel
+    
+    e.preventDefault();
+    e.stopPropagation();
+
+    let selector = '';
+    if (e.target.id) {
+      selector = '#' + e.target.id;
+    } else {
+      let path = [];
+      let curr = e.target;
+      while (curr && curr !== document.body && path.length < 3) {
+        let p = curr.tagName.toLowerCase();
+        if (curr.className && typeof curr.className === 'string') {
+          const classes = curr.className.trim().split(/\s+/).filter(c => c && !c.includes(':'));
+          if (classes.length) p += '.' + classes.join('.');
+        }
+        path.unshift(p);
+        curr = curr.parentElement;
+      }
+      selector = path.join(' > ');
+    }
+
+    const box = document.getElementById('_dbg_identifier_box');
+    if (box) {
+      box.value += (box.value ? '\n' : '') + selector;
+    }
+  }
+
+  window.__dbgCloseIdentifier = function() {
+    const wrap = document.getElementById('_dbg_identifier_wrap');
+    const btn = document.getElementById('_dbg_identifier_toggle');
+    if (!wrap) return;
+    wrap.style.display = 'none';
+    if (btn) {
+      btn.textContent = '🔍 Identifier ▾';
+      btn.style.background = 'rgba(236,72,153,0.25)';
+    }
+    inspectorActive = false;
+    if (hoveredEl) {
+      hoveredEl.style.outline = savedOutline;
+      hoveredEl.style.background = savedBackground;
+      hoveredEl = null;
+    }
+  };
+
+  window.__dbgToggleIdentifier = function () {
+    const panel = document.getElementById('_dbg_panel');
+    const wrap = document.getElementById('_dbg_identifier_wrap');
+    const body = document.getElementById('_dbg_panel_body');
+    const dbWrap = document.getElementById('_dbg_db_wrap');
+    const axiomWrap = document.getElementById('_dbg_axiom_wrap');
+    const btn = document.getElementById('_dbg_identifier_toggle');
+    
+    if (!panel || !wrap) return;
+    if (panel.style.height === '36px') panel.style.height = '380px';
+    
+    const open = wrap.style.display === 'none';
+    
+    if (open) {
+      if (dbWrap) dbWrap.style.display = 'none';
+      if (axiomWrap) axiomWrap.style.display = 'none';
+      
+      wrap.style.display = 'block';
+      if (body) body.style.height = '180px';
+      if (btn) {
+        btn.textContent = '🔍 Identifier ▴';
+        btn.style.background = 'rgba(236,72,153,0.45)';
+      }
+      
+      if (!window._dbgIdentifierListenerAdded) {
+        document.body.addEventListener('mouseover', handleInspectorMouseOver, true);
+        document.body.addEventListener('mouseout', handleInspectorMouseOut, true);
+        document.body.addEventListener('click', handleInspectorClick, true);
+        document.addEventListener('keydown', e => {
+          if (e.key === 'Escape' && inspectorActive) window.__dbgToggleIdentifier();
+        });
+        window._dbgIdentifierListenerAdded = true;
+      }
+      inspectorActive = true;
+    } else {
+      window.__dbgCloseIdentifier();
+      if (body) body.style.height = '300px';
+    }
+  };
+
+  window.__dbgCopyIdentifier = function() {
+    const box = document.getElementById('_dbg_identifier_box');
+    if (!box || !box.value) return;
+    navigator.clipboard.writeText(box.value);
   };
 
   function copyAll() {
@@ -609,6 +729,7 @@
         <div style="margin-left:auto;display:flex;gap:8px;">
           ${headerBtn('🗄️ DB Tables', "window.__dbgToggleDb()", 'rgba(16,185,129,0.18)', 'rgba(16,185,129,0.4)')}
           <button id="_dbg_axiom_toggle" onclick="event.stopPropagation(); window.__dbgToggleAxiom()" title="Show Axiom controls" style="background:rgba(6,182,212,0.25);color:#81e6d9;border:1px solid rgba(6,182,212,0.4);padding:3px 10px;border-radius:6px;cursor:pointer;font-size:0.72rem;font-weight:700;">📡 Axiom ▾</button>
+          <button id="_dbg_identifier_toggle" onclick="event.stopPropagation(); window.__dbgToggleIdentifier()" title="Identify DOM Elements" style="background:rgba(236,72,153,0.25);color:#f9a8d4;border:1px solid rgba(236,72,153,0.4);padding:3px 10px;border-radius:6px;cursor:pointer;font-size:0.72rem;font-weight:700;">🔍 Identifier ▾</button>
           <button id="_dbg_copy_btn" onclick="event.stopPropagation(); window.__dbgCopyAll()" style="background:rgba(139,92,246,0.3);color:#c4b5fd;border:1px solid rgba(139,92,246,0.4);padding:3px 10px;border-radius:6px;cursor:pointer;font-size:0.72rem;font-weight:700;">📋 Copy All</button>
           <button id="_dbg_cache_btn" onclick="event.stopPropagation(); window.__dbgClearCache()" title="Clear caches & service workers, then hard-reload" style="background:rgba(245,158,11,0.22);color:#fcd34d;border:1px solid rgba(245,158,11,0.45);padding:3px 10px;border-radius:6px;cursor:pointer;font-size:0.72rem;font-weight:700;">♻️ Clear Cache</button>
           <button onclick="event.stopPropagation(); window.__dbgClear()" style="background:rgba(239,68,68,0.2);color:#fca5a5;border:1px solid rgba(239,68,68,0.3);padding:3px 8px;border-radius:6px;cursor:pointer;font-size:0.72rem;">🗑 Clear</button>
@@ -628,6 +749,16 @@
           </div>
         </div>
         <div id="_dbg_axiom_list" style="max-height:180px;overflow-y:auto;"></div>
+      </div>
+      <div id="_dbg_identifier_wrap" style="display:none;padding:8px 16px;border-bottom:1px solid rgba(236,72,153,0.2);background:rgba(236,72,153,0.05);">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+          <span style="font-size:0.68rem;font-weight:800;color:#f9a8d4;letter-spacing:0.08em;">🔍 IDENTIFIER · Click elements to capture ID/path. Press Esc to exit.</span>
+          <div style="margin-left:auto;display:flex;gap:6px;">
+            <button onclick="event.stopPropagation(); window.__dbgCopyIdentifier()" style="background:rgba(236,72,153,0.25);color:#f9a8d4;border:1px solid rgba(236,72,153,0.4);padding:3px 10px;border-radius:6px;cursor:pointer;font-size:0.72rem;font-weight:700;">📋 Copy</button>
+            <button onclick="event.stopPropagation(); document.getElementById('_dbg_identifier_box').value=''" style="background:rgba(239,68,68,0.2);color:#fca5a5;border:1px solid rgba(239,68,68,0.3);padding:3px 8px;border-radius:6px;cursor:pointer;font-size:0.72rem;">🗑 Clear</button>
+          </div>
+        </div>
+        <textarea id="_dbg_identifier_box" onclick="event.stopPropagation()" style="width:100%;height:80px;background:rgba(0,0,0,0.5);color:#f9a8d4;border:1px solid rgba(236,72,153,0.3);border-radius:4px;padding:4px;font-family:monospace;font-size:0.75rem;resize:vertical;" spellcheck="false" placeholder="Captured DOM IDs will appear here..."></textarea>
       </div>
       <div id="_dbg_panel_body" style="height:300px;overflow-y:auto;padding:8px 16px;"></div>
     `;
