@@ -344,13 +344,15 @@
           ]},
           { group: true, label: '🐙 Code & Repo', children: [
             { label: '🔑 GitHub Tokens', url: 'https://github.com/settings/tokens' },
-            { label: '📦 GitHub Packages', url: 'https://github.com/users/rifaterdemsahin/packages/container/claude-animations-runpod/settings' }
+            { label: '📦 GitHub Packages', url: 'https://github.com/users/rifaterdemsahin/packages/container/claude-animations-runpod/settings' },
+            { label: '🎬 Animation Helper Repo', url: 'https://rifaterdemsahin.github.io/my-claude-animations/' }
           ]},
           { group: true, label: '☁️ Cloud', children: [
             { label: '☁️ Azure Portal', url: 'https://portal.azure.com/' },
             { label: '☁️ RunPod Serverless', url: 'https://console.runpod.io/serverless' },
             { label: '☁️ RunPod Requests', url: 'https://console.runpod.io/serverless/user/endpoint/s13kv6t2jg78lk?tab=requests' },
-            { label: '☁️ RunPod MFA', url: 'https://console.runpod.io/user/settings?open=login-settings' }
+            { label: '☁️ RunPod MFA', url: 'https://console.runpod.io/user/settings?open=login-settings' },
+            { label: '⚡ Performance GPU', url: 'https://github.com/rifaterdemsahin/my-claude-animations/blob/main/PERFORMANCE_RATIONALE.md', description: 'Rationale for GPU rendering performance.' }
           ]}
         ]
       }
