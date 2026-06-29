@@ -892,6 +892,11 @@
                 {
                   "label": "\ud83c\udfa8 Canva",
                   "url": "https://canva.com"
+                },
+                {
+                  "label": "\ud83d\uddbc\ufe0f Thumbnails",
+                  "url": "https://www.canva.com/design/DAGJhH098do/7a-TDVcjX482MetGV3HLPA/edit",
+                  "description": "Canva template for YouTube thumbnails."
                 }
               ]
             },

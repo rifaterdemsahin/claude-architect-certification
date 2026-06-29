@@ -418,7 +418,8 @@
         label: '🛠️ Tools',
         children: [
           { group: true, label: '🎨 Design', children: [
-            { label: '🎨 Canva', url: 'https://canva.com' }
+            { label: '🎨 Canva', url: 'https://canva.com' },
+            { label: '🖼️ Thumbnails', url: 'https://www.canva.com/design/DAGJhH098do/7a-TDVcjX482MetGV3HLPA/edit', description: 'Canva template for YouTube thumbnails.' }
           ]},
           { group: true, label: '📺 YouTube', children: [
             { label: '📺 YouTube Studio', url: 'https://studio.youtube.com/' },
