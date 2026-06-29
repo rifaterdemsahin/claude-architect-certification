@@ -343,7 +343,8 @@
             { label: '🎨 VS Code: Terminal Profiles', url: 'markdown_renderer.html?file=5_Symbols/tools/vscode_terminal_profiles/formula.md' }
           ]},
           { group: true, label: '☁️ Cloud', children: [
-            { label: '☁️ Azure Portal', url: 'https://portal.azure.com/' }
+            { label: '☁️ Azure Portal', url: 'https://portal.azure.com/' },
+            { label: '☁️ RunPod Serverless', url: 'https://console.runpod.io/serverless' }
           ]}
         ]
       }
