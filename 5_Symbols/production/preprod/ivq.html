@@ -124,6 +124,18 @@
     <h1>🎯 IVQ Manager</h1>
     <p class="subtitle">In-Video Questions — link quiz questions to video timestamps with explanations</p>
 
+    <div class="config-panel" style="background: rgba(139,92,246,0.1); border-color: rgba(139,92,246,0.4);">
+      <h3 style="margin-bottom: 8px; font-family: var(--font-h);">🎓 Producer Goal: Content to Exam Mapping</h3>
+      <p style="font-size: 0.9rem; margin-bottom: 12px;">
+        As a producer, the main problem I am solving is getting certified, so the production has to map to the questions that are getting asked in the exam. By linking these questions to the <strong>video/module/sentence system</strong>, we know the questions are actively covered in the content.
+      </p>
+      <div style="background: rgba(0,0,0,0.4); padding: 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); font-size: 0.88rem;">
+        <div style="margin-bottom: 10px;"><strong style="color: var(--primary);">Question:</strong> The web search and document analysis agents have both completed their tasks and returned findings to the coordinator. What is the appropriate next step for producing an integrated research output?</div>
+        <div style="margin-bottom: 10px;"><strong style="color: var(--green);">Answer:</strong> Correct Answer: A. The coordinator passes both sets of findings to the synthesis agent for unified integration</div>
+        <div><strong style="color: var(--blue);">Why?</strong> In a hub-and-spoke multi-agent architecture, the coordinator acts as the central orchestrator. Once individual specialized subagents (web search and document analysis) finish their respective isolated tasks, their outputs must be routed through the coordinator to the synthesis agent. The synthesis agent is specifically designed to reconcile, combine, and merge disparate data sets into a coherent, non-redundant output. Bypassing the coordinator or concatenating raw text directly fails to utilize specialized integration intelligence.</div>
+      </div>
+    </div>
+
     <!-- Connection status (auto-connects via /api/config) -->
     <div class="config-panel" style="display:flex;align-items:center;gap:12px;padding:12px 18px;">
       <span style="font-size:0.85rem;color:var(--muted);">⚙️ Supabase</span>
