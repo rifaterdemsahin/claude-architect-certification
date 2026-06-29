@@ -55,7 +55,9 @@ GET  /api/animations/runpod/code-status?id=… (admin-gated)
 
 ---
 
-## 🧪 Phase 1 — Prove the composition locally (recommended first)
+## 🧪 Phase 1 — Prove the composition locally  ✅ COMPLETE
+
+> **Status:** ✅ All 10 animation types render to 1920×1080 h264 MP4 (2026-06-29). The Remotion project lives at [`5_Symbols/course_src/module-remotion-animations/`](../../5_Symbols/course_src/module-remotion-animations/README.md) and the proof outputs are in [`3_Simulation/generated/animations_demo/`](../../3_Simulation/generated/animations_demo/). The commands below reproduce it from scratch.
 
 Before paying for a RunPod render endpoint, prove your composition renders on your laptop. ~10 minutes.
 
@@ -75,17 +77,44 @@ npm install
 - **Paste the code from Phase 0** (the LLM output for one animation type) into `src/Main.tsx` and register it as `<Composition id="Main">`.
 - Feed it `defaultProps` that match the `inputProps` the server sends (see the contract below).
 
+> 💡 The reference implementation in the repo uses a **single** `Main` component that dispatches all 10 types via `props.animationType` — so one bundle renders every sentence in every style. See [`src/Main.tsx`](../../5_Symbols/course_src/module-remotion-animations/src/Main.tsx).
+
 ### 1.3 Preview + render locally
 
 ```bash
 # live preview in the browser
 npx remotion studio
 
-# render one MP4 to prove the pipeline
-npx remotion render Main out/concept_reveal.mp4 --props='{"title":"Claude is an AI assistant","brandColor":"#8b5cf6","bgColor":"#030712","fps":30,"durationInFrames":150}'
+# render one MP4 to prove the pipeline (concept_reveal is the default — props optional)
+npx remotion render src/index.ts Main out/concept_reveal.mp4
+
+# render any of the 10 types by setting animationType + that type's props.
+# Tip: use a JSON file instead of inline --props to avoid shell-escaping bugs.
+cat > /tmp/props.json <<'EOF'
+{"animationType":"code_typing","title":"Code Typing","code":"const x = 1;","caption":"setup","durationInFrames":180}
+EOF
+npx remotion render src/index.ts Main out/code_typing.mp4 --props=/tmp/props.json
 ```
 
 ✅ If `out/concept_reveal.mp4` plays → your composition is correct and you're ready to host it (Phase 2).
+
+### 1.4 ✅ Verified proof outputs (all 10 types)
+
+```
+3_Simulation/generated/animations_demo/
+├── architecture_diagram.mp4
+├── callout_zoom.mp4
+├── code_typing.mp4
+├── comparison.mp4
+├── concept_reveal.mp4
+├── data_flow.mp4
+├── flowchart.mp4
+├── metric_counter.mp4
+├── process_steps.mp4
+└── timeline.mp4
+```
+
+Each uses the **exact** `inputProps` the Go server sends (`animationDefaultProps()` in `cmd/server/main.go`) — no drift between the local proof and the serverless render.
 
 ---
 
