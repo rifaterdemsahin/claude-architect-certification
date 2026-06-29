@@ -343,11 +343,13 @@
             { label: '🎨 VS Code: Terminal Profiles', url: 'markdown_renderer.html?file=5_Symbols/tools/vscode_terminal_profiles/formula.md' }
           ]},
           { group: true, label: '🐙 Code & Repo', children: [
-            { label: '🔑 GitHub Tokens', url: 'https://github.com/settings/tokens' }
+            { label: '🔑 GitHub Tokens', url: 'https://github.com/settings/tokens' },
+            { label: '📦 GitHub Packages', url: 'https://github.com/users/rifaterdemsahin/packages/container/claude-animations-runpod/settings' }
           ]},
           { group: true, label: '☁️ Cloud', children: [
             { label: '☁️ Azure Portal', url: 'https://portal.azure.com/' },
-            { label: '☁️ RunPod Serverless', url: 'https://console.runpod.io/serverless' }
+            { label: '☁️ RunPod Serverless', url: 'https://console.runpod.io/serverless' },
+            { label: '☁️ RunPod MFA', url: 'https://console.runpod.io/user/settings?open=login-settings' }
           ]}
         ]
       }
