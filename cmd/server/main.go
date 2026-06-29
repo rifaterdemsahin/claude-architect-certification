@@ -3462,6 +3462,126 @@ func animationPromptHandler(cfg config) http.HandlerFunc {
 	}
 }
 
+// animationOpenRouterPrepareHandler calls OpenRouter to intelligently populate
+// the inputProps for a given sentence and animation type, returning JSON.
+func animationOpenRouterPrepareHandler(cfg config) http.HandlerFunc {
+	type Req struct {
+		AnimationType string `json:"animationType"`
+		Sentence      string `json:"sentence"`
+		SentenceType  string `json:"sentenceType"`
+		ModuleName    string `json:"moduleName"`
+		VideoName     string `json:"videoName"`
+	}
+	const model = "anthropic/claude-sonnet-4.6"
+	return func(w http.ResponseWriter, r *http.Request) {
+		setCORS(w, r)
+		w.Header().Set("Content-Type", "application/json")
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+		if !isAdminRequest(r) {
+			http.Error(w, `{"error":"Unauthorized"}`, http.StatusUnauthorized)
+			return
+		}
+		if r.Method != http.MethodPost {
+			http.Error(w, `{"error":"method not allowed"}`, http.StatusMethodNotAllowed)
+			return
+		}
+
+		apiKey := cfg.getSecret("OPENROUTER_API_KEY")
+		if apiKey == "" {
+			http.Error(w, `{"error":"OPENROUTER_API_KEY missing from server configuration"}`, http.StatusServiceUnavailable)
+			return
+		}
+
+		var req Req
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, `{"error":"invalid request body"}`, http.StatusBadRequest)
+			return
+		}
+
+		meta := findAnimationType(req.AnimationType)
+		if meta == nil {
+			http.Error(w, `{"error":"unknown animation type"}`, http.StatusBadRequest)
+			return
+		}
+
+		defaultProps := animationDefaultProps(req.AnimationType, req.Sentence, req.SentenceType, req.ModuleName, req.VideoName)
+		defaultPropsJSON, _ := json.MarshalIndent(defaultProps, "", "  ")
+
+		prompt := fmt.Sprintf(`You are an expert data extractor for video animations.
+I will give you a sentence from a technical course script and an animation type.
+I need you to output the JSON properties ("inputProps") that will be passed to the Remotion video renderer.
+
+Animation Type: %s (%s)
+Sentence: %q
+
+Instructions:
+1. Return ONLY a valid JSON object. No markdown formatting, no prose, no code blocks (do not wrap in ` + "`" + `json` + "`" + `).
+2. The JSON schema must exactly match the keys and data types of this default example:
+%s
+3. Intelligently update the values (e.g. titles, points, steps, nodes, code snippets) to match the meaning of the Sentence.
+4. Keep strings concise. Do not change colors, fps, or durationInFrames unless absolutely necessary for the content to fit.`, meta.Label, meta.Slug, req.Sentence, string(defaultPropsJSON))
+
+		payload := map[string]any{
+			"model":       model,
+			"messages":    []map[string]string{{"role": "user", "content": prompt}},
+			"temperature": 0.2,
+		}
+		body, _ := json.Marshal(payload)
+		ctx, cancel := context.WithTimeout(r.Context(), 30*time.Second)
+		defer cancel()
+		hreq, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://openrouter.ai/api/v1/chat/completions", bytes.NewReader(body))
+		if err != nil {
+			http.Error(w, `{"error":"request build failed"}`, http.StatusInternalServerError)
+			return
+		}
+		hreq.Header.Set("Content-Type", "application/json")
+		hreq.Header.Set("Authorization", "Bearer "+apiKey)
+		hreq.Header.Set("HTTP-Referer", "https://github.com/rifaterdemsahin/claude-architect-certification")
+		hreq.Header.Set("X-Title", "Claude Architect Certification")
+
+		hresp, err := http.DefaultClient.Do(hreq)
+		if err != nil {
+			http.Error(w, `{"error":"OpenRouter call failed"}`, http.StatusBadGateway)
+			return
+		}
+		defer hresp.Body.Close()
+		b, _ := io.ReadAll(hresp.Body)
+		if hresp.StatusCode != http.StatusOK {
+			http.Error(w, fmt.Sprintf(`{"error":"OpenRouter HTTP %d: %s"}`, hresp.StatusCode, b), http.StatusBadGateway)
+			return
+		}
+
+		var orResp struct {
+			Choices []struct {
+				Message struct {
+					Content string `json:"content"`
+				} `json:"message"`
+			} `json:"choices"`
+		}
+		if err := json.Unmarshal(b, &orResp); err != nil || len(orResp.Choices) == 0 {
+			http.Error(w, `{"error":"invalid OpenRouter response"}`, http.StatusBadGateway)
+			return
+		}
+		
+		content := strings.TrimSpace(orResp.Choices[0].Message.Content)
+		content = strings.TrimPrefix(content, "```json")
+		content = strings.TrimPrefix(content, "```")
+		content = strings.TrimSuffix(content, "```")
+		content = strings.TrimSpace(content)
+
+		var parsed map[string]any
+		if err := json.Unmarshal([]byte(content), &parsed); err != nil {
+			http.Error(w, fmt.Sprintf(`{"error":"OpenRouter did not return valid JSON. Content was: %s"}`, content), http.StatusBadGateway)
+			return
+		}
+
+		json.NewEncoder(w).Encode(parsed)
+	}
+}
+
 // animationRunpodRunHandler submits a render job to RunPod serverless and
 // records a generating row in sentence_animations. Admin-gated (paid render).
 func animationRunpodRunHandler(cfg config) http.HandlerFunc {
@@ -4391,6 +4511,7 @@ func main() {
 	mux.Handle("/api/drawings/save", observe(cfg, drawingSaveHandler(cfg)))
 	mux.Handle("/api/slides/openrouter", observe(cfg, slideGenerateHandler(cfg)))
 	mux.Handle("/api/animations/generate-prompt", observe(cfg, animationPromptHandler(cfg)))
+	mux.Handle("/api/animations/openrouter-prepare", observe(cfg, animationOpenRouterPrepareHandler(cfg)))
 	mux.Handle("/api/animations/runpod/run", observe(cfg, animationRunpodRunHandler(cfg)))
 	mux.Handle("/api/animations/runpod/status", observe(cfg, animationRunpodStatusHandler(cfg)))
 	mux.Handle("/api/animations/runpod/generate-code", observe(cfg, animationRunpodGenerateCodeHandler(cfg)))

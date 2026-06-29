@@ -154,7 +154,10 @@
             <span class="chip">👣 process steps</span><span class="chip">🔢 metric counter</span>
             <span class="chip">🔀 flowchart</span><span class="chip">🔍 callout zoom</span>
           </div>
-          <button class="btn btn-sm" data-require-admin style="background:#4ade80; color:#000; margin-left:16px; white-space:nowrap;" onclick="bulkGenerateSentences()">▶️ Bulk Generate</button>
+          <div style="display:flex; align-items:center;">
+            <button class="btn btn-sm" data-require-admin style="background:#fbbf24; color:#000; margin-left:16px; white-space:nowrap;" onclick="bulkPrepareSentences()">⚙️ Bulk Prepare</button>
+            <button class="btn btn-sm" data-require-admin style="background:#4ade80; color:#000; margin-left:16px; white-space:nowrap;" onclick="bulkGenerateSentences()">▶️ Bulk Generate</button>
+          </div>
         </div>
 
         <!-- Integrated Preview Area -->
@@ -390,6 +393,7 @@
         const viewBtn = existing
           ? `<button class="btn btn-secondary btn-sm" onclick="selectSentence(${s.id})">👁️</button>`
           : `<button class="btn btn-secondary btn-sm" onclick="selectSentence(${s.id})" disabled title="No render yet">👁️</button>`;
+        const prepBtn = `<button class="btn btn-sm" data-require-admin style="background:#fbbf24; color:#000;" onclick="prepareSentence(${s.id})" title="Intelligently populate props via OpenRouter">⚙️</button>`;
         const renderBtn = `<button class="btn btn-sm" data-require-admin style="background:#4ade80; color:#000;" onclick="generateForSentence(${s.id})">▶️</button>`;
         return `<tr>
           <td class="check-col"><input type="checkbox" class="sentence-cb" value="${s.id}"></td>
@@ -401,6 +405,7 @@
           <td class="action-col">
             <button class="btn btn-secondary btn-sm" onclick="openPromptModal(${s.id})">🔍 Prompt</button>
             ${viewBtn}
+            ${prepBtn}
             ${renderBtn}
           </td>
         </tr>`;
@@ -453,6 +458,57 @@
       for (let cb of cbs) {
         await generateForSentence(parseInt(cb.value));
         await new Promise(r => setTimeout(r, 500));
+      }
+    }
+
+    async function bulkPrepareSentences() {
+      if (!window.requireAdmin || !requireAdmin('prepare animations')) return;
+      const cbs = document.querySelectorAll('.sentence-cb:checked');
+      if (!cbs.length) { showToast('No sentences selected.'); return; }
+      
+      showToast(`⚙️ Starting bulk prepare for ${cbs.length} sentence(s)…`);
+      for (let cb of cbs) {
+        await prepareSentence(parseInt(cb.value));
+        await new Promise(r => setTimeout(r, 1000));
+      }
+    }
+
+    async function prepareSentence(sentenceId) {
+      if (!window.requireAdmin || !requireAdmin('prepare animations')) return;
+      const s = currentSentences.find(x => x.id === sentenceId);
+      if (!s) { showToast('Sentence not found.', true); return; }
+      const animType = ($('anim_' + sentenceId) || {}).value || suggestType(s.sentence_type);
+      
+      showToast(`⚙️ Preparing props via OpenRouter...`);
+      try {
+        const res = await fetch('/api/animations/openrouter-prepare', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sentenceId, moduleName: moduleTitle(), videoName: videoTitle(),
+            sentenceType: s.sentence_type, animationType: animType, sentence: s.sentence_text
+          })
+        });
+        if (res.status === 401) { showToast('Sign in as admin to prepare.', true); return; }
+        if (!res.ok) { const t = await res.text(); throw new Error(t || ('HTTP ' + res.status)); }
+        
+        const preparedProps = await res.json();
+        
+        if (!sentenceAnimMap[sentenceId]) {
+          sentenceAnimMap[sentenceId] = { sentence_id: sentenceId };
+        }
+        sentenceAnimMap[sentenceId].preparedProps = preparedProps;
+        
+        // if this row is currently selected for preview, update the preview
+        if (sentenceId === selectedSentenceId && currentRunpodPayload) {
+          currentRunpodPayload.input.inputProps = preparedProps;
+          updateCurlPreview();
+        }
+        
+        showToast(`✅ Props prepared successfully!`);
+      } catch (e) {
+        showToast('Error preparing props: ' + e.message, true);
+        console.error(e);
       }
     }
 
@@ -522,6 +578,13 @@
       try {
         const data = await fetchPrompt(sentenceId);
         currentRunpodPayload = data.runpodPayload;
+        
+        // If we have intelligently prepared props for this sentence, overwrite the defaults
+        const existing = sentenceAnimMap[sentenceId];
+        if (existing && existing.preparedProps) {
+          currentRunpodPayload.input.inputProps = existing.preparedProps;
+        }
+        
         updateCurlPreview();
       } catch (e) {
         // gracefully handle error
@@ -596,6 +659,10 @@
         // build the prompt/payload first (so we can store prompt_used)
         const promptData = await fetchPrompt(sentenceId);
         const scriptId = await getScriptIdForVideo($('videoSelect').value);
+        // Use prepared props if they exist, otherwise fallback to the defaults
+        const existing = sentenceAnimMap[sentenceId] || {};
+        const propsToUse = existing.preparedProps || promptData.inputProps;
+
         setJobStatus('generating');
         const res = await fetch('/api/animations/runpod/run', {
           method: 'POST',
@@ -604,8 +671,8 @@
             sentenceId, moduleNumber: moduleNumber(), videoNumber: videoNumber(),
             scriptId, animationType: animType,
             prompt: promptData.prompt,
-            inputProps: promptData.inputProps,
-            durationInFrames: (promptData.inputProps && promptData.inputProps.durationInFrames) || 150
+            inputProps: propsToUse,
+            durationInFrames: (propsToUse && propsToUse.durationInFrames) || 150
           })
         });
         if (res.status === 401) { showToast('Sign in as admin to render.', true); return; }

@@ -24,6 +24,24 @@ Learnings baked in (see issue #10–#14 retro, 2026-06-27):
      which previously produced generic, wrong fixes (issue #14).
   5. 🛡️ DRY-RUN MODE. `--dry-run` shows the planned action without writing,
      committing, or closing — safe to run on a populated tracker.
+  6. 🧭 CLASSIFY BEFORE ACTING (2026-06-29, issues #17/#18/#20/#21-#23). Not all
+     axiom-errors are `SyntaxError`s. We now classify each as syntax / runtime /
+     network / third-party and route accordingly:
+       • syntax       → verify-parse gate → fix or already-fixed (unchanged).
+       • runtime      → resolve the file + function from the stack frame, then
+                        ask the model for a MINIMAL scoped fix (parse-OK does NOT
+                        mean a runtime bug is gone, so we no longer auto-close on
+                        a clean parse for these).
+       • network      → e.g. 'Failed to fetch' / 'Unexpected end of JSON input'
+                        (an empty-body JSON-parse). Steer the model toward
+                        hardening the page's fetch helpers; returns [] if safe.
+       • third-party  → stack frame is on a CDN / minified bundle (excalidraw,
+                        react umd) or a bare 'Script error.' → close with the
+                        `third-party` label (nothing in this repo to patch).
+  7. 📍 DIRECTORY-INDEX + STACK-FRAME RESOLUTION. Browser errors often point at
+     `http://host/5_Symbols/production/prod/:184:20` (a directory index, not a
+     file) or `at supFetch (…url…:184:20)`. We now map directory-index URLs →
+     `…/index.html`, walk `at func (url:line:col)` frames, and skip CDN frames.
 """
 
 import os
@@ -107,24 +125,112 @@ def resolve_repo_path(candidate):
     return matches[0] if matches else None
 
 
+# ─── Error classification ────────────────────────────────────────────────────
+# Routes an axiom-error to the right handler. Order matters: third-party and
+# network are checked before syntax, because a JSON-parse failure surfaces as
+# `SyntaxError: Unexpected end of JSON input` but its root is a network/
+# empty-body condition whose fix is fetch-handler hardening, not a parse fix.
+_CDN_HOST_RE = re.compile(
+    r'https?://[^/\s]*(?:unpkg\.com|cdn\.jsdelivr|cdnjs\.cloudflare'
+    r'|esm\.sh|skypack\.dev|googleapis\.com)[^:\s]*:\d+:\d+'
+)
+_NETWORK_MARKERS = (
+    "failed to fetch", "networkerror", "network request failed", "load failed",
+    "err_network", "cors", "unexpected end of json input",
+    "failed to execute 'json'",
+)
+_RUNTIME_MARKERS = (
+    "typeerror", "referenceerror", "rangeerror", "cannot read",
+    "is undefined", "is not a function", "cannot read properties",
+    "reading 'length'", "reading '",
+)
+
+
+def classify_error(body, title):
+    """Return one of: 'third-party' | 'network' | 'runtime' | 'syntax' | 'unknown'."""
+    text = ((title or "") + "\n" + (body or "")).lower()
+    if _CDN_HOST_RE.search(text):
+        return "third-party"
+    # Bare cross-origin 'Script error.' with no own-source frame = masked CDN error.
+    if re.search(r'\bscript error\b', text) and not re.search(r'\.html\b', text):
+        return "third-party"
+    if any(m in text for m in _NETWORK_MARKERS):
+        return "network"
+    if any(m in text for m in _RUNTIME_MARKERS):
+        return "runtime"
+    if "syntaxerror" in text or "unexpected token" in text:
+        return "syntax"
+    return "unknown"
+
+
+def _is_cdn_url(url):
+    return bool(url and re.search(
+        r'(?:unpkg\.com|cdn\.jsdelivr|cdnjs\.cloudflare|esm\.sh'
+        r'|skypack\.dev|googleapis\.com|\.min\.js)', url))
+
+
+def url_to_repo_file(url):
+    """Map a localhost page URL to a tracked repo-relative file.
+      http://host/5_Symbols/production/prod/           → 5_Symbols/production/prod/index.html
+      http://host/5_Symbols/.../drawing_generator.html → that path
+    Returns None if the resolved file isn't tracked in the repo."""
+    from urllib.parse import urlparse
+    if not url:
+        return None
+    path = urlparse(url).path
+    if path.endswith("/"):                 # directory index → index.html
+        path = path + "index.html"
+    path = path.lstrip("/")
+    return resolve_repo_path(path)
+
+
 def parse_error_location(body):
     """
-    Extract (resolved_file_path, line, col) from the issue body.
+    Extract (resolved_file_path, line, col, func) from the issue body.
 
-      1. `path/file.ext:line:col` (machine format, preferred) — path resolved in-repo.
-      2. Fallback: first existing repo file token in the body + a nearby
-         'line N' / 'Line `N`' hint (handles AI-analysis prose).
+      1. `path/file.ext:line:col` (machine format) — resolved in-repo.
+      2. Any `URL:line:col` (covers `**Location**` tables AND `at func (url:l:c)`
+         stack frames). Handles DIRECTORY-INDEX urls: `…/prod/:184:20` →
+         `…/prod/index.html:184`. CDN frames are skipped (third-party).
+      3. Page URL only (stackless runtime/network errors) → directory index maps
+         to index.html; line taken from a nearby 'line N' hint if present.
+      4. Fallback: first existing repo file token + a nearby line hint.
 
-    Returns (path, line, col); path is None when no repo file can be resolved.
-    line/col may be None when only the file is identifiable.
+    `func` (top stack-frame function name) is best-effort context for the model.
+    Returns (path, line, col, func); path is None when nothing resolves.
     """
     body = body or ""
-    # 1) machine-readable path:line:col
+    # best-effort function name from the top stack frame
+    func = None
+    fm = re.search(r'\bat\s+(?:async\s+)?([\w$.]+)\s*\(', body)
+    if fm:
+        func = fm.group(1)
+    # 1) machine-readable repo path:line:col
     for m in re.finditer(r'([\w/.\-]+\.(?:html|js|go)):(\d+):(\d+)', body):
         resolved = resolve_repo_path(m.group(1))
         if resolved:
-            return resolved, int(m.group(2)), int(m.group(3))
-    # 2) fallback: first existing repo file token + a nearby line hint
+            return resolved, int(m.group(2)), int(m.group(3)), func
+    # 2) any URL:line:col (Location tables + stack frames); resolve directory index
+    for m in re.finditer(r'(https?://[\w.\-]+(?::\d+)?/[\w/.\-]*):(\d+):(\d+)', body):
+        url = m.group(1)
+        if _is_cdn_url(url):
+            continue
+        repo_file = url_to_repo_file(url)
+        if repo_file:
+            return repo_file, int(m.group(2)), int(m.group(3)), func
+    # 3) page URL only (stackless network/runtime errors) → index.html
+    for m in re.finditer(r'https?://[\w.\-]+(?::\d+)?(/[\w/.\-]*)', body):
+        url = m.group(0)
+        if _is_cdn_url(url):
+            continue
+        repo_file = url_to_repo_file(url)
+        if repo_file:
+            line = None
+            lm = re.search(r'[Ll]ine\s*[`:]?\s*(\d+)', body)
+            if lm:
+                line = int(lm.group(1))
+            return repo_file, line, None, func
+    # 4) fallback: first existing repo file token + a nearby line hint
     line = None
     lm = re.search(r'[Ll]ine\s*[`:]?\s*(\d+)', body)
     if lm:
@@ -132,8 +238,8 @@ def parse_error_location(body):
     for m in re.finditer(r'([\w/.\-]+\.(?:html|js|go))\b', body):
         resolved = resolve_repo_path(m.group(1))
         if resolved:
-            return resolved, line, None
-    return None, None, None
+            return resolved, line, None, func
+    return None, None, None, None
 
 
 # ─── Verifiers ───────────────────────────────────────────────────────────────
@@ -183,7 +289,7 @@ def go_build_ok():
 
 
 # ─── LLM ─────────────────────────────────────────────────────────────────────
-def ask_openrouter_for_fix(issue_body, file_path, line, col):
+def ask_openrouter_for_fix(issue_body, file_path, line, col, func=None, hint=""):
     if not OPENROUTER_API_KEY:
         print("Missing OPENROUTER_API_KEY")
         return None
@@ -196,11 +302,14 @@ def ask_openrouter_for_fix(issue_body, file_path, line, col):
     }
 
     focused = (
-        f"The error is located at **{file_path}:{line}:{col}**.\n"
-        "Read that exact file from the repo. If the reported error no longer "
-        "reproduces there (e.g. it was already fixed), return an empty array [].\n"
-        "Otherwise return ONLY a JSON array of {file_path, content} objects with "
-        "the FULL corrected file contents — no markdown fences, no prose.\n\n"
+        f"The error is located at **{file_path}:{line}:{col}**"
+        + (f" (inside function `{func}`)." if func else ".") + "\n"
+        + (hint + "\n" if hint else "")
+        + "Read that exact file from the repo. If the reported error no longer "
+        "reproduces there (e.g. it was already fixed, or the code already handles "
+        "it safely), return an empty array []. Otherwise return ONLY a JSON array "
+        "of {file_path, content} objects with the FULL corrected file contents — "
+        "no markdown fences, no prose.\n\n"
         f"Issue:\n{issue_body[:4000]}\n"
     )
 
@@ -285,12 +394,15 @@ def apply_fixes(fixes):
 LABEL_AUTO_FIXED = "auto-fixed"
 LABEL_NO_CODE_CHANGE = "no-code-change"
 LABEL_DUPLICATE = "duplicate"
+LABEL_THIRD_PARTY = "third-party"
 
 _LABEL_SPECS = [
     (LABEL_AUTO_FIXED, "2DA44E",
      "Closed automatically — a code fix was committed by the Issue Fix Agent."),
     (LABEL_NO_CODE_CHANGE, "6E7781",
      "Closed automatically — no code change was needed (already fixed / not reproducible)."),
+    (LABEL_THIRD_PARTY, "D93F0B",
+     "Closed automatically — error is in a third-party CDN/minified library, not our source."),
     # GitHub ships a built-in `duplicate` (#cfd3d7); --force keeps it consistent.
     (LABEL_DUPLICATE, "cfd3d7",
      "Closed automatically — duplicates another axiom-error issue (same fingerprint)."),
@@ -378,6 +490,24 @@ def close_as_already_fixed(number, reason):
     run_cmd(f'gh issue close {number} -r completed')
 
 
+def close_as_third_party(number, detail=""):
+    comment = (
+        "✅ Closed by Issue Fix Agent — **third-party library error** "
+        "(no source change in this repo).\n\n"
+        + (detail + "\n\n" if detail else "")
+        + "The stack trace originates inside a minified CDN/bundle script "
+        "(e.g. excalidraw, react umd), not our source code, so there is nothing "
+        "in this repo to patch. If it recurs frequently, consider pinning or "
+        "upgrading the library, or guarding its mount/lifecycle in the host page."
+    )
+    add_labels(number, [LABEL_THIRD_PARTY])
+    if DRY_RUN:
+        print(f"[dry-run] would comment+close #{number} as third-party")
+        return
+    run_cmd(f'gh issue comment {number} --body {shell_quote(comment)}')
+    run_cmd(f'gh issue close {number} -r completed')
+
+
 def shell_quote(s):
     return "'" + s.replace("'", "'\\''") + "'"
 
@@ -396,15 +526,29 @@ def process_issue(issue):
             close_as_duplicate(number, canonical)
             return
 
-    file_path, line, col = parse_error_location(body)
+    error_class = classify_error(body, title)
+    file_path, line, col, func = parse_error_location(body)
+    # Pretty location string (omit missing line/col, e.g. prose bodies have no col).
+    loc_str = file_path + (f":{line}" if line else "") + (f":{col}" if col else "")
+    print(f"   → class={error_class} · location={loc_str or '—'}"
+          + (f" · func={func}" if func else ""))
+
+    # 1️⃣ THIRD-PARTY — error originates inside a CDN/minified library: not our source.
+    if error_class == "third-party":
+        close_as_third_party(
+            number, f"Classified as `{error_class}` (CDN/minified library frame in the stack)."
+        )
+        return
+
     if not file_path:
         print(f"⏭️  #{number}: no file:line:col location found in body — skipping (manual triage).")
         return
-    # Pretty location string (omit missing line/col, e.g. prose bodies have no col).
-    loc_str = file_path + (f":{line}" if line else "") + (f":{col}" if col else "")
 
-    # 1️⃣ VERIFY BEFORE APPLYING — was this already fixed?
-    if os.path.exists(file_path) and file_path.endswith(".html"):
+    # 2️⃣ SYNTAX errors only: verify-before-apply via a parse check. (Runtime &
+    #    network errors parse FINE yet can still be real bugs — e.g. an unguarded
+    #    `res.json()` whose rejection escapes a try/catch — so we do NOT auto-close
+    #    those on a clean parse; the model decides whether a fix is needed.)
+    if error_class == "syntax" and file_path.endswith(".html") and os.path.exists(file_path):
         ok = html_inline_js_ok(file_path)
         if ok is True:
             close_as_already_fixed(
@@ -416,8 +560,31 @@ def process_issue(issue):
         if ok is False:
             print(f"⚠️  #{number}: `{file_path}` still fails to parse — proceeding to fix.")
 
-    # 2️⃣ Generate a *scoped* fix.
-    fixes = ask_openrouter_for_fix(body, file_path, line, col)
+    # 3️⃣ Generate a *scoped* fix. Steer the model by error class:
+    #    • network → harden the fetch helpers (empty-body / non-JSON / try-catch);
+    #               return [] if already safe.
+    #    • runtime → minimal null/length guard at the location; [] if already safe.
+    hint = ""
+    if error_class == "network":
+        hint = (
+            "This is a client network/runtime error (e.g. 'Failed to fetch', "
+            "or an empty/non-JSON response causing a JSON-parse failure). Examine "
+            "the page's fetch helpers and error handling around the reported "
+            "location. A common root cause is `return res.json()` (not awaited) "
+            "inside a try/catch, which lets a parse rejection escape — or a call "
+            "with no try/catch at all. If the code already guards empty bodies, "
+            "awaits the parse, and wraps calls in try/catch returning null, return "
+            "an empty array []. Otherwise make the MINIMAL change to prevent an "
+            "unhandled promise rejection."
+        )
+    elif error_class == "runtime":
+        hint = (
+            "This is a runtime error (e.g. TypeError). Read the file and make the "
+            "MINIMAL change at the reported location to prevent it (e.g. a null/"
+            "length guard, or an optional-chain). If the code is already safe, "
+            "return an empty array []."
+        )
+    fixes = ask_openrouter_for_fix(body, file_path, line, col, func=func, hint=hint)
     if fixes is None:
         print(f"❌ #{number}: could not generate a fix (LLM/analysis failure). Leaving open.")
         return
