@@ -345,8 +345,13 @@
                   "url": "https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/database/schemas"
                 },
                 {
-                  "label": "\ud83d\uddc3 Preprod Data Admin",
+                  "label": "🗃️ Preprod Data Admin",
                   "url": "5_Symbols/production/preprod/tools/admin.html"
+                },
+                {
+                  "label": "🗄️ Manual Backup",
+                  "url": "5_Symbols/production/preprod/tools/manual_backup.html",
+                  "description": "Download manual backups for Supabase database and Azure configuration."
                 },
                 {
                   "label": "\ud83d\uddc4\ufe0f Database Analysis",
@@ -489,6 +494,11 @@
               "label": "\ud83c\udfa8 Canva Course Folder",
               "url": "https://www.canva.com/folder/FAHMZK9u-JE",
               "description": "Canva folder holding the course design assets, slides, and graphics."
+            },
+            {
+              "label": "\ud83e\uddee Cohort Production Whiteboard",
+              "url": "https://canva.link/iahtnqhu0rdkq8z",
+              "description": "Cohort production whiteboard \u2014 shared Canva board for collaborative planning across the production cohort."
             }
           ]
         },
@@ -785,6 +795,11 @@
               "label": "9c. \ud83d\udd0e Test the Value Proposition",
               "url": "5_Symbols/production/postprod/value_proposition_test.html",
               "description": "Does a recorded, proof-of-work certification beat a standard paper certificate? Erdem passes first, the audience passes, and a $10 student is guaranteed to pass \u2014 or the proposition fails."
+            },
+            {
+              "label": "\ud83d\udcfa YouTube Paywall",
+              "url": "5_Symbols/production/postprod/youtube_paywall.html",
+              "description": "How YouTube Channel Memberships and the Partner Program (YPP) work, and how far @RifatErdemSahin (700 subs) is from the 1,000-sub / 4,000-watch-hour monetization gate."
             },
             {
               "label": "10. \ud83d\udcbc Membership / Business",

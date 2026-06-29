@@ -2361,3 +2361,39 @@ The previous attempt discovered tables from the PostgREST OpenAPI spec at the RE
 - Live probes: `/rest/v1/` → **401** (confirms the OpenAPI route is blocked for anon); `modules?select=count` → **206** (data still readable); `rpc/get_table_stats` → **404 PGRST202** before the user runs the migration (schema-modal will surface it).
 - Local server serves `stats.html` + `schema-modal.js` **HTTP 200**; page opens in Chrome.
 - DDL can't run via REST (no `exec_sql`), so the migration was copied to the clipboard for the user to run in the Supabase SQL Editor, then Retry.
+
+## 2026-06-28 — 🗄️ Manual Backup for Supabase & Azure
+
+### 🎯 Objective
+Create a manual backup page in `preprod > tools` that allows downloading snapshots of the Supabase database and Azure Key Vault configuration locally.
+
+### 📐 Implementation
+- **`5_Symbols/production/preprod/tools/manual_backup.html`**: A new hub with UI cards for "Supabase Backup" and "Azure Key Vault Backup". Sends requests to Go endpoints to trigger downloads directly in the browser.
+- **Go Server Endpoints (`cmd/server/main.go`)**: 
+  - `GET /api/admin/backup/supabase`: Retrieves `SUPABASE_DB_URL` from Azure Key Vault (`cfg.getSecret("SUPABASE_DB_URL")`), executes `pg_dump` via `os/exec`, and streams the resulting `.sql` file to the response.
+  - `GET /api/admin/backup/azure`: Aggregates the known application secrets mapped in Azure Key Vault and returns them as a JSON file `azure_secrets_backup.json`.
+- Both endpoints are heavily protected by `isAdminRequest(r)` so only authorized admins can download secrets or database snapshots.
+
+### ✅ Verification
+- `go build ./... && go vet ./...` pass.
+- Endpoint registered in `main.go`.
+- Added to `navigation_config.json`, `index.html`, and `markdown_renderer.html`.
+
+---
+
+## 2026-06-28 — 📺 YouTube Paywall (YPP + Memberships Roadmap)
+
+### 🎯 Objective
+Add a "YouTube Paywall" page under Post Prod explaining how YouTube Channel Memberships and the YouTube Partner Program (YPP) work, and chart how far the @RifatErdemSahin channel (700 subs) is from unlocking monetization.
+
+### 📐 Approach
+- New static page `5_Symbols/production/postprod/youtube_paywall.html`, modeled on `mvp_pivot.html` (same dark theme, nav.js, debug-panel, seo.js — no hardcoded navbar).
+- Two-tier explainer:
+  - **Early Access (Fan Funding):** 500 subs + 3 uploads/90d + 3,000 watch-hours(12mo) OR 3M Shorts views(90d) → unlocks Channel Memberships, Super Thanks, Super Chat, Shopping (NO ad revenue).
+  - **Full YPP:** 1,000 subs + 4,000 watch-hours(12mo) OR 10M Shorts views(90d) → unlocks ad revenue share + YouTube Premium revenue + all fan funding.
+- "Paywall" = Channel Memberships: monthly fee for badges, emoji, members-only videos — the recurring revenue gate behind the course.
+- Channel status: 700 subs → past the 500 early-access bar ✅, need 300 more for full YPP (70%). Watch-hours tracked against the 4,000 gate (live number pulled from YouTube Studio).
+
+### ✅ Verification
+- Page added to `navigation_config.json` Post Prod menu as "📺 YouTube Paywall".
+- Open in Chrome, commit, push (triggers Pages + Fly deploy).
