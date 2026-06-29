@@ -342,6 +342,9 @@
           { group: true, label: '💻 Dev Environment', children: [
             { label: '🎨 VS Code: Terminal Profiles', url: 'markdown_renderer.html?file=5_Symbols/tools/vscode_terminal_profiles/formula.md' }
           ]},
+          { group: true, label: '🐙 Code & Repo', children: [
+            { label: '🔑 GitHub Tokens', url: 'https://github.com/settings/tokens' }
+          ]},
           { group: true, label: '☁️ Cloud', children: [
             { label: '☁️ Azure Portal', url: 'https://portal.azure.com/' },
             { label: '☁️ RunPod Serverless', url: 'https://console.runpod.io/serverless' }
@@ -361,6 +364,7 @@
           { label: '🖼️ Image Generator', url: '5_Symbols/production/postprod/image_generator.html' },
           { label: '🎬 Lower Thirds Manager', url: '5_Symbols/production/postprod/lower_thirds.html' },
           { label: '🎨 SVG Generator', url: '5_Symbols/production/postprod/graphics_generator.html' },
+          { label: '🎨 Drawing Generator', url: '5_Symbols/production/postprod/drawing_generator.html', description: 'Generate Excalidraw diagrams from your video script sentences using AI.' },
           { label: '📊 Slide Generator', url: '5_Symbols/production/postprod/slide_generator.html', description: 'Generate Marp markdown presentations from your video script sentences.' },
           { label: '🎞️ Animation Generator', url: '5_Symbols/production/postprod/animation_generator.html', description: 'Generate per-sentence Remotion animations rendered on RunPod serverless, uploaded to Azure.' }
         ]},
