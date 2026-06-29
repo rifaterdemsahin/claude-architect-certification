@@ -419,6 +419,7 @@
           ]},
           { group: true, label: '🤖 Guides', children: [
             { label: '✨ Gemini Guide', url: 'gemini.md' },
+            { label: '🎞️ Remotion + RunPod Setup', url: 'markdown_renderer.html?file=4_Formula/tools/remotion_runpod_setup.md', description: 'How to set up REMOTION_SERVE_URL + a RunPod render endpoint so the Animation Generator renders MP4s.' },
             { label: '📜 Commit History', url: 'https://github.com/rifaterdemsahin/claude-architect-certification/commits/main' }
           ]},
           { group: true, label: '🗂️ Repos', children: [
