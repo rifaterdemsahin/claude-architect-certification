@@ -590,6 +590,7 @@
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
           <span style="font-size:0.68rem;font-weight:800;color:#81e6d9;letter-spacing:0.08em;">📡 AXIOM · live events from the server (admin)</span>
           <div style="margin-left:auto;display:flex;gap:6px;">
+            <a href="https://app.axiom.co/rifaterdemsahin-stks/stream/videoproduction" target="_blank" rel="noopener noreferrer" title="Open the Axiom stream in a new tab" style="background:rgba(6,182,212,0.25);color:#81e6d9;border:1px solid rgba(6,182,212,0.4);padding:3px 10px;border-radius:6px;cursor:pointer;font-size:0.72rem;font-weight:700;text-decoration:none;display:inline-block;">🔗 Open Stream</a>
             <button id="_dbg_axiom_show_btn" onclick="event.stopPropagation(); window.__dbgShowAxiomLogs()" style="background:rgba(6,182,212,0.25);color:#81e6d9;border:1px solid rgba(6,182,212,0.4);padding:3px 10px;border-radius:6px;cursor:pointer;font-size:0.72rem;font-weight:700;">📊 Show Axiom Logs</button>
             <button id="_dbg_axiom_btn" onclick="event.stopPropagation(); window.sendAllToAxiom()" style="background:rgba(6,182,212,0.25);color:#81e6d9;border:1px solid rgba(6,182,212,0.4);padding:3px 10px;border-radius:6px;cursor:pointer;font-size:0.72rem;font-weight:700;">📡 Send to Axiom</button>
           </div>
