@@ -204,12 +204,16 @@ CREATE TABLE IF NOT EXISTS videos (
 CREATE TABLE IF NOT EXISTS ivq_questions (
   id BIGSERIAL PRIMARY KEY,
   video_id BIGINT REFERENCES videos(id) ON DELETE CASCADE,
+  sentence_id BIGINT REFERENCES sentences(id) ON DELETE SET NULL,
   question_text TEXT NOT NULL, options JSONB NOT NULL DEFAULT '[]',
   correct_option TEXT NOT NULL, explanation TEXT,
   incorrect_explanations JSONB DEFAULT '{}',
   timestamp_seconds INT DEFAULT 0, sort_order INT DEFAULT 0,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+-- If upgrading existing table:
+-- ALTER TABLE ivq_questions ADD COLUMN sentence_id BIGINT REFERENCES sentences(id) ON DELETE SET NULL;
+
 ALTER TABLE videos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ivq_questions ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "allow_all_videos" ON videos FOR ALL USING (true) WITH CHECK (true);
@@ -248,19 +252,30 @@ CREATE POLICY "allow_all_ivq" ON ivq_questions FOR ALL USING (true) WITH CHECK (
     }
 
     // ── State ─────────────────────────────────────────────────────────────────
-    let videos = [], ivqMap = {}; // ivqMap[video_id] = [questions]
+    let videos = [], ivqMap = {}, allSentences = []; // ivqMap[video_id] = [questions]
 
     async function loadAll() {
       if (!SB_URL || !SB_KEY) { renderVideoList(); return; }
       try {
-        const [vr, qr] = await Promise.all([
+        const [vr, qr, sr] = await Promise.all([
           api('videos?order=created_at.asc'),
-          api('ivq_questions?order=sort_order.asc,created_at.asc')
+          api('ivq_questions?order=sort_order.asc,created_at.asc'),
+          api('sentences?select=id,sentence_text,scripts!inner(video_id)')
         ]);
         if (!vr.ok) throw new Error(await vr.text());
-        if (!qr.ok) throw new Error(await qr.text());
+        
+        let questions = [];
+        if (qr.ok) {
+            questions = await qr.json();
+        } else {
+            console.error("ivq_questions fetch failed (migration missing?):", await qr.text());
+        }
+
+        if (sr.ok) {
+            allSentences = await sr.json();
+        }
+
         videos = await vr.json();
-        const questions = await qr.json();
         ivqMap = {};
         for (const q of questions) {
           if (!ivqMap[q.video_id]) ivqMap[q.video_id] = [];
@@ -315,10 +330,14 @@ CREATE POLICY "allow_all_ivq" ON ivq_questions FOR ALL USING (true) WITH CHECK (
         </div>`;
       }).join('');
       const ts = q.timestamp_seconds > 0 ? `<span class="ts-badge">⏱ ${fmtTime(q.timestamp_seconds)}</span>` : '';
+      const linkedSentence = allSentences.find(s => s.id === q.sentence_id);
+      const sentenceBadge = linkedSentence ? `<div style="margin-top:8px;font-size:0.75rem;color:var(--primary);background:rgba(139,92,246,0.1);padding:6px 10px;border-radius:6px;border:1px solid rgba(139,92,246,0.2);">🔗 <strong>Linked:</strong> ${esc(linkedSentence.sentence_text)}</div>` : '';
+
       return `<div class="ivq-row" id="ivq-${q.id}">
         <div class="ivq-question">${esc(q.question_text)}${ts}</div>
         <div class="ivq-options">${opts}</div>
         ${q.explanation ? `<div class="ivq-explanation"><span>✅ Correct:</span> ${esc(q.explanation)}</div>` : ''}
+        ${sentenceBadge}
         <div class="ivq-row-actions">
           <button class="btn btn-blue btn-sm" onclick="previewQuiz(${q.id})">🧪 Preview</button>
           <button class="btn btn-ghost btn-sm" onclick="openEditIvq(${q.id}, ${videoId})">✏️</button>
@@ -343,6 +362,10 @@ CREATE POLICY "allow_all_ivq" ON ivq_questions FOR ALL USING (true) WITH CHECK (
           <span class="opt-label">${k})</span>
           <input class="form-input" style="margin-bottom:0" id="${videoId}-inc-${k}" placeholder="Why ${k} is wrong (optional)…" value="${esc(incorr[k]||'')}">
         </div>`).join('');
+
+      const vidSentences = allSentences.filter(s => s.scripts && s.scripts.video_id === videoId);
+      const sentenceOpts = vidSentences.map(s => `<option value="${s.id}"${isEdit && q.sentence_id === s.id ? ' selected' : ''}>${esc(s.sentence_text.substring(0, 80))}${s.sentence_text.length > 80 ? '...' : ''}</option>`).join('');
+
       return `<label class="form-label">Question *</label>
         <textarea class="form-input" id="${videoId}-q-text" placeholder="Type your question here…">${isEdit ? esc(q.question_text) : ''}</textarea>
         <label class="form-label">Options (fill all 4)</label>
@@ -357,8 +380,19 @@ CREATE POLICY "allow_all_ivq" ON ivq_questions FOR ALL USING (true) WITH CHECK (
           <summary style="cursor:pointer;font-size:0.8rem;color:var(--muted);font-weight:600">⚠️ Per-option incorrect explanations (optional)</summary>
           <div style="margin-top:8px">${incorrectFields}</div>
         </details>
-        <label class="form-label">Video timestamp (seconds)</label>
-        <input class="form-input" type="number" id="${videoId}-ts" min="0" placeholder="0" value="${isEdit ? (q.timestamp_seconds||0) : 0}">
+        <div class="options-grid">
+          <div>
+            <label class="form-label">Video timestamp (seconds)</label>
+            <input class="form-input" type="number" id="${videoId}-ts" min="0" placeholder="0" value="${isEdit ? (q.timestamp_seconds||0) : 0}">
+          </div>
+          <div>
+            <label class="form-label">Link to Sentence</label>
+            <select class="form-input" id="${videoId}-sentence">
+              <option value="">-- No sentence linked --</option>
+              ${sentenceOpts}
+            </select>
+          </div>
+        </div>
         <div class="form-actions" style="margin-top:12px">
           <button class="btn btn-primary" onclick="${isEdit ? `saveEditIvq(${q.id},${videoId})` : `saveNewIvq(${videoId})`}">${isEdit ? '💾 Update' : '💾 Save Question'}</button>
           <button class="btn btn-ghost" onclick="toggleAddIvq(${videoId})">${isEdit ? 'Cancel' : 'Cancel'}</button>
@@ -429,6 +463,9 @@ CREATE POLICY "allow_all_ivq" ON ivq_questions FOR ALL USING (true) WITH CHECK (
       const correct = document.getElementById(videoId + '-correct')?.value;
       const explanation = document.getElementById(videoId + '-expl')?.value.trim();
       const ts = parseInt(document.getElementById(videoId + '-ts')?.value) || 0;
+      const sentenceIdStr = document.getElementById(videoId + '-sentence')?.value;
+      const sentenceId = sentenceIdStr ? parseInt(sentenceIdStr) : null;
+
       const options = ['a','b','c','d'].map(k => ({
         key: k, text: document.getElementById(videoId + '-opt-' + k)?.value.trim() || ''
       })).filter(o => o.text);
@@ -437,17 +474,18 @@ CREATE POLICY "allow_all_ivq" ON ivq_questions FOR ALL USING (true) WITH CHECK (
         const v = document.getElementById(videoId + '-inc-' + k)?.value.trim();
         if (v) incorrect_explanations[k] = v;
       });
-      return { questionText, correct, explanation, ts, options, incorrect_explanations };
+      return { questionText, correct, explanation, ts, options, incorrect_explanations, sentenceId };
     }
 
     async function saveNewIvq(videoId) {
-      const { questionText, correct, explanation, ts, options, incorrect_explanations } = collectIvqFormData(videoId);
+      const { questionText, correct, explanation, ts, options, incorrect_explanations, sentenceId } = collectIvqFormData(videoId);
       if (!questionText) { toast('Question text required', 'error'); return; }
       if (options.length < 2) { toast('Add at least 2 options', 'error'); return; }
       const body = {
         video_id: videoId, question_text: questionText, options,
         correct_option: correct, explanation: explanation || null,
         incorrect_explanations, timestamp_seconds: ts,
+        sentence_id: sentenceId,
         sort_order: (ivqMap[videoId]?.length || 0)
       };
       try {
@@ -470,11 +508,12 @@ CREATE POLICY "allow_all_ivq" ON ivq_questions FOR ALL USING (true) WITH CHECK (
     }
 
     async function saveEditIvq(qId, videoId) {
-      const { questionText, correct, explanation, ts, options, incorrect_explanations } = collectIvqFormData(videoId);
+      const { questionText, correct, explanation, ts, options, incorrect_explanations, sentenceId } = collectIvqFormData(videoId);
       if (!questionText) { toast('Question text required', 'error'); return; }
       const body = {
         question_text: questionText, options, correct_option: correct,
-        explanation: explanation || null, incorrect_explanations, timestamp_seconds: ts
+        explanation: explanation || null, incorrect_explanations, timestamp_seconds: ts,
+        sentence_id: sentenceId
       };
       try {
         const r = await api('ivq_questions?id=eq.' + qId, { method: 'PATCH', body: JSON.stringify(body) });
