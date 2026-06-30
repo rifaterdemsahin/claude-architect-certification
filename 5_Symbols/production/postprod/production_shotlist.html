@@ -623,7 +623,7 @@
         <div class="input-with-picker" style="margin-top:8px;">
           <input type="text" id="fVoiceoverUrl" placeholder="Paste Drive voiceover URL or upload…" style="min-width:200px;" oninput="onVoiceoverChange(this.value)">
           <button class="btn-pick-drive" onclick="browseAzure('fVoiceoverUrl')" title="Browse Azure files">☁️ Azure</button>
-          <button class="btn-upload-drive" onclick="triggerUpload('fVoiceoverUrl')" title="Upload voiceover audio">⬆️ Upload</button>
+          <button class="btn-upload-drive" data-require-admin onclick="triggerUpload('fVoiceoverUrl')" title="Upload voiceover audio">⬆️ Upload</button>
         </div>
       </div>
       <audio id="master-audio" controls src="">
@@ -691,7 +691,7 @@
           <div class="input-with-picker">
             <input type="text" id="fBundleUrl" placeholder="Upload the recorded clip to Azure →">
             <button class="btn-pick-drive" onclick="browseAzure('fBundleUrl')" title="Browse Azure files">☁️ Azure</button>
-            <button class="btn-upload-drive" id="btnUploadReversal" onclick="uploadPendingReversal()" title="Upload the recorded reversal clip to Azure">⬆️ Upload Reversal Clip</button>
+            <button class="btn-upload-drive" id="btnUploadReversal" data-require-admin onclick="uploadPendingReversal()" title="Upload the recorded reversal clip to Azure">⬆️ Upload Reversal Clip</button>
           </div>
           <span class="field-hint" id="reversalClipHint"></span>
         </div>
@@ -717,7 +717,7 @@
           <div class="input-with-picker">
             <input type="text" id="fBg" placeholder="Upload to Azure, or paste a URL (e.g. assets/...png)">
             <button class="btn-pick-drive" onclick="browseAzure('fBg')" title="Browse Azure files">☁️ Azure</button>
-            <button class="btn-upload-drive" onclick="triggerUpload('fBg')" title="Upload local file to Azure">⬆️ Upload</button>
+            <button class="btn-upload-drive" data-require-admin onclick="triggerUpload('fBg')" title="Upload local file to Azure">⬆️ Upload</button>
           </div>
         </div>
         <div class="form-group">
@@ -725,7 +725,7 @@
           <div class="input-with-picker">
             <input type="text" id="fMusicUrl" placeholder="Upload to Azure, or paste a URL (e.g. .mp3 filename)">
             <button class="btn-pick-drive" onclick="browseAzure('fMusicUrl')" title="Browse Azure files">☁️ Azure</button>
-            <button class="btn-upload-drive" onclick="triggerUpload('fMusicUrl')" title="Upload music to Azure">⬆️ Upload</button>
+            <button class="btn-upload-drive" data-require-admin onclick="triggerUpload('fMusicUrl')" title="Upload music to Azure">⬆️ Upload</button>
           </div>
         </div>
         <div class="form-group">
@@ -733,7 +733,7 @@
           <div class="input-with-picker">
             <input type="text" id="fSfxUrl" placeholder="Upload to Azure, or paste a URL (e.g. .wav filename)">
             <button class="btn-pick-drive" onclick="browseAzure('fSfxUrl')" title="Browse Azure files">☁️ Azure</button>
-            <button class="btn-upload-drive" onclick="triggerUpload('fSfxUrl')" title="Upload SFX to Azure">⬆️ Upload</button>
+            <button class="btn-upload-drive" data-require-admin onclick="triggerUpload('fSfxUrl')" title="Upload SFX to Azure">⬆️ Upload</button>
           </div>
         </div>
         <div class="form-group">
@@ -741,7 +741,7 @@
           <div class="input-with-picker">
             <input type="text" id="fLtImg" placeholder="Upload to Azure, or paste a URL (e.g. assets/overlays/lt_intro.png)">
             <button class="btn-pick-drive" onclick="browseAzure('fLtImg')" title="Browse Azure files">☁️ Azure</button>
-            <button class="btn-upload-drive" onclick="triggerUpload('fLtImg')" title="Upload local file to Azure">⬆️ Upload</button>
+            <button class="btn-upload-drive" data-require-admin onclick="triggerUpload('fLtImg')" title="Upload local file to Azure">⬆️ Upload</button>
           </div>
         </div>
         <div class="form-group">
@@ -757,7 +757,7 @@
           <div class="input-with-picker">
             <input type="text" id="fOverlayLt" placeholder="Upload to Azure, or paste a URL (e.g. assets/overlays/lt_intro.png)">
             <button class="btn-pick-drive" onclick="browseAzure('fOverlayLt')" title="Browse Azure files">☁️ Azure</button>
-            <button class="btn-upload-drive" onclick="triggerUpload('fOverlayLt')" title="Upload local file to Azure">⬆️ Upload</button>
+            <button class="btn-upload-drive" data-require-admin onclick="triggerUpload('fOverlayLt')" title="Upload local file to Azure">⬆️ Upload</button>
           </div>
         </div>
         <div class="form-group">
@@ -765,7 +765,7 @@
           <div class="input-with-picker">
             <input type="text" id="fOverlayText" placeholder="Upload to Azure, or paste a URL (e.g. assets/overlays/overlay_systems.png)">
             <button class="btn-pick-drive" onclick="browseAzure('fOverlayText')" title="Browse Azure files">☁️ Azure</button>
-            <button class="btn-upload-drive" onclick="triggerUpload('fOverlayText')" title="Upload local file to Azure">⬆️ Upload</button>
+            <button class="btn-upload-drive" data-require-admin onclick="triggerUpload('fOverlayText')" title="Upload local file to Azure">⬆️ Upload</button>
           </div>
         </div>
         <div class="form-group full-width">
@@ -773,14 +773,14 @@
           <div class="input-with-picker">
             <input type="text" id="fRefDocUrl" placeholder="Upload to Azure, or paste any reference URL">
             <button class="btn-pick-drive" onclick="browseAzure('fRefDocUrl')" title="Browse Azure files">☁️ Azure</button>
-            <button class="btn-upload-drive" onclick="triggerUpload('fRefDocUrl')" title="Upload to Azure">⬆️ Upload</button>
+            <button class="btn-upload-drive" data-require-admin onclick="triggerUpload('fRefDocUrl')" title="Upload to Azure">⬆️ Upload</button>
           </div>
         </div>
       </div>
       <div class="form-actions">
-        <button class="btn-form-delete" id="btnDeleteScene" onclick="deleteScene()" style="display:none;">🗑 Delete Scene</button>
+        <button class="btn-form-delete" id="btnDeleteScene" data-require-admin onclick="deleteScene()" style="display:none;">🗑 Delete Scene</button>
         <button class="btn-form-cancel" onclick="closeSceneForm()">Cancel</button>
-        <button class="btn-form-save" onclick="saveSceneForm()">💾 Save to Supabase</button>
+        <button class="btn-form-save" data-require-admin onclick="saveSceneForm()">💾 Save to Supabase</button>
       </div>
     </div>
   </div>
@@ -1137,7 +1137,7 @@
               <span style="font-family:monospace;font-size:0.75rem;color:var(--text-muted);margin-right:8px;">S${s.id}${s.timing ? ' · ' + s.timing : ''}</span>
               ${s.dbId ? `
                 <button onclick="openSceneForm(${s.dbId})" title="Edit scene">✏️ Edit</button>
-                <button onclick="deleteSceneById(${s.dbId}, ${s.id})" title="Delete scene" style="border-color:#ef4444;color:#ef4444;">🗑</button>
+                <button data-require-admin onclick="deleteSceneById(${s.dbId}, ${s.id})" title="Delete scene" style="border-color:#ef4444;color:#ef4444;">🗑</button>
               ` : '<span style="opacity:0.4;font-size:0.7rem;padding:6px 10px;">📋 local</span>'}
             </div>
             <div class="script-col">
@@ -1533,6 +1533,7 @@
 
     // 💾 Save scene to Supabase
     async function saveSceneForm() {
+      if (!window.requireAdmin('create or update scenes')) return;
       const supabaseUrl = localStorage.getItem('supabase_url') || 'https://rmekfsdhglyiralxvkwc.supabase.co';
       const supabaseKey = localStorage.getItem('supabase_anon_key') || '';
       if (!supabaseKey) { alert('Supabase anon key not found. Set it in localStorage: supabase_anon_key'); return; }
@@ -1620,6 +1621,7 @@
 
     // 🗑 Delete scene
     async function deleteSceneById(dbId, sceneNum) {
+      if (!window.requireAdmin('delete scenes')) return;
       if (!dbId || isNaN(parseInt(dbId))) {
         alert('Cannot delete: this scene is local fallback data with no database ID.\nCreate a real scene via "Save to Supabase" first.');
         return;
@@ -1644,6 +1646,7 @@
 
     // Also expose delete from form
     async function deleteScene() {
+      if (!window.requireAdmin('delete scenes')) return;
       const dbId = document.getElementById('editSceneId').value;
       const sceneNum = document.getElementById('fSceneNumber').value;
       if (dbId) await deleteSceneById(parseInt(dbId), sceneNum);
@@ -1983,6 +1986,7 @@
     }
 
     async function uploadPendingReversal() {
+      if (!window.requireAdmin('upload files')) return;
       if (!window._pendingReversal || !window._pendingReversal.file) {
         return triggerUpload('fBundleUrl'); // no staged clip → manual file pick
       }
@@ -2097,6 +2101,7 @@
     }
 
     function triggerUpload(targetInputId) {
+      if (!window.requireAdmin('upload files')) return;
       const input = document.getElementById('_driveFileInput');
       input.onchange = async (e) => {
         const file = e.target.files[0];

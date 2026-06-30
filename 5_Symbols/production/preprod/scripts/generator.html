@@ -530,45 +530,104 @@ See you in Module [NEXT MODULE NUMBER].`
       const modId = document.getElementById('module-select').value;
       const vidId = document.getElementById('video-select').value;
       const statusEl = document.getElementById('save-status');
-      statusEl.textContent = '⏳ Saving...';
-      statusEl.style.display = 'block';
+      
+      const saveBtn = document.getElementById('btn-save');
+      saveBtn.disabled = true;
 
       try {
+        statusEl.textContent = '⏳ Converting script to structured sentences via AI...';
+        statusEl.style.display = 'block';
+        statusEl.style.color = '#3b82f6';
+        
+        // 1. Call OpenRouter to convert to JSON
+        const convertPrompt = `You are a script formatter. Convert the following script text into an array of sentence blocks.
+Each block must have:
+- "sentence_text": The exact text of the block.
+- "sentence_type": One of: hook, objective, transition, step, insight, takeaway, cue, heading, body.
+- "section": One of: intro, objectives, screenshare, outro, body.
+- "visual_mode": One of: talking_head, screenshare, b_roll.
+
+Return ONLY a JSON array of objects.
+
+SCRIPT TO CONVERT:
+${text}`;
+
+        const orRes = await fetch('/api/scripts/openrouter', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt: convertPrompt, jsonMode: true })
+        });
+        
+        if (!orRes.ok) {
+          const errText = await orRes.text();
+          throw new Error('OpenRouter API Error: ' + errText);
+        }
+        
+        const orData = await orRes.json();
+        let structuredData = [];
+        try {
+          structuredData = JSON.parse(orData.content);
+          if (!Array.isArray(structuredData)) {
+            // Fallback for wrapped objects
+            if (structuredData.sentences && Array.isArray(structuredData.sentences)) {
+              structuredData = structuredData.sentences;
+            } else if (structuredData.blocks && Array.isArray(structuredData.blocks)) {
+              structuredData = structuredData.blocks;
+            } else {
+              throw new Error('Returned JSON is not an array.');
+            }
+          }
+        } catch(e) {
+          throw new Error('Failed to parse OpenRouter JSON: ' + e.message + '\\n\\n' + orData.content);
+        }
+        
+        statusEl.textContent = '⏳ Saving to Supabase...';
+
         const SUPABASE_URL = localStorage.getItem('supabase_url') || 'https://rmekfsdhglyiralxvkwc.supabase.co';
         const SUPABASE_ANON_KEY = localStorage.getItem('supabase_anon_key');
         if (!SUPABASE_ANON_KEY) throw new Error('Missing Supabase Anon Key in localStorage. Please login as admin.');
 
         const headers = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
 
-        // 1. Get module
+        // 2. Get module
         let modRes = await fetch(`${SUPABASE_URL}/rest/v1/modules?module_number=eq.${modId}&select=id`, { headers });
         let mods = await modRes.json();
         if (!mods.length) throw new Error(`Module ${modId} not found in DB`);
         
-        // 2. Get video
+        // 3. Get video
         let vidRes = await fetch(`${SUPABASE_URL}/rest/v1/videos?module_id=eq.${mods[0].id}&video_number=eq.${vidId}&select=id`, { headers });
         let vids = await vidRes.json();
         if (!vids.length) throw new Error(`Video ${vidId} not found in DB`);
 
-        // 3. Get or create script
+        // 4. Get or create script
         let scriptRes = await fetch(`${SUPABASE_URL}/rest/v1/scripts?video_id=eq.${vids[0].id}&select=id`, { headers });
         let scripts = await scriptRes.json();
         let dbScriptId;
         if (scripts.length) {
           dbScriptId = scripts[0].id;
+          await fetch(`${SUPABASE_URL}/rest/v1/scripts?id=eq.${dbScriptId}`, {
+            method: 'PATCH', headers, body: JSON.stringify({ script_text: text })
+          });
         } else {
           let createRes = await fetch(`${SUPABASE_URL}/rest/v1/scripts`, {
-            method: 'POST', headers, body: JSON.stringify({ video_id: vids[0].id, script_text: 'Generated script' })
+            method: 'POST', headers, body: JSON.stringify({ video_id: vids[0].id, script_text: text })
           });
           let newScript = await createRes.json();
           dbScriptId = newScript[0].id;
         }
 
-        // 4. Save paragraphs as sentences
-        const paragraphs = text.split(/\n\n+/).map(p => p.trim()).filter(p => p);
-        const inserts = paragraphs.map((p, i) => ({
+        // 5. Delete old sentences for this script
+        await fetch(`${SUPABASE_URL}/rest/v1/sentences?script_id=eq.${dbScriptId}`, {
+          method: 'DELETE', headers
+        });
+
+        // 6. Save structured sentences
+        const inserts = structuredData.map((b, i) => ({
           script_id: dbScriptId,
-          sentence_text: p,
+          sentence_text: b.sentence_text || '',
+          sentence_type: b.sentence_type || 'body',
+          section: b.section || 'body',
+          visual_mode: b.visual_mode || 'talking_head',
           sort_order: (i + 1) * 10
         }));
 
@@ -580,12 +639,15 @@ See you in Module [NEXT MODULE NUMBER].`
            throw new Error('Failed to insert sentences: ' + errJson);
         }
         
-        statusEl.textContent = '✅ Saved to Sentences successfully!';
-        setTimeout(() => statusEl.style.display = 'none', 3000);
+        statusEl.textContent = \`✅ Saved \${inserts.length} structured sentences successfully!\`;
+        statusEl.style.color = '#10b981';
+        setTimeout(() => statusEl.style.display = 'none', 5000);
       } catch (err) {
         statusEl.textContent = '❌ Error: ' + err.message;
         statusEl.style.color = '#f87171';
         console.error(err);
+      } finally {
+        saveBtn.disabled = false;
       }
     }
 

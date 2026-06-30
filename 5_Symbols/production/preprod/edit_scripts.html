@@ -264,6 +264,22 @@
       cursor: not-allowed;
       transform: none;
     }
+    .btn-copy {
+      background: var(--secondary);
+      color: white;
+      border: none;
+      padding: 12px 28px;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-family: var(--font-body);
+      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    }
+    .btn-copy:hover {
+      background: #2563eb;
+      transform: translateY(-2px);
+    }
     .status-text {
       font-size: 0.85rem;
       font-weight: 600;
@@ -443,6 +459,24 @@
       }
     }
 
+    async function copyScriptText() {
+      const ta = document.getElementById('script-editor-textarea');
+      if (!ta) return;
+      try {
+        await navigator.clipboard.writeText(ta.value);
+        const statusSpan = document.getElementById('status-span');
+        statusSpan.innerHTML = '<span>📋 Copied to clipboard!</span>';
+        statusSpan.style.color = '#10b981';
+        setTimeout(() => {
+          if (statusSpan.textContent.includes('Copied')) {
+            statusSpan.textContent = '';
+          }
+        }, 3000);
+      } catch (err) {
+        console.error('Failed to copy text: ', err);
+      }
+    }
+
     function updateWordCounters() {
       const ta = document.getElementById('script-editor-textarea');
       if (!ta) return;
@@ -565,7 +599,8 @@
 
         <!-- Actions -->
         <div class="editor-actions">
-          <button class="btn-save" id="btn-save-script" onclick="saveScriptText()">Save Script Content</button>
+          <button class="btn-save" id="btn-save-script" onclick="saveScriptText()" data-require-admin>Save Script Content</button>
+          <button class="btn-copy" onclick="copyScriptText()">📋 Copy to Clipboard</button>
           <span class="status-text" id="status-span"></span>
         </div>
       `;
@@ -574,6 +609,7 @@
     }
 
     async function saveScriptText() {
+      if (!window.requireAdmin('save scripts')) return;
       const m = currentData.modules[selectedModuleIdx];
       const v = m.videos[selectedVideoIdx];
       const ta = document.getElementById('script-editor-textarea');

@@ -432,7 +432,7 @@
             <button id="btn-show-folders" class="btn btn-secondary" onclick="showGdriveFolders()" style="flex: 1; min-width: 180px;">
               <i class="fa-solid fa-table"></i> Show Folders Table
             </button>
-            <button id="btn-clear-links" class="btn btn-secondary" onclick="clearDriveLinks()" style="flex: 1; min-width: 180px; border: 1px solid rgba(239,68,68,0.4); color: #fca5a5;">
+            <button id="btn-clear-links" class="btn btn-secondary" data-require-admin onclick="clearDriveLinks()" style="flex: 1; min-width: 180px; border: 1px solid rgba(239,68,68,0.4); color: #fca5a5;">
               <i class="fa-solid fa-link-slash"></i> Clear Drive Links
             </button>
           </div>
@@ -1370,6 +1370,7 @@
 
     // ── DATABASE UPDATE HELPER ──
     async function saveFolderLinkToSupabase(tableName, recordId, folderUrl) {
+      if (!window.requireAdmin('save folder links')) return;
       if (window.__DRY_RUN__) {
         log('info', `↪ [DRY RUN] Would record folder link for ID ${recordId} in ${tableName}`);
         return;
@@ -1481,6 +1482,7 @@
     // Removes the "Google Drive Folder" link from every course_modules and course_videos
     // record in Supabase (preserving any other link types). Drive folders are NOT deleted.
     async function clearDriveLinks() {
+      if (!window.requireAdmin('clear drive links')) return;
       if (!window.confirm('Remove all Google Drive folder links from every module and video in Supabase?\n\nThis lets a fresh run recreate real folders. Folders already in Google Drive are NOT deleted.')) {
         return;
       }

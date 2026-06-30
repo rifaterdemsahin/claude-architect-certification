@@ -101,7 +101,7 @@
         </button>
       </div>
 
-      <button class="btn btn-primary" onclick="saveGoogleCredentials()" style="margin-bottom: 12px; margin-top: 12px;">
+      <button data-require-admin class="btn btn-primary" onclick="saveGoogleCredentials()" style="margin-bottom: 12px; margin-top: 12px;">
         Save Google Credentials
       </button>
 
@@ -501,6 +501,7 @@
     }
 
     async function saveGoogleCredentials() {
+      if (!window.requireAdmin('save credentials')) return;
       const clientId = document.getElementById("client-id").value.trim();
       const apiKey = document.getElementById("api-key").value.trim();
       localStorage.setItem("gdrive_client_id", clientId);

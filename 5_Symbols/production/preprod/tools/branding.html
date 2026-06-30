@@ -83,7 +83,7 @@
 
     <div class="toolbar">
       <button class="btn btn-secondary btn-sm" id="reloadBtn">🔄 Reload</button>
-      <button class="btn btn-sm" id="seedBtn">🌱 Seed defaults</button>
+      <button class="btn btn-sm" id="seedBtn" data-require-admin>🌱 Seed defaults</button>
     </div>
 
     <div id="errorWrap"></div>
@@ -229,7 +229,7 @@
               '<td class="key-col">' + escHtml(r.rule_key) + '</td>' +
               '<td>' + (r.color ? '<span class="swatch" style="background:' + escHtml(r.color) + '"></span>' : '') +
                 '<input class="val-input" value="' + escHtml(r.value) + '" data-id="' + r.id + '"></td>' +
-              '<td style="text-align:right"><button class="btn btn-sm copy-btn" data-val="' + escHtml(r.value) + '" title="Copy value">📋 Copy</button> <button class="btn btn-sm save-btn" data-id="' + r.id + '">💾 Save</button></td>' +
+              '<td style="text-align:right"><button class="btn btn-sm copy-btn" data-val="' + escHtml(r.value) + '" title="Copy value">📋 Copy</button> <button class="btn btn-sm save-btn" data-id="' + r.id + '" data-require-admin>💾 Save</button></td>' +
             '</tr>'
           ).join('') +
           '</tbody></table></div>';
@@ -242,6 +242,7 @@
     }
 
     async function saveRow(id) {
+      if (!window.requireAdmin('save business rules')) return;
       const input = document.querySelector('.val-input[data-id="' + id + '"]');
       if (!input) return;
       const value = input.value;
@@ -278,6 +279,7 @@
     }
 
     async function seedDefaults() {
+      if (!window.requireAdmin('seed default rules')) return;
       $('seedBtn').disabled = true; $('seedBtn').textContent = 'Seeding…';
       try {
         const payload = DEFAULTS.map(d => ({ category: d[0], rule_key: d[1], label: d[2], value: d[3], color: d[4], description: d[5], sort_order: d[6] }));

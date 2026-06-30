@@ -249,9 +249,9 @@
       <div class="glass-card-body">
         <div id="statsRow" class="stats-row" style="display:none;"></div>
         <div style="margin-bottom:14px;display:flex;gap:10px;flex-wrap:wrap;" id="candBulkBar">
-          <button class="btn btn-primary btn-sm" id="bulkGenSaveBtn" onclick="bulkGenerateAndSave()" style="background:var(--accent);">✨ Bulk Generate & Save Selected</button>
-          <button class="btn btn-success btn-sm" id="saveSelectedBtn">💾 Save Selected Images</button>
-          <button class="btn btn-success btn-sm" id="saveAllAzureBtn">☁️ Save All Candidates to Azure</button>
+          <button class="btn btn-primary btn-sm" id="bulkGenSaveBtn" data-require-admin onclick="bulkGenerateAndSave()" style="background:var(--accent);">✨ Bulk Generate & Save Selected</button>
+          <button class="btn btn-success btn-sm" id="saveSelectedBtn" data-require-admin>💾 Save Selected Images</button>
+          <button class="btn btn-success btn-sm" id="saveAllAzureBtn" data-require-admin>☁️ Save All Candidates to Azure</button>
         </div>
         <div id="candidatesWrap" style="overflow-x:auto;">
           <div class="empty-state">
@@ -586,7 +586,7 @@
             <button class="btn btn-secondary btn-sm" style="background:rgba(255,255,255,0.1);" onclick="generateForSentence(${s.id}, true)" ${isGenerating ? 'disabled' : ''}>🔄 Regen</button>
             <button class="btn btn-secondary btn-sm" style="background:rgba(255,255,255,0.1);margin-top:4px;" onclick="openPromptModal(${s.id})">🔍 Prompt</button>`;
         } else if (status === 'candidate') {
-          actionCell = `<button class="btn btn-success btn-sm" onclick="saveToAzure(${s.id})">☁️ Save Azure</button>
+          actionCell = `<button class="btn btn-success btn-sm" data-require-admin onclick="saveToAzure(${s.id})">☁️ Save Azure</button>
             <button class="btn btn-secondary btn-sm" style="background:rgba(255,255,255,0.1);" onclick="generateForSentence(${s.id}, true)" ${isGenerating ? 'disabled' : ''}>🔄 Regen</button>
             <button class="btn btn-secondary btn-sm" style="background:rgba(255,255,255,0.1);margin-top:4px;" onclick="openPromptModal(${s.id})">🔍 Prompt</button>`;
         } else {
@@ -912,6 +912,7 @@ Avoid: garbled or misspelled text, watermarks, logos, stock-photo clichés, busy
     }
 
     async function saveToAzure(sentenceId) {
+      if (!window.requireAdmin('save images to Azure')) return;
       const cand = candidateMap[sentenceId];
       if (!cand) { showToast('Generate a candidate first.', true); return; }
       const s = currentSentences.find(x => x.id === sentenceId);

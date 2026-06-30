@@ -1157,6 +1157,10 @@ func researchUploadHandler(cfg config) http.HandlerFunc {
 			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 			return
 		}
+		if !isAdminRequest(r) {
+			http.Error(w, "Unauthorized — sign in as admin to upload.", http.StatusUnauthorized)
+			return
+		}
 		container := r.URL.Query().Get("container")
 		if !allowedResearchContainers[container] {
 			http.Error(w, "invalid container", http.StatusBadRequest)
@@ -1365,6 +1369,10 @@ func researchRenameHandler(cfg config) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+		if !isAdminRequest(r) {
+			http.Error(w, "Unauthorized — sign in as admin to rename.", http.StatusUnauthorized)
 			return
 		}
 		var body struct {
@@ -1930,6 +1938,10 @@ func imageSaveHandler(cfg config) http.HandlerFunc {
 			http.Error(w, `{"error":"method not allowed"}`, http.StatusMethodNotAllowed)
 			return
 		}
+		if !isAdminRequest(r) {
+			http.Error(w, `{"error":"Unauthorized — sign in as admin to save images."}`, http.StatusUnauthorized)
+			return
+		}
 
 		var req ImageSaveRequest
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -2057,6 +2069,10 @@ func drawingSaveHandler(cfg config) http.HandlerFunc {
 		w.Header().Set("Content-Type", "application/json")
 		if r.Method != http.MethodPost {
 			http.Error(w, `{"error":"method not allowed"}`, http.StatusMethodNotAllowed)
+			return
+		}
+		if !isAdminRequest(r) {
+			http.Error(w, `{"error":"Unauthorized — sign in as admin to save drawings."}`, http.StatusUnauthorized)
 			return
 		}
 
@@ -2414,6 +2430,10 @@ func infographicSaveHandler(cfg config) http.HandlerFunc {
 		w.Header().Set("Content-Type", "application/json")
 		if r.Method != http.MethodPost {
 			http.Error(w, `{"error":"method not allowed"}`, http.StatusMethodNotAllowed)
+			return
+		}
+		if !isAdminRequest(r) {
+			http.Error(w, `{"error":"Unauthorized — sign in as admin to save infographics."}`, http.StatusUnauthorized)
 			return
 		}
 
@@ -3464,7 +3484,8 @@ func animationPromptHandler(cfg config) http.HandlerFunc {
 
 func scriptGenerateHandler(cfg config) http.HandlerFunc {
 	type ORRequest struct {
-		Prompt string `json:"prompt"`
+		Prompt   string `json:"prompt"`
+		JsonMode bool   `json:"jsonMode"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -3494,6 +3515,11 @@ func scriptGenerateHandler(cfg config) http.HandlerFunc {
 			"messages": []map[string]string{
 				{"role": "user", "content": req.Prompt},
 			},
+		}
+		if req.JsonMode {
+			reqBody["response_format"] = map[string]map[string]string{
+				"type": {"type": "json_object"},
+			}
 		}
 
 		b, _ := json.Marshal(reqBody)

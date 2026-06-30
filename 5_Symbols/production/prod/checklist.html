@@ -248,7 +248,7 @@
               </div>
               <div class="item-actions">
                 <button class="item-btn" onclick="openEditModal(${item.id},'${item.item_name.replace(/'/g,"\\'")}','${(item.item_desc||'').replace(/'/g,"\\'")}','${phase}')">✏️ Edit</button>
-                <button class="item-btn danger" onclick="deleteItem(${item.id})">🗑</button>
+                <button class="item-btn danger" data-require-admin onclick="deleteItem(${item.id})">🗑</button>
               </div>
             </li>`;
           }).join('')}</ul>
@@ -332,6 +332,7 @@
     function closeEditModal() { document.getElementById('editModal').classList.remove('open'); }
 
     async function saveEdit() {
+      if (!window.requireAdmin('save items')) return;
       const id = parseInt(document.getElementById('editItemId').value);
       const name = document.getElementById('editName').value.trim();
       const desc = document.getElementById('editDesc').value.trim();
@@ -346,6 +347,7 @@
 
     // ── Delete item ──
     async function deleteItem(id) {
+      if (!window.requireAdmin('delete items')) return;
       if (!confirm('Delete this checklist item?')) return;
       setBadge('saving');
       try {

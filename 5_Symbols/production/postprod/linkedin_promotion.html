@@ -417,7 +417,7 @@ function renderPosts(){
             <label>💾 Save the published post link</label>
             <div class="save-input-wrap">
               <input type="url" id="url_${id}" placeholder="https://www.linkedin.com/feed/update/...">
-              <button class="act btn-copy" data-act="save" data-id="${id}">💾 Save link</button>
+              <button class="act btn-copy" data-act="save" data-id="${id}" data-require-admin>💾 Save link</button>
             </div>
             <div class="posted-badge" id="badge_${id}"></div>
           </div>
@@ -513,6 +513,7 @@ async function downloadImage(url, filename){
 
 // Upsert the published LinkedIn link into Supabase
 async function saveLink(it, postUrl, imgUrl){
+  if (!window.requireAdmin('save LinkedIn links')) return;
   const now = new Date().toISOString();
   const payload = {
     module_number: it.m, video_number: it.v || 0, kind: it.kind,

@@ -695,7 +695,7 @@
           <div class="asset-desc-edit" style="display:none;">
             <textarea class="asset-desc-input" placeholder="Describe this research element..."></textarea>
             <div class="asset-desc-actions">
-              <button class="btn-desc-save" onclick="saveDescription('${id}')">💾 Save</button>
+              <button class="btn-desc-save" data-require-admin onclick="saveDescription('${id}')">💾 Save</button>
               <button class="btn-desc-cancel" onclick="cancelDescription('${id}')">Cancel</button>
             </div>
           </div>
@@ -714,6 +714,7 @@
     };
 
     window.saveDescription = async function(id) {
+      if (!window.requireAdmin || !window.requireAdmin('save descriptions')) return;
       const wrap = document.getElementById(id);
       if (!wrap) return;
       const { container, name } = descRegistry[id] || {};

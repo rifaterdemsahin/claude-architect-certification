@@ -630,6 +630,7 @@
     }
 
     async function save(itemId, checked, notes) {
+      if (!window.requireAdmin('manage sanity checklist')) return;
       setBadge('saving');
       try {
         const { error } = await db.from('checklist_progress').upsert(
@@ -656,6 +657,7 @@
     }
 
     async function saveDesc(itemId, desc) {
+      if (!window.requireAdmin('manage sanity checklist')) return;
       try {
         const { error } = await db
           .from('checklist_items')
@@ -762,7 +764,7 @@
               <div class="url-edit-row" id="url-row-${item.id}">
                 <input class="url-input" type="url" data-id="${item.id}"
                   value="${item.item_url || ''}" placeholder="https://…">
-                <button class="url-save-btn" onclick="saveUrlFromBtn(${item.id})">Save link</button>
+                <button class="url-save-btn" data-require-admin onclick="saveUrlFromBtn(${item.id})">Save link</button>
               </div>
               <textarea class="item-note" data-id="${item.id}" placeholder="Add production note… (saves automatically)">${notes}</textarea>
             </div>
@@ -965,7 +967,7 @@
             <div class="item-desc" contenteditable="true" data-id="${newItem.id}">${newItem.item_desc || ''}</div>
             <div class="url-edit-row" id="url-row-${newItem.id}">
               <input class="url-input" type="url" data-id="${newItem.id}" value="" placeholder="https://…">
-              <button class="url-save-btn" onclick="saveUrlFromBtn(${newItem.id})">Save link</button>
+              <button class="url-save-btn" data-require-admin onclick="saveUrlFromBtn(${newItem.id})">Save link</button>
             </div>
             <textarea class="item-note" data-id="${newItem.id}" placeholder="Add production note… (saves automatically)"></textarea>
           </div>`;
@@ -1038,6 +1040,7 @@
     }
 
     async function updateSortOrder(list) {
+      if (!window.requireAdmin('manage sanity checklist')) return;
       const rows = [...list.querySelectorAll('li[data-item-id]')];
       setBadge('saving');
       try {
@@ -1081,6 +1084,7 @@
     }
 
     async function saveUrlFromBtn(itemId) {
+      if (!window.requireAdmin('manage sanity checklist')) return;
       const input = document.querySelector(`.url-input[data-id="${itemId}"]`);
       if (!input) return;
       const url = input.value.trim();

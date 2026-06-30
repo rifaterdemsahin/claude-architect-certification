@@ -146,7 +146,7 @@
                 <button class="btn btn-success btn-sm" id="downloadBtn" onclick="downloadMarkdown()">⬇️ .md</button>
                 <button class="btn btn-sm" style="background:#f59e0b; color:#000;" onclick="downloadCurrentSlidePng()">🖼️ PNG</button>
                 <button class="btn btn-sm" style="background:#3b82f6; color:#fff;" id="bulkPngBtn" onclick="bulkDownloadPng()">📦 Bulk PNG</button>
-                <button class="btn btn-sm" style="background:#4ade80; color:#000;" onclick="savePresentation()">💾 Save to DB</button>
+                <button class="btn btn-sm" style="background:#4ade80; color:#000;" onclick="savePresentation()" data-require-admin>💾 Save to DB</button>
               </div>
             </div>
             <textarea id="marpPreview" class="preview-box" style="width:100%; height:320px; resize:vertical;" oninput="parseMarkdownToPreview(this.value)"></textarea>
@@ -650,6 +650,7 @@ style: |
     }
 
     async function savePresentation() {
+      if (!window.requireAdmin('save presentations')) return;
       const videoId = $('videoSelect').value;
       if (!videoId) { showToast('Select a video first.', true); return; }
       
@@ -734,7 +735,7 @@ style: |
             <td style="white-space:nowrap; color:var(--text-muted); font-size:0.8rem;">${escHtml(when)}</td>
             <td style="white-space:nowrap;">
               <button class="btn btn-secondary btn-sm" onclick="loadSavedPresentation('${r.id}')">📂 Load</button>
-              <button class="btn btn-sm" style="background:var(--danger); color:#fff;" onclick="deleteSavedPresentation('${r.id}')">🗑</button>
+              <button class="btn btn-sm" style="background:var(--danger); color:#fff;" onclick="deleteSavedPresentation('${r.id}')" data-require-admin>🗑</button>
             </td>
           </tr>`;
         }).join('');
@@ -778,6 +779,7 @@ style: |
     }
 
     async function deleteSavedPresentation(id) {
+      if (!window.requireAdmin('delete presentations')) return;
       if (!confirm('Delete this saved presentation? This cannot be undone.')) return;
       try {
         const res = await fetch(SUPABASE_URL + `/rest/v1/presentations?id=eq.${id}`, {

@@ -534,11 +534,11 @@
     const grid = document.getElementById('personas-grid');
     grid.innerHTML = personas.map(p => `
       <div class="pain-item" data-id="${p.id}">
-        <button class="delete-row-btn" onclick="deletePersona('${p.id}', this)">✕</button>
+        <button class="delete-row-btn" data-require-admin onclick="deletePersona('${p.id}', this)">✕</button>
         <span class="pain-icon" contenteditable="${editMode}" data-placeholder="emoji">${p.emoji}</span>
         <h4 contenteditable="${editMode}" data-placeholder="Role title">${p.role_title}</h4>
         <p contenteditable="${editMode}" data-placeholder="Description">${p.description}</p>
-        <button class="save-row-btn" onclick="savePersona('${p.id}', this)">
+        <button class="save-row-btn" data-require-admin onclick="savePersona('${p.id}', this)">
           <i class="fa-solid fa-floppy-disk"></i> Save
         </button>
       </div>
@@ -546,6 +546,7 @@
   }
 
   async function savePersona(id, btn) {
+    if (!window.requireAdmin('manage problem data')) return;
     const card = btn.closest('.pain-item');
     const emoji       = card.querySelector('.pain-icon').textContent.trim();
     const role_title  = card.querySelector('h4').textContent.trim();
@@ -557,6 +558,7 @@
   }
 
   async function deletePersona(id, btn) {
+    if (!window.requireAdmin('manage problem data')) return;
     if (!confirm('Delete this persona?')) return;
     try {
       await sbDelete('target_personas', id);
@@ -576,11 +578,11 @@
       const div = document.createElement('div');
       div.className = 'pain-item'; div.dataset.id = p.id;
       div.innerHTML = `
-        <button class="delete-row-btn" onclick="deletePersona('${p.id}', this)">✕</button>
+        <button class="delete-row-btn" data-require-admin onclick="deletePersona('${p.id}', this)">✕</button>
         <span class="pain-icon" contenteditable="true" data-placeholder="emoji">${p.emoji}</span>
         <h4 contenteditable="true" data-placeholder="Role title">${p.role_title}</h4>
         <p contenteditable="true" data-placeholder="Description">${p.description}</p>
-        <button class="save-row-btn" onclick="savePersona('${p.id}', this)">
+        <button class="save-row-btn" data-require-admin onclick="savePersona('${p.id}', this)">
           <i class="fa-solid fa-floppy-disk"></i> Save
         </button>`;
       grid.appendChild(div);
@@ -591,13 +593,13 @@
     const list = document.getElementById('challenges-list');
     list.innerHTML = challenges.map(c => `
       <li style="display:flex; gap:0.75rem; align-items:flex-start; position:relative;" data-id="${c.id}">
-        <button class="delete-row-btn" style="position:static; margin-left:auto;" onclick="deleteChallenge('${c.id}', this)">✕</button>
+        <button class="delete-row-btn" data-require-admin style="position:static; margin-left:auto;" onclick="deleteChallenge('${c.id}', this)">✕</button>
         <span style="color:#ef4444; font-weight:700; flex-shrink:0;">${c.challenge_number}.</span>
         <span>
           <strong contenteditable="${editMode}" data-placeholder="Title">${c.title}</strong>
           — <span contenteditable="${editMode}" data-placeholder="Description">${c.description}</span>
           <br>
-          <button class="save-row-btn" onclick="saveChallenge('${c.id}', this)">
+          <button class="save-row-btn" data-require-admin onclick="saveChallenge('${c.id}', this)">
             <i class="fa-solid fa-floppy-disk"></i> Save
           </button>
         </span>
@@ -606,6 +608,7 @@
   }
 
   async function saveChallenge(id, btn) {
+    if (!window.requireAdmin('manage problem data')) return;
     const li = btn.closest('li');
     const title       = li.querySelector('strong').textContent.trim();
     const description = li.querySelector('strong + span, strong ~ span').textContent.trim().replace(/^—\s*/, '');
@@ -616,6 +619,7 @@
   }
 
   async function deleteChallenge(id, btn) {
+    if (!window.requireAdmin('manage problem data')) return;
     if (!confirm('Delete this challenge?')) return;
     try {
       await sbDelete('core_challenges', id);
@@ -637,12 +641,12 @@
       li.style.cssText = 'display:flex; gap:0.75rem; align-items:flex-start; position:relative;';
       li.dataset.id = c.id;
       li.innerHTML = `
-        <button class="delete-row-btn" style="position:static; margin-left:auto;" onclick="deleteChallenge('${c.id}', this)">✕</button>
+        <button class="delete-row-btn" data-require-admin style="position:static; margin-left:auto;" onclick="deleteChallenge('${c.id}', this)">✕</button>
         <span style="color:#ef4444; font-weight:700; flex-shrink:0;">${c.challenge_number}.</span>
         <span>
           <strong contenteditable="true" data-placeholder="Title">${c.title}</strong>
           — <span contenteditable="true" data-placeholder="Description">${c.description}</span><br>
-          <button class="save-row-btn" onclick="saveChallenge('${c.id}', this)">
+          <button class="save-row-btn" data-require-admin onclick="saveChallenge('${c.id}', this)">
             <i class="fa-solid fa-floppy-disk"></i> Save
           </button>
         </span>`;
@@ -656,14 +660,14 @@
       <tr data-id="${d.id}">
         <td>
           <strong contenteditable="${editMode}" data-placeholder="Domain name">${d.domain_name}</strong>
-          <br><button class="save-row-btn" onclick="saveDomain('${d.id}', this)"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+          <br><button class="save-row-btn" data-require-admin onclick="saveDomain('${d.id}', this)"><i class="fa-solid fa-floppy-disk"></i> Save</button>
         </td>
         <td contenteditable="${editMode}" data-placeholder="Topics (comma separated)">${d.topics_covered.join(', ')}</td>
         <td>
           <span class="pct-badge">
             ~<span contenteditable="${editMode}" data-placeholder="15">${d.weight_percent}</span>%
           </span>
-          <button class="delete-row-btn" style="position:static; display:none;" onclick="deleteDomain('${d.id}', this)">✕</button>
+          <button class="delete-row-btn" data-require-admin style="position:static; display:none;" onclick="deleteDomain('${d.id}', this)">✕</button>
         </td>
       </tr>
     `).join('');
@@ -672,6 +676,7 @@
   }
 
   async function saveDomain(id, btn) {
+    if (!window.requireAdmin('manage problem data')) return;
     const row = btn.closest('tr');
     const domain_name    = row.querySelector('strong').textContent.trim();
     const topicsRaw      = row.cells[1].textContent.trim();
@@ -684,6 +689,7 @@
   }
 
   async function deleteDomain(id, btn) {
+    if (!window.requireAdmin('manage problem data')) return;
     if (!confirm('Delete this domain?')) return;
     try {
       await sbDelete('exam_domains', id);
@@ -705,12 +711,12 @@
       tr.innerHTML = `
         <td>
           <strong contenteditable="true" data-placeholder="Domain name">${d.domain_name}</strong>
-          <br><button class="save-row-btn" onclick="saveDomain('${d.id}', this)"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+          <br><button class="save-row-btn" data-require-admin onclick="saveDomain('${d.id}', this)"><i class="fa-solid fa-floppy-disk"></i> Save</button>
         </td>
         <td contenteditable="true" data-placeholder="Topics (comma separated)">${d.topics_covered.join(', ')}</td>
         <td>
           <span class="pct-badge">~<span contenteditable="true" data-placeholder="10">${d.weight_percent}</span>%</span>
-          <button class="delete-row-btn" style="position:static;" onclick="deleteDomain('${d.id}', this)">✕</button>
+          <button class="delete-row-btn" data-require-admin style="position:static;" onclick="deleteDomain('${d.id}', this)">✕</button>
         </td>`;
       tbody.appendChild(tr);
     } catch(e) { showError(e.message); }
@@ -724,16 +730,17 @@
         <div class="solution-step-body" style="flex:1;">
           <h4 contenteditable="${editMode}" data-placeholder="Title">${s.title}</h4>
           <p contenteditable="${editMode}" data-placeholder="Description">${s.description}</p>
-          <button class="save-row-btn" onclick="saveSolution('${s.id}', this)">
+          <button class="save-row-btn" data-require-admin onclick="saveSolution('${s.id}', this)">
             <i class="fa-solid fa-floppy-disk"></i> Save
           </button>
         </div>
-        <button class="delete-row-btn" onclick="deleteSolution('${s.id}', this)">✕</button>
+        <button class="delete-row-btn" data-require-admin onclick="deleteSolution('${s.id}', this)">✕</button>
       </li>
     `).join('');
   }
 
   async function saveSolution(id, btn) {
+    if (!window.requireAdmin('manage problem data')) return;
     const li = btn.closest('li');
     const title       = li.querySelector('h4').textContent.trim();
     const description = li.querySelector('p').textContent.trim();
@@ -744,6 +751,7 @@
   }
 
   async function deleteSolution(id, btn) {
+    if (!window.requireAdmin('manage problem data')) return;
     if (!confirm('Delete this step?')) return;
     try {
       await sbDelete('course_solutions', id);
@@ -768,11 +776,11 @@
         <div class="solution-step-body" style="flex:1;">
           <h4 contenteditable="true" data-placeholder="Title">${s.title}</h4>
           <p contenteditable="true" data-placeholder="Description">${s.description}</p>
-          <button class="save-row-btn" onclick="saveSolution('${s.id}', this)">
+          <button class="save-row-btn" data-require-admin onclick="saveSolution('${s.id}', this)">
             <i class="fa-solid fa-floppy-disk"></i> Save
           </button>
         </div>
-        <button class="delete-row-btn" onclick="deleteSolution('${s.id}', this)">✕</button>`;
+        <button class="delete-row-btn" data-require-admin onclick="deleteSolution('${s.id}', this)">✕</button>`;
       list.appendChild(li);
     } catch(e) { showError(e.message); }
   }

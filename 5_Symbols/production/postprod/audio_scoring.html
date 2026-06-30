@@ -803,7 +803,7 @@ function renderEmotionTable() {
       <td data-label="Rationale"><textarea class="cell-edit" data-f="audio_rationale" placeholder="Why these choices fit">${esc(s.audio_rationale)}</textarea></td>
       <td data-label="Status"><select class="cell-edit" data-f="audio_status">${statusOpts}</select></td>
       <td data-label="Actions"><div class="row-actions">
-        <button class="btn btn-save" onclick="saveSentenceRow(${s.id}, this)">💾 Save</button>
+        <button class="btn btn-save" data-require-admin onclick="saveSentenceRow(${s.id}, this)">💾 Save</button>
         <button class="btn btn-sfx" onclick="genSentencePrompt(${s.id}, 'sfx')">🎚️ SFX Prompt</button>
         <button class="btn btn-music" onclick="genSentencePrompt(${s.id}, 'music')">🎵 Music Prompt</button>
       </div></td>
@@ -828,6 +828,7 @@ function updateEmotionStats() {
 }
 
 async function saveSentenceRow(id, btn) {
+  if (!window.requireAdmin('save audio scoring')) return;
   const tr = btn.closest('tr');
   const payload = {};
   tr.querySelectorAll('[data-f]').forEach(el => { payload[el.dataset.f] = el.value; });
@@ -887,7 +888,7 @@ function renderSceneTable() {
       <td data-label="Rationale"><textarea class="cell-edit" data-f="audio_rationale" placeholder="Why these choices fit the scene">${esc(s.audio_rationale)}</textarea></td>
       <td data-label="Status"><select class="cell-edit" data-f="audio_status">${statusOpts}</select></td>
       <td data-label="Actions"><div class="row-actions">
-        <button class="btn btn-save" onclick="saveSceneRow(${s.id}, this)">💾 Save</button>
+        <button class="btn btn-save" data-require-admin onclick="saveSceneRow(${s.id}, this)">💾 Save</button>
         <button class="btn btn-sfx" onclick="genScenePrompt(${s.id}, 'sfx')">🎚️ SFX Prompt</button>
         <button class="btn btn-music" onclick="genScenePrompt(${s.id}, 'music')">🎵 Music Prompt</button>
       </div></td>
@@ -896,6 +897,7 @@ function renderSceneTable() {
 }
 
 async function saveSceneRow(id, btn) {
+  if (!window.requireAdmin('save audio scoring')) return;
   const tr = btn.closest('tr');
   const payload = {};
   tr.querySelectorAll('[data-f]').forEach(el => { payload[el.dataset.f] = el.value; });

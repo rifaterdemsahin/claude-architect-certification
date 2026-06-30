@@ -221,7 +221,7 @@ Return ONLY a JSON array with this structure:
         </div>
         <div class="glass-card-body">
           <div style="margin-bottom: 12px; display: none;" id="bulkSaveWrap">
-            <button class="btn btn-secondary btn-sm" onclick="saveSelectedCandidates()">💾 Save Selected to Scenes</button>
+            <button class="btn btn-secondary btn-sm" data-require-admin onclick="saveSelectedCandidates()">💾 Save Selected to Scenes</button>
           </div>
           <div id="candidatesTableWrap">
             <div class="empty-state">
@@ -263,7 +263,7 @@ Return ONLY a JSON array with this structure:
             </div>
           </div>
           <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-top:8px;">
-            <button class="btn" id="saveBtn">💾 Save & Upload</button>
+            <button class="btn" id="saveBtn" data-require-admin>💾 Save & Upload</button>
             <button class="btn btn-secondary" id="clearBtn">🗑️ Clear Form</button>
             <span id="saveStatus" style="color:var(--text-muted);font-size:0.85rem;"></span>
           </div>
@@ -661,6 +661,7 @@ Return ONLY a JSON array with this structure:
     }
 
     async function uploadToAzure(blob, ltMain) {
+      if (!window.requireAdmin('upload lower thirds')) return;
       const form = new FormData();
       const fileName = brandFilePrefix(ltMain) + '.png';
       form.append('file', blob, fileName);
@@ -674,6 +675,7 @@ Return ONLY a JSON array with this structure:
     }
 
     async function saveLowerThird() {
+      if (!window.requireAdmin('save lower thirds')) return;
       const sceneNum = parseInt($('sceneNumber').value);
       const ltMain = $('ltMain').value.trim();
       const ltSub = $('ltSub').value.trim();
@@ -976,6 +978,7 @@ Return ONLY a JSON array with this structure:
     }
 
     async function saveSelectedCandidates() {
+      if (!window.requireAdmin('save candidates')) return;
       const cbs = document.querySelectorAll('.cand-cb:checked');
       if (!cbs.length) { showToast('Select at least one candidate.', true); return; }
       if (!currentModuleId || !currentVideoId) return;

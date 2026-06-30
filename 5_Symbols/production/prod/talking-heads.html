@@ -592,7 +592,7 @@
       html += `    <div class="video-header-left">`;
       html += `      <span class="video-toggle${isCollapsed ? ' collapsed' : ''}" id="${groupId}-toggle">▼</span>`;
       const isRecorded = firstSent.recorded === true;
-      html += `      <input type="checkbox" ${isRecorded ? 'checked' : ''} style="width:18px;height:18px;accent-color:var(--success);cursor:pointer;flex-shrink:0;" onclick="event.stopPropagation();toggleRecorded(${scriptId}, ${firstSent.video_id || 0}, this.checked)" title="Mark as shot">`;
+      html += `      <input type="checkbox" ${isRecorded ? 'checked' : ''} style="width:18px;height:18px;accent-color:var(--success);cursor:pointer;flex-shrink:0;" onclick="event.stopPropagation();toggleRecorded(${scriptId}, ${firstSent.video_id || 0}, this.checked)" title="Mark as shot" data-require-admin>`;
       html += `      <h2 style="font-family: var(--font-title); font-size: 1.25rem; font-weight: 700; margin: 0; color: white;">${esc(groupLabel)}</h2>`;
       const labelSafe = groupLabel.replace(/'/g, "\\'");
       html += `      <button class="video-btn" style="font-size:0.7rem; padding:2px 8px;" onclick="event.stopPropagation();copyToClipboard('${labelSafe}')" title="Copy video label to clipboard">📋</button>`;
@@ -660,6 +660,7 @@
   };
 
   window.toggleRecorded = async function(scriptId, videoId, checked) {
+    if (!window.requireAdmin('mark recorded status')) return;
     try {
       const res = await fetch(
         `${SUPABASE_URL}/rest/v1/videos?id=eq.${videoId}`,
@@ -849,6 +850,7 @@ let carouselData = [];
     renderCarousel();
   };
   window.saveCarouselOrder = async function() {
+    if (!window.requireAdmin('reorder images')) return;
     const width = String(carouselData.length).length;
     const targets = carouselData.map((item, i) =>
       `${String(i + 1).padStart(width, '0')}_${stripOrderPrefix(item.name)}`);
@@ -896,6 +898,7 @@ let carouselData = [];
     }
   };
   window.saveCarouselRename = async function() {
+    if (!window.requireAdmin('rename images')) return;
     const item = carouselData[carouselIndex];
     const inp = document.getElementById('carousel-rename-input');
     if (!item || !inp) return;
@@ -1108,7 +1111,7 @@ let carouselData = [];
     let html = `<div style="display:flex; justify-content:flex-end; align-items:center; gap:8px; margin-bottom:14px;">`;
     if (carouselSorting) {
       html += `  <span style="margin-right:auto; font-size:0.8rem; color:var(--text-muted);">↕ Reorder mode — use ▲▼, then save. Names become 1_, 2_, …</span>`;
-      html += `  <button class="mod-btn js-save-order" style="background:var(--success); border-color:var(--success); color:white;" onclick="saveCarouselOrder()">💾 Save order</button>`;
+      html += `  <button class="mod-btn js-save-order" style="background:var(--success); border-color:var(--success); color:white;" onclick="saveCarouselOrder()" data-require-admin>💾 Save order</button>`;
       html += `  <button class="mod-btn" onclick="cancelCarouselSort()">Cancel</button>`;
     } else {
       html += `  <button class="mod-btn" onclick="startCarouselSort()" title="Reorder images — saving prefixes filenames with 1_, 2_, …">↕ Sort</button>`;
@@ -1126,7 +1129,7 @@ let carouselData = [];
       html += `    style="background:rgba(0,0,0,0.4); border:1px solid var(--accent,#6366f1); border-radius:6px; color:var(--text-main); padding:6px 10px; font-size:0.85rem; min-width:220px;"`;
       html += `    onkeydown="if(event.key==='Enter'){saveCarouselRename();}else if(event.key==='Escape'){cancelCarouselRename();}">`;
       html += `  <span style="font-size:0.85rem; color:var(--text-muted); font-family:monospace;">${esc(ext || '')}</span>`;
-      html += `  <button class="mod-btn" style="background:var(--success); border-color:var(--success); color:white;" onclick="saveCarouselRename()">💾 Save</button>`;
+      html += `  <button class="mod-btn" style="background:var(--success); border-color:var(--success); color:white;" onclick="saveCarouselRename()" data-require-admin>💾 Save</button>`;
       html += `  <button class="mod-btn" onclick="cancelCarouselRename()">Cancel</button>`;
       html += `</div>`;
     } else {
@@ -1162,9 +1165,8 @@ let carouselData = [];
     // scrolling through a long grid without scrolling back up.
     if (carouselSorting) {
       html += `<div style="display:flex; justify-content:center; gap:8px; margin-top:18px;">`;
-      html += `  <button class="mod-btn js-save-order" style="background:var(--success); border-color:var(--success); color:white;" onclick="saveCarouselOrder()">💾 Save order</button>`;
+      html += `  <button class="mod-btn js-save-order" style="background:var(--success); border-color:var(--success); color:white;" onclick="saveCarouselOrder()" data-require-admin>💾 Save order</button>`;
       html += `  <button class="mod-btn" onclick="cancelCarouselSort()">Cancel</button>`;
-      html += `</div>`;
     }
 
     body.innerHTML = html;
