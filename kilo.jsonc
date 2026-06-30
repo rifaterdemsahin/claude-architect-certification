@@ -1,0 +1,13 @@
+{
+  "$schema": "https://app.kilo.ai/config.json",
+  "indexing": {
+    "enabled": true,
+    "provider": "ollama",
+    "model": "nomic-embed-text",
+    "vectorStore": "lancedb",
+    "ollama": {
+      "baseURL": "http://localhost:11434"
+    },
+    "lancedb": {}
+  }
+}
