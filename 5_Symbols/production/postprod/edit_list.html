@@ -614,7 +614,7 @@ CREATE POLICY "Allow public all access" ON public.video_assets FOR ALL USING (tr
     }
 
     async function deleteVideo(id) {
-  if (window.requireAdmin && !window.requireAdmin('deleteVideo')) return;
+  if (!window.requireAdmin || !window.requireAdmin('deleteVideo')) return;
       if (!confirm('Are you sure you want to delete this video and all its assets from Supabase?')) return;
       
       try {

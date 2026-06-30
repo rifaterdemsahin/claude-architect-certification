@@ -418,7 +418,7 @@
     }
 
     async function clearAll() {
-  if (window.requireAdmin && !window.requireAdmin('clearAll')) return;
+  if (!window.requireAdmin || !window.requireAdmin('clearAll')) return;
       if (!confirm('This will DELETE all data from all tables. Continue?')) return;
       const tables = ['scripts', 'course_content', 'checklist_progress', 'checklist_items', 'edl_entries', 'scene_cues', 'scenes', 'resource_links', 'video_cues', 'videos', 'modules'];
       for (const t of tables) {

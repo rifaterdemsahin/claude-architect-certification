@@ -504,7 +504,7 @@ CREATE POLICY "allow_all_ivq" ON ivq_questions FOR ALL USING (true) WITH CHECK (
     }
 
     async function deleteVideo(id) {
-  if (window.requireAdmin && !window.requireAdmin('deleteVideo')) return;
+  if (!window.requireAdmin || !window.requireAdmin('deleteVideo')) return;
       if (!confirm('Delete this video and ALL its questions?')) return;
       try {
         const r = await api('videos?id=eq.' + id, { method: 'DELETE', headers: { 'Prefer': 'return=minimal' } });
@@ -598,7 +598,7 @@ CREATE POLICY "allow_all_ivq" ON ivq_questions FOR ALL USING (true) WITH CHECK (
     }
 
     async function deleteIvq(qId, videoId) {
-  if (window.requireAdmin && !window.requireAdmin('deleteIvq')) return;
+  if (!window.requireAdmin || !window.requireAdmin('deleteIvq')) return;
       if (!confirm('Delete this question?')) return;
       try {
         const r = await api('ivq_questions?id=eq.' + qId, { method: 'DELETE', headers: { 'Prefer': 'return=minimal' } });

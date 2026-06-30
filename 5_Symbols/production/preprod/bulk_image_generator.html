@@ -612,7 +612,7 @@
     }
 
     function removeSentence(id) {
-  if (window.requireAdmin && !window.requireAdmin('removeSentence')) return;
+  if (!window.requireAdmin || !window.requireAdmin('removeSentence')) return;
       sentences = sentences.filter(s => s.id !== id);
       results = results.filter(r => r.sentenceId !== id);
       renderSentences();

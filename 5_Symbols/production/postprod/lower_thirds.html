@@ -719,7 +719,7 @@ Return ONLY a JSON array with this structure:
     }
 
     async function deleteScene(id) {
-  if (window.requireAdmin && !window.requireAdmin('deleteScene')) return;
+  if (!window.requireAdmin || !window.requireAdmin('deleteScene')) return;
       if (!confirm('Delete this lower third?')) return;
       try {
         await api('scenes?id=eq.' + id, { method: 'DELETE' });

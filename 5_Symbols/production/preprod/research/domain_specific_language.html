@@ -328,7 +328,7 @@ function searchRelated(term) {
 
 // ── Save (Create / Update) ──────────────────────────────────────────────────
 async function saveEntry() {
-  if (window.requireAdmin && !window.requireAdmin('saveEntry')) return;
+  if (!window.requireAdmin || !window.requireAdmin('saveEntry')) return;
   const term = document.getElementById('input-term').value.trim();
   const definition = document.getElementById('input-definition').value.trim();
   const category = document.getElementById('input-category').value;
@@ -414,7 +414,7 @@ function resetForm() {
 
 // ── Delete ──────────────────────────────────────────────────────────────────
 async function deleteEntry(id) {
-  if (window.requireAdmin && !window.requireAdmin('deleteEntry')) return;
+  if (!window.requireAdmin || !window.requireAdmin('deleteEntry')) return;
   const entry = allEntries.find(e => e.id === id);
   if (!entry) return;
   if (!confirm('🗑 Permanently delete "' + entry.term + '"?\n\nThis removes the entry from the dictionary and cannot be undone.')) return;

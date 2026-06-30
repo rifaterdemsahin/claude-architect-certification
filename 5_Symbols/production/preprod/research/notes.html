@@ -97,8 +97,8 @@
     </div>
     <textarea id="note-body" placeholder="# Research Note&#10;&#10;Write your notes here in Markdown…&#10;&#10;## Key Points&#10;- "></textarea>
     <div class="editor-footer">
-      <button class="btn btn-primary" onclick="saveNote()">💾 Save Note</button>
-      <button class="btn btn-ghost-lg" onclick="newNote()">➕ New</button>
+      <button class="btn btn-primary" data-require-admin="true" onclick="saveNote()">💾 Save Note</button>
+      <button class="btn btn-ghost-lg" data-require-admin="true" onclick="newNote()">➕ New</button>
       <span class="save-status" id="save-status"></span>
     </div>
   </div>
@@ -137,7 +137,7 @@ function newNote() {
 }
 
 function saveNote() {
-  if (window.requireAdmin && !window.requireAdmin('save notes')) return;
+  if (!window.requireAdmin || !window.requireAdmin('save notes')) return;
   let name = document.getElementById('filename-input').value.trim();
   if (!name) name = defaultFilename();
   if (!name.endsWith('.md') && !name.endsWith('.txt')) name += '.md';
@@ -177,7 +177,7 @@ function loadNote(name) {
 }
 
 function deleteFile(name) {
-  if (window.requireAdmin && !window.requireAdmin('delete notes')) return;
+  if (!window.requireAdmin || !window.requireAdmin('delete notes')) return;
   if (!confirm('Delete ' + name + '?')) return;
   fetch('/api/research/file?container=' + CONTAINER + '&name=' + encodeURIComponent(name), { method: 'DELETE' })
     .then(r => {
@@ -418,7 +418,7 @@ function updateAllRelationsUI() {
 }
 
 async function linkAssetToVideo(container, itemName, select) {
-  if (window.requireAdmin && !window.requireAdmin('link videos')) return;
+  if (!window.requireAdmin || !window.requireAdmin('link videos')) return;
   const videoId = parseInt(select.value, 10);
   if (isNaN(videoId)) return;
   const exists = allRelationships.some(r => r.container === container && r.item_name === itemName && r.video_id === videoId);
@@ -435,14 +435,14 @@ async function linkAssetToVideo(container, itemName, select) {
 
 async function unlinkAssetFromVideo(container, itemName, videoId, e) {
   if (e) e.stopPropagation();
-  if (window.requireAdmin && !window.requireAdmin('unlink videos')) return;
+  if (!window.requireAdmin || !window.requireAdmin('unlink videos')) return;
   const { error } = await client.from('research_relationships').delete().match({ container: container, item_name: itemName, video_id: videoId });
   if (error) alert('Unlink failed: ' + error.message);
   else { allRelationships = allRelationships.filter(r => !(r.container === container && r.item_name === itemName && r.video_id === videoId)); updateAllRelationsUI(); }
 }
 
 async function linkAssetToSentence(container, itemName, select) {
-  if (window.requireAdmin && !window.requireAdmin('link sentences')) return;
+  if (!window.requireAdmin || !window.requireAdmin('link sentences')) return;
   const sentenceId = parseInt(select.value, 10);
   if (isNaN(sentenceId)) return;
   const exists = allRelationships.some(r => r.container === container && r.item_name === itemName && r.sentence_id === sentenceId);
@@ -459,7 +459,7 @@ async function linkAssetToSentence(container, itemName, select) {
 
 async function unlinkAssetFromSentence(container, itemName, sentenceId, e) {
   if (e) e.stopPropagation();
-  if (window.requireAdmin && !window.requireAdmin('unlink sentences')) return;
+  if (!window.requireAdmin || !window.requireAdmin('unlink sentences')) return;
   const { error } = await client.from('research_relationships').delete().eq('container', container).eq('item_name', itemName).eq('sentence_id', sentenceId);
   if (error) alert('Unlink failed: ' + error.message);
   else { allRelationships = allRelationships.filter(r => !(r.container === container && r.item_name === itemName && r.sentence_id === sentenceId)); updateAllRelationsUI(); }

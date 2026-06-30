@@ -216,7 +216,7 @@
       <div id="info-grid" class="info-grid"></div>
       
       <div style="margin-top: 60px; text-align: center; display: flex; justify-content: center; gap: 20px;">
-          <button id="save-btn" class="btn btn-success" onclick="saveInfographic()">💾 Save to Supabase</button>
+          <button id="save-btn" class="btn btn-success" data-require-admin="true" onclick="saveInfographic()">💾 Save to Supabase</button>
           <button class="btn btn-primary" onclick="window.print()">🖨️ Export as PDF</button>
       </div>
       <p id="save-status" style="margin-top: 15px; color: var(--success); text-align: center; display: none;"></p>
@@ -370,6 +370,7 @@
     }
 
     async function saveInfographic() {
+        if (!window.requireAdmin || !window.requireAdmin('save infographic')) return;
         if (!currentLayout) return;
         
         const saveBtn = document.getElementById('save-btn');

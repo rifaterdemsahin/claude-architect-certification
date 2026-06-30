@@ -101,7 +101,7 @@
       <div style="font-size: 2.8rem; color: var(--primary);" id="record-static">🎤</div>
       <div style="font-weight: 700; font-size: 1.05rem;" id="record-status">Mobile Voice Recorder</div>
       <div style="font-family: monospace; font-size: 1.3rem; color: var(--muted); font-weight: bold;" id="record-timer">00:00</div>
-      <button class="btn-sm" id="btn-record" onclick="toggleRecording()" style="padding: 10px 20px; font-size: 0.85rem; border-radius: 10px; font-weight: 700; background: var(--primary); color: white; border: none; cursor: pointer; transition: all 0.2s; width: 100%; max-width: 200px;">🔴 Record Live</button>
+      <button class="btn-sm" id="btn-record" data-require-admin="true" onclick="toggleRecording()" style="padding: 10px 20px; font-size: 0.85rem; border-radius: 10px; font-weight: 700; background: var(--primary); color: white; border: none; cursor: pointer; transition: all 0.2s; width: 100%; max-width: 200px;">🔴 Record Live</button>
     </div>
   </div>
   <input type="file" id="file-input" accept="audio/*" multiple data-require-admin="true">
@@ -172,7 +172,7 @@ function loadList() {
 }
 
 function uploadFiles(files) {
-  if (window.requireAdmin && !window.requireAdmin('upload files')) return;
+  if (!window.requireAdmin || !window.requireAdmin('upload files')) return;
   const progressWrap = document.getElementById('progress-wrap');
   const progressFill = document.getElementById('progress-fill');
   const progressLabel = document.getElementById('progress-label');
@@ -191,7 +191,7 @@ function uploadFiles(files) {
 }
 
 function deleteFile(name) {
-  if (window.requireAdmin && !window.requireAdmin('delete files')) return;
+  if (!window.requireAdmin || !window.requireAdmin('delete files')) return;
   if (!confirm('Delete ' + name + '?')) return;
   fetch('/api/research/file?container=' + CONTAINER + '&name=' + encodeURIComponent(name), { method: 'DELETE' })
     .then(r => { if (r.ok || r.status === 204) { toast('Deleted: ' + name, 'success'); loadList(); } else toast('Delete failed', 'error'); })
@@ -212,7 +212,7 @@ let recordInterval;
 let startTime;
 
 function toggleRecording() {
-  if (window.requireAdmin && !window.requireAdmin('record audio')) return;
+  if (!window.requireAdmin || !window.requireAdmin('record audio')) return;
   const btn = document.getElementById('btn-record');
   const status = document.getElementById('record-status');
   const timer = document.getElementById('record-timer');
@@ -492,7 +492,7 @@ function updateAllRelationsUI() {
 }
 
 async function linkAssetToVideo(container, itemName, select) {
-  if (window.requireAdmin && !window.requireAdmin('link videos')) return;
+  if (!window.requireAdmin || !window.requireAdmin('link videos')) return;
   const videoId = parseInt(select.value, 10);
   if (isNaN(videoId)) return;
   const exists = allRelationships.some(r => r.container === container && r.item_name === itemName && r.video_id === videoId);
@@ -509,14 +509,14 @@ async function linkAssetToVideo(container, itemName, select) {
 
 async function unlinkAssetFromVideo(container, itemName, videoId, e) {
   if (e) e.stopPropagation();
-  if (window.requireAdmin && !window.requireAdmin('unlink videos')) return;
+  if (!window.requireAdmin || !window.requireAdmin('unlink videos')) return;
   const { error } = await client.from('research_relationships').delete().match({ container: container, item_name: itemName, video_id: videoId });
   if (error) alert('Unlink failed: ' + error.message);
   else { allRelationships = allRelationships.filter(r => !(r.container === container && r.item_name === itemName && r.video_id === videoId)); updateAllRelationsUI(); }
 }
 
 async function linkAssetToSentence(container, itemName, select) {
-  if (window.requireAdmin && !window.requireAdmin('link sentences')) return;
+  if (!window.requireAdmin || !window.requireAdmin('link sentences')) return;
   const sentenceId = parseInt(select.value, 10);
   if (isNaN(sentenceId)) return;
   const exists = allRelationships.some(r => r.container === container && r.item_name === itemName && r.sentence_id === sentenceId);
@@ -533,7 +533,7 @@ async function linkAssetToSentence(container, itemName, select) {
 
 async function unlinkAssetFromSentence(container, itemName, sentenceId, e) {
   if (e) e.stopPropagation();
-  if (window.requireAdmin && !window.requireAdmin('unlink sentences')) return;
+  if (!window.requireAdmin || !window.requireAdmin('unlink sentences')) return;
   const { error } = await client.from('research_relationships').delete().eq('container', container).eq('item_name', itemName).eq('sentence_id', sentenceId);
   if (error) alert('Unlink failed: ' + error.message);
   else { allRelationships = allRelationships.filter(r => !(r.container === container && r.item_name === itemName && r.sentence_id === sentenceId)); updateAllRelationsUI(); }

@@ -482,7 +482,7 @@ function renderTaskRow(item, stage) {
 }
 
 function removeTask(id, stageKey) {
-  if (window.requireAdmin && !window.requireAdmin('removeTask')) return;
+  if (!window.requireAdmin || !window.requireAdmin('removeTask')) return;
   if (!confirm('Delete this task?')) return;
   checklistItems = checklistItems.filter(i => i.id !== id);
   saveToStorage();
