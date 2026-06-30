@@ -3462,6 +3462,89 @@ func animationPromptHandler(cfg config) http.HandlerFunc {
 	}
 }
 
+func scriptGenerateHandler(cfg config) http.HandlerFunc {
+	type ORRequest struct {
+		Prompt string `json:"prompt"`
+	}
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		if r.Method != http.MethodPost {
+			http.Error(w, `{"error":"method not allowed"}`, http.StatusMethodNotAllowed)
+			return
+		}
+
+		var req ORRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, `{"error":"invalid request body"}`, http.StatusBadRequest)
+			return
+		}
+
+		apiKey := cfg.getSecret("OPENROUTER_API_KEY")
+		if apiKey == "" {
+			http.Error(w, `{"error":"OPENROUTER_API_KEY missing from server configuration"}`, http.StatusServiceUnavailable)
+			return
+		}
+
+		ctx, cancel := context.WithTimeout(r.Context(), 30*time.Second)
+		defer cancel()
+
+		orURL := "https://openrouter.ai/api/v1/chat/completions"
+		reqBody := map[string]any{
+			"model": "google/gemini-2.5-flash",
+			"messages": []map[string]string{
+				{"role": "user", "content": req.Prompt},
+			},
+		}
+
+		b, _ := json.Marshal(reqBody)
+		hreq, err := http.NewRequestWithContext(ctx, "POST", orURL, bytes.NewReader(b))
+		if err != nil {
+			http.Error(w, `{"error":"failed to build request"}`, http.StatusInternalServerError)
+			return
+		}
+
+		hreq.Header.Set("Content-Type", "application/json")
+		hreq.Header.Set("Authorization", "Bearer "+apiKey)
+		hreq.Header.Set("HTTP-Referer", "https://claude-architect-certification.com")
+		hreq.Header.Set("X-Title", "Claude Architect Certification")
+
+		hresp, err := http.DefaultClient.Do(hreq)
+		if err != nil {
+			http.Error(w, `{"error":"OpenRouter API call failed"}`, http.StatusBadGateway)
+			return
+		}
+		defer hresp.Body.Close()
+
+		if hresp.StatusCode >= 400 {
+			body, _ := io.ReadAll(hresp.Body)
+			http.Error(w, fmt.Sprintf(`{"error":"OpenRouter API returned HTTP %d: %s"}`, hresp.StatusCode, body), http.StatusBadGateway)
+			return
+		}
+
+		var orResp struct {
+			Choices []struct {
+				Message struct {
+					Content string `json:"content"`
+				} `json:"message"`
+			} `json:"choices"`
+		}
+
+		if err := json.NewDecoder(hresp.Body).Decode(&orResp); err != nil {
+			http.Error(w, `{"error":"failed to decode response"}`, http.StatusInternalServerError)
+			return
+		}
+
+		content := ""
+		if len(orResp.Choices) > 0 {
+			content = orResp.Choices[0].Message.Content
+		}
+
+		json.NewEncoder(w).Encode(map[string]string{
+			"content": content,
+		})
+	}
+}
+
 // animationOpenRouterPrepareHandler calls OpenRouter to intelligently populate
 // the inputProps for a given sentence and animation type, returning JSON.
 func animationOpenRouterPrepareHandler(cfg config) http.HandlerFunc {
@@ -4505,6 +4588,7 @@ func main() {
 	mux.Handle("/api/images/test-gemini", observe(cfg, imageTestGeminiHandler(cfg)))
 	mux.Handle("/api/infographics/generate", observe(cfg, infographicGenerateHandler(cfg)))
 	mux.Handle("/api/infographics/save", observe(cfg, infographicSaveHandler(cfg)))
+	mux.Handle("/api/scripts/openrouter", observe(cfg, scriptGenerateHandler(cfg)))
 	mux.Handle("/api/lowerthirds/generate", observe(cfg, lowerThirdGenerateHandler(cfg)))
 	mux.Handle("/api/lowerthirds/openrouter", observe(cfg, openRouterGenerateHandler(cfg)))
 	mux.Handle("/api/drawings/openrouter", observe(cfg, drawingGenerateHandler(cfg)))
