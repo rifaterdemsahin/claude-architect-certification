@@ -446,6 +446,24 @@
             },
             {
               "group": true,
+              "label": "🧠 LLM",
+              "children": [
+                {
+                  "label": "🧠 DeepSeek Usage",
+                  "url": "https://platform.deepseek.com/usage"
+                },
+                {
+                  "label": "✨ Gemini App",
+                  "url": "https://gemini.google.com/app/"
+                },
+                {
+                  "label": "🤖 Z.ai Plan",
+                  "url": "https://z.ai/manage-apikey/coding-plan/personal/my-plan"
+                }
+              ]
+            },
+            {
+              "group": true,
               "label": "🤖 AI & APIs",
               "children": [
                 {
