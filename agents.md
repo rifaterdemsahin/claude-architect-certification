@@ -380,6 +380,7 @@ This document defines how AI agents interact with the **Claude AI Certification 
 | **Kilo DeepSeek V4 Flash** | `kilo -m deepseek/...`| Precision code generation, efficiency | `deepseek-v4-flash` |
 | **GLM (Zhipu AI)** | [glm.md](glm.md) | Long-context code synthesis, SQL/schema gen, bilingual (EN/中文) | `glm-4.6` |
 | GitHub Copilot | [copilot.md](copilot.md) | Inline autocompletion | `gpt-4o` |
+| **Obsolete Agent** | `.kilo/agent/obsolete-agent.md` | Scan for unused files, ask before deleting | `deepseek-v4-flash` |
 
 ---
 
