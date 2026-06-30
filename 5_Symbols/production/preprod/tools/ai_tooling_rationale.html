@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Why each AI tool owns a specific job — Gemini for images & bulk context, DeepSeek via Kilo+VSCode, Z.ai/GLM for the fix agent, Claude Code for the coding map & refactors.">
+  <title>🧭 AI Tooling Rationale — Claude Architect Certification</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --bg-dark: #0b0f19;
+      --bg-card: rgba(22, 28, 45, 0.7);
+      --bg-glass: rgba(15, 23, 42, 0.6);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --text-primary: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-violet: #8b5cf6;
+      --accent-cyan: #06b6d4;
+      --accent-green: #10b981;
+      --accent-amber: #f59e0b;
+      --font-display: 'Outfit', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image:
+        radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.14) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.13) 0px, transparent 50%);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      line-height: 1.6;
+      overflow-x: hidden;
+      padding-top: 70px;
+      padding-bottom: 80px;
+    }
+
+    a { color: inherit; text-decoration: none; transition: var(--transition); }
+    .page-container { max-width: 980px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+    /* ── Hero ── */
+    .hero { text-align: center; margin-bottom: 2.5rem; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: rgba(6, 182, 212, 0.12); border: 1px solid rgba(6, 182, 212, 0.32);
+      color: #67e8f9; padding: 0.35rem 1rem; border-radius: 100px;
+      font-size: 0.85rem; font-weight: 600; letter-spacing: 0.05em; margin-bottom: 1.25rem;
+    }
+    .hero-title {
+      font-family: var(--font-display); font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 1rem;
+    }
+    .hero-title .hl {
+      background: linear-gradient(135deg, var(--accent-violet), var(--accent-cyan));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hero-subtitle { font-size: 1.1rem; color: var(--text-muted); max-width: 700px; margin: 0 auto; }
+
+    /* ── Glass Cards ── */
+    .glass-card {
+      background: var(--bg-card); border: 1px solid var(--border-color);
+      border-radius: 16px; padding: 1.75rem 2rem; backdrop-filter: blur(8px); margin-bottom: 1.5rem;
+    }
+    .card-title {
+      font-family: var(--font-display); font-size: 1.3rem; font-weight: 700;
+      display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1rem;
+    }
+
+    .intro-text { font-size: 1.05rem; }
+
+    /* ── Tool cards grid ── */
+    .tool-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.25rem; }
+    .tool-card {
+      background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-color);
+      border-radius: 14px; padding: 1.5rem; display: flex; flex-direction: column; gap: 0.6rem;
+      transition: var(--transition);
+    }
+    .tool-card:hover { transform: translateY(-3px); border-color: rgba(139, 92, 246, 0.35); }
+    .tool-head { display: flex; align-items: center; gap: 0.75rem; }
+    .tool-logo {
+      width: 44px; height: 44px; border-radius: 11px; display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; flex-shrink: 0;
+    }
+    .tool-name { font-family: var(--font-display); font-weight: 700; font-size: 1.12rem; }
+    .tool-role { font-size: 0.8rem; color: var(--text-muted); }
+    .tool-job {
+      font-weight: 600; font-size: 0.98rem; margin-top: 0.2rem;
+      color: #c4b5fd;
+    }
+    .tool-card p.tool-desc { font-size: 0.9rem; color: var(--text-muted); }
+    .tool-tag {
+      align-self: flex-start; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.04em;
+      padding: 3px 10px; border-radius: 100px; margin-top: auto;
+    }
+    .tag-create { background: rgba(245,158,11,0.14); border:1px solid rgba(245,158,11,0.34); color:#fcd34d; }
+    .tag-cut   { background: rgba(6,182,212,0.14);  border:1px solid rgba(6,182,212,0.34); color:#67e8f9; }
+    .tag-fix   { background: rgba(16,185,129,0.14); border:1px solid rgba(16,185,129,0.34); color:#6ee7b7; }
+    .tag-map   { background: rgba(139,92,246,0.16); border:1px solid rgba(139,92,246,0.36); color:#c4b5fd; }
+
+    /* ── Decision matrix table ── */
+    .matrix { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+    .matrix th {
+      text-align: left; padding: 0.6rem 0.9rem; background: rgba(139,92,246,0.12);
+      color: var(--text-muted); font-weight: 600; font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase;
+    }
+    .matrix th:first-child { border-radius: 8px 0 0 8px; }
+    .matrix th:last-child  { border-radius: 0 8px 8px 0; }
+    .matrix td { padding: 0.7rem 0.9rem; border-bottom: 1px solid var(--border-color); vertical-align: top; }
+    .matrix tr:last-child td { border-bottom: none; }
+
+    /* ── Note ── */
+    .note {
+      background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.25);
+      border-radius: 12px; padding: 1rem 1.2rem; font-size: 0.95rem; line-height: 1.55;
+    }
+
+    /* ── CTA ── */
+    .cta-section { text-align: center; margin-top: 1.5rem; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.6rem;
+      padding: 0.7rem 1.6rem; border-radius: 100px; font-weight: 600; font-size: 0.98rem;
+      transition: var(--transition); cursor: pointer; border: none;
+    }
+    .btn-primary { background: linear-gradient(135deg, var(--accent-violet), #7c3aed); color: #fff; box-shadow: 0 4px 20px rgba(139,92,246,0.4); }
+    .btn-primary:hover { transform: translateY(-2px); }
+    .btn-secondary { background: rgba(255,255,255,0.06); color: var(--text-primary); border: 1px solid var(--border-color); margin-left: 1rem; }
+    .btn-secondary:hover { background: rgba(255,255,255,0.12); }
+
+    footer { text-align: center; padding: 2rem 1rem; color: var(--text-muted); font-size: 0.85rem; border-top: 1px solid var(--border-color); margin-top: 2rem; }
+    footer a { color: #93c5fd; }
+  </style>
+  <script src="../../../../shared/schema-modal.js"></script>
+  <script src="../../../../shared/nav.js" defer></script>
+  <script src="../../../../shared/seo.js" defer></script>
+</head>
+<body>
+
+  <div class="page-container">
+
+    <!-- ── Hero ── -->
+    <div class="hero">
+      <div class="hero-badge">
+        <i class="fa-solid fa-compass"></i>
+        <span>AI Tooling Rationale</span>
+      </div>
+      <h1 class="hero-title">The right model for the <span class="hl">right job</span></h1>
+      <p class="hero-subtitle">
+        No single AI does everything well. This is the working split behind the Claude Architect Certification build —
+        each tool owns the job it's genuinely best at, so cost, quality, and speed all stay where they should.
+      </p>
+    </div>
+
+    <!-- ── Intro ── -->
+    <div class="glass-card">
+      <h2 class="card-title"><i class="fa-solid fa-lightbulb" style="color:var(--accent-amber);"></i> 🧠 The principle</h2>
+      <p class="intro-text">
+        Treat each model as a <strong>specialist, not a generalist</strong>. Image generation, long-context ingestion,
+        precision code edits, repetitive error-fixing, and repo-wide refactoring are <em>different problems</em> with
+        different cost/quality profiles. Routing each task to the tool built for it is faster, cheaper, and produces
+        better output than asking one model to do all of it.
+      </p>
+    </div>
+
+    <!-- ── Tool cards ── -->
+    <div class="glass-card">
+      <h2 class="card-title"><i class="fa-solid fa-toolbox" style="color:var(--accent-cyan);"></i> 🛠️ The split</h2>
+      <div class="tool-grid">
+
+        <!-- Gemini -->
+        <div class="tool-card">
+          <div class="tool-head">
+            <div class="tool-logo" style="background:rgba(66,133,244,0.18);color:#93c5fd;">
+              <i class="fa-solid fa-wand-magic-sparkles"></i>
+            </div>
+            <div>
+              <div class="tool-name">Gemini</div>
+              <div class="tool-role">Google · long-context multimodal</div>
+            </div>
+          </div>
+          <div class="tool-job">Image creation &amp; bulk context load</div>
+          <p class="tool-desc">
+            Owns the two jobs its huge context window and native image model do best:
+            <strong>generating course visuals</strong> (diagrams, hero art, infographics) and
+            <strong>ingesting whole repos / docs / PDFs at once</strong> to summarise, index, or answer across them.
+            When you need to "dump everything in and ask about it", it goes here.
+          </p>
+          <span class="tool-tag tag-create">✨ Create · Ingest</span>
+        </div>
+
+        <!-- DeepSeek via Kilo + VSCode -->
+        <div class="tool-card">
+          <div class="tool-head">
+            <div class="tool-logo" style="background:rgba(6,182,212,0.18);color:#67e8f9;">
+              <i class="fa-solid fa-code"></i>
+            </div>
+            <div>
+              <div class="tool-name">DeepSeek</div>
+              <div class="tool-role">via Kilo CLI · VSCode inline</div>
+            </div>
+          </div>
+          <div class="tool-job">Precision code generation in the editor</div>
+          <p class="tool-desc">
+            Run <strong>inline inside VSCode through the Kilo harness</strong> for fast, cheap, token-efficient
+            code completion and surgical edits. It's the daily-driver "cut code" model — strong at focused
+            generation (functions, SQL, configs) at a fraction of the cost of the bigger agents. Nothing long-horizon;
+            just sharp, local edits where you're already typing.
+          </p>
+          <span class="tool-tag tag-cut">✂️ Cut code</span>
+        </div>
+
+        <!-- Z.ai / GLM -->
+        <div class="tool-card">
+          <div class="tool-head">
+            <div class="tool-logo" style="background:rgba(16,185,129,0.18);color:#6ee7b7;">
+              <i class="fa-solid fa-wrench"></i>
+            </div>
+            <div>
+              <div class="tool-name">Z.ai (GLM)</div>
+              <div class="tool-role">long-context · runs the fix agent</div>
+            </div>
+          </div>
+          <div class="tool-job">Solving errors with the fix agent</div>
+          <p class="tool-desc">
+            Powers the <strong>autonomous error-loop fix agent</strong> on <em>known / repetitive</em> tasks —
+            the class of error we've seen before and have a reliable pattern for. Its long context ingests the
+            log + file + issue at once and ships a scoped, verifiable patch cheaply and predictably. It's the
+            workhorse for closing <code>axiom-error</code> issues that don't need human judgement.
+          </p>
+          <span class="tool-tag tag-fix">🔧 Fix · Automate</span>
+        </div>
+
+        <!-- Claude Code -->
+        <div class="tool-card">
+          <div class="tool-head">
+            <div class="tool-logo" style="background:rgba(139,92,246,0.2);color:#c4b5fd;">
+              <i class="fa-solid fa-diagram-project"></i>
+            </div>
+            <div>
+              <div class="tool-name">Claude Code</div>
+              <div class="tool-role">Anthropic · agentic, repo-aware</div>
+            </div>
+          </div>
+          <div class="tool-job">The coding map &amp; refactors</div>
+          <p class="tool-desc">
+            Owns the <strong>high-leverage, high-judgement</strong> work: building and maintaining a
+            <strong>coding map</strong> of the whole repo, then executing <strong>large refactors</strong> across
+            many files at once while keeping behaviour consistent. When a change needs real planning — moving
+            abstractions, untangling coupling, restructuring a module — this is where it goes.
+          </p>
+          <span class="tool-tag tag-map">🗺️ Map · Refactor</span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── Decision matrix ── -->
+    <div class="glass-card">
+      <h2 class="card-title"><i class="fa-solid fa-table-list" style="color:var(--accent-green);"></i> 📊 Decision matrix</h2>
+      <div style="overflow-x:auto;">
+        <table class="matrix">
+          <thead>
+            <tr><th>Tool</th><th>Owns</th><th>Use when…</th><th>Don't use for</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>✨ Gemini</strong></td>
+              <td>Images &amp; bulk context</td>
+              <td>You need a visual, or to load an entire repo/doc and ask across it.</td>
+              <td>Fine, multi-file code refactors.</td>
+            </tr>
+            <tr>
+              <td><strong>✂️ DeepSeek</strong> <span style="color:var(--text-muted);">(Kilo + VSCode)</span></td>
+              <td>Inline code edits</td>
+              <td>You're in the editor and want a fast, cheap, focused code completion.</td>
+              <td>Repo-wide planning or open-ended architecture decisions.</td>
+            </tr>
+            <tr>
+              <td><strong>🔧 Z.ai / GLM</strong></td>
+              <td>The fix agent</td>
+              <td>An error matches a known pattern and can be auto-fixed and verified.</td>
+              <td>Novel bugs needing real diagnosis or design judgement.</td>
+            </tr>
+            <tr>
+              <td><strong>🗺️ Claude Code</strong></td>
+              <td>Coding map &amp; refactors</td>
+              <td>A change spans many files and needs planning + behaviour preservation.</td>
+              <td>Throwaway one-liners — overkill on cost.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── Note ── -->
+    <div class="glass-card">
+      <h2 class="card-title"><i class="fa-solid fa-circle-info" style="color:var(--accent-amber);"></i> 💡 Why split at all?</h2>
+      <p class="note">
+        Using one model for everything means overpaying on cheap jobs and under-thinking on hard ones.
+        <strong>Gemini</strong> absorbs context and makes pictures; <strong>DeepSeek</strong> cuts code cheaply
+        where you're typing; <strong>Z.ai</strong> grinds through the known-error backlog autonomously; and
+        <strong>Claude Code</strong> holds the map and does the refactors that actually move the architecture.
+        That division is what keeps this project fast, cheap, and high-quality at the same time.
+      </p>
+    </div>
+
+    <!-- ── CTA ── -->
+    <div class="cta-section">
+      <a href="../ways_of_working.html" class="btn btn-primary">
+        <i class="fa-solid fa-arrows-rotate"></i> Ways of Working
+      </a>
+      <a href="../../../../index.html" class="btn btn-secondary">
+        <i class="fa-solid fa-house"></i> Back to Home
+      </a>
+    </div>
+
+  </div>
+
+  <footer>
+    <p>Built for the <strong>Claude AI Certification for Architects</strong> Masterclass.</p>
+    <p style="margin-top:6px;">
+      Instructor: <a href="https://www.linkedin.com/in/rifaterdemsahin" target="_blank">Rifat Erdem Sahin</a>
+      &nbsp;|&nbsp;
+      <a href="https://github.com/rifaterdemsahin/claude-architect-certification" target="_blank">GitHub</a>
+    </p>
+  </footer>
+
+  <script src="../../../../shared/debug-panel.js"></script>
+</body>
+</html>

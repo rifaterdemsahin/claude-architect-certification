@@ -1,5 +1,26 @@
 # LLM Thinking Log
 
+## 2026-06-30 — 🧭 AI Tooling Rationale page (Preprod → Tools)
+
+### 🎯 Objective
+Add a single rationale page to the **Preprod 🛠️ Tools** menu explaining *why each AI tool owns a specific job* in this build: Gemini (images + bulk context), DeepSeek via Kilo+VSCode (inline code), Z.ai/GLM (the fix agent on known tasks), Claude Code (coding map + refactors).
+
+### 🧭 Design choices
+- **One page, four cards — not four pages.** The ask was a rationale, so a single scannable page (hero → principle → 4 tool cards → decision matrix → "why split" note) is more useful than scattered links. Each card names the tool, the job it owns, *when to use* vs *don't use for*, plus a coloured role tag (Create/Cut/Fix/Map).
+- **Static, not Supabase.** This is fixed doctrine (the "why"), not editable data — ships as a static `.glass-card` shell, can't be wiped by an editor, identical on live + fallback paths. No DB table needed.
+- **Style consistency.** Reused the violet/cyan glassmorphic theme already used across the site (problem.html, generators) so it reads as part of the family; cards lift on hover for liveness.
+- **Nav placement.** New group **"🧭 AI Tooling Rationale"** inserted directly *before* the "📈 AI Usage" group inside Preprod 🛠️ Tools — the "why which tool" sits naturally right before the per-tool usage dashboards. Synced across all 4 nav sources (`navigation_config.json` + `index.html` + `markdown_renderer.html` + `shared/nav.js`).
+- **Path depth.** Page lives in `preprod/tools/`, so shared assets resolve at `../../../../shared/*` (verified against sibling `branding.html`).
+
+### 🛠 Changes
+- `5_Symbols/production/preprod/tools/ai_tooling_rationale.html` — new static page.
+- `navigation_config.json`, `index.html`, `markdown_renderer.html`, `shared/nav.js` — new "🧭 AI Tooling Rationale" group with one entry.
+
+### ✅ Verification
+- `navigation_config.json` valid JSON; `node -c shared/nav.js` OK; page has no inline JS; `go build ./... && go vet ./...` green.
+- Local server serves the page **HTTP 200**; all four tool names render; served `navigation_config.json` contains the new group.
+
+
 ## 2026-06-30 — 🤖 "AI Shift" rationale card on the Problem page
 
 ### 🎯 Objective

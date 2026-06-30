@@ -290,6 +290,9 @@
               { label: '🏠 Home Template', url: '5_Symbols/templates/index.html' },
               { label: '📋 Error Log Template', url: '5_Symbols/templates/axiom_errors.html' }
             ]},
+            { group: true, label: '🧭 AI Tooling Rationale', children: [
+              { label: '🧭 Why Which AI Tool', url: '5_Symbols/production/preprod/tools/ai_tooling_rationale.html', description: 'The working split: Gemini for images & bulk context, DeepSeek via Kilo+VSCode for inline code, Z.ai/GLM for the fix agent, Claude Code for the coding map & refactors.' }
+            ]},
             { group: true, label: '📈 AI Usage', children: [
               { label: '✨ Gemini Usage', url: 'https://gemini.google.com/usage' },
               { label: '🤖 Claude Usage', url: 'https://console.anthropic.com/settings/usage' },
