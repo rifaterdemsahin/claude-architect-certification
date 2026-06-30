@@ -292,16 +292,18 @@ CREATE POLICY "allow_all_ivq" ON ivq_questions FOR ALL USING (true) WITH CHECK (
         el.innerHTML = '<div class="empty">📭 No videos yet — add one above or seed sample data.</div>';
         return;
       }
-      el.innerHTML = videos.map(v => renderVideoCard(v)).join('');
+      const state = getCollapseState();
+      el.innerHTML = videos.map(v => renderVideoCard(v, state)).join('');
     }
 
-    function renderVideoCard(v) {
+    function renderVideoCard(v, state = {}) {
       const questions = ivqMap[v.id] || [];
       const qCount = questions.length;
       const urlLink = v.youtube_url
         ? `<a href="${esc(v.youtube_url)}" target="_blank" rel="noopener">▶ Watch on YouTube</a> &nbsp;·&nbsp; `
         : '';
       const qRows = questions.map(q => renderIvqRow(q, v.id)).join('');
+      const isHidden = state['vb-' + v.id] ? ' hidden' : '';
       return `<div class="video-card" id="vc-${v.id}">
         <div class="video-header" onclick="toggleBody('vb-${v.id}')">
           <div class="video-title">🎬 ${esc(v.title)}</div>
@@ -311,7 +313,7 @@ CREATE POLICY "allow_all_ivq" ON ivq_questions FOR ALL USING (true) WITH CHECK (
             <button class="btn btn-danger btn-sm" title="Delete video" onclick="deleteVideo(${v.id})">🗑</button>
           </div>
         </div>
-        <div class="video-body" id="vb-${v.id}">
+        <div class="video-body${isHidden}" id="vb-${v.id}">
           <div class="video-meta">${urlLink}${esc(v.description || '')}</div>
           ${qRows}
           <hr class="divider">
@@ -399,8 +401,30 @@ CREATE POLICY "allow_all_ivq" ON ivq_questions FOR ALL USING (true) WITH CHECK (
         </div>`;
     }
 
+    function getCookie(name) {
+      const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+      return match ? decodeURIComponent(match[2]) : null;
+    }
+
+    function setCookie(name, value) {
+      document.cookie = name + '=' + encodeURIComponent(value) + '; path=/; max-age=31536000';
+    }
+
+    function getCollapseState() {
+      try { return JSON.parse(getCookie('ivq_collapse_state') || '{}'); } catch(e) { return {}; }
+    }
+
+    function saveCollapseState(state) {
+      setCookie('ivq_collapse_state', JSON.stringify(state));
+    }
+
     function toggleBody(id) {
-      document.getElementById(id)?.classList.toggle('hidden');
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.toggle('hidden');
+      const state = getCollapseState();
+      state[id] = el.classList.contains('hidden');
+      saveCollapseState(state);
     }
 
     function toggleAddIvq(videoId) {
