@@ -155,8 +155,8 @@
             <span class="chip">🔀 flowchart</span><span class="chip">🔍 callout zoom</span>
           </div>
           <div id="bulkActionsWrap" style="display:flex; align-items:center;">
-            <button id="btnBulkPrepare" class="btn btn-sm" data-require-admin style="background:#fbbf24; color:#000; margin-left:16px; white-space:nowrap;" onclick="bulkPrepareSentences()">⚙️ Bulk Prepare</button>
-            <button id="btnBulkGenerate" class="btn btn-sm" data-require-admin style="background:#4ade80; color:#000; margin-left:16px; white-space:nowrap;" onclick="bulkGenerateSentences()">▶️ Bulk Generate</button>
+            <button id="btnBulkPrepare" class="btn btn-sm" data-require-admin style="background:#fbbf24; color:#000; margin-left:16px; white-space:nowrap;" onclick="bulkPrepareSentences()">⚙️ Multi Prep</button>
+            <button id="btnBulkGenerate" class="btn btn-sm" data-require-admin style="background:#4ade80; color:#000; margin-left:16px; white-space:nowrap;" onclick="bulkGenerateSentences()">▶️ Multi Save</button>
           </div>
         </div>
 
@@ -200,6 +200,14 @@
     <footer>
       <p><a href="index.html" style="color:var(--secondary);text-decoration:none;">← Back to Post-Production</a></p>
     </footer>
+  </div>
+
+  <!-- Video modal -->
+  <div id="videoModal" class="modal" onclick="if(event.target===this) closeVideoModal()" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; align-items:center; justify-content:center;">
+    <div class="modal-content" style="background:var(--bg-card); border:1px solid rgba(255,255,255,0.1); border-radius:16px; padding:16px; max-width:820px; width:90%; box-shadow:0 20px 40px rgba(0,0,0,0.6); position:relative;">
+      <button onclick="closeVideoModal()" style="position:absolute; top:12px; right:12px; background:rgba(0,0,0,0.8); border:1px solid rgba(255,255,255,0.2); color:#fff; border-radius:50%; width:32px; height:32px; cursor:pointer; z-index:10;">✕</button>
+      <video id="videoModalPlayer" controls autoplay loop style="width:100%; border-radius:8px;"></video>
+    </div>
   </div>
 
   <!-- Prompt modal -->
@@ -365,6 +373,9 @@
         const chosen = (existing && existing.animation_type) || suggestType(s.sentence_type);
         const status = existing ? existing.generation_status : 'pending';
         const pill = `<span class="status-pill ${statusPillClass(status)}">${escHtml(status)}</span>`;
+        const thumb = existing && existing.animation_url
+          ? `<video src="${escHtml(existing.animation_url)}" muted preload="metadata" style="width:96px;height:54px;object-fit:cover;border-radius:6px;border:1px solid rgba(255,255,255,0.1); cursor:pointer;" onclick="openVideoModal('${escHtml(existing.animation_url)}')"></video>`
+          : '<span style="font-size:0.72rem;color:var(--text-muted);">no render</span>';
         return `<tr>
           <td class="check-col"><input type="checkbox" class="sentence-cb" value="${s.id}"></td>
           <td class="num-col">${i + 1}</td>
@@ -372,9 +383,10 @@
             <div style="font-size:0.7rem;color:var(--text-muted);margin-top:2px;">type: ${escHtml(s.sentence_type||'body')}</div></td>
           <td class="type-col"><select class="anim-select" id="anim_${s.id}" onchange="onTypeChange(${s.id})">${opts}</select></td>
           <td class="status-col">${pill}</td>
+          <td class="preview-col" style="width: 110px;">${thumb}</td>
           <td class="action-col">
-            <button class="btn btn-secondary btn-sm" onclick="openPromptModal(${s.id})">🔍 Prompt</button>
-            <button class="btn btn-secondary btn-sm" data-require-admin onclick="generateForSentence(${s.id})">▶️ API Call</button>
+            <button class="btn btn-secondary btn-sm" data-require-admin onclick="prepareSentence(${s.id})">⚙️ Prep Prompt</button>
+            <button class="btn btn-secondary btn-sm" data-require-admin onclick="generateForSentence(${s.id})">▶️ Single Save</button>
           </td>
         </tr>`;
       }).join('');
@@ -386,6 +398,7 @@
           <th class="sentence-col">Sentence</th>
           <th class="type-col">Animation Type</th>
           <th class="status-col">Status</th>
+          <th class="preview-col">Preview</th>
           <th class="action-col">Actions</th>
         </tr></thead>
         <tbody>${rows}</tbody>
@@ -590,6 +603,17 @@
     }
 
     function closePromptModal() { $('promptModal').style.display = 'none'; }
+    
+    function openVideoModal(url) {
+      $('videoModalPlayer').src = url;
+      $('videoModal').style.display = 'flex';
+    }
+    
+    function closeVideoModal() {
+      $('videoModal').style.display = 'none';
+      $('videoModalPlayer').pause();
+      $('videoModalPlayer').src = '';
+    }
     
     function updateCurlPreview() {
       if (!currentRunpodPayload) return;
