@@ -1,5 +1,27 @@
 # LLM Thinking Log
 
+## 2026-06-30 — 🔑 Admin login password = `Welcome.June.SH`
+
+### 🎯 Objective
+The admin login page (`5_Symbols/supabase/ui/admin.html`, the "🔐 Admin Authorization → Unlock Admin Mode" card that posts to `/api/admin/login`) had to actually accept the chosen password **`Welcome.June.SH`** (and reject the old default).
+
+### 🔍 Root cause
+`adminLoginHandler` (`cmd/server/main.go`) resolves the expected password as `getSecret("ClaudeCertificateSiteAdminPassword")` → `getSecret("AdminPassword")` → **hardcoded `"admin"`**. With no `AdminPassword` in `.env` and no Azure Key Vault wired locally (`AZURE_KEYVAULT_NAME` unset), `getSecret("AdminPassword")` = `os.Getenv("AdminPassword")` = `""` → the handler fell through to the `"admin"` fallback, so `Welcome.June.SH` returned `{"success":false,"error":"Invalid password"}`. The page already asked for a password + honoured `?redirect=`; only the *expected value* was wrong.
+
+### 🛠 Fix (no Go code change — the auth flow was already correct)
+- **`.env`** (gitignored, local-only): added `AdminPassword=Welcome.June.SH`. `loadDotEnv(".env")` in `loadConfig()` picks it up at startup, so `getSecret("AdminPassword")` now resolves to the chosen password and the `"admin"` fallback is never reached.
+- **`.env.example`** (committed, documents vars): added a `SITE ADMIN PASSWORD` section documenting that `AdminPassword` gates `/api/admin/login`, the resolution order (`ClaudeCertificateSiteAdminPassword` → `AdminPassword` → `"admin"`), and the Fly.io equivalent (`fly secrets set AdminPassword=...`).
+
+### 🔐 Security note
+This only changes the **local** dev server. For the deployed Fly.io app the same var must be set via `fly secrets set AdminPassword=Welcome.June.SH --app claude-architect-certification` (or stored in Azure Key Vault as `AdminPassword`) — otherwise production still falls back to `"admin"`. I did not commit `.env` (gitignored; verified with `git check-ignore`).
+
+### ✅ Verification
+- `go build ./... && go vet ./...` green.
+- Restarted the server cleanly (killed the orphaned `go run`-spawned `main` child that still held `:8080`, then `go run cmd/server/main.go`).
+- `POST /api/admin/login` with `admin` → **HTTP 401**; with `Welcome.June.SH` → **HTTP 200** + `Set-Cookie: admin_logged_in=true` + `{"success":true}`.
+- With the cookie set, `GET /api/admin/status` → `{"admin":true}`; `GET admin.html?redirect=…` → **200**.
+
+
 ## 2026-06-30 — 🧭 AI Tooling Rationale page (Preprod → Tools)
 
 ### 🎯 Objective
