@@ -223,10 +223,12 @@ CREATE TABLE IF NOT EXISTS ivq_questions (
   correct_option TEXT NOT NULL, explanation TEXT,
   incorrect_explanations JSONB DEFAULT '{}',
   timestamp_seconds INT DEFAULT 0, sort_order INT DEFAULT 0,
+  reference_url TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 -- If upgrading existing table:
 -- ALTER TABLE ivq_questions ADD COLUMN sentence_id BIGINT REFERENCES sentences(id) ON DELETE SET NULL;
+-- ALTER TABLE ivq_questions ADD COLUMN reference_url TEXT;
 
 ALTER TABLE videos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ivq_questions ENABLE ROW LEVEL SECURITY;
@@ -373,12 +375,14 @@ CREATE POLICY "allow_all_ivq" ON ivq_questions FOR ALL USING (true) WITH CHECK (
       const ts = q.timestamp_seconds > 0 ? `<span class="ts-badge">⏱ ${fmtTime(q.timestamp_seconds)}</span>` : '';
       const linkedSentence = allSentences.find(s => s.id === q.sentence_id);
       const sentenceBadge = linkedSentence ? `<div style="margin-top:8px;font-size:0.75rem;color:var(--primary);background:rgba(139,92,246,0.1);padding:6px 10px;border-radius:6px;border:1px solid rgba(139,92,246,0.2);">🔗 <strong>Linked:</strong> ${esc(linkedSentence.sentence_text)}</div>` : '';
+      const refBadge = q.reference_url ? `<div style="margin-top:8px;font-size:0.75rem;padding:6px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);"><a href="${esc(q.reference_url)}" target="_blank" style="color:var(--blue);text-decoration:none;">🔗 <strong>Reference Repo:</strong> ${esc(q.reference_url)}</a></div>` : '';
 
       return `<div class="ivq-row" id="ivq-${q.id}">
-        <div class="ivq-question">${esc(q.question_text)}${ts}</div>
+        <div class="ivq-question"><span style="color:var(--muted);font-size:0.85em;margin-right:6px;">#${q.id}</span>${esc(q.question_text)}${ts}</div>
         <div class="ivq-options">${opts}</div>
         ${q.explanation ? `<div class="ivq-explanation"><span>✅ Correct:</span> ${esc(q.explanation)}</div>` : ''}
         ${sentenceBadge}
+        ${refBadge}
         <div class="ivq-row-actions">
           <button class="btn btn-blue btn-sm" onclick="previewQuiz(${q.id})">🧪 Preview</button>
           <button class="btn btn-ghost btn-sm" onclick="openEditIvq(${q.id}, ${videoId})">✏️</button>
@@ -432,6 +436,10 @@ CREATE POLICY "allow_all_ivq" ON ivq_questions FOR ALL USING (true) WITH CHECK (
               <option value="">-- No sentence linked --</option>
               ${sentenceOpts}
             </select>
+          </div>
+          <div style="grid-column: 1 / -1">
+            <label class="form-label">Reference Repo / Link URL</label>
+            <input class="form-input" id="${videoId}-ref" placeholder="https://github.com/..." value="${isEdit ? esc(q.reference_url||'') : ''}">
           </div>
         </div>
         <div class="form-actions" style="margin-top:12px">
@@ -528,6 +536,7 @@ CREATE POLICY "allow_all_ivq" ON ivq_questions FOR ALL USING (true) WITH CHECK (
       const ts = parseInt(document.getElementById(videoId + '-ts')?.value) || 0;
       const sentenceIdStr = document.getElementById(videoId + '-sentence')?.value;
       const sentenceId = sentenceIdStr ? parseInt(sentenceIdStr) : null;
+      const reference_url = document.getElementById(videoId + '-ref')?.value.trim() || null;
 
       const options = ['a','b','c','d'].map(k => ({
         key: k, text: document.getElementById(videoId + '-opt-' + k)?.value.trim() || ''
@@ -537,18 +546,18 @@ CREATE POLICY "allow_all_ivq" ON ivq_questions FOR ALL USING (true) WITH CHECK (
         const v = document.getElementById(videoId + '-inc-' + k)?.value.trim();
         if (v) incorrect_explanations[k] = v;
       });
-      return { questionText, correct, explanation, ts, options, incorrect_explanations, sentenceId };
+      return { questionText, correct, explanation, ts, options, incorrect_explanations, sentenceId, reference_url };
     }
 
     async function saveNewIvq(videoId) {
-      const { questionText, correct, explanation, ts, options, incorrect_explanations, sentenceId } = collectIvqFormData(videoId);
+      const { questionText, correct, explanation, ts, options, incorrect_explanations, sentenceId, reference_url } = collectIvqFormData(videoId);
       if (!questionText) { toast('Question text required', 'error'); return; }
       if (options.length < 2) { toast('Add at least 2 options', 'error'); return; }
       const body = {
         video_id: videoId, question_text: questionText, options,
         correct_option: correct, explanation: explanation || null,
         incorrect_explanations, timestamp_seconds: ts,
-        sentence_id: sentenceId,
+        sentence_id: sentenceId, reference_url,
         sort_order: (ivqMap[videoId]?.length || 0)
       };
       try {
@@ -571,12 +580,12 @@ CREATE POLICY "allow_all_ivq" ON ivq_questions FOR ALL USING (true) WITH CHECK (
     }
 
     async function saveEditIvq(qId, videoId) {
-      const { questionText, correct, explanation, ts, options, incorrect_explanations, sentenceId } = collectIvqFormData(videoId);
+      const { questionText, correct, explanation, ts, options, incorrect_explanations, sentenceId, reference_url } = collectIvqFormData(videoId);
       if (!questionText) { toast('Question text required', 'error'); return; }
       const body = {
         question_text: questionText, options, correct_option: correct,
         explanation: explanation || null, incorrect_explanations, timestamp_seconds: ts,
-        sentence_id: sentenceId
+        sentence_id: sentenceId, reference_url
       };
       try {
         const r = await api('ivq_questions?id=eq.' + qId, { method: 'PATCH', body: JSON.stringify(body) });
