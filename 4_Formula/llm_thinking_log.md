@@ -1,5 +1,24 @@
 # LLM Thinking Log
 
+## 2026-06-30 — 🤖 "AI Shift" rationale card on the Problem page
+
+### 🎯 Objective
+On `5_Symbols/production/preprod/problem.html`, add the macro rationale for *why* architect certification matters now: with the rise of AI, implementation jobs get delegated to AI, so people must work like architects — becoming **observers and commanders, not coders**.
+
+### 🧭 Design choices
+- **Static card, not Supabase-driven.** This is a fixed framing argument (the "why now"), not editable persona/challenge/domain data, so it ships as a static `.glass-card` with its own scoped CSS — it renders identically on the live data path and the `renderFallback()` path, and it can't be accidentally wiped by an editor.
+- **Placement.** Sits directly under the hero, before "Who Faces This Problem" — it frames the problem before the audience is introduced.
+- **Visual argument.** A 3-column `shift-comparison` grid (Yesterday → arrow → Today & Tomorrow) makes the coder→observer/commander shift scannable; an amber callout carries the one-line takeaway. Reuses the page's glassmorphic palette (cyan accent for the AI theme, amber for the callout) — no new design language.
+- **Responsive.** Grid collapses to a single column with a rotated arrow under 640px.
+
+### 🛠 Changes
+- `5_Symbols/production/preprod/problem.html` — new `.ai-shift-card` section (HTML + scoped CSS) under the hero.
+
+### ✅ Verification
+- `node -c` on the inline script still parses (no JS touched).
+- Local Go server serves the page **HTTP 200** with the new card visible.
+
+
 ## 2026-06-28 — 🎞️ Animation Generator (RunPod serverless + Remotion)
 
 ### 🎯 Objective
