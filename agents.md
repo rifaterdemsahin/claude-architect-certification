@@ -457,6 +457,11 @@ bat 6_Semblance/logs/autonomous_error_loop_report.md   # or: cat / glow
 - **✅ Verify Locally Before Push:** Before committing and pushing any page or UI/feature change, run the app locally (`/run-local`, http://localhost:8080) and confirm the affected pages actually work — pages serve HTTP 200 and, for Supabase-backed pages, the data round-trip (load → save/upsert → read back) succeeds against the live tables. Only push once local verification passes. Never push UI changes unverified.
 - **🌐 Open HTML in Chrome Only:** Whenever you open any HTML page or local/preview URL, ALWAYS open it in **Google Chrome** — never the default browser. Use `open -a "Google Chrome" <url>` (e.g. `open -a "Google Chrome" http://localhost:8080/path/to/page.html`). This applies to every "open"/"preview"/"open local" action in this project.
 - **🌐 Post-Task Execution:** Always remember to run the local server at port 8080 (e.g. `go build ./... && go run cmd/server/main.go &`) and open the modified page in Chrome (e.g., `open -a "Google Chrome" http://localhost:8080/path/to/page.html`) after making changes to visually and functionally verify them.
+- **🌐 Visual Diff on Multi-File Changes:** Whenever a commit/changeset touches **more than 3 files**, open the GitHub commit history page in Chrome **after pushing** so the user can visually review the diff at a glance:
+  ```bash
+  open -a "Google Chrome" https://github.com/rifaterdemsahin/claude-architect-certification/commits/main/
+  ```
+  This is a review aid only — it does not replace local verification. Skip it for single-file / 2–3 file changes.
 - **Thinking & Planning Gate:** Before writing any code (`5_Symbols`), document the approach and reasoning in `4_Formula/llm_thinking_log.md`.
 - **Error & Fix Logging:** Log all runtime errors to `6_Semblance/logs/error.log` and fixes to `6_Semblance/logs/fix.log`. Additionally, automatically send all error logs to Axiom using the ingestion helper script: `./6_Semblance/tools/send_error.sh "<stage>" "<severity>" "<description>"`.
 - **Active Reflection:** Write a retrospective journal in `6_Semblance/logs/lessons_learned.md` after every milestone.
