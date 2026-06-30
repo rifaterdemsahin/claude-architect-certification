@@ -17,6 +17,8 @@ Run each file in the Supabase SQL Editor in the order shown. All files are idemp
 | 2 | `schema/02_course_metadata.sql` | `course_metadata` + `course_tools` tables + seeds course data (idempotent) |
 | 3 | `schema/03_ivq.sql` | `ivq_questions` + `videos` (IVQ variant) + RLS |
 | 4 | `schema/04_nav_favorites.sql` | `nav_favorites` table + RLS (server-side nav state for Go app) |
+| … | `schema/05`–`12` | Relationship & feature tables (research_relationships, sentence_links, explanations, infographics, research_assets, prerequisites, fix_agent_resolutions…) |
+| 13 | `schema/13_objective_links.sql` | `objective_links` — links Learning Objectives & Key Results (`outline` rows) to IVQ/sentences/images/scenes/research; rendered at the bottom of `course_outline.html` |
 
 ### 🌱 Step 2 — Seeds (run after schema)
 

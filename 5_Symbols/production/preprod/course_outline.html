@@ -605,6 +605,98 @@
     .asset-picker-item input {
       accent-color: var(--accent-violet);
     }
+
+    /* ── Objective → Asset Map (bottom section) ──────────────── */
+    .objmap-section {
+      margin-top: 3rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 2rem;
+      backdrop-filter: blur(10px);
+    }
+    .objmap-heading {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .objmap-sub {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin-bottom: 1.75rem;
+    }
+    .objmap-module { margin-bottom: 1.75rem; }
+    .objmap-module-title {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent-cyan);
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .objmap-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.6rem;
+      padding: 0.85rem 1rem;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border-color);
+      margin-bottom: 0.75rem;
+    }
+    .objmap-obj-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      border-radius: 100px;
+      padding: 2px 10px;
+      width: fit-content;
+    }
+    .objmap-obj-label.objective { background: rgba(139,92,246,0.12); color: var(--accent-violet); border: 1px solid rgba(139,92,246,0.3); }
+    .objmap-obj-label.key_result { background: rgba(16,185,129,0.1); color: var(--accent-green); border: 1px solid rgba(16,185,129,0.3); }
+    .objmap-obj-text { font-size: 0.9rem; color: var(--text-primary); line-height: 1.45; }
+    .objmap-assets { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-top: 0.2rem; }
+    .objmap-asset {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(6,182,212,0.07);
+      border: 1px solid rgba(6,182,212,0.22);
+      border-radius: 8px;
+      padding: 4px 11px;
+      font-size: 0.78rem;
+      color: var(--accent-cyan);
+      transition: var(--transition);
+      max-width: 320px;
+    }
+    .objmap-asset:hover { background: rgba(6,182,212,0.16); transform: translateY(-1px); }
+    .objmap-asset .objmap-asset-type {
+      font-size: 0.62rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--accent-violet);
+    }
+    .objmap-asset .objmap-asset-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .objmap-empty {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-style: italic;
+    }
   </style>
   <script src="../../../shared/schema-modal.js"></script>
   <script src="../../../shared/nav.js" defer></script>
@@ -639,6 +731,19 @@
         <i class="fa-solid fa-file-signature"></i> Start the Exam
       </a>
     </div>
+
+    <!-- 🔗 Objective → Asset Map: how Learning Objectives & Key Results
+         relate to other Supabase objects (IVQ, sentences, images, scenes…) -->
+    <div class="objmap-section" id="objectiveMapSection" style="display:none">
+      <div class="objmap-heading">🔗 Objective → Asset Map</div>
+      <div class="objmap-sub">
+        Learning Objectives and Key Results are the backbone of the course. Each one is
+        traced here to the Supabase objects that <em>prove</em> it — IVQ questions, script
+        sentences, generated images, scenes and research assets — via the
+        <code style="background:rgba(255,255,255,0.08);padding:1px 5px;border-radius:4px">objective_links</code> table.
+      </div>
+      <div id="objectiveMapBody"></div>
+    </div>
   </div>
 
   
@@ -650,6 +755,82 @@
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZWtmc2RoZ2x5aXJhbHh2a3djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NzYzODgsImV4cCI6MjA5NjM1MjM4OH0.ay6HsmO_CbMGDXL_Dv4DT-paAIAOqlQPfmqqx_mexSU';
 
     const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+    // Register the objective_links migration so the shared "Database Table
+    // Missing" modal can offer the SQL via its Copy button if the table is absent.
+    // Mirrors 5_Symbols/supabase/migrations/migration_objective_links.sql
+    if (window.SchemaModal) {
+      window.SchemaModal.register('objective_links', `-- 🔗 OBJECTIVE LINKS — link Learning Objectives & Key Results to any DB object
+-- Run in the Supabase SQL Editor, then come back and click Retry.
+
+CREATE TABLE IF NOT EXISTS objective_links (
+  id          SERIAL PRIMARY KEY,
+  outline_id  INTEGER NOT NULL REFERENCES outline(id) ON DELETE CASCADE,
+  object_type TEXT NOT NULL,        -- ivq | sentence | image | scene | research | video | note | link
+  object_id   INTEGER,
+  label       TEXT NOT NULL,
+  url         TEXT,
+  container   TEXT,
+  item_name   TEXT,
+  sort_order  INTEGER DEFAULT 0,
+  created_at  TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_objective_links_outline ON objective_links(outline_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_objective_links_unique
+  ON objective_links(outline_id, object_type, COALESCE(object_id, 0), COALESCE(item_name, ''));
+
+ALTER TABLE objective_links ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS anon_all_objective_links ON objective_links;
+CREATE POLICY anon_all_objective_links ON objective_links FOR ALL USING (true) WITH CHECK (true);
+
+-- 🌱 Seed example: link Module 1 objective + first key result to a real IVQ,
+-- sentence, and generated image (idempotent).
+DO $$
+DECLARE
+  v_objective_id  INTEGER;
+  v_kr_id         INTEGER;
+  v_ivq_id        INTEGER; v_ivq_text TEXT;
+  v_sentence_id   INTEGER; v_sentence_text TEXT;
+  v_image_id      INTEGER; v_image_url TEXT;
+BEGIN
+  SELECT id INTO v_objective_id FROM outline
+   WHERE module_number = 1 AND video_number = 0 AND content_type = 'objective' ORDER BY sort_order LIMIT 1;
+  SELECT id INTO v_kr_id FROM outline
+   WHERE module_number = 1 AND video_number = 0 AND content_type = 'key_result' ORDER BY sort_order LIMIT 1;
+
+  SELECT id, question_text INTO v_ivq_id, v_ivq_text FROM ivq_questions ORDER BY id LIMIT 1;
+  IF v_objective_id IS NOT NULL AND v_ivq_id IS NOT NULL THEN
+    INSERT INTO objective_links (outline_id, object_type, object_id, label, url, sort_order)
+    VALUES (v_objective_id, 'ivq', v_ivq_id, COALESCE(v_ivq_text, 'In-Video Question'),
+            '/5_Symbols/production/preprod/ivq.html', 1)
+    ON CONFLICT (outline_id, object_type, COALESCE(object_id, 0), COALESCE(item_name, '')) DO NOTHING;
+  END IF;
+
+  SELECT id, sentence_text INTO v_sentence_id, v_sentence_text FROM sentences ORDER BY id LIMIT 1;
+  IF v_objective_id IS NOT NULL AND v_sentence_id IS NOT NULL THEN
+    INSERT INTO objective_links (outline_id, object_type, object_id, label, url, sort_order)
+    VALUES (v_objective_id, 'sentence', v_sentence_id, LEFT(COALESCE(v_sentence_text, 'Script sentence'), 80),
+            '/5_Symbols/production/preprod/scripts/index.html?module=1', 2)
+    ON CONFLICT (outline_id, object_type, COALESCE(object_id, 0), COALESCE(item_name, '')) DO NOTHING;
+  END IF;
+
+  SELECT id, COALESCE(thumbnail_url, image_url) INTO v_image_id, v_image_url
+    FROM generated_images WHERE image_url IS NOT NULL ORDER BY id LIMIT 1;
+  IF v_objective_id IS NOT NULL AND v_image_id IS NOT NULL THEN
+    INSERT INTO objective_links (outline_id, object_type, object_id, label, url, sort_order)
+    VALUES (v_objective_id, 'image', v_image_id, 'Generated image #' || v_image_id, v_image_url, 3)
+    ON CONFLICT (outline_id, object_type, COALESCE(object_id, 0), COALESCE(item_name, '')) DO NOTHING;
+  END IF;
+
+  IF v_kr_id IS NOT NULL AND v_ivq_id IS NOT NULL THEN
+    INSERT INTO objective_links (outline_id, object_type, object_id, label, url, sort_order)
+    VALUES (v_kr_id, 'ivq', v_ivq_id, COALESCE(v_ivq_text, 'In-Video Question'),
+            '/5_Symbols/production/preprod/ivq.html', 1)
+    ON CONFLICT (outline_id, object_type, COALESCE(object_id, 0), COALESCE(item_name, '')) DO NOTHING;
+  END IF;
+END $$;`);
+    }
 
     // ── Progress state (keyed by course_videos.id) ─────────
     // { [videoId]: { status, tell, show, do, apply } }
@@ -741,11 +922,12 @@
     async function loadCourse() {
       const container = document.getElementById('courseContent');
       try {
-        const [modulesRes, okrRes, topicsRes, progressRes] = await Promise.all([
+        const [modulesRes, okrRes, topicsRes, progressRes, objLinksRes] = await Promise.all([
           client.from('course_modules').select('*, course_videos(*)').order('sort_order', { ascending: true }),
           client.from('outline').select('*').eq('video_number', 0).in('content_type', ['objective', 'key_result']).order('sort_order', { ascending: true }),
           client.from('outline').select('*').neq('video_number', 0).eq('content_type', 'topic').order('module_number').order('video_number').order('sort_order'),
-          client.from('course_video_progress').select('*').eq('user_id', 'default')
+          client.from('course_video_progress').select('*').eq('user_id', 'default'),
+          client.from('objective_links').select('*').order('sort_order', { ascending: true })
         ]);
 
         if (modulesRes.error) throw modulesRes.error;
@@ -802,6 +984,9 @@
 
         container.innerHTML = modules.map((mod, idx) => renderModule(mod, idx)).join('');
         document.getElementById('examCta').style.display = 'block';
+
+        // 🔗 Render the Objective → Asset map at the bottom of the page
+        renderObjectiveMap(okrRes.data || [], objLinksRes.data || []);
 
         // Auto-expand module and optionally scroll to a specific video from URL params ?module=N&video=V
         const _qp = new URLSearchParams(location.search);
@@ -949,6 +1134,84 @@
     }
 
     
+
+    // ── 🔗 Objective → Asset Map ───────────────────────────────
+    const OBJ_ASSET_META = {
+      ivq:      { icon: '❓', label: 'IVQ' },
+      sentence: { icon: '✍️', label: 'Sentence' },
+      image:    { icon: '🖼', label: 'Image' },
+      scene:    { icon: '🎬', label: 'Scene' },
+      research: { icon: '🔬', label: 'Research' },
+      video:    { icon: '📹', label: 'Video' },
+      note:     { icon: '📝', label: 'Note' },
+      link:     { icon: '🔗', label: 'Link' }
+    };
+
+    function escapeHtml(s) {
+      return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    function renderObjectiveMap(outlineRows, links) {
+      const section = document.getElementById('objectiveMapSection');
+      const body    = document.getElementById('objectiveMapBody');
+      if (!section || !body) return;
+
+      // Only show objectives/key results that actually have linked assets
+      const linksByOutline = {};
+      links.forEach(l => {
+        (linksByOutline[l.outline_id] = linksByOutline[l.outline_id] || []).push(l);
+      });
+
+      const linkedRows = outlineRows
+        .filter(r => linksByOutline[r.id] && linksByOutline[r.id].length)
+        .sort((a, b) => (a.module_number - b.module_number) || (a.sort_order - b.sort_order));
+
+      if (linkedRows.length === 0) {
+        // Keep the section hidden when nothing is linked yet (e.g. migration not run)
+        section.style.display = 'none';
+        return;
+      }
+
+      // Group by module
+      const byModule = {};
+      linkedRows.forEach(r => {
+        (byModule[r.module_number] = byModule[r.module_number] || []).push(r);
+      });
+
+      body.innerHTML = Object.keys(byModule)
+        .sort((a, b) => a - b)
+        .map(mn => {
+          const rowsHtml = byModule[mn].map(r => {
+            const assets = (linksByOutline[r.id] || []).map(l => {
+              const meta = OBJ_ASSET_META[l.object_type] || { icon: '📎', label: l.object_type };
+              const inner = `<span class="objmap-asset-type">${meta.icon} ${escapeHtml(meta.label)}</span>` +
+                            `<span class="objmap-asset-name">${escapeHtml(l.label)}</span>`;
+              return l.url
+                ? `<a class="objmap-asset" href="${escapeHtml(l.url)}" target="_blank" rel="noopener" title="${escapeHtml(l.label)}">${inner}</a>`
+                : `<span class="objmap-asset" title="${escapeHtml(l.label)}">${inner}</span>`;
+            }).join('');
+
+            const typeClass = r.content_type === 'objective' ? 'objective' : 'key_result';
+            const typeLabel = r.content_type === 'objective' ? '🎯 Objective' : '🔑 Key Result';
+            return `
+              <div class="objmap-row">
+                <span class="objmap-obj-label ${typeClass}">${typeLabel}</span>
+                <div class="objmap-obj-text">${escapeHtml(r.content)}</div>
+                <div class="objmap-assets">${assets}</div>
+              </div>`;
+          }).join('');
+
+          return `
+            <div class="objmap-module">
+              <div class="objmap-module-title">Module ${mn}</div>
+              ${rowsHtml}
+            </div>`;
+        }).join('');
+
+      section.style.display = 'block';
+    }
 
     let allRelationships = [];
     let allResearchFiles = {};
