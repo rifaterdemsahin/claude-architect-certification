@@ -162,7 +162,7 @@
       <textarea class="form-textarea" id="input-examples" placeholder="- Example usage 1&#10;- Example usage 2" style="min-height: 60px;"></textarea>
     </div>
     <div class="editor-footer">
-      <button class="btn btn-primary" onclick="saveEntry()">💾 Save Term</button>
+      <button data-require-admin="true" class="btn btn-primary" onclick="saveEntry()">💾 Save Term</button>
       <button class="btn btn-ghost-lg" onclick="resetForm()">➕ New</button>
       <button class="btn btn-cancel" id="btn-cancel-edit" style="display:none;" onclick="cancelEdit()">✕ Cancel Edit</button>
       <span class="save-status" id="save-status"></span>
@@ -300,7 +300,7 @@ function renderList(entries) {
         ${e.source ? `<div class="detail-label" style="margin-top:8px;">📚 Source</div><div class="detail-text" style="font-size:0.82rem;color:var(--muted);font-family:var(--font-mono);">${escHtml(e.source)}</div>` : ''}
         <div class="dict-actions">
           <button class="btn-sm btn-edit" onclick="editEntry(${e.id});event.stopPropagation();">✏️ Edit</button>
-          <button class="btn-sm btn-delete" onclick="deleteEntry(${e.id});event.stopPropagation();">🗑 Delete</button>
+          <button data-require-admin="true" class="btn-sm btn-delete btn-del" onclick="deleteEntry(${e.id});event.stopPropagation();">🗑 Delete</button>
         </div>
       </div>
     `;
@@ -328,6 +328,7 @@ function searchRelated(term) {
 
 // ── Save (Create / Update) ──────────────────────────────────────────────────
 async function saveEntry() {
+  if (window.requireAdmin && !window.requireAdmin('saveEntry')) return;
   const term = document.getElementById('input-term').value.trim();
   const definition = document.getElementById('input-definition').value.trim();
   const category = document.getElementById('input-category').value;
@@ -413,6 +414,7 @@ function resetForm() {
 
 // ── Delete ──────────────────────────────────────────────────────────────────
 async function deleteEntry(id) {
+  if (window.requireAdmin && !window.requireAdmin('deleteEntry')) return;
   const entry = allEntries.find(e => e.id === id);
   if (!entry) return;
   if (!confirm('🗑 Permanently delete "' + entry.term + '"?\n\nThis removes the entry from the dictionary and cannot be undone.')) return;
