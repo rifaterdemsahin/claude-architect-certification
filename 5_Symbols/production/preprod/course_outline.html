@@ -153,11 +153,18 @@
       font-family: var(--font-display);
       font-size: 2rem;
       font-weight: 800;
-      background: linear-gradient(135deg, var(--accent-violet), var(--accent-cyan));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
-    .stat-label { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .stat-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .si-modules .stat-number { background: linear-gradient(135deg, #a78bfa, #c4b5fd); }
+    .si-modules .stat-label  { color: #a78bfa; }
+    .si-videos  .stat-number { background: linear-gradient(135deg, #60a5fa, #93c5fd); }
+    .si-videos  .stat-label  { color: #60a5fa; }
+    .si-cost    .stat-number { background: linear-gradient(135deg, #34d399, #6ee7b7); }
+    .si-cost    .stat-label  { color: #34d399; }
+    .si-complete .stat-number { background: linear-gradient(135deg, #fbbf24, #fcd34d); }
+    .si-complete .stat-label  { color: #fbbf24; }
 
     /* Content */
     .content-wrapper {
@@ -801,10 +808,10 @@
     <h1 class="hero-title">Course Outline</h1>
     <p class="hero-subtitle">From AI prototyping to production-grade enterprise deployment — master secure architecture, MCP, ZDR, deterministic routers, and prompt caching.</p>
     <div class="hero-stats">
-      <div class="stat-item"><div class="stat-number">5</div><div class="stat-label">Modules</div></div>
-      <div class="stat-item"><div class="stat-number" id="totalVideosStat">15</div><div class="stat-label">Videos</div></div>
-      <div class="stat-item"><div class="stat-number">90%</div><div class="stat-label">Cost Reduction</div></div>
-      <div class="stat-item"><div class="stat-number" id="completionPct">0%</div><div class="stat-label">Complete</div></div>
+      <div class="stat-item si-modules"><div class="stat-number">5</div><div class="stat-label">Modules</div></div>
+      <div class="stat-item si-videos"><div class="stat-number" id="totalVideosStat">15</div><div class="stat-label">Videos</div></div>
+      <div class="stat-item si-cost"><div class="stat-number">90%</div><div class="stat-label">Cost Reduction</div></div>
+      <div class="stat-item si-complete"><div class="stat-number" id="completionPct">0%</div><div class="stat-label">Complete</div></div>
     </div>
     <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBarFill"></div></div>
   </section>
