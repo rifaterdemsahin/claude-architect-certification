@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Why each AI tool owns a specific job — Gemini for images & bulk context, DeepSeek via Kilo+VSCode, Z.ai/GLM for the fix agent, Claude Code for the coding map & refactors.">
+  <meta name="description" content="Why each AI tool owns a specific job — Gemini for images & bulk context, DeepSeek via Kilo+VSCode, Z.ai/GLM for the fix agent, Claude Code for the coding map & refactors — plus OpenRouter as the funded production gateway for runtime LLM calls.">
   <title>🧭 AI Tooling Rationale — Claude Architect Certification</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -105,6 +105,7 @@
     .tag-cut   { background: rgba(6,182,212,0.14);  border:1px solid rgba(6,182,212,0.34); color:#67e8f9; }
     .tag-fix   { background: rgba(16,185,129,0.14); border:1px solid rgba(16,185,129,0.34); color:#6ee7b7; }
     .tag-map   { background: rgba(139,92,246,0.16); border:1px solid rgba(139,92,246,0.36); color:#c4b5fd; }
+    .tag-ops   { background: rgba(244,63,94,0.14);  border:1px solid rgba(244,63,94,0.34);  color:#fda4af; }
 
     /* ── Decision matrix table ── */
     .matrix { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
@@ -155,7 +156,9 @@
       <h1 class="hero-title">The right model for the <span class="hl">right job</span></h1>
       <p class="hero-subtitle">
         No single AI does everything well. This is the working split behind the Claude Architect Certification build —
-        each tool owns the job it's genuinely best at, so cost, quality, and speed all stay where they should.
+        each <strong>development</strong> tool owns the job it's genuinely best at, while a separate
+        <strong>operational</strong> layer (OpenRouter) carries the runtime LLM calls the shipped product makes.
+        Cost, quality, and speed each stay where they should.
       </p>
     </div>
 
@@ -172,7 +175,11 @@
 
     <!-- ── Tool cards ── -->
     <div class="glass-card">
-      <h2 class="card-title"><i class="fa-solid fa-toolbox" style="color:var(--accent-cyan);"></i> 🛠️ The split</h2>
+      <h2 class="card-title"><i class="fa-solid fa-toolbox" style="color:var(--accent-cyan);"></i> 🛠️ The development layer</h2>
+      <p class="intro-text" style="margin-bottom:1.25rem; font-size:0.98rem; color:var(--text-muted);">
+        The tools the developer reaches for interactively while <em>building</em> the project. (Runtime / production
+        calls live in the <strong>operational layer</strong> further down.)
+      </p>
       <div class="tool-grid">
 
         <!-- Gemini -->
@@ -262,6 +269,41 @@
       </div>
     </div>
 
+    <!-- ── Operational layer (production) ── -->
+    <div class="glass-card">
+      <h2 class="card-title"><i class="fa-solid fa-rocket" style="color:#fda4af;"></i> 🚀 Operational layer (production)</h2>
+      <p class="intro-text" style="margin-bottom:1.25rem;">
+        Everything above is <strong>development</strong>. The product running live needs a different thing: a single,
+        funded gateway to reach a model at runtime — with the API key kept safely server-side and a model chosen per
+        call. OpenRouter is that operational layer.
+      </p>
+      <div class="tool-grid">
+
+        <!-- OpenRouter -->
+        <div class="tool-card">
+          <div class="tool-head">
+            <div class="tool-logo" style="background:rgba(244,63,94,0.18);color:#fda4af;">
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+            </div>
+            <div>
+              <div class="tool-name">OpenRouter</div>
+              <div class="tool-role">The production LLM gateway · operational</div>
+            </div>
+          </div>
+          <div class="tool-job">Runtime LLM calls in shipped features &amp; automation</div>
+          <p class="tool-desc">
+            The single funded rail the <strong>product itself</strong> calls whenever it needs a model at runtime —
+            lower-thirds generation, the animation generator, and the autonomous error-loop fix agent all route
+            through it. A model is selected per call (e.g. <code>anthropic/claude-sonnet-4.6</code>) and the key
+            never reaches the browser. <strong>Loaded &amp; topped up as the production LLM budget</strong> — this
+            is an operational tool, not a development toy.
+          </p>
+          <span class="tool-tag tag-ops">🚀 Production</span>
+        </div>
+
+      </div>
+    </div>
+
     <!-- ── Decision matrix ── -->
     <div class="glass-card">
       <h2 class="card-title"><i class="fa-solid fa-table-list" style="color:var(--accent-green);"></i> 📊 Decision matrix</h2>
@@ -271,6 +313,12 @@
             <tr><th>Tool</th><th>Owns</th><th>Use when…</th><th>Don't use for</th></tr>
           </thead>
           <tbody>
+            <tr>
+              <td><strong>🚀 OpenRouter</strong> <span style="color:#fda4af;">(production)</span></td>
+              <td>Operational LLM gateway</td>
+              <td>A shipped feature or automation needs a model at runtime (lower-thirds, animation gen, fix agent).</td>
+              <td>Interactive dev work — that's what the development tools below are for.</td>
+            </tr>
             <tr>
               <td><strong>✨ Gemini</strong></td>
               <td>Images &amp; bulk context</td>
@@ -308,7 +356,9 @@
         <strong>Gemini</strong> absorbs context and makes pictures; <strong>DeepSeek</strong> cuts code cheaply
         where you're typing; <strong>Z.ai</strong> grinds through the known-error backlog autonomously; and
         <strong>Claude Code</strong> holds the map and does the refactors that actually move the architecture.
-        That division is what keeps this project fast, cheap, and high-quality at the same time.
+        That division is what keeps this project fast, cheap, and high-quality at the same time. On the operational
+        side, <strong>OpenRouter</strong> is the funded gateway every shipped feature and automation calls when it
+        needs a model at runtime — topped up and maintained as the production LLM budget.
       </p>
     </div>
 
