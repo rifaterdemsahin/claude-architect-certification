@@ -271,6 +271,9 @@
         {
           label: '🛠️ Tools',
           children: [
+            { group: true, label: '💻 Dev Environment', children: [
+              { label: '🌊 Wave Terminal', url: '5_Symbols/production/preprod/tools/wave_terminal.html', description: 'Configuration and layout for Wave Terminal.' }
+            ]},
             { group: true, label: '🐙 Code & Repo', children: [
               { label: '🐙 GitHub Repo', url: 'https://github.com/rifaterdemsahin/claude-architect-certification' },
               { label: '🐛 Issue Tracker', url: 'https://github.com/rifaterdemsahin/claude-architect-certification/issues' },
@@ -427,6 +430,7 @@
         {
           label: '9. 🤝 LinkedIn Outreach',
           children: [
+            { label: "Erdem's Story", url: '5_Symbols/production/postprod/erdems_story.html' },
             { label: 'Journey Post (pre-exam)', url: '5_Symbols/production/postprod/linkedin_messaging.html#msg-a' },
             { label: 'Announcement Post (after pass)', url: '5_Symbols/production/postprod/linkedin_messaging.html#msg-b' },
             { label: 'Reply to Recruiter', url: '5_Symbols/production/postprod/linkedin_messaging.html#msg-c' }

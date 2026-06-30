@@ -311,6 +311,17 @@
             },
             {
               "group": true,
+              "label": "💻 Dev Environment",
+              "children": [
+                {
+                  "label": "🌊 Wave Terminal",
+                  "url": "5_Symbols/production/preprod/tools/wave_terminal.html",
+                  "description": "Configuration and layout for Wave Terminal."
+                }
+              ]
+            },
+            {
+              "group": true,
               "label": "🐙 Code & Repo",
               "children": [
                 {
@@ -911,6 +922,11 @@
             {
               "label": "11. 🤝 LinkedIn Outreach",
               "children": [
+                {
+                  "label": "Erdem's Story",
+                  "url": "5_Symbols/production/postprod/erdems_story.html",
+                  "description": "Erdem's journey of learning by building, why this AI certification matters more than traditional degrees, and how generative AI supports the self-learning process."
+                },
                 {
                   "label": "Journey Post (pre-exam)",
                   "url": "5_Symbols/production/postprod/linkedin_messaging.html#msg-a"

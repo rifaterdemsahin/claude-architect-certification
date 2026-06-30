@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Wave Terminal configuration and usage guide.">
+  <title>🌊 Wave Terminal — Claude Architect Certification</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --bg-dark: #0b0f19;
+      --bg-card: rgba(22, 28, 45, 0.7);
+      --bg-glass: rgba(15, 23, 42, 0.6);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --text-primary: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-cyan: #06b6d4;
+      --font-display: 'Outfit', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      line-height: 1.6;
+      padding-top: 70px;
+      padding-bottom: 80px;
+    }
+
+    a { color: inherit; text-decoration: none; transition: var(--transition); }
+    .page-container { max-width: 980px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+    /* ── Hero ── */
+    .hero { text-align: center; margin-bottom: 2.5rem; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: rgba(6, 182, 212, 0.12); border: 1px solid rgba(6, 182, 212, 0.32);
+      color: #67e8f9; padding: 0.35rem 1rem; border-radius: 100px;
+      font-size: 0.85rem; font-weight: 600; letter-spacing: 0.05em; margin-bottom: 1.25rem;
+    }
+    .hero-title {
+      font-family: var(--font-display); font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 1rem;
+    }
+    .hero-subtitle { font-size: 1.1rem; color: var(--text-muted); max-width: 700px; margin: 0 auto; }
+
+    /* ── Glass Cards ── */
+    .glass-card {
+      background: var(--bg-card); border: 1px solid var(--border-color);
+      border-radius: 16px; padding: 1.75rem 2rem; backdrop-filter: blur(8px); margin-bottom: 1.5rem;
+    }
+    .card-title {
+      font-family: var(--font-display); font-size: 1.3rem; font-weight: 700;
+      display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1rem;
+    }
+
+    .intro-text { font-size: 1.05rem; }
+    
+    footer { text-align: center; padding: 2rem 1rem; color: var(--text-muted); font-size: 0.85rem; border-top: 1px solid var(--border-color); margin-top: 2rem; }
+    footer a { color: #93c5fd; }
+  </style>
+  <script src="../../../../shared/schema-modal.js"></script>
+  <script src="../../../../shared/nav.js" defer></script>
+  <script src="../../../../shared/seo.js" defer></script>
+</head>
+<body>
+
+  <div class="page-container">
+
+    <!-- ── Hero ── -->
+    <div class="hero">
+      <div class="hero-badge">
+        <i class="fa-solid fa-terminal"></i>
+        <span>Dev Environment</span>
+      </div>
+      <h1 class="hero-title">Wave <span style="color:var(--accent-cyan);">Terminal</span></h1>
+      <p class="hero-subtitle">
+        Configuration and layout for Wave Terminal in the Claude Architect Certification project.
+      </p>
+    </div>
+
+    <!-- ── Content ── -->
+    <div class="glass-card">
+      <h2 class="card-title"><i class="fa-solid fa-gear" style="color:var(--accent-cyan);"></i> Setup & Configuration</h2>
+      <p class="intro-text">
+        Use Wave Terminal for advanced workspace management, combining standard terminal functionality with a GUI for easy access to logs, servers, and multi-pane setups.
+      </p>
+      <br>
+      <ul style="list-style-type: none; padding-left: 1rem;">
+        <li style="margin-bottom: 0.5rem;"><i class="fa-solid fa-check" style="color:#10b981; margin-right: 0.5rem;"></i> <strong>Workspace:</strong> <code>claude-architect-certification</code></li>
+        <li style="margin-bottom: 0.5rem;"><i class="fa-solid fa-check" style="color:#10b981; margin-right: 0.5rem;"></i> <strong>Split Panes:</strong> Set up a pane for Go server, and another for Kilo agent.</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <footer>
+    <p>Built for the <strong>Claude AI Certification for Architects</strong> Masterclass.</p>
+    <p style="margin-top:6px;">
+      Instructor: <a href="https://www.linkedin.com/in/rifaterdemsahin" target="_blank">Rifat Erdem Sahin</a>
+      &nbsp;|&nbsp;
+      <a href="https://github.com/rifaterdemsahin/claude-architect-certification" target="_blank">GitHub</a>
+    </p>
+  </footer>
+
+  <script src="../../../../shared/debug-panel.js"></script>
+</body>
+</html>
