@@ -67,7 +67,7 @@
 <script src="../../../../shared/schema-modal.js"></script>
 <script src="../../../../shared/nav.js"></script>
 <div class="container">
-  <h1>🖼 Research Images</h1>
+  <h1>🖼 Research Images <span id="top-count" style="font-size: 1.2rem; color: var(--primary); font-weight: 600; margin-left: 8px;"></span></h1>
   <p class="subtitle">Upload and manage reference images for research — stored in Azure Blob Storage. ⚡ Thumbnails are generated automatically and indexed in Supabase.</p>
 
   <!-- Thumbnail generation status (shown while thumbnails are being created) -->
@@ -163,6 +163,8 @@ function loadGallery() {
       );
       const files = (allFiles || []).filter(f => !f.name.startsWith(THUMB_PREFIX));
       document.getElementById('count').textContent = '(' + files.length + ')';
+      const topCountEl = document.getElementById('top-count');
+      if (topCountEl) topCountEl.textContent = '(' + files.length + ' total)';
       if (files.length === 0) {
         gallery.innerHTML = '<div class="empty-state">No images yet — upload one above.</div>';
         return;
