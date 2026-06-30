@@ -176,7 +176,15 @@
   /* ---- Favorites helpers (backed by Supabase via /api/nav/favs) ---- */
 
   function getFavs() {
-    return window.__NAV_FAVS__ || [];
+    if (window.__NAV_FAVS__) return window.__NAV_FAVS__;
+    try {
+      var match = document.cookie.match(new RegExp('(^| )nav_favs=([^;]+)'));
+      if (match) {
+        window.__NAV_FAVS__ = JSON.parse(decodeURIComponent(match[2]));
+        return window.__NAV_FAVS__;
+      }
+    } catch(e) {}
+    return [];
   }
 
   function toggleFav(resolvedUrl, label) {
@@ -190,7 +198,11 @@
     else { favs.push({ url: resolvedUrl, label: label }); nowFav = true; }
     window.__NAV_FAVS__ = favs; // optimistic update
 
-    fetch('/api/nav/favs', {
+    try {
+      document.cookie = "nav_favs=" + encodeURIComponent(JSON.stringify(favs)) + "; path=/; max-age=31536000";
+    } catch(e) {}
+
+    fetch((window.API_BASE || '') + '/api/nav/favs', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ url: resolvedUrl, label: label })
@@ -726,6 +738,20 @@
       'font-size:0.85rem;white-space:nowrap;cursor:pointer;transition:all 0.2s;" ' +
       'title="Toggle Light/Dark Mode">' +
       '<span class="site-nav-theme-label">' + themeIcon + '</span></button>';
+
+    // ⭐ Current Page Favorite chip
+    var currentUrl = resolveUrl(window.location.pathname.replace(/^.*\/5_Symbols/, '5_Symbols').replace(/^\//, '') + window.location.search);
+    if (window.location.pathname.endsWith('index.html') && !window.location.pathname.includes('5_Symbols')) currentUrl = resolveUrl('index.html');
+    var isCurrentFav = favs.some(function(f) { return f.url === currentUrl; });
+    var pageFavStar = isCurrentFav ? '★' : '☆';
+    var safeTitle = (document.title || 'Current Page').replace(/"/g, '&quot;');
+    html += '<button id="site-nav-page-fav" class="nav-star' + (isCurrentFav ? ' nav-star--on' : '') + '" ' +
+      'data-fav-url="' + currentUrl + '" data-fav-label="' + safeTitle + '" ' +
+      'style="display:inline-flex;align-items:center;justify-content:center;margin-left:10px;width:30px;height:30px;border-radius:50%;' +
+      'background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:inherit;' +
+      'font-size:1.1rem;cursor:pointer;transition:all 0.2s;line-height:1;" ' +
+      'title="' + (isCurrentFav ? 'Remove from favorites' : 'Add to favorites') + '">' +
+      pageFavStar + '</button>';
 
     html += '</div></div>';
 
