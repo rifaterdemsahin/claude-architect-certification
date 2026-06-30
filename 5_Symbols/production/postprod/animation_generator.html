@@ -31,6 +31,21 @@
     header p { color: var(--text-muted); font-size: 1.05rem; }
     header code { background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 5px; font-size: 0.9em; }
 
+    .concept-stats { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-top: 36px; }
+    .concept-stat {
+      text-align: center; padding: 18px 28px; border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.08); min-width: 130px;
+      backdrop-filter: blur(8px);
+    }
+    .concept-stat .val { font-family: var(--font-title); font-size: 2.2rem; font-weight: 900; line-height: 1.1; }
+    .concept-stat .lbl { font-size: 0.82rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+    .cs-modules   { background: rgba(139,92,246,0.15); --cs-color: #a78bfa; }
+    .cs-videos    { background: rgba(59,130,246,0.15); --cs-color: #60a5fa; }
+    .cs-cost      { background: rgba(16,185,129,0.15); --cs-color: #34d399; }
+    .cs-complete  { background: rgba(245,158,11,0.15); --cs-color: #fbbf24; }
+    .concept-stat .val { color: var(--cs-color); }
+    .concept-stat .lbl { color: var(--cs-color); }
+
     .selector-bar { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
     .selector-bar select {
       background: var(--bg-card); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px;
@@ -122,6 +137,12 @@
     <header id="page_header">
       <h1 id="page_title">🎞️ Animation Generator</h1>
       <p id="page_description">Turn each script sentence into a <strong>Remotion</strong> animation rendered on <strong>RunPod serverless</strong>, then stored in <strong>Azure</strong>. Pick a module &amp; video, choose one of <strong>10 animation types</strong> per sentence, preview the <strong>Remotion prompt</strong>, then <strong>▶️ Generate</strong>. Renders land back here automatically.</p>
+      <div class="concept-stats">
+        <div class="concept-stat cs-modules"><div class="val">5</div><div class="lbl">Modules</div></div>
+        <div class="concept-stat cs-videos"><div class="val">15</div><div class="lbl">Videos</div></div>
+        <div class="concept-stat cs-cost"><div class="val">90%</div><div class="lbl">Cost Reduction</div></div>
+        <div class="concept-stat cs-complete"><div class="val">7%</div><div class="lbl">Complete</div></div>
+      </div>
     </header>
 
     <!-- 1) Filter -->
