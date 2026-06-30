@@ -29,13 +29,21 @@
         radial-gradient(circle at 85% 30%, rgba(236, 72, 153, 0.15), transparent 25%);
       color: var(--text-main); 
       font-family: 'Plus Jakarta Sans', sans-serif; 
-      min-height: 100dvh; 
+      min-height: 100vh; 
       display: flex; 
-      justify-content: center; 
-      align-items: center; 
-      padding: 24px; 
+      flex-direction: column;
+      margin: 0;
+      padding: 0;
       line-height: 1.6;
-      overflow: hidden;
+    }
+
+    .content-container {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+      position: relative;
     }
 
     .background-shapes {
@@ -283,29 +291,31 @@
     <div class="shape shape-2"></div>
   </div>
 
-  <div class="container">
-    <div class="header-content">
-      <div class="icon-wrapper">🛡️</div>
-      <h1>Admin Portal</h1>
-      <p>Authenticate to securely access system management and configuration.</p>
-    </div>
-    
-    <div class="card" id="admin-auth-card">
-      <div class="input-group">
-        <label for="admin-password">Admin Password</label>
-        <div class="input-wrapper">
-          <input id="admin-password" type="password" placeholder="••••••••••••" onkeydown="if(event.key === 'Enter') loginAdmin()">
-        </div>
+  <main class="content-container">
+    <div class="container">
+      <div class="header-content">
+        <div class="icon-wrapper">🛡️</div>
+        <h1>Admin Portal</h1>
+        <p>Authenticate to securely access system management and configuration.</p>
       </div>
       
-      <button class="btn btn-primary" id="btn-admin-login" onclick="loginAdmin()">
-        <span>Sign In</span>
-        <div class="loader"></div>
-      </button>
-      
-      <div id="admin-auth-status" class="status-badge" style="display: none;"></div>
+      <div class="card" id="admin-auth-card">
+        <div class="input-group">
+          <label for="admin-password">Admin Password</label>
+          <div class="input-wrapper">
+            <input id="admin-password" type="password" placeholder="••••••••••••" onkeydown="if(event.key === 'Enter') loginAdmin()">
+          </div>
+        </div>
+        
+        <button class="btn btn-primary" id="btn-admin-login" onclick="loginAdmin()">
+          <span>Sign In</span>
+          <div class="loader"></div>
+        </button>
+        
+        <div id="admin-auth-status" class="status-badge" style="display: none;"></div>
+      </div>
     </div>
-  </div>
+  </main>
 
   <script>
     function getCookie(name) {
