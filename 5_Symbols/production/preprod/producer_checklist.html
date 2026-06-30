@@ -361,7 +361,7 @@ function renderSection(stage, items) {
       </div>
       <div class="task-actions">
         <button class="btn btn-ghost btn-sm" title="Edit" onclick="openEdit(${item.id})">✏️</button>
-        <button class="btn btn-danger btn-sm" title="Delete" onclick="removeTask(${item.id}, '${stage.key}')">🗑</button>
+        <button data-require-admin="true" class="btn btn-danger btn-del btn-sm" title="Delete" onclick="removeTask(${item.id}, '${stage.key}')">🗑</button>
       </div>
     </div>`;
   }).join('');
@@ -476,12 +476,13 @@ function renderTaskRow(item, stage) {
     </div>
     <div class="task-actions">
       <button class="btn btn-ghost btn-sm" title="Edit" onclick="openEdit(${item.id})">✏️</button>
-      <button class="btn btn-danger btn-sm" title="Delete" onclick="removeTask(${item.id}, '${stage.key}')">🗑</button>
+      <button data-require-admin="true" class="btn btn-danger btn-del btn-sm" title="Delete" onclick="removeTask(${item.id}, '${stage.key}')">🗑</button>
     </div>
   </div>`;
 }
 
 function removeTask(id, stageKey) {
+  if (window.requireAdmin && !window.requireAdmin('removeTask')) return;
   if (!confirm('Delete this task?')) return;
   checklistItems = checklistItems.filter(i => i.id !== id);
   saveToStorage();

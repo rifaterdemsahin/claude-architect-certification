@@ -550,7 +550,7 @@
             <span class="sentence-status-icon">${s.status === 'done' ? '✅' : s.status === 'error' ? '❌' : s.status === 'processing' ? '⏳' : '⏺️'}</span>
             <button class="btn btn-sm btn-secondary" onclick="editSentence('${s.id}')">✏️</button>
             <button class="btn btn-sm btn-secondary" onclick="enhanceSentence('${s.id}')">✨</button>
-            <button class="btn btn-sm btn-danger" onclick="removeSentence('${s.id}')">✕</button>
+            <button data-require-admin="true" class="btn btn-sm btn-danger btn-del" onclick="removeSentence('${s.id}')">✕</button>
           </div>
         </div>
       `).join('');
@@ -612,6 +612,7 @@
     }
 
     function removeSentence(id) {
+  if (window.requireAdmin && !window.requireAdmin('removeSentence')) return;
       sentences = sentences.filter(s => s.id !== id);
       results = results.filter(r => r.sentenceId !== id);
       renderSentences();

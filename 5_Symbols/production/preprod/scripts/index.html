@@ -2074,7 +2074,7 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
         </div>
         <div class="code-ref-actions-col">
           <button class="btn btn-ghost btn-sm" title="Edit" onclick="openCodeRefEdit(${id})">✏️</button>
-          <button class="btn btn-danger btn-sm" title="Delete" onclick="deleteCodeRefUI(${id})">🗑</button>
+          <button data-require-admin="true" class="btn btn-danger btn-del btn-sm" title="Delete" onclick="deleteCodeRefUI(${id})">🗑</button>
         </div>
       </div>`;
     }
@@ -2220,7 +2220,7 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
             <span style="font-weight:600; font-size:0.82rem; color:var(--text-main); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${esc2(l.description)}</span>
             <a href="${esc2(l.url)}" target="_blank" rel="noopener" style="font-size:0.72rem; color:#60a5fa; text-decoration:none; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${esc2(l.url)}</a>
           </div>
-          <button class="btn btn-danger btn-sm" onclick="deleteSentLink(${l.id})" style="padding:4px 8px; font-size:0.75rem; margin-left:10px; flex-shrink: 0;" title="Delete this URL link">🗑 Delete</button>
+          <button data-require-admin="true" class="btn btn-danger btn-del btn-sm" onclick="deleteSentLink(${l.id})" style="padding:4px 8px; font-size:0.75rem; margin-left:10px; flex-shrink: 0;" title="Delete this URL link">🗑 Delete</button>
         </div>`).join('');
     }
 
@@ -2402,7 +2402,7 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
               </div>
             </div>
             <div class="code-ref-actions-col">
-              <button class="btn btn-danger btn-sm" title="Unlink" onclick="unlinkResearchUI(${r.id}, '${elementId}')">✕</button>
+              <button data-require-admin="true" class="btn btn-danger btn-del btn-sm" title="Unlink" onclick="unlinkResearchUI(${r.id}, '${elementId}')">✕</button>
             </div>
           </div>`;
         }).join('');

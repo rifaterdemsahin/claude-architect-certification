@@ -90,7 +90,7 @@
     </div>
   </div>
 
-  <div class="editor-card">
+  <div class="editor-card" data-require-admin="true">
     <div class="editor-header">
       <label for="filename-input">📄 Filename:</label>
       <input class="filename-input" id="filename-input" type="text" placeholder="note-2026-06-12.md" spellcheck="false">
@@ -137,6 +137,7 @@ function newNote() {
 }
 
 function saveNote() {
+  if (window.requireAdmin && !window.requireAdmin('save notes')) return;
   let name = document.getElementById('filename-input').value.trim();
   if (!name) name = defaultFilename();
   if (!name.endsWith('.md') && !name.endsWith('.txt')) name += '.md';
@@ -176,6 +177,7 @@ function loadNote(name) {
 }
 
 function deleteFile(name) {
+  if (window.requireAdmin && !window.requireAdmin('delete notes')) return;
   if (!confirm('Delete ' + name + '?')) return;
   fetch('/api/research/file?container=' + CONTAINER + '&name=' + encodeURIComponent(name), { method: 'DELETE' })
     .then(r => {
@@ -212,7 +214,7 @@ function loadList() {
           <div class="note-actions">
             <button class="btn-sm btn-blue" onclick="loadNote('${f.name.replace(/'/g,"\\'")}')">✏️ Edit</button>
             <a class="btn-sm btn-ghost" href="/api/research/file?container=${CONTAINER}&name=${encodeURIComponent(f.name)}" download="${f.name}">⬇ Download</a>
-            <button class="btn-sm btn-danger" onclick="deleteFile('${f.name.replace(/'/g,"\\'")}')">🗑 Delete</button>
+            <button class="btn-sm btn-danger btn-del" data-require-admin="true" onclick="deleteFile('${f.name.replace(/'/g,"\\'")}')">🗑 Delete</button>
           </div>`;
         list.appendChild(card);
         // Load preview snippet
@@ -286,7 +288,7 @@ function renderRelationsMarkup(container, fileName) {
     <div style="margin-top:8px; padding-top:6px; border-top:1px solid rgba(255,255,255,0.06); text-align:left;">
       <div style="font-size:0.7rem; font-weight:bold; color:var(--muted); margin-bottom:4px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:4px;">
         <span>📝 Link to Script:</span>
-        <select id="${dropId}" onchange="linkAssetToVideo('${container}', '${safeFile}', this)" style="background:rgba(255,255,255,0.08); border:1px solid var(--border); border-radius:4px; color:var(--text); font-size:0.65rem; padding:1px 3px; outline:none; max-width: 140px; cursor:pointer;">
+        <select id="${dropId}" data-require-admin="true" onchange="linkAssetToVideo('${container}', '${safeFile}', this)" style="background:rgba(255,255,255,0.08); border:1px solid var(--border); border-radius:4px; color:var(--text); font-size:0.65rem; padding:1px 3px; outline:none; max-width: 140px; cursor:pointer;">
           <option value="">-- link video --</option>
         </select>
       </div>
@@ -296,7 +298,7 @@ function renderRelationsMarkup(container, fileName) {
 
       <div style="margin-top:6px; padding-top:5px; border-top:1px solid rgba(255,255,255,0.04); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:4px;">
         <span style="font-size:0.7rem; font-weight:bold; color:var(--muted);">📋 Link to Sentence:</span>
-        <select id="${sentDropId}" data-container="${container}" data-name="${fileName}" onchange="linkAssetToSentence('${container}', '${safeFile}', this)" style="background:rgba(255,255,255,0.08); border:1px solid rgba(59,130,246,0.3); border-radius:4px; color:var(--text); font-size:0.65rem; padding:1px 3px; outline:none; max-width: 140px; cursor:pointer;">
+        <select id="${sentDropId}" data-require-admin="true" data-container="${container}" data-name="${fileName}" onchange="linkAssetToSentence('${container}', '${safeFile}', this)" style="background:rgba(255,255,255,0.08); border:1px solid rgba(59,130,246,0.3); border-radius:4px; color:var(--text); font-size:0.65rem; padding:1px 3px; outline:none; max-width: 140px; cursor:pointer;">
           <option value="">-- choose sentence --</option>
         </select>
       </div>
@@ -392,7 +394,7 @@ function updateAllRelationsUI() {
       }
       return `<span style="display:inline-flex;align-items:center;gap:3px;background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.3);border-radius:4px;padding:2px 4px;font-size:0.65rem;color:var(--text);">
         <a href="${scriptUrl}" style="color:inherit;text-decoration:none;" onmouseover="this.style.color='#c084fc'" onmouseout="this.style.color='inherit'">📝 ${label}</a>
-        <span style="cursor:pointer;font-weight:bold;color:var(--muted);font-size:0.75rem;" onclick="unlinkAssetFromVideo('${container}','${name.replace(/'/g,"\\'")}',${r.video_id},event)">✕</span>
+        <span style="cursor:pointer;font-weight:bold;color:var(--muted);font-size:0.75rem;" data-require-admin="true" onclick="unlinkAssetFromVideo('${container}','${name.replace(/'/g,"\\'")}',${r.video_id},event)">✕</span>
       </span>`;
     }).join('');
   });
@@ -409,13 +411,14 @@ function updateAllRelationsUI() {
       const preview = sent ? `${sent.sentence_type}: ${sent.sentence_text.slice(0, 36)}…` : `#${r.sentence_id}`;
       return `<span style="display:inline-flex;align-items:center;gap:3px;background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.3);border-radius:4px;padding:2px 4px;font-size:0.65rem;color:var(--text);" title="${sent ? sent.sentence_text.replace(/"/g,'&quot;') : ''}">
         📋 ${preview}
-        <span style="cursor:pointer;font-weight:bold;color:var(--muted);font-size:0.75rem;" onclick="unlinkAssetFromSentence('${container}','${name.replace(/'/g,"\\'")}',${r.sentence_id},event)">✕</span>
+        <span style="cursor:pointer;font-weight:bold;color:var(--muted);font-size:0.75rem;" data-require-admin="true" onclick="unlinkAssetFromSentence('${container}','${name.replace(/'/g,"\\'")}',${r.sentence_id},event)">✕</span>
       </span>`;
     }).join('');
   });
 }
 
 async function linkAssetToVideo(container, itemName, select) {
+  if (window.requireAdmin && !window.requireAdmin('link videos')) return;
   const videoId = parseInt(select.value, 10);
   if (isNaN(videoId)) return;
   const exists = allRelationships.some(r => r.container === container && r.item_name === itemName && r.video_id === videoId);
@@ -432,12 +435,14 @@ async function linkAssetToVideo(container, itemName, select) {
 
 async function unlinkAssetFromVideo(container, itemName, videoId, e) {
   if (e) e.stopPropagation();
+  if (window.requireAdmin && !window.requireAdmin('unlink videos')) return;
   const { error } = await client.from('research_relationships').delete().match({ container: container, item_name: itemName, video_id: videoId });
   if (error) alert('Unlink failed: ' + error.message);
   else { allRelationships = allRelationships.filter(r => !(r.container === container && r.item_name === itemName && r.video_id === videoId)); updateAllRelationsUI(); }
 }
 
 async function linkAssetToSentence(container, itemName, select) {
+  if (window.requireAdmin && !window.requireAdmin('link sentences')) return;
   const sentenceId = parseInt(select.value, 10);
   if (isNaN(sentenceId)) return;
   const exists = allRelationships.some(r => r.container === container && r.item_name === itemName && r.sentence_id === sentenceId);
@@ -454,6 +459,7 @@ async function linkAssetToSentence(container, itemName, select) {
 
 async function unlinkAssetFromSentence(container, itemName, sentenceId, e) {
   if (e) e.stopPropagation();
+  if (window.requireAdmin && !window.requireAdmin('unlink sentences')) return;
   const { error } = await client.from('research_relationships').delete().eq('container', container).eq('item_name', itemName).eq('sentence_id', sentenceId);
   if (error) alert('Unlink failed: ' + error.message);
   else { allRelationships = allRelationships.filter(r => !(r.container === container && r.item_name === itemName && r.sentence_id === sentenceId)); updateAllRelationsUI(); }

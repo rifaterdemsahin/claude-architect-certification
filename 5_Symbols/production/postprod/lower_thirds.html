@@ -536,7 +536,7 @@ Return ONLY a JSON array with this structure:
             '<div class="scene-actions">' +
               '<button class="btn btn-sm btn-secondary" onclick="downloadExistingScene(\'' + escJs(s.lt_main) + '\',\'' + escJs(s.lt_sub) + '\',' + s.scene_number + ')">📥 Download</button>' +
               '<button class="btn btn-sm btn-secondary" onclick="editScene(' + s.id + ',' + s.scene_number + ',\'' + escJs(s.lt_main) + '\',\'' + escJs(s.lt_sub) + '\',\'' + escJs(s.lt_image) + '\')">✏️ Edit</button>' +
-              '<button class="btn btn-sm btn-danger" onclick="deleteScene(' + s.id + ')">🗑️</button>' +
+              '<button data-require-admin="true" class="btn btn-sm btn-danger btn-del" onclick="deleteScene(' + s.id + ')">🗑️</button>' +
             '</div>' +
           '</div>'
         ).join('');
@@ -719,6 +719,7 @@ Return ONLY a JSON array with this structure:
     }
 
     async function deleteScene(id) {
+  if (window.requireAdmin && !window.requireAdmin('deleteScene')) return;
       if (!confirm('Delete this lower third?')) return;
       try {
         await api('scenes?id=eq.' + id, { method: 'DELETE' });
