@@ -202,6 +202,45 @@
       border-top: 1px solid rgba(255,255,255,0.05);
     }
     footer a { color: var(--secondary); text-decoration: none; }
+
+    .img-modal {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      align-items: center;
+      justify-content: center;
+      cursor: zoom-out;
+    }
+    .img-modal.open { display: flex; }
+    .img-modal img {
+      max-width: 92vw;
+      max-height: 92vh;
+      border-radius: 12px;
+      box-shadow: 0 0 60px rgba(0,0,0,0.8);
+      cursor: default;
+    }
+    .img-modal-close {
+      position: fixed;
+      top: 20px;
+      right: 28px;
+      font-size: 2rem;
+      color: #fff;
+      cursor: pointer;
+      background: rgba(0,0,0,0.5);
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+      border: none;
+      z-index: 10000;
+    }
+    .img-modal-close:hover { background: rgba(255,255,255,0.15); }
+    .iteration-card img { cursor: zoom-in; }
   </style>
   <script src="../../../shared/nav.js"></script>
 <script src="../../../shared/seo.js" defer></script></head>
@@ -321,6 +360,11 @@
       </div>
     </div>
 
+    <div class="img-modal" id="imgModal">
+      <button class="img-modal-close" id="imgModalClose">&times;</button>
+      <img id="imgModalSrc" src="" alt="Enlarged view">
+    </div>
+
     <footer>
       <p style="margin-bottom: 8px;">
         <a href="planning.html">← Back to Planning Hub</a>
@@ -334,5 +378,29 @@
   </div>
 
   <script src="../../../shared/debug-panel.js"></script>
+  <script>
+    (function(){
+      var modal = document.getElementById('imgModal');
+      var modalImg = document.getElementById('imgModalSrc');
+      var closeBtn = document.getElementById('imgModalClose');
+
+      document.querySelectorAll('.iteration-card img').forEach(function(img){
+        img.addEventListener('click', function(e){
+          e.stopPropagation();
+          modalImg.src = this.src;
+          modal.classList.add('open');
+        });
+      });
+
+      function closeModal(){
+        modal.classList.remove('open');
+      }
+      closeBtn.addEventListener('click', closeModal);
+      modal.addEventListener('click', closeModal);
+      document.addEventListener('keydown', function(e){
+        if(e.key === 'Escape') closeModal();
+      });
+    })();
+  </script>
 </body>
 </html>
