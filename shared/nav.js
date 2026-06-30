@@ -271,7 +271,8 @@
               { label: '🕸️ Database ERD', url: '5_Symbols/production/preprod/tools/database_erd.html', description: 'Interactive visual Entity-Relationship Diagram of the Supabase database.' }
             ]},
             { group: true, label: '📊 Logs & Monitoring', children: [
-              { label: '📡 Axiom Errors Admin', url: '/admin/errors' }
+              { label: '📡 Axiom Errors Admin', url: '/admin/errors' },
+              { label: '🤖 Error Stats (Fix Agent)', url: '5_Symbols/production/preprod/tools/error_stats.html' }
             ]},
             { group: true, label: '🎨 Templates & Sitemap', children: [
               { label: '🏠 Home Template', url: '5_Symbols/templates/index.html' },

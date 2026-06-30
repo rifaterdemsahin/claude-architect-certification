@@ -1,220 +1,220 @@
 {
   "projectMenu": [
     {
-      "label": "\ud83c\udfac Preprod",
+      "label": "🎬 Preprod",
       "children": [
         {
-          "label": "1. \u2753 Problem",
+          "label": "1. ❓ Problem",
           "children": [
             {
-              "label": "\u2753 Problem Statement",
+              "label": "❓ Problem Statement",
               "url": "5_Symbols/production/preprod/problem.html",
-              "description": "Core problem the course solves \u2014 gap, audience, and value proposition."
+              "description": "Core problem the course solves — gap, audience, and value proposition."
             },
             {
-              "label": "\ud83d\udcca Market Analysis",
+              "label": "📊 Market Analysis",
               "url": "5_Symbols/production/preprod/research/market_analysis.html",
               "description": "Demand sizing, target audience, competitive landscape, and positioning."
             },
             {
-              "label": "\ud83e\udd4a Competitive Analysis",
+              "label": "🥊 Competitive Analysis",
               "url": "5_Symbols/production/preprod/research/competitive_analysis.html",
               "description": "Reviewing similar offers on the web to position the course."
             }
           ]
         },
         {
-          "label": "2. \ud83c\udfe0 Product (Solution)",
+          "label": "2. 🏠 Product (Solution)",
           "url": "index.html"
         },
         {
-          "label": "3. \ud83d\udd2c Research",
+          "label": "3. 🔬 Research",
           "children": [
             {
-              "label": "\ud83d\uddc2 Research Hub",
+              "label": "🗂 Research Hub",
               "url": "5_Symbols/production/preprod/research/index.html",
               "description": "Central dashboard for all pre-production assets including images, audio, and notes."
             },
             {
-              "label": "\ud83d\uddbc Images",
+              "label": "🖼 Images",
               "children": [
                 {
-                  "label": "\ud83d\uddc2 Image Library",
+                  "label": "🗂 Image Library",
                   "url": "5_Symbols/production/preprod/research/images.html",
                   "description": "Visual assets, mockups, and diagrams used for course production."
                 },
                 {
-                  "label": "\ud83d\uddbc\ufe0f Image Generator",
+                  "label": "🖼️ Image Generator",
                   "url": "5_Symbols/production/postprod/image_generator.html",
                   "description": "AI-powered image generator for scene backgrounds and assets."
                 },
                 {
-                  "label": "\ud83d\uddbc\ufe0f Bulk Image Generator",
+                  "label": "🖼️ Bulk Image Generator",
                   "url": "5_Symbols/production/preprod/bulk_image_generator.html"
                 }
               ]
             },
             {
-              "label": "\ud83d\udcca Analytics",
+              "label": "📊 Analytics",
               "children": [
                 {
-                  "label": "\ud83d\udcc8 Video Analytics",
+                  "label": "📈 Video Analytics",
                   "url": "https://studio.youtube.com/video/bsH-vBGNERE/analytics/tab-overview/period-default/explore?entity_type=VIDEO&entity_id=bsH-vBGNERE&time_period=since_publish%2Ctime_period_unit_nth_days%2C1&explore_type=TABLE_AND_CHART&metric=AVERAGE_WATCH_PERCENTAGE&granularity=DAY&t_metrics=AVERAGE_WATCH_PERCENTAGE&dimension=VIDEO&o_column=VIDEO&o_direction=ANALYTICS_ORDER_DIRECTION_ASC&comparison_entity_id=j5lku3LYoK4&comparison_time_period=since_publish%2Ctime_period_unit_nth_days%2C1&comparison_entity_type=VIDEO&comparison_type=CONTENT_AND_CHANNEL"
                 }
               ]
             },
             {
-              "label": "\ud83c\udfb5 Audio",
+              "label": "🎵 Audio",
               "url": "5_Symbols/production/preprod/research/audio.html",
               "description": "Voiceovers, background music, and sound effects for video modules."
             },
             {
-              "label": "\ud83c\udfac Videos",
+              "label": "🎬 Videos",
               "url": "5_Symbols/production/preprod/research/videos.html",
               "description": "Raw footage, B-roll, and screen recordings for final assembly."
             },
             {
-              "label": "\ud83d\udcdd Notes",
+              "label": "📝 Notes",
               "url": "5_Symbols/production/preprod/research/notes.html",
               "description": "Research findings, technical references, and production scripts."
             },
             {
-              "label": "\ud83d\udcca Infographics",
+              "label": "📊 Infographics",
               "url": "5_Symbols/production/preprod/research/infographic_generator.html",
               "description": "AI-powered infographic layout and asset generator."
             },
             {
-              "label": "\ud83d\udcd6 DSL Dictionary",
+              "label": "📖 DSL Dictionary",
               "url": "5_Symbols/production/preprod/research/domain_specific_language.html",
-              "description": "Domain-specific language dictionary \u2014 definitions, context, and examples of project terminology."
+              "description": "Domain-specific language dictionary — definitions, context, and examples of project terminology."
             }
           ]
         },
         {
-          "label": "4. \ud83d\udccb Outline",
+          "label": "4. 📋 Outline",
           "url": "5_Symbols/production/preprod/course_outline.html"
         },
         {
-          "label": "5. \ud83c\udfac Script",
+          "label": "5. 🎬 Script",
           "children": [
             {
-              "label": "\ud83d\uddc2 Master Script",
+              "label": "🗂 Master Script",
               "url": "5_Symbols/production/preprod/scripts/index.html"
             },
             {
-              "label": "\u2728 Script Generator",
+              "label": "✨ Script Generator",
               "url": "5_Symbols/production/preprod/scripts/generator.html"
             },
             {
-              "label": "\ud83d\uddbc Image Link Report",
+              "label": "🖼 Image Link Report",
               "url": "5_Symbols/production/preprod/image_link_report.html",
               "description": "Per-sentence image & URL link coverage analytics, live from Supabase."
             },
             {
-              "label": "\u270d\ufe0f Script Editor",
+              "label": "✍️ Script Editor",
               "url": "5_Symbols/production/preprod/edit_scripts.html"
             }
           ]
         },
         {
-          "label": "6. \ud83d\udccb Planning",
+          "label": "6. 📋 Planning",
           "children": [
             {
-              "label": "\ud83d\uddc2\ufe0f Planning Hub",
+              "label": "🗂️ Planning Hub",
               "url": "5_Symbols/production/preprod/planning.html",
               "description": "Critical path overview and pre-production checklists."
             },
             {
               "group": true,
-              "label": "1. \ud83e\udded Strategy & Research",
+              "label": "1. 🧭 Strategy & Research",
               "children": [
                 {
-                  "label": "\ud83c\udf93 AI Certifications Analysis \u2197",
+                  "label": "🎓 AI Certifications Analysis ↗",
                   "url": "https://rifaterdemsahin.github.io/ai-certifications-analysis/",
-                  "description": "Market research on the hard, expensive AI certificates the course preps for \u2014 cost, difficulty, and re-sit pain framing the value proposition."
+                  "description": "Market research on the hard, expensive AI certificates the course preps for — cost, difficulty, and re-sit pain framing the value proposition."
                 },
                 {
-                  "label": "\ud83d\udcc8 Customer Development",
+                  "label": "📈 Customer Development",
                   "url": "5_Symbols/production/preprod/customer_development.html",
                   "description": "Validation framework from macro brand authority to micro-execution loops."
                 },
                 {
-                  "label": "\u2696\ufe0f Theory of Constraints",
+                  "label": "⚖️ Theory of Constraints",
                   "url": "5_Symbols/production/preprod/theory_of_constraints.html",
                   "description": "Analysis of the Customer Development process, focusing on retention and sequencing risks."
                 },
                 {
-                  "label": "\ud83c\udfa4 Customer Discovery Interviews",
+                  "label": "🎤 Customer Discovery Interviews",
                   "url": "5_Symbols/production/preprod/customer_discovery_interviews.html",
                   "description": "User interviews for customer discovery."
                 },
                 {
-                  "label": "\u265f\ufe0f Certification Strategy",
+                  "label": "♟️ Certification Strategy",
                   "url": "5_Symbols/production/preprod/strategy.html"
                 },
                 {
-                  "label": "\ud83c\udfaf Product-Market Fit",
+                  "label": "🎯 Product-Market Fit",
                   "url": "5_Symbols/production/preprod/product_market_fit.html"
                 }
               ]
             },
             {
               "group": true,
-              "label": "2. \ud83c\udfa8 Method & Doctrine",
+              "label": "2. 🎨 Method & Doctrine",
               "children": [
                 {
-                  "label": "\ud83c\udfa8 Ways of Working",
+                  "label": "🎨 Ways of Working",
                   "url": "5_Symbols/production/preprod/ways_of_working.html",
                   "description": "Visual script table read method with real-time image creation."
                 },
                 {
-                  "label": "\ud83c\udfaf Tell \u00b7 Show \u00b7 Do \u00b7 Apply",
+                  "label": "🎯 Tell · Show · Do · Apply",
                   "url": "5_Symbols/production/preprod/tell_show_do_apply.html",
-                  "description": "Four-beat instructional design loop: Tell the script, Show it with Gemini images, Do the hands-on screen-share build, Apply by turning the camera 180\u00b0."
+                  "description": "Four-beat instructional design loop: Tell the script, Show it with Gemini images, Do the hands-on screen-share build, Apply by turning the camera 180°."
                 },
                 {
-                  "label": "\ud83c\udfac Production Doctrine",
+                  "label": "🎬 Production Doctrine",
                   "url": "5_Symbols/production/preprod/production_doctrine.html",
                   "description": "Operating manual and doctrine: the recording is the process."
                 },
                 {
-                  "label": "\ud83e\udd16 Prompt Writer",
+                  "label": "🤖 Prompt Writer",
                   "url": "5_Symbols/production/preprod/prompt_writer.html",
                   "description": "Assemble a high-quality task prompt for LLM agents."
                 },
                 {
-                  "label": "\ud83e\udde0 AI Architect Explanations",
+                  "label": "🧠 AI Architect Explanations",
                   "url": "5_Symbols/production/preprod/explanations.html"
                 }
               ]
             },
             {
               "group": true,
-              "label": "3. \ud83d\udcd0 Standards & Config",
+              "label": "3. 📐 Standards & Config",
               "children": [
                 {
-                  "label": "\ud83c\udfa8 Branding & Business Rules",
+                  "label": "🎨 Branding & Business Rules",
                   "url": "5_Symbols/production/preprod/tools/branding.html",
-                  "description": "Branding configuration (colors, fonts) and core project business rules (naming, navigation, infra, classification) stored in the Supabase business_rules table \u2014 view, edit, and seed."
+                  "description": "Branding configuration (colors, fonts) and core project business rules (naming, navigation, infra, classification) stored in the Supabase business_rules table — view, edit, and seed."
                 }
               ]
             },
             {
               "group": true,
-              "label": "4. \u2705 Readiness & Checklists",
+              "label": "4. ✅ Readiness & Checklists",
               "children": [
                 {
-                  "label": "\ud83d\udd34 Critical Path",
+                  "label": "🔴 Critical Path",
                   "url": "markdown_renderer.html?file=1_Real_Unknown/critical_task.md",
                   "description": "Rules for shipping the course content before the platform."
                 },
                 {
-                  "label": "\u2705 Sanity Checklist",
+                  "label": "✅ Sanity Checklist",
                   "url": "5_Symbols/production/preprod/sanity_checklist.html",
                   "description": "Pre-flight checks before going live."
                 },
                 {
-                  "label": "\ud83d\udccb Producer Checklist",
+                  "label": "📋 Producer Checklist",
                   "url": "5_Symbols/production/preprod/producer_checklist.html",
                   "description": "Pre-production readiness verification checklist."
                 }
@@ -222,15 +222,15 @@
             },
             {
               "group": true,
-              "label": "5. \ud83d\uddd3\ufe0f Schedule & Pipeline",
+              "label": "5. 🗓️ Schedule & Pipeline",
               "children": [
                 {
-                  "label": "\ud83e\udde9 Pipeline",
+                  "label": "🧩 Pipeline",
                   "url": "5_Symbols/pipeline.html",
                   "description": "End-to-end production workflow pipeline."
                 },
                 {
-                  "label": "\ud83d\udcc5 Timeline",
+                  "label": "📅 Timeline",
                   "url": "5_Symbols/timeline.html",
                   "description": "Scheduled dates for the course execution."
                 }
@@ -238,298 +238,303 @@
             },
             {
               "group": true,
-              "label": "6. \ud83d\uddfa\ufe0f Reference",
+              "label": "6. 🗺️ Reference",
               "children": [
                 {
-                  "label": "\ud83d\uddfa\ufe0f Menu Map (2D)",
+                  "label": "🗺️ Menu Map (2D)",
                   "url": "5_Symbols/menu_map.html",
-                  "description": "Top-down 2D map of the entire site navigation \u2014 every Project and Debug link, colour-coded by group, with live filter."
+                  "description": "Top-down 2D map of the entire site navigation — every Project and Debug link, colour-coded by group, with live filter."
                 }
               ]
             }
           ]
         },
         {
-          "label": "7. \ud83d\udee0\ufe0f Prerequisites",
+          "label": "7. 🛠️ Prerequisites",
           "url": "5_Symbols/production/preprod/prerequisites.html"
         },
         {
-          "label": "8. \ud83c\udfaf IVQ Manager",
+          "label": "8. 🎯 IVQ Manager",
           "url": "5_Symbols/production/preprod/ivq.html"
         },
         {
-          "label": "9. \u26a0\ufe0f Risk",
+          "label": "9. ⚠️ Risk",
           "children": [
             {
-              "label": "\u26a0\ufe0f Risks & Mitigations",
+              "label": "⚠️ Risks & Mitigations",
               "url": "5_Symbols/production/preprod/risks.html",
               "description": "Risk Registry: Scaffolding delays and audience representation risks."
             },
             {
-              "label": "\ud83c\udfd7\ufe0f Scaffolding Risk",
+              "label": "🏗️ Scaffolding Risk",
               "url": "markdown_renderer.html?file=5_Symbols/production/preprod/scaffolding_risk.md",
               "description": "Scaffolding risk: Video pipeline and delivery pilot pipeline delays and mitigations."
             }
           ]
         },
         {
-          "label": "10. \ud83e\udde0 Self Learning",
+          "label": "10. 🧠 Self Learning",
           "children": [
             {
-              "label": "\ud83e\udde0 Self Learning Concept",
+              "label": "🧠 Self Learning Concept",
               "url": "5_Symbols/production/preprod/self_learning.html",
               "description": "Feynman technique, Lacanian visual review, and Semblance error solving."
             },
             {
-              "label": "\ud83d\udcfc Multimedia Learning",
+              "label": "📼 Multimedia Learning",
               "url": "5_Symbols/production/preprod/multimedia_learning.html",
               "description": "Mayer's multimedia learning principles and Erdem's video-based transformation."
             },
             {
-              "label": "\ud83c\udfc6 10x Certification",
+              "label": "🏆 10x Certification",
               "url": "5_Symbols/production/preprod/10x_certification.html",
               "description": "How the $10 membership guarantees the $100 certification via post-production camera reversal."
             }
           ]
         },
         {
-          "label": "\ud83d\udee0\ufe0f Tools",
+          "label": "🛠️ Tools",
           "children": [
             {
               "group": true,
-              "label": "\ud83c\udf0d Environments",
+              "label": "🌍 Environments",
               "children": [
                 {
-                  "label": "\ud83d\udcbb Local (8080)",
+                  "label": "💻 Local (8080)",
                   "url": "http://localhost:8080/5_Symbols/production/preprod/course_outline.html"
                 },
                 {
-                  "label": "\u2601\ufe0f Fly.io (Production)",
+                  "label": "☁️ Fly.io (Production)",
                   "url": "https://claude-architect-certification.fly.dev/5_Symbols/production/preprod/course_outline.html"
                 }
               ]
             },
             {
               "group": true,
-              "label": "\ud83d\udc19 Code & Repo",
+              "label": "🐙 Code & Repo",
               "children": [
                 {
-                  "label": "\ud83d\udc19 GitHub Repo",
+                  "label": "🐙 GitHub Repo",
                   "url": "https://github.com/rifaterdemsahin/claude-architect-certification"
                 },
                 {
-                  "label": "\ud83d\udc1b Issue Tracker",
+                  "label": "🐛 Issue Tracker",
                   "url": "https://github.com/rifaterdemsahin/claude-architect-certification/issues"
                 },
                 {
-                  "label": "\ud83d\udcb3 GitHub Billing Usage",
+                  "label": "💳 GitHub Billing Usage",
                   "url": "https://github.com/settings/billing/usage?period=3&group=0&customer=592572"
                 }
               ]
             },
             {
               "group": true,
-              "label": "\ud83d\uddc4\ufe0f Data & Backend",
+              "label": "🗄️ Data & Backend",
               "children": [
                 {
-                  "label": "\ud83d\udd25 Supabase",
+                  "label": "🔥 Supabase",
                   "url": "https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/"
                 },
                 {
-                  "label": "\ud83e\uddea Supabase SQL Queries",
+                  "label": "🧪 Supabase SQL Queries",
                   "url": "https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/sql/05ea76ba-cb44-44c6-b83a-f85a226bc315",
                   "description": "Execute and manage Supabase SQL queries."
                 },
                 {
-                  "label": "\ud83d\uddc4 Database Schema",
+                  "label": "🗄 Database Schema",
                   "url": "https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/database/schemas"
                 },
                 {
-                  "label": "\ud83d\uddc3\ufe0f Preprod Data Admin",
+                  "label": "🗃️ Preprod Data Admin",
                   "url": "5_Symbols/production/preprod/tools/admin.html"
                 },
                 {
-                  "label": "\ud83d\uddc4\ufe0f Manual Backup",
+                  "label": "🗄️ Manual Backup",
                   "url": "5_Symbols/production/preprod/tools/manual_backup.html",
                   "description": "Download manual backups for Supabase database and Azure configuration."
                 },
                 {
-                  "label": "\ud83d\uddc4\ufe0f Database Analysis",
+                  "label": "🗄️ Database Analysis",
                   "url": "5_Symbols/production/preprod/tools/database_analysis.html",
                   "description": "Collapsible analysis of every Supabase table: row counts, columns, and relationships."
                 },
                 {
-                  "label": "\ud83d\udd78\ufe0f Database ERD",
+                  "label": "🕸️ Database ERD",
                   "url": "5_Symbols/production/preprod/tools/database_erd.html",
                   "description": "Interactive visual Entity-Relationship Diagram of the Supabase database."
                 },
                 {
-                  "label": "\ud83d\udda5\ufe0f Virtual Machines",
+                  "label": "🖥️ Virtual Machines",
                   "url": "https://fly.io/dashboard/erdem-391",
                   "description": "Fly.io dashboard for the project's virtual machines."
                 },
                 {
-                  "label": "\ud83c\udf0d Loaded Environment",
+                  "label": "🌍 Loaded Environment",
                   "url": "5_Symbols/production/preprod/environment.html"
                 },
                 {
-                  "label": "\ud83d\udcca Database Stats",
+                  "label": "📊 Database Stats",
                   "url": "5_Symbols/production/preprod/stats.html"
                 }
               ]
             },
             {
               "group": true,
-              "label": "\ud83d\udcca Logs & Monitoring",
+              "label": "📊 Logs & Monitoring",
               "children": [
                 {
-                  "label": "\ud83d\udcdc Project Logs",
+                  "label": "📜 Project Logs",
                   "url": "5_Symbols/production/preprod/log_viewer.html",
                   "description": "Unified viewer for error.log and fix.log with search and filtering."
                 },
                 {
-                  "label": "\ud83d\udce1 Axiom Errors Admin",
+                  "label": "📡 Axiom Errors Admin",
                   "url": "/admin/errors"
+                },
+                {
+                  "label": "🤖 Error Stats (Fix Agent)",
+                  "url": "5_Symbols/production/preprod/tools/error_stats.html",
+                  "description": "Live dashboard of axiom-error issues the autonomous error loop has handled — error types, resolution verdicts, and GitHub issue links."
                 }
               ]
             },
             {
               "group": true,
-              "label": "\ud83c\udfa8 Templates & Sitemap",
+              "label": "🎨 Templates & Sitemap",
               "children": [
                 {
-                  "label": "\ud83d\uddfa Project Sitemap",
+                  "label": "🗺 Project Sitemap",
                   "url": "5_Symbols/tools/sitemap.html"
                 },
                 {
-                  "label": "\ud83c\udfe0 Home Template",
+                  "label": "🏠 Home Template",
                   "url": "5_Symbols/templates/index.html"
                 },
                 {
-                  "label": "\ud83d\udccb Error Log Template",
+                  "label": "📋 Error Log Template",
                   "url": "5_Symbols/templates/axiom_errors.html"
                 }
               ]
             },
             {
               "group": true,
-              "label": "\ud83d\udcc8 AI Usage",
+              "label": "📈 AI Usage",
               "children": [
                 {
-                  "label": "\u2728 Gemini Usage",
+                  "label": "✨ Gemini Usage",
                   "url": "https://gemini.google.com/usage"
                 },
                 {
-                  "label": "\ud83e\udd16 Claude Usage",
+                  "label": "🤖 Claude Usage",
                   "url": "https://console.anthropic.com/settings/usage"
                 },
                 {
-                  "label": "\ud83e\udde0 xAI Usage",
+                  "label": "🧠 xAI Usage",
                   "url": "https://console.x.ai/usage"
                 }
               ]
             },
             {
               "group": true,
-              "label": "\ud83e\uddd8 Wellbeing & Focus",
+              "label": "🧘 Wellbeing & Focus",
               "children": [
                 {
-                  "label": "\ud83e\uddd8 Meditation Timer",
+                  "label": "🧘 Meditation Timer",
                   "url": "https://rifaterdemsahin.github.io/schedule-helper/meditation-timer.html?page=meditation"
                 }
               ]
             },
             {
               "group": true,
-              "label": "\ud83e\udd16 AI & APIs",
+              "label": "🤖 AI & APIs",
               "children": [
                 {
-                  "label": "\u2601\ufe0f Google Cloud API",
+                  "label": "☁️ Google Cloud API",
                   "url": "https://console.cloud.google.com/"
                 },
                 {
-                  "label": "\ud83e\udd16 Claude Guide",
+                  "label": "🤖 Claude Guide",
                   "url": "claude.md"
                 },
                 {
-                  "label": "\ud83d\udd00 OpenRouter Logs",
+                  "label": "🔀 OpenRouter Logs",
                   "url": "https://openrouter.ai/logs"
                 },
                 {
-                  "label": "\ud83c\udfa7 Audio Player (Gemini Studio)",
+                  "label": "🎧 Audio Player (Gemini Studio)",
                   "url": "https://aistudio.google.com/apps/b66c6f93-8411-4eb3-b7b0-63edbb8d509a?showPreview=true&showAssistant=true"
                 }
               ]
             },
             {
-              "label": "\u2699\ufe0f Settings",
+              "label": "⚙️ Settings",
               "url": "5_Symbols/production/settings.html"
             }
           ]
         },
         {
-          "label": "\ud83d\uddc2\ufe0f Pre-Production Hub",
+          "label": "🗂️ Pre-Production Hub",
           "url": "5_Symbols/production/preprod/index.html"
         }
       ]
     },
     {
-      "label": "\ud83c\udfa5 Production",
+      "label": "🎥 Production",
       "children": [
         {
           "group": true,
-          "label": "1. \ud83d\udcc1 Assets & Storage",
+          "label": "1. 📁 Assets & Storage",
           "children": [
             {
-              "label": "\ud83d\udcc1 Google Drive Folder Creator",
+              "label": "📁 Google Drive Folder Creator",
               "url": "5_Symbols/production/prod/google_drive_folder_creator.html",
               "description": "Recursively generate Google Drive folders for course modules and videos, and automatically record the folder links back to Supabase."
             },
             {
-              "label": "\ud83d\udd17 Google Drive Links",
+              "label": "🔗 Google Drive Links",
               "url": "5_Symbols/production/prod/google_drive_links.html",
               "description": "View and verify all created Google Drive directory links for modules and videos."
             },
             {
-              "label": "\ud83c\udfa8 Canva Course Folder",
+              "label": "🎨 Canva Course Folder",
               "url": "https://www.canva.com/folder/FAHMZK9u-JE",
               "description": "Canva folder holding the course design assets, slides, and graphics."
             },
             {
-              "label": "\ud83e\uddee Cohort Production Whiteboard",
+              "label": "🧮 Cohort Production Whiteboard",
               "url": "https://canva.link/iahtnqhu0rdkq8z",
-              "description": "Cohort production whiteboard \u2014 shared Canva board for collaborative planning across the production cohort."
+              "description": "Cohort production whiteboard — shared Canva board for collaborative planning across the production cohort."
             }
           ]
         },
         {
           "group": true,
-          "label": "2. \ud83c\udfa5 Recording & Capture",
+          "label": "2. 🎥 Recording & Capture",
           "children": [
             {
-              "label": "\ud83d\udde3\ufe0f Talking Heads",
+              "label": "🗣️ Talking Heads",
               "url": "5_Symbols/production/prod/talking-heads.html",
               "description": "All on-camera presenter scenes with greenscreen recording guide."
             },
             {
-              "label": "\ud83d\udda5\ufe0f Screenshare",
+              "label": "🖥️ Screenshare",
               "url": "5_Symbols/production/prod/screenshare.html",
               "description": "All screenshare scenes with screen recording setup guide."
             },
             {
-              "label": "\ud83d\udcbb Hands-on Code",
+              "label": "💻 Hands-on Code",
               "url": "https://github.com/rifaterdemsahin/claude-architect-certification/tree/main/5_Symbols/course_src",
               "description": "Course source code on GitHub used for hands-on coding demos."
             },
             {
-              "label": "\ud83d\udcac Feedback Session",
+              "label": "💬 Feedback Session",
               "children": [
                 {
-                  "label": "\ud83d\udcfd\ufe0f Presentation",
+                  "label": "📽️ Presentation",
                   "url": "https://www.canva.com/design/DAHN3UqZIl4/tJv2gU0sU6QY_gsLscl5YQ/edit?ui=eyJBIjp7IlAiOnsiQSI6IkZBSE1aSzl1LUpFIiwiQiI6dHJ1ZSwiQyI6IkRBSE4zVXFaSWw0In19LCJHIjp7IlQiOnsiQSI6IkZBSE1aSzl1LUpFIiwiQiI6IkRBSE4zVXFaSWw0In19fQ"
                 },
                 {
-                  "label": "\ud83d\udcc4 Analysis & Video",
+                  "label": "📄 Analysis & Video",
                   "url": "5_Symbols/production/prod/feedback_session_analysis.html"
                 }
               ]
@@ -538,69 +543,69 @@
         },
         {
           "group": true,
-          "label": "3. \ud83d\udccb Shots & Tracking",
+          "label": "3. 📋 Shots & Tracking",
           "children": [
             {
-              "label": "\ud83d\udcf8 Shot List & Assets",
+              "label": "📸 Shot List & Assets",
               "url": "5_Symbols/production/postprod/production_shotlist.html?module=1&section=1"
             },
             {
-              "label": "\ud83c\udfa5 Footage Mapping",
+              "label": "🎥 Footage Mapping",
               "url": "5_Symbols/production/prod/footage_mapping.html"
             },
             {
-              "label": "\u2705 Production Checklist",
+              "label": "✅ Production Checklist",
               "url": "5_Symbols/production/prod/checklist.html"
             },
             {
-              "label": "\u2705 Asset Checklist",
+              "label": "✅ Asset Checklist",
               "url": "5_Symbols/production/postprod/asset_checklist.html"
             }
           ]
         },
         {
-          "label": "\ud83d\udee0\ufe0f Tools",
+          "label": "🛠️ Tools",
           "children": [
             {
               "group": true,
-              "label": "\ud83c\udf99\ufe0f Audio & Voice",
+              "label": "🎙️ Audio & Voice",
               "children": [
                 {
-                  "label": "\ud83d\udcdd Prompters",
+                  "label": "📝 Prompters",
                   "url": "https://zacue.com/index.html"
                 },
                 {
-                  "label": "\ud83d\udd0a Audio Generator",
+                  "label": "🔊 Audio Generator",
                   "url": "https://secondbrain-kokoro.fly.dev/"
                 }
               ]
             },
             {
               "group": true,
-              "label": "\ud83c\udfa8 Visuals",
+              "label": "🎨 Visuals",
               "children": [
                 {
-                  "label": "\ud83d\udcca Slide Generator",
+                  "label": "📊 Slide Generator",
                   "url": "5_Symbols/production/postprod/slide_generator.html",
                   "description": "Generate Marp markdown presentations from your video script sentences (basic + AI napkin-style)."
                 },
                 {
-                  "label": "\ud83c\udf9e\ufe0f Animation Generator",
+                  "label": "🎞️ Animation Generator",
                   "url": "5_Symbols/production/postprod/animation_generator.html",
                   "description": "Generate per-sentence Remotion animations rendered on RunPod serverless, uploaded to Azure. 10 course-content animation types linked to sentences."
                 },
                 {
-                  "label": "\ud83c\udfa8 Thumbnail Assembly (Canva)",
+                  "label": "🎨 Thumbnail Assembly (Canva)",
                   "url": "https://www.canva.com/design/DAGJhH098do/7a-TDVcjX482MetGV3HLPA/edit"
                 }
               ]
             },
             {
               "group": true,
-              "label": "\ud83d\udcbb Dev Environment",
+              "label": "💻 Dev Environment",
               "children": [
                 {
-                  "label": "\ud83c\udfa8 VS Code: Terminal Profiles",
+                  "label": "🎨 VS Code: Terminal Profiles",
                   "url": "markdown_renderer.html?file=5_Symbols/tools/vscode_terminal_profiles/formula.md",
                   "description": "Name and colour-code VS Code: integrated terminals for each AI agent."
                 }
@@ -608,49 +613,49 @@
             },
             {
               "group": true,
-              "label": "\ud83d\udc19 Code & Repo",
+              "label": "🐙 Code & Repo",
               "children": [
                 {
-                  "label": "\ud83d\udd11 GitHub Tokens",
+                  "label": "🔑 GitHub Tokens",
                   "url": "https://github.com/settings/tokens"
                 },
                 {
-                  "label": "\ud83d\udce6 GitHub Packages",
+                  "label": "📦 GitHub Packages",
                   "url": "https://github.com/users/rifaterdemsahin/packages/container/claude-animations-runpod/settings"
                 },
                 {
-                  "label": "\ud83c\udfac Animation Helper Repo",
+                  "label": "🎬 Animation Helper Repo",
                   "url": "https://rifaterdemsahin.github.io/my-claude-animations/"
                 }
               ]
             },
             {
               "group": true,
-              "label": "\u2601\ufe0f Cloud",
+              "label": "☁️ Cloud",
               "children": [
                 {
-                  "label": "\u2601\ufe0f Azure Portal",
+                  "label": "☁️ Azure Portal",
                   "url": "https://portal.azure.com/"
                 },
                 {
-                  "label": "\u2601\ufe0f RunPod Serverless",
+                  "label": "☁️ RunPod Serverless",
                   "url": "https://console.runpod.io/serverless"
                 },
                 {
-                  "label": "\u2601\ufe0f RunPod Requests",
+                  "label": "☁️ RunPod Requests",
                   "url": "https://console.runpod.io/serverless/user/endpoint/s13kv6t2jg78lk?tab=requests"
                 },
                 {
-                  "label": "\u2601\ufe0f RunPod MFA",
+                  "label": "☁️ RunPod MFA",
                   "url": "https://console.runpod.io/user/settings?open=login-settings"
                 },
                 {
-                  "label": "\u26a1 Performance GPU",
+                  "label": "⚡ Performance GPU",
                   "url": "https://github.com/rifaterdemsahin/my-claude-animations/blob/main/PERFORMANCE_RATIONALE.md",
                   "description": "Rationale for GPU rendering performance."
                 },
                 {
-                  "label": "\u26a1 Performance GPU",
+                  "label": "⚡ Performance GPU",
                   "url": "https://github.com/rifaterdemsahin/my-claude-animations/blob/main/PERFORMANCE_RATIONALE.md",
                   "description": "Rationale for GPU rendering performance."
                 }
@@ -659,88 +664,88 @@
           ]
         },
         {
-          "label": "\ud83d\uddc2\ufe0f Production Hub",
+          "label": "🗂️ Production Hub",
           "url": "5_Symbols/production/prod/index.html"
         },
         {
-          "label": "\ud83c\udf10 Production Overview Hub",
+          "label": "🌐 Production Overview Hub",
           "url": "5_Symbols/production/production_hub.html"
         }
       ]
     },
     {
-      "label": "\ud83d\udce6 Post Prod",
+      "label": "📦 Post Prod",
       "children": [
         {
-          "label": "\ud83c\udfac Content Assembly",
+          "label": "🎬 Content Assembly",
           "children": [
             {
               "group": true,
-              "label": "1. \ud83c\udfac Editing & Assembly",
+              "label": "1. 🎬 Editing & Assembly",
               "children": [
                 {
-                  "label": "\ud83d\udcfa Course Playlist",
+                  "label": "📺 Course Playlist",
                   "url": "https://www.youtube.com/watch?v=F8IBooe3bXY&list=PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy/"
                 },
                 {
-                  "label": "\ud83c\udfac Edit List",
+                  "label": "🎬 Edit List",
                   "url": "5_Symbols/production/postprod/edit_list.html"
                 },
                 {
-                  "label": "\u2705 Post Production Checklist",
+                  "label": "✅ Post Production Checklist",
                   "url": "5_Symbols/production/postprod/post_production_checklist.html"
                 }
               ]
             },
             {
               "group": true,
-              "label": "2. \ud83c\udfa8 Visuals & Graphics",
+              "label": "2. 🎨 Visuals & Graphics",
               "children": [
                 {
-                  "label": "\ud83c\udfa5 Greenscreen Backgrounds",
+                  "label": "🎥 Greenscreen Backgrounds",
                   "url": "5_Symbols/production/postprod/greenscreen_backgrounds.html",
                   "description": "Configure and generate green screen background videos per module."
                 },
                 {
-                  "label": "\ud83d\uddbc\ufe0f Image Generator",
+                  "label": "🖼️ Image Generator",
                   "url": "5_Symbols/production/postprod/image_generator.html"
                 },
                 {
-                  "label": "\ud83c\udfac Lower Thirds Manager",
+                  "label": "🎬 Lower Thirds Manager",
                   "url": "5_Symbols/production/postprod/lower_thirds.html"
                 },
                 {
-                  "label": "\ud83c\udfa8 SVG Generator",
+                  "label": "🎨 SVG Generator",
                   "url": "5_Symbols/production/postprod/graphics_generator.html",
                   "description": "Per-sentence branded SVG vector generation (title cards, lower thirds, callouts, diagrams) using the branding kit, with bulk mode, status tracking, inline editing, and rationale for skipped assets."
                 },
                 {
-                  "label": "\ud83c\udfa8 Drawing Generator",
+                  "label": "🎨 Drawing Generator",
                   "url": "5_Symbols/production/postprod/drawing_generator.html",
                   "description": "Draw a per-sentence Excalidraw diagram by hand or seed it with AI; saves the editable scene to Supabase (sentence_drawings) and a flattened PNG to Azure Blob Storage."
                 },
                 {
-                  "label": "\ud83d\uddbc\ufe0f Visual Asset Gallery",
+                  "label": "🖼️ Visual Asset Gallery",
                   "url": "5_Symbols/production/postprod/visual_gallery.html"
                 },
                 {
-                  "label": "\ud83c\udfa8 YouTube Banner (Canva)",
+                  "label": "🎨 YouTube Banner (Canva)",
                   "url": "https://www.canva.com/design/DAFjSiuJm7U/H-YWVTOjf6C731PQnrIZ_g/edit",
-                  "description": "Channel banner / branding artwork for YouTube \u2014 edit in Canva."
+                  "description": "Channel banner / branding artwork for YouTube — edit in Canva."
                 }
               ]
             },
             {
               "group": true,
-              "label": "3. \ud83c\udfb5 Audio & Music",
+              "label": "3. 🎵 Audio & Music",
               "children": [
                 {
-                  "label": "\ud83c\udfb5 Audio Scoring",
+                  "label": "🎵 Audio Scoring",
                   "url": "5_Symbols/production/postprod/audio_scoring.html",
                   "description": "Find sound effects and background music for every script scene in post-production."
                 },
                 {
-                  "label": "\ud83c\udfbc Sound & Music Score (Pre-Edit)",
+                  "label": "🎼 Sound & Music Score (Pre-Edit)",
                   "url": "5_Symbols/production/postprod/music_sfx_score.html",
                   "description": "Pre-edit spotting score mapping SFX hits and music beds scene-by-scene from the rendered master script across all 5 modules."
                 }
@@ -748,41 +753,41 @@
             },
             {
               "group": true,
-              "label": "4. \ud83e\udd16 AI Generation",
+              "label": "4. 🤖 AI Generation",
               "children": [
                 {
-                  "label": "\ud83e\uddd1\u200d\ud83d\udcbc AI Avatar / Talking-Head",
+                  "label": "🧑‍💼 AI Avatar / Talking-Head",
                   "url": "5_Symbols/production/postprod/ai_avatar.html",
-                  "description": "Track photorealistic presenter clips (HeyGen / Synthesia) per sentence \u2014 persona, video URL, and status."
+                  "description": "Track photorealistic presenter clips (HeyGen / Synthesia) per sentence — persona, video URL, and status."
                 },
                 {
-                  "label": "\ud83c\udf0d AI Localization & Dubbing",
+                  "label": "🌍 AI Localization & Dubbing",
                   "url": "5_Symbols/production/postprod/ai_localization.html",
                   "description": "Multi-language translation and voice-cloned dubbing per sentence and target language."
                 },
                 {
-                  "label": "\u270d\ufe0f AI Script & Prompt Gen",
+                  "label": "✍️ AI Script & Prompt Gen",
                   "url": "5_Symbols/production/postprod/ai_script_gen.html",
-                  "description": "Capture each sentence's provenance \u2014 source blueprint, LLM, prompt used, and generated text."
+                  "description": "Capture each sentence's provenance — source blueprint, LLM, prompt used, and generated text."
                 },
                 {
-                  "label": "\ud83c\udf9e\ufe0f AI Video B-Roll",
+                  "label": "🎞️ AI Video B-Roll",
                   "url": "5_Symbols/production/postprod/ai_broll.html",
-                  "description": "Text-to-video B-roll (Runway / Pika / Sora) per sentence \u2014 prompt, clip URL, and status."
+                  "description": "Text-to-video B-roll (Runway / Pika / Sora) per sentence — prompt, clip URL, and status."
                 },
                 {
-                  "label": "\ud83c\udf99\ufe0f AI Voiceover (TTS)",
+                  "label": "🎙️ AI Voiceover (TTS)",
                   "url": "5_Symbols/production/postprod/ai_voiceover.html",
-                  "description": "Per-sentence text-to-speech tracking \u2014 provider, voice, audio URL, and status (ElevenLabs / OpenAI TTS / Azure)."
+                  "description": "Per-sentence text-to-speech tracking — provider, voice, audio URL, and status (ElevenLabs / OpenAI TTS / Azure)."
                 }
               ]
             },
             {
               "group": true,
-              "label": "5. \ud83e\udde0 Memory & Learning",
+              "label": "5. 🧠 Memory & Learning",
               "children": [
                 {
-                  "label": "\ud83c\udfdb\ufe0f Memory Palace Builder",
+                  "label": "🏛️ Memory Palace Builder",
                   "url": "5_Symbols/production/postprod/memory_palace.html",
                   "description": "Generate and save a method-of-loci memory palace per module from its full script, so the audience can remember every concept."
                 }
@@ -790,20 +795,20 @@
             },
             {
               "group": true,
-              "label": "6. \ud83e\uddf0 Utilities & Ops",
+              "label": "6. 🧰 Utilities & Ops",
               "children": [
                 {
-                  "label": "\ud83d\udcb0 Cost Calculator",
+                  "label": "💰 Cost Calculator",
                   "url": "5_Symbols/production/postprod/cost_calculator.html",
-                  "description": "Compare TikTok vs. Architect generation strategies \u2014 Gemini image/SFX/music cost estimation."
+                  "description": "Compare TikTok vs. Architect generation strategies — Gemini image/SFX/music cost estimation."
                 },
                 {
-                  "label": "\ud83d\udd0d Customer Discovery",
+                  "label": "🔍 Customer Discovery",
                   "url": "5_Symbols/production/postprod/customer_discovery.html",
                   "description": "Validation framework from macro-philosophical foundation to micro-execution steps."
                 },
                 {
-                  "label": "\ud83d\udcc1 Google Drive Sync",
+                  "label": "📁 Google Drive Sync",
                   "url": "5_Symbols/production/postprod/gdrive_sync.html",
                   "description": "Idempotent course footage and asset synchronization to Google Drive."
                 }
@@ -812,70 +817,70 @@
           ]
         },
         {
-          "label": "\ud83c\udf93 Certification & Proof",
+          "label": "🎓 Certification & Proof",
           "children": [
             {
-              "label": "5. \ud83d\udcdc Erdem's Certification",
+              "label": "5. 📜 Erdem's Certification",
               "url": "markdown_renderer.html?file=4_Formula/certification/erdems_certification.md"
             },
             {
-              "label": "6. \ud83e\udded Exam & Case Study",
+              "label": "6. 🧭 Exam & Case Study",
               "url": "markdown_renderer.html?file=4_Formula/certification/exam_and_case_study.md"
             },
             {
-              "label": "7. \ud83d\udcca Business Plan",
+              "label": "7. 📊 Business Plan",
               "url": "markdown_renderer.html?file=4_Formula/certification/business_plan.md"
             },
             {
-              "label": "8. \ud83c\udf93 Paid vs Unpaid Certificates",
+              "label": "8. 🎓 Paid vs Unpaid Certificates",
               "url": "5_Symbols/production/postprod/paid_vs_unpaid_certificates.html",
               "description": "Why paid vendor certifications carry real weight, why the audience deserves to see the exam receipt, and how to avoid low-quality courses from instructors who never passed the exam."
             },
             {
-              "label": "9. \ud83d\udee1\ufe0f Certification Guarantee",
+              "label": "9. 🛡️ Certification Guarantee",
               "url": "5_Symbols/production/postprod/certification_guarantee.html",
               "description": "Our commitment to your success: unlimited live answers within 24 hours, and guaranteed live group sessions if you fail the certification exam."
             },
             {
-              "label": "9b. \ud83d\ude80 MVP Pivot Point (First 200 Free)",
+              "label": "9b. 🚀 MVP Pivot Point (First 200 Free)",
               "url": "5_Symbols/production/postprod/mvp_pivot.html",
               "description": "The make-or-break MVP probe: a high-value YouTube series. The first 200 course takers get full access FREE, and the certification is killed if we don't reach 4,000 watch hours."
             },
             {
-              "label": "9c. \ud83d\udd0e Test the Value Proposition",
+              "label": "9c. 🔎 Test the Value Proposition",
               "url": "5_Symbols/production/postprod/value_proposition_test.html",
-              "description": "Does a recorded, proof-of-work certification beat a standard paper certificate? Erdem passes first, the audience passes, and a $10 student is guaranteed to pass \u2014 or the proposition fails."
+              "description": "Does a recorded, proof-of-work certification beat a standard paper certificate? Erdem passes first, the audience passes, and a $10 student is guaranteed to pass — or the proposition fails."
             },
             {
-              "label": "\ud83d\udcfa YouTube Paywall",
+              "label": "📺 YouTube Paywall",
               "url": "5_Symbols/production/postprod/youtube_paywall.html",
               "description": "How YouTube Channel Memberships and the Partner Program (YPP) work, and how far @RifatErdemSahin (700 subs) is from the 1,000-sub / 4,000-watch-hour monetization gate."
             },
             {
-              "label": "10. \ud83d\udcbc Membership / Business",
+              "label": "10. 💼 Membership / Business",
               "url": "5_Symbols/production/publish/membership.html"
             },
             {
-              "label": "11. \ud83d\udd04 Flywheel System",
+              "label": "11. 🔄 Flywheel System",
               "url": "5_Symbols/production/postprod/flywheel.html"
             },
             {
-              "label": "12. \u2601\ufe0f AWS GenAI Developer \u2014 Professional",
+              "label": "12. ☁️ AWS GenAI Developer — Professional",
               "url": "5_Symbols/production/postprod/aws_genai_cert.html",
-              "description": "What the AWS Certified Generative AI Developer - Professional is, why it matters, and the full cost breakdown \u2014 similar industry certification."
+              "description": "What the AWS Certified Generative AI Developer - Professional is, why it matters, and the full cost breakdown — similar industry certification."
             },
             {
-              "label": "13. \ud83d\udcc8 Sales & Marketing Plan",
+              "label": "13. 📈 Sales & Marketing Plan",
               "url": "5_Symbols/production/postprod/sales_and_marketing_plan.html",
               "description": "Sales and marketing plan targeting the RAISE audience with automated outreach."
             }
           ]
         },
         {
-          "label": "\ud83e\udd1d Outreach",
+          "label": "🤝 Outreach",
           "children": [
             {
-              "label": "11. \ud83e\udd1d LinkedIn Outreach",
+              "label": "11. 🤝 LinkedIn Outreach",
               "children": [
                 {
                   "label": "Journey Post (pre-exam)",
@@ -896,24 +901,24 @@
               ]
             },
             {
-              "label": "\ud83d\udce3 LinkedIn Promotion Helper",
+              "label": "📣 LinkedIn Promotion Helper",
               "url": "5_Symbols/production/postprod/linkedin_promotion.html"
             }
           ]
         },
         {
-          "label": "\ud83d\udee0\ufe0f Tools",
+          "label": "🛠️ Tools",
           "children": [
             {
               "group": true,
-              "label": "\ud83c\udfa8 Design",
+              "label": "🎨 Design",
               "children": [
                 {
-                  "label": "\ud83c\udfa8 Canva",
+                  "label": "🎨 Canva",
                   "url": "https://canva.com"
                 },
                 {
-                  "label": "\ud83d\uddbc\ufe0f Thumbnails",
+                  "label": "🖼️ Thumbnails",
                   "url": "https://www.canva.com/design/DAGJhH098do/7a-TDVcjX482MetGV3HLPA/edit",
                   "description": "Canva template for YouTube thumbnails."
                 }
@@ -921,56 +926,56 @@
             },
             {
               "group": true,
-              "label": "\ud83d\udcfa YouTube",
+              "label": "📺 YouTube",
               "children": [
                 {
-                  "label": "\ud83d\udcfa YouTube Studio",
+                  "label": "📺 YouTube Studio",
                   "url": "https://studio.youtube.com/"
                 },
                 {
-                  "label": "\ud83c\udfac Channel Playlist",
+                  "label": "🎬 Channel Playlist",
                   "url": "https://www.youtube.com/watch?v=F8IBooe3bXY&list=PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy/"
                 },
                 {
-                  "label": "\ud83c\udfac Studio Playlist Editor",
+                  "label": "🎬 Studio Playlist Editor",
                   "url": "https://studio.youtube.com/playlist/PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy/edit"
                 }
               ]
             },
             {
               "group": true,
-              "label": "\ud83e\udd16 Guides",
+              "label": "🤖 Guides",
               "children": [
                 {
-                  "label": "\u2728 Gemini Guide",
+                  "label": "✨ Gemini Guide",
                   "url": "gemini.md"
                 },
                 {
-                  "label": "\ud83c\udf9e\ufe0f Remotion + RunPod Setup",
+                  "label": "🎞️ Remotion + RunPod Setup",
                   "url": "markdown_renderer.html?file=4_Formula/tools/remotion_runpod_setup.md",
                   "description": "How to set up REMOTION_SERVE_URL + a RunPod render endpoint so the Animation Generator renders MP4s serverlessly."
                 },
                 {
-                  "label": "\ud83d\udcdc Commit History",
+                  "label": "📜 Commit History",
                   "url": "https://github.com/rifaterdemsahin/claude-architect-certification/commits/main"
                 }
               ]
             },
             {
               "group": true,
-              "label": "\ud83d\uddc2\ufe0f Repos",
+              "label": "🗂️ Repos",
               "children": [
                 {
-                  "label": "\ud83d\uddc2\ufe0f Video Production Repos",
+                  "label": "🗂️ Video Production Repos",
                   "url": "5_Symbols/production/postprod/github_repos.html",
-                  "description": "All rifaterdemsahin GitHub repos related to video production \u2014 kokoro, fal.ai, remotion, greenscreen, etc."
+                  "description": "All rifaterdemsahin GitHub repos related to video production — kokoro, fal.ai, remotion, greenscreen, etc."
                 }
               ]
             }
           ]
         },
         {
-          "label": "\ud83d\uddc2\ufe0f Post-Production Hub",
+          "label": "🗂️ Post-Production Hub",
           "url": "5_Symbols/production/postprod/index.html"
         }
       ]
@@ -978,431 +983,431 @@
   ],
   "debugMenu": [
     {
-      "label": "\ud83d\udcc1 1. Real Unknown",
+      "label": "📁 1. Real Unknown",
       "url": "1_Real_Unknown/"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udcd6 README",
+      "label": "   ├─ 📖 README",
       "url": "markdown_renderer.html?file=1_Real_Unknown/README.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83c\udfaf OKRs",
+      "label": "   ├─ 🎯 OKRs",
       "url": "markdown_renderer.html?file=1_Real_Unknown/1_okr.md"
     },
     {
-      "label": "   \u251c\u2500 \u2753 Problem Statement",
+      "label": "   ├─ ❓ Problem Statement",
       "url": "markdown_renderer.html?file=1_Real_Unknown/2_problem_statement.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83e\uddea Hypotheses",
+      "label": "   ├─ 🧪 Hypotheses",
       "url": "markdown_renderer.html?file=1_Real_Unknown/3_hypotheses.md"
     },
     {
-      "label": "   \u251c\u2500 \u2754 Questions",
+      "label": "   ├─ ❔ Questions",
       "url": "markdown_renderer.html?file=1_Real_Unknown/4_questions.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udcb0 Cost Tracker",
+      "label": "   ├─ 💰 Cost Tracker",
       "url": "markdown_renderer.html?file=1_Real_Unknown/5_costs.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udccb Kanban Board",
+      "label": "   ├─ 📋 Kanban Board",
       "url": "markdown_renderer.html?file=1_Real_Unknown/6_kanban.md"
     },
     {
-      "label": "   \u2514\u2500 \u2705 Sanity Check",
+      "label": "   └─ ✅ Sanity Check",
       "url": "markdown_renderer.html?file=1_Real_Unknown/7_sanity_check.md"
     },
     {
-      "label": "\ud83d\udcc1 2. Environment",
+      "label": "📁 2. Environment",
       "url": "2_Environment/"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udcd6 README",
+      "label": "   ├─ 📖 README",
       "url": "markdown_renderer.html?file=2_Environment/README.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83c\udfdb Architecture",
+      "label": "   ├─ 🏛 Architecture",
       "url": "markdown_renderer.html?file=2_Environment/1_architecture.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83c\udf10 GitHub Pages",
+      "label": "   ├─ 🌐 GitHub Pages",
       "url": "markdown_renderer.html?file=2_Environment/2_github_pages.md"
     },
     {
-      "label": "   \u251c\u2500 \u26a1 Cloudflare Workers",
+      "label": "   ├─ ⚡ Cloudflare Workers",
       "url": "markdown_renderer.html?file=2_Environment/3_cloudflare_workers.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\ude80 Fly.io",
+      "label": "   ├─ 🚀 Fly.io",
       "url": "markdown_renderer.html?file=2_Environment/4_fly_io.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udd10 Setup Azure Key Vault",
+      "label": "   ├─ 🔐 Setup Azure Key Vault",
       "url": "markdown_renderer.html?file=2_Environment/5_setup_azure.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udcbb Setup Mac",
+      "label": "   ├─ 💻 Setup Mac",
       "url": "markdown_renderer.html?file=2_Environment/6_setup_mac.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83e\ude9f Setup Windows",
+      "label": "   ├─ 🪟 Setup Windows",
       "url": "markdown_renderer.html?file=2_Environment/7_setup_windows.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83e\udd16 Setup AI Tools",
+      "label": "   ├─ 🤖 Setup AI Tools",
       "url": "markdown_renderer.html?file=2_Environment/8_setup_ai.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\uddfa Navigation Config",
+      "label": "   ├─ 🗺 Navigation Config",
       "url": "markdown_renderer.html?file=2_Environment/9_navigation.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83c\udfd7 Production Setup",
+      "label": "   ├─ 🏗 Production Setup",
       "url": "markdown_renderer.html?file=2_Environment/10_production_setup.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\uddc4 Database (Supabase)",
+      "label": "   ├─ 🗄 Database (Supabase)",
       "url": "markdown_renderer.html?file=2_Environment/11_database.md"
     },
     {
-      "label": "   \u2514\u2500 \ud83d\udcbe Supabase Backup",
+      "label": "   └─ 💾 Supabase Backup",
       "url": "markdown_renderer.html?file=2_Environment/12_supabase_backup.md"
     },
     {
-      "label": "\ud83d\udcc1 3. Simulation",
+      "label": "📁 3. Simulation",
       "url": "3_Simulation/"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udcd6 README",
+      "label": "   ├─ 📖 README",
       "url": "markdown_renderer.html?file=3_Simulation/README.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83c\udfa8 Image Prompts",
+      "label": "   ├─ 🎨 Image Prompts",
       "url": "markdown_renderer.html?file=3_Simulation/image_prompts.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udc68\u200d\ud83c\udfeb Instructor Experience",
+      "label": "   ├─ 👨‍🏫 Instructor Experience",
       "url": "markdown_renderer.html?file=3_Simulation/instructor_experience.md"
     },
     {
-      "label": "   \u2514\u2500 \ud83d\udc64 User Experience",
+      "label": "   └─ 👤 User Experience",
       "url": "markdown_renderer.html?file=3_Simulation/userexperience.md"
     },
     {
-      "label": "\ud83d\udcc1 4. Formula",
+      "label": "📁 4. Formula",
       "url": "4_Formula/"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udcd6 README",
+      "label": "   ├─ 📖 README",
       "url": "markdown_renderer.html?file=4_Formula/README.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udcc4 HTML Specs",
+      "label": "   ├─ 📄 HTML Specs",
       "url": "markdown_renderer.html?file=4_Formula/specs/README.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udcda API Reference",
+      "label": "   ├─ 📚 API Reference",
       "url": "markdown_renderer.html?file=4_Formula/delivery_pilot/api_reference.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udce1 Axiom Logging Ingestion",
+      "label": "   ├─ 📡 Axiom Logging Ingestion",
       "url": "markdown_renderer.html?file=4_Formula/tools/axiom_logging_setup.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udd0d Axiom Query Guide",
+      "label": "   ├─ 🔍 Axiom Query Guide",
       "url": "markdown_renderer.html?file=4_Formula/tools/axiom_query_guide.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udcd0 Decisions (ADRs)",
+      "label": "   ├─ 📐 Decisions (ADRs)",
       "url": "markdown_renderer.html?file=4_Formula/delivery_pilot/decisions.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udcd6 DSL Glossary",
+      "label": "   ├─ 📖 DSL Glossary",
       "url": "markdown_renderer.html?file=4_Formula/delivery_pilot/dsl.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udee0 Implementation Guide",
+      "label": "   ├─ 🛠 Implementation Guide",
       "url": "markdown_renderer.html?file=4_Formula/delivery_pilot/implementation_guide.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83e\udde0 LLM Thinking Formula",
+      "label": "   ├─ 🧠 LLM Thinking Formula",
       "url": "markdown_renderer.html?file=4_Formula/delivery_pilot/llm_thinking_formula.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83e\udde0 LLM Thinking Log",
+      "label": "   ├─ 🧠 LLM Thinking Log",
       "url": "markdown_renderer.html?file=4_Formula/delivery_pilot/llm_thinking_log.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udcdd Research Notes",
+      "label": "   ├─ 📝 Research Notes",
       "url": "markdown_renderer.html?file=4_Formula/delivery_pilot/research_notes.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udccb Certification: Course Outline",
+      "label": "   ├─ 📋 Certification: Course Outline",
       "url": "markdown_renderer.html?file=4_Formula/certification/course_outline.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udcdc Certification: Erdem's Certification",
+      "label": "   ├─ 📜 Certification: Erdem's Certification",
       "url": "markdown_renderer.html?file=4_Formula/certification/erdems_certification.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83c\udf93 Certification: Exam & Case Study",
+      "label": "   ├─ 🎓 Certification: Exam & Case Study",
       "url": "markdown_renderer.html?file=4_Formula/certification/exam_and_case_study.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udcc4 Certification: Post-Prod Template",
+      "label": "   ├─ 📄 Certification: Post-Prod Template",
       "url": "markdown_renderer.html?file=4_Formula/certification/post_prod_template.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83c\udfac Certification: Production Plan",
+      "label": "   ├─ 🎬 Certification: Production Plan",
       "url": "markdown_renderer.html?file=4_Formula/certification/production_plan.md"
     },
     {
-      "label": "   \u251c\u2500 \u2708\ufe0f Delivery Pilot Log",
+      "label": "   ├─ ✈️ Delivery Pilot Log",
       "url": "markdown_renderer.html?file=4_Formula/delivery_pilot/llm_thinking_log.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udcc1 Production: Google Drive Structure",
+      "label": "   ├─ 📁 Production: Google Drive Structure",
       "url": "markdown_renderer.html?file=4_Formula/production/google_drive_folder_Structure.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udd0c Production: MCP Google Drive",
+      "label": "   ├─ 🔌 Production: MCP Google Drive",
       "url": "markdown_renderer.html?file=4_Formula/production/mcp_google_drive.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udcc4 Production: Outline Template",
+      "label": "   ├─ 📄 Production: Outline Template",
       "url": "markdown_renderer.html?file=4_Formula/production/outline_template.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udcac Production: Prompter",
+      "label": "   ├─ 💬 Production: Prompter",
       "url": "markdown_renderer.html?file=4_Formula/production/prompter.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83c\udfac Production: Script",
+      "label": "   ├─ 🎬 Production: Script",
       "url": "markdown_renderer.html?file=4_Formula/production/script.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udee1 Security: ZDR Checklist",
+      "label": "   ├─ 🛡 Security: ZDR Checklist",
       "url": "markdown_renderer.html?file=4_Formula/security/zdr_checklist.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udc41 Tools: Markdown Preview Auto",
+      "label": "   ├─ 👁 Tools: Markdown Preview Auto",
       "url": "markdown_renderer.html?file=4_Formula/tools/markdown_preview_auto.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udd27 Tools: VS Code Extensions",
+      "label": "   ├─ 🔧 Tools: VS Code Extensions",
       "url": "markdown_renderer.html?file=4_Formula/tools/vscode_extensions.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83c\udfa8 Tools: VS Code Terminal Profiles Formula",
+      "label": "   ├─ 🎨 Tools: VS Code Terminal Profiles Formula",
       "url": "markdown_renderer.html?file=4_Formula/tools/vscode_terminal_profiles_formula.md"
     },
     {
-      "label": "   \u2514\u2500 \ud83d\udee2\ufe0f Tools: Supabase Setup Formula",
+      "label": "   └─ 🛢️ Tools: Supabase Setup Formula",
       "url": "markdown_renderer.html?file=4_Formula/tools/supabase_setup_formula.md"
     },
     {
-      "label": "\ud83d\udcc1 5. Symbols (Code)",
+      "label": "📁 5. Symbols (Code)",
       "url": "5_Symbols/"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udcd6 README",
+      "label": "   ├─ 📖 README",
       "url": "markdown_renderer.html?file=5_Symbols/README.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83c\udfa8 Branding & Business Rules",
+      "label": "   ├─ 🎨 Branding & Business Rules",
       "url": "5_Symbols/production/preprod/tools/branding.html"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udd0c MCP Server README",
+      "label": "   ├─ 🔌 MCP Server README",
       "url": "markdown_renderer.html?file=5_Symbols/course_src/module-2-mcp-server/README.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udee1 ZDR Compliance",
+      "label": "   ├─ 🛡 ZDR Compliance",
       "url": "markdown_renderer.html?file=5_Symbols/course_src/module-3-security/ZDR_COMPLIANCE.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udcb0 Plan: Business Model",
+      "label": "   ├─ 💰 Plan: Business Model",
       "url": "markdown_renderer.html?file=4_Formula/certification/business_plan.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udccb Plan: Pre-Prod Module 1",
+      "label": "   ├─ 📋 Plan: Pre-Prod Module 1",
       "url": "markdown_renderer.html?file=5_Symbols/production/preprod/module_1_plan.md"
     },
     {
-      "label": "   \u251c\u2500 \u26a0\ufe0f Risks & Mitigations",
+      "label": "   ├─ ⚠️ Risks & Mitigations",
       "url": "5_Symbols/production/preprod/risks.html"
     },
     {
-      "label": "   \u251c\u2500 \u26a0\ufe0f Risk: Scaffolding Risk",
+      "label": "   ├─ ⚠️ Risk: Scaffolding Risk",
       "url": "markdown_renderer.html?file=5_Symbols/production/preprod/scaffolding_risk.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udccb Plan: Prod Module 1",
+      "label": "   ├─ 📋 Plan: Prod Module 1",
       "url": "markdown_renderer.html?file=5_Symbols/production/prod/module_1_plan.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83e\uddea Sanity Gate (Pre-Prod\u2192Post)",
+      "label": "   ├─ 🧪 Sanity Gate (Pre-Prod→Post)",
       "url": "5_Symbols/production/preprod/sanity_check.html"
     },
     {
-      "label": "   \u251c\u2500 \u2705 Production Checklist",
+      "label": "   ├─ ✅ Production Checklist",
       "url": "5_Symbols/production/prod/checklist.html"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udcc1 Google Drive Creator",
+      "label": "   ├─ 📁 Google Drive Creator",
       "url": "5_Symbols/production/prod/google_drive_folder_creator.html"
     },
     {
-      "label": "   \u251c\u2500 \ud83c\udf10 Production Overview Hub",
+      "label": "   ├─ 🌐 Production Overview Hub",
       "url": "5_Symbols/production/production_hub.html"
     },
     {
-      "label": "   \u251c\u2500 \u2699\ufe0f Settings",
+      "label": "   ├─ ⚙️ Settings",
       "url": "5_Symbols/production/settings.html"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\uddc2\ufe0f Post-Production Hub",
+      "label": "   ├─ 🗂️ Post-Production Hub",
       "url": "5_Symbols/production/postprod/index.html"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\uddc2\ufe0f Production Hub",
+      "label": "   ├─ 🗂️ Production Hub",
       "url": "5_Symbols/production/prod/index.html"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\uddc2\ufe0f Pre-Production Hub",
+      "label": "   ├─ 🗂️ Pre-Production Hub",
       "url": "5_Symbols/production/preprod/index.html"
     },
     {
-      "label": "   \u251c\u2500 \u2705 Asset Checklist",
+      "label": "   ├─ ✅ Asset Checklist",
       "url": "5_Symbols/production/postprod/asset_checklist.html"
     },
     {
-      "label": "   \u251c\u2500 \u270d\ufe0f Script Editor",
+      "label": "   ├─ ✍️ Script Editor",
       "url": "5_Symbols/production/preprod/edit_scripts.html"
     },
     {
-      "label": "   \u251c\u2500 \ud83c\udfaf Product-Market Fit",
+      "label": "   ├─ 🎯 Product-Market Fit",
       "url": "5_Symbols/production/preprod/product_market_fit.html"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\uddbc\ufe0f Bulk Image Generator",
+      "label": "   ├─ 🖼️ Bulk Image Generator",
       "url": "5_Symbols/production/preprod/bulk_image_generator.html"
     },
     {
-      "label": "   \u251c\u2500 \u265f\ufe0f Certification Strategy",
+      "label": "   ├─ ♟️ Certification Strategy",
       "url": "5_Symbols/production/preprod/strategy.html"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udcca Database Stats",
+      "label": "   ├─ 📊 Database Stats",
       "url": "5_Symbols/production/preprod/stats.html"
     },
     {
-      "label": "   \u251c\u2500 \ud83c\udf0d Loaded Environment",
+      "label": "   ├─ 🌍 Loaded Environment",
       "url": "5_Symbols/production/preprod/environment.html"
     },
     {
-      "label": "   \u251c\u2500 \ud83e\udde0 AI Architect Explanations",
+      "label": "   ├─ 🧠 AI Architect Explanations",
       "url": "5_Symbols/production/preprod/explanations.html"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\uddbc\ufe0f Visual Asset Gallery",
+      "label": "   ├─ 🖼️ Visual Asset Gallery",
       "url": "5_Symbols/production/postprod/visual_gallery.html"
     },
     {
-      "label": "   \u251c\u2500 Controversial Post Playbook",
+      "label": "   ├─ Controversial Post Playbook",
       "url": "5_Symbols/production/postprod/linkedin_controversial.html"
     },
     {
-      "label": "   \u251c\u2500 \ud83c\udfa4 Customer Discovery Interviews",
+      "label": "   ├─ 🎤 Customer Discovery Interviews",
       "url": "5_Symbols/production/preprod/customer_discovery_interviews.html"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udd17 Google Drive Links",
+      "label": "   ├─ 🔗 Google Drive Links",
       "url": "5_Symbols/production/prod/google_drive_links.html"
     },
     {
-      "label": "\ud83d\udcc1 6. Semblance",
+      "label": "📁 6. Semblance",
       "url": "6_Semblance/"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udcd6 README",
+      "label": "   ├─ 📖 README",
       "url": "markdown_renderer.html?file=6_Semblance/README.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83e\ude79 Workarounds",
+      "label": "   ├─ 🩹 Workarounds",
       "url": "markdown_renderer.html?file=6_Semblance/logs/workarounds.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udcdc Project Logs (Unified)",
+      "label": "   ├─ 📜 Project Logs (Unified)",
       "url": "5_Symbols/production/preprod/log_viewer.html"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udc1b Error Log (Raw)",
+      "label": "   ├─ 🐛 Error Log (Raw)",
       "url": "6_Semblance/logs/error.log"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udee0 Fix Log (Raw)",
+      "label": "   ├─ 🛠 Fix Log (Raw)",
       "url": "6_Semblance/logs/fix.log"
     },
     {
-      "label": "   \u251c\u2500 \u26a0\ufe0f Error: Insert Policy",
+      "label": "   ├─ ⚠️ Error: Insert Policy",
       "url": "markdown_renderer.html?file=6_Semblance/errors/error_insertpolicy.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udd17 CI Broken Links",
+      "label": "   ├─ 🔗 CI Broken Links",
       "url": "markdown_renderer.html?file=6_Semblance/errors/error_ci_broken_links_label_failure.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udd17 CI Setup-Node Caching Error",
+      "label": "   ├─ 🔗 CI Setup-Node Caching Error",
       "url": "markdown_renderer.html?file=6_Semblance/errors/error_ci_setup_node_cache_missing_path.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udd0d Gap Analysis",
+      "label": "   ├─ 🔍 Gap Analysis",
       "url": "markdown_renderer.html?file=6_Semblance/logs/gap_analysis.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83e\uddea Fly vs GH Pages Sync Issue",
+      "label": "   ├─ 🧪 Fly vs GH Pages Sync Issue",
       "url": "markdown_renderer.html?file=6_Semblance/sync_issue_fly_vs_ghpages.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udcdd Lessons Learned",
+      "label": "   ├─ 📝 Lessons Learned",
       "url": "markdown_renderer.html?file=6_Semblance/logs/lessons_learned.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udee0 Missing Menu Remediation",
+      "label": "   ├─ 🛠 Missing Menu Remediation",
       "url": "markdown_renderer.html?file=6_Semblance/errors/error_missing_menu_items_remediation.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udda5\ufe0f Error: VS Code: Terminal Title Not Visible",
+      "label": "   ├─ 🖥️ Error: VS Code: Terminal Title Not Visible",
       "url": "markdown_renderer.html?file=6_Semblance/errors/error_vscode_terminal_title_not_visible.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udd12 RLS Checklist Insert",
+      "label": "   ├─ 🔒 RLS Checklist Insert",
       "url": "markdown_renderer.html?file=6_Semblance/errors/error_rls_checklist_insert.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udd10 Error: Accessibility Permissions (osascript)",
+      "label": "   ├─ 🔐 Error: Accessibility Permissions (osascript)",
       "url": "markdown_renderer.html?file=6_Semblance/logs/accessibility_error.md"
     },
     {
-      "label": "   \u2514\u2500 \ud83d\uddc4 Archive: 2026-06-06 (and more)",
+      "label": "   └─ 🗄 Archive: 2026-06-06 (and more)",
       "url": "6_Semblance/archive/daily/"
     },
     {
-      "label": "\ud83d\udcc1 7. Testing Known",
+      "label": "📁 7. Testing Known",
       "url": "7_Testing_Known/"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udcd6 README",
+      "label": "   ├─ 📖 README",
       "url": "markdown_renderer.html?file=7_Testing_Known/README.md"
     },
     {
-      "label": "   \u251c\u2500 \u2705 Sanity Check Report",
+      "label": "   ├─ ✅ Sanity Check Report",
       "url": "markdown_renderer.html?file=7_Testing_Known/sanity_check_report.md"
     },
     {
-      "label": "   \u2514\u2500 \ud83e\uddea Validation Report",
+      "label": "   └─ 🧪 Validation Report",
       "url": "markdown_renderer.html?file=7_Testing_Known/validation_report.md"
     },
     {
@@ -1410,51 +1415,51 @@
       "url": "divider"
     },
     {
-      "label": "\ud83d\udcc1 Root Documents",
+      "label": "📁 Root Documents",
       "url": ""
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udcd6 README (repo root)",
+      "label": "   ├─ 📖 README (repo root)",
       "url": "markdown_renderer.html?file=README.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83e\udd16 agents.md",
+      "label": "   ├─ 🤖 agents.md",
       "url": "markdown_renderer.html?file=agents.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83c\udf00 antigravity.md",
+      "label": "   ├─ 🌀 antigravity.md",
       "url": "markdown_renderer.html?file=antigravity.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83e\udd16 claude.md",
+      "label": "   ├─ 🤖 claude.md",
       "url": "markdown_renderer.html?file=claude.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udc68\u200d\ud83d\udcbb copilot.md",
+      "label": "   ├─ 👨‍💻 copilot.md",
       "url": "markdown_renderer.html?file=copilot.md"
     },
     {
-      "label": "   \u251c\u2500 \u2728 gemini.md",
+      "label": "   ├─ ✨ gemini.md",
       "url": "markdown_renderer.html?file=gemini.md"
     },
     {
-      "label": "   \u251c\u2500 \u26a1 kilocode.md",
+      "label": "   ├─ ⚡ kilocode.md",
       "url": "markdown_renderer.html?file=kilocode.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83c\udf19 kimi.md",
+      "label": "   ├─ 🌙 kimi.md",
       "url": "markdown_renderer.html?file=kimi.md"
     },
     {
-      "label": "   \u251c\u2500 \ud83d\udcac prompts.md",
+      "label": "   ├─ 💬 prompts.md",
       "url": "markdown_renderer.html?file=prompts.md"
     },
     {
-      "label": "   \u2514\u2500 \u2705 todos.md",
+      "label": "   └─ ✅ todos.md",
       "url": "markdown_renderer.html?file=todos.md"
     },
     {
-      "label": "\ud83c\udf10 Live Site",
+      "label": "🌐 Live Site",
       "url": "https://claude-architect-certification.fly.dev"
     }
   ]
