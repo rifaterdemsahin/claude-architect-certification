@@ -332,6 +332,7 @@
       <div class="btn-group">
         <button class="btn btn-secondary" onclick="previewPrompt()">🔍 Preview Prompt</button>
         <button class="btn btn-primary" id="btn-generate" onclick="generateScript()">🚀 Generate Script</button>
+        <button class="btn btn-primary" id="btn-convert" style="background: #8b5cf6;" onclick="convertToSentences()" disabled>🧠 Convert to Sentences</button>
         <button class="btn btn-primary" id="btn-save" style="background: #10b981;" onclick="saveToSentences()" disabled>💾 Save to DB</button>
       </div>
 
@@ -345,7 +346,22 @@
         <button class="copy-btn" onclick="copyToClipboard()">📋 Copy</button>
         <textarea id="script-output" placeholder="Generated script will appear here..."></textarea>
         <div id="copy-status" class="success-msg">✅ Copied to clipboard!</div>
+        <div id="convert-status" class="success-msg" style="color: #3b82f6;"></div>
+      </div>
+
+      <div class="output-area" id="json-area" style="display: none;">
+        <label style="display: block; margin-bottom: 8px; font-size: 0.85rem; font-weight: 700; text-transform: uppercase;">Sentence Table Format (JSON):</label>
+        <textarea id="json-output" placeholder="JSON structure will appear here..."></textarea>
         <div id="save-status" class="success-msg" style="color: #3b82f6;"></div>
+      </div>
+    </div>
+
+    <!-- Error Modal -->
+    <div id="error-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; flex-direction: column; justify-content: center; align-items: center;">
+      <div style="background: var(--bg-card); padding: 32px; border-radius: 16px; border: 1px solid #f87171; max-width: 600px; width: 90%;">
+        <h3 style="color: #f87171; margin-bottom: 16px; font-family: var(--font-title);">⚠️ Error</h3>
+        <p id="error-modal-text" style="color: #e2e8f0; margin-bottom: 24px; white-space: pre-wrap; font-family: 'Monaco', 'Consolas', monospace; font-size: 0.85rem; max-height: 300px; overflow-y: auto;"></p>
+        <button class="btn btn-secondary" onclick="document.getElementById('error-modal').style.display='none'" style="width: 100%;">Close</button>
       </div>
     </div>
 
@@ -449,12 +465,22 @@ See you in Module [NEXT MODULE NUMBER].`
         videos.map((v, i) => `<option value="${i+1}">Video ${i+1}: ${v}</option>`).join('');
     }
 
+    function checkConvertEnable() {
+      const hasScript = document.getElementById('script-output').value.trim().length > 0;
+      document.getElementById('btn-convert').disabled = !hasScript;
+    }
+
     function checkSaveEnable() {
       const modId = document.getElementById('module-select').value;
       const vidId = document.getElementById('video-select').value;
-      const hasScript = document.getElementById('script-output').value.trim().length > 0;
+      const hasJson = document.getElementById('json-output') ? document.getElementById('json-output').value.trim().length > 0 : false;
       
-      document.getElementById('btn-save').disabled = !(modId && vidId && hasScript);
+      document.getElementById('btn-save').disabled = !(modId && vidId && hasJson);
+    }
+
+    function showErrorModal(message) {
+      document.getElementById('error-modal-text').textContent = message;
+      document.getElementById('error-modal').style.display = 'flex';
     }
 
     function setTemplate(tpl) {
@@ -504,15 +530,15 @@ See you in Module [NEXT MODULE NUMBER].`
         });
         
         if (!res.ok) {
-          const text = await res.text();
-          throw new Error('API Error: ' + text);
+          const errText = await res.text();
+          throw new Error('OpenRouter API Error: ' + errText);
         }
         
         const data = await res.json();
         document.getElementById('script-output').value = data.content || '';
-        checkSaveEnable();
+        checkConvertEnable();
       } catch(err) {
-        alert('Failed to generate: ' + err.message);
+        showErrorModal('Failed to generate script:\n' + err.message);
         console.error(err);
       } finally {
         btn.innerHTML = prevText;
@@ -520,26 +546,24 @@ See you in Module [NEXT MODULE NUMBER].`
       }
     }
 
-    // Add event listener to script output so manual edits can also enable the save button
-    document.getElementById('script-output').addEventListener('input', checkSaveEnable);
+    // Add event listener to script output so manual edits can enable the convert button
+    document.getElementById('script-output').addEventListener('input', checkConvertEnable);
 
-    async function saveToSentences() {
+    async function convertToSentences() {
       const text = document.getElementById('script-output').value.trim();
-      if (!text) { alert('No script to save!'); return; }
+      if (!text) return;
       
-      const modId = document.getElementById('module-select').value;
-      const vidId = document.getElementById('video-select').value;
-      const statusEl = document.getElementById('save-status');
-      
-      const saveBtn = document.getElementById('btn-save');
-      saveBtn.disabled = true;
+      const btn = document.getElementById('btn-convert');
+      const prevText = btn.innerHTML;
+      btn.innerHTML = '⏳ Converting...';
+      btn.disabled = true;
+
+      const statusEl = document.getElementById('convert-status');
+      statusEl.textContent = '⏳ Converting script to structured sentences via AI...';
+      statusEl.style.display = 'block';
+      statusEl.style.color = '#3b82f6';
 
       try {
-        statusEl.textContent = '⏳ Converting script to structured sentences via AI...';
-        statusEl.style.display = 'block';
-        statusEl.style.color = '#3b82f6';
-        
-        // 1. Call OpenRouter to convert to JSON
         const convertPrompt = `You are a script formatter. Convert the following script text into an array of sentence blocks.
 Each block must have:
 - "sentence_text": The exact text of the block.
@@ -564,24 +588,69 @@ ${text}`;
         }
         
         const orData = await orRes.json();
-        let structuredData = [];
-        try {
-          structuredData = JSON.parse(orData.content);
-          if (!Array.isArray(structuredData)) {
-            // Fallback for wrapped objects
-            if (structuredData.sentences && Array.isArray(structuredData.sentences)) {
-              structuredData = structuredData.sentences;
-            } else if (structuredData.blocks && Array.isArray(structuredData.blocks)) {
-              structuredData = structuredData.blocks;
-            } else {
-              throw new Error('Returned JSON is not an array.');
-            }
-          }
-        } catch(e) {
-          throw new Error('Failed to parse OpenRouter JSON: ' + e.message + '\\n\\n' + orData.content);
-        }
         
+        // Ensure we show the json-area and populate it
+        document.getElementById('json-area').style.display = 'block';
+        
+        // Attempt to pretty-print if it's valid JSON, otherwise just show raw
+        try {
+          const parsed = JSON.parse(orData.content);
+          document.getElementById('json-output').value = JSON.stringify(parsed, null, 2);
+        } catch(e) {
+          document.getElementById('json-output').value = orData.content;
+        }
+
+        statusEl.textContent = '✅ Converted successfully!';
+        statusEl.style.color = '#10b981';
+        setTimeout(() => statusEl.style.display = 'none', 3000);
+
+        checkSaveEnable();
+      } catch (err) {
+        statusEl.style.display = 'none';
+        showErrorModal('Conversion Error:\n' + err.message);
+        console.error(err);
+      } finally {
+        btn.innerHTML = prevText;
+        btn.disabled = false;
+      }
+    }
+
+    // Add event listener to JSON output so manual edits can enable the save button
+    document.getElementById('json-output').addEventListener('input', checkSaveEnable);
+
+    async function saveToSentences() {
+      const jsonText = document.getElementById('json-output').value.trim();
+      const rawText = document.getElementById('script-output').value.trim();
+      if (!jsonText) { showErrorModal('No JSON to save!'); return; }
+      
+      let structuredData = [];
+      try {
+        structuredData = JSON.parse(jsonText);
+        if (!Array.isArray(structuredData)) {
+          if (structuredData.sentences && Array.isArray(structuredData.sentences)) {
+            structuredData = structuredData.sentences;
+          } else if (structuredData.blocks && Array.isArray(structuredData.blocks)) {
+            structuredData = structuredData.blocks;
+          } else {
+            throw new Error('JSON is not an array.');
+          }
+        }
+      } catch (e) {
+        showErrorModal('Invalid JSON format:\n' + e.message);
+        return;
+      }
+
+      const modId = document.getElementById('module-select').value;
+      const vidId = document.getElementById('video-select').value;
+      const statusEl = document.getElementById('save-status');
+      
+      const saveBtn = document.getElementById('btn-save');
+      saveBtn.disabled = true;
+
+      try {
         statusEl.textContent = '⏳ Saving to Supabase...';
+        statusEl.style.display = 'block';
+        statusEl.style.color = '#3b82f6';
 
         const SUPABASE_URL = localStorage.getItem('supabase_url') || 'https://rmekfsdhglyiralxvkwc.supabase.co';
         const SUPABASE_ANON_KEY = localStorage.getItem('supabase_anon_key');
@@ -606,11 +675,11 @@ ${text}`;
         if (scripts.length) {
           dbScriptId = scripts[0].id;
           await fetch(`${SUPABASE_URL}/rest/v1/scripts?id=eq.${dbScriptId}`, {
-            method: 'PATCH', headers, body: JSON.stringify({ script_text: text })
+            method: 'PATCH', headers, body: JSON.stringify({ script_text: rawText })
           });
         } else {
           let createRes = await fetch(`${SUPABASE_URL}/rest/v1/scripts`, {
-            method: 'POST', headers, body: JSON.stringify({ video_id: vids[0].id, script_text: text })
+            method: 'POST', headers, body: JSON.stringify({ video_id: vids[0].id, script_text: rawText })
           });
           let newScript = await createRes.json();
           dbScriptId = newScript[0].id;
@@ -639,12 +708,12 @@ ${text}`;
            throw new Error('Failed to insert sentences: ' + errJson);
         }
         
-        statusEl.textContent = \`✅ Saved \${inserts.length} structured sentences successfully!\`;
+        statusEl.textContent = `✅ Saved ${inserts.length} structured sentences successfully!`;
         statusEl.style.color = '#10b981';
         setTimeout(() => statusEl.style.display = 'none', 5000);
       } catch (err) {
-        statusEl.textContent = '❌ Error: ' + err.message;
-        statusEl.style.color = '#f87171';
+        statusEl.style.display = 'none';
+        showErrorModal('Save Error:\n' + err.message);
         console.error(err);
       } finally {
         saveBtn.disabled = false;
