@@ -289,7 +289,8 @@
       <div class="form-grid">
         <div class="form-group">
           <label for="module-select">📍 Module</label>
-          <select id="module-select" onchange="updateVideos()">
+          <select id="module-select" onchange="updateVideos(); checkSaveEnable();">
+            <option value="" disabled selected>Select Module...</option>
             <option value="1">Module 1: Architecture</option>
             <option value="2">Module 2: MCP Bridges</option>
             <option value="3">Module 3: Security & ZDR</option>
@@ -299,12 +300,16 @@
         </div>
         <div class="form-group">
           <label for="video-select">🎬 Video</label>
-          <select id="video-select">
-            <option value="1">Video 1: Overview</option>
+          <select id="video-select" onchange="checkSaveEnable();">
+            <option value="" disabled selected>Select Video...</option>
             <option value="2">Video 2: Implementation</option>
             <option value="3">Video 3: Advanced Patterns</option>
             <option value="4">Video 4: Testing & Validation</option>
           </select>
+        </div>
+        <div class="form-group" style="grid-column: 1 / -1;">
+          <label for="seed-input">🌱 Seed Context</label>
+          <textarea id="seed-input" placeholder="Enter context/seed to shape the script..." rows="3" style="background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 12px 16px; color: white; font-family: var(--font-body); font-size: 1rem; width: 100%; resize: vertical;"></textarea>
         </div>
       </div>
 
@@ -325,13 +330,22 @@
       </div>
 
       <div class="btn-group">
-        <button class="btn btn-primary" onclick="generateScript()">🚀 Generate Script</button>
+        <button class="btn btn-secondary" onclick="previewPrompt()">🔍 Preview Prompt</button>
+        <button class="btn btn-primary" id="btn-generate" onclick="generateScript()">🚀 Generate Script</button>
+        <button class="btn btn-primary" id="btn-save" style="background: #10b981;" onclick="saveToSentences()" disabled>💾 Save to DB</button>
+      </div>
+
+      <div class="output-area" id="prompt-area" style="display: none; margin-bottom: 24px;">
+        <label style="display: block; margin-bottom: 8px; color: var(--accent); font-size: 0.85rem; font-weight: 700; text-transform: uppercase;">Prompt Preview:</label>
+        <textarea id="prompt-output" readonly placeholder="Prompt will appear here..." style="height: 200px; border-color: rgba(245, 158, 11, 0.3); background: rgba(245, 158, 11, 0.02);"></textarea>
       </div>
 
       <div class="output-area">
+        <label style="display: block; margin-bottom: 8px; font-size: 0.85rem; font-weight: 700; text-transform: uppercase;">Generated Script:</label>
         <button class="copy-btn" onclick="copyToClipboard()">📋 Copy</button>
         <textarea id="script-output" placeholder="Generated script will appear here..."></textarea>
         <div id="copy-status" class="success-msg">✅ Copied to clipboard!</div>
+        <div id="save-status" class="success-msg" style="color: #3b82f6;"></div>
       </div>
     </div>
 
@@ -424,9 +438,23 @@ See you in Module [NEXT MODULE NUMBER].`
     function updateVideos() {
       const modId = document.getElementById('module-select').value;
       const vidSelect = document.getElementById('video-select');
-      const videos = MODULE_DATA[modId].videos;
       
-      vidSelect.innerHTML = videos.map((v, i) => `<option value="${i+1}">Video ${i+1}: ${v}</option>`).join('');
+      if (!modId) {
+        vidSelect.innerHTML = '<option value="" disabled selected>Select Video...</option>';
+        return;
+      }
+      
+      const videos = MODULE_DATA[modId].videos;
+      vidSelect.innerHTML = '<option value="" disabled selected>Select Video...</option>' + 
+        videos.map((v, i) => `<option value="${i+1}">Video ${i+1}: ${v}</option>`).join('');
+    }
+
+    function checkSaveEnable() {
+      const modId = document.getElementById('module-select').value;
+      const vidId = document.getElementById('video-select').value;
+      const hasScript = document.getElementById('script-output').value.trim().length > 0;
+      
+      document.getElementById('btn-save').disabled = !(modId && vidId && hasScript);
     }
 
     function setTemplate(tpl) {
@@ -435,11 +463,12 @@ See you in Module [NEXT MODULE NUMBER].`
       document.getElementById('tpl-' + tpl).classList.add('active');
     }
 
-    function generateScript() {
+    function buildPrompt() {
       const modId = document.getElementById('module-select').value;
       const vidId = document.getElementById('video-select').value;
-      const modName = MODULE_DATA[modId].name;
-      const vidName = MODULE_DATA[modId].videos[vidId-1];
+      const seed = document.getElementById('seed-input').value.trim();
+      const modName = modId ? MODULE_DATA[modId].name : "[Module Name]";
+      const vidName = (modId && vidId) ? MODULE_DATA[modId].videos[vidId-1] : "[Video Name]";
       
       let script = TEMPLATES[currentTemplate];
       
@@ -447,7 +476,117 @@ See you in Module [NEXT MODULE NUMBER].`
       script = script.replace(/\[TOPIC 1\]/g, modName);
       script = script.replace(/\[FIRST TOPIC\]/g, vidName);
       
-      document.getElementById('script-output').value = script;
+      if (seed) {
+        script = `Context/Seed:\n${seed}\n\n` + script;
+      }
+      return script;
+    }
+
+    function previewPrompt() {
+      const prompt = buildPrompt();
+      document.getElementById('prompt-area').style.display = 'block';
+      document.getElementById('prompt-output').value = prompt;
+    }
+
+    async function generateScript() {
+      previewPrompt();
+      const prompt = document.getElementById('prompt-output').value;
+      const btn = document.getElementById('btn-generate');
+      const prevText = btn.innerHTML;
+      btn.innerHTML = '⏳ Generating...';
+      btn.disabled = true;
+      
+      try {
+        const res = await fetch('/api/scripts/openrouter', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt: prompt })
+        });
+        
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error('API Error: ' + text);
+        }
+        
+        const data = await res.json();
+        document.getElementById('script-output').value = data.content || '';
+        checkSaveEnable();
+      } catch(err) {
+        alert('Failed to generate: ' + err.message);
+        console.error(err);
+      } finally {
+        btn.innerHTML = prevText;
+        btn.disabled = false;
+      }
+    }
+
+    // Add event listener to script output so manual edits can also enable the save button
+    document.getElementById('script-output').addEventListener('input', checkSaveEnable);
+
+    async function saveToSentences() {
+      const text = document.getElementById('script-output').value.trim();
+      if (!text) { alert('No script to save!'); return; }
+      
+      const modId = document.getElementById('module-select').value;
+      const vidId = document.getElementById('video-select').value;
+      const statusEl = document.getElementById('save-status');
+      statusEl.textContent = '⏳ Saving...';
+      statusEl.style.display = 'block';
+
+      try {
+        const SUPABASE_URL = localStorage.getItem('supabase_url') || 'https://rmekfsdhglyiralxvkwc.supabase.co';
+        const SUPABASE_ANON_KEY = localStorage.getItem('supabase_anon_key');
+        if (!SUPABASE_ANON_KEY) throw new Error('Missing Supabase Anon Key in localStorage. Please login as admin.');
+
+        const headers = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
+
+        // 1. Get module
+        let modRes = await fetch(`${SUPABASE_URL}/rest/v1/modules?module_number=eq.${modId}&select=id`, { headers });
+        let mods = await modRes.json();
+        if (!mods.length) throw new Error(`Module ${modId} not found in DB`);
+        
+        // 2. Get video
+        let vidRes = await fetch(`${SUPABASE_URL}/rest/v1/videos?module_id=eq.${mods[0].id}&video_number=eq.${vidId}&select=id`, { headers });
+        let vids = await vidRes.json();
+        if (!vids.length) throw new Error(`Video ${vidId} not found in DB`);
+
+        // 3. Get or create script
+        let scriptRes = await fetch(`${SUPABASE_URL}/rest/v1/scripts?video_id=eq.${vids[0].id}&select=id`, { headers });
+        let scripts = await scriptRes.json();
+        let dbScriptId;
+        if (scripts.length) {
+          dbScriptId = scripts[0].id;
+        } else {
+          let createRes = await fetch(`${SUPABASE_URL}/rest/v1/scripts`, {
+            method: 'POST', headers, body: JSON.stringify({ video_id: vids[0].id, script_text: 'Generated script' })
+          });
+          let newScript = await createRes.json();
+          dbScriptId = newScript[0].id;
+        }
+
+        // 4. Save paragraphs as sentences
+        const paragraphs = text.split(/\n\n+/).map(p => p.trim()).filter(p => p);
+        const inserts = paragraphs.map((p, i) => ({
+          script_id: dbScriptId,
+          sentence_text: p,
+          sort_order: (i + 1) * 10
+        }));
+
+        let insertRes = await fetch(`${SUPABASE_URL}/rest/v1/sentences`, {
+          method: 'POST', headers, body: JSON.stringify(inserts)
+        });
+        if (!insertRes.ok) {
+           const errJson = await insertRes.text();
+           throw new Error('Failed to insert sentences: ' + errJson);
+        }
+        
+        statusEl.textContent = '✅ Saved to Sentences successfully!';
+        setTimeout(() => statusEl.style.display = 'none', 3000);
+      } catch (err) {
+        statusEl.textContent = '❌ Error: ' + err.message;
+        statusEl.style.color = '#f87171';
+        console.error(err);
+      }
     }
 
     function copyToClipboard() {
