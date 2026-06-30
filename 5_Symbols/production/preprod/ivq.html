@@ -131,10 +131,11 @@
     <p class="subtitle">In-Video Questions — link quiz questions to video timestamps with explanations</p>
 
     <!-- Dashboard -->
-    <div class="dashboard-grid" id="stats-dashboard">
+    <div class="dashboard-grid" id="stats-dashboard" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
       <div class="stat-card"><div class="stat-value" id="stat-q">-</div><div class="stat-label">Total Questions</div></div>
       <div class="stat-card"><div class="stat-value" id="stat-v">-</div><div class="stat-label">Videos w/ IVQs</div></div>
       <div class="stat-card"><div class="stat-value" id="stat-c">-</div><div class="stat-label">Sentence Coverage</div></div>
+      <div class="stat-card"><div class="stat-value" id="stat-o">-</div><div class="stat-label">Learning Objective Coverage</div></div>
     </div>
 
     <div class="config-panel" style="background: rgba(139,92,246,0.1); border-color: rgba(139,92,246,0.4);">
@@ -265,15 +266,17 @@ CREATE POLICY "allow_all_ivq" ON ivq_questions FOR ALL USING (true) WITH CHECK (
     }
 
     // ── State ─────────────────────────────────────────────────────────────────
-    let videos = [], ivqMap = {}, allSentences = []; // ivqMap[video_id] = [questions]
+    let videos = [], ivqMap = {}, allSentences = [], totalObjectives = 0, linkedObjectives = 0; // ivqMap[video_id] = [questions]
 
     async function loadAll() {
       if (!SB_URL || !SB_KEY) { renderVideoList(); return; }
       try {
-        const [vr, qr, sr] = await Promise.all([
+        const [vr, qr, sr, or, olr] = await Promise.all([
           api('videos?order=created_at.asc'),
           api('ivq_questions?order=sort_order.asc,created_at.asc'),
-          api('sentences?select=id,sentence_text,scripts!inner(video_id)')
+          api('sentences?select=id,sentence_text,scripts!inner(video_id)'),
+          api('outline?content_type=eq.objective&select=id'),
+          api('objective_links?object_type=eq.ivq&select=outline_id')
         ]);
         if (!vr.ok) throw new Error(await vr.text());
         
@@ -286,6 +289,15 @@ CREATE POLICY "allow_all_ivq" ON ivq_questions FOR ALL USING (true) WITH CHECK (
 
         if (sr.ok) {
             allSentences = await sr.json();
+        }
+
+        if (or.ok) {
+            const objs = await or.json();
+            totalObjectives = objs.length;
+        }
+        if (olr.ok) {
+            const links = await olr.json();
+            linkedObjectives = new Set(links.map(l => l.outline_id)).size;
         }
 
         videos = await vr.json();
@@ -303,12 +315,14 @@ CREATE POLICY "allow_all_ivq" ON ivq_questions FOR ALL USING (true) WITH CHECK (
     function updateDashboard(questions) {
       const qCount = questions.length;
       const vCount = Object.keys(ivqMap).length;
-      const linkedCount = questions.filter(q => q.sentence_id).length;
-      const coverage = qCount > 0 ? Math.round((linkedCount / qCount) * 100) : 0;
+      const uniqueLinkedSentences = new Set(questions.filter(q => q.sentence_id).map(q => q.sentence_id)).size;
+      const coverage = allSentences.length > 0 ? Math.round((uniqueLinkedSentences / allSentences.length) * 100) : 0;
+      const objCoverage = totalObjectives > 0 ? Math.round((linkedObjectives / totalObjectives) * 100) : 0;
       
       document.getElementById('stat-q').textContent = qCount;
       document.getElementById('stat-v').textContent = vCount;
       document.getElementById('stat-c').textContent = coverage + '%';
+      document.getElementById('stat-o').textContent = objCoverage + '%';
     }
 
     function renderVideoList() {
