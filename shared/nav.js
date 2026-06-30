@@ -109,7 +109,7 @@
     var base = window.API_BASE || '';
     // The login UI lives on the admin page; pass the current path back.
     var here = encodeURIComponent(window.location.pathname.slice(1) + window.location.search);
-    return base + '/5_Symbols/supabase/ui/admin.html?redirect=' + here;
+    return base + '/5_Symbols/admin_login.html?redirect=' + here;
   }
   // Sign out: clears the admin cookie server-side, then refreshes the gate
   // so destructive buttons hide immediately (no full page reload needed).
