@@ -697,6 +697,99 @@
       color: var(--text-muted);
       font-style: italic;
     }
+
+    /* ── Objective Coverage Stats ────────────────────────────── */
+    .cov-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.75rem;
+    }
+    .cov-card {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.4rem 1.25rem;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .cov-card-label { font-size: 0.82rem; font-weight: 600; color: var(--text-primary); }
+    .cov-card-sub   { font-size: 0.74rem; color: var(--text-muted); }
+    .cov-big {
+      font-family: var(--font-display);
+      font-size: 2.2rem; font-weight: 800;
+      background: linear-gradient(135deg, var(--accent-violet), var(--accent-cyan));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      line-height: 1;
+    }
+    .cov-ring {
+      width: 104px; height: 104px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      background: conic-gradient(var(--accent-violet) 0deg, rgba(255,255,255,0.06) 0deg);
+      transition: background 0.7s ease;
+      margin-bottom: 0.2rem;
+    }
+    .cov-ring-num {
+      width: 80px; height: 80px; border-radius: 50%;
+      background: var(--bg-dark);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display); font-size: 1.4rem; font-weight: 800;
+      color: var(--text-primary);
+    }
+    .cov-bar {
+      width: 100%; height: 6px; border-radius: 100px;
+      background: rgba(255,255,255,0.07); overflow: hidden; margin-top: 0.35rem;
+    }
+    .cov-bar-fill {
+      height: 100%; border-radius: 100px; width: 0%;
+      background: linear-gradient(90deg, var(--accent-violet), var(--accent-cyan));
+      transition: width 0.7s cubic-bezier(0.4,0,0.2,1);
+    }
+    .cov-bar-fill.green { background: linear-gradient(90deg, var(--accent-green), #34d399); }
+
+    .cov-section-label {
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--text-muted);
+      margin: 1.5rem 0 0.85rem;
+    }
+    .cov-inventory {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 0.7rem;
+    }
+    .cov-inv-item {
+      background: rgba(6,182,212,0.05);
+      border: 1px solid rgba(6,182,212,0.18);
+      border-radius: 10px; padding: 0.85rem 1rem;
+      display: flex; flex-direction: column; gap: 0.15rem;
+    }
+    .cov-inv-num { font-family: var(--font-display); font-size: 1.5rem; font-weight: 800; color: var(--accent-cyan); }
+    .cov-inv-label { font-size: 0.74rem; color: var(--text-muted); }
+
+    .cov-bytype { display: flex; flex-direction: column; gap: 0.7rem; }
+    .cov-bytype-row { display: grid; grid-template-columns: 140px 1fr 64px; gap: 0.75rem; align-items: center; }
+    .cov-bytype-name { font-size: 0.82rem; color: var(--text-primary); }
+    .cov-bytype-track { height: 8px; background: rgba(255,255,255,0.07); border-radius: 100px; overflow: hidden; }
+    .cov-bytype-fill { height: 100%; border-radius: 100px; background: linear-gradient(90deg, var(--accent-violet), var(--accent-cyan)); width: 0%; transition: width 0.7s ease; }
+    .cov-bytype-val { font-size: 0.78rem; color: var(--text-muted); text-align: right; }
+
+    .cov-gaps { margin-top: 0.5rem; }
+    .cov-gap-item {
+      font-size: 0.8rem; color: var(--text-muted);
+      padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+      display: flex; gap: 0.5rem; align-items: baseline;
+    }
+    .cov-gap-item .cov-gap-mod {
+      font-size: 0.65rem; font-weight: 700; color: #f59e0b;
+      background: rgba(245,158,11,0.1); border-radius: 4px; padding: 1px 6px; flex-shrink: 0;
+    }
+    @media (max-width: 700px) {
+      .cov-grid { grid-template-columns: 1fr; }
+      .cov-bytype-row { grid-template-columns: 100px 1fr 54px; }
+    }
   </style>
   <script src="../../../shared/schema-modal.js"></script>
   <script src="../../../shared/nav.js" defer></script>
@@ -730,6 +823,50 @@
       <a href="../../../markdown_renderer.html?file=4_Formula/certification/exam_and_case_study.md" class="btn-cta">
         <i class="fa-solid fa-file-signature"></i> Start the Exam
       </a>
+    </div>
+
+    <!-- 📊 Objective Coverage Stats: how many objectives are backed by
+         student-facing content scanned across the Supabase tables -->
+    <div class="objmap-section" id="coverageStatsSection" style="display:none">
+      <div class="objmap-heading">📊 Objective Coverage</div>
+      <div class="objmap-sub">
+        Overall coverage of Learning Objectives &amp; Key Results by student-facing
+        content (IVQ questions, script sentences, generated images, research assets)
+        linked via <code style="background:rgba(255,255,255,0.08);padding:1px 5px;border-radius:4px">objective_links</code>.
+      </div>
+
+      <div class="cov-grid">
+        <div class="cov-card">
+          <div class="cov-ring" id="covRing">
+            <div class="cov-ring-num" id="covPct">0%</div>
+          </div>
+          <div class="cov-card-label">Overall coverage</div>
+          <div class="cov-card-sub" id="covOverallSub">0 / 0 covered</div>
+        </div>
+        <div class="cov-card">
+          <div class="cov-big" id="covObjPct">0%</div>
+          <div class="cov-card-label">🎯 Objectives</div>
+          <div class="cov-card-sub" id="covObjSub">0 / 0 covered</div>
+          <div class="cov-bar"><div class="cov-bar-fill" id="covObjBar" style="width:0%"></div></div>
+        </div>
+        <div class="cov-card">
+          <div class="cov-big" id="covKrPct">0%</div>
+          <div class="cov-card-label">🔑 Key Results</div>
+          <div class="cov-card-sub" id="covKrSub">0 / 0 covered</div>
+          <div class="cov-bar"><div class="cov-bar-fill green" id="covKrBar" style="width:0%"></div></div>
+        </div>
+      </div>
+
+      <div class="cov-section-label">📦 Student-facing content inventory (Supabase scan)</div>
+      <div class="cov-inventory" id="covInventory"></div>
+
+      <div class="cov-section-label">🧩 Objectives covered by content type</div>
+      <div class="cov-bytype" id="covByType"></div>
+
+      <div class="cov-gaps" id="covGaps" style="display:none">
+        <div class="cov-section-label" style="color:#f59e0b;">⚠️ Uncovered (no linked content yet)</div>
+        <div id="covGapsList"></div>
+      </div>
     </div>
 
     <!-- 🔗 Objective → Asset Map: how Learning Objectives & Key Results
@@ -987,6 +1124,7 @@ END $$;`);
 
         // 🔗 Render the Objective → Asset map at the bottom of the page
         renderObjectiveMap(okrRes.data || [], objLinksRes.data || []);
+        renderCoverageStats(okrRes.data || [], objLinksRes.data || []);
 
         // Auto-expand module and optionally scroll to a specific video from URL params ?module=N&video=V
         const _qp = new URLSearchParams(location.search);
@@ -1211,6 +1349,113 @@ END $$;`);
         }).join('');
 
       section.style.display = 'block';
+    }
+
+    // ── 📊 Objective Coverage Stats ────────────────────────────
+    // Student-facing object types tracked by objective_links, and the
+    // Supabase table whose total we report as the content inventory.
+    const STUDENT_FACING = [
+      { type: 'ivq',      table: 'ivq_questions',         icon: '❓', label: 'IVQ Questions' },
+      { type: 'sentence', table: 'sentences',             icon: '✍️', label: 'Script Sentences' },
+      { type: 'image',    table: 'generated_images',      icon: '🖼', label: 'Generated Images' },
+      { type: 'video',    table: 'course_videos',         icon: '📹', label: 'Course Videos' },
+      { type: 'scene',    table: 'scenes',                icon: '🎬', label: 'Scenes' },
+      { type: 'research', table: 'research_relationships', icon: '🔬', label: 'Research Links' }
+    ];
+
+    async function scanInventory() {
+      const out = {};
+      await Promise.all(STUDENT_FACING.map(async s => {
+        try {
+          const { count, error } = await client.from(s.table).select('*', { count: 'exact', head: true });
+          out[s.type] = error ? null : (count || 0);
+        } catch (e) { out[s.type] = null; }
+      }));
+      return out;
+    }
+
+    function setRing(pct) {
+      const ring = document.getElementById('covRing');
+      if (ring) ring.style.background =
+        `conic-gradient(var(--accent-violet) ${pct * 3.6}deg, rgba(255,255,255,0.06) ${pct * 3.6}deg)`;
+    }
+
+    async function renderCoverageStats(outlineRows, links) {
+      const section = document.getElementById('coverageStatsSection');
+      if (!section) return;
+
+      const objectives = outlineRows.filter(r => r.content_type === 'objective');
+      const keyResults = outlineRows.filter(r => r.content_type === 'key_result');
+      if (objectives.length === 0 && keyResults.length === 0) { section.style.display = 'none'; return; }
+
+      const linkedIds = new Set(links.map(l => l.outline_id));
+      const covered = rows => rows.filter(r => linkedIds.has(r.id)).length;
+
+      const objCov = covered(objectives), krCov = covered(keyResults);
+      const totalRows = objectives.length + keyResults.length;
+      const totalCov  = objCov + krCov;
+      const pctOf = (n, d) => d ? Math.round((n / d) * 100) : 0;
+
+      const overallPct = pctOf(totalCov, totalRows);
+      const objPct = pctOf(objCov, objectives.length);
+      const krPct  = pctOf(krCov, keyResults.length);
+
+      document.getElementById('covPct').textContent      = overallPct + '%';
+      document.getElementById('covOverallSub').textContent = `${totalCov} / ${totalRows} covered`;
+      document.getElementById('covObjPct').textContent   = objPct + '%';
+      document.getElementById('covObjSub').textContent   = `${objCov} / ${objectives.length} covered`;
+      document.getElementById('covKrPct').textContent    = krPct + '%';
+      document.getElementById('covKrSub').textContent    = `${krCov} / ${keyResults.length} covered`;
+      setRing(overallPct);
+      requestAnimationFrame(() => {
+        document.getElementById('covObjBar').style.width = objPct + '%';
+        document.getElementById('covKrBar').style.width  = krPct + '%';
+      });
+
+      // Objectives/KRs covered per content type (distinct outline rows per type)
+      const byTypeRows = {};
+      links.forEach(l => {
+        (byTypeRows[l.object_type] = byTypeRows[l.object_type] || new Set()).add(l.outline_id);
+      });
+      const byTypeEl = document.getElementById('covByType');
+      byTypeEl.innerHTML = STUDENT_FACING.map(s => {
+        const n = byTypeRows[s.type] ? byTypeRows[s.type].size : 0;
+        const p = pctOf(n, totalRows);
+        return `
+          <div class="cov-bytype-row">
+            <div class="cov-bytype-name">${s.icon} ${s.label}</div>
+            <div class="cov-bytype-track"><div class="cov-bytype-fill" style="width:${p}%"></div></div>
+            <div class="cov-bytype-val">${n} / ${totalRows}</div>
+          </div>`;
+      }).join('');
+
+      // Gaps — objectives/KRs with zero linked content
+      const gaps = [...objectives, ...keyResults]
+        .filter(r => !linkedIds.has(r.id))
+        .sort((a, b) => (a.module_number - b.module_number) || (a.sort_order - b.sort_order));
+      const gapsWrap = document.getElementById('covGaps');
+      if (gaps.length) {
+        document.getElementById('covGapsList').innerHTML = gaps.map(r => {
+          const tag = r.content_type === 'objective' ? '🎯' : '🔑';
+          return `<div class="cov-gap-item"><span class="cov-gap-mod">M${r.module_number}</span>${tag} ${escapeHtml(r.content)}</div>`;
+        }).join('');
+        gapsWrap.style.display = 'block';
+      } else {
+        gapsWrap.style.display = 'none';
+      }
+
+      section.style.display = 'block';
+
+      // Content inventory — scan student-facing Supabase tables for totals
+      const invEl = document.getElementById('covInventory');
+      invEl.innerHTML = STUDENT_FACING.map(s =>
+        `<div class="cov-inv-item"><span class="cov-inv-num" id="inv-${s.type}">…</span><span class="cov-inv-label">${s.icon} ${s.label}</span></div>`
+      ).join('');
+      const inv = await scanInventory();
+      STUDENT_FACING.forEach(s => {
+        const el = document.getElementById('inv-' + s.type);
+        if (el) el.textContent = inv[s.type] == null ? '—' : inv[s.type];
+      });
     }
 
     let allRelationships = [];
