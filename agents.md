@@ -26,6 +26,11 @@ This document defines how AI agents interact with the **Claude AI Certification 
 
 ## 📅 Agent Activity Log
 
+### 2026-07-01
+- **Task:** Add Axiom page view logging when pages load, covering all pages with full URL.
+- **Action:** Added `reportPageView()` to `shared/nav.js` (which is loaded on all pages). It posts a page view event with `level: 'info'`, `url`, and `path` to the existing `/api/errors` backend, which forwards it to Axiom. Called it in the `init()` sequence so it triggers reliably on `DOMContentLoaded`.
+- **Status:** IMPLEMENTED, COMMITTED, PUSHED.
+
 ### 2026-06-29
 - **Task:** Create feedback session analysis page and replace old recordings link.
 - **Action:** Created `5_Symbols/production/prod/feedback_session_analysis.html` embedding the provided Word Doc and Google Drive video. Removed the old Google Drive recordings folder link and replaced it with this new page across `navigation_config.json`, `index.html`, and `markdown_renderer.html`.

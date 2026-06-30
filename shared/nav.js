@@ -812,6 +812,23 @@
     } catch (_) {}
   }
 
+  /* ---- Client-side page view reporter → POST /api/errors → Axiom ----------- */
+  function reportPageView() {
+    try {
+      fetch('/api/errors', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: 'Page view',
+          level: 'info',
+          url: window.location.href,
+          path: window.location.pathname,
+          userAgent: navigator.userAgent
+        })
+      }).catch(function () {});
+    } catch (_) {}
+  }
+
   var _prevOnError = window.onerror;
   window.onerror = function (msg, src, line, col, err) {
     reportError(msg, src, line, col, err);
@@ -1006,6 +1023,7 @@
 
   function init() {
     showLiveSiteBanner();
+    reportPageView();
     if (document.getElementById('site-nav')) return;
     var preloaded = window.__NAV_CONFIG__;
     if (preloaded && preloaded.projectMenu) {
