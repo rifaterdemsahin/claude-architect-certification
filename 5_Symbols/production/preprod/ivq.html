@@ -24,6 +24,12 @@
     .config-panel { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px 24px; margin-bottom: 28px; }
     #conn-status { font-size: 0.85rem; }
 
+    /* Dashboard */
+    .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 28px; }
+    .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; }
+    .stat-value { font-family: var(--font-h); font-size: 2.2rem; font-weight: 800; color: var(--primary); line-height: 1.1; margin-bottom: 4px; }
+    .stat-label { font-size: 0.85rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+
     /* Buttons */
     .btn { padding: 9px 18px; border-radius: 10px; font-weight: 700; border: none; cursor: pointer; font-size: 0.88rem; transition: all 0.2s; font-family: var(--font-b); }
     .btn-primary { background: var(--primary); color: #fff; }
@@ -123,6 +129,13 @@
   <div class="container">
     <h1>🎯 IVQ Manager</h1>
     <p class="subtitle">In-Video Questions — link quiz questions to video timestamps with explanations</p>
+
+    <!-- Dashboard -->
+    <div class="dashboard-grid" id="stats-dashboard">
+      <div class="stat-card"><div class="stat-value" id="stat-q">-</div><div class="stat-label">Total Questions</div></div>
+      <div class="stat-card"><div class="stat-value" id="stat-v">-</div><div class="stat-label">Videos w/ IVQs</div></div>
+      <div class="stat-card"><div class="stat-value" id="stat-c">-</div><div class="stat-label">Sentence Coverage</div></div>
+    </div>
 
     <div class="config-panel" style="background: rgba(139,92,246,0.1); border-color: rgba(139,92,246,0.4);">
       <h3 style="margin-bottom: 8px; font-family: var(--font-h);">🎓 Producer Goal: Content to Exam Mapping</h3>
@@ -281,11 +294,23 @@ CREATE POLICY "allow_all_ivq" ON ivq_questions FOR ALL USING (true) WITH CHECK (
           if (!ivqMap[q.video_id]) ivqMap[q.video_id] = [];
           ivqMap[q.video_id].push(q);
         }
+        updateDashboard(questions);
         renderVideoList();
       } catch(e) { toast('Load error: ' + e.message, 'error'); renderVideoList(); }
     }
 
     // ── Render ────────────────────────────────────────────────────────────────
+    function updateDashboard(questions) {
+      const qCount = questions.length;
+      const vCount = Object.keys(ivqMap).length;
+      const linkedCount = questions.filter(q => q.sentence_id).length;
+      const coverage = qCount > 0 ? Math.round((linkedCount / qCount) * 100) : 0;
+      
+      document.getElementById('stat-q').textContent = qCount;
+      document.getElementById('stat-v').textContent = vCount;
+      document.getElementById('stat-c').textContent = coverage + '%';
+    }
+
     function renderVideoList() {
       const el = document.getElementById('video-list');
       if (!videos.length) {
