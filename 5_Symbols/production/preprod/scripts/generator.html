@@ -332,8 +332,6 @@
       <div class="btn-group">
         <button class="btn btn-secondary" onclick="previewPrompt()">🔍 Preview Prompt</button>
         <button class="btn btn-primary" id="btn-generate" onclick="generateScript()">🚀 Generate Script</button>
-        <button class="btn btn-primary" id="btn-convert" style="background: #8b5cf6;" onclick="convertToSentences()" disabled>🧠 Convert to Sentences</button>
-        <button class="btn btn-primary" id="btn-save" style="background: #10b981;" onclick="saveToSentences()" disabled>💾 Save to DB</button>
       </div>
 
       <div class="output-area" id="prompt-area" style="display: none; margin-bottom: 24px;">
@@ -346,12 +344,14 @@
         <button class="copy-btn" onclick="copyToClipboard()">📋 Copy</button>
         <textarea id="script-output" placeholder="Generated script will appear here..."></textarea>
         <div id="copy-status" class="success-msg">✅ Copied to clipboard!</div>
+        <button class="btn btn-primary" id="btn-convert" style="background: #8b5cf6; margin-top: 16px; width: 100%; display: none;" onclick="convertToSentences()">🧠 Convert to Sentences</button>
         <div id="convert-status" class="success-msg" style="color: #3b82f6;"></div>
       </div>
 
       <div class="output-area" id="json-area" style="display: none;">
         <label style="display: block; margin-bottom: 8px; font-size: 0.85rem; font-weight: 700; text-transform: uppercase;">Sentence Table Format (JSON):</label>
         <textarea id="json-output" placeholder="JSON structure will appear here..."></textarea>
+        <button class="btn btn-primary" id="btn-save" style="background: #10b981; margin-top: 16px; width: 100%; display: none;" onclick="saveToSentences()">💾 Save to DB</button>
         <div id="save-status" class="success-msg" style="color: #3b82f6;"></div>
       </div>
     </div>
@@ -467,7 +467,11 @@ See you in Module [NEXT MODULE NUMBER].`
 
     function checkConvertEnable() {
       const hasScript = document.getElementById('script-output').value.trim().length > 0;
-      document.getElementById('btn-convert').disabled = !hasScript;
+      const btn = document.getElementById('btn-convert');
+      if (btn) {
+        btn.style.display = hasScript ? 'block' : 'none';
+        btn.disabled = !hasScript;
+      }
     }
 
     function checkSaveEnable() {
@@ -475,7 +479,11 @@ See you in Module [NEXT MODULE NUMBER].`
       const vidId = document.getElementById('video-select').value;
       const hasJson = document.getElementById('json-output') ? document.getElementById('json-output').value.trim().length > 0 : false;
       
-      document.getElementById('btn-save').disabled = !(modId && vidId && hasJson);
+      const btn = document.getElementById('btn-save');
+      if (btn) {
+        btn.disabled = !(modId && vidId && hasJson);
+        btn.style.display = hasJson ? 'block' : 'none';
+      }
     }
 
     function showErrorModal(message) {
@@ -593,11 +601,12 @@ ${text}`;
         document.getElementById('json-area').style.display = 'block';
         
         // Attempt to pretty-print if it's valid JSON, otherwise just show raw
+        let cleanJsonText = (orData.content || '').replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
         try {
-          const parsed = JSON.parse(orData.content);
+          const parsed = JSON.parse(cleanJsonText);
           document.getElementById('json-output').value = JSON.stringify(parsed, null, 2);
         } catch(e) {
-          document.getElementById('json-output').value = orData.content;
+          document.getElementById('json-output').value = cleanJsonText;
         }
 
         statusEl.textContent = '✅ Converted successfully!';
