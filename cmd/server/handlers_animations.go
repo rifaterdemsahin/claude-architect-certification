@@ -183,21 +183,6 @@ func findAnimationType(slug string) *AnimationTypeMeta {
 	return nil
 }
 
-func suggestAnimationType(sentenceType string) string {
-	switch strings.ToLower(strings.TrimSpace(sentenceType)) {
-	case "hook", "heading", "title":
-		return "concept_reveal"
-	case "objective", "takeaway", "insight":
-		return "callout_zoom"
-	case "step", "transition":
-		return "process_steps"
-	case "cue":
-		return "code_typing"
-	default:
-		return "concept_reveal"
-	}
-}
-
 func animationDefaultProps(animType, sentence, sentenceType, moduleTitle, videoTitle string) map[string]any {
 	base := map[string]any{
 		"title":              clampLen(sentence, 64),
@@ -844,57 +829,16 @@ func animationRunpodGenerateCodeHandler(cfg config) http.HandlerFunc {
 			return
 		}
 
-		jobID := rpRun.ID
-		deadline := time.Now().Add(120 * time.Second)
-		for time.Now().Before(deadline) {
-			pollCtx, pollCancel := context.WithTimeout(r.Context(), 30*time.Second)
-			statusURL := "https://api.runpod.ai/v2/" + endpointID + "/status/" + jobID
-			preq, _ := http.NewRequestWithContext(pollCtx, http.MethodGet, statusURL, nil)
-			preq.Header.Set("Authorization", "Bearer "+apiKey)
-			presp, perr := http.DefaultClient.Do(preq)
-			if perr != nil {
-				pollCancel()
-				time.Sleep(3 * time.Second)
-				continue
-			}
-			pb, _ := io.ReadAll(presp.Body)
-			presp.Body.Close()
-			pollCancel()
-			var st struct {
-				Status string `json:"status"`
-				Output any    `json:"output"`
-				Error  string `json:"error"`
-			}
-			_ = json.Unmarshal(pb, &st)
-			status := strings.ToUpper(strings.TrimSpace(st.Status))
-			switch status {
-			case "COMPLETED":
-				code := strings.TrimSpace(runPodLLMText(st.Output))
-				if code == "" {
-					http.Error(w, `{"error":"RunPod completed but returned no generated text"}`, http.StatusBadGateway)
-					return
-				}
-				json.NewEncoder(w).Encode(map[string]any{
-					"animationType": meta.Slug,
-					"label":         meta.Label,
-					"emoji":         meta.Emoji,
-					"prompt":        prompt,
-					"inputProps":    props,
-					"code":          code,
-					"jobId":         jobID,
-					"endpoint":      endpointID,
-				})
-				return
-			case "FAILED", "CANCELLED", "TIMED_OUT":
-				errMsg := st.Error
-				if errMsg == "" {
-					errMsg = "RunPod LLM job " + strings.ToLower(status)
-				}
-				http.Error(w, fmt.Sprintf(`{"error":"RunPod LLM failed: %s"}`, errMsg), http.StatusBadGateway)
-				return
-			}
-			time.Sleep(3 * time.Second)
-		}
-		http.Error(w, `{"error":"RunPod LLM timed out (120s)"}`, http.StatusGatewayTimeout)
+		w.WriteHeader(http.StatusAccepted)
+		json.NewEncoder(w).Encode(map[string]any{
+			"animationType": meta.Slug,
+			"label":         meta.Label,
+			"emoji":         meta.Emoji,
+			"prompt":        prompt,
+			"inputProps":    props,
+			"jobId":         rpRun.ID,
+			"endpoint":      endpointID,
+			"status":        rpRun.Status,
+		})
 	}
 }

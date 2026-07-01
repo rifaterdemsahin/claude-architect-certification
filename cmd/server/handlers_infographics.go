@@ -135,6 +135,9 @@ func infographicSaveHandler(cfg config) http.HandlerFunc {
 					log.Printf("azure infographic upload failed: %v", err)
 					blobName = ""
 				}
+				if uresp != nil && uresp.Body != nil {
+					uresp.Body.Close()
+				}
 			} else {
 				log.Printf("sas error for infographic: %v", err)
 				blobName = ""

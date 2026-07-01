@@ -106,7 +106,7 @@ func adminLoginHandler(cfg config) http.HandlerFunc {
 			adminPass = cfg.getSecret("AdminPassword")
 		}
 		if adminPass == "" {
-			adminPass = "admin"
+			log.Fatalf("no admin password configured: set ClaudeCertificateSiteAdminPassword in Azure Key Vault or env")
 		}
 
 		if req.Password != adminPass {
@@ -121,8 +121,9 @@ func adminLoginHandler(cfg config) http.HandlerFunc {
 			Value:    "true",
 			Path:     "/",
 			MaxAge:   3600 * 24,
-			HttpOnly: false,
-			SameSite: http.SameSiteLaxMode,
+			HttpOnly: true,
+			Secure:   true,
+			SameSite: http.SameSiteStrictMode,
 		})
 
 		w.Header().Set("Content-Type", "application/json")
