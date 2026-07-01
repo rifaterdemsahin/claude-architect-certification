@@ -456,6 +456,13 @@
           ]},
           { group: true, label: '🗂️ Repos', children: [
             { label: '🗂️ Video Production Repos', url: '5_Symbols/production/postprod/github_repos.html', description: 'All rifaterdemsahin GitHub repos related to video production — kokoro, fal.ai, remotion, greenscreen, etc.' }
+          ]},
+          { group: true, label: '🤝 Outreach & Social', children: [
+            { label: '🤝 LinkedIn Messaging', url: 'https://www.linkedin.com/messaging/' }
+          ]},
+          { group: true, label: '🤖 AI Assistants', children: [
+            { label: '🤖 Claude Cowork', url: 'https://claude.ai/' },
+            { label: '💻 OpenInterpreter', url: 'https://openinterpreter.com/' }
           ]}
         ]
       }
