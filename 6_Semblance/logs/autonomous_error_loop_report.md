@@ -6,6 +6,34 @@
 
 ---
 
+## 📅 2026-07-01 — Manual verify+close (agent blocked by 2 infra gaps)
+
+### 🎯 Objective
+Run the fix agent (Stage 2) against the open `axiom-error` backlog.
+
+### 🔍 What happened
+- **Stage 1 (Axiom→issues):** first pass printed `Filed 6 new` but actually created nothing — `Missing GITHUB_TOKEN or GITHUB_REPOSITORY` (not in `.env`). Re-ran with `GITHUB_TOKEN=$(gh auth token)` + `GITHUB_REPOSITORY=rifaterdemsahin/claude-architect-certification` → deduped cleanly, `Filed 0 new · skipped 10 duplicate`. 5 issues were already **OPEN**: #28, #30, #31, #32, #33.
+- **Stage 2 (fix agent):** all 5 LLM fix calls failed with `Error asking OpenRouter (…): Expecting value: line 1 column 1 (char 0)`. Two compounding causes:
+  1. **`OPENROUTER_API_KEY` missing from `.env`.** Sourced on the fly from Azure Key Vault `dp-kv-deliverypilot` → secret `openrouter-api-key` (verified live: model replies "OK").
+  2. **Design flaw in `ask_openrouter_for_fix`.** The prompt tells the model to *"Read that exact file from the repo"* but **never passes the file contents** (the only `open()` in the script is the *write* path). So `claude-sonnet-4.6` emits prose ("I'll read the file… Let me fetch the file content…") and hits `finish_reason: "length"` at `max_tokens=4000`; `json.loads` then fails on prose → all 5 left open.
+
+### 🛠 Resolution (manual verify — the verdict the agent would have reached)
+All 5 errors **verified non-reproducing** in current source (local `HEAD 6938ea0` **+** live GitHub Pages deploy, 26,541 bytes):
+
+| 🏷 Issue | 🐛 Error | 🔎 Verdict | ✅ Outcome |
+|----------|---------|-----------|----------|
+| #30, #31 | `updateVideos is not defined` (:292 onchange) | function defined `:454`, **global scope** of plain inline `<script>`; block parses clean (`node --check`) local + deployed | `no-code-change` (stale/transient) |
+| #32, #33 | `checkSaveEnable is not defined` (:292/:303 onchange) | function defined `:477`, global scope; block parses clean local + deployed | `no-code-change` (stale/transient) |
+| #28 | `404 page not found at generateScript` (:508) | route `/api/scripts/openrouter` **registered** (`main.go:53`) → **HTTP 200** on Go backend; 404 only on **static GitHub Pages** (no `/api` host); already surfaced via `showErrorModal` | `no-code-change` (deployment-context) |
+
+**Result: 0 open `axiom-error` issues.** All 5 closed `not_planned` with `no-code-change` label + documented verify comment.
+
+### ⚠️ Gaps to fix (so the agent self-resolves next time)
+1. **`OPENROUTER_API_KEY` not in `.env`** — local runs silently fail. Either add to `.env` (gitignored, local-only) or always source from Key Vault. Verify the daily CI workflow secret `OPENROUTER_API_KEY` is set in GitHub.
+2. **`ask_openrouter_for_fix` prompt must include the file contents** (read the file + a window around the error line) and request a **scoped fix** (single function / diff) instead of "FULL corrected file contents" — the latter exceeds `max_tokens` for any non-trivial file, so the model can never comply. Until this is fixed the agent can only close already-fixed/third-party issues, never produce a real edit.
+
+---
+
 ## 📅 2026-06-27 — Hardening + same-day dedup + spec
 
 ### 🎯 Objective
