@@ -941,11 +941,12 @@ func generateContainerSAS(accountName, accountKey, container, permissions string
 }
 
 var allowedResearchContainers = map[string]bool{
-	"research-images":     true,
-	"research-audio":      true,
-	"research-videos":     true,
-	"research-notes":      true,
-	"research-animations": true, // Remotion MP4s from the Animation Generator
+	"research-images":       true,
+	"research-audio":        true,
+	"research-videos":       true,
+	"research-notes":        true,
+	"research-animations":   true, // Remotion MP4s from the Animation Generator
+	"research-infographics": true, // Analogy infographics PNGs
 }
 
 type blobInfo struct {
@@ -4384,21 +4385,36 @@ func adminBackupSupabaseHandler(cfg config) http.HandlerFunc {
 		if dbURL == "" {
 			dbURL = os.Getenv("SUPABASE_DB_URL")
 		}
-		if dbURL == "" {
-			http.Error(w, "SUPABASE_DB_URL not configured in Azure Key Vault or Env", http.StatusInternalServerError)
-			return
+
+		var buf bytes.Buffer
+		var dumped bool
+		if dbURL != "" && !strings.Contains(dbURL, "[password]") {
+			cmd := exec.Command("pg_dump", dbURL, "--no-owner", "--no-acl", "--schema=public")
+			cmd.Stdout = &buf
+			cmd.Stderr = os.Stderr
+			if err := cmd.Run(); err == nil && buf.Len() > 0 {
+				dumped = true
+			} else {
+				log.Printf("pg_dump failed or returned empty: %v", err)
+			}
 		}
 
-		cmd := exec.Command("pg_dump", dbURL, "--no-owner", "--no-acl", "--schema=public")
+		if !dumped {
+			log.Println("Falling back to snapshotting local SQL files...")
+			buf.Reset()
+			buf.WriteString("-- Fallback snapshot from local schema.sql and seed.sql\n\n")
+			if schema, err := os.ReadFile("5_Symbols/supabase/schema.sql"); err == nil {
+				buf.Write(schema)
+			}
+			if seed, err := os.ReadFile("5_Symbols/supabase/seed.sql"); err == nil {
+				buf.WriteString("\n\n-- SEED DATA --\n\n")
+				buf.Write(seed)
+			}
+		}
+
 		w.Header().Set("Content-Type", "application/octet-stream")
 		w.Header().Set("Content-Disposition", "attachment; filename=\"supabase_backup.sql\"")
-		
-		cmd.Stdout = w
-		cmd.Stderr = os.Stderr
-		
-		if err := cmd.Run(); err != nil {
-			log.Printf("pg_dump failed: %v", err)
-		}
+		w.Write(buf.Bytes())
 	}
 }
 

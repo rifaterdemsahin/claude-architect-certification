@@ -6,7 +6,11 @@ This document outlines the financial targets, subscriber metrics, OKRs, and cont
 
 ## 📊 Financial Model & Projections
 
-To focus on this operation full-time, Erdem requires a personal net income of **£5,000/month**. 
+### 🧭 Stage Distinction: Current vs. Full-Time Scaling
+*   **Discovery & Validation Stage (Current Course):** For the initial **Claude Architect Certification** masterclass, Erdem is in the customer discovery and validation stage. The financial target for this specific course is **£10,000 lifetime revenue**.
+*   **Customer Creation Stage (Full-Time Course Creator):** When Erdem stops contracting and transitions to creating **one course per month back-to-back**, the business target scales to **£15,000 gross/month** (approx. £13,000 net gross required after buffer calculations).
+
+To focus on this operation full-time in the customer creation stage, Erdem requires a personal net income of **£5,000/month**. 
 
 ### 1. 🇬🇧 The UK Tax & Personal Math
 *   **Target Net Personal Income:** £5,000 / month (£60,000 / year)

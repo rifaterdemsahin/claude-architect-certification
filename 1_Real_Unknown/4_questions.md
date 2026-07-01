@@ -11,22 +11,21 @@
 | **Q1:** What is the preferred hosting platform? | Human / Dev | `2_Environment` | GitHub Pages via GitHub Actions |
 | **Q2:** How will user authentication be handled? | Claude / Gemini | `4_Formula` | YouTube Join button handles membership + payment; no custom auth needed |
 | **Q3:** What are the performance metrics to meet? | Human | `1_Real_Unknown` | YouTube Analytics: video retention rate is the primary KPI. Target: sustained retention indicating course value |
-| **Q4:** What is the break-even point for Erdem? | Human | `1_Real_Unknown` | **£5,000 net/month** to replace contracting income. At ~50% tax, gross must be **£10,000/month**. With life buffer, realistic target is **£15,000 gross/month** |
+| **Q4:** What is the break-even point for Erdem? | Human | `1_Real_Unknown` | **£10,000 lifetime revenue** from this course during the discovery & validation stage. When Erdem stops contracting to build one course a month back-to-back (customer creation stage), the target is **£15,000 gross/month** |
 | **Q5:** What payment/monetisation system will be used? | Human | `2_Environment` | YouTube Join button + YouTube membership tiers. No custom payment gateway needed |
 | **Q6:** How many product sections are there? | Human | `1_Real_Unknown` | **Two sections:** (1) **Content** — Claude AI Architect Certification Course; (2) **Delivery Pilot** — the debug/framework system |
 | **Q7:** How is the system tested? | Claude / CI | `7_Testing_Known` | GitHub Actions on every push; post-deployment link checks; active GitHub Issues used as failure reports |
 
 ---
 
-## 💰 Break-Even Model
+## 💰 Break-Even & Revenue Model
 
-| Level | Amount (GBP/month) |
-| :--- | :--- |
-| Net income target (replace contracting) | £5,000 |
-| Gross required (50% tax rate) | £10,000 |
-| Realistic target with life buffer | **£15,000** |
+| Stage / Level | Amount | Description |
+| :--- | :--- | :--- |
+| **Discovery & Validation Stage (Current Course)** | **£10,000** | Lifetime revenue target from the Claude Architect Certification course |
+| **Customer Creation Stage (Full-time course creator)** | **£15,000 / month** | Required gross monthly revenue when Erdem stops contracting to build 1 course/month back-to-back |
 
-YouTube membership pricing and subscriber count needed to hit £15k gross will be tracked in `4_Formula/revenue_model.md`.
+YouTube membership pricing and subscriber count needed to hit these targets will be tracked in `4_Formula/revenue_model.md`.
 
 ---
 

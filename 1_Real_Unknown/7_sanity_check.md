@@ -50,7 +50,7 @@
 | Q1: Hosting platform | ✅ Resolved | GitHub Pages via GitHub Actions |
 | Q2: User authentication | ✅ Resolved | YouTube Join button — no custom auth |
 | Q3: Performance metrics | ✅ Resolved | YouTube Analytics — retention ≥ 50% |
-| Q4: Break-even point | ✅ Resolved | £15,000 gross/month |
+| Q4: Break-even point | ✅ Resolved | £10,000 lifetime revenue (this course); £15,000 gross/month (customer creation stage) |
 | Q5: Payment/monetisation | ✅ Resolved | YouTube Join button + membership tiers |
 | Q6: Product sections | ✅ Resolved | Two sections: Content + Delivery Pilot |
 | Q7: System testing | ✅ Resolved | GitHub Actions + link checks + GitHub Issues |

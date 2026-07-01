@@ -4,82 +4,255 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manual Backup | Claude Architect Certification</title>
-    <link rel="stylesheet" href="../../../../index.css">
+    <!-- Use Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../../../shared/nav.css">
     <style>
-        .backup-container {
-            max-width: 800px;
-            margin: 40px auto;
-            padding: 20px;
-            background: rgba(20, 20, 25, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            backdrop-filter: blur(10px);
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #09090e 0%, #1a1a2e 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
+
+        .backup-container {
+            max-width: 900px;
+            margin: 100px auto 40px; /* Offset for fixed nav */
+            padding: 40px;
+            background: rgba(20, 20, 30, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+            animation: fadeIn 0.8s ease-out forwards;
+            width: 90%;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .backup-header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 50px;
         }
+
+        .backup-header h2 {
+            font-size: 2.8em;
+            margin: 0 0 15px 0;
+            font-weight: 800;
+            background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 10px rgba(79, 172, 254, 0.2);
+            letter-spacing: -1px;
+        }
+
+        .backup-header p {
+            color: #a0a0b0;
+            font-size: 1.1em;
+            line-height: 1.6;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
         .backup-cards {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
         }
+
         .backup-card {
-            background: rgba(30, 30, 40, 0.8);
-            padding: 20px;
-            border-radius: 8px;
+            background: rgba(30, 30, 45, 0.4);
+            padding: 30px;
+            border-radius: 16px;
             border: 1px solid rgba(255, 255, 255, 0.05);
             text-align: center;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
+
+        .backup-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+            transition: left 0.5s ease;
+            pointer-events: none;
+        }
+
+        .backup-card:hover::before {
+            left: 100%;
+        }
+
+        .backup-card:hover {
+            transform: translateY(-5px);
+            background: rgba(40, 40, 60, 0.6);
+            border-color: rgba(79, 172, 254, 0.3);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(79, 172, 254, 0.1);
+        }
+
         .backup-card h3 {
-            margin-top: 0;
-            color: #4facfe;
+            margin: 0 0 15px 0;
+            color: #ffffff;
+            font-size: 1.5em;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
+
         .backup-card p {
-            color: #a0a0b0;
-            font-size: 0.9em;
-            margin-bottom: 20px;
-            line-height: 1.4;
+            color: #8c8c9a;
+            font-size: 1em;
+            margin-bottom: 25px;
+            line-height: 1.5;
+            flex-grow: 1;
         }
+
         .backup-btn {
             background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
             color: #000;
             border: none;
-            padding: 12px 24px;
-            border-radius: 6px;
-            font-weight: 600;
+            padding: 15px 24px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1em;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
             width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-family: 'Outfit', sans-serif;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
         }
+
+        .backup-btn::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            opacity: 0;
+            z-index: -1;
+            transition: opacity 0.3s ease;
+        }
+
+        .backup-btn:hover::after {
+            opacity: 1;
+        }
+
         .backup-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(79, 172, 254, 0.4);
+            box-shadow: 0 8px 20px rgba(79, 172, 254, 0.4);
+            color: #fff;
         }
+
         .backup-btn:disabled {
-            opacity: 0.6;
+            background: rgba(255, 255, 255, 0.1);
+            color: #666;
             cursor: not-allowed;
             transform: none;
+            box-shadow: none;
         }
-        .log-container {
-            margin-top: 30px;
-            background: #0d0d12;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 0.85em;
-            color: #00ff00;
-            height: 200px;
-            overflow-y: auto;
+        
+        .backup-btn:disabled::after {
             display: none;
         }
-        .log-line { margin: 4px 0; }
-        .log-error { color: #ff4444; }
-        .log-success { color: #00ff00; }
+
+        .log-container {
+            margin-top: 40px;
+            background: rgba(10, 10, 15, 0.8);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9em;
+            height: 250px;
+            overflow-y: auto;
+            display: none;
+            box-shadow: inset 0 5px 15px rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .log-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .log-container::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+        
+        .log-container::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+        
+        .log-container::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .log-line { margin: 6px 0; padding-left: 10px; border-left: 2px solid transparent; }
+        .log-info { color: #8ab4f8; border-left-color: #8ab4f8; }
+        .log-error { color: #ff5252; border-left-color: #ff5252; }
+        .log-success { color: #69f0ae; border-left-color: #69f0ae; }
+        
+        /* Admin Gate */
+        body:not(.is-admin) .backup-container {
+            display: none;
+        }
+        body.is-admin .login-prompt {
+            display: none;
+        }
+        .login-prompt {
+            text-align: center;
+            margin-top: 150px;
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+        .login-prompt h2 {
+            font-size: 2.2em;
+            margin-bottom: 20px;
+        }
+        .login-prompt a {
+            display: inline-block;
+            margin-top: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.2s;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .login-prompt a:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
     </style>
 </head>
 <body>
+    <div class="login-prompt">
+        <h2>🔒 Admin Access Required</h2>
+        <p>Please sign in to view the manual backup hub.</p>
+        <a href="#" onclick="document.getElementById('site-nav-admin-signin')?.click(); return false;">Sign In</a>
+    </div>
+
     <div class="backup-container">
         <div class="backup-header">
             <h2>📦 Manual Backup Hub</h2>
@@ -90,13 +263,27 @@
             <div class="backup-card">
                 <h3>🗄️ Supabase Backup</h3>
                 <p>Downloads a full PostgreSQL dump of the Supabase database. Uses credentials from Azure Key Vault.</p>
-                <button class="backup-btn" id="btnBackupSupabase" onclick="triggerBackup('supabase')">Download DB Backup</button>
+                <button class="backup-btn" id="btnBackupSupabase" onclick="triggerBackup('supabase')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Download DB Backup
+                </button>
             </div>
             
             <div class="backup-card">
                 <h3>🔐 Azure Key Vault Backup</h3>
                 <p>Downloads a JSON snapshot of the current environment and configuration secrets from Azure.</p>
-                <button class="backup-btn" id="btnBackupAzure" onclick="triggerBackup('azure')">Download Config Backup</button>
+                <button class="backup-btn" id="btnBackupAzure" onclick="triggerBackup('azure')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Download Config
+                </button>
             </div>
         </div>
 

@@ -1,5 +1,19 @@
 # LLM Thinking Log
 
+## 2026-07-01 — 🖼️ Research Images Page Enhancement (Last Uploaded, Sort, and Note Adding)
+
+### 🎯 Objective
+Update the Research Images page (`5_Symbols/production/preprod/research/images.html`) to:
+1. **Highlight the Last Uploaded Image**: Add a dedicated spotlight card at the top displaying the newest image uploaded to Azure Blob Storage, and default the gallery sorting to newest first.
+2. **Sort Feature**: Implement a versatile sorting control allowing users to order the image gallery by Upload Date (Newest/Oldest), Name (A-Z/Z-A), or File Size (Largest/Smallest).
+3. **Note Adding Feature**: Integrate editable, persistent image notes/descriptions backed by Supabase (`research_assets.description` with PostgREST upsert) and mirrored in `localStorage`, consistent with the footage mapping description pattern.
+
+### 🧭 Architecture & Design Choices
+- **Last Uploaded Spotlight**: Analyzes the `lastModified` timestamps from `/api/research/files` to identify the most recently uploaded image, presenting it in a prominent glassmorphism showcase card with preview, metadata, time-ago formatting, and immediate action buttons.
+- **Client-side Sorting**: Caches files retrieved from the backend in `allLoadedFiles` and re-renders the grid responsively whenever the user changes the sort criteria via `#sort-select`.
+- **Persistent Notes via Supabase**: Leverages the `description` column on `research_assets` (`UNIQUE(container, item_name)`) for cross-device persistence, mirroring locally to `localStorage` (`research_descriptions`) for offline resilience.
+- **Lightbox Integration**: Enhances the modal image viewer (`openLightbox`) to display the image note inside a styled caption badge.
+
 ## 2026-07-01 — ⚖️ Analogy Helper Page (Infographic Generator)
 
 ### 🎯 Objective

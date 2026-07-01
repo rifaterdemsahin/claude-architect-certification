@@ -25,12 +25,14 @@
 
 ## 💰 3. Financial & Revenue Model Check
 
-- **Break-Even Target:** £15,000 gross/month.
+- **Course Lifetime Revenue Target:** £10,000 lifetime revenue expected from this specific course (Claude Architect Certification).
+- **Full-Time Break-Even Target:** £15,000 gross/month. This applies when Erdem stops contracting and moves to creating one course a month back-to-back (customer creation stage).
+- **Current Stage:** Discovery and validation stage (building the Claude Architect course).
 - **Monetization Strategy:** YouTube Join button and membership tiers.
   - Module 1 offered for free to build the funnel.
   - $10/month membership for access to advanced modules and guaranteed 10x ROI for the $100 certification.
 - **Infrastructure Costs:** Minimized using free tiers (GitHub Pages, Fly.io Hobby) and pay-per-operation services (Azure Key Vault).
-- **Sanity Check:** ✅ The low-overhead operational model supports the revenue goals without introducing high enterprise cloud spend risks.
+- **Sanity Check:** ✅ The low-overhead operational model supports discovery and validation without financial strain, setting up a clear path toward the £10,000 course lifetime target and future full-time £15,000 gross/month scaling.
 
 ---
 

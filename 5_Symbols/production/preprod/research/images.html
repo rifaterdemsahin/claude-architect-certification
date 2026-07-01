@@ -112,7 +112,31 @@
     <div class="progress-bar-track"><div class="progress-bar-fill" id="progress-fill"></div></div>
   </div>
 
-  <div class="section-title">🗂 Uploaded Images <span id="count" style="color:var(--muted);font-size:0.85rem;font-weight:400"></span></div>
+  <!-- Last Uploaded Spotlight Section -->
+  <div id="last-uploaded-wrap" style="display:none; margin-bottom: 32px;">
+    <div style="font-family: var(--font-h); font-size: 1.15rem; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 10px;">
+      <span>✨ Last Uploaded Image</span>
+      <span style="font-size: 0.72rem; background: rgba(16,185,129,0.15); color: var(--green); border: 1px solid rgba(16,185,129,0.3); padding: 3px 10px; border-radius: 999px; font-family: var(--font-b); font-weight: 700; letter-spacing: 0.02em;">Latest in Storage</span>
+    </div>
+    <div id="last-uploaded-card" style="background: linear-gradient(135deg, rgba(139,92,246,0.15) 0%, rgba(17,24,39,0.95) 100%); border: 1px solid rgba(139,92,246,0.4); border-radius: 18px; padding: 20px; box-shadow: 0 12px 36px rgba(0,0,0,0.4); display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap; position: relative; overflow: hidden; transition: all 0.3s ease;">
+      <!-- Rendered dynamically by renderLastUploaded() -->
+    </div>
+  </div>
+
+  <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 18px;">
+    <div class="section-title" style="margin-bottom: 0;">🗂 Uploaded Images <span id="count" style="color:var(--muted);font-size:0.85rem;font-weight:400"></span></div>
+    <div class="sort-controls" style="display: flex; align-items: center; gap: 8px;">
+      <label for="sort-select" style="font-size: 0.82rem; color: var(--muted); font-weight: 600;">⇄ Sort by:</label>
+      <select id="sort-select" onchange="applySort()" style="background: rgba(255,255,255,0.06); border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; color: var(--text); font-size: 0.82rem; font-weight: 600; outline: none; cursor: pointer; transition: border-color 0.2s;">
+        <option value="newest">📅 Upload Date: Newest First</option>
+        <option value="oldest">📅 Upload Date: Oldest First</option>
+        <option value="name_asc">🔤 Name: A to Z</option>
+        <option value="name_desc">🔤 Name: Z to A</option>
+        <option value="size_desc">📏 Size: Largest First</option>
+        <option value="size_asc">📏 Size: Smallest First</option>
+      </select>
+    </div>
+  </div>
   <div class="gallery" id="gallery"><div class="empty-state">Loading…</div></div>
 </div>
 
@@ -152,58 +176,170 @@ function setStatus(ok) {
   el.textContent = ok ? '🟢 Connected to Azure Storage — research-images' : '🔴 Azure Storage unavailable';
 }
 
+let allLoadedFiles = [];
+let allThumbSet = new Set();
+
+function formatTimeAgo(dateStr) {
+  if (!dateStr) return 'Unknown time';
+  const now = new Date();
+  const date = new Date(dateStr);
+  const diffSec = Math.floor((now - date) / 1000);
+  if (isNaN(diffSec)) return dateStr;
+  if (diffSec < 60) return 'Just now';
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) return `${diffMin} min${diffMin > 1 ? 's' : ''} ago`;
+  const diffHour = Math.floor(diffMin / 60);
+  if (diffHour < 24) return `${diffHour} hr${diffHour > 1 ? 's' : ''} ago`;
+  const diffDay = Math.floor(diffHour / 24);
+  if (diffDay < 30) return `${diffDay} day${diffDay > 1 ? 's' : ''} ago`;
+  return date.toLocaleDateString();
+}
+
+function renderLastUploaded(files, thumbSet) {
+  const wrap = document.getElementById('last-uploaded-wrap');
+  const card = document.getElementById('last-uploaded-card');
+  if (!card || !wrap) return;
+  if (!files || files.length === 0) {
+    wrap.style.display = 'none';
+    return;
+  }
+  let latestFile = null;
+  let latestTime = -1;
+  files.forEach(f => {
+    const t = f.lastModified ? new Date(f.lastModified).getTime() : 0;
+    if (t > latestTime || !latestFile) {
+      latestTime = t;
+      latestFile = f;
+    }
+  });
+  if (!latestFile) {
+    wrap.style.display = 'none';
+    return;
+  }
+
+  const isImg = /^image\//i.test(latestFile.contentType);
+  const fileUrl = `/api/research/file?container=${CONTAINER}&name=${encodeURIComponent(latestFile.name)}`;
+  const thumbName = THUMB_PREFIX + latestFile.name;
+  const hasThumb = thumbSet.has(thumbName);
+  const thumbUrl = hasThumb ? `/api/research/file?container=${CONTAINER}&name=${encodeURIComponent(thumbName)}` : fileUrl;
+  const imgUrl = fileUrl;
+
+  const timeAgo = formatTimeAgo(latestFile.lastModified);
+  const dateStr = latestFile.lastModified ? new Date(latestFile.lastModified).toLocaleString() : 'Unknown date';
+
+  const noteMarkup = renderNoteMarkup(CONTAINER, latestFile.name);
+  const relMarkup = renderRelationsMarkup(CONTAINER, latestFile.name);
+
+  card.innerHTML = `
+    <div style="flex: 0 0 200px; max-width: 200px; width: 100%;">
+      ${isImg ? `<img src="${thumbUrl}" alt="${latestFile.name}" style="width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); cursor: zoom-in; box-shadow: 0 4px 15px rgba(0,0,0,0.4);" onclick="openLightbox('${imgUrl.replace(/'/g,"\\'")}','${latestFile.name.replace(/'/g,"\\'")}')">`
+              : `<div style="width: 100%; aspect-ratio: 1; background: rgba(139,92,246,0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 3.5rem; cursor: zoom-in;" onclick="openLightbox('${imgUrl.replace(/'/g,"\\'")}','${latestFile.name.replace(/'/g,"\\'")}')">🖼</div>`}
+    </div>
+    <div style="flex: 1; min-width: 260px; display: flex; flex-direction: column; gap: 8px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+        <span style="font-size: 1.1rem; font-weight: 800; color: #fff; word-break: break-all;" title="${latestFile.name}">${latestFile.name}</span>
+        <div style="display: flex; gap: 6px;">
+          <a class="btn-sm btn-ghost" href="${imgUrl}" download="${latestFile.name}" style="text-decoration: none;">⬇ Save</a>
+          <button class="btn-sm btn-danger btn-del" data-require-admin="true" onclick="deleteFile('${latestFile.name.replace(/'/g,"\\'")}')">🗑 Delete</button>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 14px; font-size: 0.8rem; color: var(--muted); flex-wrap: wrap;">
+        <span>📅 Uploaded: <strong style="color: var(--green);">${timeAgo}</strong> (<span title="${dateStr}">${dateStr}</span>)</span>
+        <span>📏 Size: <strong style="color: var(--text);">${fmtBytes(latestFile.size)}</strong></span>
+      </div>
+      <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 10px 14px; margin-top: 4px;">
+        ${noteMarkup}
+      </div>
+      <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 10px 14px; margin-top: 2px;">
+        ${relMarkup}
+      </div>
+    </div>
+  `;
+  wrap.style.display = 'block';
+}
+
+function applySort() {
+  const sortVal = document.getElementById('sort-select')?.value || 'newest';
+  const files = [...allLoadedFiles];
+  files.sort((a, b) => {
+    if (sortVal === 'newest') {
+      const tA = a.lastModified ? new Date(a.lastModified).getTime() : 0;
+      const tB = b.lastModified ? new Date(b.lastModified).getTime() : 0;
+      return tB - tA;
+    } else if (sortVal === 'oldest') {
+      const tA = a.lastModified ? new Date(a.lastModified).getTime() : 0;
+      const tB = b.lastModified ? new Date(b.lastModified).getTime() : 0;
+      return tA - tB;
+    } else if (sortVal === 'name_asc') {
+      return a.name.localeCompare(b.name);
+    } else if (sortVal === 'name_desc') {
+      return b.name.localeCompare(a.name);
+    } else if (sortVal === 'size_desc') {
+      return b.size - a.size;
+    } else if (sortVal === 'size_asc') {
+      return a.size - b.size;
+    }
+    return 0;
+  });
+
+  const gallery = document.getElementById('gallery');
+  document.getElementById('count').textContent = '(' + files.length + ')';
+  const topCountEl = document.getElementById('top-count');
+  if (topCountEl) topCountEl.textContent = '(' + files.length + ' total)';
+  if (files.length === 0) {
+    gallery.innerHTML = '<div class="empty-state">No images yet — upload one above.</div>';
+    return;
+  }
+  gallery.innerHTML = '';
+  files.forEach(f => {
+    const card = document.createElement('div');
+    card.className = 'img-card';
+    const isImg = /^image\//i.test(f.contentType);
+    const fileUrl = `/api/research/file?container=${CONTAINER}&name=${encodeURIComponent(f.name)}`;
+    const thumbName = THUMB_PREFIX + f.name;
+    const hasThumb = allThumbSet.has(thumbName);
+    const thumbUrl = hasThumb
+      ? `/api/research/file?container=${CONTAINER}&name=${encodeURIComponent(thumbName)}`
+      : fileUrl;
+    const imgUrl = fileUrl;
+    const noteMarkup = renderNoteMarkup(CONTAINER, f.name);
+    const relMarkup = renderRelationsMarkup(CONTAINER, f.name);
+    const needsAttr = (isImg && !hasThumb) ? ` data-needs-thumb="1" data-name="${f.name.replace(/"/g,'&quot;')}"` : '';
+    const timeAgo = formatTimeAgo(f.lastModified);
+    card.innerHTML = `
+      ${isImg
+        ? `<img class="img-thumb"${needsAttr} src="${thumbUrl}" alt="${f.name}" loading="lazy" onclick="openLightbox('${imgUrl.replace(/'/g,"\\'")}','${f.name.replace(/'/g,"\\'")}' )">`
+        : `<div class="img-thumb-placeholder" style="cursor:zoom-in;" onclick="openLightbox('${imgUrl.replace(/'/g,"\\'")}','${f.name.replace(/'/g,"\\'")}')">🖼</div>`}
+      <div class="img-info">
+        <div class="img-name" title="${f.name}">${f.name}</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 4px;">
+          <span class="img-size">${fmtBytes(f.size)}</span>
+          <span style="font-size:0.68rem; color:var(--muted); background:rgba(255,255,255,0.05); padding:1px 6px; border-radius:4px;" title="${f.lastModified ? new Date(f.lastModified).toLocaleString() : ''}">⏱ ${timeAgo}</span>
+        </div>
+        ${noteMarkup}
+        ${relMarkup}
+      </div>
+      <div class="img-actions">
+        <a class="btn-sm btn-ghost" href="${imgUrl}" download="${f.name}">⬇ Save</a>
+        <button class="btn-sm btn-danger btn-del" data-require-admin="true" onclick="deleteFile('${f.name.replace(/'/g,"\\'")}')">🗑</button>
+      </div>`;
+    gallery.appendChild(card);
+  });
+  updateAllRelationsUI();
+  backfillThumbnails(files, allThumbSet);
+}
+
 function loadGallery() {
   fetch('/api/research/files?container=' + CONTAINER)
     .then(r => r.json())
     .then(allFiles => {
       const gallery = document.getElementById('gallery');
-      // Separate auto-generated thumbnails from the real items.
-      const thumbSet = new Set(
+      allThumbSet = new Set(
         (allFiles || []).filter(f => f.name.startsWith(THUMB_PREFIX)).map(f => f.name)
       );
-      const files = (allFiles || []).filter(f => !f.name.startsWith(THUMB_PREFIX));
-      document.getElementById('count').textContent = '(' + files.length + ')';
-      const topCountEl = document.getElementById('top-count');
-      if (topCountEl) topCountEl.textContent = '(' + files.length + ' total)';
-      if (files.length === 0) {
-        gallery.innerHTML = '<div class="empty-state">No images yet — upload one above.</div>';
-        return;
-      }
-      gallery.innerHTML = '';
-      files.forEach(f => {
-        const card = document.createElement('div');
-        card.className = 'img-card';
-        const isImg = /^image\//i.test(f.contentType);
-        const fileUrl = `/api/research/file?container=${CONTAINER}&name=${encodeURIComponent(f.name)}`;
-        // Use the auto-generated thumbnail for the grid when available; the
-        // lightbox always opens the full-resolution original.
-        const thumbName = THUMB_PREFIX + f.name;
-        const hasThumb = thumbSet.has(thumbName);
-        const thumbUrl = hasThumb
-          ? `/api/research/file?container=${CONTAINER}&name=${encodeURIComponent(thumbName)}`
-          : fileUrl;
-        const imgUrl = fileUrl;
-        const relMarkup = renderRelationsMarkup(CONTAINER, f.name);
-        // Mark images still missing a thumbnail so the backfill can target them.
-        const needsAttr = (isImg && !hasThumb) ? ` data-needs-thumb="1" data-name="${f.name.replace(/"/g,'&quot;')}"` : '';
-        card.innerHTML = `
-          ${isImg
-            ? `<img class="img-thumb"${needsAttr} src="${thumbUrl}" alt="${f.name}" loading="lazy" onclick="openLightbox('${imgUrl.replace(/'/g,"\\'")}','${f.name.replace(/'/g,"\\'")}' )">`
-            : `<div class="img-thumb-placeholder" style="cursor:zoom-in;" onclick="openLightbox('${imgUrl.replace(/'/g,"\\'")}','${f.name.replace(/'/g,"\\'")}')">🖼</div>`}
-          <div class="img-info">
-            <div class="img-name" title="${f.name}">${f.name}</div>
-            <div class="img-size">${fmtBytes(f.size)}</div>
-            ${relMarkup}
-          </div>
-          <div class="img-actions">
-            <a class="btn-sm btn-ghost" href="${imgUrl}" download="${f.name}">⬇ Save</a>
-            <button class="btn-sm btn-danger btn-del" data-require-admin="true" onclick="deleteFile('${f.name.replace(/'/g,"\\'")}')">🗑</button>
-          </div>`;
-        gallery.appendChild(card);
-      });
-      updateAllRelationsUI();
-      // Generate + map thumbnails for any images uploaded before this feature.
-      backfillThumbnails(files, thumbSet);
+      allLoadedFiles = (allFiles || []).filter(f => !f.name.startsWith(THUMB_PREFIX));
+      renderLastUploaded(allLoadedFiles, allThumbSet);
+      applySort();
     })
     .catch(e => {
       document.getElementById('gallery').innerHTML = '<div class="empty-state">Failed to load: ' + e.message + '</div>';
@@ -345,7 +481,13 @@ function deleteFile(name) {
 function openLightbox(url, name) {
   document.getElementById('lightbox-img').src = url;
   document.getElementById('lightbox-img').alt = name;
-  document.getElementById('lightbox-caption').textContent = name;
+  const desc = getDescription(CONTAINER, name);
+  const captionEl = document.getElementById('lightbox-caption');
+  if (desc) {
+    captionEl.innerHTML = `<strong style="color:var(--text);">${escHtml(name)}</strong><br><span style="color: #d8b4fe; font-size: 0.88rem; display:inline-block; margin-top:6px; background:rgba(139,92,246,0.18); padding:6px 14px; border-radius:8px; border:1px solid rgba(139,92,246,0.4); box-shadow: 0 4px 12px rgba(0,0,0,0.3);">📝 ${escHtml(desc)}</span>`;
+  } else {
+    captionEl.textContent = name;
+  }
   document.getElementById('lightbox-bg').classList.add('open');
 }
 
@@ -407,18 +549,161 @@ let allVideos = [];
 let allRelationships = [];
 let allSentences = [];
 
+const DESC_STORE_KEY = 'research_descriptions';
+let descRegistry = {};
+let descCounter = 0;
+let descCache = {};
+
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s == null ? '' : s;
+  return d.innerHTML;
+}
+function getLocalDescriptions() {
+  try { return JSON.parse(localStorage.getItem(DESC_STORE_KEY)) || {}; }
+  catch { return {}; }
+}
+function mirrorLocalDescription(k, text) {
+  const all = getLocalDescriptions();
+  if (text) all[k] = text; else delete all[k];
+  localStorage.setItem(DESC_STORE_KEY, JSON.stringify(all));
+}
+function descKey(container, name) { return `${container}/${name}`; }
+
+function getDescription(container, name) {
+  const k = descKey(container, name);
+  if (k in descCache) return descCache[k] || '';
+  return getLocalDescriptions()[k] || '';
+}
+
+async function setDescription(container, name, text) {
+  const clean = (text || '').trim();
+  const k = descKey(container, name);
+  descCache[k] = clean;
+  mirrorLocalDescription(k, clean);
+  try {
+    const { error } = await client.from('research_assets').upsert({
+      container: container,
+      item_name: name,
+      description: clean || null,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'container,item_name' });
+    if (error) {
+      console.warn('Supabase note save warning:', error.message);
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.warn('Description saved locally but Supabase write failed:', e);
+    return false;
+  }
+}
+
+function renderNoteMarkup(container, fileName) {
+  const id = 'note-' + (descCounter++);
+  descRegistry[id] = { container, name: fileName };
+  const desc = getDescription(container, fileName);
+  const hasDesc = !!desc;
+  return `
+    <div class="img-note-wrap" id="${id}" style="margin-top:8px; padding-top:6px; border-top:1px solid rgba(139,92,246,0.15); text-align:left;">
+      <div class="img-note-view"${hasDesc ? '' : ' data-empty="1"'}>
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px; gap:4px;">
+          <span style="font-size:0.7rem; font-weight:bold; color:var(--muted); display:flex; align-items:center; gap:4px;">📝 Note:</span>
+          <button class="btn-sm btn-ghost" style="padding:2px 8px; font-size:0.65rem; border-color:rgba(139,92,246,0.3);" onclick="editNote('${id}')" title="Add/Edit Note">✎ ${hasDesc ? 'Edit' : 'Add Note'}</button>
+        </div>
+        <div class="img-note-text" style="font-size:0.75rem; color:${hasDesc ? 'var(--text)' : 'var(--muted)'}; background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.06); border-radius:6px; padding:6px 8px; font-style:${hasDesc ? 'normal' : 'italic'}; max-height:80px; overflow-y:auto; line-height:1.4; word-break:break-word;">${hasDesc ? escHtml(desc) : 'No note yet — click Add Note.'}</div>
+      </div>
+      <div class="img-note-edit" style="display:none; margin-top:4px;">
+        <textarea class="img-note-input" placeholder="Enter research notes or tags for this image..." style="width:100%; min-height:60px; background:rgba(0,0,0,0.5); border:1px solid var(--primary); border-radius:6px; padding:6px 8px; color:var(--text); font-size:0.75rem; font-family:var(--font-b); outline:none; resize:vertical; line-height:1.4;"></textarea>
+        <div style="display:flex; gap:6px; margin-top:4px; justify-content:flex-end;">
+          <button class="btn-sm btn-ghost" style="padding:3px 10px; font-size:0.7rem;" onclick="cancelNote('${id}')">Cancel</button>
+          <button class="btn-sm" style="padding:3px 10px; font-size:0.7rem; background:var(--primary); color:#fff; border:none;" data-require-admin="true" onclick="saveNote('${id}')">💾 Save</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+window.editNote = function(id) {
+  const wrap = document.getElementById(id);
+  if (!wrap) return;
+  const { container, name } = descRegistry[id] || {};
+  const textarea = wrap.querySelector('.img-note-input');
+  textarea.value = getDescription(container, name);
+  wrap.querySelector('.img-note-view').style.display = 'none';
+  wrap.querySelector('.img-note-edit').style.display = 'block';
+  textarea.focus();
+};
+
+window.cancelNote = function(id) {
+  const wrap = document.getElementById(id);
+  if (!wrap) return;
+  wrap.querySelector('.img-note-view').style.display = 'block';
+  wrap.querySelector('.img-note-edit').style.display = 'none';
+};
+
+window.saveNote = async function(id) {
+  if (!window.requireAdmin || !window.requireAdmin('save notes')) return;
+  const wrap = document.getElementById(id);
+  if (!wrap) return;
+  const { container, name } = descRegistry[id] || {};
+  const text = wrap.querySelector('.img-note-input').value;
+  const saveBtn = wrap.querySelector('button[onclick^="saveNote"]');
+  const origText = saveBtn ? saveBtn.innerHTML : '';
+  if (saveBtn) { saveBtn.disabled = true; saveBtn.innerHTML = '⏳…'; }
+
+  const ok = await setDescription(container, name, text);
+  if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = origText; }
+
+  Object.keys(descRegistry).forEach(regId => {
+    const item = descRegistry[regId];
+    if (item && item.container === container && item.name === name) {
+      const el = document.getElementById(regId);
+      if (el) {
+        const view = el.querySelector('.img-note-view');
+        const txtEl = el.querySelector('.img-note-text');
+        const btn = el.querySelector('button[onclick^="editNote"]');
+        const desc = getDescription(container, name);
+        const hasDesc = !!desc;
+        if (hasDesc) {
+          txtEl.textContent = desc;
+          txtEl.style.color = 'var(--text)';
+          txtEl.style.fontStyle = 'normal';
+          if (btn) btn.innerHTML = '✎ Edit';
+          view.removeAttribute('data-empty');
+        } else {
+          txtEl.textContent = 'No note yet — click Add Note.';
+          txtEl.style.color = 'var(--muted)';
+          txtEl.style.fontStyle = 'italic';
+          if (btn) btn.innerHTML = '✎ Add Note';
+          view.setAttribute('data-empty', '1');
+        }
+        view.style.display = 'block';
+        const editEl = el.querySelector('.img-note-edit');
+        if (editEl) editEl.style.display = 'none';
+      }
+    }
+  });
+
+  if (ok) toast('Note saved for ' + name, 'success');
+  else toast('Note saved locally (offline/sync warning)', 'success');
+};
+
 // Record (upsert) a reference to an uploaded asset + its thumbnail in Supabase.
 // Non-fatal: a missing table or RLS issue only logs a warning so uploads still work.
 async function recordAsset(itemName, thumbName, contentType, sizeBytes) {
   try {
-    const { error } = await client.from('research_assets').upsert({
+    const existingDesc = getDescription(CONTAINER, itemName);
+    const payload = {
       container: CONTAINER,
       item_name: itemName,
       thumb_name: thumbName,
       content_type: contentType || null,
       size_bytes: sizeBytes || null,
       updated_at: new Date().toISOString()
-    }, { onConflict: 'container,item_name' });
+    };
+    if (existingDesc) payload.description = existingDesc;
+    const { error } = await client.from('research_assets').upsert(payload, { onConflict: 'container,item_name' });
     if (error) console.warn('research_assets upsert failed:', error.message);
   } catch (e) { console.warn('research_assets upsert error:', e); }
 }
@@ -434,11 +719,13 @@ async function loadSupabaseData() {
   const [
     { data: vids,  error: err1 },
     { data: rels,  error: err2 },
-    { data: sents, error: err3 }
+    { data: sents, error: err3 },
+    { data: assets, error: err4 }
   ] = await Promise.all([
     client.from('videos').select('id, title, video_number, modules(module_number)').order('id'),
     client.from('research_relationships').select('*'),
-    client.from('sentences').select('id, sentence_type, section, sentence_text, script_id, scripts(video_id)').order('sort_order')
+    client.from('sentences').select('id, sentence_type, section, sentence_text, script_id, scripts(video_id)').order('sort_order'),
+    client.from('research_assets').select('item_name, description').eq('container', CONTAINER)
   ]);
 
   if (err1) console.error('Error loading course videos:', err1);
@@ -461,7 +748,19 @@ async function loadSupabaseData() {
     });
   }
 
+  if (err4) console.warn('Error loading asset descriptions:', err4);
+  else {
+    (assets || []).forEach(r => {
+      if (r.description) {
+        const k = descKey(CONTAINER, r.item_name);
+        descCache[k] = r.description;
+        mirrorLocalDescription(k, r.description);
+      }
+    });
+  }
+
   updateAllRelationsUI();
+  if (typeof applySort === 'function') applySort();
 }
 
 function renderRelationsMarkup(container, fileName) {

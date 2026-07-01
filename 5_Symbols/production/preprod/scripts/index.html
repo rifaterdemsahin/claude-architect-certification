@@ -1341,7 +1341,10 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
                   <span class="sent-badge ${esc2(s.sentence_type)}">${esc2(s.sentence_type)}</span>
                   <span class="sent-badge ${esc2(s.visual_mode)}">${visualLabel}</span>
                 </div>
-                <div class="sent-text">${esc2(s.sentence_text)}</div>
+                <div class="sent-text">
+                  ${esc2(s.sentence_text)}
+                  ${s.created_at ? `<div class="sent-date" style="font-size: 0.65rem; color: var(--text-muted); margin-top: 4px; opacity: 0.7;">📅 Created: ${new Date(s.created_at).toLocaleString()}</div>` : ''}
+                </div>
                 <div class="sent-row-btns">
                   <button class="btn-sent-edit" onclick="sentEdit('${rid}')" title="Edit this sentence">✏️</button>
                   <button class="btn-sent-link" onclick="copySentenceLink('${rid}', ${s.id})" title="Copy link to this sentence">📌</button>
@@ -2402,7 +2405,7 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
             <span class="code-ref-icon">${icon}</span>
             <div class="code-ref-body">
               <div class="code-ref-label research-hover-container">
-                <a href="javascript:void(0)" onclick="${previewAction}" style="border-bottom: 1px dotted rgba(255,255,255,0.3); padding-bottom: 1px; color: #93c5fd; text-decoration: none;">${esc2(r.item_name)}</a>
+                <a href="javascript:void(0)" onclick="${previewAction}" style="border-bottom: 1px dotted rgba(255,255,255,0.3); padding-bottom: 1px; color: #93c5fd; text-decoration: none;" onmouseenter="startResearchHoverTimer('${fileUrl}', '${r.container}', '${esc2(r.item_name)}')" onmouseleave="cancelResearchHoverTimer()">${esc2(r.item_name)}</a>
                 <span class="code-ref-badge db" style="background: rgba(139,92,246,0.18); color: #c084fc; vertical-align: middle; margin-left: 6px;">Research</span>
                 ${tooltipHtml}
               </div>
@@ -2824,6 +2827,48 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
     </div>
   </div>
 
+<!-- Research Player Modal -->
+  <div class="img-preview-overlay" id="research-player-overlay" onclick="closeResearchPlayer()">
+    <button class="img-preview-close" onclick="event.stopPropagation();closeResearchPlayer()" title="Close player popup">✕</button>
+    <div class="img-preview-box" id="research-player-box" onclick="event.stopPropagation()" style="background: #0f172a; border: 1px solid rgba(255,255,255,0.12); padding: 20px;">
+       <div id="research-player-content"></div>
+    </div>
+  </div>
+
+<script>
+  let researchHoverTimer = null;
+  function startResearchHoverTimer(fileUrl, container, itemName) {
+    if (container !== 'research-audio' && container !== 'research-videos') return;
+    
+    researchHoverTimer = setTimeout(() => {
+      const overlay = document.getElementById('research-player-overlay');
+      const content = document.getElementById('research-player-content');
+      
+      let html = '';
+      if (container === 'research-audio') {
+        html = `<audio controls autoplay style="width: 100%; min-width: 300px; border-radius: 8px;"><source src="${fileUrl}" type="audio/mpeg">Your browser does not support the audio element.</audio>`;
+      } else if (container === 'research-videos') {
+        html = `<video controls autoplay style="max-width: 90vw; max-height: 80vh; border-radius: 8px;"><source src="${fileUrl}" type="video/mp4">Your browser does not support the video tag.</video>`;
+      }
+      content.innerHTML = `<h3 style="font-size: 1rem; color: #fff; margin-bottom: 12px; font-family: var(--font-title);">${itemName}</h3>` + html;
+      
+      overlay.classList.add('open');
+    }, 3000);
+  }
+
+  function cancelResearchHoverTimer() {
+    if (researchHoverTimer) {
+      clearTimeout(researchHoverTimer);
+      researchHoverTimer = null;
+    }
+  }
+
+  function closeResearchPlayer() {
+    const overlay = document.getElementById('research-player-overlay');
+    overlay.classList.remove('open');
+    document.getElementById('research-player-content').innerHTML = '';
+  }
+</script>
 <script src="../../../../shared/debug-panel.js"></script>
 </body>
 </html>
