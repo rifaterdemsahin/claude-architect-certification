@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="../../../shared/redirect-to-live-site.js"></script>
+  <title>Analogy Helper (Infographic Generator) | Claude AI Certification</title>
+  <meta name="description" content="Generate side-by-side split-screen analogy infographics from course script sentences using Gemini image generation, saved to Azure & Supabase.">
+  <link rel="icon" type="image/png" href="../../../favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #030712; --bg-card: rgba(17,24,39,0.9); --border-glow: rgba(139,92,246,0.3);
+      --text-main: #f3f4f6; --text-muted: #9ca3af; --primary: #8b5cf6; --primary-glow: rgba(139,92,246,0.6);
+      --secondary: #3b82f6; --success: #10b981; --danger: #ef4444; --warning: #f59e0b; --accent: #8b5cf6;
+      --font-title: 'Outfit', sans-serif; --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-dark);
+      background-image: radial-gradient(circle at 10% 20%, rgba(139,92,246,0.12) 0%, transparent 40%),
+                        radial-gradient(circle at 90% 80%, rgba(59,130,246,0.12) 0%, transparent 40%);
+      color: var(--text-main); font-family: var(--font-body); line-height: 1.6;
+      padding: 100px 24px 60px;
+    }
+    .container { max-width: 1280px; margin: 0 auto; }
+    header { text-align: center; margin-bottom: 48px; }
+    header h1 { font-family: var(--font-title); font-size: 2.6rem; font-weight: 900; letter-spacing: -0.02em; margin-bottom: 10px; }
+    header p { color: var(--text-muted); font-size: 1.05rem; max-width: 700px; margin: 0 auto; }
+    header code { background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 5px; font-size: 0.9em; color: var(--accent); }
+
+    .concept-stats { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-top: 36px; }
+    .concept-stat {
+      text-align: center; padding: 18px 28px; border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.08); min-width: 140px;
+      backdrop-filter: blur(8px);
+    }
+    .concept-stat .val { font-family: var(--font-title); font-size: 2.2rem; font-weight: 900; line-height: 1.1; }
+    .concept-stat .lbl { font-size: 0.82rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+    .cs-modules   { background: rgba(139,92,246,0.15); --cs-color: #a78bfa; }
+    .cs-videos    { background: rgba(59,130,246,0.15); --cs-color: #60a5fa; }
+    .cs-cost      { background: rgba(16,185,129,0.15); --cs-color: #34d399; }
+    .cs-complete  { background: rgba(245,158,11,0.15); --cs-color: #fbbf24; }
+    .concept-stat .val { color: var(--cs-color); }
+    .concept-stat .lbl { color: var(--cs-color); }
+
+    .selector-bar { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-bottom: 32px; }
+    .selector-bar select, .selector-bar input {
+      background: var(--bg-card); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px;
+      color: var(--text-main); padding: 12px 20px; font-size: 0.95rem; font-family: var(--font-body);
+      min-width: 200px; cursor: pointer;
+    }
+    .selector-bar select:focus, .selector-bar input:focus { outline: none; border-color: var(--accent); }
+
+    .glass-card {
+      background: var(--bg-card); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px;
+      padding: 32px; margin-bottom: 32px; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.6); backdrop-filter: blur(12px);
+    }
+    .glass-card h2 { font-family: var(--font-title); font-weight: 700; font-size: 1.3rem; margin-bottom: 0; }
+    .glass-card-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+    .glass-card-body { margin-top: 20px; }
+    .glass-card-body.collapsed { display: none; }
+    .collapse-icon { transition: transform 0.3s ease; font-size: 1.2rem; }
+
+    .btn {
+      background: var(--primary); color: #fff; border: none; border-radius: 10px; padding: 10px 22px;
+      font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; text-decoration: none;
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(139,92,246,0.3); }
+    .btn-secondary { background: var(--secondary); color: #fff; }
+    .btn-success { background: var(--success); color: #000; }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-sm { padding: 6px 14px; font-size: 0.8rem; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    .empty-state { text-align: center; padding: 48px 24px; color: var(--text-muted); }
+    .empty-state .empty-icon { font-size: 3rem; margin-bottom: 12px; }
+
+    .toast {
+      position: fixed; top: 24px; right: 24px; background: var(--success); color: #000;
+      padding: 14px 24px; border-radius: 12px; font-weight: 700; z-index: 1000;
+      transform: translateX(120%); transition: transform 0.4s ease; max-width: 400px;
+    }
+    .toast.show { transform: translateX(0); }
+    .toast.error { background: var(--danger); color: #fff; }
+
+    .ig-table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
+    .ig-table th { text-align: left; color: var(--text-muted); font-size: 0.78rem; font-weight: 600; padding: 8px 12px; text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .ig-table td { padding: 12px; background: rgba(0,0,0,0.18); vertical-align: middle; font-size: 0.9rem; }
+    .ig-table tr td:first-child { border-radius: 12px 0 0 12px; }
+    .ig-table tr td:last-child { border-radius: 0 12px 12px 0; }
+    .ig-table .check-col { width: 36px; text-align: center; }
+    .ig-table .num-col { width: 42px; text-align: center; font-weight: 700; color: var(--accent); }
+    .ig-table .sentence-col { min-width: 280px; }
+    .ig-table .type-col { width: 210px; }
+    .ig-table .status-col { width: 120px; text-align: center; }
+    .ig-table .preview-col { width: 110px; text-align: center; }
+    .ig-table .action-col { width: 240px; text-align: right; white-space: nowrap; }
+
+    .status-pill {
+      display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .status-pill.pending { background: rgba(156,163,175,0.2); color: #9ca3af; }
+    .status-pill.generating { background: rgba(59,130,246,0.2); color: #60a5fa; animation: pulse 1.5s infinite; }
+    .status-pill.completed { background: rgba(16,185,129,0.2); color: #34d399; }
+    .status-pill.skipped { background: rgba(245,158,11,0.2); color: #fbbf24; }
+    .status-pill.failed { background: rgba(239,68,68,0.2); color: #f87171; }
+    @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
+
+    .preview-thumb { width: 80px; height: 45px; border-radius: 6px; object-fit: cover; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; transition: transform 0.2s; }
+    .preview-thumb:hover { transform: scale(1.1); }
+
+    .editor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    @media (max-width: 900px) { .editor-grid { grid-template-columns: 1fr; } }
+    .editor-box { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 20px; }
+    .editor-box h3 { font-size: 1rem; color: var(--accent); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+    textarea.prompt-textarea {
+      width: 100%; height: 260px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px; color: var(--text-main); font-family: monospace; font-size: 0.85rem; padding: 14px;
+      resize: vertical; line-height: 1.4;
+    }
+    textarea.prompt-textarea:focus { outline: none; border-color: var(--accent); }
+    pre.json-pre {
+      width: 100%; height: 260px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px; color: #a78bfa; font-family: monospace; font-size: 0.82rem; padding: 14px;
+      overflow: auto; white-space: pre-wrap; line-height: 1.4; margin: 0;
+    }
+
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(8px); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 20px;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-content {
+      background: var(--bg-card); border: 1px solid rgba(255,255,255,0.15); border-radius: 20px;
+      padding: 28px; max-width: 800px; width: 100%; max-height: 90vh; overflow-y: auto; position: relative;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.8);
+    }
+    .modal-content.img-modal { max-width: 1100px; text-align: center; }
+    .modal-close { position: absolute; top: 18px; right: 20px; background: none; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; }
+    .modal-close:hover { color: #fff; }
+    .full-img { max-width: 100%; max-height: 75vh; border-radius: 12px; border: 1px solid rgba(255,255,255,0.15); margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <div id="toast" class="toast"></div>
+
+  <div class="container">
+    <header>
+      <h1>⚖️ Analogy Helper</h1>
+      <p>Generate high-impact 1080p split-screen analogy infographics from your course script sentences. Choose from 10 stark visual analogies to simplify complex architectural tradeoffs.</p>
+      <div class="concept-stats">
+        <div class="concept-stat cs-modules"><div class="val" id="statSentences">0</div><div class="lbl">Script Sentences</div></div>
+        <div class="concept-stat cs-videos"><div class="val">10</div><div class="lbl">Analogy Themes</div></div>
+        <div class="concept-stat cs-complete"><div class="val" id="statCompleted">0</div><div class="lbl">Generated Infographics</div></div>
+        <div class="concept-stat cs-cost"><div class="val" id="statCost">$0.00</div><div class="lbl">Gemini Render Cost</div></div>
+      </div>
+    </header>
+
+    <div class="selector-bar">
+      <select id="moduleSelect" onchange="onFilterChange()">
+        <option value="">All Modules</option>
+        <option value="1" selected>Module 1: Pre-Prod & Foundations</option>
+        <option value="2">Module 2: MCP Server & Tools</option>
+        <option value="3">Module 3: Security & Gates</option>
+        <option value="4">Module 4: Multi-Agent Systems</option>
+        <option value="5">Module 5: Optimization & DevOps</option>
+      </select>
+      <select id="videoSelect" onchange="onFilterChange()">
+        <option value="">All Videos</option>
+        <option value="1">Video 1</option>
+        <option value="2">Video 2</option>
+        <option value="3">Video 3</option>
+        <option value="4">Video 4</option>
+      </select>
+      <select id="themeFilter" onchange="onFilterChange()">
+        <option value="">All Analogy Themes</option>
+        <option value="racing">Racing 🏁</option>
+        <option value="cooking">Cooking 🍳</option>
+        <option value="construction">Construction 🏗️</option>
+        <option value="sailing">Sailing ⛵</option>
+        <option value="aviation">Aviation ✈️</option>
+        <option value="space">Space Exploration 🚀</option>
+        <option value="medical">Medical / Surgery 🏥</option>
+        <option value="traffic">Traffic / Highway 🛣️</option>
+        <option value="factory">Factory / Assembly Line 🏭</option>
+        <option value="gardening">Gardening 🌱</option>
+      </select>
+      <input type="text" id="searchInput" placeholder="🔍 Search sentence text..." oninput="onFilterChange()">
+    </div>
+
+    <!-- CARD 1: Sentence Analogy Selector -->
+    <div class="glass-card">
+      <div class="glass-card-header" onclick="toggleCard(this)">
+        <h2>⚖️ 1. Sentence Analogy Infographic Selector</h2>
+        <span class="collapse-icon">▾</span>
+      </div>
+      <div class="glass-card-body">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
+          <div style="font-size:0.9rem;color:var(--text-muted);">
+            Select sentences and choose a stark analogy theme to compare the inefficient approach against the optimized cloud architecture.
+          </div>
+          <div style="display:flex;gap:10px;">
+            <button class="btn btn-secondary btn-sm" data-require-admin onclick="bulkPrepareSentences()">⚙️ Bulk Prep Prompt</button>
+            <button class="btn btn-sm" data-require-admin onclick="bulkGenerateInfographics()">▶️ Bulk Generate Infographics</button>
+          </div>
+        </div>
+        <div id="sentenceTableWrap">
+          <div class="empty-state"><div class="empty-icon">⏳</div><p>Loading course script sentences...</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 2: Live Editor & Prompt Inspector -->
+    <div class="glass-card" id="editorCard">
+      <div class="glass-card-header" onclick="toggleCard(this)">
+        <h2>🖼️ 2. Live Infographic Preview & Prompt Editor</h2>
+        <span class="collapse-icon">▾</span>
+      </div>
+      <div class="glass-card-body">
+        <div style="margin-bottom:16px;color:var(--text-muted);font-size:0.9rem;">
+          Inspect the structured analogy JSON and fine-tune the 1080p split-screen prompt before rendering with Gemini.
+        </div>
+        <div class="editor-grid">
+          <div class="editor-box">
+            <h3><span>⬇️ Structured Analogy JSON</span> <button class="btn btn-secondary btn-sm" onclick="copyText('editorJson')">📋 Copy JSON</button></h3>
+            <pre id="editorJson" class="json-pre">// Select a sentence above or click ⚙️ Prep Prompt to view structured properties</pre>
+          </div>
+          <div class="editor-box">
+            <h3><span>🎨 Infographic Image Prompt</span> <button class="btn btn-secondary btn-sm" onclick="copyText('editorPrompt')">📋 Copy Prompt</button></h3>
+            <textarea id="editorPrompt" class="prompt-textarea" placeholder="Select a sentence above or click ⚙️ Prep Prompt to view formatted prompt..."></textarea>
+          </div>
+        </div>
+        <div style="margin-top:20px;display:flex;justify-content:flex-end;gap:12px;align-items:center;">
+          <span id="activeSentenceLabel" style="color:var(--text-muted);font-size:0.85rem;margin-right:auto;">No active sentence selected.</span>
+          <button class="btn btn-secondary" data-require-admin onclick="saveCurrentSpecOnly()">💾 Save Spec to Supabase</button>
+          <button class="btn" data-require-admin id="btnRenderNow" onclick="renderCurrentInfographic()">▶️ Render Infographic Now</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 3: Saved Analogy Infographics -->
+    <div class="glass-card">
+      <div class="glass-card-header" onclick="toggleCard(this)">
+        <h2>📚 3. Saved Analogy Infographics in Supabase</h2>
+        <span class="collapse-icon">▾</span>
+      </div>
+      <div class="glass-card-body">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <div style="font-size:0.9rem;color:var(--text-muted);">
+            All saved split-screen analogy infographics synced with Azure Blob Storage and Supabase.
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="loadSavedAnalogies()">🔄 Refresh Table</button>
+        </div>
+        <div id="savedAnalogiesWrap">
+          <div class="empty-state"><div class="empty-icon">📂</div><p>No saved analogy infographics found yet. Click ▶️ Generate above to create one!</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODALS -->
+  <div class="modal-overlay" id="jsonModal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('jsonModal')">✕</button>
+      <h3 style="font-family:var(--font-title);margin-bottom:16px;font-size:1.4rem;">🔍 Inspect Analogy Spec & Prompt</h3>
+      <div style="margin-bottom:16px;">
+        <h4 style="color:var(--accent);margin-bottom:6px;font-size:0.9rem;">Analogy Properties (JSON)</h4>
+        <pre id="modalJson" class="json-pre" style="height:200px;"></pre>
+      </div>
+      <div>
+        <h4 style="color:var(--accent);margin-bottom:6px;font-size:0.9rem;">Formatted Infographic Prompt</h4>
+        <textarea id="modalPrompt" class="prompt-textarea" style="height:200px;" readonly></textarea>
+      </div>
+      <div style="margin-top:20px;display:flex;justify-content:flex-end;gap:10px;">
+        <button class="btn btn-secondary" onclick="copyText('modalJson')">📋 Copy JSON</button>
+        <button class="btn btn-secondary" onclick="copyText('modalPrompt')">📋 Copy Prompt</button>
+        <button class="btn" onclick="closeModal('jsonModal')">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="imgModal">
+    <div class="modal-content img-modal">
+      <button class="modal-close" onclick="closeModal('imgModal')">✕</button>
+      <h3 id="imgModalTitle" style="font-family:var(--font-title);margin-bottom:10px;font-size:1.3rem;">⚖️ Analogy Infographic</h3>
+      <img id="imgModalSrc" class="full-img" src="" alt="Infographic Preview">
+      <div style="margin-top:16px;display:flex;justify-content:center;gap:12px;">
+        <a id="imgModalDownload" class="btn" href="" target="_blank" download>⬇️ Open / Download Image</a>
+        <button class="btn btn-secondary" onclick="closeModal('imgModal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let allSentences = [];
+    let currentSentences = [];
+    let sentenceAnalogyMap = {}; // sentence_id -> active row object
+    let activeSentenceId = null;
+    let savedAnalogiesList = [];
+
+    const THEME_OPTIONS = [
+      { val: 'racing', label: 'Racing 🏁' },
+      { val: 'cooking', label: 'Cooking 🍳' },
+      { val: 'construction', label: 'Construction 🏗️' },
+      { val: 'sailing', label: 'Sailing ⛵' },
+      { val: 'aviation', label: 'Aviation ✈️' },
+      { val: 'space', label: 'Space Exploration 🚀' },
+      { val: 'medical', label: 'Medical / Surgery 🏥' },
+      { val: 'traffic', label: 'Traffic / Highway 🛣️' },
+      { val: 'factory', label: 'Factory / Assembly Line 🏭' },
+      { val: 'gardening', label: 'Gardening 🌱' }
+    ];
+
+    function showToast(msg, isError = false, duration = 3500) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'toast show' + (isError ? ' error' : '');
+      setTimeout(() => t.classList.remove('show'), duration);
+    }
+
+    function toggleCard(headerEl) {
+      const body = headerEl.nextElementSibling;
+      const icon = headerEl.querySelector('.collapse-icon');
+      if (body) {
+        body.classList.toggle('collapsed');
+        if (icon) icon.textContent = body.classList.contains('collapsed') ? '▸' : '▾';
+      }
+    }
+
+    function escHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function copyText(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const text = el.value !== undefined ? el.value : el.textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('📋 Copied to clipboard!');
+      });
+    }
+
+    function openModal(id) { document.getElementById(id).classList.add('active'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+    function suggestTheme(sentenceType, text) {
+      const t = (text || '').toLowerCase();
+      if (t.includes('speed') || t.includes('fast') || t.includes('late') || t.includes('race')) return 'racing';
+      if (t.includes('prep') || t.includes('chef') || t.includes('recipe') || t.includes('serv')) return 'cooking';
+      if (t.includes('build') || t.includes('struct') || t.includes('found') || t.includes('modul')) return 'construction';
+      if (t.includes('navig') || t.includes('flow') || t.includes('stream') || t.includes('drift')) return 'sailing';
+      if (t.includes('cloud') || t.includes('fly') || t.includes('launch') || t.includes('altit')) return 'aviation';
+      if (t.includes('scal') || t.includes('orbit') || t.includes('univers') || t.includes('gravit')) return 'space';
+      if (t.includes('health') || t.includes('check') || t.includes('diag') || t.includes('reco')) return 'medical';
+      if (t.includes('route') || t.includes('traff') || t.includes('gate') || t.includes('path')) return 'traffic';
+      if (t.includes('pipel') || t.includes('process') || t.includes('auto') || t.includes('assemb')) return 'factory';
+      if (t.includes('grow') || t.includes('seed') || t.includes('env') || t.includes('nurt')) return 'gardening';
+      return 'racing';
+    }
+
+    async function init() {
+      await Promise.all([loadSentences(), loadSavedAnalogies()]);
+      updateStats();
+    }
+
+    async function loadSentences() {
+      try {
+        const r = await fetch('/rest/v1/sentences?select=id,module_number,video_number,sentence_number,sentence_text,sentence_type,script_id&order=sentence_number.asc', {
+          headers: { 'apikey': 'public-anon-key' }
+        });
+        if (r.ok) {
+          allSentences = await r.json();
+          document.getElementById('statSentences').textContent = allSentences.length;
+        } else {
+          // fallback mock sentences if DB offline
+          allSentences = [
+            { id: 101, module_number: 1, video_number: 1, sentence_number: 1, sentence_text: "Loading all raw unindexed data into memory creates severe performance bottlenecks and high latency.", sentence_type: "problem", script_id: 1 },
+            { id: 102, module_number: 1, video_number: 1, sentence_number: 2, sentence_text: "By implementing semantic vector search and dynamic caching, we achieve sub-second startup times and low resource usage.", sentence_type: "solution", script_id: 1 },
+            { id: 103, module_number: 1, video_number: 1, sentence_number: 3, sentence_text: "Monolithic deployments require manual scaling and suffer from frequent cascading failures under heavy user traffic.", sentence_type: "body", script_id: 1 },
+            { id: 104, module_number: 1, video_number: 1, sentence_number: 4, sentence_text: "Decoupled microservices allow automated linear scaling and fault isolation across cloud availability zones.", sentence_type: "solution", script_id: 1 }
+          ];
+          document.getElementById('statSentences').textContent = allSentences.length;
+        }
+        onFilterChange();
+      } catch (err) {
+        console.error('Error loading sentences:', err);
+        document.getElementById('sentenceTableWrap').innerHTML = `<div class="empty-state"><div class="empty-icon">❌</div><p>Failed to load sentences: ${escHtml(err.message)}</p></div>`;
+      }
+    }
+
+    async function loadSavedAnalogies() {
+      try {
+        const r = await fetch('/rest/v1/sentence_analogies?select=*&order=created_at.desc', {
+          headers: { 'apikey': 'public-anon-key' }
+        });
+        if (r.ok) {
+          savedAnalogiesList = await r.json();
+          document.getElementById('statCompleted').textContent = savedAnalogiesList.filter(x => x.generation_status === 'completed' && x.image_url).length;
+          // estimate cost: $0.039 per Gemini 2.5 flash image render
+          const cost = (savedAnalogiesList.length * 0.039).toFixed(2);
+          document.getElementById('statCost').textContent = `$${cost}`;
+          
+          // map to sentenceAnalogyMap
+          savedAnalogiesList.forEach(item => {
+            if (item.sentence_id) {
+              sentenceAnalogyMap[item.sentence_id] = item;
+            }
+          });
+          renderSavedAnalogiesTable();
+          if (currentSentences.length) renderSentenceTable();
+        }
+      } catch (err) {
+        console.warn('Could not load sentence_analogies from Supabase:', err);
+      }
+    }
+
+    function onFilterChange() {
+      const mod = document.getElementById('moduleSelect').value;
+      const vid = document.getElementById('videoSelect').value;
+      const thm = document.getElementById('themeFilter').value;
+      const query = document.getElementById('searchInput').value.trim().toLowerCase();
+
+      currentSentences = allSentences.filter(s => {
+        if (mod && String(s.module_number) !== mod) return false;
+        if (vid && String(s.video_number) !== vid) return false;
+        if (query && !String(s.sentence_text || '').toLowerCase().includes(query)) return false;
+        if (thm) {
+          const mapped = sentenceAnalogyMap[s.id];
+          const activeTheme = (mapped && mapped.analogy_theme) || suggestTheme(s.sentence_type, s.sentence_text);
+          if (activeTheme !== thm) return false;
+        }
+        return true;
+      });
+
+      renderSentenceTable();
+    }
+
+    function renderSentenceTable() {
+      const wrap = document.getElementById('sentenceTableWrap');
+      if (!currentSentences.length) {
+        wrap.innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><p>No matching script sentences found for selected filter.</p></div>`;
+        return;
+      }
+
+      const optsHtml = THEME_OPTIONS.map(o => `<option value="${o.val}">${o.label}</option>`).join('') + `<option value="custom">Custom Theme ✨</option>`;
+
+      const rows = currentSentences.map((s, i) => {
+        const existing = sentenceAnalogyMap[s.id] || {};
+        const chosenTheme = existing.analogy_theme || suggestTheme(s.sentence_type, s.sentence_text);
+        const status = existing.generation_status || 'pending';
+        
+        let pill = `<span class="status-pill ${status}">${status}</span>`;
+        let preview = `<span style="color:var(--text-muted);font-size:0.8rem;">—</span>`;
+        if (existing.image_url) {
+          preview = `<img src="${escHtml(existing.image_url)}" class="preview-thumb" onclick="viewImageModal(${s.id})" title="Click to view full infographic">`;
+        }
+
+        return `<tr>
+          <td class="check-col"><input type="checkbox" class="sentence-cb" value="${s.id}"></td>
+          <td class="num-col">${i + 1}</td>
+          <td class="sentence-col" style="cursor:pointer;" onclick="selectSentence(${s.id})">
+            <div style="font-weight:500;">${escHtml(s.sentence_text || '')}</div>
+            <div style="font-size:0.75rem;color:var(--text-muted);margin-top:4px;">
+              Module ${s.module_number} Video ${s.video_number} &bull; <span style="color:var(--accent);">${escHtml(s.sentence_type || 'body')}</span>
+            </div>
+          </td>
+          <td class="type-col">
+            <select class="theme-select" id="theme_${s.id}" onchange="onThemeChange(${s.id})">
+              ${optsHtml}
+            </select>
+          </td>
+          <td class="status-col">${pill}</td>
+          <td class="preview-col">${preview}</td>
+          <td class="action-col">
+            <button class="btn btn-secondary btn-sm" data-require-admin onclick="prepareSentence(${s.id})">⚙️ Prep</button>
+            <button class="btn btn-sm" data-require-admin onclick="generateForSentence(${s.id})">▶️ Render</button>
+            <button class="btn btn-secondary btn-sm" onclick="inspectModal(${s.id})" title="Inspect JSON & Prompt">🔍</button>
+          </td>
+        </tr>`;
+      }).join('');
+
+      wrap.innerHTML = `<table class="ig-table">
+        <thead><tr>
+          <th class="check-col"><input type="checkbox" id="selectAllSentences" onchange="toggleAll(this.checked)"></th>
+          <th class="num-col">#</th>
+          <th class="sentence-col">Sentence Text</th>
+          <th class="type-col">Analogy Theme</th>
+          <th class="status-col">Status</th>
+          <th class="preview-col">Preview</th>
+          <th class="action-col">Actions</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+
+      // Set select box values
+      currentSentences.forEach(s => {
+        const sel = document.getElementById('theme_' + s.id);
+        const existing = sentenceAnalogyMap[s.id];
+        if (sel) sel.value = (existing && existing.analogy_theme) || suggestTheme(s.sentence_type, s.sentence_text);
+      });
+
+      // auto-select first sentence if none active
+      if (!activeSentenceId && currentSentences.length > 0) {
+        selectSentence(currentSentences[0].id);
+      }
+    }
+
+    function toggleAll(checked) {
+      document.querySelectorAll('.sentence-cb').forEach(cb => cb.checked = checked);
+    }
+
+    function onThemeChange(sentenceId) {
+      const sel = document.getElementById('theme_' + sentenceId);
+      if (!sentenceAnalogyMap[sentenceId]) sentenceAnalogyMap[sentenceId] = { sentence_id: sentenceId };
+      sentenceAnalogyMap[sentenceId].analogy_theme = sel.value;
+      sentenceAnalogyMap[sentenceId].generation_status = sentenceAnalogyMap[sentenceId].generation_status || 'pending';
+      if (sentenceId === activeSentenceId) selectSentence(sentenceId);
+    }
+
+    async function selectSentence(sentenceId) {
+      activeSentenceId = sentenceId;
+      const s = allSentences.find(x => x.id === sentenceId);
+      if (!s) return;
+
+      const mapped = sentenceAnalogyMap[sentenceId] || {};
+      const theme = mapped.analogy_theme || suggestTheme(s.sentence_type, s.sentence_text);
+
+      document.getElementById('activeSentenceLabel').innerHTML = `Active Sentence #${s.sentence_number} (Module ${s.module_number} Video ${s.video_number}) &bull; Theme: <strong style="color:var(--accent);">${escHtml(theme)}</strong>`;
+
+      if (mapped.analogy_props && mapped.prompt_used) {
+        document.getElementById('editorJson').textContent = JSON.stringify(mapped.analogy_props, null, 2);
+        document.getElementById('editorPrompt').value = mapped.prompt_used;
+      } else {
+        // fetch or build default preview
+        await prepareSentence(sentenceId, true);
+      }
+    }
+
+    async function prepareSentence(sentenceId, isSilent = false) {
+      const s = allSentences.find(x => x.id === sentenceId);
+      if (!s) return;
+      const sel = document.getElementById('theme_' + sentenceId);
+      const theme = (sel && sel.value) || suggestTheme(s.sentence_type, s.sentence_text);
+
+      if (!isSilent) showToast(`⚙️ Prepping prompt for Sentence #${s.sentence_number}...`);
+
+      try {
+        const r = await fetch('/api/analogies/generate-prompt', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sentence: s.sentence_text || '',
+            sentenceType: s.sentence_type || 'body',
+            analogyTheme: theme,
+            moduleName: `Module ${s.module_number}`,
+            videoName: `Video ${s.video_number}`
+          })
+        });
+        const data = await r.json();
+        if (data.ok) {
+          if (!sentenceAnalogyMap[sentenceId]) sentenceAnalogyMap[sentenceId] = { sentence_id: sentenceId };
+          sentenceAnalogyMap[sentenceId].analogy_theme = theme;
+          sentenceAnalogyMap[sentenceId].analogy_props = data.analogyProps;
+          sentenceAnalogyMap[sentenceId].prompt_used = data.prompt;
+
+          if (activeSentenceId === sentenceId) {
+            document.getElementById('editorJson').textContent = JSON.stringify(data.analogyProps, null, 2);
+            document.getElementById('editorPrompt').value = data.prompt;
+          }
+          if (!isSilent) showToast(`✅ Prompt prepped for Sentence #${s.sentence_number}!`);
+        }
+      } catch (err) {
+        if (!isSilent) showToast(`❌ Error prepping prompt: ${err.message}`, true);
+      }
+    }
+
+    async function generateForSentence(sentenceId) {
+      if (!window.requireAdmin || !requireAdmin('render infographic')) return;
+      const s = allSentences.find(x => x.id === sentenceId);
+      if (!s) return;
+
+      const mapped = sentenceAnalogyMap[sentenceId] || {};
+      const sel = document.getElementById('theme_' + sentenceId);
+      const theme = (sel && sel.value) || mapped.analogy_theme || suggestTheme(s.sentence_type, s.sentence_text);
+
+      // Ensure we have prompt & props prepped
+      if (!mapped.prompt_used || !mapped.analogy_props) {
+        await prepareSentence(sentenceId, true);
+      }
+      const activeMapped = sentenceAnalogyMap[sentenceId] || {};
+      const promptToUse = activeMapped.prompt_used || document.getElementById('editorPrompt').value;
+      const propsToUse = activeMapped.analogy_props || {};
+
+      showToast(`▶️ Submitting Gemini image render for Sentence #${s.sentence_number}...`);
+      
+      // Update UI to generating
+      if (!sentenceAnalogyMap[sentenceId]) sentenceAnalogyMap[sentenceId] = { sentence_id: sentenceId };
+      sentenceAnalogyMap[sentenceId].generation_status = 'generating';
+      renderSentenceTable();
+
+      try {
+        const r = await fetch('/api/analogies/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sentence_id: s.id,
+            module_number: s.module_number || 1,
+            video_number: s.video_number || 1,
+            script_id: s.script_id || 1,
+            analogy_theme: theme,
+            prompt: promptToUse,
+            analogy_props: propsToUse
+          })
+        });
+        const data = await r.json();
+        if (r.ok && data.ok) {
+          sentenceAnalogyMap[sentenceId].generation_status = 'completed';
+          sentenceAnalogyMap[sentenceId].image_url = data.image_url;
+          sentenceAnalogyMap[sentenceId].azure_blob_name = data.azure_blob_name;
+          showToast(`🎉 Infographic rendered and saved for Sentence #${s.sentence_number}!`);
+          await loadSavedAnalogies();
+        } else {
+          sentenceAnalogyMap[sentenceId].generation_status = 'failed';
+          showToast(`❌ Render failed: ${data.error || 'Unknown error'}`, true, 5000);
+          renderSentenceTable();
+        }
+      } catch (err) {
+        if (sentenceAnalogyMap[sentenceId]) sentenceAnalogyMap[sentenceId].generation_status = 'failed';
+        showToast(`❌ Network error rendering image: ${err.message}`, true, 5000);
+        renderSentenceTable();
+      }
+    }
+
+    async function bulkPrepareSentences() {
+      if (!window.requireAdmin || !requireAdmin('prepare prompts')) return;
+      const cbs = document.querySelectorAll('.sentence-cb:checked');
+      if (!cbs.length) { showToast('No sentences checked. Please select rows.'); return; }
+      showToast(`⚙️ Prepping prompts for ${cbs.length} sentence(s)...`);
+      for (let cb of cbs) {
+        await prepareSentence(parseInt(cb.value), true);
+        await new Promise(r => setTimeout(r, 400));
+      }
+      showToast(`✅ Finished prepping ${cbs.length} prompts!`);
+      renderSentenceTable();
+    }
+
+    async function bulkGenerateInfographics() {
+      if (!window.requireAdmin || !requireAdmin('render infographics')) return;
+      const cbs = document.querySelectorAll('.sentence-cb:checked');
+      if (!cbs.length) { showToast('No sentences checked. Please select rows.'); return; }
+      showToast(`▶️ Starting sequential Gemini render for ${cbs.length} infographic(s)...`);
+      for (let cb of cbs) {
+        await generateForSentence(parseInt(cb.value));
+        await new Promise(r => setTimeout(r, 1000));
+      }
+      showToast(`🏆 Finished bulk infographic generation!`);
+    }
+
+    async function saveCurrentSpecOnly() {
+      if (!window.requireAdmin || !requireAdmin('save spec')) return;
+      if (!activeSentenceId) { showToast('No active sentence selected.'); return; }
+      const s = allSentences.find(x => x.id === activeSentenceId);
+      if (!s) return;
+
+      const sel = document.getElementById('theme_' + activeSentenceId);
+      const theme = (sel && sel.value) || 'racing';
+      const prompt = document.getElementById('editorPrompt').value;
+      let props = {};
+      try { props = JSON.parse(document.getElementById('editorJson').textContent); } catch (e) {}
+
+      showToast(`💾 Saving spec to Supabase...`);
+      try {
+        const r = await fetch('/api/analogies/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sentence_id: s.id,
+            module_number: s.module_number || 1,
+            video_number: s.video_number || 1,
+            script_id: s.script_id || 1,
+            analogy_theme: theme,
+            generation_status: 'completed',
+            prompt_used: prompt,
+            analogy_props: props
+          })
+        });
+        if (r.ok) {
+          showToast(`✅ Spec saved to Supabase!`);
+          await loadSavedAnalogies();
+        } else {
+          showToast(`❌ Error saving spec to Supabase.`, true);
+        }
+      } catch (err) {
+        showToast(`❌ Error: ${err.message}`, true);
+      }
+    }
+
+    async function renderCurrentInfographic() {
+      if (!activeSentenceId) { showToast('No active sentence selected.'); return; }
+      const promptVal = document.getElementById('editorPrompt').value;
+      if (sentenceAnalogyMap[activeSentenceId]) {
+        sentenceAnalogyMap[activeSentenceId].prompt_used = promptVal;
+      }
+      await generateForSentence(activeSentenceId);
+    }
+
+    function inspectModal(sentenceId) {
+      const s = allSentences.find(x => x.id === sentenceId);
+      const mapped = sentenceAnalogyMap[sentenceId] || {};
+      document.getElementById('modalJson').textContent = JSON.stringify(mapped.analogy_props || { info: "No properties generated yet. Click Prep Prompt." }, null, 2);
+      document.getElementById('modalPrompt').value = mapped.prompt_used || "No prompt generated yet. Click Prep Prompt.";
+      openModal('jsonModal');
+    }
+
+    function viewImageModal(sentenceId) {
+      const mapped = sentenceAnalogyMap[sentenceId] || {};
+      if (!mapped.image_url) return;
+      const s = allSentences.find(x => x.id === sentenceId) || { sentence_number: sentenceId };
+      document.getElementById('imgModalTitle').textContent = `⚖️ Analogy Infographic — Sentence #${s.sentence_number} (${mapped.analogy_theme || 'analogy'})`;
+      document.getElementById('imgModalSrc').src = mapped.image_url;
+      document.getElementById('imgModalDownload').href = mapped.image_url;
+      openModal('imgModal');
+    }
+
+    function renderSavedAnalogiesTable() {
+      const wrap = document.getElementById('savedAnalogiesWrap');
+      if (!savedAnalogiesList.length) {
+        wrap.innerHTML = `<div class="empty-state"><div class="empty-icon">📂</div><p>No saved analogy infographics found yet. Click ▶️ Render above to create one!</p></div>`;
+        return;
+      }
+
+      const rows = savedAnalogiesList.map(item => {
+        let imgHtml = `<span style="color:var(--text-muted);">No Image</span>`;
+        if (item.image_url) {
+          imgHtml = `<a href="${escHtml(item.image_url)}" target="_blank" style="color:var(--secondary);font-weight:600;text-decoration:underline;">🔗 Open PNG</a>`;
+        }
+        const dateStr = item.created_at ? new Date(item.created_at).toLocaleString() : '—';
+        return `<tr>
+          <td style="font-weight:700;color:var(--accent);">#${item.sentence_id || '—'}</td>
+          <td>Module ${item.module_number || 1} Video ${item.video_number || 1}</td>
+          <td style="text-transform:capitalize;font-weight:600;">${escHtml(item.analogy_theme || 'racing')}</td>
+          <td><span class="status-pill ${item.generation_status || 'completed'}">${item.generation_status || 'completed'}</span></td>
+          <td>${imgHtml}</td>
+          <td style="font-size:0.8rem;color:var(--text-muted);">${dateStr}</td>
+          <td style="text-align:right;">
+            <button class="btn btn-secondary btn-sm" onclick="inspectModal(${item.sentence_id})">🔍 Spec</button>
+            <button class="btn btn-danger btn-sm" data-require-admin onclick="deleteAnalogyRow(${item.id || 0}, ${item.sentence_id || 0})">🗑️</button>
+          </td>
+        </tr>`;
+      }).join('');
+
+      wrap.innerHTML = `<table class="ig-table">
+        <thead><tr>
+          <th>Sentence ID</th>
+          <th>Location</th>
+          <th>Theme</th>
+          <th>Status</th>
+          <th>Image Link</th>
+          <th>Created At</th>
+          <th style="text-align:right;">Actions</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+    }
+
+    async function deleteAnalogyRow(id, sentenceId) {
+      if (!window.requireAdmin || !requireAdmin('delete analogy')) return;
+      if (!confirm('Are you sure you want to delete this analogy infographic record?')) return;
+      try {
+        let targetUrl = `/rest/v1/sentence_analogies?sentence_id=eq.${sentenceId}`;
+        if (id) targetUrl = `/rest/v1/sentence_analogies?id=eq.${id}`;
+        const r = await fetch(targetUrl, {
+          method: 'DELETE',
+          headers: { 'apikey': 'public-anon-key' }
+        });
+        if (r.ok) {
+          showToast('🗑️ Analogy record deleted.');
+          if (sentenceAnalogyMap[sentenceId]) delete sentenceAnalogyMap[sentenceId];
+          await loadSavedAnalogies();
+          renderSentenceTable();
+        }
+      } catch (err) {
+        showToast(`❌ Error deleting row: ${err.message}`, true);
+      }
+    }
+
+    function updateStats() {
+      document.getElementById('statSentences').textContent = allSentences.length || 0;
+    }
+
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

@@ -272,7 +272,8 @@
           label: '🛠️ Tools',
           children: [
             { group: true, label: '💻 Dev Environment', children: [
-              { label: '🌊 Wave Terminal', url: '5_Symbols/production/preprod/tools/wave_terminal.html', description: 'Configuration and layout for Wave Terminal.' }
+              { label: '🌊 Wave Terminal', url: '5_Symbols/production/preprod/tools/wave_terminal.html', description: 'Configuration and layout for Wave Terminal.' },
+              { label: '🔄 Before & After Restart', url: '5_Symbols/production/preprod/tools/before_after_restart.html', description: 'Understanding state preservation and environment behavior before and after restarting your sessions.' }
             ]},
             { group: true, label: '🐙 Code & Repo', children: [
               { label: '🐙 GitHub Repo', url: 'https://github.com/rifaterdemsahin/claude-architect-certification' },

@@ -27,6 +27,10 @@ This document defines how AI agents interact with the **Claude AI Certification 
 ## 📅 Agent Activity Log
 
 ### 2026-07-01
+- **Task:** Ensure local application server (`http://localhost:8080`) automatically starts without prompting on login/restart, and complete verification of `wave_terminal.html` and `before_after_restart.html`.
+- **Action:** Added mandatory server startup rule to `.agents/AGENTS.md` and `GEMINI.md` requiring agents to immediately check reachability (`curl -s http://localhost:8080 >/dev/null`) and asynchronously launch `go build ./cmd/server && ./server` on startup without asking the user. Verified and opened both tools pages in Google Chrome.
+- **Status:** IMPLEMENTED, COMMITTED, PUSHED.
+
 - **Task:** Add Axiom page view logging when pages load, covering all pages with full URL.
 - **Action:** Added `reportPageView()` to `shared/nav.js` (which is loaded on all pages). It posts a page view event with `level: 'info'`, `url`, and `path` to the existing `/api/errors` backend, which forwards it to Axiom. Called it in the `init()` sequence so it triggers reliably on `DOMContentLoaded`.
 - **Status:** IMPLEMENTED, COMMITTED, PUSHED.
