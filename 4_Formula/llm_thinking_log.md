@@ -1,5 +1,21 @@
 # LLM Thinking Log
 
+## 2026-07-01 — ⚖️ Analogy Helper Page (Infographic Generator)
+
+### 🎯 Objective
+Create an **Analogy Helper** page (`5_Symbols/production/postprod/analogy_helper.html`) in the Production menu that generates side-by-side split-screen analogy infographics from course script sentences. Modeled closely after `animation_generator.html`, it allows users to choose from 10 analogy themes per sentence, preview the infographic prompt and structured analogy JSON, and execute live image rendering using Gemini image generation (`gemini-2.5-flash-image`), saving outputs to Azure Blob Storage and a new `sentence_analogies` Supabase table.
+
+### 🧭 Architecture & Workflow
+1. **Supabase Schema (`5_Symbols/supabase/migrations/migration_sentence_analogies.sql`)**:
+   - Table `sentence_analogies` tracking `(sentence_id, analogy_theme)`, generation status, full prompt used, structured analogy JSON props (`analogy_props`), image URL, and Azure blob name.
+2. **Go Backend Endpoints (`cmd/server/main.go`)**:
+   - `POST /api/analogies/generate-prompt`: Generates structured analogy JSON and formatted infographic prompt from sentence text using OpenRouter (`anthropic/claude-sonnet-4.6`) with a deterministic offline fallback.
+   - `POST /api/analogies/generate`: Admin-gated endpoint that submits the prompt to Gemini image generation (`gemini-2.5-flash-image`), uploads the resulting image to Azure Blob Storage (`research-images`), and upserts the record into Supabase.
+3. **Frontend UI (`5_Symbols/production/postprod/analogy_helper.html`)**:
+   - Glassmorphic interface with module/video filter, sentence selector table with per-sentence theme `<select>` dropdown (Racing, Cooking, Construction, Sailing, Aviation, Space, Medical, Traffic, Factory, Gardening), live preview area, modal inspectors for prompts/images, and saved analogies table.
+4. **Navigation Integration**:
+   - Added `⚖️ Analogy Helper` to `2. 🎨 Visuals & Graphics` under `📦 Post Prod` in `shared/nav.js`, `navigation_config.json`, `index.html`, and `markdown_renderer.html`.
+
 ## 2026-06-30 — 🔑 Admin login password = `Welcome.June.SH`
 
 ### 🎯 Objective
