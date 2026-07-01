@@ -129,6 +129,11 @@
               "label": "1. 🧭 Strategy & Research",
               "children": [
                 {
+                  "label": "📊 Business Sanity Check",
+                  "url": "markdown_renderer.html?file=4_Formula/sanity_check_report.md",
+                  "description": "Validation of the business model, assumptions, and operational readiness."
+                },
+                {
                   "label": "🎓 AI Certifications Analysis ↗",
                   "url": "https://rifaterdemsahin.github.io/ai-certifications-analysis/",
                   "description": "Market research on the hard, expensive AI certificates the course preps for — cost, difficulty, and re-sit pain framing the value proposition."
