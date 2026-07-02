@@ -615,6 +615,205 @@
       text-decoration: line-through;
     }
 
+    /* ===== Production Process Guide (Flywheel) ===== */
+    .flywheel-hero {
+      position: relative;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 1.25rem;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+    .flywheel-hero::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      opacity: 0.8;
+    }
+    .flywheel-hero img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 0.85rem;
+      box-shadow: 0 0 40px var(--primary-glow);
+    }
+    .flywheel-caption {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-top: 1rem;
+      font-style: italic;
+    }
+    .guide-intro {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 1.25rem;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    .guide-intro h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .guide-intro p {
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+    .phase-block {
+      margin-bottom: 2rem;
+    }
+    .phase-banner {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.5rem;
+      border-radius: 0.85rem;
+      margin-bottom: 1.5rem;
+      border-left: 4px solid;
+    }
+    .phase-banner.phase-1 {
+      background: rgba(0, 240, 255, 0.08);
+      border-left-color: var(--primary);
+    }
+    .phase-banner.phase-2 {
+      background: rgba(168, 85, 247, 0.08);
+      border-left-color: var(--secondary);
+    }
+    .phase-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+    }
+    .phase-1 .phase-label {
+      background: rgba(0, 240, 255, 0.15);
+      color: var(--primary);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+    }
+    .phase-2 .phase-label {
+      background: rgba(168, 85, 247, 0.15);
+      color: #d8b4fe;
+      border: 1px solid rgba(168, 85, 247, 0.3);
+    }
+    .phase-name {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+    .flywheel-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+    }
+    .step-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    .step-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--primary);
+      box-shadow: 0 10px 25px rgba(0, 240, 255, 0.12);
+    }
+    .step-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      font-weight: 800;
+      font-size: 1.1rem;
+      margin-bottom: 0.75rem;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: #000;
+      box-shadow: 0 0 15px var(--primary-glow);
+    }
+    .step-card.phase-2-card .step-num {
+      background: linear-gradient(135deg, var(--secondary), #ec4899);
+      box-shadow: 0 0 15px var(--secondary-glow);
+    }
+    .step-card h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 0.4rem;
+    }
+    .step-focus {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
+    .phase-2-card .step-focus {
+      color: #d8b4fe;
+    }
+    .step-card p {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      line-height: 1.55;
+    }
+    .step-card.visual-only {
+      border-style: dashed;
+      opacity: 0.9;
+    }
+    .flywheel-loop {
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.08), rgba(168, 85, 247, 0.08));
+      border: 1px solid rgba(0, 240, 255, 0.25);
+      border-radius: 1.25rem;
+      padding: 2rem;
+      text-align: center;
+      margin-top: 1rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .flywheel-loop::before {
+      content: '🔄';
+      position: absolute;
+      font-size: 8rem;
+      opacity: 0.05;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    .flywheel-loop h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      position: relative;
+    }
+    .flywheel-loop p {
+      color: var(--text-muted);
+      max-width: 700px;
+      margin: 0 auto;
+      line-height: 1.6;
+      position: relative;
+    }
+    @media (max-width: 640px) {
+      .phase-banner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+      }
+    }
+
     footer {
       margin-top: 4rem;
       text-align: center;
@@ -720,7 +919,11 @@
 
     <!-- TABS NAVIGATION -->
     <div class="tabs-nav">
-      <button class="tab-btn active" onclick="switchTab('prompt-builder', this)">
+      <button class="tab-btn active" onclick="switchTab('process-guide', this)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+        🔄 Production Process
+      </button>
+      <button class="tab-btn" onclick="switchTab('prompt-builder', this)">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
         ⚡ Prompt Builder
       </button>
@@ -734,8 +937,100 @@
       </button>
     </div>
 
+    <!-- TAB 0: PRODUCTION PROCESS GUIDE -->
+    <div id="tab-process-guide" class="tab-content active">
+      <!-- Hero infographic -->
+      <div class="flywheel-hero">
+        <img src="../../../3_Simulation/generated/deliverypilot_course_flywheel.png" alt="DeliveryPilot Course Creation Flywheel infographic showing a continuous 7-step loop from outline generation through marketing and community back to the start" />
+        <p class="flywheel-caption">The DeliveryPilot Course Creation Flywheel — a continuous 7-step loop where community feedback spins straight back into the next outline.</p>
+      </div>
+
+      <!-- Intro -->
+      <div class="guide-intro">
+        <h2>🎬 How the Production Process Works</h2>
+        <p>
+          Every course module on this certification path is built with a single, repeatable engine: the <strong>DeliveryPilot Course Creation Flywheel</strong>.
+          The work is split into <strong>two phases</strong> and <strong>seven continuous steps</strong>. It is not a funnel that ends — it is a wheel that keeps
+          spinning, because what the audience does with a published video directly shapes the next script. Use this guide as your orientation before diving into
+          the Prompt Builder, Reference Repositories, and Objectives Matrix below.
+        </p>
+      </div>
+
+      <!-- PHASE 1 -->
+      <div class="phase-block">
+        <div class="phase-banner phase-1">
+          <span class="phase-label">Phase 1</span>
+          <span class="phase-name">🏗️ Architecture &amp; Narrative</span>
+        </div>
+        <div class="flywheel-grid">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <h3>📋 Outline Generation</h3>
+            <div class="step-focus">Core Focus: Designing the blueprint</div>
+            <p>Establish the core learning objectives and the logical flow of the module — the structural skeleton every later step hangs from.</p>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <h3>✍️ Script Production</h3>
+            <div class="step-focus">Core Focus: Crafting the narrative</div>
+            <p>Develop a structured, engaging script that balances deep theory with clarity — the spoken backbone of the video.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- PHASE 2 -->
+      <div class="phase-block">
+        <div class="phase-banner phase-2">
+          <span class="phase-label">Phase 2</span>
+          <span class="phase-name">🎬 Visuals &amp; Execution</span>
+        </div>
+        <div class="flywheel-grid">
+          <div class="step-card phase-2-card">
+            <div class="step-num">3</div>
+            <h3>🎨 Visual Translation</h3>
+            <div class="step-focus">Core Focus: Converting script into diagrams &amp; assets</div>
+            <p>Turn the narrative into purposeful diagrams and visual assets — cost-effective and built specifically for certification teaching.</p>
+          </div>
+          <div class="step-card phase-2-card">
+            <div class="step-num">4</div>
+            <h3>🎥 Recording the Walkthrough</h3>
+            <div class="step-focus">Core Focus: Capturing execution</div>
+            <p>Record the screen, terminal, and voiceover to guide the viewer step-by-step through the implementation.</p>
+          </div>
+          <div class="step-card phase-2-card visual-only">
+            <div class="step-num">5</div>
+            <h3>📹 On-Camera Capture</h3>
+            <div class="step-focus">Core Focus: Visual asset only</div>
+            <p>The infographic marks this slot with a camera icon — the on-camera / presenter capture that complements the screen recording.</p>
+          </div>
+          <div class="step-card phase-2-card">
+            <div class="step-num">6</div>
+            <h3>📦 Post-Production &amp; Publishing</h3>
+            <div class="step-focus">Core Focus: Assembling the final product</div>
+            <p>Leverage editing tools to integrate the technical recordings and visuals, then deploy the video to its publishing platform.</p>
+          </div>
+          <div class="step-card phase-2-card">
+            <div class="step-num">7</div>
+            <h3>📣 Marketing &amp; Community</h3>
+            <div class="step-focus">Core Focus: Pushing content live</div>
+            <p>Use engagement as a driver for feedback and audience-building — and this is where the wheel spins straight back to Step 1.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Flywheel effect -->
+      <div class="flywheel-loop">
+        <h3>🔄 The Flywheel Effect</h3>
+        <p>
+          Because this is a flywheel model, <strong>Step 7 (Marketing &amp; Community)</strong> feeds directly back into
+          <strong>Step 1 (Outline Generation)</strong>. Community feedback continuously refines the next iteration — or the next course —
+          so every published video makes the next one sharper.
+        </p>
+      </div>
+    </div>
+
     <!-- TAB 1: PROMPT BUILDER -->
-    <div id="tab-prompt-builder" class="tab-content active">
+    <div id="tab-prompt-builder" class="tab-content">
       <div class="app-grid">
         <!-- LEFT PANEL: CONFIGURATION FORM -->
         <div class="panel">
@@ -1296,6 +1591,22 @@
       const promptText = `# TASK: Generate an Architectural Demonstration Project for the Claude AI Architect Exam
 
 You are an expert Principal AI Architect and Systems Engineer. Your task is to build a complete, runnable, production-grade architectural demonstration project from scratch based on the provided **Claude AI Architect Exam** Question and Answer. You must initialize the project folder locally and push the completed repository directly to GitHub.
+
+## 📐 Concrete Example of Expected Output
+
+Before you begin, here is a concrete working example of exactly what you must produce — use this as your structural template:
+
+**Example Scenario:** The exam question is *"A document analysis subagent frequently fails on PDF files (corrupted sections, password protection, parse timeouts). Raw exceptions kill the subagent and force the coordinator to retry/skip/fail, causing excessive overhead. What is the best architectural improvement?"*
+
+**Expected Output (following this exact template):**
+- **Repo name:** \`pdf-agent-error-recovery-demo\`
+- **Side-by-side:** \`src/subagent-naive.js\` (raw throws — coordinator does everything) vs \`src/subagent-resilient.js\` (local retry 3× on transient, structured escalation with \`{status, partialResults, attemptLog}\` on fatal)
+- **CLI benchmark (\`demo.js\`):** ascii table showing \`Coordinator Interventions: 5 → 1\`, \`Token Cost: 12.4k → 3.1k\`, \`Success Rate: 60% → 98%\`
+- **Web simulator (\`index.html\`):** Pico.css + htmx with tab toggle (Naive ↔ Resilient ↔ Side-by-Side), animated metric scoreboard, event log, "🔊 Listen & Follow" MP3 auto-scroll walkthrough
+- **Docs:** \`docs/step-images/\` with 5 "How, What & Why" visual diagrams + modal lightbox; \`README.md\` with LLM attribution badge, live demo link, and quickstart
+- **Deployment:** \`.github/workflows/static.yml\` → auto-deploy to GitHub Pages → auto-open \`https://<github-username>.github.io/<repo-name>/\`
+
+Now apply this exact structure to the exam question and answer below.
 
 ## ⚡ Mandatory Initial Settings & Pre-requisites
 1. **Gemini \`settings.json\` Permission Access**: At the very start of your session before executing commands or modifying files, check, request, or configure your permission access grants in \`/Users/rifaterdemsahin/.gemini/antigravity-cli/settings.json\` (or workspace settings) so that you have automated read/write, git, and command execution access without interrupting the user by repeatedly asking for permission during project build and deployment!
@@ -2168,11 +2479,14 @@ Execute the steps above sequentially and thoroughly. When finished, print the CL
       initSupabaseLabs();
 
       // Check URL hash for tab linking
-      if (location.hash === '#repos') {
-        const btn = document.querySelectorAll('.tab-btn')[1];
+      if (location.hash === '#process') {
+        const btn = document.querySelectorAll('.tab-btn')[0];
+        if (btn) switchTab('process-guide', btn);
+      } else if (location.hash === '#repos') {
+        const btn = document.querySelectorAll('.tab-btn')[2];
         if (btn) switchTab('repos', btn);
       } else if (location.hash === '#objectives') {
-        const btn = document.querySelectorAll('.tab-btn')[2];
+        const btn = document.querySelectorAll('.tab-btn')[3];
         if (btn) switchTab('objectives', btn);
       }
     });

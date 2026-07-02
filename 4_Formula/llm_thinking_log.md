@@ -1,5 +1,21 @@
 # LLM Thinking Log
 
+## 2026-07-02 — 🔄 Production Process Guide (Course Creation Flywheel) on Hands-on Labs
+
+### 🎯 Objective
+Add a guide explaining how the production process works to the **Hands-on Labs** page (`5_Symbols/production/prod/handson.html`, reached via Production menu → Hands-on Labs), with the DeliveryPilot Course Creation Flywheel infographic embedded at the top.
+
+### 🧭 Architecture & Design Choices
+- **Asset placement:** Copied the user-provided infographic into the project as `3_Simulation/generated/deliverypilot_course_flywheel.png` (1024×559), reusing the existing `../../../3_Simulation/...` relative-path convention already used by other pages — no new asset directory or server route needed (Go server already serves `3_Simulation/` statically).
+- **New tab, not a new page:** The Hands-on Labs page is a tabbed command center (Prompt Builder / Reference Repositories / Objectives Matrix). To respect the “HTML containment inside `5_Symbols`” rule and keep the experience cohesive, the guide was added as a **new first tab** `🔄 Production Process` (`tab-process-guide`) rather than a standalone HTML file.
+- **Default-active orientation tab:** Made the new guide the first tab and default-active so visitors land on the “how it works” overview before the tools. This shifted the existing tab-button indices, so the URL-hash deeplink logic (`#repos` → `[1]`, `#objectives` → `[2]`) was updated to `[2]` / `[3]` and a new `#process` → `[0]` branch was added.
+- **Visual design:** Reused the page’s existing CSS variables (cyan/purple/green glassmorphic theme). Built reusable classes — `.flywheel-hero` (glowing embedded image + caption), `.phase-banner` (colour-coded Phase 1 cyan / Phase 2 purple), `.flywheel-grid` + `.step-card` (responsive auto-fit step cards with gradient step-number badges), and `.flywheel-loop` (the flywheel-effect callout with a giant translucent 🔄 watermark). Faithfully represented all 7 wheel slots, marking Step 5 as `visual-only` (dashed border) since the infographic shows only a camera icon there.
+- **No behavioural drift:** The `switchTab()` function needed no changes; `DOMContentLoaded` still calls `updatePrompt()`/`loadObjectives()`/`initSupabaseLabs()` so the other tabs initialise correctly regardless of which is active.
+
+### ✅ Verification
+`go build ./... && go vet ./...` green; inline `<script>` parses (1 block); local server serves the page **200** and the embedded PNG **200**; `tab-process-guide` + `deliverypilot_course_flywheel.png` both present in served HTML. Opened in Chrome.
+
+
 ## 2026-07-02 — ⌨️ Mac Terminal Navigation Formula (`mac_terminal_navigation_formula.md`)
 
 ### 🎯 Objective
