@@ -1744,6 +1744,28 @@ Execute the steps above sequentially and thoroughly. When finished, print the CL
       if (!container) return;
       let html = '';
       labs.forEach(lab => {
+        let objsHtml = '';
+        const objs = typeof lab.objectives === 'string' ? JSON.parse(lab.objectives) : lab.objectives;
+        if (Array.isArray(objs) && objs.length > 0) {
+          objsHtml = `
+            <div style="margin-top: 1rem; padding: 0.75rem; background: rgba(0, 240, 255, 0.04); border: 1px solid rgba(0, 240, 255, 0.15); border-radius: 8px;">
+              <div style="font-size: 0.75rem; font-weight: 600; color: #00f0ff; margin-bottom: 0.4rem; display: flex; align-items: center; gap: 4px; text-transform: uppercase; letter-spacing: 0.5px;">
+                <span>🎯 Learning Objectives</span>
+              </div>
+              <ul style="margin: 0; padding-left: 1.2rem; font-size: 0.82rem; color: var(--text-main); list-style-type: disc; display: flex; flex-direction: column; gap: 4px;">
+          `;
+          objs.forEach(o => {
+            const label = typeof o === 'string' ? o : (o.label || '');
+            if (label) {
+              objsHtml += `<li style="line-height: 1.4;">${label}</li>`;
+            }
+          });
+          objsHtml += `
+              </ul>
+            </div>
+          `;
+        }
+
         html += `
           <div class="repo-card">
             <div>
@@ -1756,6 +1778,7 @@ Execute the steps above sequentially and thoroughly. When finished, print the CL
                 <span class="meta-tag"><span class="meta-dot" style="background: #00f0ff;"></span>Module ${lab.module_number} Lab</span>
                 <span>Video ${lab.video_id}</span>
               </div>
+              ${objsHtml}
             </div>
             <div class="repo-actions">
               <a href="${lab.repo_url}" target="_blank" class="btn-repo">🐙 GitHub</a>
