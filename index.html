@@ -3135,7 +3135,8 @@
 
         function resolveUrl(url) {
           if (!url) return "#";
-          if (url === "index.html" || url.startsWith("http") || url.includes("markdown_renderer.html") || url.endsWith(".html")) return url;
+          const pathname = url.split('#')[0].split('?')[0];
+          if (pathname === "index.html" || url.startsWith("http") || url.includes("markdown_renderer.html") || pathname.endsWith(".html") || pathname.endsWith("/")) return url;
           return `markdown_renderer.html?file=${url}`;
         }
 

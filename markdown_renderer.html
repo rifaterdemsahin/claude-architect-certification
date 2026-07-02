@@ -2038,9 +2038,10 @@
             // URLs in navigation_config.json are already fully resolved.
             // Only auto-prefix bare .md paths from the minimal offline fallback.
             let finalUrl = item.url;
+            const pathname = finalUrl ? finalUrl.split('#')[0].split('?')[0] : '';
             if (finalUrl && finalUrl !== "divider" && !finalUrl.startsWith("http") &&
-                !finalUrl.includes("markdown_renderer.html") && !finalUrl.endsWith(".html") &&
-                !finalUrl.endsWith("/")) {
+                !finalUrl.includes("markdown_renderer.html") && !pathname.endsWith(".html") &&
+                !pathname.endsWith("/")) {
               finalUrl = `markdown_renderer.html?file=${finalUrl}`;
             }
             

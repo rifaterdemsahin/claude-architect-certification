@@ -474,7 +474,8 @@
   function resolveUrl(url) {
     if (!url || url === '#') return '#';
     if (url.startsWith('http') || url.startsWith('/')) return url; // absolute path or external URL
-    if (url.endsWith('.html') || url.includes('?') || url.endsWith('/')) return ROOT + url;
+    var pathname = url.split('#')[0].split('?')[0];
+    if (pathname.endsWith('.html') || url.includes('?') || pathname.endsWith('/')) return ROOT + url;
     return ROOT + 'markdown_renderer.html?file=' + url;
   }
 
