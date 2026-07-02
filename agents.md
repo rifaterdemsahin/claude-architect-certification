@@ -26,6 +26,11 @@ This document defines how AI agents interact with the **Claude AI Certification 
 
 ## 📅 Agent Activity Log
 
+### 2026-07-02
+- **Task:** When logging into AGY or starting a session, immediately turn on `http://localhost:8080/` and show it at the start.
+- **Action:** Updated `.agents/AGENTS.md`, `gemini.md`, and `agents.md` to explicitly require turning on the local server (`http://localhost:8080/`), opening `http://localhost:8080/` in Google Chrome, AND displaying the clickable link at the very start of the initial response upon login/session start. Verified server status and opened `http://localhost:8080/` in Chrome.
+- **Status:** IMPLEMENTED, COMMITTED, PUSHED.
+
 ### 2026-07-01
 - **Task:** Ensure local application server (`http://localhost:8080`) automatically starts without prompting on login/restart, and complete verification of `wave_terminal.html` and `before_after_restart.html`.
 - **Action:** Added mandatory server startup rule to `.agents/AGENTS.md` and `GEMINI.md` requiring agents to immediately check reachability (`curl -s http://localhost:8080 >/dev/null`) and asynchronously launch `go build ./cmd/server && ./server` on startup without asking the user. Verified and opened both tools pages in Google Chrome.
@@ -466,6 +471,7 @@ bat 6_Semblance/logs/autonomous_error_loop_report.md   # or: cat / glow
 - **Micro-commits:** Commit and push after every incremental task.
 - **✅ Verify Locally Before Push:** Before committing and pushing any page or UI/feature change, run the app locally (`/run-local`, http://localhost:8080) and confirm the affected pages actually work — pages serve HTTP 200 and, for Supabase-backed pages, the data round-trip (load → save/upsert → read back) succeeds against the live tables. Only push once local verification passes. Never push UI changes unverified.
 - **🌐 Open HTML in Chrome Only:** Whenever you open any HTML page or local/preview URL, ALWAYS open it in **Google Chrome** — never the default browser. Use `open -a "Google Chrome" <url>` (e.g. `open -a "Google Chrome" http://localhost:8080/path/to/page.html`). This applies to every "open"/"preview"/"open local" action in this project.
+- **⚡ Mandatory Server Startup & Display at Login/Session Start:** Whenever starting a new session or logging into AGY, immediately turn on the local server (`go build ./cmd/server && ./server` in background if not already running), open `http://localhost:8080/` in Google Chrome (`open -a "Google Chrome" http://localhost:8080/`), and display the clickable link http://localhost:8080/ at the very start of your initial response without asking the user.
 - **🌐 Post-Task Execution:** Always remember to run the local server at port 8080 (e.g. `go build ./... && go run cmd/server/main.go &`) and open the modified page in Chrome (e.g., `open -a "Google Chrome" http://localhost:8080/path/to/page.html`) after making changes to visually and functionally verify them.
 - **🌐 Visual Diff on Multi-File Changes:** Whenever a commit/changeset touches **more than 3 files**, open the GitHub commit history page in Chrome **after pushing** so the user can visually review the diff at a glance:
   ```bash
