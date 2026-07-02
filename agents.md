@@ -28,7 +28,7 @@ This document defines how AI agents interact with the **Claude AI Certification 
 
 ### 2026-07-02
 - **Task:** Update customer development framework page with specific validation milestones and timeline gates.
-- **Action:** Updated `5_Symbols/production/preprod/customer_development.html` with explicit gate descriptions for Customer Discovery ($10 YouTube join model vs $100 exam / 6-month penalty), Customer Validation ($10k lifetime revenue), Customer Creation (monthly course creation cycle), and Company Building (full-time independence with no extra contracts). Documented in `4_Formula/llm_thinking_log.md`.
+- **Action:** Updated `5_Symbols/production/preprod/customer_development.html` with explicit gate descriptions for Customer Discovery ($10 YouTube join model vs $100 exam / 6-month penalty, plus self-learning technique discovery goal using Delivery Pilot and video production), Customer Validation ($10k lifetime revenue), Customer Creation (monthly course creation cycle), and Company Building (full-time independence with no extra contracts). Documented in `4_Formula/llm_thinking_log.md`.
 - **Status:** IMPLEMENTED, COMMITTED, PUSHED.
 
 - **Task:** When logging into AGY or starting a session, immediately turn on `http://localhost:8080/` and show it at the start.
