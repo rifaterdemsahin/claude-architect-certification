@@ -1,5 +1,15 @@
 # LLM Thinking Log
 
+## 2026-07-02 — ⚡ Mandatory Server Startup & Display Formula
+
+### 🎯 Objective
+Create a formal Formula document (`4_Formula/mandatory_server_startup_formula.md`) capturing the rule, rationale, and technical architecture behind the mandatory server startup and link display requirement on AI session start/restart.
+
+### 🧭 Architecture & Design Choices
+- **Zero-Prompt Activation**: Eliminates manual friction where users previously had to prompt the AI agent to start or check the local application server (`http://localhost:8080/`).
+- **Idempotent Check-and-Launch**: Uses `curl -s http://localhost:8080 >/dev/null` as a lightweight probe before conditionally launching `go build ./cmd/server && ./server &` asynchronously.
+- **Multi-Document Verification**: Records the invariant across `.agents/AGENTS.md`, `GEMINI.md`, `agents.md`, and `AGENTS.md` to ensure any AI agent model or persona respects the requirement.
+
 ## 2026-07-01 — 🖼️ Research Images Page Enhancement (Last Uploaded, Sort, and Note Adding)
 
 ### 🎯 Objective
