@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS handsonlabs (
   description     TEXT NOT NULL,                    -- Short description of the repo pattern
   module_number   INTEGER NOT NULL,                 -- e.g. 1
   module_title    TEXT NOT NULL,                    -- e.g. "📚 Module 1: Foundations of Cloud & AI Architecture"
-  video_id        TEXT UNIQUE NOT NULL,             -- e.g. "1.1" or "Video 1.1"
+  video_id        TEXT NOT NULL,                    -- e.g. "1.1" or "Video 1.1"
   video_title     TEXT NOT NULL,                    -- e.g. "Video 1.1: Architecture Overview"
   objectives      JSONB NOT NULL,                   -- Array of objective objects: [{"id": "m1-v1-1", "label": "..."}]
   created_at      TIMESTAMPTZ DEFAULT NOW(),

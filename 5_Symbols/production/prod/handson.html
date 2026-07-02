@@ -724,13 +724,13 @@
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
         ⚡ Prompt Builder
       </button>
-      <button class="tab-btn" onclick="switchTab('repos', this)">
+      <button class="tab-btn" id="reposTabBtn" onclick="switchTab('repos', this)">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
-        📦 Reference Repositories (8)
+        <span id="reposTabLabel">📦 Reference Repositories (9)</span>
       </button>
-      <button class="tab-btn" onclick="switchTab('objectives', this)">
+      <button class="tab-btn" id="objsTabBtn" onclick="switchTab('objectives', this)">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
-        🎯 Video & Module Objectives Matrix
+        <span id="objsTabLabel">🎯 Video & Module Objectives Matrix</span>
       </button>
     </div>
 
@@ -833,9 +833,9 @@
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
             Live Resilience Demo Repositories
           </div>
-          <span style="color: var(--text-muted); font-size: 0.85rem;">8 Public Reference Repositories</span>
+          <span id="reposCountSubtitle" style="color: var(--text-muted); font-size: 0.85rem;">9 Public Reference Repositories</span>
           <span id="supabaseReposBadge" style="font-size: 0.75rem; background: rgba(0, 240, 255, 0.1); color: #00f0ff; padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(0, 240, 255, 0.2); display: none;">🗄️ Supabase Synced</span>
-          <button class="btn-repo" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border-color: #10b981; margin-left: auto; font-weight: 600;" onclick="openLabModal()">➕ Add New Repository</button>
+          <button class="btn-repo" data-require-admin="true" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border-color: #10b981; margin-left: auto; font-weight: 600;" onclick="openLabModal()">➕ Add New Repository</button>
         </div>
         <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem;">
           These production-grade demonstration repositories showcase side-by-side comparisons of resilient architectural patterns versus naive anti-patterns. Click to view source code on GitHub, experience live interactive simulators, or copy git clone commands.
@@ -1222,34 +1222,34 @@
             <label>Description</label>
             <textarea id="modalDesc" rows="2" placeholder="Brief description of the resilience pattern..." required></textarea>
           </div>
-          <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 1rem;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
             <div class="form-group">
-              <label>Module Number</label>
-              <select id="modalModNum" required>
-                <option value="1">Module 1</option>
-                <option value="2">Module 2</option>
-                <option value="3">Module 3</option>
-                <option value="4">Module 4</option>
-                <option value="5">Module 5</option>
+              <label>Course Module</label>
+              <select id="modalModNum" onchange="onModuleSelectChange(true)" required>
+                <option value="1">Module 1: Foundations of Cloud & AI Architecture</option>
+                <option value="2">Module 2: Multi-Agent & Subagent Orchestration</option>
+                <option value="3">Module 3: Error Coordination & Escalation Patterns</option>
+                <option value="4">Module 4: API Rate Limiting & Backpressure</option>
+                <option value="5">Module 5: Exam Scenarios & Production Capstone</option>
               </select>
+              <input type="hidden" id="modalModTitle" value="">
             </div>
             <div class="form-group">
-              <label>Module Title</label>
-              <input type="text" id="modalModTitle" placeholder="📚 Module 1: Foundations of Cloud & AI Architecture" required>
-            </div>
-          </div>
-          <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 1rem;">
-            <div class="form-group">
-              <label>Video ID (e.g. 1.1)</label>
-              <input type="text" id="modalVidId" placeholder="1.1" required>
-            </div>
-            <div class="form-group">
-              <label>Video Title</label>
-              <input type="text" id="modalVidTitle" placeholder="Video 1.1: Architecture Overview" required>
+              <label>Video / Lesson</label>
+              <select id="modalVidSelect" onchange="onVideoSelectChange(true)" required>
+                <!-- Populated dynamically -->
+              </select>
+              <input type="hidden" id="modalVidId" value="">
+              <input type="hidden" id="modalVidTitle" value="">
             </div>
           </div>
           <div class="form-group">
-            <label>Learning Objectives (One objective per line)</label>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+              <label style="margin-bottom: 0;">Learning Objectives (One per line)</label>
+              <select id="modalObjsDropdown" onchange="onObjectivesDropdownChange()" style="width: auto; padding: 0.25rem 0.6rem; font-size: 0.75rem; background: rgba(0, 240, 255, 0.08); border: 1px solid rgba(0, 240, 255, 0.3); color: #00f0ff; border-radius: 6px;">
+                <option value="">✨ Load Preset Objectives...</option>
+              </select>
+            </div>
             <textarea id="modalObjs" rows="4" placeholder="Understand core architectural bottlenecks&#10;Implement local backoff recovery&#10;Verify real-time token savings" required></textarea>
           </div>
           <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem;">
@@ -1710,6 +1710,9 @@ Execute the steps above sequentially and thoroughly. When finished, print the CL
 
       if (progressText) progressText.innerText = `${done} / ${total} (${pct}%)`;
       if (progressBarFill) progressBarFill.style.width = `${pct}%`;
+
+      const objsTabLabel = document.getElementById('objsTabLabel');
+      if (objsTabLabel) objsTabLabel.innerText = `🎯 Video & Module Objectives Matrix (${total})`;
     }
 
     // Supabase DB Integration
@@ -1742,8 +1745,20 @@ Execute the steps above sequentially and thoroughly. When finished, print the CL
     function renderReposGridFromSupabase(labs) {
       const container = document.getElementById('reposGridContainer');
       if (!container) return;
+
+      const tabLabel = document.getElementById('reposTabLabel');
+      if (tabLabel) tabLabel.innerText = `📦 Reference Repositories (${labs.length})`;
+      const sub = document.getElementById('reposCountSubtitle');
+      if (sub) sub.innerText = `${labs.length} Public Reference Repositories`;
+
+      const sortedLabs = [...labs].sort((a, b) => {
+        const dateA = new Date(a.updated_at || a.created_at || 0).getTime();
+        const dateB = new Date(b.updated_at || b.created_at || 0).getTime();
+        return dateB - dateA;
+      });
+
       let html = '';
-      labs.forEach(lab => {
+      sortedLabs.forEach(lab => {
         let objsHtml = '';
         const objs = typeof lab.objectives === 'string' ? JSON.parse(lab.objectives) : lab.objectives;
         if (Array.isArray(objs) && objs.length > 0) {
@@ -1766,6 +1781,9 @@ Execute the steps above sequentially and thoroughly. When finished, print the CL
           `;
         }
 
+        const dateStr = lab.updated_at || lab.created_at;
+        const formattedDate = dateStr ? new Date(dateStr).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Recently updated';
+
         html += `
           <div class="repo-card">
             <div>
@@ -1777,6 +1795,7 @@ Execute the steps above sequentially and thoroughly. When finished, print the CL
               <div class="repo-meta">
                 <span class="meta-tag"><span class="meta-dot" style="background: #00f0ff;"></span>Module ${lab.module_number} Lab</span>
                 <span>Video ${lab.video_id}</span>
+                <span style="color: #a855f7; font-size: 0.8rem; font-weight: 500;">🗓️ Updated: ${formattedDate}</span>
               </div>
               ${objsHtml}
             </div>
@@ -1784,8 +1803,8 @@ Execute the steps above sequentially and thoroughly. When finished, print the CL
               <a href="${lab.repo_url}" target="_blank" class="btn-repo">🐙 GitHub</a>
               <a href="${lab.demo_url}" target="_blank" class="btn-repo" style="color: #00f0ff; border-color: rgba(0, 240, 255, 0.3);">🌐 Live Demo</a>
               <button class="btn-repo" onclick="copyCloneCmd('rifaterdemsahin/${lab.repo_name}', this)">📋 Clone</button>
-              <button class="btn-repo" style="border-color: rgba(168, 85, 247, 0.4); color: #c084fc;" onclick="editLab(${lab.id})">✏️ Edit</button>
-              <button class="btn-repo" style="border-color: rgba(239, 68, 68, 0.4); color: #f87171;" onclick="deleteLab(${lab.id}, '${lab.repo_name}')">🗑️ Delete</button>
+              <button class="btn-repo" data-require-admin="true" style="border-color: rgba(168, 85, 247, 0.4); color: #c084fc;" onclick="editLab(${lab.id})">✏️ Edit</button>
+              <button class="btn-repo" data-require-admin="true" style="border-color: rgba(239, 68, 68, 0.4); color: #f87171;" onclick="deleteLab(${lab.id}, '${lab.repo_name}')">🗑️ Delete</button>
             </div>
           </div>
         `;
@@ -1840,8 +1859,8 @@ Execute the steps above sequentially and thoroughly. When finished, print the CL
               <td>
                 <a href="${vid.repo_url}" target="_blank" style="color: var(--primary); font-weight: 500; display: block; margin-bottom: 0.4rem;">${vid.repo_name} ↗</a>
                 <div style="display: flex; gap: 6px;">
-                  <button onclick="editLab(${vid.id})" style="padding: 2px 6px; font-size: 0.7rem; background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 4px; cursor: pointer;">✏️ Edit</button>
-                  <button onclick="deleteLab(${vid.id}, '${vid.repo_name}')" style="padding: 2px 6px; font-size: 0.7rem; background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 4px; cursor: pointer;">🗑️ Delete</button>
+                  <button data-require-admin="true" onclick="editLab(${vid.id})" style="padding: 2px 6px; font-size: 0.7rem; background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 4px; cursor: pointer;">✏️ Edit</button>
+                  <button data-require-admin="true" onclick="deleteLab(${vid.id}, '${vid.repo_name}')" style="padding: 2px 6px; font-size: 0.7rem; background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 4px; cursor: pointer;">🗑️ Delete</button>
                 </div>
               </td>
               <td>${objsHtml}</td>
@@ -1857,17 +1876,160 @@ Execute the steps above sequentially and thoroughly. When finished, print the CL
       container.innerHTML = html;
     }
 
+    const COURSE_CATALOG = {
+      1: {
+        title: "📚 Module 1: Foundations of Cloud & AI Architecture",
+        videos: [
+          { id: "1.1", title: "Video 1.1: Architecture Overview", objectives: [
+            "Understand distributed cache bottlenecks & mutex stampedes under concurrency",
+            "Implement local backoff recovery instead of throwing raw database errors",
+            "Verify real-time token savings and reduced coordinator overhead in CLI tables"
+          ]},
+          { id: "1.1x", title: "Video 1.1x: Lost-in-the-Middle Attention Recovery", objectives: [
+            "Solve Lost-in-the-Middle attention degradation in large 75k token contexts",
+            "Implement structured summary hoisting and explicit header anchoring",
+            "Measure accuracy improvements in long-context retrieval benchmarks"
+          ]},
+          { id: "1.2", title: "Video 1.2: System Seams & Decoupling", objectives: [
+            "Define typed error classes (e.g. TransientError) as clean architectural seams",
+            "Return structured attempt logs and partial results on unresolvable failure",
+            "Ensure zero-dependency Node.js ESM (\"type\": \"module\") execution"
+          ]}
+        ]
+      },
+      2: {
+        title: "🤖 Module 2: Multi-Agent & Subagent Orchestration",
+        videos: [
+          { id: "2.1", title: "Video 2.1: Subagent Pool Resiliency", objectives: [
+            "Orchestrate concurrent worker subagents with bounded retries and circuit breakers",
+            "Implement duck-typed worker contracts for seamless naive vs resilient swapping",
+            "Display real-time visual intervention scoreboards in Pico.css & htmx simulators"
+          ]},
+          { id: "2.2", title: "Video 2.2: Hub-and-Spoke Error Triage", objectives: [
+            "Build centralized hub triage with autonomous spoke subagent fallback loops",
+            "Prevent cascading system timeouts during document analysis and PDF parsing",
+            "Configure automated GitHub Actions deployment workflows for static Pages"
+          ]}
+        ]
+      },
+      3: {
+        title: "🛡️ Module 3: Error Coordination & Escalation Patterns",
+        videos: [
+          { id: "3.1", title: "Video 3.1: Autonomous Error Loops", objectives: [
+            "Coordinate autonomous error discovery and self-healing multi-agent loops",
+            "Reduce input token consumption by resolving routine exceptions locally",
+            "Log structured telemetry and resolution verdicts to Axiom error monitoring"
+          ]},
+          { id: "3.2", title: "Video 3.2: Multi-Agent Recovery Workflows", objectives: [
+            "Execute side-by-side benchmarking scripts proving recovery rate superiority",
+            "Embed interactive modal popup lightboxes for step-by-step How/What/Why diagrams",
+            "Generate and attach MP3 audio narration files with auto-scrolling walkthroughs"
+          ]}
+        ]
+      },
+      4: {
+        title: "⚡ Module 4: API Rate Limiting & Backpressure",
+        videos: [
+          { id: "4.1", title: "Video 4.1: API Backpressure Resilience", objectives: [
+            "Implement token bucket and leaky bucket rate limiters for API surge protection",
+            "Handle 429 Too Many Requests responses with exponential backoff and jitter",
+            "Demonstrate graceful degradation under high API concurrency in CLI ascii tables"
+          ]}
+        ]
+      },
+      5: {
+        title: "🏆 Module 5: Exam Scenarios & Production Capstone",
+        videos: [
+          { id: "5.1", title: "Video 5.1: Production Orchestration Capstone", objectives: [
+            "Solve end-to-end Claude AI Architect exam scenarios with production-grade code",
+            "Display prominent LLM attribution headers (Gemini 3.1 Pro / Claude 3.7 Sonnet)",
+            "Verify SEO assets (sitemap.xml, robots.txt, favicon) and automated live deployment"
+          ]}
+        ]
+      }
+    };
+
+    function initCatalogDropdowns() {
+      const objsDrop = document.getElementById('modalObjsDropdown');
+      if (objsDrop) {
+        let html = '<option value="">✨ Load Preset Objectives...</option>';
+        Object.keys(COURSE_CATALOG).sort((a,b)=>a-b).forEach(modNum => {
+          COURSE_CATALOG[modNum].videos.forEach(vid => {
+            html += `<option value="${encodeURIComponent(JSON.stringify(vid.objectives))}">${vid.id}: ${vid.title}</option>`;
+          });
+        });
+        objsDrop.innerHTML = html;
+      }
+    }
+
+    function onModuleSelectChange(autoLoadObjs = true) {
+      const modNum = document.getElementById('modalModNum').value || '1';
+      const modObj = COURSE_CATALOG[modNum] || COURSE_CATALOG[1];
+      const titleInput = document.getElementById('modalModTitle');
+      if (titleInput) titleInput.value = modObj.title;
+
+      const vidSelect = document.getElementById('modalVidSelect');
+      if (vidSelect) {
+        let html = '';
+        modObj.videos.forEach(vid => {
+          html += `<option value="${vid.id}">${vid.title}</option>`;
+        });
+        vidSelect.innerHTML = html;
+        if (modObj.videos.length > 0) {
+          vidSelect.value = modObj.videos[0].id;
+        }
+      }
+      onVideoSelectChange(autoLoadObjs);
+    }
+
+    function onVideoSelectChange(autoLoadObjs = true) {
+      const modNum = document.getElementById('modalModNum').value || '1';
+      const modObj = COURSE_CATALOG[modNum] || COURSE_CATALOG[1];
+      const vidId = document.getElementById('modalVidSelect').value || (modObj.videos[0]?.id || '');
+      const vidObj = modObj.videos.find(v => v.id === vidId) || modObj.videos[0];
+
+      const idInput = document.getElementById('modalVidId');
+      if (idInput) idInput.value = vidObj?.id || '';
+      const titleInput = document.getElementById('modalVidTitle');
+      if (titleInput) titleInput.value = vidObj?.title || '';
+
+      if (autoLoadObjs && vidObj?.objectives) {
+        const objsInput = document.getElementById('modalObjs');
+        if (objsInput) objsInput.value = vidObj.objectives.join('\n');
+      }
+
+      const objsDrop = document.getElementById('modalObjsDropdown');
+      if (objsDrop && vidObj?.objectives) {
+        const targetVal = encodeURIComponent(JSON.stringify(vidObj.objectives));
+        objsDrop.value = targetVal;
+      }
+    }
+
+    function onObjectivesDropdownChange() {
+      const objsDrop = document.getElementById('modalObjsDropdown');
+      if (!objsDrop || !objsDrop.value) return;
+      try {
+        const objs = JSON.parse(decodeURIComponent(objsDrop.value));
+        if (Array.isArray(objs)) {
+          const objsInput = document.getElementById('modalObjs');
+          if (objsInput) objsInput.value = objs.join('\n');
+        }
+      } catch (e) {
+        console.error('Error parsing objective preset:', e);
+      }
+    }
+
     function openLabModal() {
+      if (typeof window.requireAdmin === 'function' && !window.requireAdmin('add repositories')) return;
       document.getElementById('modalLabId').value = '';
       document.getElementById('modalRepoName').value = '';
       document.getElementById('modalRepoUrl').value = '';
       document.getElementById('modalDemoUrl').value = '';
       document.getElementById('modalDesc').value = '';
+      
+      initCatalogDropdowns();
       document.getElementById('modalModNum').value = '1';
-      document.getElementById('modalModTitle').value = '📚 Module 1: Foundations of Cloud & AI Architecture';
-      document.getElementById('modalVidId').value = '';
-      document.getElementById('modalVidTitle').value = '';
-      document.getElementById('modalObjs').value = 'Understand core architectural bottlenecks\nImplement resilient recovery patterns\nVerify performance and token efficiency';
+      onModuleSelectChange(true);
 
       document.getElementById('modalTitle').innerText = '➕ Add New Reference Repository';
       document.getElementById('labModal').style.display = 'flex';
@@ -1878,6 +2040,7 @@ Execute the steps above sequentially and thoroughly. When finished, print the CL
     }
 
     function editLab(id) {
+      if (typeof window.requireAdmin === 'function' && !window.requireAdmin('edit repositories')) return;
       const lab = labsData.find(l => l.id === id || l.id == id);
       if (!lab) return;
       
@@ -1886,8 +2049,27 @@ Execute the steps above sequentially and thoroughly. When finished, print the CL
       document.getElementById('modalRepoUrl').value = lab.repo_url || '';
       document.getElementById('modalDemoUrl').value = lab.demo_url || '';
       document.getElementById('modalDesc').value = lab.description || '';
-      document.getElementById('modalModNum').value = lab.module_number || 1;
-      document.getElementById('modalModTitle').value = lab.module_title || '';
+      
+      initCatalogDropdowns();
+      const modNum = lab.module_number || 1;
+      document.getElementById('modalModNum').value = modNum;
+      onModuleSelectChange(false);
+      
+      if (lab.video_id) {
+        const vidSelect = document.getElementById('modalVidSelect');
+        if (vidSelect && Array.from(vidSelect.options).some(o => o.value === lab.video_id)) {
+          vidSelect.value = lab.video_id;
+        } else if (vidSelect) {
+          const opt = document.createElement('option');
+          opt.value = lab.video_id;
+          opt.innerText = lab.video_title || `Video ${lab.video_id}`;
+          vidSelect.appendChild(opt);
+          vidSelect.value = lab.video_id;
+        }
+        onVideoSelectChange(false);
+      }
+
+      document.getElementById('modalModTitle').value = lab.module_title || COURSE_CATALOG[modNum]?.title || '';
       document.getElementById('modalVidId').value = lab.video_id || '';
       document.getElementById('modalVidTitle').value = lab.video_title || '';
 
@@ -1959,6 +2141,7 @@ Execute the steps above sequentially and thoroughly. When finished, print the CL
     }
 
     async function deleteLab(id, repoName) {
+      if (typeof window.requireAdmin === 'function' && !window.requireAdmin('delete repositories')) return;
       if (!confirm(`Are you sure you want to permanently delete repository "${repoName}" from Supabase?`)) {
         return;
       }
