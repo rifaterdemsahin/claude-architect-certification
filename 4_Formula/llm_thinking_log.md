@@ -15,13 +15,14 @@ Create a formal developer tooling formula (`4_Formula/tools/mac_terminal_navigat
 
 ### 🎯 Objective
 Update `5_Symbols/production/preprod/customer_development.html` to clearly define the specific validation gates and timeline milestones for all 4 stages:
-1. **Customer Discovery**: In July 2026 still in customer discovery stage exploring how the Claude AI Architect course could create 10x value solving the AI certification problem via the $10 YouTube join model against the $100 exam and 6-month penalty risk as workforce jobs shift.
+1. **Customer Discovery**: In July 2026 still in customer discovery stage exploring how the Claude AI Architect course could create 10x value solving the AI certification problem via the $10 YouTube join model against the $100 exam and 6-month penalty risk as workforce jobs shift. Also highlighting that in this discovery phase, Erdem is working on discovering the self-learning technique to help in the new world of rapid AI increases and skill expectation shift, where discovering that is the main goal using Delivery Pilot and video production and sharing it with others.
 2. **Customer Validation**: Customer validation happens when one course creates $10k lifetime revenue.
 3. **Customer Creation**: Customer creation phase happens when there is a cycle of monthly course creation.
 4. **Company Building**: Company building happens when Erdem does the work full time with no extra contract as main source of income.
 
 ### 🧭 Architecture & Design Choices
 - Added explicit milestone gate bullets at the top of each stage's list (`.details-list`) in `5_Symbols/production/preprod/customer_development.html`.
+- Added a dedicated bullet in Stage 1 for "Self-Learning Technique Discovery (Core Goal)" emphasizing Delivery Pilot, video production, and sharing.
 - Preserved existing glassmorphic UI design and structure while elevating the specific milestones required by the founder.
 
 ## 2026-07-02 — ⚡ Mandatory Server Startup & Display Formula
