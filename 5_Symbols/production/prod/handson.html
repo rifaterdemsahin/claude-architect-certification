@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
       --bg-dark: #0a0e17;
@@ -763,12 +764,13 @@
             Live Resilience Demo Repositories
           </div>
           <span style="color: var(--text-muted); font-size: 0.85rem;">8 Public Reference Repositories</span>
+          <span id="supabaseReposBadge" style="font-size: 0.75rem; background: rgba(0, 240, 255, 0.1); color: #00f0ff; padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(0, 240, 255, 0.2); display: none;">🗄️ Supabase Synced</span>
         </div>
         <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem;">
           These production-grade demonstration repositories showcase side-by-side comparisons of resilient architectural patterns versus naive anti-patterns. Click to view source code on GitHub, experience live interactive simulators, or copy git clone commands.
         </p>
 
-        <div class="repos-grid">
+        <div class="repos-grid" id="reposGridContainer">
           <!-- Repo 1 -->
           <div class="repo-card">
             <div>
@@ -946,6 +948,7 @@
             </p>
           </div>
           <div class="progress-box">
+            <span id="supabaseMatrixBadge" style="font-size: 0.75rem; background: rgba(0, 240, 255, 0.1); color: #00f0ff; padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(0, 240, 255, 0.2); display: none;">🗄️ Supabase Synced</span>
             <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-main);">Progress: <span id="progressText" style="color: var(--accent);">0 / 24</span></span>
             <div class="progress-bar-bg">
               <div id="progressBarFill" class="progress-bar-fill"></div>
@@ -954,6 +957,7 @@
           </div>
         </div>
 
+        <div id="objectivesMatrixContainer">
         <!-- MODULE 1 -->
         <div class="module-block">
           <div class="module-title">
@@ -1114,6 +1118,7 @@
               </tr>
             </tbody>
           </table>
+        </div>
         </div>
       </div>
     </div>
@@ -1570,10 +1575,123 @@ Execute the steps above sequentially and thoroughly. When finished, print the CL
       if (progressBarFill) progressBarFill.style.width = `${pct}%`;
     }
 
+    // Supabase DB Integration
+    const SUPABASE_URL = 'https://rmekfsdhglyiralxvkwc.supabase.co';
+    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZWtmc2RoZ2x5aXJhbHh2a3djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NzYzODgsImV4cCI6MjA5NjM1MjM4OH0.ay6HsmO_CbMGDXL_Dv4DT-paAIAOqlQPfmqqx_mexSU';
+    let dbClient = null;
+
+    async function initSupabaseLabs() {
+      if (!window.supabase) return;
+      try {
+        dbClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+        const { data, error } = await dbClient.from('handsonlabs').select('*').order('module_number', {ascending: true}).order('video_id', {ascending: true});
+        if (!error && data && data.length > 0) {
+          console.log(`Loaded ${data.length} labs from Supabase DB!`);
+          renderReposGridFromSupabase(data);
+          renderObjectivesFromSupabase(data);
+          loadObjectives();
+          const b1 = document.getElementById('supabaseReposBadge');
+          const b2 = document.getElementById('supabaseMatrixBadge');
+          if (b1) b1.style.display = 'inline-block';
+          if (b2) b2.style.display = 'inline-block';
+        }
+      } catch (err) {
+        console.warn('Supabase handsonlabs fetch failed, using fallback HTML:', err);
+      }
+    }
+
+    function renderReposGridFromSupabase(labs) {
+      const container = document.getElementById('reposGridContainer');
+      if (!container) return;
+      let html = '';
+      labs.forEach(lab => {
+        html += `
+          <div class="repo-card">
+            <div>
+              <div class="repo-header">
+                <a href="${lab.repo_url}" target="_blank" class="repo-name">${lab.repo_name} ↗</a>
+                <span class="repo-badge" style="background: rgba(0, 240, 255, 0.15); color: #00f0ff; border: 1px solid rgba(0, 240, 255, 0.3);">Supabase DB</span>
+              </div>
+              <p class="repo-desc">${lab.description}</p>
+              <div class="repo-meta">
+                <span class="meta-tag"><span class="meta-dot" style="background: #00f0ff;"></span>Module ${lab.module_number} Lab</span>
+                <span>Video ${lab.video_id}</span>
+              </div>
+            </div>
+            <div class="repo-actions">
+              <a href="${lab.repo_url}" target="_blank" class="btn-repo">🐙 GitHub</a>
+              <a href="${lab.demo_url}" target="_blank" class="btn-repo" style="color: #00f0ff; border-color: rgba(0, 240, 255, 0.3);">🌐 Live Demo</a>
+              <button class="btn-repo" onclick="copyCloneCmd('rifaterdemsahin/${lab.repo_name}', this)">📋 Clone</button>
+            </div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    function renderObjectivesFromSupabase(labs) {
+      const container = document.getElementById('objectivesMatrixContainer');
+      if (!container) return;
+      const modules = {};
+      labs.forEach(lab => {
+        if (!modules[lab.module_number]) {
+          modules[lab.module_number] = { title: lab.module_title, videos: [] };
+        }
+        modules[lab.module_number].videos.push(lab);
+      });
+      let html = '';
+      Object.keys(modules).sort((a, b) => a - b).forEach(modNum => {
+        const mod = modules[modNum];
+        html += `
+          <div class="module-block">
+            <div class="module-title">
+              <span>${mod.title}</span>
+            </div>
+            <table class="video-table">
+              <thead>
+                <tr>
+                  <th style="width: 25%;">Video Title</th>
+                  <th style="width: 25%;">Reference Repository</th>
+                  <th style="width: 50%;">Learning Objectives Checklist</th>
+                </tr>
+              </thead>
+              <tbody>
+        `;
+        mod.videos.forEach(vid => {
+          let objsHtml = '';
+          const objs = typeof vid.objectives === 'string' ? JSON.parse(vid.objectives) : vid.objectives;
+          if (Array.isArray(objs)) {
+            objs.forEach(obj => {
+              objsHtml += `
+                <label class="obj-item">
+                  <input type="checkbox" class="obj-checkbox" data-obj="${obj.id}" onchange="toggleObjective(this)">
+                  <span class="obj-label">${obj.label}</span>
+                </label>
+              `;
+            });
+          }
+          html += `
+            <tr>
+              <td><strong>${vid.video_title}</strong></td>
+              <td><a href="${vid.repo_url}" target="_blank" style="color: var(--primary); font-weight: 500;">${vid.repo_name} ↗</a></td>
+              <td>${objsHtml}</td>
+            </tr>
+          `;
+        });
+        html += `
+              </tbody>
+            </table>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
     // Initialize on load
     window.addEventListener('DOMContentLoaded', () => {
       updatePrompt();
       loadObjectives();
+      initSupabaseLabs();
 
       // Check URL hash for tab linking
       if (location.hash === '#repos') {
