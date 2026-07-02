@@ -13,6 +13,9 @@
 | *(../autonomous_error_loop_formula.md)* | Spec for the Axiom→issue→fix autonomous agent loop |
 | `google_oauth_drive_picker.md` | Google OAuth drive picker configuration |
 | `vscode_mermaid_setup.md` | VS Code Mermaid extension configurations |
+| `vscode_terminal_profiles_formula.md` | AI agent color-coded terminal profiles configuration |
+| `supabase_setup_formula.md` | Supabase database project setup instructions |
+| `mac_terminal_navigation_formula.md` | Easy Mac terminal navigation shortcuts and shell aliases |
 
 ## Rules
 - Keep the one-shot install script tested and working

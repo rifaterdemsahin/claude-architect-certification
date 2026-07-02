@@ -1,0 +1,1590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hands-on Labs & Prompt Builder — Claude AI Architect Exam</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0a0e17;
+      --bg-card: rgba(18, 25, 40, 0.75);
+      --bg-input: rgba(10, 15, 25, 0.8);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-focus: #00f0ff;
+      --primary: #00f0ff;
+      --primary-glow: rgba(0, 240, 255, 0.25);
+      --secondary: #a855f7;
+      --secondary-glow: rgba(168, 85, 247, 0.25);
+      --accent: #10b981;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --code-bg: #0d121c;
+      --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(0, 240, 255, 0.07) 0%, transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(168, 85, 247, 0.07) 0%, transparent 40%),
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+      line-height: 1.5;
+      padding: 80px 2rem 4rem;
+    }
+
+    .container {
+      max-width: 1440px;
+      margin: 0 auto;
+    }
+
+    header {
+      margin-bottom: 2.5rem;
+      text-align: center;
+      position: relative;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 0.85rem;
+      border-radius: 9999px;
+      background: rgba(0, 240, 255, 0.1);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      color: var(--primary);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+      box-shadow: 0 0 15px var(--primary-glow);
+    }
+
+    h1 {
+      font-size: 2.75rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 50%, #64748b 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+    }
+
+    h1 span {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    /* Tabs Navigation */
+    .tabs-nav {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 2.5rem;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.85rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-family: inherit;
+    }
+
+    .tab-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .tab-btn.active {
+      background: rgba(0, 240, 255, 0.12);
+      border-color: var(--primary);
+      color: var(--primary);
+      box-shadow: 0 0 20px var(--primary-glow);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .app-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.15fr;
+      gap: 2rem;
+      align-items: start;
+    }
+
+    @media (max-width: 1024px) {
+      .app-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color);
+      border-radius: 1.25rem;
+      padding: 2rem;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .panel::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      opacity: 0.8;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .panel-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .panel-title svg {
+      color: var(--primary);
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 0.4rem;
+    }
+
+    label span {
+      color: var(--text-dim);
+      font-weight: 400;
+      font-size: 0.8rem;
+      margin-left: 0.25rem;
+    }
+
+    input[type="text"], textarea, select {
+      width: 100%;
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: 0.75rem;
+      padding: 0.75rem 1rem;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.95rem;
+      transition: var(--transition);
+      outline: none;
+    }
+
+    input[type="text"]:focus, textarea:focus, select:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.15);
+      background: rgba(15, 23, 40, 0.9);
+    }
+
+    textarea {
+      min-height: 110px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+
+    .help-text {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      margin-top: 0.35rem;
+    }
+
+    .output-container {
+      position: relative;
+    }
+
+    .code-wrapper {
+      background: var(--code-bg);
+      border: 1px solid rgba(0, 240, 255, 0.2);
+      border-radius: 0.85rem;
+      padding: 1.25rem;
+      height: 640px;
+      overflow-y: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.825rem;
+      line-height: 1.6;
+      color: #e2e8f0;
+      white-space: pre-wrap;
+      word-break: break-word;
+      box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .code-wrapper::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .code-wrapper::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+    }
+
+    .code-wrapper::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+    }
+
+    .code-wrapper::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 240, 255, 0.4);
+    }
+
+    .btn-copy, .btn-generate, .btn-copy-form, .btn-clear, .btn-action {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      font-weight: 700;
+      font-size: 0.95rem;
+      padding: 0.75rem 1.25rem;
+      border-radius: 0.75rem;
+      border: none;
+      cursor: pointer;
+      transition: var(--transition);
+      font-family: 'Outfit', sans-serif;
+    }
+
+    .btn-copy, .btn-generate {
+      background: linear-gradient(135deg, var(--primary) 0%, #00a8ff 100%);
+      color: #000;
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+    }
+
+    .btn-copy:hover, .btn-generate:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 30px rgba(0, 240, 255, 0.6);
+      background: linear-gradient(135deg, #33f3ff 0%, #1ab5ff 100%);
+    }
+
+    .btn-copy.copied, .btn-generate.generated, .btn-copy-form.copied {
+      background: linear-gradient(135deg, var(--accent) 0%, #059669 100%);
+      color: #fff;
+      box-shadow: 0 0 25px rgba(16, 185, 129, 0.5);
+    }
+
+    .btn-copy-form {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+    }
+
+    .btn-copy-form:hover {
+      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .btn-clear {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #f87171;
+    }
+
+    .btn-clear:hover {
+      transform: translateY(-2px);
+      background: rgba(239, 68, 68, 0.2);
+      border-color: #ef4444;
+      color: #fff;
+    }
+
+    .stats-bar {
+      display: flex;
+      gap: 1.5rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .stat-value {
+      color: var(--primary);
+      font-weight: 600;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Repositories Grid */
+    .repos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .repo-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 1.25rem;
+      padding: 1.75rem;
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    .repo-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-4px);
+      box-shadow: 0 15px 30px rgba(0, 240, 255, 0.15);
+    }
+
+    .repo-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+
+    .repo-name {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--primary);
+      text-decoration: none;
+      word-break: break-all;
+    }
+
+    .repo-badge {
+      font-size: 0.7rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
+      background: rgba(168, 85, 247, 0.15);
+      border: 1px solid rgba(168, 85, 247, 0.4);
+      color: #d8b4fe;
+      font-weight: 600;
+    }
+
+    .repo-desc {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 1.25rem;
+      flex-grow: 1;
+    }
+
+    .repo-meta {
+      display: flex;
+      gap: 1rem;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      margin-bottom: 1.25rem;
+      align-items: center;
+    }
+
+    .meta-tag {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .meta-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    .repo-actions {
+      display: flex;
+      gap: 0.6rem;
+      border-top: 1px solid var(--border-color);
+      padding-top: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-repo {
+      flex: 1;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.8rem;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      border-radius: 0.5rem;
+      text-align: center;
+      text-decoration: none;
+      font-weight: 600;
+      transition: var(--transition);
+    }
+
+    .btn-repo:hover {
+      background: rgba(0, 240, 255, 0.15);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    /* Learning Objectives Matrix */
+    .matrix-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 1.25rem;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .matrix-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color);
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .progress-box {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .progress-bar-bg {
+      width: 200px;
+      height: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 9999px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      width: 0%;
+      transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 0 10px var(--primary-glow);
+    }
+
+    .module-block {
+      margin-bottom: 2rem;
+    }
+
+    .module-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #d8b4fe;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(168, 85, 247, 0.1);
+      padding: 0.75rem 1.25rem;
+      border-radius: 0.75rem;
+      border-left: 4px solid var(--secondary);
+    }
+
+    .video-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+
+    .video-table th, .video-table td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .video-table th {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      letter-spacing: 0.05em;
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .video-table tr:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .obj-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      margin-bottom: 0.5rem;
+      cursor: pointer;
+    }
+
+    .obj-checkbox {
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--border-color);
+      border-radius: 4px;
+      background: var(--bg-input);
+      cursor: pointer;
+      position: relative;
+      flex-shrink: 0;
+      margin-top: 2px;
+      transition: var(--transition);
+    }
+
+    .obj-checkbox:checked {
+      background: var(--accent);
+      border-color: var(--accent);
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+    }
+
+    .obj-checkbox:checked::after {
+      content: '✓';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .obj-label {
+      font-size: 0.875rem;
+      color: var(--text-main);
+      transition: var(--transition);
+    }
+
+    .obj-checkbox:checked + .obj-label {
+      color: var(--text-muted);
+      text-decoration: line-through;
+    }
+
+    footer {
+      margin-top: 4rem;
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      border-top: 1px solid var(--border-color);
+      padding-top: 2rem;
+    }
+
+    footer a {
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: var(--transition);
+    }
+
+    footer a:hover {
+      color: var(--primary);
+    }
+  </style>
+  <script src="../../../shared/nav.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="badge">
+        <span>⚡ Antigravity 3.1 Pro Hands-on Experience</span>
+      </div>
+      <h1>Claude AI Architect <span>Hands-on Labs</span></h1>
+      <p class="subtitle">
+        Your unified production command center for building exam prompts, exploring live architectural resilience repositories, and tracking module video learning objectives.
+      </p>
+    </header>
+
+    <!-- TABS NAVIGATION -->
+    <div class="tabs-nav">
+      <button class="tab-btn active" onclick="switchTab('prompt-builder', this)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+        ⚡ Prompt Builder
+      </button>
+      <button class="tab-btn" onclick="switchTab('repos', this)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+        📦 Reference Repositories (8)
+      </button>
+      <button class="tab-btn" onclick="switchTab('objectives', this)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+        🎯 Video & Module Objectives Matrix
+      </button>
+    </div>
+
+    <!-- TAB 1: PROMPT BUILDER -->
+    <div id="tab-prompt-builder" class="tab-content active">
+      <div class="app-grid">
+        <!-- LEFT PANEL: CONFIGURATION FORM -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+              Scenario Configuration
+            </div>
+          </div>
+          <form id="promptForm" onsubmit="return false;">
+            <div class="form-group">
+              <label for="examQuestion">Exam Question <span>(Problem / Anti-Pattern Scenario)</span></label>
+              <textarea id="examQuestion" rows="6" placeholder="Describe the system bottleneck or architectural problem..." oninput="updatePrompt()">The document analysis subagent frequently encounters failures when processing PDF files — corrupted sections, password-protected files, and parse timeouts on large files. Today any exception terminates the subagent and forces the coordinator to decide whether to retry, skip, or fail the whole task. This causes excessive coordinator involvement in routine error handling. What's the most effective architectural improvement?</textarea>
+              <div class="help-text">The exact problem scenario from the exam</div>
+            </div>
+
+            <div class="form-group">
+              <label for="examAnswer">Recommended Architectural Solution <span>(The Answer)</span></label>
+              <textarea id="examAnswer" rows="6" placeholder="Describe the recommended architectural improvement..." oninput="updatePrompt()">Have the subagent implement local recovery for transient failures and only propagate errors it cannot resolve to the coordinator — including what was attempted and any partial results obtained.</textarea>
+              <div class="help-text">The recommended design pattern to resolve the bottleneck</div>
+            </div>
+
+            <div class="form-group">
+              <label for="repoVisibility">GitHub Repo Visibility</label>
+              <select id="repoVisibility" onchange="updatePrompt()">
+                <option value="public">Public Repository (--public)</option>
+                <option value="private">Private Repository (--private)</option>
+              </select>
+              <div class="help-text">Visibility flag when pushing to GitHub via `gh repo create`</div>
+            </div>
+
+            <div class="form-group">
+              <label for="targetLLM">Creating Large Language Model (LLM)</label>
+              <select id="targetLLM" onchange="updatePrompt()">
+                <option value="Auto-Detect (Executing AI Assistant Model)">Auto-Detect (Executing AI Assistant Model)</option>
+                <option value="Google Gemini 3.1 Pro (High)">Google Gemini 3.1 Pro (High)</option>
+                <option value="Google Gemini 2.5 Pro">Google Gemini 2.5 Pro</option>
+                <option value="Google Gemini 2.0 Flash">Google Gemini 2.0 Flash</option>
+                <option value="Anthropic Claude 3.7 Sonnet">Anthropic Claude 3.7 Sonnet</option>
+                <option value="Anthropic Claude 3.5 Sonnet">Anthropic Claude 3.5 Sonnet</option>
+                <option value="OpenAI GPT-4o">OpenAI GPT-4o</option>
+                <option value="DeepSeek R1 / V3">DeepSeek R1 / V3</option>
+              </select>
+              <div class="help-text">Specifies which LLM created this project for documentation and UI badges</div>
+            </div>
+
+            <div class="action-buttons" style="display: flex; gap: 0.75rem; margin-top: 1.75rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); flex-wrap: wrap;">
+              <button type="button" id="generateBtn" class="btn-generate" onclick="generatePromptAction()" style="flex: 1.2; min-width: 140px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                <span>Generate Prompt</span>
+              </button>
+              <button type="button" id="copyFormBtn" class="btn-copy-form" onclick="copyToClipboard()" style="flex: 1; min-width: 130px;">
+                <svg id="copyFormIcon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                <span id="copyFormText">Copy Prompt</span>
+              </button>
+              <button type="button" id="clearBtn" class="btn-clear" onclick="clearFormAction()" style="flex: 0.8; min-width: 110px;" title="Restart from scratch">
+                <svg id="clearIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+                <span id="clearText">Clear / Restart</span>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- RIGHT PANEL: LIVE PROMPT OUTPUT -->
+        <div class="panel output-container">
+          <div class="panel-header">
+            <div class="panel-title">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+              Generated Output Prompt
+            </div>
+            <button type="button" id="copyBtn" class="btn-copy" onclick="copyToClipboard()">
+              <svg id="copyIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              <span id="copyText">Copy Prompt</span>
+            </button>
+          </div>
+
+          <div id="promptOutput" class="code-wrapper"></div>
+
+          <div class="panel-header" style="margin-top: 1rem; margin-bottom: 0; padding-bottom: 0; border-bottom: none;">
+            <div class="stats-bar">
+              <div class="stat-item">Words: <span id="wordCount" class="stat-value">0</span></div>
+              <div class="stat-item">Characters: <span id="charCount" class="stat-value">0</span></div>
+              <div class="stat-item">Estimated Tokens: <span id="tokenCount" class="stat-value">0</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: REFERENCE REPOSITORIES -->
+    <div id="tab-repos" class="tab-content">
+      <div class="panel" style="margin-bottom: 2rem;">
+        <div class="panel-header">
+          <div class="panel-title">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+            Live Resilience Demo Repositories
+          </div>
+          <span style="color: var(--text-muted); font-size: 0.85rem;">8 Public Reference Repositories</span>
+        </div>
+        <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem;">
+          These production-grade demonstration repositories showcase side-by-side comparisons of resilient architectural patterns versus naive anti-patterns. Click to view source code on GitHub, experience live interactive simulators, or copy git clone commands.
+        </p>
+
+        <div class="repos-grid">
+          <!-- Repo 1 -->
+          <div class="repo-card">
+            <div>
+              <div class="repo-header">
+                <a href="https://github.com/rifaterdemsahin/api-rate-limiter-resilience" target="_blank" class="repo-name">api-rate-limiter-resilience ↗</a>
+                <span class="repo-badge">Public</span>
+              </div>
+              <p class="repo-desc">Claude AI Architect Exam: API Rate Limiter & Backpressure Resilience Demo with interactive htmx scoreboard.</p>
+              <div class="repo-meta">
+                <span class="meta-tag"><span class="meta-dot" style="background: #e34c26;"></span>HTML / JS</span>
+                <span>Updated 7 hours ago</span>
+              </div>
+            </div>
+            <div class="repo-actions">
+              <a href="https://github.com/rifaterdemsahin/api-rate-limiter-resilience" target="_blank" class="btn-repo">🐙 GitHub</a>
+              <a href="https://rifaterdemsahin.github.io/api-rate-limiter-resilience/" target="_blank" class="btn-repo" style="color: #00f0ff; border-color: rgba(0, 240, 255, 0.3);">🌐 Live Demo</a>
+              <button class="btn-repo" onclick="copyCloneCmd('rifaterdemsahin/api-rate-limiter-resilience', this)">📋 Clone</button>
+            </div>
+          </div>
+
+          <!-- Repo 2 -->
+          <div class="repo-card">
+            <div>
+              <div class="repo-header">
+                <a href="https://github.com/rifaterdemsahin/resilient-subagent-pool-orchestrator" target="_blank" class="repo-name">resilient-subagent-pool-orchestrator ↗</a>
+                <span class="repo-badge">Public</span>
+              </div>
+              <p class="repo-desc">Orchestrates concurrent worker subagents with circuit breaking, bounded retries, and clean CLI benchmark outputs.</p>
+              <div class="repo-meta">
+                <span class="meta-tag"><span class="meta-dot" style="background: #e34c26;"></span>HTML / JS</span>
+                <span>Updated 8 hours ago</span>
+              </div>
+            </div>
+            <div class="repo-actions">
+              <a href="https://github.com/rifaterdemsahin/resilient-subagent-pool-orchestrator" target="_blank" class="btn-repo">🐙 GitHub</a>
+              <a href="https://rifaterdemsahin.github.io/resilient-subagent-pool-orchestrator/" target="_blank" class="btn-repo" style="color: #00f0ff; border-color: rgba(0, 240, 255, 0.3);">🌐 Live Demo</a>
+              <button class="btn-repo" onclick="copyCloneCmd('rifaterdemsahin/resilient-subagent-pool-orchestrator', this)">📋 Clone</button>
+            </div>
+          </div>
+
+          <!-- Repo 3 -->
+          <div class="repo-card">
+            <div>
+              <div class="repo-header">
+                <a href="https://github.com/rifaterdemsahin/error-coordination-sub-agents" target="_blank" class="repo-name">error-coordination-sub-agents ↗</a>
+                <span class="repo-badge">Public</span>
+              </div>
+              <p class="repo-desc">AI Sub agent coordination ai-agents demo proving autonomous error discovery, local recovery, and reduced token costs.</p>
+              <div class="repo-meta">
+                <span class="meta-tag"><span class="meta-dot" style="background: #e34c26;"></span>HTML / JS</span>
+                <span>Updated 9 hours ago</span>
+              </div>
+            </div>
+            <div class="repo-actions">
+              <a href="https://github.com/rifaterdemsahin/error-coordination-sub-agents" target="_blank" class="btn-repo">🐙 GitHub</a>
+              <a href="https://rifaterdemsahin.github.io/error-coordination-sub-agents/" target="_blank" class="btn-repo" style="color: #00f0ff; border-color: rgba(0, 240, 255, 0.3);">🌐 Live Demo</a>
+              <button class="btn-repo" onclick="copyCloneCmd('rifaterdemsahin/error-coordination-sub-agents', this)">📋 Clone</button>
+            </div>
+          </div>
+
+          <!-- Repo 4 -->
+          <div class="repo-card">
+            <div>
+              <div class="repo-header">
+                <a href="https://github.com/rifaterdemsahin/multi-agent-resilience-orchestrator" target="_blank" class="repo-name">multi-agent-resilience-orchestrator ↗</a>
+                <span class="repo-badge">Public</span>
+              </div>
+              <p class="repo-desc">Multi-agent resilience orchestrator with zero-dependency Node.js ESM backend and interactive web visualizer.</p>
+              <div class="repo-meta">
+                <span class="meta-tag"><span class="meta-dot" style="background: #e34c26;"></span>HTML / JS</span>
+                <span>Updated 9 hours ago</span>
+              </div>
+            </div>
+            <div class="repo-actions">
+              <a href="https://github.com/rifaterdemsahin/multi-agent-resilience-orchestrator" target="_blank" class="btn-repo">🐙 GitHub</a>
+              <a href="https://rifaterdemsahin.github.io/multi-agent-resilience-orchestrator/" target="_blank" class="btn-repo" style="color: #00f0ff; border-color: rgba(0, 240, 255, 0.3);">🌐 Live Demo</a>
+              <button class="btn-repo" onclick="copyCloneCmd('rifaterdemsahin/multi-agent-resilience-orchestrator', this)">📋 Clone</button>
+            </div>
+          </div>
+
+          <!-- Repo 5 -->
+          <div class="repo-card">
+            <div>
+              <div class="repo-header">
+                <a href="https://github.com/rifaterdemsahin/distributed-cache-stampede-demo" target="_blank" class="repo-name">distributed-cache-stampede-demo ↗</a>
+                <span class="repo-badge">Public</span>
+              </div>
+              <p class="repo-desc">Demonstrates mutex lock recovery and backoff strategies preventing cache stampedes under high concurrency workloads.</p>
+              <div class="repo-meta">
+                <span class="meta-tag"><span class="meta-dot" style="background: #f1e05a;"></span>JavaScript</span>
+                <span>Updated 10 hours ago</span>
+              </div>
+            </div>
+            <div class="repo-actions">
+              <a href="https://github.com/rifaterdemsahin/distributed-cache-stampede-demo" target="_blank" class="btn-repo">🐙 GitHub</a>
+              <a href="https://rifaterdemsahin.github.io/distributed-cache-stampede-demo/" target="_blank" class="btn-repo" style="color: #00f0ff; border-color: rgba(0, 240, 255, 0.3);">🌐 Live Demo</a>
+              <button class="btn-repo" onclick="copyCloneCmd('rifaterdemsahin/distributed-cache-stampede-demo', this)">📋 Clone</button>
+            </div>
+          </div>
+
+          <!-- Repo 6 -->
+          <div class="repo-card">
+            <div>
+              <div class="repo-header">
+                <a href="https://github.com/rifaterdemsahin/multi-agent-error-recovery-demo" target="_blank" class="repo-name">multi-agent-error-recovery-demo ↗</a>
+                <span class="repo-badge">Public</span>
+              </div>
+              <p class="repo-desc">Side-by-side resilience demo showing how local subagent recovery eliminates coordinator bottlenecks and timeouts.</p>
+              <div class="repo-meta">
+                <span class="meta-tag"><span class="meta-dot" style="background: #e34c26;"></span>HTML / JS</span>
+                <span>Updated 10 hours ago</span>
+              </div>
+            </div>
+            <div class="repo-actions">
+              <a href="https://github.com/rifaterdemsahin/multi-agent-error-recovery-demo" target="_blank" class="btn-repo">🐙 GitHub</a>
+              <a href="https://rifaterdemsahin.github.io/multi-agent-error-recovery-demo/" target="_blank" class="btn-repo" style="color: #00f0ff; border-color: rgba(0, 240, 255, 0.3);">🌐 Live Demo</a>
+              <button class="btn-repo" onclick="copyCloneCmd('rifaterdemsahin/multi-agent-error-recovery-demo', this)">📋 Clone</button>
+            </div>
+          </div>
+
+          <!-- Repo 7 -->
+          <div class="repo-card">
+            <div>
+              <div class="repo-header">
+                <a href="https://github.com/rifaterdemsahin/subagent-escalation-resilience" target="_blank" class="repo-name">subagent-escalation-resilience ↗</a>
+                <span class="repo-badge">Public</span>
+              </div>
+              <p class="repo-desc">Demonstrates structured error escalation contracts where subagents return attempt logs and partial results instead of crashing.</p>
+              <div class="repo-meta">
+                <span class="meta-tag"><span class="meta-dot" style="background: #f1e05a;"></span>JavaScript</span>
+                <span>Updated 11 hours ago</span>
+              </div>
+            </div>
+            <div class="repo-actions">
+              <a href="https://github.com/rifaterdemsahin/subagent-escalation-resilience" target="_blank" class="btn-repo">🐙 GitHub</a>
+              <a href="https://rifaterdemsahin.github.io/subagent-escalation-resilience/" target="_blank" class="btn-repo" style="color: #00f0ff; border-color: rgba(0, 240, 255, 0.3);">🌐 Live Demo</a>
+              <button class="btn-repo" onclick="copyCloneCmd('rifaterdemsahin/subagent-escalation-resilience', this)">📋 Clone</button>
+            </div>
+          </div>
+
+          <!-- Repo 8 -->
+          <div class="repo-card">
+            <div>
+              <div class="repo-header">
+                <a href="https://github.com/rifaterdemsahin/hub-spoke-multi-agent-orchestrator" target="_blank" class="repo-name">hub-spoke-multi-agent-orchestrator ↗</a>
+                <span class="repo-badge">Public</span>
+              </div>
+              <p class="repo-desc">Hub-and-spoke multi-agent orchestrator implementing duck-typed interfaces and automated GitHub Actions deployment.</p>
+              <div class="repo-meta">
+                <span class="meta-tag"><span class="meta-dot" style="background: #e34c26;"></span>HTML / JS</span>
+                <span>Updated 11 hours ago</span>
+              </div>
+            </div>
+            <div class="repo-actions">
+              <a href="https://github.com/rifaterdemsahin/hub-spoke-multi-agent-orchestrator" target="_blank" class="btn-repo">🐙 GitHub</a>
+              <a href="https://rifaterdemsahin.github.io/hub-spoke-multi-agent-orchestrator/" target="_blank" class="btn-repo" style="color: #00f0ff; border-color: rgba(0, 240, 255, 0.3);">🌐 Live Demo</a>
+              <button class="btn-repo" onclick="copyCloneCmd('rifaterdemsahin/hub-spoke-multi-agent-orchestrator', this)">📋 Clone</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: VIDEO & MODULE OBJECTIVES MATRIX -->
+    <div id="tab-objectives" class="tab-content">
+      <div class="matrix-section">
+        <div class="matrix-header">
+          <div>
+            <div class="panel-title">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+              Video & Module Learning Objectives Matrix
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.25rem;">
+              Link each course video to its reference repository and check off hands-on learning objectives as you complete them. Progress is automatically saved in browser localStorage.
+            </p>
+          </div>
+          <div class="progress-box">
+            <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-main);">Progress: <span id="progressText" style="color: var(--accent);">0 / 24</span></span>
+            <div class="progress-bar-bg">
+              <div id="progressBarFill" class="progress-bar-fill"></div>
+            </div>
+            <button class="btn-clear" onclick="resetAllObjectives()" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;">Reset All</button>
+          </div>
+        </div>
+
+        <!-- MODULE 1 -->
+        <div class="module-block">
+          <div class="module-title">
+            <span>📚 Module 1: Foundations of Cloud & AI Architecture</span>
+          </div>
+          <table class="video-table">
+            <thead>
+              <tr>
+                <th style="width: 25%;">Video Title</th>
+                <th style="width: 25%;">Reference Repository</th>
+                <th style="width: 50%;">Learning Objectives Checklist</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Video 1.1: Architecture Overview</strong></td>
+                <td><a href="https://github.com/rifaterdemsahin/distributed-cache-stampede-demo" target="_blank" style="color: var(--primary);">distributed-cache-stampede-demo ↗</a></td>
+                <td>
+                  <label class="obj-item"><input type="checkbox" class="obj-checkbox" data-obj="m1-v1-1" onchange="toggleObjective(this)"><span class="obj-label">Understand distributed cache bottlenecks & mutex stampedes under concurrency</span></label>
+                  <label class="obj-item"><input type="checkbox" class="obj-checkbox" data-obj="m1-v1-2" onchange="toggleObjective(this)"><span class="obj-label">Implement local backoff recovery instead of throwing raw database errors</span></label>
+                  <label class="obj-item"><input type="checkbox" class="obj-checkbox" data-obj="m1-v1-3" onchange="toggleObjective(this)"><span class="obj-label">Verify real-time token savings and reduced coordinator overhead in CLI tables</span></label>
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Video 1.2: System Seams & Decoupling</strong></td>
+                <td><a href="https://github.com/rifaterdemsahin/subagent-escalation-resilience" target="_blank" style="color: var(--primary);">subagent-escalation-resilience ↗</a></td>
+                <td>
+                  <label class="obj-item"><input type="checkbox" class="obj-checkbox" data-obj="m1-v2-1" onchange="toggleObjective(this)"><span class="obj-label">Define typed error classes (e.g. TransientError) as clean architectural seams</span></label>
+                  <label class="obj-item"><input type="checkbox" class="obj-checkbox" data-obj="m1-v2-2" onchange="toggleObjective(this)"><span class="obj-label">Return structured attempt logs and partial results on unresolvable failure</span></label>
+                  <label class="obj-item"><input type="checkbox" class="obj-checkbox" data-obj="m1-v2-3" onchange="toggleObjective(this)"><span class="obj-label">Ensure zero-dependency Node.js ESM ("type": "module") execution</span></label>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- MODULE 2 -->
+        <div class="module-block">
+          <div class="module-title">
+            <span>🤖 Module 2: Multi-Agent & Subagent Orchestration</span>
+          </div>
+          <table class="video-table">
+            <thead>
+              <tr>
+                <th style="width: 25%;">Video Title</th>
+                <th style="width: 25%;">Reference Repository</th>
+                <th style="width: 50%;">Learning Objectives Checklist</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Video 2.1: Subagent Pool Resiliency</strong></td>
+                <td><a href="https://github.com/rifaterdemsahin/resilient-subagent-pool-orchestrator" target="_blank" style="color: var(--primary);">resilient-subagent-pool-orchestrator ↗</a></td>
+                <td>
+                  <label class="obj-item"><input type="checkbox" class="obj-checkbox" data-obj="m2-v1-1" onchange="toggleObjective(this)"><span class="obj-label">Orchestrate concurrent worker subagents with bounded retries and circuit breakers</span></label>
+                  <label class="obj-item"><input type="checkbox" class="obj-checkbox" data-obj="m2-v1-2" onchange="toggleObjective(this)"><span class="obj-label">Implement duck-typed worker contracts for seamless naive vs resilient swapping</span></label>
+                  <label class="obj-item"><input type="checkbox" class="obj-checkbox" data-obj="m2-v1-3" onchange="toggleObjective(this)"><span class="obj-label">Display real-time visual intervention scoreboards in Pico.css & htmx simulators</span></label>
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Video 2.2: Hub-and-Spoke Error Triage</strong></td>
+                <td><a href="https://github.com/rifaterdemsahin/hub-spoke-multi-agent-orchestrator" target="_blank" style="color: var(--primary);">hub-spoke-multi-agent-orchestrator ↗</a></td>
+                <td>
+                  <label class="obj-item"><input type="checkbox" class="obj-checkbox" data-obj="m2-v2-1" onchange="toggleObjective(this)"><span class="obj-label">Build centralized hub triage with autonomous spoke subagent fallback loops</span></label>
+                  <label class="obj-item"><input type="checkbox" class="obj-checkbox" data-obj="m2-v2-2" onchange="toggleObjective(this)"><span class="obj-label">Prevent cascading system timeouts during document analysis and PDF parsing</span></label>
+                  <label class="obj-item"><input type="checkbox" class="obj-checkbox" data-obj="m2-v2-3" onchange="toggleObjective(this)"><span class="obj-label">Configure automated GitHub Actions deployment workflows for static Pages</span></label>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- MODULE 3 -->
+        <div class="module-block">
+          <div class="module-title">
+            <span>🛡️ Module 3: Error Coordination & Escalation Patterns</span>
+          </div>
+          <table class="video-table">
+            <thead>
+              <tr>
+                <th style="width: 25%;">Video Title</th>
+                <th style="width: 25%;">Reference Repository</th>
+                <th style="width: 50%;">Learning Objectives Checklist</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Video 3.1: Autonomous Error Loops</strong></td>
+                <td><a href="https://github.com/rifaterdemsahin/error-coordination-sub-agents" target="_blank" style="color: var(--primary);">error-coordination-sub-agents ↗</a></td>
+                <td>
+                  <label class="obj-item"><input type="checkbox" class="obj-checkbox" data-obj="m3-v1-1" onchange="toggleObjective(this)"><span class="obj-label">Coordinate autonomous error discovery and self-healing multi-agent loops</span></label>
+                  <label class="obj-item"><input type="checkbox" class="obj-checkbox" data-obj="m3-v1-2" onchange="toggleObjective(this)"><span class="obj-label">Reduce input token consumption by resolving routine exceptions locally</span></label>
+                  <label class="obj-item"><input type="checkbox" class="obj-checkbox" data-obj="m3-v1-3" onchange="toggleObjective(this)"><span class="obj-label">Log structured telemetry and resolution verdicts to Axiom error monitoring</span></label>
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Video 3.2: Multi-Agent Recovery Workflows</strong></td>
+                <td><a href="https://github.com/rifaterdemsahin/multi-agent-error-recovery-demo" target="_blank" style="color: var(--primary);">multi-agent-error-recovery-demo ↗</a></td>
+                <td>
+                  <label class="obj-item"><input type="checkbox" class="obj-checkbox" data-obj="m3-v2-1" onchange="toggleObjective(this)"><span class="obj-label">Execute side-by-side benchmarking scripts proving recovery rate superiority</span></label>
+                  <label class="obj-item"><input type="checkbox" class="obj-checkbox" data-obj="m3-v2-2" onchange="toggleObjective(this)"><span class="obj-label">Embed interactive modal popup lightboxes for step-by-step How/What/Why diagrams</span></label>
+                  <label class="obj-item"><input type="checkbox" class="obj-checkbox" data-obj="m3-v2-3" onchange="toggleObjective(this)"><span class="obj-label">Generate and attach MP3 audio narration files with auto-scrolling walkthroughs</span></label>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- MODULE 4 -->
+        <div class="module-block">
+          <div class="module-title">
+            <span>⚡ Module 4: API Rate Limiting & Backpressure</span>
+          </div>
+          <table class="video-table">
+            <thead>
+              <tr>
+                <th style="width: 25%;">Video Title</th>
+                <th style="width: 25%;">Reference Repository</th>
+                <th style="width: 50%;">Learning Objectives Checklist</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Video 4.1: API Backpressure Resilience</strong></td>
+                <td><a href="https://github.com/rifaterdemsahin/api-rate-limiter-resilience" target="_blank" style="color: var(--primary);">api-rate-limiter-resilience ↗</a></td>
+                <td>
+                  <label class="obj-item"><input type="checkbox" class="obj-checkbox" data-obj="m4-v1-1" onchange="toggleObjective(this)"><span class="obj-label">Implement token bucket and leaky bucket rate limiters for API surge protection</span></label>
+                  <label class="obj-item"><input type="checkbox" class="obj-checkbox" data-obj="m4-v1-2" onchange="toggleObjective(this)"><span class="obj-label">Handle 429 Too Many Requests responses with exponential backoff and jitter</span></label>
+                  <label class="obj-item"><input type="checkbox" class="obj-checkbox" data-obj="m4-v1-3" onchange="toggleObjective(this)"><span class="obj-label">Demonstrate graceful degradation under high API concurrency in CLI ascii tables</span></label>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- MODULE 5 -->
+        <div class="module-block" style="margin-bottom: 0;">
+          <div class="module-title">
+            <span>🏆 Module 5: Exam Scenarios & Production Capstone</span>
+          </div>
+          <table class="video-table">
+            <thead>
+              <tr>
+                <th style="width: 25%;">Video Title</th>
+                <th style="width: 25%;">Reference Repository</th>
+                <th style="width: 50%;">Learning Objectives Checklist</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Video 5.1: Production Orchestration Capstone</strong></td>
+                <td><a href="https://github.com/rifaterdemsahin/multi-agent-resilience-orchestrator" target="_blank" style="color: var(--primary);">multi-agent-resilience-orchestrator ↗</a></td>
+                <td>
+                  <label class="obj-item"><input type="checkbox" class="obj-checkbox" data-obj="m5-v1-1" onchange="toggleObjective(this)"><span class="obj-label">Solve end-to-end Claude AI Architect exam scenarios with production-grade code</span></label>
+                  <label class="obj-item"><input type="checkbox" class="obj-checkbox" data-obj="m5-v1-2" onchange="toggleObjective(this)"><span class="obj-label">Display prominent LLM attribution headers (Gemini 3.1 Pro / Claude 3.7 Sonnet)</span></label>
+                  <label class="obj-item"><input type="checkbox" class="obj-checkbox" data-obj="m5-v1-3" onchange="toggleObjective(this)"><span class="obj-label">Verify SEO assets (sitemap.xml, robots.txt, favicon) and automated live deployment</span></label>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <p>Powered by <a href="https://github.com/rifaterdemsahin/error-coordination-sub-agents" target="_blank">error-coordination-sub-agents</a> &bull; Built with Google Antigravity &bull; <a href="../../../index.html">View Simulator Demo</a></p>
+    </footer>
+  </div>
+
+  <script>
+    // Tab switching logic
+    function switchTab(tabId, btnEl) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      
+      btnEl.classList.add('active');
+      document.getElementById('tab-' + tabId).classList.add('active');
+
+      if (tabId === 'prompt-builder') {
+        updatePrompt();
+      }
+    }
+
+    // Prompt Builder logic
+    function updatePrompt() {
+      const visibilityEl = document.getElementById('repoVisibility');
+      const targetLLMEl = document.getElementById('targetLLM');
+      const questionEl = document.getElementById('examQuestion');
+      const answerEl = document.getElementById('examAnswer');
+
+      if (!visibilityEl || !targetLLMEl || !questionEl || !answerEl) return;
+
+      const visibility = visibilityEl.value;
+      const targetLLM = targetLLMEl.value || 'Auto-Detect (Executing AI Assistant Model)';
+      const question = questionEl.value.trim() || '[Insert Exam Question Here]';
+      const answer = answerEl.value.trim() || '[Insert Recommended Architectural Solution Here]';
+
+      const promptText = `# TASK: Generate an Architectural Demonstration Project for the Claude AI Architect Exam
+
+You are an expert Principal AI Architect and Systems Engineer. Your task is to build a complete, runnable, production-grade architectural demonstration project from scratch based on the provided **Claude AI Architect Exam** Question and Answer. You must initialize the project folder locally and push the completed repository directly to GitHub.
+
+## ⚡ Mandatory Initial Settings & Pre-requisites
+1. **Gemini \`settings.json\` Permission Access**: At the very start of your session before executing commands or modifying files, check, request, or configure your permission access grants in \`/Users/rifaterdemsahin/.gemini/antigravity-cli/settings.json\` (or workspace settings) so that you have automated read/write, git, and command execution access without interrupting the user by repeatedly asking for permission during project build and deployment!
+2. **Input Token Usage Stats**: You MUST track and display simulated/actual **Input Token Stats & Context Efficiency** at the bottom of the interactive web simulator (\`index.html\`), at the bottom of the CLI comparison table (\`demo.js\`), and at the bottom of \`README.md\` (e.g., showing how the resilient approach reduces input token consumption / coordinator overhead compared to the naive approach)!
+
+## 📝 Input: Exam Scenario
+
+**Question:**
+> ${question}
+
+**Answer / Recommended Architectural Solution:**
+> ${answer}
+
+---
+
+## 🎯 Project Goals & Architectural Philosophy
+
+The objective of this repository is to transform an abstract architectural exam concept into a concrete, interactive, side-by-side demonstration proving **why** the recommended architectural solution is superior to the common naive anti-pattern.
+
+### Core Architecture Requirements:
+1. **Zero-Dependency Node.js ESM Backend**: Use clean, modern JavaScript with \`"type": "module"\` in \`package.json\`. Rely on Node.js built-in utilities without heavy external runtime dependencies so the repository is lightweight and universally executable.
+2. **Side-by-Side Comparison (Naive vs. Resilient/Optimized)**: Implement both:
+   - **The Anti-Pattern (Naive Approach)**: Demonstrating the common pitfalls (e.g., lack of local error handling, unhandled exception bubbling, tight coupling, synchronous bottlenecks, or excessive coordinator overhead).
+   - **The Answer (Resilient Approach)**: Demonstrating the recommended architectural pattern (e.g., local error recovery, structured escalation, graceful degradation, circuit breaking, decoupling, or bounded retries).
+3. **Quantifiable Metrics & Input Token Stats**: Define clear architectural metrics (e.g., *Coordinator Interventions*, *Error Recovery Rate*, *System Latency*, *Throughput*, *Memory Consumption*, and *Input Token Consumption*) that quantitatively prove the superiority of the resilient approach. You MUST include a dedicated **Input Token Stats & Efficiency Scoreboard** at the bottom of the simulator page (\`index.html\`), CLI tables (\`demo.js\`), and \`README.md\` demonstrating input token savings!
+4. **Interactive Web Simulator (\`index.html\` via Pico.css & htmx)**: Build a self-contained, responsive HTML/CSS/JS web page using **Pico.css** (via CDN \`<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">\` for clean, responsive classless semantic styling and dark mode) and **htmx** (via CDN \`<script src="https://unpkg.com/htmx.org@2.0.4"><\\/script>\` for dynamic DOM interactions, responsive tab switching, and real-time simulation updates without full page reloads).
+5. **Step-by-Step "How, What & Why" Visual Explanations & Modal Popup Lightbox (\`index.html\`)**: At each execution step (Step 0 through Step 4), you MUST generate a visual image or architectural illustration (using your image generation tool e.g. \`generate_image\`, SVG diagrams, or canvas graphics) that explains:
+   - **WHAT** is happening at this architectural layer/stage.
+   - **WHY** the resilient pattern is superior to the naive anti-pattern here.
+   - **HOW** it functions under the hood.
+   You MUST embed all of these generated visual explanation diagrams directly into a dedicated **"How, What & Why" Walkthrough Section** inside \`index.html\` (and reference them in \`README.md\`). **CRITICAL REQUIREMENT (MODAL POPUP LIGHTBOX)**: All embedded images, architecture diagrams, and visual illustrations in \`index.html\` MUST have an interactive modal popup / lightbox feature! When any image is clicked, it must open in a fullscreen darkened modal overlay with zoom-in cursor styling and smooth transitions, allowing the user to examine diagram details clearly. Clicking the background overlay or pressing the Escape key must close the modal. Furthermore, you MUST use rich, expressive emojis (e.g., 🚀, ⚡, 🛡️, ❌, ✅, 💡, 🔍, 📊, 🎯) throughout all textual explanations, captions, card headers, and diagrams to make the presentation as visually appealing, engaging, and scannable as possible!
+6. **Visual Documentation**: Generate UML diagrams (static class structure and dynamic sequence/workflow) and a comprehensive, publication-ready \`README.md\`.
+7. **Automated Verification & Git Push**: Execute the demo script to verify correctness, then initialize git, stage, commit, and push the repository directly to GitHub.
+8. **GitHub Pages Static Deployment & Auto-Open**: Configure automated static deployment via GitHub Pages. After pushing to GitHub, you MUST wait for the GitHub Actions deployment workflow to complete, confirm the site is live online (e.g., \`https://<github-username>.github.io/<project-name>/\`), and automatically open this live web simulator URL in the browser!
+9. **LLM Attribution & Creating Model Mention**: You MUST explicitly identify your Large Language Model name/version (e.g., \`${targetLLM}\` / your exact model architecture) and prominently mention which LLM created this project! This attribution MUST be displayed: (1) at the very top of \`README.md\` in a dedicated metadata header badge (e.g. \`🤖 Generated by: ${targetLLM}\`), (2) in the interactive web simulator (\`index.html\`) header badge and footer, and (3) in the command-line demo banner (\`demo.js\`).
+10. **SEO & Web Assets (\`favicon.ico\`, \`sitemap.xml\`, \`robots.txt\`)**: You MUST generate static SEO assets including a custom site favicon (\`favicon.ico\` or SVG icon), a valid \`sitemap.xml\` pointing to your live GitHub Pages URL (\`https://<github-username>.github.io/<project-name>/\`), and a \`robots.txt\` allowing search engine indexing.
+11. **AI-Generated MP3 Audio Narrator & Auto-Following Walkthrough (\`index.html\` & \`audio/\`)**: Just as you generate visual explanation images, you MUST also ask Gemini / your AI tools (e.g. speech/audio generation capabilities, TTS synthesis scripts, or audio generation APIs) to generate audio narration in **MP3 format** (\`.mp3\`) for each step and section of the walkthrough! Save these generated MP3 audio files into an \`audio/\` directory (e.g., \`audio/intro.mp3\`, \`audio/step-1.mp3\`, \`audio/step-2.mp3\`, \`audio/step-3.mp3\`, \`audio/step-4.mp3\`). In the web simulator (\`index.html\`), implement an interactive **"🔊 Read Walkthrough & Follow Section"** feature that plays these AI-generated \`.mp3\` audio files using HTML5 Audio (\`new Audio('audio/....mp3')\`, with \`window.speechSynthesis\` as a seamless fallback if an MP3 file is unavailable). Add a master "🔊 Read Walkthrough" button in the header and individual "🔊 Listen & Follow" buttons on each section/card. **CRITICAL REQUIREMENT**: When playing the MP3 audio narration, the simulator MUST follow along in real-time — smoothly auto-scrolling (\`element.scrollIntoView({ behavior: 'smooth', block: 'center' })\`) to the exact related section being narrated and applying a glowing active outline/highlight to that section while its audio is playing!
+
+---
+
+## 🛠️ Step-by-Step Execution Plan
+
+### Step 0: Analyze Scenario & Initialize Workspace
+1. **Determine Project & Repository Name**: Analyze the Exam Question and Answer above. Invent a clean, descriptive, kebab-case project folder name (e.g., \`distributed-cache-stampede-demo\` or \`api-rate-limiter-resilience\`) that represents the architectural pattern being demonstrated. Let \`<project-name>\` be this derived name. Let \`<github-username>\` be the user's GitHub username (or default to \`rifaterdemsahin\`).
+2. **Create & Initialize Local Directory**:
+   Open your terminal and create the local project folder:
+   \`\`\`bash
+   mkdir -p <project-name>
+   cd <project-name>
+   git init -b main
+   \`\`\`
+3. 🎨 **Visual Explanation Image (Step 0) & 🔊 MP3 Audio Narration**: Generate an introductory architectural concept illustration explaining **WHAT** the core bottleneck is and **WHY** the recommended solution resolves it. Save to \`docs/\` and prepare to embed in \`index.html\`. Furthermore, ask Gemini / your audio generation tool to create an **MP3 audio narration file** (\`audio/intro.mp3\`) summarizing this introduction for the audio walkthrough.
+
+---
+
+## 📁 Required Project Layout
+
+You must create the following directory structure inside the \`<project-name>\` folder:
+
+\`\`\`
+<project-name>/
+├── .github/
+│   └── workflows/
+│       └── static.yml         # GitHub Actions workflow for deploying static content to GitHub Pages
+├── package.json               # ESM configuration ("type": "module"), script commands ("start", "naive", "resilient")
+├── demo.js                    # CLI runner executing both scenarios & printing comparative ascii tables
+├── index.html                 # Interactive visual simulator (modern aesthetics, Pico.css + htmx, dark mode)
+├── favicon.ico                # Site favicon (or favicon.svg)
+├── sitemap.xml                # SEO sitemap referencing live GitHub Pages URL
+├── robots.txt                 # SEO search engine crawler instructions
+├── README.md                  # Comprehensive documentation (Question, Answer, Quickstart, Architecture Walkthrough)
+├── docs/                      # Visual architecture diagrams & generated step explanation images
+│   ├── uml-class.svg          # Static class & interface structure
+│   ├── uml-workflow.svg       # Runtime sequence diagram showing error triage & escalation
+│   └── step-images/           # Step-by-step How, What & Why visual illustrations
+├── audio/                     # AI-generated MP3 audio narration files for each walkthrough section
+│   ├── intro.mp3              # MP3 narration for introduction
+│   └── step-1.mp3             # MP3 narration for step 1, etc.
+└── src/                       # Core domain and implementation modules
+    ├── domain.js              # Domain model, data entities, and simulated test corpus/workload
+    ├── infrastructure.js      # Simulated I/O, network, or external services (with typed error classes)
+    ├── subagent-naive.js      # ❌ Anti-pattern implementation (no local handling, over-escalates)
+    ├── subagent-resilient.js  # ✅ The Answer implementation (local recovery, structured results)
+    ├── coordinator.js         # Orchestrator/Coordinator against a duck-typed interface
+    └── utils.js               # Helpers (e.g., sleep, formatters, latency simulation)
+\`\`\`
+
+*(Note: Adapt module filenames inside \`src/\` to reflect the specific domain of the exam question.)*
+
+---
+
+### Step 1: Domain Modeling & Simulated Infrastructure (\`src/\`)
+- **No Dependency Cycles**: Ensure a unidirectional dependency chain: \`domain\` → \`infrastructure/service\` → \`subagent implementations\` → \`coordinator\` → \`entry point\`.
+- **Typed Errors as Architectural Seams**: Define distinct error classes (e.g., \`TransientError\` tagged with \`recoverable: true\` vs. \`FatalError\` tagged with \`recoverable: false\`) so callers can programmatically branch on failure type.
+- **Duck-Typed Contract**: Both the naive and resilient implementations must implement the exact same interface (e.g., \`async process(item) -> Result\`) allowing the coordinator to execute either interchangeably.
+- **Structured Escalation Contract**: In the resilient implementation, catch transient errors locally (retry, fallback, or degrade). When escalating unresolvable errors, return a structured result (\`status\`, \`partialResults\`, \`attemptLog\`, \`errorContext\`) rather than throwing raw exceptions.
+- 🎨 **Visual Explanation Image (Step 1) & 🔊 MP3 Audio Narration**: Generate an illustration explaining **HOW** typed errors act as architectural seams and **WHY** structured escalation prevents coordinator overload. Save to \`docs/\` and prepare to embed in \`index.html\`. Also ask Gemini / your audio generation tool to generate an **MP3 audio narration file** (\`audio/step-1.mp3\`) explaining this domain layer.
+
+---
+
+### Step 2: Command-Line Demo Runner (\`demo.js\`)
+- Create an executable Node.js CLI script (\`#!/usr/bin/env node\`).
+- Execute the simulated workload under both scenarios and aggregate metrics.
+- Output clean, professional ascii comparison tables showing the exact metric contrast (e.g., coordinator interventions dropping from \`3\` down to \`1\`).
+- Support command-line flags: \`--naive\` (run naive only), \`--resilient\` (run resilient only), and default (run both side-by-side).
+- 🎨 **Visual Explanation Image (Step 2) & 🔊 MP3 Audio Narration**: Generate an illustration showing **HOW** the CLI benchmarking engine executes naive vs. resilient workflows side-by-side. Save to \`docs/\` and prepare to embed in \`index.html\`. Also ask Gemini / your audio generation tool to generate an **MP3 audio narration file** (\`audio/step-2.mp3\`) explaining the CLI benchmark comparison.
+
+---
+
+### Step 3: Visually Stunning Responsive Web Simulator (\`index.html\` via Pico.css & htmx)
+- Build a standalone HTML/CSS/JS web interface utilizing **Pico.css** and **htmx** with **state-of-the-art responsive aesthetics**:
+  - Link **Pico.css** (\`<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">\`) for responsive semantic layouts, clean grid systems, and built-in dark mode support.
+  - Link **htmx** (\`<script src="https://unpkg.com/htmx.org@2.0.4"><\\/script>\`) to power dynamic DOM updates, scenario switching tabs, and interactive simulation controls without full page reloads.
+  - Deep dark mode color palette with glassmorphic cards, custom styling overrides, and subtle gradients.
+  - Modern typography (e.g., Google Fonts: Inter, Roboto, or Outfit).
+  - Smooth hover effects, transitions, and micro-animations.
+- Include interactive features:
+  - Simulation control buttons (Play, Pause, Step, Reset) driven by responsive event handling.
+  - Scenario toggle (Naive vs. Resilient vs. Side-by-Side).
+  - Animated metric scoreboards comparing coordinator interventions, success rates, and local recoveries.
+  - Real-time event log viewer detailing what occurred at each step.
+  - **AI-Generated MP3 Audio Narrator & Auto-Following Walkthrough**: Implement an HTML5 Audio player (\`new Audio('audio/....mp3')\`, with \`window.speechSynthesis\` text-to-speech as a graceful fallback) configured to play the AI-generated \`.mp3\` narration files from \`audio/\`. Include a master "🔊 Read Walkthrough" button and individual "🔊 Listen & Follow" buttons on each step explanation card. **CRITICAL**: As each section's MP3 audio is played, the simulator MUST automatically follow along by smoothly auto-scrolling (\`element.scrollIntoView({ behavior: 'smooth', block: 'center' })\`) to that exact section and applying a glowing cyan active border/highlight to the section being read!
+- 🎨 **Visual Explanation Image (Step 3), 🔊 MP3 Audio Narration, EMBEDDING & MODAL POPUP LIGHTBOX**: Generate a UI architecture illustration explaining **HOW** the browser simulation visualizes real-time metrics. Also ask Gemini / your audio generation tool to generate an **MP3 audio narration file** (\`audio/step-3.mp3\`) for the web simulator walkthrough. **CRITICAL REQUIREMENT: Embed all generated step images (from Steps 0, 1, 2, and 3) directly into \`index.html\`** inside elegant glassmorphic cards with clear captions explaining the How, What, and Why for each step, heavily utilizing expressive emojis (🚀, ⚡, 💡, 🛡️, 🔍) for visual appeal! **Every embedded diagram and image MUST be clickable (\`cursor: zoom-in\`), opening in a responsive fullscreen modal popup lightbox with click-to-close and ESC key handling!**
+
+---
+
+### Step 4: Documentation, SEO Assets (\`favicon.ico\`, \`sitemap.xml\`, \`robots.txt\`), Architecture Diagrams & GitHub Actions (\`docs/\`, \`README.md\`, \`.github/workflows/static.yml\`)
+- Generate static SEO & website assets:
+  - **\`favicon.ico\`** (or \`favicon.svg\` linked in \`index.html\` header): A clean, modern icon representing the architectural concept.
+  - **\`sitemap.xml\`**: A valid XML sitemap containing the live GitHub Pages URL (\`https://<github-username>.github.io/<project-name>/\`).
+  - **\`robots.txt\`**: Standard crawler instructions allowing search engines to index the site and pointing to \`sitemap.xml\`.
+- Generate UML diagrams in \`docs/\` (as SVG files or embedded Mermaid charts):
+  - **Class Diagram**: Showing static relationships, interfaces, and module structure.
+  - **Workflow Diagram**: Sequence diagram showing runtime flow, local recovery loops, and escalation paths.
+- Write a publication-grade \`README.md\` including:
+  - 🌐 **Live Interactive Web Simulator Link**: Prominently feature the GitHub Pages URL at the very top of \`README.md\` (e.g., \`https://<github-username>.github.io/<project-name>/\` similar to \`https://rifaterdemsahin.github.io/claude-cowork/\`).
+  - 🤖 **Creating LLM Attribution**: Prominently display a badge or header stating which Large Language Model (\`${targetLLM}\`) generated and built this project.
+  - The exact Claude AI Architect Exam Question and Answer.
+  - Quickstart instructions (\`npm start\`, \`node demo.js\`, \`open index.html\`).
+  - Side-by-side outcome summary table.
+  - Detailed module explanation and architectural rationale with emojis.
+  - Key code snippets highlighting the difference between naive bubbling and resilient local recovery.
+- 🎨 **Visual Explanation Image (Step 4) & 🔊 MP3 Audio Narration**: Generate an overall system summary illustration and generate a final summary **MP3 audio narration file** (\`audio/step-4.mp3\`). Ensure all step explanation images and audio walkthrough references are documented in \`README.md\`.
+
+- **Create GitHub Actions Static Deployment Workflow**:
+  Create \`.github/workflows/static.yml\` (similar to \`https://github.com/rifaterdemsahin/hub-spoke-multi-agent-orchestrator/blob/main/.github/workflows/static.yml\`) with the exact automated deployment configuration:
+  \`\`\`yaml
+  # Simple workflow for deploying static content to GitHub Pages
+  name: Deploy static content to Pages
+
+  on:
+    # Runs on pushes targeting the default branch
+    push:
+      branches: ["main"]
+
+    # Allows you to run this workflow manually from the Actions tab
+    workflow_dispatch:
+
+  # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+  permissions:
+    contents: read
+    pages: write
+    id-token: write
+
+  # Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+  # However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+  concurrency:
+    group: "pages"
+    cancel-in-progress: false
+
+  jobs:
+    # Single deploy job since we're just deploying
+    deploy:
+      environment:
+        name: github-pages
+        url: \${{ steps.deployment.outputs.page_url }}
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v4
+        - name: Setup Pages
+          uses: actions/configure-pages@v5
+        - name: Upload artifact
+          uses: actions/upload-pages-artifact@v3
+          with:
+            # Upload entire repository
+            path: '.'
+        - name: Deploy to GitHub Pages
+          id: deployment
+          uses: actions/deploy-pages@v5
+  \`\`\`
+
+---
+
+### Step 5: Local Verification & Testing
+- Run \`node demo.js\` via terminal to verify zero syntax errors, proper import resolution, and accurate metric calculation.
+- Verify that all visual assets and scripts are correctly linked and functional.
+
+---
+
+### Step 6: Git Commit, GitHub Push, Enable Pages via \`gh\` & Auto-Open Live Page
+- Stage all generated project files:
+  \`\`\`bash
+  git add .
+  \`\`\`
+- Commit with a descriptive semantic message:
+  \`\`\`bash
+  git commit -m "feat: demonstrate architectural solution for <project-name>"
+  \`\`\`
+- **Create and Push to GitHub Repository**:
+  Use the GitHub CLI (\`gh\`) to automatically create the remote repository and push:
+  \`\`\`bash
+  gh repo create <github-username>/<project-name> --\${visibility} --source=. --remote=origin --push
+  \`\`\`
+  *(Alternative fallback if \`gh\` is unavailable: create the repository manually on GitHub, then run:*
+  \`\`\`bash
+  git remote add origin https://github.com/<github-username>/<project-name>.git
+  git branch -M main
+  git push -u origin main
+  \`\`\`
+  *)*
+- **Enable GitHub Pages via \`gh\` CLI Methods**:
+  After pushing, enable GitHub Pages deployment via GitHub Actions workflow using the \`gh\` API command:
+  \`\`\`bash
+  gh api -X POST /repos/<github-username>/<project-name>/pages -f "build_type=workflow" || gh api -X PUT /repos/<github-username>/<project-name>/pages -f "build_type=workflow" || true
+  \`\`\`
+  The live URL will be:
+  \`https://<github-username>.github.io/<project-name>/\`
+- **Wait for GitHub Actions Deployment & Automatically Open Page**:
+  Wait for the GitHub Actions deployment / Pages build workflow (\`static.yml\`) to finish executing (e.g., using \`gh run watch\` or checking \`curl -s -o /dev/null -w "%{http_code}" https://<github-username>.github.io/<project-name>/\`). Once completed and returning HTTP 200 OK, automatically launch and open the live website in the browser:
+  \`\`\`bash
+  open "https://<github-username>.github.io/<project-name>/"
+  \`\`\`
+  *(Or if Wave browser is available: \`open -a Wave "https://<github-username>.github.io/<project-name>/"\`)*
+
+---
+
+## 🚀 Final Deliverable Instructions
+Execute the steps above sequentially and thoroughly. When finished, print the CLI verification output (including the Input Token Stats summary at the bottom), confirm the successful git push to GitHub (\`https://github.com/<github-username>/<project-name>\`), confirm that the GitHub Actions static deployment has completed, confirm that you have automatically opened the live GitHub Pages URL in the browser (\`https://<github-username>.github.io/<project-name>/\`), and provide clickable local and live links to the generated \`README.md\` and \`index.html\` files.`;
+
+      const promptOutputEl = document.getElementById('promptOutput');
+      if (promptOutputEl) promptOutputEl.innerText = promptText;
+
+      const words = promptText.trim().split(/\s+/).filter(Boolean).length;
+      const chars = promptText.length;
+      const tokens = Math.round(words * 1.35);
+      
+      const wordCountEl = document.getElementById('wordCount');
+      const charCountEl = document.getElementById('charCount');
+      const tokenCountEl = document.getElementById('tokenCount');
+
+      if (wordCountEl) wordCountEl.innerText = words.toLocaleString();
+      if (charCountEl) charCountEl.innerText = chars.toLocaleString();
+      if (tokenCountEl) tokenCountEl.innerText = '~' + tokens.toLocaleString();
+    }
+
+    function clearFormAction() {
+      document.getElementById('examQuestion').value = '';
+      document.getElementById('examAnswer').value = '';
+      document.getElementById('repoVisibility').value = 'public';
+      if (document.getElementById('targetLLM')) document.getElementById('targetLLM').value = 'Auto-Detect (Executing AI Assistant Model)';
+      
+      document.getElementById('promptOutput').innerText = '// Prompt deleted.\n// Enter your exam question and recommended architectural solution above, then click "Generate Prompt" to create your project prompt.';
+      document.getElementById('wordCount').innerText = '0';
+      document.getElementById('charCount').innerText = '0';
+      document.getElementById('tokenCount').innerText = '0';
+
+      const clearBtn = document.getElementById('clearBtn');
+      const clearText = document.getElementById('clearText');
+      const clearIcon = document.getElementById('clearIcon');
+
+      if (clearBtn) {
+        clearText.innerText = '✓ Cleared!';
+        clearIcon.innerHTML = '<polyline points="20 6 9 17 4 12"></polyline>';
+        setTimeout(() => {
+          clearText.innerText = 'Clear / Restart';
+          clearIcon.innerHTML = '<polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>';
+        }, 1500);
+      }
+    }
+
+    function copyToClipboard() {
+      const text = document.getElementById('promptOutput').innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById('copyBtn');
+        const textSpan = document.getElementById('copyText');
+        const icon = document.getElementById('copyIcon');
+
+        const formBtn = document.getElementById('copyFormBtn');
+        const formTextSpan = document.getElementById('copyFormText');
+        const formIcon = document.getElementById('copyFormIcon');
+        
+        if (btn && textSpan && icon) {
+          btn.classList.add('copied');
+          textSpan.innerText = '✓ Copied!';
+          icon.innerHTML = '<polyline points="20 6 9 17 4 12"></polyline>';
+        }
+
+        if (formBtn && formTextSpan && formIcon) {
+          formBtn.classList.add('copied');
+          formTextSpan.innerText = '✓ Copied!';
+          formIcon.innerHTML = '<polyline points="20 6 9 17 4 12"></polyline>';
+        }
+        
+        setTimeout(() => {
+          if (btn && textSpan && icon) {
+            btn.classList.remove('copied');
+            textSpan.innerText = 'Copy Prompt';
+            icon.innerHTML = '<rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>';
+          }
+          if (formBtn && formTextSpan && formIcon) {
+            formBtn.classList.remove('copied');
+            formTextSpan.innerText = 'Copy Prompt';
+            formIcon.innerHTML = '<rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>';
+          }
+        }, 2500);
+      });
+    }
+
+    function generatePromptAction() {
+      updatePrompt();
+      const genBtn = document.getElementById('generateBtn');
+      const outputEl = document.getElementById('promptOutput');
+      
+      if (genBtn) {
+        genBtn.classList.add('generated');
+        genBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg><span>✓ Generated!</span>';
+      }
+      
+      if (outputEl) {
+        outputEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        outputEl.style.transition = 'all 0.3s ease';
+        outputEl.style.borderColor = 'var(--primary)';
+        outputEl.style.boxShadow = '0 0 30px rgba(0, 240, 255, 0.6)';
+      }
+      
+      setTimeout(() => {
+        if (genBtn) {
+          genBtn.classList.remove('generated');
+          genBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg><span>Generate Prompt</span>';
+        }
+        if (outputEl) {
+          outputEl.style.borderColor = 'var(--border-color)';
+          outputEl.style.boxShadow = 'inset 0 2px 10px rgba(0, 0, 0, 0.5)';
+        }
+      }, 2000);
+    }
+
+    function copyCloneCmd(repoPath, btnEl) {
+      const cmd = `git clone https://github.com/${repoPath}.git`;
+      navigator.clipboard.writeText(cmd).then(() => {
+        const origText = btnEl.innerText;
+        btnEl.innerText = '✓ Copied!';
+        btnEl.style.background = 'rgba(16, 185, 129, 0.2)';
+        btnEl.style.color = '#10b981';
+        btnEl.style.borderColor = '#10b981';
+        setTimeout(() => {
+          btnEl.innerText = origText;
+          btnEl.style.background = '';
+          btnEl.style.color = '';
+          btnEl.style.borderColor = '';
+        }, 2000);
+      });
+    }
+
+    // Learning Objectives LocalStorage Management
+    const STORAGE_KEY = 'claude_architect_handson_objectives';
+
+    function loadObjectives() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      const checkedIds = saved ? JSON.parse(saved) : [];
+      
+      document.querySelectorAll('.obj-checkbox').forEach(cb => {
+        const objId = cb.getAttribute('data-obj');
+        cb.checked = checkedIds.includes(objId);
+      });
+      
+      updateProgress();
+    }
+
+    function toggleObjective(cb) {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      let checkedIds = saved ? JSON.parse(saved) : [];
+      const objId = cb.getAttribute('data-obj');
+
+      if (cb.checked) {
+        if (!checkedIds.includes(objId)) checkedIds.push(objId);
+      } else {
+        checkedIds = checkedIds.filter(id => id !== objId);
+      }
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(checkedIds));
+      updateProgress();
+    }
+
+    function resetAllObjectives() {
+      if (!confirm('Are you sure you want to reset all learning objectives progress?')) return;
+      localStorage.removeItem(STORAGE_KEY);
+      document.querySelectorAll('.obj-checkbox').forEach(cb => { cb.checked = false; });
+      updateProgress();
+    }
+
+    function updateProgress() {
+      const allCbs = document.querySelectorAll('.obj-checkbox');
+      const checkedCbs = document.querySelectorAll('.obj-checkbox:checked');
+      const total = allCbs.length;
+      const done = checkedCbs.length;
+      const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+
+      const progressText = document.getElementById('progressText');
+      const progressBarFill = document.getElementById('progressBarFill');
+
+      if (progressText) progressText.innerText = `${done} / ${total} (${pct}%)`;
+      if (progressBarFill) progressBarFill.style.width = `${pct}%`;
+    }
+
+    // Initialize on load
+    window.addEventListener('DOMContentLoaded', () => {
+      updatePrompt();
+      loadObjectives();
+
+      // Check URL hash for tab linking
+      if (location.hash === '#repos') {
+        const btn = document.querySelectorAll('.tab-btn')[1];
+        if (btn) switchTab('repos', btn);
+      } else if (location.hash === '#objectives') {
+        const btn = document.querySelectorAll('.tab-btn')[2];
+        if (btn) switchTab('objectives', btn);
+      }
+    });
+  </script>
+  <script src="../../../shared/debug-panel.js"></script>
+</body>
+</html>

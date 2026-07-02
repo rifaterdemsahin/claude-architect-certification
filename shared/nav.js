@@ -342,6 +342,7 @@
       ]}
     ]},
     { label: '🎥 Production', children: [
+      { label: '0. 💻 Hands-on Labs & Prompt Builder', url: '5_Symbols/production/prod/handson.html', description: 'Interactive command center for prompt building, live demo repositories, and learning objective tracking.' },
       { label: '1. 📁 Google Drive Folder Creator', url: '5_Symbols/production/prod/google_drive_folder_creator.html', description: 'Recursively generate Google Drive folders for course modules and videos, and automatically record the folder links back to Supabase.' },
       { label: '2. 🔗 Google Drive Links', url: '5_Symbols/production/prod/google_drive_links.html', description: 'View and verify all created Google Drive directory links for modules and videos.' },
       { label: '3. 🗣️ Talking Heads', url: '5_Symbols/production/prod/talking-heads.html', description: 'All on-camera presenter scenes with greenscreen recording guide.' },
