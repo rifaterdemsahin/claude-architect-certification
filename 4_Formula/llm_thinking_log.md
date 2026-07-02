@@ -1,5 +1,16 @@
 # LLM Thinking Log
 
+## 2026-07-02 — ⌨️ Mac Terminal Navigation Formula (`mac_terminal_navigation_formula.md`)
+
+### 🎯 Objective
+Create a formal developer tooling formula (`4_Formula/tools/mac_terminal_navigation_formula.md`) documenting the most effective methods to quickly navigate to the `/Users/rifaterdemsahin/projects/claude-architect-certification` workspace on macOS without repetitive long-path typing.
+
+### 🧭 Architecture & Design Choices
+- **Method 1 (Zsh Alias)**: Recommends the convenient `alias cla="cd ~/projects/claude-architect-certification"` in `~/.zshrc` for one-keyword jumping from any location.
+- **Method 2 (Tab Completion)**: Explains how to leverage zsh tab completion (`cd ~/projects/clau<TAB>`).
+- **Method 3 (Symlinks)**: Shows how to create a short home-directory symlink (`ln -s ~/projects/claude-architect-certification ~/claude`) for direct `cd ~/claude` access.
+- **Menu & Index Synchronization**: Updates `4_Formula/tools/README.md`, `4_Formula/README.md`, `navigation_config.json`, `index.html`, and `markdown_renderer.html` to keep all debug navigation menus fully synchronized.
+
 ## 2026-07-02 — 📈 Customer Development Framework Updates
 
 ### 🎯 Objective
