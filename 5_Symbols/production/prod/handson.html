@@ -1590,7 +1590,7 @@
 
       const promptText = `# TASK: Generate an Architectural Demonstration Project for the Claude AI Architect Exam
 
-You are an expert Principal AI Architect and Systems Engineer. Your task is to build a complete, runnable, production-grade architectural demonstration project from scratch based on the provided **Claude AI Architect Exam** Question and Answer. You must initialize the project folder locally and push the completed repository directly to GitHub.
+You are a senior frontend engineer + motion designer + Principal AI Architect and Systems Engineer. Your task is to build a complete, runnable, production-grade architectural demonstration project — an interactive web animation demo — from scratch based on the provided **Claude AI Architect Exam** Question and Answer. You must initialize the project folder locally and push the completed repository directly to GitHub.
 
 ## 📐 Concrete Example of Expected Output
 
@@ -1645,6 +1645,45 @@ The objective of this repository is to transform an abstract architectural exam 
 10. **SEO & Web Assets (\`favicon.ico\`, \`sitemap.xml\`, \`robots.txt\`)**: You MUST generate static SEO assets including a custom site favicon (\`favicon.ico\` or SVG icon), a valid \`sitemap.xml\` pointing to your live GitHub Pages URL (\`https://<github-username>.github.io/<project-name>/\`), and a \`robots.txt\` allowing search engine indexing.
 11. **AI-Generated MP3 Audio Narrator & Auto-Following Walkthrough (\`index.html\` & \`audio/\`)**: Just as you generate visual explanation images, you MUST also ask Gemini / your AI tools (e.g. speech/audio generation capabilities, TTS synthesis scripts, or audio generation APIs) to generate audio narration in **MP3 format** (\`.mp3\`) for each step and section of the walkthrough! Save these generated MP3 audio files into an \`audio/\` directory (e.g., \`audio/intro.mp3\`, \`audio/step-1.mp3\`, \`audio/step-2.mp3\`, \`audio/step-3.mp3\`, \`audio/step-4.mp3\`). In the web simulator (\`index.html\`), implement an interactive **"🔊 Read Walkthrough & Follow Section"** feature that plays these AI-generated \`.mp3\` audio files using HTML5 Audio (\`new Audio('audio/....mp3')\`, with \`window.speechSynthesis\` as a seamless fallback if an MP3 file is unavailable). Add a master "🔊 Read Walkthrough" button in the header and individual "🔊 Listen & Follow" buttons on each section/card. **CRITICAL REQUIREMENT**: When playing the MP3 audio narration, the simulator MUST follow along in real-time — smoothly auto-scrolling (\`element.scrollIntoView({ behavior: 'smooth', block: 'center' })\`) to the exact related section being narrated and applying a glowing active outline/highlight to that section while its audio is playing!
 12. **🎨 Emoji-Rich Presentation**: Use emojis liberally and intentionally throughout every deliverable — README.md headers, CLI demo banners, simulator UI cards, diagram captions, file tree annotations, commit messages, and GitHub issue templates. Emojis make the output scannable, engaging, and exam-review friendly. Every section heading, status badge, metric label, scoreboard column, step explanation card, and file tree entry MUST carry at least one relevant emoji.
+13. **🖌️ Animation & Motion Design Audit/Improvement Required**: The interactive web animation inside \`index.html\` must teach the concept visually, not just decorate the UI. Perform the following:
+
+    **1) Audit current animation quality**
+    - Identify what is decorative vs explanatory
+    - Identify where user understanding breaks
+    - Rate: clarity, motion hierarchy, transitions, interaction feedback, accessibility, performance, responsiveness
+
+    **2) Redesign animation storytelling — create a clear state flow:**
+    - idle → input received → decision/comparison → ambiguity/failure (if applicable) → recovery/retry (if applicable) → success → metrics update → final state
+
+    **3) Improve motion design**
+    - Emphasize important elements; reduce background noise
+    - Use smooth easing and staggered timing
+    - Avoid too many simultaneous animations
+    - Keep loop readable and short
+
+    **4) Improve interaction UX**
+    - Sync animation with logs/steps/tabs
+    - Add clear Play/Pause/Step/Reset behavior
+    - Add hover/click feedback for active nodes and paths
+
+    **5) Accessibility + performance**
+    - Add prefers-reduced-motion fallback
+    - Use transform/opacity-heavy animations to reduce jank
+    - Avoid layout shifts
+    - Ensure mobile responsiveness
+    - Keep dependencies minimal
+
+    **6) Output format for this requirement**
+    - Short critique of current issues
+    - Improved storyboard (step-by-step)
+    - Prioritized fixes by impact/effort
+    - Concrete code changes (diffs/snippets) without rewriting the whole app
+    - Quick test checklist
+
+    **Constraints:**
+    - Preserve core business logic
+    - Don't remove existing educational content
+    - Prefer minimal, targeted edits over full rewrites
 
 ---
 
