@@ -1066,13 +1066,14 @@
               <label for="targetLLM">Creating Large Language Model (LLM)</label>
               <select id="targetLLM" onchange="updatePrompt()">
                 <option value="Auto-Detect (Executing AI Assistant Model)">Auto-Detect (Executing AI Assistant Model)</option>
+                <option value="DeepSeek V4 Flash">⚡ DeepSeek V4 Flash (Recommended)</option>
+                <option value="DeepSeek R1 / V3">DeepSeek R1 / V3</option>
                 <option value="Google Gemini 3.1 Pro (High)">Google Gemini 3.1 Pro (High)</option>
                 <option value="Google Gemini 2.5 Pro">Google Gemini 2.5 Pro</option>
                 <option value="Google Gemini 2.0 Flash">Google Gemini 2.0 Flash</option>
                 <option value="Anthropic Claude 3.7 Sonnet">Anthropic Claude 3.7 Sonnet</option>
                 <option value="Anthropic Claude 3.5 Sonnet">Anthropic Claude 3.5 Sonnet</option>
                 <option value="OpenAI GPT-4o">OpenAI GPT-4o</option>
-                <option value="DeepSeek R1 / V3">DeepSeek R1 / V3</option>
               </select>
               <div class="help-text">Specifies which LLM created this project for documentation and UI badges</div>
             </div>
@@ -1590,7 +1591,7 @@
 
       const promptText = `# TASK: Generate an Architectural Demonstration Project for the Claude AI Architect Exam
 
-You are a senior frontend engineer + motion designer + Principal AI Architect and Systems Engineer. Your task is to build a complete, runnable, production-grade architectural demonstration project — an interactive web animation demo — from scratch based on the provided **Claude AI Architect Exam** Question and Answer. You must initialize the project folder locally and push the completed repository directly to GitHub.
+You are DeepSeek V4 Flash — a precision code generation model with a 1M token context window. You also act as a senior frontend engineer + motion designer + Principal AI Architect and Systems Engineer. Your task is to build a complete, runnable, production-grade architectural demonstration project — an interactive web animation demo — from scratch based on the provided **Claude AI Architect Exam** Question and Answer. You must initialize the project folder locally and push the completed repository directly to GitHub.
 
 ## 📐 Concrete Example of Expected Output
 
@@ -1608,8 +1609,15 @@ Before you begin, here is a concrete working example of exactly what you must pr
 
 Now apply this exact structure to the exam question and answer below.
 
-## ⚡ Mandatory Initial Settings & Pre-requisites
-1. **Gemini \`settings.json\` Permission Access**: At the very start of your session before executing commands or modifying files, check, request, or configure your permission access grants in \`/Users/rifaterdemsahin/.gemini/antigravity-cli/settings.json\` (or workspace settings) so that you have automated read/write, git, and command execution access without interrupting the user by repeatedly asking for permission during project build and deployment!
+## ⚡ DeepSeek V4 Flash Optimization & Pre-requisites
+
+**DeepSeek V4 Flash advantages you MUST leverage:**
+- **1M token context window** — generate the entire project (all source files, all assets, all config) in a single response without chunking. Output every file in full, no placeholders.
+- **Precision code generation** — DeepSeek V4 Flash excels at producing correct, idiomatic, production-grade JavaScript/Node.js code. Lean into this by writing complete, runnable modules rather than pseudocode or stubs.
+- **Fast inference** — because this model generates quickly, you can afford to produce verbose, well-commented output. Every file should be self-documenting.
+- **Cost efficiency** — generate as many files as needed without concern for token budgets.
+
+1. **Shell / CLI Execution**: Before running any shell commands (mkdir, git, npm, etc.), confirm your environment has command execution capabilities. If running in a sandboxed environment, output all files to be created manually as a fallback.
 2. **Input Token Usage Stats**: You MUST track and display simulated/actual **Input Token Stats & Context Efficiency** at the bottom of the interactive web simulator (\`index.html\`), at the bottom of the CLI comparison table (\`demo.js\`), and at the bottom of \`README.md\` (e.g., showing how the resilient approach reduces input token consumption / coordinator overhead compared to the naive approach)!
 
 ## 📝 Input: Exam Scenario
@@ -1641,9 +1649,15 @@ The objective of this repository is to transform an abstract architectural exam 
 6. **Visual Documentation**: Generate architecture diagrams using **Excalidraw** (https://excalidraw.com) for hand-drawn-style sketches, plus formal UML diagrams (static class structure and dynamic sequence/workflow), and a comprehensive, publication-ready \`README.md\`.
 7. **Automated Verification & Git Push**: Execute the demo script to verify correctness, then initialize git, stage, commit, and push the repository directly to GitHub.
 8. **GitHub Pages Static Deployment & Auto-Open**: Configure automated static deployment via GitHub Pages. After pushing to GitHub, you MUST wait for the GitHub Actions deployment workflow to complete, confirm the site is live online (e.g., \`https://<github-username>.github.io/<project-name>/\`), and automatically open this live web simulator URL in the browser!
-9. **LLM Attribution & Creating Model Mention**: You MUST explicitly identify your Large Language Model name/version (e.g., \`${targetLLM}\` / your exact model architecture) and prominently mention which LLM created this project! This attribution MUST be displayed: (1) at the very top of \`README.md\` in a dedicated metadata header badge (e.g. \`🤖 Generated by: ${targetLLM}\`), (2) in the interactive web simulator (\`index.html\`) header badge and footer, and (3) in the command-line demo banner (\`demo.js\`).
+9. **LLM Attribution & Creating Model Mention**: You MUST explicitly identify your Large Language Model name/version (e.g., \`${targetLLM}\` — defaulting to \`DeepSeek V4 Flash\` / your exact model architecture) and prominently mention which LLM created this project! This attribution MUST be displayed: (1) at the very top of \`README.md\` in a dedicated metadata header badge (e.g. \`🤖 Generated by: ${targetLLM}\` or \`⚡ Built with DeepSeek V4 Flash\`), (2) in the interactive web simulator (\`index.html\`) header badge and footer, and (3) in the command-line demo banner (\`demo.js\`).
 10. **SEO & Web Assets (\`favicon.ico\`, \`sitemap.xml\`, \`robots.txt\`)**: You MUST generate static SEO assets including a custom site favicon (\`favicon.ico\` or SVG icon), a valid \`sitemap.xml\` pointing to your live GitHub Pages URL (\`https://<github-username>.github.io/<project-name>/\`), and a \`robots.txt\` allowing search engine indexing.
-11. **AI-Generated MP3 Audio Narrator & Auto-Following Walkthrough (\`index.html\` & \`audio/\`)**: Just as you generate visual explanation images, you MUST also ask Gemini / your AI tools (e.g. speech/audio generation capabilities, TTS synthesis scripts, or audio generation APIs) to generate audio narration in **MP3 format** (\`.mp3\`) for each step and section of the walkthrough! Save these generated MP3 audio files into an \`audio/\` directory (e.g., \`audio/intro.mp3\`, \`audio/step-1.mp3\`, \`audio/step-2.mp3\`, \`audio/step-3.mp3\`, \`audio/step-4.mp3\`). In the web simulator (\`index.html\`), implement an interactive **"🔊 Read Walkthrough & Follow Section"** feature that plays these AI-generated \`.mp3\` audio files using HTML5 Audio (\`new Audio('audio/....mp3')\`, with \`window.speechSynthesis\` as a seamless fallback if an MP3 file is unavailable). Add a master "🔊 Read Walkthrough" button in the header and individual "🔊 Listen & Follow" buttons on each section/card. **CRITICAL REQUIREMENT**: When playing the MP3 audio narration, the simulator MUST follow along in real-time — smoothly auto-scrolling (\`element.scrollIntoView({ behavior: 'smooth', block: 'center' })\`) to the exact related section being narrated and applying a glowing active outline/highlight to that section while its audio is playing!
+11. **🔊 Auto-Narrated Walkthrough with Web Speech API (\`index.html\`)**: Implement an interactive "🔊 Read Walkthrough & Follow Section" feature using the **Web Speech API** (\`window.speechSynthesis\`) for zero-dependency, AI-generated-quality audio narration in the browser. No external AI audio generation tool is needed — DeepSeek V4 Flash generates the spoken text, and the browser synthesizes it locally. Structure the implementation as follows:
+
+    - Write a JavaScript array of narration scripts (one per walkthrough step) directly in \`index.html\` — each entry contains the text to speak, the CSS selector of the corresponding section, and the duration hint.
+    - Add a master "🔊 Read Walkthrough" button in the header and individual "🔊 Listen & Follow" buttons on each section/card.
+    - On play: call \`window.speechSynthesis.speak(new SpeechSynthesisUtterance(text))\` and simultaneously \`element.scrollIntoView({ behavior: 'smooth', block: 'center' })\` to the related section, applying a glowing active outline/highlight while narration is active.
+    - Add pause/resume/stop controls and a speaking indicator badge.
+    - **CRITICAL REQUIREMENT**: The narration MUST auto-scroll and highlight the correct section in real-time as the speech progresses. Use \`onboundary\` event on the utterance to track word-level position and sync scrolling.
 12. **🎨 Emoji-Rich Presentation**: Use emojis liberally and intentionally throughout every deliverable — README.md headers, CLI demo banners, simulator UI cards, diagram captions, file tree annotations, commit messages, and GitHub issue templates. Emojis make the output scannable, engaging, and exam-review friendly. Every section heading, status badge, metric label, scoreboard column, step explanation card, and file tree entry MUST carry at least one relevant emoji.
 13. **🖌️ Animation & Motion Design Audit/Improvement Required**: The interactive web animation inside \`index.html\` must teach the concept visually, not just decorate the UI. Perform the following:
 
@@ -1685,6 +1699,16 @@ The objective of this repository is to transform an abstract architectural exam 
     - Don't remove existing educational content
     - Prefer minimal, targeted edits over full rewrites
 
+## 💡 DeepSeek V4 Flash Execution Guidance
+
+Optimize your output for DeepSeek V4 Flash's architecture:
+
+1. **Output every file in full** — with the 1M token context window there is no need to abbreviate, use "..." placeholders, or say "rest similar to above". Generate every file completely.
+2. **Prefer flat, explicit imports** — DeepSeek V4 Flash handles precise \`import\`/\`require\` paths reliably. Avoid dynamic requires or overly abstracted module resolution.
+3. **Write self-contained HTML** — inline all CSS and JS into \`index.html\` where reasonable. Avoid splitting the simulator across 5+ files unless the module count genuinely demands it.
+4. **Leverage zero-dependency patterns** — use Node.js built-ins (\`fs\`, \`path\`, \`events\`, \`assert\`) and browser APIs (\`fetch\`, \`speechSynthesis\`, \`IntersectionObserver\`) instead of npm packages. DeepSeek V4 Flash has deep knowledge of these APIs.
+5. **DeepSeek V4 Flash attribution** — every generated project MUST include \`⚡ Built with DeepSeek V4 Flash\` in the README badge, simulator footer, and CLI banner. This is non-negotiable.
+
 ---
 
 ## 🛠️ Step-by-Step Execution Plan
@@ -1698,7 +1722,7 @@ The objective of this repository is to transform an abstract architectural exam 
    cd <project-name>
    git init -b main
    \`\`\`
-3. 🎨 **Visual Explanation Image (Step 0) & 🔊 MP3 Audio Narration**: Generate an introductory architectural concept illustration explaining **WHAT** the core bottleneck is and **WHY** the recommended solution resolves it. Save to \`docs/\` and prepare to embed in \`index.html\`. Furthermore, ask Gemini / your audio generation tool to create an **MP3 audio narration file** (\`audio/intro.mp3\`) summarizing this introduction for the audio walkthrough.
+3. 🎨 **Visual Explanation Image (Step 0) & 🔊 Web Speech Narration Script**: Generate an introductory architectural concept illustration explaining **WHAT** the core bottleneck is and **WHY** the recommended solution resolves it. Save to \`docs/\` and prepare to embed in \`index.html\`. Write the corresponding narration text as an entry in \`narration.js\` (for Web Speech API playback with auto-scroll sync).
 
 ---
 
@@ -1722,9 +1746,7 @@ You must create the following directory structure inside the \`<project-name>\` 
 │   ├── uml-class.svg          # Static class & interface structure
 │   ├── uml-workflow.svg       # Runtime sequence diagram showing error triage & escalation
 │   └── step-images/           # Step-by-step How, What & Why visual illustrations
-├── audio/                     # AI-generated MP3 audio narration files for each walkthrough section
-│   ├── intro.mp3              # MP3 narration for introduction
-│   └── step-1.mp3             # MP3 narration for step 1, etc.
+├── narration.js               # Web Speech API narration scripts (text + selectors for auto-scroll walkthrough)
 └── src/                       # Core domain and implementation modules
     ├── domain.js              # Domain model, data entities, and simulated test corpus/workload
     ├── infrastructure.js      # Simulated I/O, network, or external services (with typed error classes)
@@ -1743,7 +1765,7 @@ You must create the following directory structure inside the \`<project-name>\` 
 - **Typed Errors as Architectural Seams**: Define distinct error classes (e.g., \`TransientError\` tagged with \`recoverable: true\` vs. \`FatalError\` tagged with \`recoverable: false\`) so callers can programmatically branch on failure type.
 - **Duck-Typed Contract**: Both the naive and resilient implementations must implement the exact same interface (e.g., \`async process(item) -> Result\`) allowing the coordinator to execute either interchangeably.
 - **Structured Escalation Contract**: In the resilient implementation, catch transient errors locally (retry, fallback, or degrade). When escalating unresolvable errors, return a structured result (\`status\`, \`partialResults\`, \`attemptLog\`, \`errorContext\`) rather than throwing raw exceptions.
-- 🎨 **Visual Explanation Image (Step 1) & 🔊 MP3 Audio Narration**: Generate an illustration explaining **HOW** typed errors act as architectural seams and **WHY** structured escalation prevents coordinator overload. Save to \`docs/\` and prepare to embed in \`index.html\`. Also ask Gemini / your audio generation tool to generate an **MP3 audio narration file** (\`audio/step-1.mp3\`) explaining this domain layer.
+- 🎨 **Visual Explanation Image (Step 1) & 🔊 Web Speech Narration Script**: Generate an illustration explaining **HOW** typed errors act as architectural seams and **WHY** structured escalation prevents coordinator overload. Save to \`docs/\` and prepare to embed in \`index.html\`. Add the corresponding narration entry to \`narration.js\` for Web Speech API playback.
 
 ---
 
@@ -1752,7 +1774,7 @@ You must create the following directory structure inside the \`<project-name>\` 
 - Execute the simulated workload under both scenarios and aggregate metrics.
 - Output clean, professional ascii comparison tables showing the exact metric contrast (e.g., coordinator interventions dropping from \`3\` down to \`1\`).
 - Support command-line flags: \`--naive\` (run naive only), \`--resilient\` (run resilient only), and default (run both side-by-side).
-- 🎨 **Visual Explanation Image (Step 2) & 🔊 MP3 Audio Narration**: Generate an illustration showing **HOW** the CLI benchmarking engine executes naive vs. resilient workflows side-by-side. Save to \`docs/\` and prepare to embed in \`index.html\`. Also ask Gemini / your audio generation tool to generate an **MP3 audio narration file** (\`audio/step-2.mp3\`) explaining the CLI benchmark comparison.
+- 🎨 **Visual Explanation Image (Step 2) & 🔊 Web Speech Narration Script**: Generate an illustration showing **HOW** the CLI benchmarking engine executes naive vs. resilient workflows side-by-side. Save to \`docs/\` and prepare to embed in \`index.html\`. Add the corresponding narration entry to \`narration.js\` for Web Speech API playback.
 
 ---
 
@@ -1768,8 +1790,8 @@ You must create the following directory structure inside the \`<project-name>\` 
   - Scenario toggle (Naive vs. Resilient vs. Side-by-Side).
   - Animated metric scoreboards comparing coordinator interventions, success rates, and local recoveries.
   - Real-time event log viewer detailing what occurred at each step.
-  - **AI-Generated MP3 Audio Narrator & Auto-Following Walkthrough**: Implement an HTML5 Audio player (\`new Audio('audio/....mp3')\`, with \`window.speechSynthesis\` text-to-speech as a graceful fallback) configured to play the AI-generated \`.mp3\` narration files from \`audio/\`. Include a master "🔊 Read Walkthrough" button and individual "🔊 Listen & Follow" buttons on each step explanation card. **CRITICAL**: As each section's MP3 audio is played, the simulator MUST automatically follow along by smoothly auto-scrolling (\`element.scrollIntoView({ behavior: 'smooth', block: 'center' })\`) to that exact section and applying a glowing cyan active border/highlight to the section being read!
-- 🎨 **Visual Explanation Image (Step 3), 🔊 MP3 Audio Narration, EMBEDDING & MODAL POPUP LIGHTBOX**: Generate a UI architecture illustration explaining **HOW** the browser simulation visualizes real-time metrics. Also ask Gemini / your audio generation tool to generate an **MP3 audio narration file** (\`audio/step-3.mp3\`) for the web simulator walkthrough. **CRITICAL REQUIREMENT: Embed all generated step images (from Steps 0, 1, 2, and 3) directly into \`index.html\`** inside elegant glassmorphic cards with clear captions explaining the How, What, and Why for each step, heavily utilizing expressive emojis (🚀, ⚡, 💡, 🛡️, 🔍) for visual appeal! **Every embedded diagram and image MUST be clickable (\`cursor: zoom-in\`), opening in a responsive fullscreen modal popup lightbox with click-to-close and ESC key handling!**
+  - **🔊 Web Speech API Narrator & Auto-Following Walkthrough**: Load \`narration.js\` which exports an array of \`{text, selector, duration}\` entries. Use \`window.speechSynthesis.speak(new SpeechSynthesisUtterance(text))\` to play each entry. On \`onboundary\` event, smoothly auto-scroll (\`element.scrollIntoView({ behavior: 'smooth', block: 'center' })\`) to the corresponding section and apply a glowing cyan active border/highlight. Include a master "🔊 Read Walkthrough" button, individual "🔊 Listen & Follow" buttons on each card, and pause/resume/stop controls.
+- 🎨 **Visual Explanation Image (Step 3), 🔊 Web Speech Narration Script, EMBEDDING & MODAL POPUP LIGHTBOX**: Generate a UI architecture illustration explaining **HOW** the browser simulation visualizes real-time metrics. Add the corresponding narration entry to \`narration.js\` for Web Speech API playback. **CRITICAL REQUIREMENT: Embed all generated step images (from Steps 0, 1, 2, and 3) directly into \`index.html\`** inside elegant glassmorphic cards with clear captions explaining the How, What, and Why for each step, heavily utilizing expressive emojis (🚀, ⚡, 💡, 🛡️, 🔍) for visual appeal! **Every embedded diagram and image MUST be clickable (\`cursor: zoom-in\`), opening in a responsive fullscreen modal popup lightbox with click-to-close and ESC key handling!**
 
 ---
 
@@ -1789,7 +1811,7 @@ You must create the following directory structure inside the \`<project-name>\` 
   - Side-by-side outcome summary table.
   - Detailed module explanation and architectural rationale with emojis.
   - Key code snippets highlighting the difference between naive bubbling and resilient local recovery.
-- 🎨 **Visual Explanation Image (Step 4) & 🔊 MP3 Audio Narration**: Generate an overall system summary illustration and generate a final summary **MP3 audio narration file** (\`audio/step-4.mp3\`). Ensure all step explanation images and audio walkthrough references are documented in \`README.md\`.
+- 🎨 **Visual Explanation Image (Step 4) & 🔊 Web Speech Narration Script**: Generate an overall system summary illustration and add the final summary narration entry to \`narration.js\` for Web Speech API playback. Ensure all step explanation images and Web Speech walkthrough references are documented in \`README.md\`.
 
 - **Create GitHub Actions Static Deployment Workflow**:
   Create \`.github/workflows/static.yml\` (similar to \`https://github.com/rifaterdemsahin/hub-spoke-multi-agent-orchestrator/blob/main/.github/workflows/static.yml\`) with the exact automated deployment configuration:
