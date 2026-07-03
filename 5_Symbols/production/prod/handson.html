@@ -1604,7 +1604,7 @@ Before you begin, here is a concrete working example of exactly what you must pr
 - **Side-by-side:** \`src/subagent-naive.js\` (raw throws — coordinator does everything) vs \`src/subagent-resilient.js\` (local retry 3× on transient, structured escalation with \`{status, partialResults, attemptLog}\` on fatal)
 - **CLI benchmark (\`demo.js\`):** ascii table showing \`Coordinator Interventions: 5 → 1\`, \`Token Cost: 12.4k → 3.1k\`, \`Success Rate: 60% → 98%\`
 - **Cinematic animation (\`index.html\`):** Single self-contained HTML file using **GSAP (GreenSock)** via CDN — an auto-playing, timeline-based 4-scene cinematic presentation (not an interactive dashboard). Scene 1: title card, Scene 2: naive approach fails, Scene 3: resilient architecture with visual metaphors, Scene 4: metrics comparison. Screen-record directly for YouTube.
-- **Docs:** \`docs/step-images/\` with 5 "How, What & Why" visual diagrams (use **Excalidraw** at https://excalidraw.com for hand-drawn-style architecture sketches) + modal lightbox; \`README.md\` with LLM attribution badge, live demo link, and quickstart
+- **Docs:** \`docs/step-images/\` with 5 "How, What & Why" visual diagrams (use **Excalidraw** at https://excalidraw.com for hand-drawn-style architecture sketches or the server's **Gemini Imagen API** via \`POST /api/infographics/generate\` which pulls the Gemini key from Azure Key Vault) + modal lightbox; \`README.md\` with LLM attribution badge, live demo link, and quickstart
 - **Deployment:** \`.github/workflows/static.yml\` → auto-deploy to GitHub Pages → auto-open \`https://<github-username>.github.io/<repo-name>/\`
 
 Now apply this exact structure to the exam question and answer below.
@@ -1648,12 +1648,15 @@ The objective of this repository is to transform an abstract architectural exam 
     - Use visual metaphors over text logs (e.g., show token streams being filtered, show shields blocking destructive commands, show isolation bubbles for sandboxed contexts)
     - Dark modern aesthetic (cyan #00d4aa, crimson #e94560, deep blue/black backgrounds)
     - Large, highly legible fonts suitable for 1080p video playback
-5. **Step-by-Step "How, What & Why" Visual Explanations & Modal Popup Lightbox (\`index.html\`)**: At each execution step (Step 0 through Step 4), you MUST generate a visual image or architectural illustration (using your image generation tool e.g. \`generate_image\`, SVG diagrams, **Excalidraw** at https://excalidraw.com for hand-drawn-style architecture sketches, or canvas graphics) that explains:
+5. **Step-by-Step "How, What & Why" Visual Explanations & Modal Popup Lightbox (\`index.html\`)**: At each execution step (Step 0 through Step 4), you MUST generate a visual image or architectural illustration that explains:
    - **WHAT** is happening at this architectural layer/stage.
    - **WHY** the resilient pattern is superior to the naive anti-pattern here.
    - **HOW** it functions under the hood.
+   Use one of these image generation methods (preferred first, fallback second):
+   - **Primary: Server-side Gemini Image Generation** — call the existing server endpoint \`POST /api/infographics/generate\` with \`{topic, style}\`. This endpoint retrieves the **Gemini API key from the Delivery Pilot Azure Key Vault** (\`cfg.getSecret("GEMINI_API_KEY")\`) and uses Gemini Pro / Imagen to generate publication-quality architectural infographics. Save the returned image to \`docs/step-images/\`.
+   - **Fallback: Excalidraw** — draw hand-drawn-style architecture sketches at https://excalidraw.com, export as SVG, and save to \`docs/step-images/\`.
    You MUST embed all of these generated visual explanation diagrams directly into a dedicated **"How, What & Why" Walkthrough Section** inside \`index.html\` (and reference them in \`README.md\`). **CRITICAL REQUIREMENT (MODAL POPUP LIGHTBOX)**: All embedded images, architecture diagrams, and visual illustrations in \`index.html\` MUST have an interactive modal popup / lightbox feature. When any image/SVG is clicked, it must open in a fullscreen darkened modal overlay. **The modal MUST display the image at full viewport scale with proper aspect ratio** — do NOT show thumbnails or small previews inside the modal. Use \`object-fit: contain\` and \`max-width: 95vw; max-height: 95vh\` so the diagram fills the screen legibly for projection and screen recording. Add zoom-in cursor styling and smooth transitions. Clicking the background overlay or pressing the Escape key must close the modal. Furthermore, you MUST use rich, expressive emojis (e.g., 🚀, ⚡, 🛡️, ❌, ✅, 💡, 🔍, 📊, 🎯) throughout all textual explanations, captions, card headers, and diagrams to make the presentation as visually appealing, engaging, and scannable as possible!
-6. **Visual Documentation**: Generate architecture diagrams using **Excalidraw** (https://excalidraw.com) for hand-drawn-style sketches, plus formal UML diagrams (static class structure and dynamic sequence/workflow), and a comprehensive, publication-ready \`README.md\`.
+6. **Visual Documentation**: Generate architecture diagrams using the server's \`POST /api/infographics/generate\` endpoint (pulls Gemini API key from Delivery Pilot Azure Key Vault via \`cfg.getSecret("GEMINI_API_KEY")\`) for publication-quality infographics, or draw via **Excalidraw** (https://excalidraw.com) for hand-drawn-style sketches. Supplement with formal UML diagrams (static class structure and dynamic sequence/workflow) and a comprehensive, publication-ready \`README.md\`.
 7. **Automated Verification & Git Push**: Execute the demo script to verify correctness, then initialize git, stage, commit, and push the repository directly to GitHub.
 8. **GitHub Pages Static Deployment & Auto-Open**: Configure automated static deployment via GitHub Pages. After pushing to GitHub, you MUST wait for the GitHub Actions deployment workflow to complete, confirm the site is live online (e.g., \`https://<github-username>.github.io/<project-name>/\`), and automatically open this live web simulator URL in the browser!
 9. **LLM Attribution & Creating Model Mention**: You MUST explicitly identify your Large Language Model name/version (e.g., \`${targetLLM}\` — defaulting to \`DeepSeek V4 Flash\` / your exact model architecture) and prominently mention which LLM created this project! This attribution MUST be displayed: (1) at the very top of \`README.md\` in a dedicated metadata header badge (e.g. \`🤖 Generated by: ${targetLLM}\` or \`⚡ Built with DeepSeek V4 Flash\`), (2) in the interactive web simulator (\`index.html\`) header badge and footer, and (3) in the command-line demo banner (\`demo.js\`).
@@ -1824,7 +1827,7 @@ You must create the following directory structure inside the \`<project-name>\` 
 - **Typed Errors as Architectural Seams**: Define distinct error classes (e.g., \`TransientError\` tagged with \`recoverable: true\` vs. \`FatalError\` tagged with \`recoverable: false\`) so callers can programmatically branch on failure type.
 - **Duck-Typed Contract**: Both the naive and resilient implementations must implement the exact same interface (e.g., \`async process(item) -> Result\`) allowing the coordinator to execute either interchangeably.
 - **Structured Escalation Contract**: In the resilient implementation, catch transient errors locally (retry, fallback, or degrade). When escalating unresolvable errors, return a structured result (\`status\`, \`partialResults\`, \`attemptLog\`, \`errorContext\`) rather than throwing raw exceptions.
-- 🎨 **Visual Explanation Image (Step 1) & 🔊 Web Speech Narration Script**: Generate an illustration explaining **HOW** typed errors act as architectural seams and **WHY** structured escalation prevents coordinator overload. Save to \`docs/\` and prepare to embed in \`index.html\`. Add the corresponding narration entry to \`narration.js\` for Web Speech API playback.
+- 🎨 **Visual Explanation Image (Step 1) & 🔊 Web Speech Narration Script**: Generate an architectural illustration using the server's \`POST /api/infographics/generate\` endpoint (pulls Gemini key from Azure Key Vault) or draw via Excalidraw. Explain **HOW** typed errors act as architectural seams and **WHY** structured escalation prevents coordinator overload. Save to \`docs/step-images/\` and embed in \`index.html\`. Add the corresponding narration entry to \`narration.js\` for Web Speech API playback.
 
 ---
 
@@ -1833,7 +1836,7 @@ You must create the following directory structure inside the \`<project-name>\` 
 - Execute the simulated workload under both scenarios and aggregate metrics.
 - Output clean, professional ascii comparison tables showing the exact metric contrast (e.g., coordinator interventions dropping from \`3\` down to \`1\`).
 - Support command-line flags: \`--naive\` (run naive only), \`--resilient\` (run resilient only), and default (run both side-by-side).
-- 🎨 **Visual Explanation Image (Step 2) & 🔊 Web Speech Narration Script**: Generate an illustration showing **HOW** the CLI benchmarking engine executes naive vs. resilient workflows side-by-side. Save to \`docs/\` and prepare to embed in \`index.html\`. Add the corresponding narration entry to \`narration.js\` for Web Speech API playback.
+- 🎨 **Visual Explanation Image (Step 2) & 🔊 Web Speech Narration Script**: Generate an illustration using the server's \`POST /api/infographics/generate\` (Gemini key from Azure Key Vault) or Excalidraw. Show **HOW** the CLI benchmarking engine executes naive vs. resilient workflows side-by-side. Save to \`docs/step-images/\` and embed in \`index.html\`. Add the corresponding narration entry to \`narration.js\` for Web Speech API playback.
 
 ---
 
@@ -1851,7 +1854,7 @@ You must create the following directory structure inside the \`<project-name>\` 
   - **Scene 4 (22-28s):** Metrics comparison — token reduction % counts up, destructive actions blocked: 100%, success rate animates
 - **Audio narration:** Optional Web Speech API \`window.speechSynthesis\` for voiceover that syncs with scene transitions (use \`gsap.delay()\` to align speech with animation)
 - **No user interaction required** — no buttons, no tabs, no toggles. The animation plays from start to finish automatically.
-- 🎨 **Visual Explanation Image (Step 3)**: Generate an illustration of the animation storyboard showing the 4-scene flow and key visual metaphors. Embed in \`README.md\`.
+- 🎨 **Visual Explanation Image (Step 3)**: Generate an illustration of the animation storyboard using the server's \`POST /api/infographics/generate\` (Gemini key from Azure Key Vault) or Excalidraw. Show the 4-scene flow and key visual metaphors. Save to \`docs/step-images/\` and embed in \`README.md\`.
 
 ---
 
@@ -1871,7 +1874,7 @@ You must create the following directory structure inside the \`<project-name>\` 
   - Side-by-side outcome summary table.
   - Detailed module explanation and architectural rationale with emojis.
   - Key code snippets highlighting the difference between naive bubbling and resilient local recovery.
-- 🎨 **Visual Explanation Image (Step 4) & 🔊 Web Speech Narration Script**: Generate an overall system summary illustration and add the final summary narration entry to \`narration.js\` for Web Speech API playback. Ensure all step explanation images and Web Speech walkthrough references are documented in \`README.md\`.
+- 🎨 **Visual Explanation Image (Step 4) & 🔊 Web Speech Narration Script**: Generate an overall system summary illustration using the server's \`POST /api/infographics/generate\` (Gemini key from Azure Key Vault) or Excalidraw. Save to \`docs/step-images/\` and add the final summary narration entry to \`narration.js\` for Web Speech API playback. Ensure all step explanation images and Web Speech walkthrough references are documented in \`README.md\`.
 
 - **Create GitHub Actions Static Deployment Workflow**:
   Create \`.github/workflows/static.yml\` (similar to \`https://github.com/rifaterdemsahin/hub-spoke-multi-agent-orchestrator/blob/main/.github/workflows/static.yml\`) with the exact automated deployment configuration:
