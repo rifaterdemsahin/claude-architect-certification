@@ -1735,7 +1735,43 @@ Use this exact 4-scene structure when building the GSAP animation in \`index.htm
 
 ---
 
-## 🛠️ Step-by-Step Execution Plan
+## 🔍 5-Phase Output Quality Assurance
+
+After generating all files and BEFORE committing/pushing, run this structured quality assurance pass on your output. Each phase is mandatory — do not skip any.
+
+### PHASE 1: Technical Accuracy & System Audit (High Reasoning)
+Analyze the code, configs, and documentation you generated strictly for accuracy, overclaims, vague wording, and missing constraints.
+1. **Identify overclaims** — scan for any statement like "automatically handles X" that actually requires explicit configuration or conditional context to work. Flag every instance.
+2. **Separate simulation from production** — if your CLI benchmark or demo uses local/simulated metrics, clearly label them as such. Never present simulated numbers as production telemetry. Ensure a precise reproduction command (e.g. \`npm run benchmark\`) is included.
+3. **Return a markdown table of issues** found (in \`QA_AUDIT.md\`) using this structure:
+
+   | Section/File | Current Wording | Assessment (Overclaim / Inaccurate / Needs Caveat) | Direct Engineering Correction |
+
+### PHASE 2: Developer UX & Scannability Pass
+Rewrite the core narrative and structural layout of \`README.md\` and \`index.html\` to maximize trust and scan-rate for technical audiences.
+1. **Above-the-fold "TL;DR"** — the first screen of \`README.md\` MUST contain: a 1-sentence problem statement, a 1-sentence solution, and a copyable terminal command or configuration scaffold.
+2. **Logical technical structure** — organize configs and code modularly (e.g., per-agent config files) rather than one blanket global file. Single responsibility per file.
+3. **Reproducible benchmarks** — every benchmark/table in the README MUST include the exact reproduction command that generated it (e.g. \`npm run benchmark\`), and link to the raw output.
+
+### PHASE 3: Accessibility & Playback Controls Check
+Audit the page code for strict a11y compliance and user agency. Apply these specific patches:
+1. **Motion & Media Controls** — provide robust pause/play/mute toggles for all animations and voiceovers. Fully honor \`prefers-reduced-motion\` by substituting static states for all GSAP/Web Speech sequences.
+2. **Keyboard Navigation** — enforce logical \`tabindex\` order, exact focus traps inside the modal popup, and standard Escape-key close hooks on every overlay.
+3. **SEO/A11y Fallbacks** — ensure animated metric counters and GSAP number tweens render static, semantic base values in the DOM (e.g., \`<span aria-label="98% success rate">\`) for screen readers. Animate only the visual layer, never the accessible text.
+
+### PHASE 4: Self-Contained Interactive Widgets (Vanilla Stack)
+Generate standalone drop-in UI widgets within \`index.html\` to visually prove the core value proposition:
+1. **Interactive Calculator** — a vanilla HTML/CSS/JS widget that parametrizes calculations based on user inputs (slider or number inputs) to show real-world resource or cost savings dynamically.
+2. **Sandbox Terminal Simulator** — a dependency-free typing component that plays a "Before vs. After" script inline. One column shows the naive/failure terminal output; the other shows the optimized/successful output. Type characters in sequence with a blinking cursor for cinematic effect.
+
+   **Constraints for both widgets:** Zero build steps, fully inline/embedded CSS and JS, ready to paste into any HTML page or GitHub Pages layout.
+
+### PHASE 5: Production-Grade Boilerplate / Starter Pack
+Generate the ultimate copy-pasteable repository configuration blueprint based on the architecture discussed:
+1. **ASCII file tree** — output a clean tree diagram mapping out a highly modular, best-practice project structure (max 3 levels deep, annotated with purpose).
+2. **Core config file contents** — generate the full, production-quality contents of \`package.json\`, \`tsconfig.json\` (if applicable), \`.env.example\`, and \`.gitignore\`. No placeholders or \`TODO\` comments.
+3. **Constraint labels** — annotate every config field with explicit labels: \`MUST\`, \`SHOULD\`, \`MAY\`. Include destructive-action safeguards (e.g., \`"prepare": "echo 'dry-run: OK'"\` before any actual migration script).
+4. **Single-topic-per-file** — split configuration into focused files rather than one monolithic config. Minimize context noise.
 
 ### Step 0: Analyze Scenario & Initialize Workspace
 1. **Determine Project & Repository Name**: Analyze the Exam Question and Answer above. Invent a clean, descriptive, kebab-case project folder name (e.g., \`distributed-cache-stampede-demo\` or \`api-rate-limiter-resilience\`) that represents the architectural pattern being demonstrated. Let \`<project-name>\` be this derived name. Let \`<github-username>\` be the user's GitHub username (or default to \`rifaterdemsahin\`).
@@ -1746,7 +1782,6 @@ Use this exact 4-scene structure when building the GSAP animation in \`index.htm
    cd <project-name>
    git init -b main
    \`\`\`
-3. 🎨 **Visual Explanation Image (Step 0) & 🔊 Web Speech Narration Script**: Generate an introductory architectural concept illustration explaining **WHAT** the core bottleneck is and **WHY** the recommended solution resolves it. Save to \`docs/\` and prepare to embed in \`index.html\`. Write the corresponding narration text as an entry in \`narration.js\` (for Web Speech API playback with auto-scroll sync).
 
 ---
 
