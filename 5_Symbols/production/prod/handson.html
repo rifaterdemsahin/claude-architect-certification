@@ -1652,7 +1652,7 @@ The objective of this repository is to transform an abstract architectural exam 
    - **WHAT** is happening at this architectural layer/stage.
    - **WHY** the resilient pattern is superior to the naive anti-pattern here.
    - **HOW** it functions under the hood.
-   You MUST embed all of these generated visual explanation diagrams directly into a dedicated **"How, What & Why" Walkthrough Section** inside \`index.html\` (and reference them in \`README.md\`). **CRITICAL REQUIREMENT (MODAL POPUP LIGHTBOX)**: All embedded images, architecture diagrams, and visual illustrations in \`index.html\` MUST have an interactive modal popup / lightbox feature! When any image is clicked, it must open in a fullscreen darkened modal overlay with zoom-in cursor styling and smooth transitions, allowing the user to examine diagram details clearly. Clicking the background overlay or pressing the Escape key must close the modal. Furthermore, you MUST use rich, expressive emojis (e.g., 🚀, ⚡, 🛡️, ❌, ✅, 💡, 🔍, 📊, 🎯) throughout all textual explanations, captions, card headers, and diagrams to make the presentation as visually appealing, engaging, and scannable as possible!
+   You MUST embed all of these generated visual explanation diagrams directly into a dedicated **"How, What & Why" Walkthrough Section** inside \`index.html\` (and reference them in \`README.md\`). **CRITICAL REQUIREMENT (MODAL POPUP LIGHTBOX)**: All embedded images, architecture diagrams, and visual illustrations in \`index.html\` MUST have an interactive modal popup / lightbox feature. When any image/SVG is clicked, it must open in a fullscreen darkened modal overlay. **The modal MUST display the image at full viewport scale with proper aspect ratio** — do NOT show thumbnails or small previews inside the modal. Use \`object-fit: contain\` and \`max-width: 95vw; max-height: 95vh\` so the diagram fills the screen legibly for projection and screen recording. Add zoom-in cursor styling and smooth transitions. Clicking the background overlay or pressing the Escape key must close the modal. Furthermore, you MUST use rich, expressive emojis (e.g., 🚀, ⚡, 🛡️, ❌, ✅, 💡, 🔍, 📊, 🎯) throughout all textual explanations, captions, card headers, and diagrams to make the presentation as visually appealing, engaging, and scannable as possible!
 6. **Visual Documentation**: Generate architecture diagrams using **Excalidraw** (https://excalidraw.com) for hand-drawn-style sketches, plus formal UML diagrams (static class structure and dynamic sequence/workflow), and a comprehensive, publication-ready \`README.md\`.
 7. **Automated Verification & Git Push**: Execute the demo script to verify correctness, then initialize git, stage, commit, and push the repository directly to GitHub.
 8. **GitHub Pages Static Deployment & Auto-Open**: Configure automated static deployment via GitHub Pages. After pushing to GitHub, you MUST wait for the GitHub Actions deployment workflow to complete, confirm the site is live online (e.g., \`https://<github-username>.github.io/<project-name>/\`), and automatically open this live web simulator URL in the browser!
@@ -1688,6 +1688,15 @@ The objective of this repository is to transform an abstract architectural exam 
     - \`gsap.utils.snap()\` for metric counters
     - Easing: \`power2.out\`, \`back.out(1.7)\`, \`elastic.out(1, 0.3)\`
     - Stagger: \`stagger: 0.15\` for sequential reveals
+14. **📐 Responsive & Screen-Recording-Friendly Layout**: The entire \`index.html\` (including the "How, What & Why" walkthrough section and the GSAP cinematic scenes) MUST be built with a responsive framework that makes it presentable on a projector, large monitor, or screen recording at 1080p. Requirements:
+
+    - Use a single responsive grid framework (CSS Grid or Flexbox) that adapts from mobile up to 1920px wide
+    - All SVG diagrams and Excalidraw sketches in the "How, What & Why" section MUST have \`width: 100%; height: auto; max-width: 1200px; display: block; margin: 0 auto;\` so they fill available horizontal space
+    - The modal popup MUST render SVGs at \`object-fit: contain; max-width: 95vw; max-height: 95vh; width: auto; height: auto;\` — never clip or letterbox diagrams smaller than the viewport
+    - Font size floor: never below 16px body text and 28px for headings in the walkthrough section, so content remains legible on a projected screen
+    - All click targets (modal triggers, navigation chips, buttons) must be minimum 44×44px touch target
+    - The GSAP cinematic scenes should use \`100vw × 100vh\` full-viewport sizing with \`position: fixed\` overlay approach for clean screen-recording output
+    - Test at 1920×1080 before publishing; verify every SVG is legible without zooming
 
 ## 💡 DeepSeek V4 Flash Execution Guidance
 
