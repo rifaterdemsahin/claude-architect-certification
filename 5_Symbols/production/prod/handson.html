@@ -1603,7 +1603,7 @@ Before you begin, here is a concrete working example of exactly what you must pr
 - **Repo name:** \`pdf-agent-error-recovery-demo\`
 - **Side-by-side:** \`src/subagent-naive.js\` (raw throws — coordinator does everything) vs \`src/subagent-resilient.js\` (local retry 3× on transient, structured escalation with \`{status, partialResults, attemptLog}\` on fatal)
 - **CLI benchmark (\`demo.js\`):** ascii table showing \`Coordinator Interventions: 5 → 1\`, \`Token Cost: 12.4k → 3.1k\`, \`Success Rate: 60% → 98%\`
-- **Web simulator (\`index.html\`):** Pico.css + htmx with tab toggle (Naive ↔ Resilient ↔ Side-by-Side), animated metric scoreboard, event log, "🔊 Listen & Follow" MP3 auto-scroll walkthrough
+- **Cinematic animation (\`index.html\`):** Single self-contained HTML file using **GSAP (GreenSock)** via CDN — an auto-playing, timeline-based 4-scene cinematic presentation (not an interactive dashboard). Scene 1: title card, Scene 2: naive approach fails, Scene 3: resilient architecture with visual metaphors, Scene 4: metrics comparison. Screen-record directly for YouTube.
 - **Docs:** \`docs/step-images/\` with 5 "How, What & Why" visual diagrams (use **Excalidraw** at https://excalidraw.com for hand-drawn-style architecture sketches) + modal lightbox; \`README.md\` with LLM attribution badge, live demo link, and quickstart
 - **Deployment:** \`.github/workflows/static.yml\` → auto-deploy to GitHub Pages → auto-open \`https://<github-username>.github.io/<repo-name>/\`
 
@@ -1636,11 +1636,18 @@ The objective of this repository is to transform an abstract architectural exam 
 
 ### Core Architecture Requirements:
 1. **Zero-Dependency Node.js ESM Backend**: Use clean, modern JavaScript with \`"type": "module"\` in \`package.json\`. Rely on Node.js built-in utilities without heavy external runtime dependencies so the repository is lightweight and universally executable.
-2. **Side-by-Side Comparison (Naive vs. Resilient/Optimized)**: Implement both:
-   - **The Anti-Pattern (Naive Approach)**: Demonstrating the common pitfalls (e.g., lack of local error handling, unhandled exception bubbling, tight coupling, synchronous bottlenecks, or excessive coordinator overhead).
-   - **The Answer (Resilient Approach)**: Demonstrating the recommended architectural pattern (e.g., local error recovery, structured escalation, graceful degradation, circuit breaking, decoupling, or bounded retries).
+2. **Sequential Storytelling (Naive → Fails → Resilient → Succeeds)**: Do NOT show naive and resilient side-by-side. Instead, tell a chronological story:
+   - **Act 1 — The Naive Approach**: Introduce the anti-pattern scenario. Show it operating, then failing or leaking context. The system should appear compromised (visual cue: red flash, warning overlay).
+   - **Act 2 — The Resilient Architecture**: Clear the screen. Introduce the three pillars of the resilient solution with distinct visual metaphors (e.g., sandbox isolation for context:fork, validation shield for allowed-tools, token filter for argument-hint). Show it succeeding where the naive approach failed.
+   - **Act 3 — The Metrics**: Animate the comparison results (token reduction, blocked destructive actions, success rate) counting up from 0 to final values.
 3. **Quantifiable Metrics & Input Token Stats**: Define clear architectural metrics (e.g., *Coordinator Interventions*, *Error Recovery Rate*, *System Latency*, *Throughput*, *Memory Consumption*, and *Input Token Consumption*) that quantitatively prove the superiority of the resilient approach. You MUST include a dedicated **Input Token Stats & Efficiency Scoreboard** at the bottom of the simulator page (\`index.html\`), CLI tables (\`demo.js\`), and \`README.md\` demonstrating input token savings!
-4. **Interactive Web Simulator (\`index.html\` via Pico.css, htmx & Lottie.js)**: Build a self-contained, responsive HTML/CSS/JS web page using **Pico.css** (via CDN \`<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">\` for clean, responsive classless semantic styling and dark mode) and **htmx** (via CDN \`<script src="https://unpkg.com/htmx.org@2.0.4"><\\/script>\` for dynamic DOM interactions, responsive tab switching, and real-time simulation updates without full page reloads). Integrate **Lottie.js** (via CDN \`<script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"><\\/script>\`) for lightweight, scalable vector animations — use Lottie animations for loading states, transition effects, scoreboard counter animations, and architectural concept explainers to bring the simulator to life without heavy GIFs or video files.
+4. **🎬 Cinematic Auto-Playing Animation (\`index.html\` via GSAP)**: Build a single, self-contained HTML file that acts as a cinematic, timeline-based animated presentation using **GSAP (GreenSock Animation Platform)** via CDN (\`<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"><\\/script>\`). This is NOT an interactive dashboard with buttons — it must be an auto-playing sequence that can be screen-recorded directly for a YouTube video. Key requirements:
+    - Use \`gsap.timeline()\` to orchestrate a precise, time-coded sequence
+    - Trigger on \`window.onload\` — zero user interaction required to start
+    - Chronological scene flow (not tab-based toggling): Scene 1 (Setup) → Scene 2 (Naive fails) → Scene 3 (Resilient succeeds) → Scene 4 (Metrics)
+    - Use visual metaphors over text logs (e.g., show token streams being filtered, show shields blocking destructive commands, show isolation bubbles for sandboxed contexts)
+    - Dark modern aesthetic (cyan #00d4aa, crimson #e94560, deep blue/black backgrounds)
+    - Large, highly legible fonts suitable for 1080p video playback
 5. **Step-by-Step "How, What & Why" Visual Explanations & Modal Popup Lightbox (\`index.html\`)**: At each execution step (Step 0 through Step 4), you MUST generate a visual image or architectural illustration (using your image generation tool e.g. \`generate_image\`, SVG diagrams, **Excalidraw** at https://excalidraw.com for hand-drawn-style architecture sketches, or canvas graphics) that explains:
    - **WHAT** is happening at this architectural layer/stage.
    - **WHY** the resilient pattern is superior to the naive anti-pattern here.
@@ -1659,45 +1666,28 @@ The objective of this repository is to transform an abstract architectural exam 
     - Add pause/resume/stop controls and a speaking indicator badge.
     - **CRITICAL REQUIREMENT**: The narration MUST auto-scroll and highlight the correct section in real-time as the speech progresses. Use \`onboundary\` event on the utterance to track word-level position and sync scrolling.
 12. **🎨 Emoji-Rich Presentation**: Use emojis liberally and intentionally throughout every deliverable — README.md headers, CLI demo banners, simulator UI cards, diagram captions, file tree annotations, commit messages, and GitHub issue templates. Emojis make the output scannable, engaging, and exam-review friendly. Every section heading, status badge, metric label, scoreboard column, step explanation card, and file tree entry MUST carry at least one relevant emoji.
-13. **🖌️ Animation & Motion Design Audit/Improvement Required**: The interactive web animation inside \`index.html\` must teach the concept visually, not just decorate the UI. Perform the following:
+13. **🖌️ Animation Design Strategy — How to Improve the Animation**: The cinematic animation must teach the concept visually, not just decorate. Apply these specific strategies:
 
-    **1) Audit current animation quality**
-    - Identify what is decorative vs explanatory
-    - Identify where user understanding breaks
-    - Rate: clarity, motion hierarchy, transitions, interaction feedback, accessibility, performance, responsiveness
+    **A) Pacing — Sequential over Parallel**
+    Viewers can only focus on one thing at a time. NEVER show naive and resilient side-by-side. Instead tell a chronological story: introduce the problem (naive) → show it failing → introduce the hero (resilient) → show it succeeding → reveal the metrics.
 
-    **2) Redesign animation storytelling — create a clear state flow:**
-    - idle → input received → decision/comparison → ambiguity/failure (if applicable) → recovery/retry (if applicable) → success → metrics update → final state
+    **B) Visual Metaphors (replace text logs with graphics)**
+    Text logs like \`context_access: leaked\` are unreadable in video. Use these visual representations:
+    - **context:fork** → a clean, isolated bubble/sandbox forming around the task, with unrelated tokens bouncing off
+    - **allowed-tools** → a literal shield that shatters unauthorized destructive commands (e.g. DROP TABLE) while allowing safe ones through
+    - **Token flow** → physically show a massive stream of tokens (representing full context history) being blocked/filtered down to just essential tokens by argument-hint
+    - **Security breach** → screen flash red with "System Compromised" warning when naive approach fails
 
-    **3) Improve motion design**
-    - Emphasize important elements; reduce background noise
-    - Use smooth easing and staggered timing
-    - Avoid too many simultaneous animations
-    - Keep loop readable and short
+    **C) Focus on Data Flow (Tokens)**
+    Token efficiency is your best metric. Animate it visually: show a firehose of tokens entering the naive agent vs. a filtered stream entering the resilient agent. Animate the token count number counting down from 100% to the actual savings percentage.
 
-    **4) Improve interaction UX**
-    - Sync animation with logs/steps/tabs
-    - Add clear Play/Pause/Step/Reset behavior
-    - Add hover/click feedback for active nodes and paths
-
-    **5) Accessibility + performance**
-    - Add prefers-reduced-motion fallback
-    - Use transform/opacity-heavy animations to reduce jank
-    - Avoid layout shifts
-    - Ensure mobile responsiveness
-    - Keep dependencies minimal
-
-    **6) Output format for this requirement**
-    - Short critique of current issues
-    - Improved storyboard (step-by-step)
-    - Prioritized fixes by impact/effort
-    - Concrete code changes (diffs/snippets) without rewriting the whole app
-    - Quick test checklist
-
-    **Constraints:**
-    - Preserve core business logic
-    - Don't remove existing educational content
-    - Prefer minimal, targeted edits over full rewrites
+    **D) Use GSAP as the Animation Engine**
+    Raw HTML/CSS transitions are hard to sequence for video. GSAP gives you a timeline-based API designed for precise, time-coded animations:
+    - \`gsap.timeline()\` for scene orchestration
+    - \`gsap.to()\` / \`gsap.from()\` for element transitions
+    - \`gsap.utils.snap()\` for metric counters
+    - Easing: \`power2.out\`, \`back.out(1.7)\`, \`elastic.out(1, 0.3)\`
+    - Stagger: \`stagger: 0.15\` for sequential reveals
 
 ## 💡 DeepSeek V4 Flash Execution Guidance
 
@@ -1708,6 +1698,31 @@ Optimize your output for DeepSeek V4 Flash's architecture:
 3. **Write self-contained HTML** — inline all CSS and JS into \`index.html\` where reasonable. Avoid splitting the simulator across 5+ files unless the module count genuinely demands it.
 4. **Leverage zero-dependency patterns** — use Node.js built-ins (\`fs\`, \`path\`, \`events\`, \`assert\`) and browser APIs (\`fetch\`, \`speechSynthesis\`, \`IntersectionObserver\`) instead of npm packages. DeepSeek V4 Flash has deep knowledge of these APIs.
 5. **DeepSeek V4 Flash attribution** — every generated project MUST include \`⚡ Built with DeepSeek V4 Flash\` in the README badge, simulator footer, and CLI banner. This is non-negotiable.
+
+## 🎬 Master Prompt — Animation Scene Template for \`index.html\`
+
+Use this exact 4-scene structure when building the GSAP animation in \`index.html\`. Adapt the concept names to match your specific exam scenario.
+
+### Scene 1: The Setup (0-4 seconds)
+- Display a clean, modern title card with the architectural pattern name
+- Fade in the core challenge statement
+
+### Scene 2: The Naive Approach Fails (4-12 seconds)
+- Visual: Show an "Agent" receiving a task
+- Action: Demonstrate **context leakage** — show unrelated/sensitive tokens flooding into the agent's context window
+- Action: Demonstrate a **destructive action** — show the agent attempting a dangerous command and succeeding (no guardrails), screen flashes red with "System Compromised" warning
+
+### Scene 3: The Resilient Architecture Succeeds (12-22 seconds)
+- Clear the screen and introduce the three pillars of your solution
+- **context:fork** → Show the agent placed into a clean, isolated sandbox. Unrelated tokens bounce off the sandbox boundary. Token cost visibly drops.
+- **argument-hint** → Show the system strictly validating input before the agent even spins up
+- **allowed-tools** → Show a firewall/shield. When a destructive command is attempted, the shield lights up bright green and shatters the command, allowing only safe operations through
+
+### Scene 4: The Metrics (22-28 seconds)
+- End with a bold, animated comparison of results
+- Token reduction percentage animating from 0% to actual savings
+- Destructive actions blocked: 100%
+- Counter numbers should \`gsap.to()\` from 0 to final value with \`snap\`
 
 ---
 
@@ -1737,7 +1752,7 @@ You must create the following directory structure inside the \`<project-name>\` 
 │       └── static.yml         # GitHub Actions workflow for deploying static content to GitHub Pages
 ├── package.json               # ESM configuration ("type": "module"), script commands ("start", "naive", "resilient")
 ├── demo.js                    # CLI runner executing both scenarios & printing comparative ascii tables
-├── index.html                 # Interactive visual simulator (modern aesthetics, Pico.css + htmx, dark mode)
+├── index.html                 # GSAP cinematic self-playing animation (4-scene timeline, auto-play on load, dark tech aesthetic)
 ├── favicon.ico                # Site favicon (or favicon.svg)
 ├── sitemap.xml                # SEO sitemap referencing live GitHub Pages URL
 ├── robots.txt                 # SEO search engine crawler instructions
@@ -1778,20 +1793,21 @@ You must create the following directory structure inside the \`<project-name>\` 
 
 ---
 
-### Step 3: Visually Stunning Responsive Web Simulator (\`index.html\` via Pico.css & htmx)
-- Build a standalone HTML/CSS/JS web interface utilizing **Pico.css** and **htmx** with **state-of-the-art responsive aesthetics**:
-  - Link **Pico.css** (\`<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">\`) for responsive semantic layouts, clean grid systems, and built-in dark mode support.
-  - Link **htmx** (\`<script src="https://unpkg.com/htmx.org@2.0.4"><\\/script>\`) to power dynamic DOM updates, scenario switching tabs, and interactive simulation controls without full page reloads.
-  - Deep dark mode color palette with glassmorphic cards, custom styling overrides, and subtle gradients.
-  - Modern typography (e.g., Google Fonts: Inter, Roboto, or Outfit).
-  - Smooth hover effects, transitions, and micro-animations.
-- Include interactive features:
-  - Simulation control buttons (Play, Pause, Step, Reset) driven by responsive event handling.
-  - Scenario toggle (Naive vs. Resilient vs. Side-by-Side).
-  - Animated metric scoreboards comparing coordinator interventions, success rates, and local recoveries.
-  - Real-time event log viewer detailing what occurred at each step.
-  - **🔊 Web Speech API Narrator & Auto-Following Walkthrough**: Load \`narration.js\` which exports an array of \`{text, selector, duration}\` entries. Use \`window.speechSynthesis.speak(new SpeechSynthesisUtterance(text))\` to play each entry. On \`onboundary\` event, smoothly auto-scroll (\`element.scrollIntoView({ behavior: 'smooth', block: 'center' })\`) to the corresponding section and apply a glowing cyan active border/highlight. Include a master "🔊 Read Walkthrough" button, individual "🔊 Listen & Follow" buttons on each card, and pause/resume/stop controls.
-- 🎨 **Visual Explanation Image (Step 3), 🔊 Web Speech Narration Script, EMBEDDING & MODAL POPUP LIGHTBOX**: Generate a UI architecture illustration explaining **HOW** the browser simulation visualizes real-time metrics. Add the corresponding narration entry to \`narration.js\` for Web Speech API playback. **CRITICAL REQUIREMENT: Embed all generated step images (from Steps 0, 1, 2, and 3) directly into \`index.html\`** inside elegant glassmorphic cards with clear captions explaining the How, What, and Why for each step, heavily utilizing expressive emojis (🚀, ⚡, 💡, 🛡️, 🔍) for visual appeal! **Every embedded diagram and image MUST be clickable (\`cursor: zoom-in\`), opening in a responsive fullscreen modal popup lightbox with click-to-close and ESC key handling!**
+### Step 3: Cinematic GSAP Animation (\`index.html\` — Self-Playing, No Clicks Required)
+- Build a **single self-contained HTML file** using **GSAP (GreenSock)** via CDN (\`<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"><\\/script>\`)
+- This is a **cinematic, auto-playing presentation** designed for screen recording, NOT an interactive dashboard. Trigger on \`window.onload\`.
+- **Visual style:**
+  - Dark tech aesthetic (cyan #00d4aa, crimson #e94560, deep blue/black backgrounds)
+  - Large, highly legible fonts suitable for 1080p video (e.g., 48px+ headings, 24px+ body)
+  - No glassmorphic cards, no hover tooltips, no scrollable panels — everything is a full-screen scene
+- **Scene structure (use \`gsap.timeline()\` with precise seconds):**
+  - **Scene 1 (0-4s):** Title card + challenge statement fade in
+  - **Scene 2 (4-12s):** Naive approach — show agent receiving task → context leakage (unrelated tokens flood in) → destructive command succeeds → screen flash red with warning overlay
+  - **Scene 3 (12-22s):** Resilient architecture — introduce three pillars with visual metaphors: sandbox isolation (context:fork), input validation (argument-hint), shield blocking (allowed-tools). Show destructive command being shattered by shield.
+  - **Scene 4 (22-28s):** Metrics comparison — token reduction % counts up, destructive actions blocked: 100%, success rate animates
+- **Audio narration:** Optional Web Speech API \`window.speechSynthesis\` for voiceover that syncs with scene transitions (use \`gsap.delay()\` to align speech with animation)
+- **No user interaction required** — no buttons, no tabs, no toggles. The animation plays from start to finish automatically.
+- 🎨 **Visual Explanation Image (Step 3)**: Generate an illustration of the animation storyboard showing the 4-scene flow and key visual metaphors. Embed in \`README.md\`.
 
 ---
 
