@@ -63,6 +63,7 @@ func main() {
 	mux.Handle("/api/animations/runpod/run", observe(cfg, animationRunpodRunHandler(cfg)))
 	mux.Handle("/api/animations/runpod/status", observe(cfg, animationRunpodStatusHandler(cfg)))
 	mux.Handle("/api/animations/runpod/generate-code", observe(cfg, animationRunpodGenerateCodeHandler(cfg)))
+	mux.Handle("/api/animations/remotion-instructions", observe(cfg, animationRemotionInstructionsHandler(cfg)))
 	mux.Handle("/api/ai/sanity-check", observe(cfg, sanityCheckHandler(cfg)))
 	mux.Handle("/api/ai/fix-grammar", observe(cfg, fixGrammarHandler(cfg)))
 	mux.Handle("/api/admin/login", observe(cfg, adminLoginHandler(cfg)))

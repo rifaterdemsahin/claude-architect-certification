@@ -842,3 +842,126 @@ func animationRunpodGenerateCodeHandler(cfg config) http.HandlerFunc {
 		})
 	}
 }
+
+func animationRemotionInstructionsHandler(cfg config) http.HandlerFunc {
+	type Req struct {
+		PromptText string `json:"promptText"`
+	}
+	return func(w http.ResponseWriter, r *http.Request) {
+		setCORS(w, r)
+		w.Header().Set("Content-Type", "application/json")
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+		if r.Method != http.MethodPost {
+			http.Error(w, `{"error":"method not allowed"}`, http.StatusMethodNotAllowed)
+			return
+		}
+
+		apiKey := cfg.getSecret("OPENROUTER_API_KEY")
+		if apiKey == "" {
+			http.Error(w, `{"error":"OPENROUTER_API_KEY missing"}`, http.StatusServiceUnavailable)
+			return
+		}
+
+		var req Req
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, `{"error":"invalid request body"}`, http.StatusBadRequest)
+			return
+		}
+		if req.PromptText == "" {
+			http.Error(w, `{"error":"promptText is required"}`, http.StatusBadRequest)
+			return
+		}
+
+		const model = "anthropic/claude-sonnet-4.6"
+		systemPrompt := `You are a Remotion animation expert. Your job is to analyze the provided project generation prompt and extract specific, actionable instructions for creating the Remotion video animations.
+
+Return your answer as a JSON object with this exact schema:
+{
+  "compositions": [
+    {
+      "name": "Scene1Title",
+      "description": "what this scene shows",
+      "durationInFrames": 120,
+      "visualElements": ["icon-shield", "arrow-flow", "color-flash-green"],
+      "assetsUsed": ["docs/step-images/title-card.png"],
+      "keyAnimation": "fade in title, draw connecting arrow, flash green"
+    }
+  ],
+  "showNotTell": "how to use ≤7 word labels and symbols",
+  "fallbackStrategy": "Canvas API or ffmpeg if Remotion unavailable",
+  "totalDurationEstimate": "~600 frames at 30fps"
+}
+
+Rules:
+- Max 7 words per on-screen label. Use symbols and graphics (icons, arrows, color flows) to explain.
+- List every composition that needs to be created.
+- For each composition, specify exactly which generated assets from docs/step-images/ to use.
+- Keep the animation instructions concise and implementable.`
+
+		payload := map[string]any{
+			"model": model,
+			"messages": []map[string]string{
+				{"role": "system", "content": systemPrompt},
+				{"role": "user", "content": fmt.Sprintf("Here is the project generation prompt. Extract Remotion animation instructions from it:\n\n%s", req.PromptText)},
+			},
+			"temperature": 0.3,
+			"max_tokens":  4096,
+		}
+		body, _ := json.Marshal(payload)
+		ctx, cancel := context.WithTimeout(r.Context(), 60*time.Second)
+		defer cancel()
+		hreq, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://openrouter.ai/api/v1/chat/completions", bytes.NewReader(body))
+		if err != nil {
+			http.Error(w, `{"error":"request build failed"}`, http.StatusInternalServerError)
+			return
+		}
+		hreq.Header.Set("Content-Type", "application/json")
+		hreq.Header.Set("Authorization", "Bearer "+apiKey)
+		hreq.Header.Set("HTTP-Referer", "https://github.com/rifaterdemsahin/claude-architect-certification")
+		hreq.Header.Set("X-Title", "Claude Architect Certification")
+
+		hresp, err := http.DefaultClient.Do(hreq)
+		if err != nil {
+			http.Error(w, `{"error":"OpenRouter call failed"}`, http.StatusBadGateway)
+			return
+		}
+		defer hresp.Body.Close()
+		b, _ := io.ReadAll(hresp.Body)
+		if hresp.StatusCode != http.StatusOK {
+			http.Error(w, fmt.Sprintf(`{"error":"OpenRouter HTTP %d: %s"}`, hresp.StatusCode, b), http.StatusBadGateway)
+			return
+		}
+
+		var orResp struct {
+			Choices []struct {
+				Message struct {
+					Content string `json:"content"`
+				} `json:"message"`
+			} `json:"choices"`
+		}
+		if err := json.Unmarshal(b, &orResp); err != nil || len(orResp.Choices) == 0 {
+			http.Error(w, `{"error":"invalid OpenRouter response"}`, http.StatusBadGateway)
+			return
+		}
+
+		content := strings.TrimSpace(orResp.Choices[0].Message.Content)
+		content = strings.TrimPrefix(content, "```json")
+		content = strings.TrimPrefix(content, "```")
+		content = strings.TrimSuffix(content, "```")
+		content = strings.TrimSpace(content)
+
+		var parsed map[string]any
+		if err := json.Unmarshal([]byte(content), &parsed); err != nil {
+			json.NewEncoder(w).Encode(map[string]any{
+				"raw":  content,
+				"type": "text",
+			})
+			return
+		}
+		parsed["type"] = "structured"
+		json.NewEncoder(w).Encode(parsed)
+	}
+}

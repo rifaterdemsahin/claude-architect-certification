@@ -2202,6 +2202,50 @@ Execute the steps above sequentially and thoroughly. When finished, print the CL
         outputEl.style.borderColor = 'var(--primary)';
         outputEl.style.boxShadow = '0 0 30px rgba(0, 240, 255, 0.6)';
       }
+
+      // Call OpenRouter to get Remotion animation instructions
+      const promptText = _promptRawText;
+      if (promptText && promptText.length > 100) {
+        const loadingMsg = '\n\n---\n⏳ Querying OpenRouter for Remotion animation instructions...';
+        if (outputEl) outputEl.innerText += loadingMsg;
+        _promptRawText += loadingMsg;
+
+        fetch('/api/animations/remotion-instructions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ promptText })
+        })
+        .then(res => res.json())
+        .then(data => {
+          let instructions = '\n\n---\n🎬 Remotion Animation Instructions\n';
+          if (data.type === 'structured' && data.compositions) {
+            instructions += `\nCompositions (${data.compositions.length}):\n`;
+            data.compositions.forEach(c => {
+              instructions += `  • ${c.name} — ${c.description} (${c.durationInFrames}f, assets: ${(c.assetsUsed || []).join(', ')})\n`;
+            });
+            if (data.showNotTell) instructions += `\nShow-not-tell: ${data.showNotTell}\n`;
+            if (data.fallbackStrategy) instructions += `Fallback: ${data.fallbackStrategy}\n`;
+            if (data.totalDurationEstimate) instructions += `Total: ${data.totalDurationEstimate}\n`;
+          } else if (data.raw) {
+            instructions += '\n' + data.raw;
+          } else {
+            instructions += '\n' + JSON.stringify(data, null, 2);
+          }
+          _promptRawText = _promptRawText.replace(loadingMsg, '');
+          _promptRawText += instructions;
+          if (outputEl) outputEl.innerText = _promptRawText;
+          clearSearch();
+          updateStats();
+        })
+        .catch(err => {
+          const errMsg = `\n\n---\n❌ OpenRouter call failed: ${err.message}`;
+          _promptRawText = _promptRawText.replace(loadingMsg, '');
+          _promptRawText += errMsg;
+          if (outputEl) outputEl.innerText = _promptRawText;
+          clearSearch();
+          updateStats();
+        });
+      }
       
       setTimeout(() => {
         if (genBtn) {
@@ -2213,6 +2257,18 @@ Execute the steps above sequentially and thoroughly. When finished, print the CL
           outputEl.style.boxShadow = 'inset 0 2px 10px rgba(0, 0, 0, 0.5)';
         }
       }, 2000);
+    }
+
+    function updateStats() {
+      const words = _promptRawText.trim().split(/\s+/).filter(Boolean).length;
+      const chars = _promptRawText.length;
+      const tokens = Math.round(words * 1.35);
+      const wordCountEl = document.getElementById('wordCount');
+      const charCountEl = document.getElementById('charCount');
+      const tokenCountEl = document.getElementById('tokenCount');
+      if (wordCountEl) wordCountEl.innerText = words.toLocaleString();
+      if (charCountEl) charCountEl.innerText = chars.toLocaleString();
+      if (tokenCountEl) tokenCountEl.innerText = '~' + tokens.toLocaleString();
     }
 
     function copyCloneCmd(repoPath, btnEl) {
