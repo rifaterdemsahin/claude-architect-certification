@@ -102,8 +102,9 @@
     .tree-btn.add-child:hover { color: var(--green); border-color: rgba(16,185,129,0.3); }
     .tree-btn.del-item:hover { color: var(--red); border-color: rgba(239,68,68,0.3); }
     .tree-btn.goto-item:hover { color: var(--teal); border-color: rgba(6,182,212,0.3); }
-    .tree-item.url-hover-ready { cursor: pointer; }
-    .tree-item.url-hover-ready .item-label { text-decoration: underline; text-decoration-color: var(--teal); text-underline-offset: 3px; }
+    .tree-item[data-url] { cursor: default; }
+    .tree-item[data-url]:hover .item-label { animation: navItemReveal 0s 3s forwards; cursor: pointer; }
+    @keyframes navItemReveal { to { text-decoration: underline; text-decoration-color: var(--teal); text-underline-offset: 3px; } }
 
     ol.tree ol.tree { margin-left: 24px; padding-left: 8px; border-left: 1px solid rgba(255,255,255,0.06); min-height: 4px; }
 
@@ -615,33 +616,6 @@
         selectItem(clickId);
       }
       return;
-    }
-  });
-
-  // ── 3-second hover to reveal clickable link ─────────────────────────────────
-  let hoverTimer = null;
-  let hoveredItem = null;
-
-  document.addEventListener('mouseover', e => {
-    const item = e.target.closest('.tree-item[data-url]');
-    if (item && item !== hoveredItem) {
-      if (hoverTimer) { clearTimeout(hoverTimer); hoverTimer = null; }
-      if (hoveredItem) { hoveredItem.classList.remove('url-hover-ready'); }
-      hoveredItem = item;
-      hoverTimer = setTimeout(() => {
-        if (hoveredItem) hoveredItem.classList.add('url-hover-ready');
-        hoverTimer = null;
-      }, 3000);
-    }
-  });
-
-  document.addEventListener('mouseout', e => {
-    if (!hoveredItem) return;
-    const rel = e.relatedTarget;
-    if (!rel || !hoveredItem.contains(rel)) {
-      if (hoverTimer) { clearTimeout(hoverTimer); hoverTimer = null; }
-      hoveredItem.classList.remove('url-hover-ready');
-      hoveredItem = null;
     }
   });
 
