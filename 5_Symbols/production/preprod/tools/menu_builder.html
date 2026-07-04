@@ -750,7 +750,7 @@
     showToast(`Deleted ${toDelete.size} item(s). Click 💾 Save to persist.`);
   }
 
-  // ── Save to Supabase ─────────────────────────────────────────────────────────
+  // ── Save to Supabase (INSERT-first, verify, THEN DELETE) ─────────────────────
   async function saveAll() {
     if (!window.requireAdmin('save menus to Supabase')) return;
     syncDomToState();
@@ -769,12 +769,18 @@
       }
       collect(tree, 0);
 
-      console.log('[menu-builder] Saving', ordered.length, 'items across', Math.max(...ordered.map(o => o._depth), 0) + 1, 'depth levels');
+      const expectedCount = ordered.length;
+      console.log('[menu-builder] Saving', expectedCount, 'items across', Math.max(...ordered.map(o => o._depth), 0) + 1, 'depth levels');
 
-      await api(`navigation_menus?menu_type=eq.${currentMenuType}`, { method: 'DELETE' });
+      // Step 1: Save old IDs so we can roll back if verification fails
+      const oldRows = await api(`navigation_menus?menu_type=eq.${currentMenuType}&select=id`);
+      const oldIds = oldRows.map(r => r.id);
+      console.log('[menu-builder] Existing rows in DB:', oldIds.length);
 
+      // Step 2: INSERT new items first (don't delete old ones yet)
       const maxDepth = Math.max(...ordered.map(o => o._depth), 0);
       const idMap = {};
+      const newRowsAll = [];
 
       for (let d = 0; d <= maxDepth; d++) {
         const level = ordered.filter(o => o._depth === d);
@@ -806,34 +812,51 @@
           const orig = level[i];
           idMap[orig.id] = row.id;
           orig.id = row.id;
+          newRowsAll.push(row.id);
         });
+      }
+
+      // Step 3: VERIFY — query the actual DB count
+      const verifyRes = await fetch(SUPABASE_URL + '/rest/v1/navigation_menus?menu_type=eq.' + currentMenuType + '&select=id&limit=0', {
+        headers: { 'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + SUPABASE_ANON, 'Prefer': 'count=exact' }
+      });
+      const range = verifyRes.headers.get('content-range') || '';
+      const m = range.match(/\/(\d+)$/);
+      const dbCount = m ? parseInt(m[1]) : -1;
+
+      if (dbCount < expectedCount) {
+        // ROLLBACK: delete the newly inserted rows
+        console.error('[menu-builder] ROLLBACK — expected', expectedCount, 'rows, DB has', dbCount);
+        if (newRowsAll.length) {
+          const batchSize = 50;
+          for (let i = 0; i < newRowsAll.length; i += batchSize) {
+            const batch = newRowsAll.slice(i, i + batchSize);
+            await api(`navigation_menus?id=in.(${batch.join(',')})`, { method: 'DELETE' }).catch(() => {});
+          }
+        }
+        throw new Error(`DB has ${dbCount} rows, expected ${expectedCount}. New item(s) were NOT saved. Old data restored.`);
+      }
+
+      // Step 4: Verifed — DELETE old items
+      if (oldIds.length) {
+        const toDelete = oldIds.filter(id => !newRowsAll.includes(id));
+        console.log('[menu-builder] Deleting', toDelete.length, 'stale rows');
+        if (toDelete.length) {
+          const batchSize = 50;
+          for (let i = 0; i < toDelete.length; i += batchSize) {
+            const batch = toDelete.slice(i, i + batchSize);
+            await api(`navigation_menus?id=in.(${batch.join(',')})`, { method: 'DELETE' }).catch(() => {});
+          }
+        }
       }
 
       dirty = false; pillDirty.style.display = 'none';
       pillCount.innerHTML = `<span class="dot"></span> Items: ${flatItems.length}`;
-      // Verify count in DB vs what we attempted to save
-      try {
-        const verifyRes = await fetch(SUPABASE_URL + '/rest/v1/navigation_menus?menu_type=eq.' + currentMenuType + '&select=id&limit=0', {
-          headers: { 'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + SUPABASE_ANON, 'Prefer': 'count=exact' }
-        });
-        const range = verifyRes.headers.get('content-range') || '';
-        const m = range.match(/\/(\d+)$/);
-        const dbCount = m ? parseInt(m[1]) : -1;
-        if (dbCount === ordered.length) {
-          showToast(`✅ Saved ${dbCount} items to Supabase.`);
-        } else if (dbCount >= 0) {
-          console.warn('[menu-builder] Count mismatch: expected', ordered.length, 'got', dbCount);
-          showToast(`⚠️ Saved ${ordered.length} items but DB has ${dbCount} — some may not have persisted.`, true);
-        } else {
-          showToast(`✅ Save complete.`);
-        }
-      } catch (e) {
-        showToast(`✅ Save complete (verify: ${e.message})`);
-      }
+      showToast(`✅ Saved ${dbCount} items to Supabase.`);
       await loadMenu();
     } catch (e) {
       console.error('[menu-builder] Save failed:', e);
-      showToast('Save failed: ' + e.message, true);
+      showToast('❌ ' + e.message, true, 6000);
     } finally {
       saveBtn.disabled = false; saveBtn.textContent = '💾 Save to Supabase';
     }
