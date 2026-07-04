@@ -1968,59 +1968,43 @@ You must create the following directory structure inside the \`<project-name>\` 
 ---
 
 ### [ ] Step 6: Render related videos and embed to the html
-- **Render all Remotion compositions**: Run \`npm run render:all\` inside \`remotion/\` to generate \`out/scene1-title.mp4\`, \`out/scene2-naive.mp4\`, \`out/scene3-resilient.mp4\`, \`out/scene4-metrics.mp4\`, \`out/step1-domain.mp4\`, \`out/step2-cli.mp4\`, \`out/step4-outro.mp4\`.
-- **Wait for render completion**: For each MP4 output, **poll for the file to exist and be non-empty** before proceeding. Do NOT embed placeholder paths or assume files exist before render finishes.
-- **Embed rendered videos**: Once all renders are confirmed complete, embed each MP4 using an HTML5 \`<video controls>\` tag in:
+Execute \`npm run render:all\` inside \`remotion/\` — this generates \`out/scene1-title.mp4\`, \`out/scene2-naive.mp4\`, \`out/scene3-resilient.mp4\`, \`out/scene4-metrics.mp4\`, \`out/step1-domain.mp4\`, \`out/step2-cli.mp4\`, \`out/step4-outro.mp4\`.
+Poll each output file until it exists and is non-empty. **Do NOT proceed until every MP4 is confirmed complete** — no placeholder paths, no pre-render assumptions.
+Once all renders finish, embed each MP4 with \`<video controls>\` directly into:
   - \`index.html\` — after each corresponding GSAP scene description
   - \`README.md\` — in the "🎬 Video Outputs" section
-- **Update \`FullVideo\`**: Stitch all per-scene compositions into \`FullVideo.tsx\` and render the full walkthrough as \`out/full-video.mp4\`.
+Stitch all per-scene compositions into \`FullVideo.tsx\` and render \`out/full-video.mp4\`.
 
 ---
 
 ### [ ] Step 7: Generate assets images, audio and embed to html
-- **Generate visual assets**: For each section, create architectural illustrations and step-by-step diagrams using:
-  - **Primary**: Server endpoint \`POST /api/infographics/generate\` (Gemini via Azure Key Vault) for publication-quality infographics.
-  - **Fallback**: Excalidraw (https://excalidraw.com) for hand-drawn-style sketches.
-  - Save all generated images to \`docs/step-images/\`.
-- **Generate audio narration**: Write Web Speech API scripts in \`narration.js\` for each section. The browser synthesizes audio via \`window.speechSynthesis\` with pause/resume/stop controls and auto-scroll highlighting.
-- **Embed in \`index.html\`**: Add each generated image with modal popup lightbox (click → fullscreen). Add the Web Speech narration playback controls at each section.
-- **Embed in \`README.md\`**: Reference all generated images and narration entries in the relevant sections.
-- **Update Remotion compositions**: Add the newly generated images (\`<Img>\`) and audio (\`<Audio>\`) to each scene's Remotion composition and re-render affected MP4s. Re-run the render-wait-embed cycle (Step 6) for any updated compositions.
+For each section, generate architectural illustrations by calling \`POST /api/infographics/generate\` (Gemini via Azure Key Vault) or drawing via Excalidraw (https://excalidraw.com). Save all images to \`docs/step-images/\`.
+Write Web Speech API narration scripts into \`narration.js\` with pause/resume/stop controls and auto-scroll highlighting.
+Embed each generated image into \`index.html\` with a modal popup lightbox (click → fullscreen). Add Web Speech playback controls at each section. Reference all images and narration in \`README.md\`.
+Update every Remotion composition with the new images (\`<Img>\`) and audio (\`<Audio>\`) as input props, then re-render all affected MP4s. Re-run Step 6 for any updated compositions.
 
 ---
 
 ### [ ] Step 8: Local verification (\`node demo.js\`)
-- Run \`node demo.js\` via terminal to verify zero syntax errors, proper import resolution, and accurate metric calculation.
-- Verify that all visual assets, narration scripts, and embedded MP4 videos are correctly linked and functional.
-- **🎬 Remotion Render Validation**: Re-run \`npm run render:all\` in \`remotion/\` and confirm all \`out/*.mp4\` files are generated, non-empty, and playable.
-- **⏳ Render completion verified**: For each \`out/*.mp4\`, confirm it was rendered successfully (file exists and size > 0 bytes) and that the wait-before-embed step was followed — no placeholder or pre-render embeds.
-- 🎥 **Embeds verified**: Confirm all \`remotion/out/*.mp4\` files and \`docs/step-images/*\` are embedded correctly with \`<video controls>\` / \`<img>\` tags in \`index.html\` and \`README.md\`.
+Run \`node demo.js\` — verify zero syntax errors, proper import resolution, and accurate metric calculation.
+Verify all visual assets, narration scripts, and embedded MP4s are correctly linked and functional.
+Re-run \`npm run render:all\` in \`remotion/\` and confirm every \`out/*.mp4\` exists, is non-empty, and is playable.
+For each \`out/*.mp4\`, confirm the wait-before-embed rule was followed — no placeholder or pre-render embeds.
+Confirm every \`remotion/out/*.mp4\` and \`docs/step-images/*\` is embedded with \`<video controls>\` / \`<img>\` in \`index.html\` and \`README.md\`.
 
 ---
 
 ### [ ] Step 9: Git commit, push to GitHub, enable Pages, auto-open
-- **Pipeline Confirmation**: Ensure all rendered \`out/*.mp4\` files and \`docs/step-images/*\` assets are included in the repository. Confirm each file exists and is non-empty.
-- Stage all generated project files:
-  \`\`\`bash
-  git add .
-  \`\`\`
-- Commit with a descriptive semantic message:
-  \`\`\`bash
-  git commit -m "feat: demonstrate architectural solution for <project-name>"
-  \`\`\`
-- **Create and Push to GitHub Repository**:
-  \`\`\`bash
-  gh repo create <github-username>/<project-name> --\${visibility} --source=. --remote=origin --push
-  \`\`\`
-  *(Fallback: \`git remote add origin ... && git push -u origin main\`)*
-- **Enable GitHub Pages** via \`gh\` CLI:
-  \`\`\`bash
-  gh api -X POST /repos/<github-username>/<project-name>/pages -f "build_type=workflow" || true
-  \`\`\`
-- **Wait for deployment**: Poll the GitHub Actions workflow (\`static.yml\`) until the live URL returns HTTP 200 OK.
-- **Auto-open**: Automatically launch the live page in the browser:
-  \`\`\`bash
-  open "https://<github-username>.github.io/<project-name>/"
+Confirm all rendered \`out/*.mp4\` files and \`docs/step-images/*\` assets exist and are non-empty.
+\`\`\`bash
+git add .
+git commit -m "feat: demonstrate architectural solution for <project-name>"
+gh repo create <github-username>/<project-name> --\${visibility} --source=. --remote=origin --push
+gh api -X POST /repos/<github-username>/<project-name>/pages -f "build_type=workflow" || true
+\`\`\`
+Poll the GitHub Actions workflow until the live URL returns HTTP 200, then auto-open:
+\`\`\`bash
+open "https://<github-username>.github.io/<project-name>/"
   \`\`\`
 
 ---
