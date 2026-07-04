@@ -604,7 +604,13 @@
     }
 
     if (itemDiv && !e.target.closest('.tree-btn')) {
-      selectItem(parseInt(itemDiv.dataset.id));
+      const clickId = parseInt(itemDiv.dataset.id);
+      const clickItem = flatItems.find(f => f.id === clickId);
+      if (clickItem && clickItem.url) {
+        window.open(resolveItemUrl(clickItem.url), '_blank');
+      } else {
+        selectItem(clickId);
+      }
       return;
     }
   });
