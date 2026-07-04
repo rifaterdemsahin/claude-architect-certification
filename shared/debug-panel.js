@@ -602,26 +602,79 @@
   }
   window.__dbgClear = clearLog;
 
-  // Hard cache clear: localStorage nav cache, Cache Storage API, service workers,
-  // then hard-reload with a cache-busting param so nav.js re-fetches from Supabase.
+  // Hard cache clear: show a modal listing what is being cleared, then
+  // clear ALL localStorage, Cache Storage API, service workers,
+  // auto-close after 3s, then hard-reload with a cache-busting param.
   async function clearCache() {
+    const existing = document.getElementById('_dbg_clear_modal');
+    if (existing) existing.remove();
+
+    // Count localStorage keys before clearing
+    let lsCount = 0;
+    try { lsCount = localStorage.length; } catch(e) {}
+
+    const modal = document.createElement('div');
+    modal.id = '_dbg_clear_modal';
+    modal.style.cssText = [
+      'position:fixed', 'inset:0', 'z-index:10001',
+      'background:rgba(0,0,0,0.75)', 'backdrop-filter:blur(6px)',
+      'display:flex', 'align-items:center', 'justify-content:center',
+      'padding:24px', 'font-family:monospace',
+    ].join(';');
+    modal.innerHTML = `
+      <div onclick="event.stopPropagation()" style="background:#0b1020;border:1px solid rgba(139,92,246,0.45);border-radius:12px;width:min(440px,92vw);box-shadow:0 20px 60px rgba(0,0,0,0.6);padding:24px;">
+        <div style="font-size:1.1rem;font-weight:800;color:#a78bfa;margin-bottom:16px;">♻️ Clearing Cache…</div>
+        <div id="_dbg_clear_items" style="display:flex;flex-direction:column;gap:10px;">
+          <div id="_dbg_clr_ls" style="color:#6b7280;font-size:0.82rem;">⏳ localStorage · ${lsCount} key(s) — clearing all</div>
+          <div id="_dbg_clr_caches" style="color:#6b7280;font-size:0.82rem;">⏳ Cache Storage API</div>
+          <div id="_dbg_clr_sw" style="color:#6b7280;font-size:0.82rem;">⏳ Service Worker registrations</div>
+        </div>
+        <div style="margin-top:16px;display:flex;align-items:center;gap:8px;">
+          <div style="flex:1;height:3px;background:rgba(139,92,246,0.2);border-radius:2px;overflow:hidden;">
+            <div id="_dbg_clear_progress" style="height:100%;width:0%;background:#a78bfa;border-radius:2px;transition:width 3s linear;"></div>
+          </div>
+          <span id="_dbg_clear_countdown" style="color:#6b7280;font-size:0.7rem;min-width:32px;text-align:right;">3s</span>
+        </div>
+      </div>`;
+    document.body.appendChild(modal);
+
+    const lsEl = document.getElementById('_dbg_clr_ls');
+    const cacheEl = document.getElementById('_dbg_clr_caches');
+    const swEl = document.getElementById('_dbg_clr_sw');
+    const ok = (el) => { if (el) { el.innerHTML = el.innerHTML.replace('⏳', '✅'); el.style.color = '#86efac'; } };
+    const fail = (el) => { if (el) { el.innerHTML = el.innerHTML.replace('⏳', '❌'); el.style.color = '#fca5a5'; } };
+
+    // Clear ALL localStorage
     try {
-      localStorage.removeItem('nav_menu_cache');
-    } catch (e) {
-      console.warn('[debug-panel] nav cache clear error', e);
-    }
+      localStorage.clear();
+      ok(lsEl);
+    } catch (e) { fail(lsEl); }
+
     try {
       if (window.caches && caches.keys) {
         const keys = await caches.keys();
         await Promise.all(keys.map(k => caches.delete(k)));
       }
+      ok(cacheEl);
+    } catch (e) { fail(cacheEl); }
+
+    try {
       if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
         const regs = await navigator.serviceWorker.getRegistrations();
         await Promise.all(regs.map(r => r.unregister()));
       }
-    } catch (e) {
-      console.warn('[debug-panel] cache clear error', e);
+      ok(swEl);
+    } catch (e) { fail(swEl); }
+
+    const bar = document.getElementById('_dbg_clear_progress');
+    const countdown = document.getElementById('_dbg_clear_countdown');
+    if (bar) bar.style.width = '100%';
+    for (let i = 3; i > 0; i--) {
+      if (countdown) countdown.textContent = `${i}s`;
+      await new Promise(r => setTimeout(r, 1000));
     }
+    if (countdown) countdown.textContent = '0s';
+
     const url = new URL(window.location.href);
     url.searchParams.set('_cb', Date.now());
     window.location.replace(url.toString());
