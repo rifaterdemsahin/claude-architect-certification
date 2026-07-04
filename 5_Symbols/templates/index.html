@@ -1043,6 +1043,10 @@
       100% { opacity: 0.6; }
     }
 
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
     @media (max-width: 480px) {
       .header-container {
         flex-direction: column;
@@ -1744,77 +1748,142 @@
         buildDebugMenu();
       }
 
-      function buildDebugMenu(filterText = "") {
-        debugLog(`Building Debug Menu with filter: "${filterText}"`);
+      function renderDebugLink(item) {
+        const li = document.createElement("li");
+        li.className = "debug-item";
+        const a = document.createElement("a");
+        let finalUrl = item.url;
+        if (finalUrl && finalUrl !== "divider" && !finalUrl.startsWith("http") &&
+            !finalUrl.includes("markdown_renderer.html") && !finalUrl.endsWith(".html") &&
+            !finalUrl.endsWith("/")) {
+          finalUrl = `markdown_renderer.html?file=${finalUrl}`;
+        }
+        if (!item.url || item.url === "divider") {
+          a.className = "debug-link";
+          a.style.cursor = "default";
+          a.style.opacity = "0.7";
+          a.href = "#";
+          a.addEventListener("click", (e) => e.preventDefault());
+          a.innerHTML = `<span>${item.label}</span>`;
+        } else {
+          a.href = finalUrl;
+          a.className = "debug-link";
+          a.innerHTML = `<span>${item.label}</span><i class="fa-solid fa-chevron-right debug-link-icon"></i>`;
+        }
+        li.appendChild(a);
+        debugLinksList.appendChild(li);
+      }
+
+      function renderDebugMenuItems(items, query) {
         debugLinksList.innerHTML = "";
-        const query = filterText.toLowerCase();
         const matchCount = document.getElementById("searchMatchCount");
         let visibleCount = 0;
 
-        navigationData.debugMenu.forEach(item => {
-          const labelLower = item.label.toLowerCase();
-          const urlLower = item.url.toLowerCase();
-          const matchesQuery = !query ||
-            labelLower.includes(query) ||
-            urlLower.includes(query) ||
-            urlLower.replace(/^markdown_renderer\.html\?file=/, "").includes(query);
-
-          if (query && item.label === "---") return;
-          if (query && !matchesQuery) return;
-
+        items.forEach(function(item) {
           if (item.label === "---") {
             const divider = document.createElement("li");
             divider.className = "debug-divider";
             debugLinksList.appendChild(divider);
           } else {
             visibleCount++;
-            const li = document.createElement("li");
-            li.className = "debug-item";
-            
-            const a = document.createElement("a");
-            // URLs in navigation_config.json are already fully resolved.
-            // Only auto-prefix bare .md paths from the minimal offline fallback.
-            let finalUrl = item.url;
-            if (finalUrl && finalUrl !== "divider" && !finalUrl.startsWith("http") &&
-                !finalUrl.includes("markdown_renderer.html") && !finalUrl.endsWith(".html") &&
-                !finalUrl.endsWith("/")) {
-              finalUrl = `markdown_renderer.html?file=${finalUrl}`;
-            }
-
-            // Heading entries (no URL) render as non-clickable labels
-            if (!item.url || item.url === "divider") {
-              a.className = "debug-link";
-              a.style.cursor = "default";
-              a.style.opacity = "0.7";
-              a.href = "#";
-              a.addEventListener("click", (e) => e.preventDefault());
-              a.innerHTML = `<span>${item.label}</span>`;
-            } else {
-              a.href = finalUrl;
-              a.className = "debug-link";
-              a.innerHTML = `<span>${item.label}</span><i class="fa-solid fa-chevron-right debug-link-icon"></i>`;
-            }
-            li.appendChild(a);
-            debugLinksList.appendChild(li);
+            renderDebugLink(item);
           }
         });
 
         if (matchCount) {
-          const total = navigationData.debugMenu.filter(i => i.label !== "---").length;
-          matchCount.textContent = query ? `${visibleCount}/${total}` : `${total}`;
+          const total = navigationData.debugMenu.filter(function(i) { return i.label !== "---"; }).length;
+          matchCount.textContent = query ? visibleCount + "/" + total : String(total);
         }
 
         if (visibleCount === 0 && query) {
-          const noResult = document.createElement("li");
+          var noResult = document.createElement("li");
           noResult.className = "debug-item";
-          noResult.innerHTML = `<div class="debug-link" style="justify-content:center; opacity:0.5;">No results for "${filterText}"</div>`;
+          noResult.innerHTML = '<div class="debug-link" style="justify-content:center; opacity:0.5;">No results for "' + escHtml(query) + '"</div>';
           debugLinksList.appendChild(noResult);
         }
       }
 
-      // Search Autocomplete Listener
-      debugSearch.addEventListener("input", (e) => {
-        buildDebugMenu(e.target.value);
+      function renderSearchResults(results, query) {
+        debugLinksList.innerHTML = "";
+        var matchCount = document.getElementById("searchMatchCount");
+
+        results.forEach(function(r, i) {
+          var li = document.createElement("li");
+          li.className = "debug-item";
+          var a = document.createElement("a");
+          a.href = r.url;
+          a.className = "debug-link";
+          var desc = r.excerpt ? ' <span style="font-size:0.72rem;color:var(--muted2);">' + escHtml(r.excerpt.substring(0, 100)) + '</span>' : '';
+          a.innerHTML = '<span>' + escHtml(r.title) + desc + '</span><i class="fa-solid fa-chevron-right debug-link-icon"></i>';
+          li.appendChild(a);
+          debugLinksList.appendChild(li);
+        });
+
+        if (matchCount) {
+          matchCount.textContent = results.length + ' results';
+        }
+      }
+
+      function escHtml(s) {
+        if (!s) return '';
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+      }
+
+      function buildDebugMenu(filterText) {
+        if (filterText === undefined) filterText = "";
+        debugLog('Building Debug Menu with filter: "' + filterText + '"');
+        var query = filterText.trim().toLowerCase();
+        var matchCount = document.getElementById("searchMatchCount");
+
+        if (!query) {
+          renderDebugMenuItems(navigationData.debugMenu, "");
+          return;
+        }
+
+        // Show loading
+        debugLinksList.innerHTML = '<li class="debug-item"><div class="debug-link" style="justify-content:center;"><span style="display:inline-block;animation:spin 0.8s linear infinite;">⟳</span> Searching...</div></li>';
+        if (matchCount) matchCount.textContent = '…';
+
+        fetch('/api/search?q=' + encodeURIComponent(query))
+          .then(function(res) { return res.json(); })
+          .then(function(data) {
+            if (data.results && data.results.length) {
+              renderSearchResults(data.results, query);
+            } else {
+              var filtered = navigationData.debugMenu.filter(function(item) {
+                if (item.label === "---") return false;
+                return item.label.toLowerCase().includes(query) || item.url.toLowerCase().includes(query);
+              });
+              if (filtered.length) {
+                renderDebugMenuItems(filtered, query);
+              } else {
+                renderDebugMenuItems([], query);
+              }
+            }
+          })
+          .catch(function() {
+            var filtered = navigationData.debugMenu.filter(function(item) {
+              if (item.label === "---") return false;
+              return item.label.toLowerCase().includes(query) || item.url.toLowerCase().includes(query);
+            });
+            if (filtered.length) {
+              renderDebugMenuItems(filtered, query);
+            } else {
+              renderDebugMenuItems([], query);
+            }
+          });
+      }
+
+      // Search Autocomplete Listener (debounced)
+      var searchTimeout = null;
+      debugSearch.addEventListener("input", function(e) {
+        clearTimeout(searchTimeout);
+        var val = e.target.value;
+        if (!val.trim()) {
+          buildDebugMenu("");
+          return;
+        }
+        searchTimeout = setTimeout(function() { buildDebugMenu(val); }, 300);
       });
 
       // Keyboard shortcuts: Ctrl+K / Cmd+K to focus search, Esc to close

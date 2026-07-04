@@ -44,6 +44,8 @@ func main() {
 	mux.Handle("/api/images/enhance-prompt", observe(cfg, imageEnhancePromptHandler(cfg)))
 	mux.Handle("/api/images/save", observe(cfg, imageSaveHandler(cfg)))
 	mux.Handle("/api/images/backfill-thumbnails", observe(cfg, imageThumbnailBackfillHandler(cfg)))
+	mux.Handle("/api/search", observe(cfg, searchHandler(cfg)))
+	mux.Handle("/api/admin/reindex-search", observe(cfg, adminReindexSearchHandler(cfg)))
 	mux.Handle("/api/images/test-gemini", observe(cfg, imageTestGeminiHandler(cfg)))
 	mux.Handle("/api/infographics/generate", observe(cfg, infographicGenerateHandler(cfg)))
 	mux.Handle("/api/infographics/save", observe(cfg, infographicSaveHandler(cfg)))

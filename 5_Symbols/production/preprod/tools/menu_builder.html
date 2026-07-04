@@ -975,6 +975,7 @@
       dirty = false; pillDirty.style.display = 'none';
       pillCount.innerHTML = `<span class="dot"></span> Items: ${flatItems.length}`;
       showToast(`✅ Saved ${dbCount} items to Supabase.`);
+      triggerSearchReindex();
       await loadMenu();
     } catch (e) {
       console.error('[menu-builder] Save failed:', e);
@@ -1075,12 +1076,20 @@
       }
 
       showToast(`✅ Seeded ${flat.length} items from navigation_config.json`);
+      triggerSearchReindex();
       await loadMenu();
     } catch (e) {
       showToast('Seed failed: ' + e.message, true);
     } finally {
       seedBtn.disabled = false; seedBtn.textContent = '🌱 Seed from config';
     }
+  }
+
+  // ── Trigger search reindex ──────────────────────────────────────────────────
+  function triggerSearchReindex() {
+    fetch('/api/admin/reindex-search', { method: 'POST' }).catch(function(err) {
+      console.warn('[menu-builder] Reindex trigger failed:', err);
+    });
   }
 
   // ── Search / filter ─────────────────────────────────────────────────────────
