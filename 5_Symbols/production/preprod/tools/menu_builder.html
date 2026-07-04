@@ -93,6 +93,7 @@
     .badge-external { background: rgba(59,130,246,0.15); color: #93c5fd; border: 1px solid rgba(59,130,246,0.25); }
     .badge-url { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.25); }
     .badge-children { background: rgba(139,92,246,0.15); color: #c084fc; border: 1px solid rgba(139,92,246,0.25); font-variant-numeric: tabular-nums; }
+    .item-ts { font-size: 0.62rem; color: var(--muted); font-family: var(--font-mono); margin-left: 8px; white-space: nowrap; opacity: 0.6; }
     .item-actions { display: flex; gap: 2px; flex-shrink: 0; opacity: 0; transition: opacity 0.15s; }
     .tree-item:hover .item-actions { opacity: 1; }
     .tree-btn { background: none; border: 1px solid transparent; color: var(--muted2); cursor: pointer; padding: 2px 5px; border-radius: 4px; font-size: 0.72rem; transition: all 0.15s; }
@@ -392,6 +393,13 @@
     return count;
   }
 
+  function fmtTs(ts) {
+    if (!ts) return '';
+    const d = new Date(ts);
+    if (isNaN(d.getTime())) return '';
+    return d.toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  }
+
   function renderNodeList(nodes, parentEl) {
     const ol = document.createElement('ol');
     ol.className = 'tree';
@@ -414,12 +422,16 @@
         const isExt = node.url.startsWith('http://') || node.url.startsWith('https://');
         metaHtml.push(`<span class="badge ${isExt ? 'badge-external' : 'badge-url'}">${isExt ? 'EXT' : 'URL'}</span>`);
       }
+      const ts = node.created_at ? fmtTs(node.created_at) : '';
+      const tsClass = node.id > 0 && ts ? '' : ' style="display:none"';
+      const tsUpdated = node.updated_at && node.updated_at !== node.created_at ? fmtTs(node.updated_at) : '';
 
       li.innerHTML = `
         <div class="tree-item ${node.id === selectedId ? 'selected' : ''}" data-id="${node.id}">
           <span class="drag-handle">⠿</span>
           <span class="item-icon">${icon || '📄'}</span>
           <span class="item-label">${escHtml(cleanLabel)}</span>
+          <span class="item-ts"${tsClass} title="Created: ${escHtml(node.created_at || '')}${tsUpdated ? ' · Updated: ' + escHtml(node.updated_at) : ''}">${ts}${tsUpdated ? ' ✏️' : ''}</span>
           <span class="item-meta">${metaHtml.join(' ')}</span>
           <div class="item-actions">
             <button class="tree-btn add-child" data-id="${node.id}" title="Add child">➕</button>
@@ -502,7 +514,7 @@
 
     walk(root, null);
 
-    // Merge with existing flatItems to preserve URL, description etc.
+    // Merge with existing flatItems to preserve timestamps, URL, description etc.
     const merged = collected.map(c => {
       const existing = flatItems.find(f => f.id === c.id);
       return {
@@ -511,6 +523,8 @@
         url: existing?.url || null,
         description: existing?.description || null,
         is_external: existing?.is_external || false,
+        created_at: existing?.created_at || null,
+        updated_at: existing?.updated_at || null,
         label: c.label,
         icon: c.icon,
         is_group: c.is_group
@@ -565,6 +579,9 @@
     const label = item.label || '';
     const icon = item.icon || extractIcon(label) || '';
     const cleanLabel = icon ? stripIcon(label) : label;
+    const tsCreated = item.created_at ? fmtTs(item.created_at) : '—';
+    const tsUpdated = item.updated_at ? fmtTs(item.updated_at) : '—';
+    const tsSame = item.created_at && item.updated_at && item.created_at === item.updated_at;
 
     container.innerHTML = `
       <div class="form-group">
@@ -593,6 +610,13 @@
             <input type="checkbox" id="pIsGroup" ${item.is_group ? 'checked' : ''}>
             <label for="pIsGroup" style="margin:0;text-transform:none;letter-spacing:0;">Group header</label>
           </div>
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:8px;padding-top:10px;border-top:1px solid var(--border);">
+        <div style="display:flex;gap:12px;font-size:0.72rem;color:var(--muted);font-family:var(--font-mono);">
+          <span>🆔 ${item.id > 0 ? item.id : '—'}</span>
+          <span title="Created at">📅 ${escHtml(tsCreated)}</span>
+          ${tsSame ? '' : `<span title="Updated at">✏️ ${escHtml(tsUpdated)}</span>`}
         </div>
       </div>
       <div class="form-actions">
@@ -787,7 +811,25 @@
 
       dirty = false; pillDirty.style.display = 'none';
       pillCount.innerHTML = `<span class="dot"></span> Items: ${flatItems.length}`;
-      showToast(`✅ Saved ${flatItems.length} items to Supabase.`);
+      // Verify count in DB vs what we attempted to save
+      try {
+        const verifyRes = await fetch(SUPABASE_URL + '/rest/v1/navigation_menus?menu_type=eq.' + currentMenuType + '&select=id&limit=0', {
+          headers: { 'apikey': SUPABASE_ANON, 'Authorization': 'Bearer ' + SUPABASE_ANON, 'Prefer': 'count=exact' }
+        });
+        const range = verifyRes.headers.get('content-range') || '';
+        const m = range.match(/\/(\d+)$/);
+        const dbCount = m ? parseInt(m[1]) : -1;
+        if (dbCount === ordered.length) {
+          showToast(`✅ Saved ${dbCount} items to Supabase.`);
+        } else if (dbCount >= 0) {
+          console.warn('[menu-builder] Count mismatch: expected', ordered.length, 'got', dbCount);
+          showToast(`⚠️ Saved ${ordered.length} items but DB has ${dbCount} — some may not have persisted.`, true);
+        } else {
+          showToast(`✅ Save complete.`);
+        }
+      } catch (e) {
+        showToast(`✅ Save complete (verify: ${e.message})`);
+      }
       await loadMenu();
     } catch (e) {
       console.error('[menu-builder] Save failed:', e);
