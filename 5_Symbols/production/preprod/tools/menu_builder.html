@@ -537,22 +537,39 @@
   // ── Event delegation ─────────────────────────────────────────────────────────
   document.addEventListener('click', e => {
     const itemDiv = e.target.closest('.tree-item');
-    if (itemDiv && !e.target.closest('.tree-btn')) {
-      selectItem(parseInt(itemDiv.dataset.id));
-      return;
-    }
 
     const addBtn = e.target.closest('.add-child');
     if (addBtn) {
       e.stopPropagation();
-      showAddModal(parseInt(addBtn.dataset.id));
+      e.preventDefault();
+      const rawId = addBtn.dataset.id;
+      if (rawId === undefined || rawId === null || rawId === '') {
+        console.warn('[menu-builder] add-child missing data-id');
+        return;
+      }
+      const parentId = parseInt(rawId);
+      if (isNaN(parentId)) {
+        console.warn('[menu-builder] add-child invalid data-id:', rawId);
+        return;
+      }
+      showAddModal(parentId);
       return;
     }
 
     const delBtn = e.target.closest('.del-item');
     if (delBtn) {
       e.stopPropagation();
-      confirmDelete(parseInt(delBtn.dataset.id));
+      e.preventDefault();
+      const rawId = delBtn.dataset.id;
+      if (rawId === undefined || rawId === null || rawId === '') return;
+      const delId = parseInt(rawId);
+      if (isNaN(delId)) return;
+      confirmDelete(delId);
+      return;
+    }
+
+    if (itemDiv && !e.target.closest('.tree-btn')) {
+      selectItem(parseInt(itemDiv.dataset.id));
       return;
     }
   });
@@ -658,6 +675,7 @@
 
   // ── Add item modal ──────────────────────────────────────────────────────────
   function showAddModal(parentId) {
+    console.log('[menu-builder] showAddModal parentId:', parentId, typeof parentId);
     $('modalTitle').textContent = parentId ? '➕ Add Child Item' : '➕ Add Root Item';
     $('fIcon').value = '';
     $('fLabel').value = '';
