@@ -1237,6 +1237,17 @@
             <button class="search-btn search-clear" onclick="clearSearch()" title="Clear search">✕</button>
           </div>
 
+          <div id="orStatus" class="or-status" style="display: none; align-items: center; gap: 0.5rem; padding: 0.4rem 0.75rem; border-radius: 0.5rem; margin-bottom: 0.5rem; font-size: 0.8rem; font-weight: 600; background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.25); color: #c084fc;">
+            <span class="or-spinner" style="display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(168, 85, 247, 0.3); border-top-color: #a855f7; border-radius: 50%; animation: orSpin 0.8s linear infinite;"></span>
+            <span id="orStatusText">Querying OpenRouter for Remotion animation instructions…</span>
+          </div>
+          <style>
+            @keyframes orSpin { to { transform: rotate(360deg); } }
+            .or-status.success { background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.25); color: #34d399; }
+            .or-status.error { background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.25); color: #f87171; }
+            .or-status.success .or-spinner, .or-status.error .or-spinner { display: none; }
+          </style>
+
           <div id="promptOutput" class="code-wrapper"></div>
 
           <div class="panel-header" style="margin-top: 1rem; margin-bottom: 0; padding-bottom: 0; border-bottom: none;">
@@ -2206,9 +2217,13 @@ Execute the steps above sequentially and thoroughly. When finished, print the CL
       // Call OpenRouter to get Remotion animation instructions
       const promptText = _promptRawText;
       if (promptText && promptText.length > 100) {
-        const loadingMsg = '\n\n---\n⏳ Querying OpenRouter for Remotion animation instructions...';
-        if (outputEl) outputEl.innerText += loadingMsg;
-        _promptRawText += loadingMsg;
+        const orStatus = document.getElementById('orStatus');
+        const orStatusText = document.getElementById('orStatusText');
+        if (orStatus) {
+          orStatus.style.display = 'flex';
+          orStatus.className = 'or-status';
+          orStatusText.innerText = 'Querying OpenRouter for Remotion animation instructions…';
+        }
 
         fetch('/api/animations/remotion-instructions', {
           method: 'POST',
@@ -2231,19 +2246,27 @@ Execute the steps above sequentially and thoroughly. When finished, print the CL
           } else {
             instructions += '\n' + JSON.stringify(data, null, 2);
           }
-          _promptRawText = _promptRawText.replace(loadingMsg, '');
           _promptRawText += instructions;
           if (outputEl) outputEl.innerText = _promptRawText;
           clearSearch();
           updateStats();
+          if (orStatus) {
+            orStatus.className = 'or-status success';
+            orStatusText.innerText = '✅ Remotion animation instructions received';
+            setTimeout(() => { if (orStatus) orStatus.style.display = 'none'; }, 4000);
+          }
         })
         .catch(err => {
           const errMsg = `\n\n---\n❌ OpenRouter call failed: ${err.message}`;
-          _promptRawText = _promptRawText.replace(loadingMsg, '');
           _promptRawText += errMsg;
           if (outputEl) outputEl.innerText = _promptRawText;
           clearSearch();
           updateStats();
+          if (orStatus) {
+            orStatus.className = 'or-status error';
+            orStatusText.innerText = `❌ OpenRouter call failed: ${err.message}`;
+            setTimeout(() => { if (orStatus) orStatus.style.display = 'none'; }, 6000);
+          }
         });
       }
       
