@@ -1174,12 +1174,12 @@
             <div class="form-group" style="background: rgba(168, 85, 247, 0.08); border: 1px solid rgba(168, 85, 247, 0.25); border-radius: 0.75rem; padding: 1rem;">
               <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.4rem;">
                 <span style="font-size: 1.1rem;">📦</span>
-                <span style="font-weight: 700; color: #d8b4fe; font-size: 0.9rem;">Animation Template Reference</span>
+                <span style="font-weight: 700; color: #d8b4fe; font-size: 0.9rem;">Animation Template Reference (GSAP + Remotion)</span>
               </div>
               <p style="color: var(--text-muted); font-size: 0.82rem; line-height: 1.5; margin: 0;">
                 The generated prompt instructs the AI to use
                 <a href="https://github.com/rifaterdemsahin/animation-template-llm-training" target="_blank" style="color: var(--primary);">animation-template-llm-training ↗</a>
-                as the structural foundation for the GSAP cinematic animation (<code style="background: rgba(255,255,255,0.06); padding: 1px 5px; border-radius: 3px; font-size: 0.78rem;">index.html</code>).
+                which provides both a <strong style="color: var(--text-main);">GSAP</strong> cinematic overlay (<code style="background: rgba(255,255,255,0.06); padding: 1px 5px; border-radius: 3px; font-size: 0.78rem;">index.html</code>) for browser playback and a <strong style="color: var(--text-main);">Remotion</strong> render pipeline (<code style="background: rgba(255,255,255,0.06); padding: 1px 5px; border-radius: 3px; font-size: 0.78rem;">remotion/</code>) for programmatic MP4 video generation.
               </p>
             </div>
 
@@ -1711,13 +1711,19 @@
 
 You are DeepSeek V4 Flash — a precision code generation model with a 1M token context window. You also act as a senior frontend engineer + motion designer + Principal AI Architect and Systems Engineer. Your task is to build a complete, runnable, production-grade architectural demonstration project — an interactive web animation demo — from scratch based on the provided **Claude AI Architect Exam** Question and Answer. You must initialize the project folder locally and push the completed repository directly to GitHub.
 
-## 📐 Required: Animation Template to Use
+## 📐 Required: Animation Template to Use (GSAP + Remotion)
 
-You MUST use the **Animation Template for LLM Training** as the structural foundation for the cinematic animation (\`index.html\`):
+You MUST use the **Animation Template for LLM Training** as the structural foundation for the cinematic animation:
 
 📦 **Template Repository:** https://github.com/rifaterdemsahin/animation-template-llm-training/tree/main
 
-Clone this template and adapt its 4-scene GSAP timeline, cinematic scene format, and dark tech aesthetic to your specific exam scenario below. The template provides the GSAP scaffolding — replace the content themes with your scenario's naive vs resilient architecture story.
+This template provides **two rendering paths** you must both set up:
+
+### Path A — GSAP Cinematic Overlay (\`index.html\`)
+A self-contained HTML file with a 4-scene GSAP timeline for browser playback. Clone and adapt its timeline, scene format, and dark tech aesthetic to your specific exam scenario below. Replace the content themes (tokens, shields, sandboxes) with your scenario's naive vs resilient architecture story. Screen-record at 1080p for YouTube.
+
+### Path B — Remotion Video Renderer (\`remotion/\`)
+A React-based Remotion project with 5 compositions (\`Scene1\`, \`Scene2\`, \`Scene3\`, \`Scene4\`, \`FullVideo\`) for programmatic MP4 generation. Run \`npm run studio\` in \`remotion/\` for interactive preview or \`npm run render:all\` to render all scenes to \`out/*.mp4\`. Adapt the composition content to match your GSAP scenes — same narrative, two output formats.
 
 ## ⚡ DeepSeek V4 Flash Optimization & Pre-requisites
 
@@ -1751,7 +1757,7 @@ The objective of this repository is to transform an abstract architectural exam 
    - **Act 2 — The Resilient Architecture**: Clear the screen. Introduce the three pillars of the resilient solution with distinct visual metaphors (e.g., sandbox isolation for context:fork, validation shield for allowed-tools, token filter for argument-hint). Show it succeeding where the naive approach failed.
    - **Act 3 — The Metrics**: Animate the comparison results (token reduction, blocked destructive actions, success rate) counting up from 0 to final values.
 3. **Quantifiable Metrics & Input Token Stats**: Define clear architectural metrics (e.g., *Coordinator Interventions*, *Error Recovery Rate*, *System Latency*, *Throughput*, *Memory Consumption*, and *Input Token Consumption*) that quantitatively prove the superiority of the resilient approach. You MUST include a dedicated **Input Token Stats & Efficiency Scoreboard** at the bottom of the simulator page (\`index.html\`), CLI tables (\`demo.js\`), and \`README.md\` demonstrating input token savings!
-4. **🎬 Cinematic Auto-Playing Animation (\`index.html\`)**: Clone the **Animation Template** (see 📐 Required: Animation Template to Use) and adapt its GSAP timeline, 4-scene structure, and dark tech aesthetic to your scenario. This is NOT an interactive dashboard — it must be an auto-playing sequence that can be screen-recorded at 1080p for YouTube. Replace the content themes (tokens, shields, sandboxes) with your scenario's naive → resilient architecture story.
+4. **🎬 Cinematic Animation (GSAP + Remotion)**: Clone the **Animation Template** (see 📐 Required: Animation Template to Use) which provides **two rendering paths**. Adapt the GSAP timeline (\`index.html\`) for browser playback and the Remotion compositions (\`remotion/\`) for programmatic MP4 output. Both must tell the same 4-scene narrative using the template's scaffolding — replace content themes (tokens, shields, sandboxes) with your scenario's naive → resilient architecture story.
 5. **Step-by-Step "How, What & Why" Visual Explanations & Modal Popup Lightbox (\`index.html\`)**: At each execution step (Step 0 through Step 4), you MUST generate a visual image or architectural illustration that explains:
    - **WHAT** is happening at this architectural layer/stage.
    - **WHY** the resilient pattern is superior to the naive anti-pattern here.
