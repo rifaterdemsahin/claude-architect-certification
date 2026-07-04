@@ -467,18 +467,16 @@
   }
 
   function syncDomToState() {
-    // Walk the DOM tree to collect current structure
     const root = $('treeContainer').querySelector('ol.tree');
     if (!root) return;
     const collected = [];
-    let tempIdCounter = -1;
 
     function walk(ol, parentId) {
       let idx = 0;
       ol.querySelectorAll(':scope > li').forEach(li => {
         const itemDiv = li.querySelector(':scope > .tree-item');
-        const existingId = parseInt(li.dataset.id);
-        const tempId = existingId || tempIdCounter--;
+        const idAttr = li.dataset.id;
+        const nodeId = idAttr ? parseInt(idAttr) : null;
         const childOl = li.querySelector(':scope > ol.tree');
 
         const label = itemDiv ? itemDiv.querySelector('.item-label')?.textContent || '' : '';
@@ -486,8 +484,7 @@
         const metaBadges = itemDiv ? itemDiv.querySelectorAll('.item-meta .badge') : [];
 
         collected.push({
-          id: existingId || tempId,
-          tempId: tempId,
+          id: nodeId,
           parent_id: parentId,
           sort_order: idx,
           label: label,
@@ -498,7 +495,7 @@
           is_external: false
         });
 
-        if (childOl) walk(childOl, existingId || tempId);
+        if (childOl) walk(childOl, nodeId);
         idx++;
       });
     }
@@ -510,7 +507,7 @@
       const existing = flatItems.find(f => f.id === c.id);
       return {
         ...c,
-        id: existing?.id || c.tempId,
+        id: existing?.id ?? c.id,
         url: existing?.url || null,
         description: existing?.description || null,
         is_external: existing?.is_external || false,
@@ -626,6 +623,15 @@
     showToast('Item updated in working copy. Click 💾 Save to Supabase to persist.');
   }
 
+  // ── Session-only stable key generation ──────────────────────────────────────
+  // Every in-memory item gets a unique negative session key so syncDomToState
+  // can reliably match DOM nodes to flatItems by ID without collisions.
+  let sessionKeyCounter = 0;
+
+  function nextSessionKey() {
+    return -(++sessionKeyCounter);
+  }
+
   // ── Add item modal ──────────────────────────────────────────────────────────
   function showAddModal(parentId) {
     $('modalTitle').textContent = parentId ? '➕ Add Child Item' : '➕ Add Root Item';
@@ -657,12 +663,9 @@
         is_external: false
       };
 
-      // Add to flatItems and re-render
-      const tempId = -Date.now();
-      newItem.id = tempId;
+      newItem.id = nextSessionKey();
       flatItems.push(newItem);
 
-      // Re-sort
       flatItems.sort((a, b) => {
         const pa = a.parent_id || 0, pb = b.parent_id || 0;
         if (pa !== pb) return pa - pb;
@@ -732,7 +735,6 @@
     saveBtn.disabled = true; saveBtn.textContent = '⏳ Saving…';
 
     try {
-      // Collect all items with depth-first ordering
       const tree = buildTree(flatItems, null);
       const ordered = [];
       function collect(nodes, depth) {
@@ -743,10 +745,10 @@
       }
       collect(tree, 0);
 
-      // Delete existing for this menu_type
+      console.log('[menu-builder] Saving', ordered.length, 'items across', Math.max(...ordered.map(o => o._depth), 0) + 1, 'depth levels');
+
       await api(`navigation_menus?menu_type=eq.${currentMenuType}`, { method: 'DELETE' });
 
-      // Re-insert by depth level
       const maxDepth = Math.max(...ordered.map(o => o._depth), 0);
       const idMap = {};
 
@@ -754,18 +756,22 @@
         const level = ordered.filter(o => o._depth === d);
         if (!level.length) continue;
 
-        const payload = level.map(o => ({
-          menu_type: currentMenuType,
-          sort_order: o.sort_order,
-          label: o.label,
-          url: o.url || null,
-          description: o.description || null,
-          icon: o.icon || null,
-          is_group: o.is_group || false,
-          is_external: o.url ? (o.url.startsWith('http://') || o.url.startsWith('https://')) : false,
-          parent_id: o.parent_id ? idMap[o.parent_id] : null
-        }));
+        const payload = level.map(o => {
+          const parentId = o.parent_id != null ? (idMap[o.parent_id] ?? null) : null;
+          return {
+            menu_type: currentMenuType,
+            sort_order: o.sort_order,
+            label: o.label,
+            url: o.url || null,
+            description: o.description || null,
+            icon: o.icon || null,
+            is_group: o.is_group || false,
+            is_external: o.url ? (o.url.startsWith('http://') || o.url.startsWith('https://')) : false,
+            parent_id: parentId
+          };
+        });
 
+        console.log('[menu-builder] Inserting depth', d, ':', payload.length, 'items');
         const result = await api('navigation_menus', {
           method: 'POST',
           headers: { 'Prefer': 'return=representation', 'Content-Type': 'application/json' },
@@ -773,7 +779,6 @@
         });
 
         result.forEach((row, i) => {
-          // Map old temp IDs to new DB IDs
           const orig = level[i];
           idMap[orig.id] = row.id;
           orig.id = row.id;
@@ -783,8 +788,9 @@
       dirty = false; pillDirty.style.display = 'none';
       pillCount.innerHTML = `<span class="dot"></span> Items: ${flatItems.length}`;
       showToast(`✅ Saved ${flatItems.length} items to Supabase.`);
-      await loadMenu(); // Reload to get clean IDs
+      await loadMenu();
     } catch (e) {
+      console.error('[menu-builder] Save failed:', e);
       showToast('Save failed: ' + e.message, true);
     } finally {
       saveBtn.disabled = false; saveBtn.textContent = '💾 Save to Supabase';

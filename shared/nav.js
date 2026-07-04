@@ -1101,12 +1101,17 @@
     return fetch(sb.url + '/rest/v1/navigation_menus?menu_type=eq.projectMenu&order=sort_order.asc', {
       headers: { 'apikey': sb.anon, 'Authorization': 'Bearer ' + sb.anon }
     })
-    .then(function (r) { return r.ok ? r.json() : null; })
-    .then(function (rows) {
-      if (!rows || !rows.length) return null;
-      return flatToTree(rows);
+    .then(function (r) {
+      if (!r.ok) { console.warn('[nav] Supabase fetch failed:', r.status, r.statusText); return null; }
+      return r.json();
     })
-    .catch(function () { return null; });
+    .then(function (rows) {
+      if (!rows || !rows.length) { console.warn('[nav] Supabase returned empty'); return null; }
+      var tree = flatToTree(rows);
+      console.log('[nav] Menu loaded from Supabase:', rows.length, 'rows →', tree.length, 'roots');
+      return tree;
+    })
+    .catch(function (e) { console.warn('[nav] Supabase error:', e); return null; });
   }
 
   function init() {
