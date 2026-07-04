@@ -104,7 +104,8 @@
     .tree-btn.add-child:hover { color: var(--green); border-color: rgba(16,185,129,0.3); }
     .tree-btn.del-item:hover { color: var(--red); border-color: rgba(239,68,68,0.3); }
     .tree-btn.goto-item:hover { color: var(--teal); border-color: rgba(6,182,212,0.3); }
-    .item-label-link { color: inherit; text-decoration: none; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tree-btn.goto-item { font-size: 0.85rem; }
+    .item-label-link { color: inherit; text-decoration: none; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; }
     .item-label-link:hover { text-decoration: underline; text-decoration-color: var(--teal); text-underline-offset: 3px; color: var(--teal); }
 
     ol.tree ol.tree { margin-left: 24px; padding-left: 8px; border-left: 1px solid rgba(255,255,255,0.06); min-height: 4px; }
@@ -456,7 +457,8 @@
       const tsUpdated = node.updated_at && node.updated_at !== node.created_at ? fmtTs(node.updated_at) : '';
 
       const hasUrl = !!node.url;
-      const labelHtml = hasUrl
+      const hasChildren = node.children && node.children.length > 0;
+      const labelHtml = hasUrl && !hasChildren
         ? `<a class="item-label item-label-link" href="${escHtml(resolveItemUrl(node.url))}" target="_blank" title="${escHtml(node.url)}">${escHtml(cleanLabel)}</a>`
         : `<span class="item-label">${escHtml(cleanLabel)}</span>`;
       li.innerHTML = `
@@ -467,7 +469,7 @@
           <span class="item-ts"${tsClass} title="Created: ${escHtml(node.created_at || '')}${tsUpdated ? ' · Updated: ' + escHtml(node.updated_at) : ''}">${ts}${tsUpdated ? ' ✏️' : ''}</span>
           <span class="item-meta">${metaHtml.join(' ')}</span>
           <div class="item-actions">
-            ${hasUrl ? `<button class="tree-btn goto-item" data-id="${node.id}" data-url="${escHtml(node.url)}" title="Open: ${escHtml(node.url)}">↗️</button>` : ''}
+            ${hasUrl ? `<button class="tree-btn goto-item" data-id="${node.id}" data-url="${escHtml(node.url)}" title="Open: ${escHtml(node.url)}">${hasChildren ? '🔗' : '↗️'}</button>` : ''}
             <button class="tree-btn add-child" data-id="${node.id}" title="Add child">➕</button>
             <button class="tree-btn del-item" data-id="${node.id}" title="Delete" style="opacity:0.5;">🗑</button>
           </div>
