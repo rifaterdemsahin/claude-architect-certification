@@ -1031,6 +1031,84 @@
     }
   });
 
+  /* ── Menu cache (localStorage, 15-min TTL) ───────────────────────────────
+     The menu structure is fetched from Supabase (navigation_menus table) and
+     cached in localStorage to avoid hitting the DB on every page load.
+     Cache lives 15 minutes; after expiry the next page load refetches.
+     On fetch failure the chain falls through to navigation_config.json, then
+     to the hardcoded FALLBACK array. --------------------------------------- */
+  var NAV_CACHE_KEY = 'nav_menu_cache';
+  var NAV_CACHE_TTL = 15 * 60 * 1000; // 15 minutes
+
+  function getCachedMenu() {
+    try {
+      var raw = localStorage.getItem(NAV_CACHE_KEY);
+      if (!raw) return null;
+      var data = JSON.parse(raw);
+      if (!data._ts || Date.now() - data._ts > NAV_CACHE_TTL) {
+        localStorage.removeItem(NAV_CACHE_KEY);
+        return null;
+      }
+      return data.menu;
+    } catch(e) { return null; }
+  }
+
+  function setCachedMenu(menu) {
+    try {
+      localStorage.setItem(NAV_CACHE_KEY, JSON.stringify({ _ts: Date.now(), menu: menu }));
+    } catch(e) {}
+  }
+
+  /* ── Supabase fetch ───────────────────────────────────────────────────────
+     Reads the flat navigation_menus table and converts it to the tree format
+     that buildNav() expects. Uses the public anon key (safe for client-side).
+     Overridable via localStorage keys 'supabase_url' / 'supabase_anon_key'. */
+  var SB_URL  = 'https://rmekfsdhglyiralxvkwc.supabase.co';
+  var SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZWtmc2RoZ2x5aXJhbHh2a3djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NzYzODgsImV4cCI6MjA5NjM1MjM4OH0.ay6HsmO_CbMGDXL_Dv4DT-paAIAOqlQPfmqqx_mexSU';
+
+  function getSBConfig() {
+    try {
+      return {
+        url:  localStorage.getItem('supabase_url')      || SB_URL,
+        anon: localStorage.getItem('supabase_anon_key')  || SB_ANON
+      };
+    } catch(e) { return { url: SB_URL, anon: SB_ANON }; }
+  }
+
+  function flatToTree(flat) {
+    function build(parentId) {
+      var out = [];
+      for (var i = 0; i < flat.length; i++) {
+        var f = flat[i];
+        var pid = f.parent_id;
+        if ((pid === parentId) || (!pid && parentId === null)) {
+          var node = { label: f.label };
+          if (f.is_group) node.group = true;
+          if (f.url) node.url = f.url;
+          if (f.description) node.description = f.description;
+          var children = build(f.id);
+          if (children.length) node.children = children;
+          out.push(node);
+        }
+      }
+      return out;
+    }
+    return build(null);
+  }
+
+  function fetchMenuFromSupabase() {
+    var sb = getSBConfig();
+    return fetch(sb.url + '/rest/v1/navigation_menus?menu_type=eq.projectMenu&order=sort_order.asc', {
+      headers: { 'apikey': sb.anon, 'Authorization': 'Bearer ' + sb.anon }
+    })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (rows) {
+      if (!rows || !rows.length) return null;
+      return flatToTree(rows);
+    })
+    .catch(function () { return null; });
+  }
+
   function init() {
     showLiveSiteBanner();
     reportPageView();
@@ -1042,10 +1120,31 @@
       setupSearch(preloaded.projectMenu);
       return;
     }
-    fetch(ROOT + 'navigation_config.json', { cache: 'no-store' })
-      .then(function (r) { return r.json(); })
-      .then(function (data) { buildNav(data.projectMenu); attachDropdownHandlers(); setupSearch(data.projectMenu); })
-      .catch(function () { buildNav(FALLBACK); attachDropdownHandlers(); setupSearch(FALLBACK); });
+
+    // 1. Try localStorage cache
+    var cached = getCachedMenu();
+    if (cached) {
+      buildNav(cached);
+      attachDropdownHandlers();
+      setupSearch(cached);
+      return;
+    }
+
+    // 2. Try Supabase (navigation_menus table), cache on success
+    fetchMenuFromSupabase().then(function (menu) {
+      if (menu) {
+        setCachedMenu(menu);
+        buildNav(menu);
+        attachDropdownHandlers();
+        setupSearch(menu);
+        return;
+      }
+      // 3. Fallback to navigation_config.json
+      fetch(ROOT + 'navigation_config.json', { cache: 'no-store' })
+        .then(function (r) { return r.json(); })
+        .then(function (data) { buildNav(data.projectMenu); attachDropdownHandlers(); setupSearch(data.projectMenu); })
+        .catch(function () { buildNav(FALLBACK); attachDropdownHandlers(); setupSearch(FALLBACK); });
+    });
   }
 
   function attachDropdownHandlers() {

@@ -581,9 +581,14 @@
   }
   window.__dbgClear = clearLog;
 
-  // Hard cache clear: Cache Storage API, service workers, then hard-reload with a
-  // cache-busting param so navigation_config.json / nav.js / page HTML are re-fetched.
+  // Hard cache clear: localStorage nav cache, Cache Storage API, service workers,
+  // then hard-reload with a cache-busting param so nav.js re-fetches from Supabase.
   async function clearCache() {
+    try {
+      localStorage.removeItem('nav_menu_cache');
+    } catch (e) {
+      console.warn('[debug-panel] nav cache clear error', e);
+    }
     try {
       if (window.caches && caches.keys) {
         const keys = await caches.keys();

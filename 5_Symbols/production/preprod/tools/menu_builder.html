@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🗺️ Menu Builder | Pre-Production</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&family=Fira+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
+  <style>
+    :root {
+      --bg: #030712; --card: rgba(17,24,39,0.92); --card2: rgba(10,16,28,0.95);
+      --border: rgba(255,255,255,0.07); --border-accent: rgba(139,92,246,0.25);
+      --text: #f3f4f6; --muted: #6b7280; --muted2: #9ca3af;
+      --primary: #8b5cf6; --secondary: #3b82f6; --green: #10b981;
+      --yellow: #f59e0b; --red: #ef4444; --teal: #06b6d4;
+      --font-h: 'Outfit', sans-serif; --font-b: 'Plus Jakarta Sans', sans-serif;
+      --font-mono: 'Fira Mono', monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      background-image: radial-gradient(circle at 8% 15%, rgba(139,92,246,0.07) 0%, transparent 45%),
+                        radial-gradient(circle at 92% 85%, rgba(59,130,246,0.06) 0%, transparent 45%);
+      color: var(--text); font-family: var(--font-b); line-height: 1.6;
+      padding: 100px 24px 60px;
+    }
+    .container { max-width: 1400px; margin: 0 auto; }
+
+    .page-badge { display: inline-block; padding: 5px 14px; background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(139,92,246,0.2)); border: 1px solid rgba(245,158,11,0.3); border-radius: 100px; font-size: 0.75rem; font-weight: 700; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; }
+    h1 { font-family: var(--font-h); font-size: 2.2rem; font-weight: 800; margin-bottom: 6px; }
+    .subtitle { color: var(--muted2); margin-bottom: 28px; font-size: 0.95rem; }
+
+    .status-bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; padding: 12px 18px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; }
+    .status-pill { display: inline-flex; align-items: center; gap: 6px; font-size: 0.78rem; font-weight: 700; padding: 4px 12px; border-radius: 100px; }
+    .status-pill.ok    { background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3); color: #34d399; }
+    .status-pill.warn  { background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.3); color: #fbbf24; }
+    .status-pill.err   { background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3); color: #f87171; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+
+    .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 14px; }
+    .tab { padding: 9px 20px; border-radius: 10px; border: 1px solid transparent; background: transparent; color: var(--muted2); cursor: pointer; font-size: 0.88rem; font-weight: 600; font-family: var(--font-b); transition: all 0.2s; }
+    .tab:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+    .tab.active { background: rgba(139,92,246,0.15); border-color: var(--border-accent); color: var(--text); }
+    .pane { display: none; }
+    .pane.active { display: block; }
+
+    .btn { padding: 8px 16px; border-radius: 9px; border: none; cursor: pointer; font-size: 0.82rem; font-weight: 700; font-family: var(--font-b); transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover:not(:disabled) { background: #7c3aed; }
+    .btn-success { background: var(--green); color: white; }
+    .btn-success:hover:not(:disabled) { background: #059669; }
+    .btn-danger { background: var(--red); color: white; }
+    .btn-danger:hover:not(:disabled) { background: #dc2626; }
+    .btn-ghost { background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--muted2); }
+    .btn-ghost:hover:not(:disabled) { background: rgba(255,255,255,0.1); color: var(--text); }
+    .btn-sm { padding: 4px 10px; font-size: 0.75rem; }
+    .btn-xs { padding: 2px 6px; font-size: 0.7rem; border-radius: 5px; }
+
+    .toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
+    .toolbar-sep { width: 1px; height: 24px; background: var(--border); margin: 0 4px; }
+
+    /* ── Two-column layout ── */
+    .main-split { display: grid; grid-template-columns: 1fr 340px; gap: 20px; align-items: start; }
+    @media (max-width: 900px) { .main-split { grid-template-columns: 1fr; } }
+
+    /* ── Tree panel ── */
+    .tree-panel { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; min-height: 300px; }
+    .tree-panel h3 { font-family: var(--font-h); font-size: 0.9rem; font-weight: 700; margin-bottom: 12px; color: var(--muted2); display: flex; align-items: center; gap: 8px; }
+    .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 0.88rem; }
+
+    ol.tree { list-style: none; padding: 0; margin: 0; min-height: 28px; }
+    ol.tree li { margin: 2px 0; padding: 0; }
+    .tree-item {
+      display: flex; align-items: center; gap: 6px;
+      padding: 5px 8px; border-radius: 8px;
+      border: 1px solid transparent;
+      cursor: pointer; transition: all 0.15s;
+      font-size: 0.82rem;
+      background: rgba(255,255,255,0.02);
+    }
+    .tree-item:hover { border-color: rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); }
+    .tree-item.selected { border-color: var(--primary); background: rgba(139,92,246,0.12); }
+    .tree-item.drag-over { border-color: var(--green); background: rgba(16,185,129,0.1); }
+    .drag-handle { cursor: grab; color: var(--muted); font-size: 1rem; flex-shrink: 0; padding: 0 2px; user-select: none; }
+    .drag-handle:active { cursor: grabbing; }
+    .item-icon { font-size: 1rem; flex-shrink: 0; width: 20px; text-align: center; }
+    .item-label { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .item-meta { display: inline-flex; gap: 3px; flex-shrink: 0; }
+    .item-meta .badge { font-size: 0.6rem; padding: 1px 5px; border-radius: 4px; font-weight: 600; }
+    .badge-group { background: rgba(6,182,212,0.15); color: #67e8f9; border: 1px solid rgba(6,182,212,0.25); }
+    .badge-external { background: rgba(59,130,246,0.15); color: #93c5fd; border: 1px solid rgba(59,130,246,0.25); }
+    .badge-url { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.25); }
+    .badge-children { background: rgba(139,92,246,0.15); color: #c084fc; border: 1px solid rgba(139,92,246,0.25); font-variant-numeric: tabular-nums; }
+    .item-actions { display: flex; gap: 2px; flex-shrink: 0; opacity: 0; transition: opacity 0.15s; }
+    .tree-item:hover .item-actions { opacity: 1; }
+    .tree-btn { background: none; border: 1px solid transparent; color: var(--muted2); cursor: pointer; padding: 2px 5px; border-radius: 4px; font-size: 0.72rem; transition: all 0.15s; }
+    .tree-btn:hover { border-color: var(--border); background: rgba(255,255,255,0.06); }
+    .tree-btn.add-child:hover { color: var(--green); border-color: rgba(16,185,129,0.3); }
+    .tree-btn.del-item:hover { color: var(--red); border-color: rgba(239,68,68,0.3); }
+
+    ol.tree ol.tree { margin-left: 24px; padding-left: 8px; border-left: 1px solid rgba(255,255,255,0.06); min-height: 4px; }
+
+    /* SortableJS ghost & chosen */
+    .sortable-ghost { opacity: 0.3; background: var(--primary) !important; }
+    .sortable-chosen { border-color: var(--primary) !important; background: rgba(139,92,246,0.18) !important; }
+
+    /* ── Properties panel ── */
+    .props-panel { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px; position: sticky; top: 100px; }
+    .props-panel h3 { font-family: var(--font-h); font-size: 0.9rem; font-weight: 700; margin-bottom: 14px; color: var(--muted2); }
+    .props-panel .empty-state { padding: 20px 10px; }
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--muted2); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 7px; padding: 7px 10px; color: var(--text); font-size: 0.85rem;
+      font-family: var(--font-b); outline: none; transition: border-color 0.15s;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--primary); }
+    .form-group textarea { resize: vertical; min-height: 50px; }
+    .form-group .hint { font-size: 0.68rem; color: var(--muted); margin-top: 3px; }
+    .form-row { display: flex; gap: 8px; }
+    .form-row .form-group { flex: 1; }
+    .form-actions { display: flex; gap: 6px; margin-top: 14px; flex-wrap: wrap; }
+
+    .checkbox-wrap { display: flex; align-items: center; gap: 8px; padding: 6px 0; }
+    .checkbox-wrap input[type="checkbox"] { width: auto; accent-color: var(--primary); }
+
+    /* ── Toast ── */
+    .toast { position: fixed; top: 24px; right: 24px; background: var(--green); color: #000; padding: 14px 24px; border-radius: 12px; font-weight: 700; z-index: 10000; transform: translateX(120%); transition: transform 0.3s ease; max-width: 420px; }
+    .toast.show { transform: translateX(0); }
+    .toast.error { background: var(--red); color: white; }
+
+    /* ── Modal ── */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 9999; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal { background: var(--card2); border: 1px solid var(--border-accent); border-radius: 16px; padding: 28px; width: 90%; max-width: 480px; max-height: 80vh; overflow-y: auto; }
+    .modal h2 { font-family: var(--font-h); font-size: 1.15rem; font-weight: 700; margin-bottom: 16px; }
+
+    .back-link { display: inline-flex; align-items: center; gap: 6px; color: var(--muted2); font-size: 0.85rem; margin-bottom: 16px; text-decoration: none; transition: color 0.2s; }
+    .back-link:hover { color: var(--text); }
+
+    .confirm-body { text-align: center; padding: 12px 0; }
+    .confirm-actions { display: flex; gap: 10px; justify-content: center; margin-top: 18px; }
+
+    .search-box { width: 100%; max-width: 280px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 7px 12px; color: var(--text); font-size: 0.82rem; font-family: var(--font-b); outline: none; }
+    .search-box:focus { border-color: var(--primary); }
+
+    .loading-spinner { display: inline-block; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+  <script src="../../../../shared/seo.js" defer></script>
+</head>
+<body>
+<script src="../../../../shared/nav.js"></script>
+<div class="container">
+
+  <a class="back-link" href="../index.html">← Pre-Production</a>
+
+  <div class="page-badge">Tools · Admin</div>
+  <h1>🗺️ Menu Builder</h1>
+  <p class="subtitle">Drag-and-drop menu tree editor. Build and save menu structures to Supabase. <span style="color:var(--yellow);font-weight:600;">Admin only.</span></p>
+
+  <div class="status-bar">
+    <span id="pillSB" class="status-pill warn"><span class="dot"></span> Supabase: connecting…</span>
+    <span id="pillCount" class="status-pill info"><span class="dot"></span> Items: –</span>
+    <span id="pillDirty" class="status-pill info" style="display:none;"><span class="dot"></span> Unsaved changes</span>
+    <button class="btn btn-ghost btn-sm" onclick="loadMenu()">🔄 Reload</button>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchMenuType('projectMenu')">🎬 Project Menu</button>
+    <button class="tab" onclick="switchMenuType('debugMenu')">🐛 Debug Menu</button>
+  </div>
+
+  <div id="errorWrap"></div>
+
+  <div class="toolbar">
+    <button class="btn btn-primary btn-sm" onclick="showAddModal(null)" data-require-admin>➕ Add root item</button>
+    <button class="btn btn-success btn-sm" onclick="saveAll()" data-require-admin id="saveBtn">💾 Save to Supabase</button>
+    <button class="btn btn-ghost btn-sm" onclick="seedFromConfig()" data-require-admin id="seedBtn">🌱 Seed from config</button>
+    <div class="toolbar-sep"></div>
+    <input class="search-box" placeholder="🔍 Filter items…" id="searchBox" oninput="filterTree(this.value)">
+    <span id="itemCountBadge" class="status-pill info" style="font-size:0.72rem;">0 items</span>
+  </div>
+
+  <div class="main-split">
+    <!-- Tree panel -->
+    <div class="tree-panel" id="treePanel">
+      <h3><span id="menuTypeLabel">🎬 Project Menu</span> <span id="menuItemCount" style="font-weight:400;color:var(--muted);font-size:0.78rem;"></span></h3>
+      <div id="treeContainer">
+        <div class="empty-state">⏳ Loading menu structure…</div>
+      </div>
+    </div>
+
+    <!-- Properties panel -->
+    <div class="props-panel" id="propsPanel">
+      <h3>📝 Item Properties</h3>
+      <div id="propsContent">
+        <div class="empty-state">Click a tree item to edit its properties.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div id="toast" class="toast"></div>
+
+<!-- Add/Edit modal -->
+<div class="modal-overlay" id="itemModal">
+  <div class="modal">
+    <h2 id="modalTitle">Add Item</h2>
+    <div class="form-group">
+      <label>Icon (emoji)</label>
+      <input id="fIcon" placeholder="e.g. 🎬" maxlength="4">
+    </div>
+    <div class="form-group">
+      <label>Label *</label>
+      <input id="fLabel" placeholder="Item label">
+    </div>
+    <div class="form-group">
+      <label>URL</label>
+      <input id="fUrl" placeholder="e.g. 5_Symbols/page.html or https://...">
+      <div class="hint">Leave empty for group headers.</div>
+    </div>
+    <div class="form-group">
+      <label>Description</label>
+      <textarea id="fDescription" placeholder="Optional description"></textarea>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Sort order</label>
+        <input id="fSortOrder" type="number" value="0" min="0">
+      </div>
+      <div class="form-group" style="display:flex;align-items:flex-end;">
+        <div class="checkbox-wrap">
+          <input type="checkbox" id="fIsGroup">
+          <label for="fIsGroup" style="margin:0;text-transform:none;letter-spacing:0;">Group header</label>
+        </div>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-primary" id="modalSaveBtn">💾 Save Item</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm modal -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal">
+    <h2 id="confirmTitle">⚠️ Confirm</h2>
+    <div class="confirm-body" id="confirmBody"></div>
+    <div class="confirm-actions">
+      <button class="btn btn-danger" id="confirmYesBtn">Yes, delete</button>
+      <button class="btn btn-ghost" onclick="closeConfirm()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── Config ──────────────────────────────────────────────────────────────────
+  const SUPABASE_URL  = localStorage.getItem('supabase_url')      || 'https://rmekfsdhglyiralxvkwc.supabase.co';
+  const SUPABASE_ANON = localStorage.getItem('supabase_anon_key') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZWtmc2RoZ2x5aXJhbHh2a3djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NzYzODgsImV4cCI6MjA5NjM1MjM4OH0.ay6HsmO_CbMGDXL_Dv4DT-paAIAOqlQPfmqqx_mexSU';
+  const HEADERS = { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
+  const SORTABLE_GROUP = 'nav-tree';
+
+  // ── State ────────────────────────────────────────────────────────────────────
+  let currentMenuType = 'projectMenu';
+  let flatItems = [];        // all flat rows from DB
+  let selectedId = null;     // selected item ID
+  let dirty = false;
+  let sortableInstances = [];
+
+  // ── DOM refs ────────────────────────────────────────────────────────────────
+  const $ = id => document.getElementById(id);
+  const pillSB = $('pillSB'), pillCount = $('pillCount'), pillDirty = $('pillDirty');
+
+  // ── API ──────────────────────────────────────────────────────────────────────
+  async function api(path, opts) {
+    const url = SUPABASE_URL + '/rest/v1/' + path;
+    const res = await fetch(url, { ...opts, headers: { ...HEADERS, ...(opts?.headers || {}) } });
+    if (!res.ok) { const err = await res.text().catch(() => ''); const e = new Error(res.status + ': ' + err); e.status = res.status; throw e; }
+    const ct = res.headers.get('content-type') || '';
+    if (ct.includes('json')) return res.json();
+    const text = await res.text();
+    try { return JSON.parse(text); } catch { return text; }
+  }
+
+  function escHtml(s) { if (s == null) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function extractIcon(label) {
+    if (!label) return null;
+    const m = label.match(/^(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])\s*/);
+    return m ? m[1] : null;
+  }
+  function stripIcon(label) {
+    if (!label) return label;
+    return label.replace(/^(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])\s*/, '').trim();
+  }
+
+  let toastTimer = null;
+  function showToast(msg, isError, ms) {
+    const t = $('toast');
+    t.textContent = msg; t.className = 'toast' + (isError ? ' error' : '');
+    clearTimeout(toastTimer);
+    setTimeout(() => t.classList.add('show'), 10);
+    toastTimer = setTimeout(() => t.classList.remove('show'), ms || 3200);
+  }
+
+  function markDirty() { dirty = true; pillDirty.style.display = 'inline-flex'; }
+
+  // ── Tab switching ──────────────────────────────────────────────────────────
+  function switchMenuType(type) {
+    currentMenuType = type;
+    document.querySelectorAll('.tabs .tab').forEach((t, i) => t.classList.toggle('active', i === (type === 'projectMenu' ? 0 : 1)));
+    $('menuTypeLabel').textContent = type === 'projectMenu' ? '🎬 Project Menu' : '🐛 Debug Menu';
+    selectedId = null;
+    loadMenu();
+  }
+
+  // ── Load menu from Supabase ──────────────────────────────────────────────────
+  async function loadMenu() {
+    $('treeContainer').innerHTML = '<div class="empty-state"><span class="loading-spinner">⟳</span> Loading…</div>';
+    $('propsContent').innerHTML = '<div class="empty-state">Click a tree item to edit its properties.</div>';
+    dirty = false; pillDirty.style.display = 'none';
+
+    try {
+      const rows = await api(`navigation_menus?menu_type=eq.${currentMenuType}&order=sort_order.asc`);
+      flatItems = rows || [];
+      pillSB.className = 'status-pill ok';
+      pillSB.innerHTML = `<span class="dot"></span> Supabase: connected`;
+      pillCount.innerHTML = `<span class="dot"></span> Items: ${flatItems.length}`;
+      $('itemCountBadge').textContent = `${flatItems.length} items`;
+      renderTree();
+    } catch (e) {
+      if (e.status === 404 || (e.message && e.message.includes('404'))) {
+        showTableMissing();
+      } else {
+        pillSB.className = 'status-pill err';
+        pillSB.innerHTML = `<span class="dot"></span> Error: ${escHtml(e.message)}`;
+        $('treeContainer').innerHTML = `<div class="empty-state" style="color:var(--red);">❌ ${escHtml(e.message)}</div>`;
+      }
+    }
+  }
+
+  function showTableMissing() {
+    pillSB.className = 'status-pill err';
+    pillSB.innerHTML = '<span class="dot"></span> Table not found';
+    $('errorWrap').innerHTML = `
+      <div style="background:var(--card);border:1px solid rgba(239,68,68,0.3);border-radius:14px;padding:20px;margin-bottom:16px;">
+        <h3 style="font-family:var(--font-h);color:var(--yellow);margin-bottom:8px;">⚠️ Table <code>navigation_menus</code> not found</h3>
+        <p style="color:var(--muted2);margin-bottom:10px;">Run the migration in the Supabase SQL Editor first, then reload this page.</p>
+        <p><code style="background:rgba(0,0,0,0.4);padding:4px 10px;border-radius:6px;font-size:0.82rem;">5_Symbols/supabase/migrations/migration_navigation_menus.sql</code></p>
+        <p style="margin-top:10px;"><a class="btn btn-sm btn-primary" href="https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/sql/new" target="_blank" rel="noopener">Open SQL Editor ↗</a></p>
+      </div>`;
+    $('treeContainer').innerHTML = '<div class="empty-state">Run the migration, then click Reload.</div>';
+  }
+
+  // ── Tree building ────────────────────────────────────────────────────────────
+  function buildTree(flat, parentId) {
+    return flat
+      .filter(f => (f.parent_id === parentId) || (!f.parent_id && parentId === null))
+      .sort((a, b) => {
+        if (a.sort_order !== b.sort_order) return a.sort_order - b.sort_order;
+        return a.id - b.id;
+      })
+      .map(f => ({ ...f, children: buildTree(flat, f.id) }));
+  }
+
+  function renderTree() {
+    const container = $('treeContainer');
+    const tree = buildTree(flatItems, null);
+    destroySortable();
+
+    if (!tree.length) {
+      container.innerHTML = '<div class="empty-state">📭 No items yet. Click <strong>🌱 Seed from config</strong> to populate, or <strong>➕ Add root item</strong> to start fresh.</div>';
+      $('menuItemCount').textContent = '(0)';
+      return;
+    }
+
+    $('menuItemCount').textContent = `(${flatItems.length})`;
+    container.innerHTML = '';
+    const ol = renderNodeList(tree, container);
+    container.appendChild(ol);
+    initSortable(container);
+  }
+
+  function countDescendants(node) {
+    let count = node.children ? node.children.length : 0;
+    if (node.children) node.children.forEach(child => { count += countDescendants(child); });
+    return count;
+  }
+
+  function renderNodeList(nodes, parentEl) {
+    const ol = document.createElement('ol');
+    ol.className = 'tree';
+    ol.dataset.level = '0';
+
+    nodes.forEach(node => {
+      const li = document.createElement('li');
+      li.dataset.id = node.id;
+      li.dataset.parentId = node.parent_id || '';
+      li.dataset.sortOrder = node.sort_order;
+
+      const label = node.label || '';
+      const icon = node.icon || extractIcon(label) || '';
+      const cleanLabel = icon ? stripIcon(label) : label;
+      const metaHtml = [];
+      if (node.is_group) metaHtml.push('<span class="badge badge-group">GROUP</span>');
+      const childCount = countDescendants(node);
+      if (childCount > 0) metaHtml.push(`<span class="badge badge-children">${childCount}</span>`);
+      if (node.url) {
+        const isExt = node.url.startsWith('http://') || node.url.startsWith('https://');
+        metaHtml.push(`<span class="badge ${isExt ? 'badge-external' : 'badge-url'}">${isExt ? 'EXT' : 'URL'}</span>`);
+      }
+
+      li.innerHTML = `
+        <div class="tree-item ${node.id === selectedId ? 'selected' : ''}" data-id="${node.id}">
+          <span class="drag-handle">⠿</span>
+          <span class="item-icon">${icon || '📄'}</span>
+          <span class="item-label">${escHtml(cleanLabel)}</span>
+          <span class="item-meta">${metaHtml.join(' ')}</span>
+          <div class="item-actions">
+            <button class="tree-btn add-child" data-id="${node.id}" title="Add child">➕</button>
+            <button class="tree-btn del-item" data-id="${node.id}" title="Delete" style="opacity:0.5;">🗑</button>
+          </div>
+        </div>`;
+
+      if (node.children && node.children.length) {
+        const childOl = renderNodeList(node.children, li);
+        li.appendChild(childOl);
+      }
+
+      ol.appendChild(li);
+    });
+
+    return ol;
+  }
+
+  // ── SortableJS init / destroy ────────────────────────────────────────────────
+  function initSortable(container) {
+    container.querySelectorAll('ol.tree').forEach(el => {
+      const sort = new Sortable(el, {
+        group: SORTABLE_GROUP,
+        handle: '.drag-handle',
+        animation: 150,
+        fallbackOnBody: true,
+        swapThreshold: 0.65,
+        ghostClass: 'sortable-ghost',
+        chosenClass: 'sortable-chosen',
+        onEnd: onSortEnd
+      });
+      sortableInstances.push(sort);
+    });
+  }
+
+  function destroySortable() {
+    sortableInstances.forEach(s => s.destroy());
+    sortableInstances = [];
+  }
+
+  function onSortEnd(evt) {
+    // Update DOM data attributes after drag
+    markDirty();
+    syncDomToState();
+  }
+
+  function syncDomToState() {
+    // Walk the DOM tree to collect current structure
+    const root = $('treeContainer').querySelector('ol.tree');
+    if (!root) return;
+    const collected = [];
+    let tempIdCounter = -1;
+
+    function walk(ol, parentId) {
+      let idx = 0;
+      ol.querySelectorAll(':scope > li').forEach(li => {
+        const itemDiv = li.querySelector(':scope > .tree-item');
+        const existingId = parseInt(li.dataset.id);
+        const tempId = existingId || tempIdCounter--;
+        const childOl = li.querySelector(':scope > ol.tree');
+
+        const label = itemDiv ? itemDiv.querySelector('.item-label')?.textContent || '' : '';
+        const iconEl = itemDiv ? itemDiv.querySelector('.item-icon')?.textContent || '' : '';
+        const metaBadges = itemDiv ? itemDiv.querySelectorAll('.item-meta .badge') : [];
+
+        collected.push({
+          id: existingId || tempId,
+          tempId: tempId,
+          parent_id: parentId,
+          sort_order: idx,
+          label: label,
+          icon: iconEl.trim() || null,
+          url: null,
+          description: null,
+          is_group: Array.from(metaBadges).some(b => b.textContent === 'GROUP'),
+          is_external: false
+        });
+
+        if (childOl) walk(childOl, existingId || tempId);
+        idx++;
+      });
+    }
+
+    walk(root, null);
+
+    // Merge with existing flatItems to preserve URL, description etc.
+    const merged = collected.map(c => {
+      const existing = flatItems.find(f => f.id === c.id);
+      return {
+        ...c,
+        id: existing?.id || c.tempId,
+        url: existing?.url || null,
+        description: existing?.description || null,
+        is_external: existing?.is_external || false,
+        label: c.label,
+        icon: c.icon,
+        is_group: c.is_group
+      };
+    });
+
+    flatItems = merged;
+  }
+
+  // ── Event delegation ─────────────────────────────────────────────────────────
+  document.addEventListener('click', e => {
+    const itemDiv = e.target.closest('.tree-item');
+    if (itemDiv && !e.target.closest('.tree-btn')) {
+      selectItem(parseInt(itemDiv.dataset.id));
+      return;
+    }
+
+    const addBtn = e.target.closest('.add-child');
+    if (addBtn) {
+      e.stopPropagation();
+      showAddModal(parseInt(addBtn.dataset.id));
+      return;
+    }
+
+    const delBtn = e.target.closest('.del-item');
+    if (delBtn) {
+      e.stopPropagation();
+      confirmDelete(parseInt(delBtn.dataset.id));
+      return;
+    }
+  });
+
+  // ── Select item ──────────────────────────────────────────────────────────────
+  function selectItem(id) {
+    selectedId = id;
+    // Update visual selection
+    document.querySelectorAll('.tree-item').forEach(el => el.classList.remove('selected'));
+    const sel = document.querySelector(`.tree-item[data-id="${id}"]`);
+    if (sel) sel.classList.add('selected');
+    renderProps(id);
+  }
+
+  // ── Properties panel ─────────────────────────────────────────────────────────
+  function renderProps(id) {
+    const container = $('propsContent');
+    const item = flatItems.find(f => f.id === id);
+    if (!item) {
+      container.innerHTML = '<div class="empty-state">Item not found.</div>';
+      return;
+    }
+
+    const label = item.label || '';
+    const icon = item.icon || extractIcon(label) || '';
+    const cleanLabel = icon ? stripIcon(label) : label;
+
+    container.innerHTML = `
+      <div class="form-group">
+        <label>Icon</label>
+        <input value="${escHtml(icon)}" id="pIcon" maxlength="4">
+      </div>
+      <div class="form-group">
+        <label>Label</label>
+        <input value="${escHtml(cleanLabel)}" id="pLabel">
+      </div>
+      <div class="form-group">
+        <label>URL</label>
+        <input value="${escHtml(item.url || '')}" id="pUrl" placeholder="Leave empty for group headers">
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea id="pDescription" rows="2">${escHtml(item.description || '')}</textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="flex:0 0 80px;">
+          <label>Sort</label>
+          <input type="number" value="${item.sort_order}" id="pSortOrder" min="0">
+        </div>
+        <div class="form-group" style="flex:1;">
+          <div class="checkbox-wrap" style="padding-top:18px;">
+            <input type="checkbox" id="pIsGroup" ${item.is_group ? 'checked' : ''}>
+            <label for="pIsGroup" style="margin:0;text-transform:none;letter-spacing:0;">Group header</label>
+          </div>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary btn-sm" onclick="saveProps(${id})">💾 Save</button>
+        <button class="btn btn-ghost btn-sm" onclick="showAddModal(${id})">➕ Add child</button>
+      </div>
+    `;
+  }
+
+  function saveProps(id) {
+    if (!window.requireAdmin('save menu properties')) return;
+    const item = flatItems.find(f => f.id === id);
+    if (!item) return;
+
+    const icon = $('pIcon').value.trim();
+    const label = icon ? icon + ' ' + $('pLabel').value.trim() : $('pLabel').value.trim();
+
+    item.icon = icon || null;
+    item.label = label;
+    item.url = $('pUrl').value.trim() || null;
+    item.description = $('pDescription').value.trim() || null;
+    item.sort_order = parseInt($('pSortOrder').value) || 0;
+    item.is_group = $('pIsGroup').checked;
+
+    markDirty();
+    renderTree();
+    selectItem(id);
+    showToast('Item updated in working copy. Click 💾 Save to Supabase to persist.');
+  }
+
+  // ── Add item modal ──────────────────────────────────────────────────────────
+  function showAddModal(parentId) {
+    $('modalTitle').textContent = parentId ? '➕ Add Child Item' : '➕ Add Root Item';
+    $('fIcon').value = '';
+    $('fLabel').value = '';
+    $('fUrl').value = '';
+    $('fDescription').value = '';
+    $('fSortOrder').value = '0';
+    $('fIsGroup').checked = false;
+
+    const saveBtn = $('modalSaveBtn');
+    saveBtn.dataset.parentId = parentId || '';
+    saveBtn.onclick = function() {
+      if (!window.requireAdmin('add menu item')) return;
+      const icon = $('fIcon').value.trim();
+      const labelRaw = $('fLabel').value.trim();
+      if (!labelRaw) { showToast('Label is required.', true); return; }
+      const label = icon ? icon + ' ' + labelRaw : labelRaw;
+
+      const newItem = {
+        menu_type: currentMenuType,
+        parent_id: parentId || null,
+        sort_order: parseInt($('fSortOrder').value) || 0,
+        label: label,
+        url: $('fUrl').value.trim() || null,
+        description: $('fDescription').value.trim() || null,
+        icon: icon || null,
+        is_group: $('fIsGroup').checked,
+        is_external: false
+      };
+
+      // Add to flatItems and re-render
+      const tempId = -Date.now();
+      newItem.id = tempId;
+      flatItems.push(newItem);
+
+      // Re-sort
+      flatItems.sort((a, b) => {
+        const pa = a.parent_id || 0, pb = b.parent_id || 0;
+        if (pa !== pb) return pa - pb;
+        return a.sort_order - b.sort_order;
+      });
+
+      closeModal();
+      markDirty();
+      renderTree();
+      showToast('Item added. Click 💾 Save to Supabase to persist.');
+    };
+
+    $('itemModal').classList.add('open');
+  }
+
+  function closeModal() { $('itemModal').classList.remove('open'); }
+
+  // ── Delete confirmation ─────────────────────────────────────────────────────
+  let deleteTargetId = null;
+  function confirmDelete(id) {
+    if (!window.requireAdmin('delete menu items')) return;
+    const item = flatItems.find(f => f.id === id);
+    const children = flatItems.filter(f => f.parent_id === id);
+    const label = item ? (item.label || 'this item') : 'this item';
+    let msg = `Delete <strong>${escHtml(label)}</strong>?<br>`;
+    if (children.length) msg += `<span style="color:var(--yellow);">⚠️ This will also delete ${children.length} child item(s).</span>`;
+    else msg += `<span style="color:var(--muted2);">This cannot be undone.</span>`;
+
+    $('confirmTitle').textContent = '🗑 Delete Item';
+    $('confirmBody').innerHTML = msg;
+    $('confirmYesBtn').textContent = '🗑 Delete';
+    $('confirmYesBtn').onclick = function() {
+      if (!window.requireAdmin('delete menu items')) return;
+      deleteItem(id);
+      closeConfirm();
+    };
+    deleteTargetId = id;
+    $('confirmModal').classList.add('open');
+  }
+
+  function closeConfirm() { $('confirmModal').classList.remove('open'); deleteTargetId = null; }
+
+  function deleteItem(id) {
+    const toDelete = new Set();
+    function collectDescendants(parentId) {
+      toDelete.add(parentId);
+      flatItems.filter(f => f.parent_id === parentId).forEach(f => collectDescendants(f.id));
+    }
+    // Find by temp ID or real ID
+    const realItem = flatItems.find(f => f.id === id);
+    if (realItem) collectDescendants(realItem.id);
+
+    flatItems = flatItems.filter(f => !toDelete.has(f.id));
+    if (selectedId && toDelete.has(selectedId)) { selectedId = null; $('propsContent').innerHTML = '<div class="empty-state">Click a tree item to edit its properties.</div>'; }
+
+    markDirty();
+    renderTree();
+    showToast(`Deleted ${toDelete.size} item(s). Click 💾 Save to persist.`);
+  }
+
+  // ── Save to Supabase ─────────────────────────────────────────────────────────
+  async function saveAll() {
+    if (!window.requireAdmin('save menus to Supabase')) return;
+    syncDomToState();
+
+    const saveBtn = $('saveBtn');
+    saveBtn.disabled = true; saveBtn.textContent = '⏳ Saving…';
+
+    try {
+      // Collect all items with depth-first ordering
+      const tree = buildTree(flatItems, null);
+      const ordered = [];
+      function collect(nodes, depth) {
+        nodes.forEach(n => {
+          ordered.push({ ...n, _depth: depth });
+          if (n.children) collect(n.children, depth + 1);
+        });
+      }
+      collect(tree, 0);
+
+      // Delete existing for this menu_type
+      await api(`navigation_menus?menu_type=eq.${currentMenuType}`, { method: 'DELETE' });
+
+      // Re-insert by depth level
+      const maxDepth = Math.max(...ordered.map(o => o._depth), 0);
+      const idMap = {};
+
+      for (let d = 0; d <= maxDepth; d++) {
+        const level = ordered.filter(o => o._depth === d);
+        if (!level.length) continue;
+
+        const payload = level.map(o => ({
+          menu_type: currentMenuType,
+          sort_order: o.sort_order,
+          label: o.label,
+          url: o.url || null,
+          description: o.description || null,
+          icon: o.icon || null,
+          is_group: o.is_group || false,
+          is_external: o.url ? (o.url.startsWith('http://') || o.url.startsWith('https://')) : false,
+          parent_id: o.parent_id ? idMap[o.parent_id] : null
+        }));
+
+        const result = await api('navigation_menus', {
+          method: 'POST',
+          headers: { 'Prefer': 'return=representation', 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        result.forEach((row, i) => {
+          // Map old temp IDs to new DB IDs
+          const orig = level[i];
+          idMap[orig.id] = row.id;
+          orig.id = row.id;
+        });
+      }
+
+      dirty = false; pillDirty.style.display = 'none';
+      pillCount.innerHTML = `<span class="dot"></span> Items: ${flatItems.length}`;
+      showToast(`✅ Saved ${flatItems.length} items to Supabase.`);
+      await loadMenu(); // Reload to get clean IDs
+    } catch (e) {
+      showToast('Save failed: ' + e.message, true);
+    } finally {
+      saveBtn.disabled = false; saveBtn.textContent = '💾 Save to Supabase';
+    }
+  }
+
+  // ── Seed from navigation_config.json ─────────────────────────────────────────
+  async function seedFromConfig() {
+    if (!window.requireAdmin('seed menu from config')) return;
+    const seedBtn = $('seedBtn');
+    seedBtn.disabled = true; seedBtn.textContent = '⏳ Seeding…';
+
+    try {
+      const res = await fetch('/navigation_config.json');
+      if (!res.ok) throw new Error('Failed to fetch navigation_config.json: ' + res.status);
+      const config = await res.json();
+      const items = config[currentMenuType];
+      if (!items || !items.length) throw new Error(`No items found for ${currentMenuType}`);
+
+      // Flatten the tree with temp IDs
+      let flat = [];
+      let tempId = 1;
+      let sortCounter = 0;
+
+      function flatten(nodeList, parentTempId) {
+        for (const node of nodeList) {
+          const myTempId = tempId++;
+          const label = node.label || '';
+          const icon = extractIcon(label);
+
+          flat.push({
+            tempId: myTempId,
+            parentTempId: parentTempId,
+            menu_type: currentMenuType,
+            sort_order: sortCounter++,
+            label: label,
+            url: node.url || null,
+            description: node.description || null,
+            icon: icon,
+            is_group: node.group === true,
+            is_external: node.url ? (node.url.startsWith('http://') || node.url.startsWith('https://')) : false
+          });
+
+          if (node.children && node.children.length) {
+            flatten(node.children, myTempId);
+          }
+        }
+      }
+
+      flatten(items, null);
+
+      // Delete existing for this menu_type
+      await api(`navigation_menus?menu_type=eq.${currentMenuType}`, { method: 'DELETE' });
+
+      // Insert by depth — compute depth from parentTempId chain
+      function computeDepth(item, all) {
+        let depth = 0;
+        let pid = item.parentTempId;
+        while (pid) {
+          depth++;
+          const parent = all.find(a => a.tempId === pid);
+          pid = parent ? parent.parentTempId : null;
+        }
+        return depth;
+      }
+      flat.forEach(f => f._depth = computeDepth(f, flat));
+      const maxDepth = Math.max(...flat.map(f => f._depth), 0);
+      const idMap = {};
+
+      for (let d = 0; d <= maxDepth; d++) {
+        const level = flat.filter(f => f._depth === d);
+        if (!level.length) continue;
+
+        const payload = level.map(f => ({
+          menu_type: currentMenuType,
+          sort_order: f.sort_order,
+          label: f.label,
+          url: f.url,
+          description: f.description,
+          icon: f.icon,
+          is_group: f.is_group,
+          is_external: f.is_external,
+          parent_id: f.parentTempId ? idMap[f.parentTempId] : null
+        }));
+
+        const result = await api('navigation_menus', {
+          method: 'POST',
+          headers: { 'Prefer': 'return=representation' },
+          body: JSON.stringify(payload)
+        });
+
+        result.forEach((row, i) => {
+          idMap[level[i].tempId] = row.id;
+        });
+      }
+
+      showToast(`✅ Seeded ${flat.length} items from navigation_config.json`);
+      await loadMenu();
+    } catch (e) {
+      showToast('Seed failed: ' + e.message, true);
+    } finally {
+      seedBtn.disabled = false; seedBtn.textContent = '🌱 Seed from config';
+    }
+  }
+
+  // ── Search / filter ─────────────────────────────────────────────────────────
+  function filterTree(query) {
+    const q = query.toLowerCase().trim();
+    document.querySelectorAll('ol.tree li').forEach(li => {
+      const label = li.querySelector('.item-label')?.textContent?.toLowerCase() || '';
+      li.style.display = (!q || label.includes(q)) ? '' : 'none';
+    });
+    // Always show ancestors of visible items
+    if (q) {
+      document.querySelectorAll('ol.tree li').forEach(li => {
+        if (li.style.display !== 'none') {
+          let parent = li.parentElement?.closest('li');
+          while (parent) {
+            parent.style.display = '';
+            parent = parent.parentElement?.closest('li');
+          }
+        }
+      });
+    }
+  }
+
+  // ── Init ─────────────────────────────────────────────────────────────────────
+  loadMenu();
+</script>
+<script src="../../../../shared/debug-panel.js"></script>
+</body>
+</html>
