@@ -102,6 +102,8 @@
     .tree-btn.add-child:hover { color: var(--green); border-color: rgba(16,185,129,0.3); }
     .tree-btn.del-item:hover { color: var(--red); border-color: rgba(239,68,68,0.3); }
     .tree-btn.goto-item:hover { color: var(--teal); border-color: rgba(6,182,212,0.3); }
+    .tree-item.url-hover-ready { cursor: pointer; }
+    .tree-item.url-hover-ready .item-label { text-decoration: underline; text-decoration-color: var(--teal); text-underline-offset: 3px; }
 
     ol.tree ol.tree { margin-left: 24px; padding-left: 8px; border-left: 1px solid rgba(255,255,255,0.06); min-height: 4px; }
 
@@ -451,15 +453,16 @@
       const tsClass = node.id > 0 && ts ? '' : ' style="display:none"';
       const tsUpdated = node.updated_at && node.updated_at !== node.created_at ? fmtTs(node.updated_at) : '';
 
+      const hasUrl = !!node.url;
       li.innerHTML = `
-        <div class="tree-item ${node.id === selectedId ? 'selected' : ''}" data-id="${node.id}">
+        <div class="tree-item ${node.id === selectedId ? 'selected' : ''}" data-id="${node.id}" ${hasUrl ? `data-url="${escHtml(node.url)}"` : ''}>
           <span class="drag-handle">⠿</span>
           <span class="item-icon">${icon || '📄'}</span>
           <span class="item-label">${escHtml(cleanLabel)}</span>
           <span class="item-ts"${tsClass} title="Created: ${escHtml(node.created_at || '')}${tsUpdated ? ' · Updated: ' + escHtml(node.updated_at) : ''}">${ts}${tsUpdated ? ' ✏️' : ''}</span>
           <span class="item-meta">${metaHtml.join(' ')}</span>
           <div class="item-actions">
-            ${node.url ? `<button class="tree-btn goto-item" data-id="${node.id}" data-url="${escHtml(node.url)}" title="Open: ${escHtml(node.url)}">↗️</button>` : ''}
+            ${hasUrl ? `<button class="tree-btn goto-item" data-id="${node.id}" data-url="${escHtml(node.url)}" title="Open: ${escHtml(node.url)}">↗️</button>` : ''}
             <button class="tree-btn add-child" data-id="${node.id}" title="Add child">➕</button>
             <button class="tree-btn del-item" data-id="${node.id}" title="Delete" style="opacity:0.5;">🗑</button>
           </div>
@@ -605,13 +608,42 @@
 
     if (itemDiv && !e.target.closest('.tree-btn')) {
       const clickId = parseInt(itemDiv.dataset.id);
-      const clickItem = flatItems.find(f => f.id === clickId);
-      if (clickItem && clickItem.url) {
-        window.open(resolveItemUrl(clickItem.url), '_blank');
+      const clickUrl = itemDiv.dataset.url;
+      if (clickUrl) {
+        window.open(resolveItemUrl(clickUrl), '_blank');
       } else {
         selectItem(clickId);
       }
       return;
+    }
+  });
+
+  // ── 3-second hover to reveal clickable link ─────────────────────────────────
+  let hoverTimer = null;
+  let hoveredItem = null;
+
+  document.addEventListener('mouseover', e => {
+    const itemDiv = e.target.closest('.tree-item[data-url]');
+    if (!itemDiv) {
+      if (hoverTimer) { clearTimeout(hoverTimer); hoverTimer = null; }
+      if (hoveredItem) { hoveredItem.classList.remove('url-hover-ready'); hoveredItem = null; }
+      return;
+    }
+    if (itemDiv === hoveredItem) return;
+    if (hoverTimer) { clearTimeout(hoverTimer); }
+    if (hoveredItem) { hoveredItem.classList.remove('url-hover-ready'); }
+    hoveredItem = itemDiv;
+    hoverTimer = setTimeout(() => {
+      if (hoveredItem) hoveredItem.classList.add('url-hover-ready');
+      hoverTimer = null;
+    }, 3000);
+  });
+
+  document.addEventListener('mouseout', e => {
+    const itemDiv = e.target.closest('.tree-item[data-url]');
+    if (!itemDiv || (hoveredItem && !itemDiv.contains(e.relatedTarget) && !itemDiv.contains(e.target))) {
+      if (hoverTimer) { clearTimeout(hoverTimer); hoverTimer = null; }
+      if (hoveredItem) { hoveredItem.classList.remove('url-hover-ready'); hoveredItem = null; }
     }
   });
 
