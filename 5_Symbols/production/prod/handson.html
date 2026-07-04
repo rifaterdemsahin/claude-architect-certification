@@ -1964,16 +1964,18 @@ You must create the following directory structure inside the \`<project-name>\` 
 - **Define composition structure**: Create scene files (\`Scene1.tsx\` through \`Scene5.tsx\` plus \`FullVideo.tsx\`) each as React/Remotion components that will later accept images (via \`<Img>\`) and audio (via \`<Audio>\`) as input props.
 - **Create \`narration.js\`**: Write the Web Speech API narration scripts array — each entry contains the spoken text, the matching CSS selector for auto-scroll, and duration hints. This file is used by both \`index.html\` (for GSAP sync) and the Remotion compositions (as audio track source).
 - **Configure render scripts**: Add \`"render:all"\` to \`remotion/package.json\` that renders all compositions to \`exports/*.mp4\`.
+- **Do NOT ignore exports**: Check \`remotion/.gitignore\` (and the root \`.gitignore\`) — if \`exports/\` or \`out/\` appears in any ignore rule, remove it. The \`remotion/exports/\` folder MUST be tracked by git so the MP4 files are included in the repository and deployed to GitHub Pages.
 
 ---
 
 ### [ ] Step 6: Render related videos and embed to the html
-Execute \`npm run render:all\` inside \`remotion/\` — this generates \`exports/scene1-title.mp4\`, \`exports/scene2-naive.mp4\`, \`exports/scene3-resilient.mp4\`, \`exports/scene4-metrics.mp4\`, \`exports/step1-domain.mp4\`, \`exports/step2-cli.mp4\`, \`exports/step4-outro.mp4\`.
-Poll each output file until it exists and is non-empty. **Do NOT proceed until every MP4 is confirmed complete** — no placeholder paths, no pre-render assumptions.
+Execute \`npm run render:all\` inside \`remotion/\` — this renders all MP4s into \`remotion/exports/\`: \`exports/scene1-title.mp4\`, \`exports/scene2-naive.mp4\`, \`exports/scene3-resilient.mp4\`, \`exports/scene4-metrics.mp4\`, \`exports/step1-domain.mp4\`, \`exports/step2-cli.mp4\`, \`exports/step4-outro.mp4\`.
+Poll each file in \`remotion/exports/\` until it exists and is non-empty. **Do NOT proceed until every MP4 is confirmed complete** — no placeholder paths, no pre-render assumptions.
 Once all renders finish, embed each MP4 with \`<video controls>\` directly into:
   - \`index.html\` — after each corresponding GSAP scene description
   - \`README.md\` — in the "🎬 Video Outputs" section
-Stitch all per-scene compositions into \`FullVideo.tsx\` and render \`exports/full-video.mp4\`.
+Stitch all per-scene compositions into \`FullVideo.tsx\` and render \`remotion/exports/full-video.mp4\`.
+**The \`remotion/exports/\` folder is tracked by git — do not add it to any \`.gitignore\`. These MP4s must be committed and deployed.**
 
 ---
 
