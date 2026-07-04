@@ -1190,12 +1190,17 @@
             <div class="form-group" style="background: rgba(168, 85, 247, 0.08); border: 1px solid rgba(168, 85, 247, 0.25); border-radius: 0.75rem; padding: 1rem;">
               <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.4rem;">
                 <span style="font-size: 1.1rem;">📦</span>
-                <span style="font-weight: 700; color: #d8b4fe; font-size: 0.9rem;">Animation Template Reference (GSAP + Remotion)</span>
+                <span style="font-weight: 700; color: #d8b4fe; font-size: 0.9rem;">Animation Template (AGENTS.md + Kilo Pipeline)</span>
               </div>
               <p style="color: var(--text-muted); font-size: 0.82rem; line-height: 1.5; margin: 0;">
-                The generated prompt instructs the AI to use
+                The generated prompt uses
                 <a href="https://github.com/rifaterdemsahin/animation-template-llm-training" target="_blank" style="color: var(--primary);">animation-template-llm-training ↗</a>
-                which provides both a <strong style="color: var(--text-main);">GSAP</strong> cinematic overlay (<code style="background: rgba(255,255,255,0.06); padding: 1px 5px; border-radius: 3px; font-size: 0.78rem;">index.html</code>) for browser playback and a <strong style="color: var(--text-main);">Remotion</strong> render pipeline (<code style="background: rgba(255,255,255,0.06); padding: 1px 5px; border-radius: 3px; font-size: 0.78rem;">remotion/</code>) for programmatic MP4 video generation.
+                — see
+                <a href="https://github.com/rifaterdemsahin/animation-template-llm-training/blob/main/AGENTS.md" target="_blank" style="color: var(--primary);">AGENTS.md ↗</a>
+                for Kilo commands (<code style="background: rgba(255,255,255,0.06); padding: 1px 5px; border-radius: 3px; font-size: 0.78rem;">/pipeline</code>,
+                <code style="background: rgba(255,255,255,0.06); padding: 1px 5px; border-radius: 3px; font-size: 0.78rem;">/render</code>,
+                <code style="background: rgba(255,255,255,0.06); padding: 1px 5px; border-radius: 3px; font-size: 0.78rem;">/generate-assets</code>) and agents (<code style="background: rgba(255,255,255,0.06); padding: 1px 5px; border-radius: 3px; font-size: 0.78rem;">remotion-dev</code>,
+                <code style="background: rgba(255,255,255,0.06); padding: 1px 5px; border-radius: 3px; font-size: 0.78rem;">infographic-builder</code>).
               </p>
             </div>
 
@@ -1856,20 +1861,34 @@
 
 You are ${model.name} — ${model.desc}. You also act as a senior frontend engineer + motion designer + Principal AI Architect and Systems Engineer. Your task is to build a complete, runnable, production-grade architectural demonstration project — an interactive web animation demo — from scratch based on the provided **Claude AI Architect Exam** Question and Answer. You must initialize the project folder locally and push the completed repository directly to GitHub.
 
-## 📐 Required: Animation Template to Use (GSAP + Remotion)
+## 📐 Required: Animation Template & Pipeline (AGENTS.md)
 
-You MUST use the **Animation Template for LLM Training** as the structural foundation for the cinematic animation:
+You MUST use the **Animation Template for LLM Training** as the structural foundation:
 
 📦 **Template Repository:** https://github.com/rifaterdemsahin/animation-template-llm-training/tree/main
 
-This template provides **converged rendering paths** — every section produces a browser-playable GSAP timeline AND a programmatic Remotion MP4 from the same narrative:
+This template now includes a **Kilo agent system** (see \`AGENTS.md\`) with these commands and agents:
+
+### ⚡ Kilo Commands (from \`.kilo/command/\`)
+| Command | Purpose |
+|---------|---------|
+| \`/pipeline "<topic>"\` | Full pipeline: generate assets + render all videos |
+| \`/render [scene]\` | Render-only: render Remotion MP4s from existing assets |
+| \`/generate-assets "<topic>"\` | Generate SVG + narration + MP3 via Gemini |
+| \`/serve\` | Start Flask dev server (port 5177) |
+
+### 🤖 Kilo Agents
+| Agent | Purpose |
+|-------|---------|
+| \`remotion-dev\` | Remotion composition development, debugging, scene creation |
+| \`infographic-builder\` | SVG infographic generation, narration scripts, API calls |
 
 ### 🎬 Video Pipeline: Show Don't Tell — ≤7 Words, Symbols & Graphics Only
 Each video MUST explain concepts **visually** — symbols, icons, diagrams, animated graphics. Max **7 words** of on-screen text per concept. No paragraphs, no voiceover explaining what the viewer can see. The generated image assets ARE the explanation.
 
-1. **🎨 Generate Visual Assets** — Create symbolic architectural illustrations using \`POST /api/infographics/generate\` (Gemini via Azure Key Vault) or Excalidraw. Use icons (🔒⚡🛡️❌✅), arrows, color-coded flows — zero text walls. Save to \`docs/step-images/\`.
-2. **🔊 Generate Audio** — Minimal Web Speech narration in \`narration.js\`: label concepts only (≤7 words per label). The audio supplements the visuals, it does not replace them.
-3. **🎬 Render Remotion Video** — Build a composition in \`remotion/src/\` that composites the generated images (\`<Img>\`) and optional short audio (\`<Audio>\`) into a timed scene. Animate the images — fade in icons, draw connecting arrows, flash green/red for success/fail. Let the graphics tell the story. Render to \`exports/*.mp4\` via \`npm run render:all\`.
+1. **🎨 Generate Visual Assets** — Use the template's Flask server (\`server.py\` on port 5177) via its Gemini API endpoints (\`POST /api/generate/infographic\`, \`POST /api/generate/audio\`) to create symbolic architectural illustrations and narration scripts. Alternatively use \`POST /api/infographics/generate\` (Delivery Pilot server, Azure Key Vault) or Excalidraw. Use icons (🔒⚡🛡️❌✅), arrows, color-coded flows — zero text walls. Save to \`generated-assets/\`.
+2. **🔊 Generate Audio** — Minimal narration labels (≤7 words per label). Convert to MP3 using macOS \`say\` + ffmpeg (template's pipeline does this automatically). The audio supplements the visuals, it does not replace them.
+3. **🎬 Render Remotion Video** — Compositions accept \`svgData\` (string, SVG markup via data URI as background \`<Img>\`), \`audioSrc\` (path to MP3 as \`<Audio>\`), and \`script\` (narration text for overlay). Build scenes in \`remotion/src/\` using these input props. Animate with icons, arrows, color flashes. Run \`cd remotion && npm install && npm run render:all\` to export to \`remotion/exports/*.mp4\`. Or use the \`/pipeline\` Kilo command which runs all steps automatically.
 4. **⏳ Wait → Embed** — Poll for \`exports/*.mp4\` to exist and be non-empty, then embed with \`<video controls>\`. Do NOT embed placeholders.
 
 The GSAP timeline (\`index.html\`) and the Remotion MP4s share the same visual assets — no text rephrasing what the graphics already show.
@@ -1901,16 +1920,16 @@ The objective of this repository is to transform an abstract architectural exam 
    - **Act 1 — The Naive Approach**: Introduce the anti-pattern scenario. Show it operating, then failing or leaking context. The system should appear compromised (visual cue: red flash, warning overlay).
    - **Act 2 — The Resilient Architecture**: Clear the screen. Introduce the three pillars of the resilient solution with distinct visual metaphors (e.g., sandbox isolation for context:fork, validation shield for allowed-tools, token filter for argument-hint). Show it succeeding where the naive approach failed.
    - **Act 3 — The Metrics**: Animate the comparison results (token reduction, blocked destructive actions, success rate) counting up from 0 to final values.
-   - 🎥 **Remotion-rendered MP4 walkthroughs of each architectural scene** — For each act, follow the 4-step pipeline: (1) generate visual images (\`docs/step-images/\`), (2) write audio narration (\`narration.js\`), (3) build a Remotion composition that composites images + audio into an MP4, and (4) WAIT for the render to finish (poll until \`exports/sceneN-name.mp4\` exists and is non-empty), THEN embed the resulting MP4 with \`<video controls>\` in both \`index.html\` and \`README.md\` after each act description. Do NOT reference placeholder paths — the video must actually be rendered and confirmed complete before embedding.
+   - 🎥 **Remotion-rendered MP4 walkthroughs of each architectural scene** — For each act, follow the 4-step pipeline: (1) generate visual images (\`generated-assets/\`), (2) write audio narration (\`narration.js\`), (3) build a Remotion composition that composites images + audio into an MP4, and (4) WAIT for the render to finish (poll until \`exports/sceneN-name.mp4\` exists and is non-empty), THEN embed the resulting MP4 with \`<video controls>\` in both \`index.html\` and \`README.md\` after each act description. Do NOT reference placeholder paths — the video must actually be rendered and confirmed complete before embedding.
 3. **Quantifiable Metrics & Input Token Stats**: Define clear architectural metrics (e.g., *Coordinator Interventions*, *Error Recovery Rate*, *System Latency*, *Throughput*, *Memory Consumption*, and *Input Token Consumption*) that quantitatively prove the superiority of the resilient approach. You MUST include a dedicated **Input Token Stats & Efficiency Scoreboard** at the bottom of the simulator page (\`index.html\`), CLI tables (\`demo.js\`), and \`README.md\` demonstrating input token savings!
-4. **🎬 Cinematic Animation (GSAP + Remotion)**: Clone the **Animation Template** (see 📐 Required: Animation Template to Use) which provides **two rendering paths**. Adapt the GSAP timeline (\`index.html\`) for browser playback and the Remotion compositions (\`remotion/\`) for programmatic MP4 output. Both must tell the same 4-scene narrative using the template's scaffolding — replace content themes (tokens, shields, sandboxes) with your scenario's naive → resilient architecture story.
+4. **🎬 Cinematic Animation (GSAP + Remotion)**: Clone the **Animation Template** (see 📐 Required) which includes a GSAP cinematic overlay (\`index.html\`) and a Remotion render pipeline (\`remotion/\`) with Kilo commands (\`/pipeline\`, \`/render\`) and agents (\`remotion-dev\`, \`infographic-builder\`) in its \`AGENTS.md\`. Adapt the GSAP timeline for browser playback and the Remotion compositions for programmatic MP4 output. Remotion scenes accept \`svgData\` (SVG as background image), \`audioSrc\` (MP3 narration), and \`script\` (text overlay) as input props. Both must tell the same 4-scene narrative using the template's scaffolding — replace content themes with your scenario's naive → resilient architecture story.
 5. **Step-by-Step "How, What & Why" Visual Explanations & Modal Popup Lightbox (\`index.html\`)**: At each execution step (Step 0 through Step 4), you MUST generate a visual image or architectural illustration that explains:
    - **WHAT** is happening at this architectural layer/stage.
    - **WHY** the resilient pattern is superior to the naive anti-pattern here.
    - **HOW** it functions under the hood.
    Use one of these image generation methods (preferred first, fallback second):
-   - **Primary: Server-side Gemini Image Generation** — call the existing server endpoint \`POST /api/infographics/generate\` with \`{topic, style}\`. This endpoint retrieves the **Gemini API key from the Delivery Pilot Azure Key Vault** (\`cfg.getSecret("GEMINI_API_KEY")\`) and uses Gemini Pro / Imagen to generate publication-quality architectural infographics. Save the returned image to \`docs/step-images/\`.
-   - **Fallback: Excalidraw** — draw hand-drawn-style architecture sketches at https://excalidraw.com, export as SVG, and save to \`docs/step-images/\`.
+   - **Primary: Server-side Gemini Image Generation** — call the existing server endpoint \`POST /api/infographics/generate\` with \`{topic, style}\`. This endpoint retrieves the **Gemini API key from the Delivery Pilot Azure Key Vault** (\`cfg.getSecret("GEMINI_API_KEY")\`) and uses Gemini Pro / Imagen to generate publication-quality architectural infographics. Save the returned image to \`generated-assets/\`.
+   - **Fallback: Excalidraw** — draw hand-drawn-style architecture sketches at https://excalidraw.com, export as SVG, and save to \`generated-assets/\`.
    You MUST embed all of these generated visual explanation diagrams directly into a dedicated **"How, What & Why" Walkthrough Section** inside \`index.html\` (and reference them in \`README.md\`). **CRITICAL REQUIREMENT (MODAL POPUP LIGHTBOX)**: All embedded images, architecture diagrams, and visual illustrations in \`index.html\` MUST have an interactive modal popup / lightbox feature. When any image/SVG is clicked, it must open in a fullscreen darkened modal overlay. **The modal MUST display the image at full viewport scale with proper aspect ratio** — do NOT show thumbnails or small previews inside the modal. Use \`object-fit: contain\` and \`max-width: 95vw; max-height: 95vh\` so the diagram fills the screen legibly for projection and screen recording. Add zoom-in cursor styling and smooth transitions. Clicking the background overlay or pressing the Escape key must close the modal. Furthermore, you MUST use rich, expressive emojis (e.g., 🚀, ⚡, 🛡️, ❌, ✅, 💡, 🔍, 📊, 🎯) throughout all textual explanations, captions, card headers, and diagrams to make the presentation as visually appealing, engaging, and scannable as possible!
 6. **Visual Documentation**: Generate architecture diagrams using the server's \`POST /api/infographics/generate\` endpoint (pulls Gemini API key from Delivery Pilot Azure Key Vault via \`cfg.getSecret("GEMINI_API_KEY")\`) for publication-quality infographics, or draw via **Excalidraw** (https://excalidraw.com) for hand-drawn-style sketches. Supplement with formal UML diagrams (static class structure and dynamic sequence/workflow) and a comprehensive, publication-ready \`README.md\`.
 7. **Automated Verification & Git Push**: Execute the demo script to verify correctness, then initialize git, stage, commit, and push the repository directly to GitHub.
@@ -2082,24 +2101,25 @@ You must create the following directory structure inside the \`<project-name>\` 
 ---
 
 ### [ ] Step 5: Create \`remotion/\` structure, \`narration.js\`, \`package.json\`
-- **Initialize Remotion project**: Create \`remotion/package.json\` with Remotion dependencies, \`remotion/src/\` for compositions, and \`remotion/exports/\` for rendered MP4s.
-- **Define composition structure**: Create scene files (\`Scene1.tsx\` through \`Scene5.tsx\` plus \`FullVideo.tsx\`) each as React/Remotion components that will later accept images (via \`<Img>\`) and audio (via \`<Audio>\`) as input props.
-- **Create \`narration.js\`**: Write the Web Speech API narration scripts array — each entry contains the spoken text, the matching CSS selector for auto-scroll, and duration hints. This file is used by both \`index.html\` (for GSAP sync) and the Remotion compositions (as audio track source).
-- **Configure render scripts**: Add \`"render:all"\` to \`remotion/package.json\` that renders all compositions to \`exports/*.mp4\`.
-- **Do NOT ignore exports**: Check \`remotion/.gitignore\` (and the root \`.gitignore\`) — if \`exports/\` or \`out/\` appears in any ignore rule, remove it. The \`remotion/exports/\` folder MUST be tracked by git so the MP4 files are included in the repository and deployed to GitHub Pages.
+- **Clone the template's Remotion pipeline** — the template at \`animation-template-llm-training/remotion/\` already provides the scene structure (\`Scene1.tsx\`–\`Scene4.tsx\`, \`FullVideo.tsx\`). Copy or adapt it. Compositions accept \`svgData\` (SVG markup rendered as background via data URI \`<Img>\`), \`audioSrc\` (MP3 path for \`<Audio>\`), and \`script\` (narration text for overlay) as input props.
+- **Use the Kilo agents** — the template's \`AGENTS.md\` defines \`remotion-dev\` (for composition development) and \`infographic-builder\` (for SVG/narration generation). Run \`kilo -a remotion-dev\` to engage the Remotion specialist agent.
+- **Create \`narration.js\`**: Write minimal Web Speech API narration labels (≤7 words per label). Used by both \`index.html\` (GSAP sync) and converted to MP3 (\`generated-assets/narration.mp3\`) via macOS \`say\` + ffmpeg for the Remotion \`audioSrc\` prop.
+- **Configure render scripts**: Ensure \`remotion/package.json\` has \`"render:all"\` (renders all compositions to \`exports/*.mp4\`), plus individual \`"render:scene1"\`–\`"render:scene4"\` and \`"render:full"\`.
+- **Do NOT ignore exports**: Check \`remotion/.gitignore\` and root \`.gitignore\` — if \`exports/\` or \`out/\` appears, remove it. The \`remotion/exports/\` folder MUST be tracked by git.
 
 ---
 
 ### [ ] Step 6: Render related videos and embed to the html
-Run \`cd remotion && npm install && npm run render:all\` to render all MP4s into \`remotion/exports/\`: \`exports/scene1-title.mp4\`, \`exports/scene2-naive.mp4\`, \`exports/scene3-resilient.mp4\`, \`exports/scene4-metrics.mp4\`, \`exports/step1-domain.mp4\`, \`exports/step2-cli.mp4\`, \`exports/step4-outro.mp4\`.
-If Remotion fails due to environment constraints (no GPU, headless, missing deps), generate browser-playable placeholder videos instead using the **Canvas API** (render frames via \`canvas.captureStream()\`) or a simple **ffmpeg** MP4 mock. The placeholders must show the same symbolic graphics — icons, arrows, color-coded flows — matching the show-not-tell style.
+Run the render pipeline using the template's scripts: \`cd remotion && npm install && npm run render:all\` — this renders all MP4s into \`remotion/exports/\`: \`exports/scene1-title.mp4\`, \`exports/scene2-naive.mp4\`, \`exports/scene3-resilient.mp4\`, \`exports/scene4-metrics.mp4\`, \`exports/step1-domain.mp4\`, \`exports/step2-cli.mp4\`, \`exports/step4-outro.mp4\`.
+Alternatively, use the Kilo \`/pipeline\` command (from the template's \`AGENTS.md\`) which runs the full pipeline: start Flask server, generate SVG + narration + MP3, then render all scenes.
+If Remotion fails due to environment constraints (no GPU, headless, missing deps), generate browser-playable placeholder videos using the **Canvas API** (\`canvas.captureStream()\`) or a simple **ffmpeg** MP4 mock. The placeholders must show the same symbolic graphics — icons, arrows, color-coded flows — matching the show-not-tell style.
 Poll each file in \`remotion/exports/\` until it exists and is non-empty. **Do NOT proceed until every MP4 is confirmed complete** — no placeholder paths, no pre-render assumptions.
 Once all renders finish, embed each MP4 with \`<video controls>\` directly into:
   - \`index.html\` — after each corresponding GSAP scene description
   - \`README.md\` — in the "🎬 Video Outputs" section
 Stitch all per-scene compositions into \`FullVideo.tsx\` and render \`remotion/exports/full-video.mp4\`.
 **The \`remotion/exports/\` folder is tracked by git — do not add it to any \`.gitignore\`. These MP4s must be committed and deployed.**
-**Show don't tell**: Each video uses only the generated assets (\`docs/step-images/*\`) and minimal on-screen text (≤7 words per concept). The graphics ARE the explanation.
+**Show don't tell**: Each video uses only the generated assets (\`generated-assets/*\`) and minimal on-screen text (≤7 words per concept). The graphics ARE the explanation.
 
 **Expected render summary output at completion:**
 \`\`\`
@@ -2116,10 +2136,14 @@ After rendering, print this exact summary table showing Composition, File, Size,
 ---
 
 ### [ ] Step 7: Generate assets images, audio and embed to html
-For each section, generate symbolic architectural illustrations by calling \`POST /api/infographics/generate\` (Gemini via Azure Key Vault) or drawing via Excalidraw (https://excalidraw.com). Use icons, arrows, color-coded flows — max 7 words per graphic. Save to \`docs/step-images/\`.
-Write minimal Web Speech API labels into \`narration.js\` (≤7 words per label). The audio labels what the graphics already show — it does not explain them.
-Embed each generated image into \`index.html\` with a modal popup lightbox (click → fullscreen). Add Web Speech playback controls at each section. Reference all images and narration in \`README.md\`.
-Update every Remotion composition with the generated images (\`<Img>\`) and audio (\`<Audio>\`) as input props, then re-render all affected MP4s. Re-run Step 6 for any updated compositions.
+Use the template's asset generation workflow (see \`AGENTS.md\`): start the Flask server (\`python3 server.py\`, port 5177) and call its Gemini endpoints:
+  - \`POST /api/generate/infographic\` — generates an SVG infographic from a topic prompt, saves to \`generated-assets/infographic.svg\`.
+  - \`POST /api/generate/audio\` — generates a narration script, saves to \`generated-assets/narration.txt\`.
+  - Convert narration to MP3 via macOS \`say\` command + ffmpeg → \`generated-assets/narration.mp3\`.
+Or use the Delivery Pilot server endpoint \`POST /api/infographics/generate\` (Gemini via Azure Key Vault) or Excalidraw. Use icons, arrows, color-coded flows — max 7 words per graphic.
+Save prompt records to \`generated-assets/prompts/\` per the template's convention.
+Embed each generated image into \`index.html\` with a modal popup lightbox (click → fullscreen). Add Web Speech playback controls at each section.
+Update every Remotion composition with the generated \`svgData\` (SVG markup as data URI), \`audioSrc\` (MP3 path), and \`script\` (narration text) as input props, then re-render all affected MP4s. Re-run Step 6 for any updated compositions.
 
 ---
 
@@ -2128,12 +2152,12 @@ Run \`node demo.js\` — verify zero syntax errors, proper import resolution, an
 Verify all visual assets, narration scripts, and embedded MP4s are correctly linked and functional.
 Re-run \`npm run render:all\` in \`remotion/\` and confirm every \`exports/*.mp4\` exists, is non-empty, and is playable.
 For each \`exports/*.mp4\`, confirm the wait-before-embed rule was followed — no placeholder or pre-render embeds.
-Confirm every \`remotion/exports/*.mp4\` and \`docs/step-images/*\` is embedded with \`<video controls>\` / \`<img>\` in \`index.html\` and \`README.md\`.
+Confirm every \`remotion/exports/*.mp4\` and \`generated-assets/*\` is embedded with \`<video controls>\` / \`<img>\` in \`index.html\` and \`README.md\`.
 
 ---
 
 ### [ ] Step 9: Git commit, push to GitHub, enable Pages, auto-open
-Confirm all rendered \`exports/*.mp4\` files and \`docs/step-images/*\` assets exist and are non-empty.
+Confirm all rendered \`exports/*.mp4\` files and \`generated-assets/*\` assets exist and are non-empty.
 \`\`\`bash
 git add .
 git commit -m "feat: demonstrate architectural solution for <project-name>"
