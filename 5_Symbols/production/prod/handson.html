@@ -1734,15 +1734,15 @@ You MUST use the **Animation Template for LLM Training** as the structural found
 
 This template provides **converged rendering paths** — every section produces a browser-playable GSAP timeline AND a programmatic Remotion MP4 from the same narrative:
 
-### 🎬 Video Pipeline: Generate Images & Audio → Render → Wait → Embed
-Each section below follows a 4-step video production pipeline:
+### 🎬 Video Pipeline: Show Don't Tell — ≤7 Words, Symbols & Graphics Only
+Each video MUST explain concepts **visually** — symbols, icons, diagrams, animated graphics. Max **7 words** of on-screen text per concept. No paragraphs, no voiceover explaining what the viewer can see. The generated image assets ARE the explanation.
 
-1. **🎨 Generate Visual Assets** — Create step-by-step architectural illustrations and diagrams for this section using the server's \`POST /api/infographics/generate\` endpoint (Gemini via Azure Key Vault) or Excalidraw. Save to \`docs/step-images/\`.
-2. **🔊 Generate Audio Narration** — Write a Web Speech API narration script for this section in \`narration.js\` describing what the video demonstrates. The browser synthesizes it via \`window.speechSynthesis\`.
-3. **🎬 Render Remotion Video** — Build a Remotion composition (React component in \`remotion/src/\`) that composites the generated images and audio narration into a timed video scene. The composition displays each image, plays the corresponding audio, adds animated transitions, and renders to \`exports/*.mp4\`. Run \`npm run render:all\` to render all per-section videos.
-4. **⏳ Wait for Render → Embed** — After running the render command, poll for the output \`exports/*.mp4\` file to exist and be non-empty. Only once the render is confirmed complete, embed the video using an HTML5 \`<video>\` tag with \`controls\` in the written output. Do NOT reference placeholder paths or assume the file exists before rendering finishes.
+1. **🎨 Generate Visual Assets** — Create symbolic architectural illustrations using \`POST /api/infographics/generate\` (Gemini via Azure Key Vault) or Excalidraw. Use icons (🔒⚡🛡️❌✅), arrows, color-coded flows — zero text walls. Save to \`docs/step-images/\`.
+2. **🔊 Generate Audio** — Minimal Web Speech narration in \`narration.js\`: label concepts only (≤7 words per label). The audio supplements the visuals, it does not replace them.
+3. **🎬 Render Remotion Video** — Build a composition in \`remotion/src/\` that composites the generated images (\`<Img>\`) and optional short audio (\`<Audio>\`) into a timed scene. Animate the images — fade in icons, draw connecting arrows, flash green/red for success/fail. Let the graphics tell the story. Render to \`exports/*.mp4\` via \`npm run render:all\`.
+4. **⏳ Wait → Embed** — Poll for \`exports/*.mp4\` to exist and be non-empty, then embed with \`<video controls>\`. Do NOT embed placeholders.
 
-Both the browser GSAP timeline (in \`index.html\`) and the embedded rendered MP4 walkthrough explain the same concept — delivered in interactive and video formats.
+The GSAP timeline (\`index.html\`) and the Remotion MP4s share the same visual assets — no text rephrasing what the graphics already show.
 
 ## ⚡ DeepSeek V4 Flash Optimization & Pre-requisites
 
@@ -1976,14 +1976,15 @@ Once all renders finish, embed each MP4 with \`<video controls>\` directly into:
   - \`README.md\` — in the "🎬 Video Outputs" section
 Stitch all per-scene compositions into \`FullVideo.tsx\` and render \`remotion/exports/full-video.mp4\`.
 **The \`remotion/exports/\` folder is tracked by git — do not add it to any \`.gitignore\`. These MP4s must be committed and deployed.**
+**Show don't tell**: Each video uses only the generated assets (\`docs/step-images/*\`) and minimal on-screen text (≤7 words per concept). The graphics ARE the explanation.
 
 ---
 
 ### [ ] Step 7: Generate assets images, audio and embed to html
-For each section, generate architectural illustrations by calling \`POST /api/infographics/generate\` (Gemini via Azure Key Vault) or drawing via Excalidraw (https://excalidraw.com). Save all images to \`docs/step-images/\`.
-Write Web Speech API narration scripts into \`narration.js\` with pause/resume/stop controls and auto-scroll highlighting.
+For each section, generate symbolic architectural illustrations by calling \`POST /api/infographics/generate\` (Gemini via Azure Key Vault) or drawing via Excalidraw (https://excalidraw.com). Use icons, arrows, color-coded flows — max 7 words per graphic. Save to \`docs/step-images/\`.
+Write minimal Web Speech API labels into \`narration.js\` (≤7 words per label). The audio labels what the graphics already show — it does not explain them.
 Embed each generated image into \`index.html\` with a modal popup lightbox (click → fullscreen). Add Web Speech playback controls at each section. Reference all images and narration in \`README.md\`.
-Update every Remotion composition with the new images (\`<Img>\`) and audio (\`<Audio>\`) as input props, then re-render all affected MP4s. Re-run Step 6 for any updated compositions.
+Update every Remotion composition with the generated images (\`<Img>\`) and audio (\`<Audio>\`) as input props, then re-render all affected MP4s. Re-run Step 6 for any updated compositions.
 
 ---
 
