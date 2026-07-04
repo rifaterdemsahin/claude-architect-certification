@@ -58,6 +58,8 @@
     .btn-ghost:hover:not(:disabled) { background: rgba(255,255,255,0.1); color: var(--text); }
     .btn-sm { padding: 4px 10px; font-size: 0.75rem; }
     .btn-xs { padding: 2px 6px; font-size: 0.7rem; border-radius: 5px; }
+    .item-label-link { color: inherit; text-decoration: none; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; }
+    .item-label-link:hover { text-decoration: underline; text-decoration-color: var(--teal); text-underline-offset: 3px; color: var(--teal); }
 
     .toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
     .toolbar-sep { width: 1px; height: 24px; background: var(--border); margin: 0 4px; }
@@ -102,8 +104,8 @@
     .tree-btn.add-child:hover { color: var(--green); border-color: rgba(16,185,129,0.3); }
     .tree-btn.del-item:hover { color: var(--red); border-color: rgba(239,68,68,0.3); }
     .tree-btn.goto-item:hover { color: var(--teal); border-color: rgba(6,182,212,0.3); }
-    .tree-item.url-hover-ready { cursor: pointer; }
-    .tree-item.url-hover-ready .item-label { text-decoration: underline; text-decoration-color: var(--teal); text-underline-offset: 3px; }
+    .item-label-link { color: inherit; text-decoration: none; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .item-label-link:hover { text-decoration: underline; text-decoration-color: var(--teal); text-underline-offset: 3px; color: var(--teal); }
 
     ol.tree ol.tree { margin-left: 24px; padding-left: 8px; border-left: 1px solid rgba(255,255,255,0.06); min-height: 4px; }
 
@@ -454,11 +456,14 @@
       const tsUpdated = node.updated_at && node.updated_at !== node.created_at ? fmtTs(node.updated_at) : '';
 
       const hasUrl = !!node.url;
+      const labelHtml = hasUrl
+        ? `<a class="item-label item-label-link" href="${escHtml(resolveItemUrl(node.url))}" target="_blank" title="${escHtml(node.url)}">${escHtml(cleanLabel)}</a>`
+        : `<span class="item-label">${escHtml(cleanLabel)}</span>`;
       li.innerHTML = `
-        <div class="tree-item ${node.id === selectedId ? 'selected' : ''}" data-id="${node.id}" ${hasUrl ? `data-url="${escHtml(node.url)}"` : ''}>
+        <div class="tree-item ${node.id === selectedId ? 'selected' : ''}" data-id="${node.id}">
           <span class="drag-handle">⠿</span>
           <span class="item-icon">${icon || '📄'}</span>
-          <span class="item-label">${escHtml(cleanLabel)}</span>
+          ${labelHtml}
           <span class="item-ts"${tsClass} title="Created: ${escHtml(node.created_at || '')}${tsUpdated ? ' · Updated: ' + escHtml(node.updated_at) : ''}">${ts}${tsUpdated ? ' ✏️' : ''}</span>
           <span class="item-meta">${metaHtml.join(' ')}</span>
           <div class="item-actions">
@@ -500,46 +505,6 @@
     sortableInstances.forEach(s => s.destroy());
     sortableInstances = [];
   }
-
-  // ── 3s hover → underline + clickable link ──────────────────────────────────
-  // Uses a single document-level mouseover handler with element tracking to
-  // avoid SortableJS event interference. When the mouse stays on a
-  // .tree-item[data-url] for 3s, the 'url-hover-ready' class is added.
-  // The class triggers underline CSS and enables navigation in the click handler.
-  const HOVER_DELAY = 3000;
-  let hoverData = { timer: null, el: null, id: 0 };
-  let hoverSeq = 0;
-
-  document.addEventListener('mouseover', e => {
-    const item = e.target.closest('.tree-item[data-url]');
-    if (item && item !== hoverData.el) {
-      hoverSeq++;
-      const seq = hoverSeq;
-      console.log('[menu-builder] ⏳ hover #' + seq + ' timer started for:', (item.querySelector('.item-label')?.textContent || '').trim());
-      if (hoverData.timer) { clearTimeout(hoverData.timer); }
-      if (hoverData.el) { hoverData.el.classList.remove('url-hover-ready'); }
-      hoverData.el = item;
-      hoverData.id = seq;
-      hoverData.timer = setTimeout(() => {
-        if (hoverData.el === item && hoverData.id === seq) {
-          item.classList.add('url-hover-ready');
-          console.log('[menu-builder] 🔗 hover #' + seq + ' link ready:', (item.dataset.url || '').substring(0, 60));
-        }
-        hoverData.timer = null;
-      }, HOVER_DELAY);
-    }
-    if (!item && hoverData.el) {
-      const rel = e.relatedTarget;
-      if (!rel || !hoverData.el.contains(rel)) {
-        if (hoverData.timer) { clearTimeout(hoverData.timer); hoverData.timer = null; }
-        if (hoverData.el) {
-          hoverData.el.classList.remove('url-hover-ready');
-          console.log('[menu-builder] 🔗 hover #' + hoverData.id + ' cancelled — mouse left');
-        }
-        hoverData.el = null;
-      }
-    }
-  });
 
   function onSortEnd(evt) {
     // Update DOM data attributes after drag
@@ -646,17 +611,8 @@
       return;
     }
 
-    if (itemDiv && !e.target.closest('.tree-btn')) {
-      const clickId = parseInt(itemDiv.dataset.id);
-      if (itemDiv.classList.contains('url-hover-ready')) {
-        const url = itemDiv.dataset.url;
-        if (url) {
-          console.log('[menu-builder] 🔗 navigating to:', url.substring(0, 80));
-          window.open(resolveItemUrl(url), '_blank');
-          return;
-        }
-      }
-      selectItem(clickId);
+    if (itemDiv && !e.target.closest('.tree-btn') && !e.target.closest('.item-label-link')) {
+      selectItem(parseInt(itemDiv.dataset.id));
       return;
     }
   });
