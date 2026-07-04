@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="../../../shared/redirect-to-live-site.js"></script>
+  <title>🎭 Comedy Sketches & Memory Palace | Production</title>
+  <meta name="description" content="Create comedy sketches at the end of every module that double as memory palace pegs — a trophy for the audience that makes the content unforgettable.">
+  <meta name="keywords" content="comedy sketch, memory palace, method of loci, retention, mnemonic, trophy, entertainment, Claude AI Certification">
+  <meta name="author" content="Rifat Erdem Sahin">
+  <link rel="icon" type="image/png" href="../../../favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #030712; --bg-card: rgba(17,24,39,0.8); --text-main: #f3f4f6; --text-muted: #9ca3af;
+      --primary: #8b5cf6; --secondary: #3b82f6; --accent: #f59e0b; --success: #10b981; --danger: #ef4444;
+      --font-title: 'Outfit', sans-serif; --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-dark);
+      background-image: radial-gradient(circle at 10% 20%, rgba(139,92,246,0.07) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(245,158,11,0.05) 0%, transparent 40%);
+      color: var(--text-main); font-family: var(--font-body); line-height: 1.6; padding-bottom: 80px;
+    }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+    .badge {
+      display: inline-block; padding: 6px 16px; background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(139,92,246,0.2));
+      border: 1px solid rgba(245,158,11,0.3); border-radius: 100px; font-size: 0.8rem; font-weight: 600;
+      color: #fbbf24; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 14px;
+    }
+    h1 { font-family: var(--font-title); font-size: 2.6rem; font-weight: 800; margin-bottom: 10px; }
+    header p { color: var(--text-muted); max-width: 700px; margin: 0 auto 8px; font-size: 1rem; }
+    header { text-align: center; padding: 48px 0 24px; }
+    a { color: #c084fc; }
+
+    .trophy-banner {
+      background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(139,92,246,0.08));
+      border: 1px solid rgba(245,158,11,0.25); border-radius: 18px; padding: 28px;
+      text-align: center; margin: 24px 0; position: relative; overflow: hidden;
+    }
+    .trophy-banner::before {
+      content: '🏆'; position: absolute; top: -10px; right: 16px; font-size: 5rem; opacity: 0.15;
+    }
+    .trophy-banner h2 { font-family: var(--font-title); font-size: 1.8rem; font-weight: 800; color: #fbbf24; margin-bottom: 8px; }
+    .trophy-banner p { max-width: 680px; margin: 0 auto; color: #d1d5db; font-size: 0.95rem; }
+
+    .section { margin: 40px 0; }
+    .section h2 { font-family: var(--font-title); font-size: 1.5rem; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+    .section h2 .num { color: #fbbf24; font-size: 0.9rem; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 22px;
+    }
+    .card h3 { font-family: var(--font-title); font-weight: 700; font-size: 1.1rem; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+    .card p, .card li { font-size: 0.9rem; color: var(--text-muted); line-height: 1.65; }
+    .card ul { list-style: none; display: flex; flex-direction: column; gap: 6px; padding: 0; }
+    .card ul li { padding-left: 18px; position: relative; }
+    .card ul li::before { content: '›'; position: absolute; left: 0; color: #fbbf24; font-weight: 700; }
+
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+    @media (max-width: 768px) { .grid-3 { grid-template-columns: 1fr; } }
+
+    .how-card { background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 20px; }
+    .how-card .step-num { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #f59e0b, #8b5cf6); display: flex; align-items: center; justify-content: center; font-weight: 800; font-family: var(--font-title); margin-bottom: 10px; font-size: 0.95rem; }
+    .how-card h3 { font-family: var(--font-title); font-weight: 700; font-size: 1rem; margin-bottom: 6px; }
+    .how-card p { font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; }
+
+    .principle-list { display: flex; flex-direction: column; gap: 12px; }
+    .principle-row { display: flex; gap: 14px; align-items: flex-start; background: var(--bg-card); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 16px; }
+    .principle-row .icon { font-size: 1.6rem; flex-shrink: 0; line-height: 1; }
+    .principle-row h4 { font-family: var(--font-title); font-weight: 700; font-size: 0.95rem; color: #fbbf24; margin-bottom: 3px; }
+    .principle-row p { font-size: 0.85rem; color: var(--text-muted); }
+
+    .example-box { background: rgba(16,185,129,0.06); border: 1px solid rgba(16,185,129,0.2); border-radius: 14px; padding: 18px; margin: 14px 0; }
+    .example-box h4 { font-family: var(--font-title); font-weight: 700; font-size: 0.95rem; color: #6ee7b7; margin-bottom: 6px; }
+    .example-box p, .example-box li { font-size: 0.85rem; color: #d1d5db; }
+
+    .link-bar { text-align: center; margin: 32px 0; }
+    .link-bar a { display: inline-flex; align-items: center; gap: 8px; background: rgba(139,92,246,0.12); border: 1px solid rgba(139,92,246,0.25); border-radius: 12px; padding: 14px 24px; font-weight: 700; font-size: 1rem; color: #c084fc; text-decoration: none; transition: all 0.2s; }
+    .link-bar a:hover { background: rgba(139,92,246,0.25); transform: translateY(-2px); }
+
+    .faq-item { border-bottom: 1px solid rgba(255,255,255,0.06); padding: 16px 0; }
+    .faq-item:first-of-type { padding-top: 0; }
+    .faq-q { font-family: var(--font-title); font-weight: 700; font-size: 1rem; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+    .faq-a { font-size: 0.88rem; color: var(--text-muted); padding-left: 28px; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="badge">🎭 Production — Entertainment & Memory</div>
+    <h1>Comedy Sketches × Memory Palace</h1>
+    <p>End every module with a comedy sketch that doubles as a memory palace peg — a trophy your audience earns for completing the content.</p>
+  </header>
+
+  <div class="trophy-banner">
+    <h2>🏆 The Sketch Is the Trophy</h2>
+    <p>Each module is a climb. The comedy sketch at the summit is the reward — a shared laugh that sears the concepts into long-term memory. The audience doesn't just <em>learn</em> the content; they <em>experience</em> it. That experience becomes the retrieval cue.</p>
+  </div>
+
+  <div class="section">
+    <h2><span class="num">01</span> Why Comedy Anchors Memory</h2>
+    <div class="grid-2">
+      <div class="card">
+        <h3>🧠 Emotional Arousal</h3>
+        <p>Laughter releases dopamine and endorphins, which enhance neuroplasticity and memory consolidation. A funny sketch creates an emotional spike — the brain flags that moment as <strong>worth keeping</strong>.</p>
+      </div>
+      <div class="card">
+        <h3>📍 Loci via Laughter</h3>
+        <p>Each joke becomes a memory peg. The absurd image of a "load balancer as a stressed-out octopus" is infinitely more recallable than a diagram. The humor <em>is</em> the locus point in the palace.</p>
+      </div>
+      <div class="card">
+        <h3>🔄 Narrative Chunking</h3>
+        <p>A 2-minute sketch compresses an entire module's key ideas into one story. The audience retrieves the whole module by remembering the punchline — narrative chunking at its most effective.</p>
+      </div>
+      <div class="card">
+        <h3>🎁 Reciprocity & Reward</h3>
+        <p>The audience invested time. The sketch is your thank-you — a trophy that says "you made it." Reciprocity theory means they remember the giver (you) and the context (the content) more vividly.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2><span class="num">02</span> How It Works</h2>
+    <div class="grid-3">
+      <div class="how-card">
+        <div class="step-num">1</div>
+        <h3>Extract the Core Tension</h3>
+        <p>Every module has a central pain point — a concept that frustrates beginners. That's your comedy gold. Find the gap between <em>what the audience thinks</em> and <em>what the concept actually is</em>.</p>
+      </div>
+      <div class="how-card">
+        <div class="step-num">2</div>
+        <h3>Write the 2-Minute Sketch</h3>
+        <p>One scene, two characters (or one character + narrator). The protagonist misunderstands the concept → tries the wrong solution → comic failure → sudden clarity. Ends on a real fact that ties back to the module.</p>
+      </div>
+      <div class="how-card">
+        <div class="step-num">3</div>
+        <h3>Record & Tag as Memory Peg</h3>
+        <p>Record the sketch during the production phase. Tag it in the memory palace as the "comedy room" for that module. The audience revisits it during review — the laugh re-triggers the recall.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2><span class="num">03</span> The Memory Palace Connection</h2>
+    <div class="grid-2">
+      <div class="card">
+        <h3>🏛️ Existing Palace Builder</h3>
+        <p>The <a href="../postprod/memory_palace.html" target="_blank">Memory Palace Builder</a> generates a method-of-loci palace per module. Each comedy sketch becomes a <strong>room</strong> in that palace — the funniest room, the one the audience <em>wants</em> to visit.</p>
+        <p style="margin-top: 10px;">When the audience needs to recall a concept, they think of the sketch first. The laugh unlocks the door to the full module.</p>
+      </div>
+      <div class="card">
+        <h3>🎞️ Sketch as Peg Sequence</h3>
+        <p>A single sketch can encode 5-7 key concepts (Miller's Law). Each beat in the sketch maps to one peg in the memory palace:</p>
+        <ul style="margin-top: 10px;">
+          <li><strong>Setup</strong> → What problem does this module solve?</li>
+          <li><strong>Complication</strong> → What goes wrong without this concept?</li>
+          <li><strong>Punchline</strong> → The "aha" moment — the core insight</li>
+          <li><strong>Callback</strong> → A real-world example from the module</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2><span class="num">04</span> Principles of Educational Comedy</h2>
+    <div class="principle-list">
+      <div class="principle-row">
+        <div class="icon">🎯</div>
+        <div>
+          <h4>The Pain Point Is the Punchline</h4>
+          <p>Never make fun of the student. The joke is always at the expense of the <em>confusion itself</em> — the absurdity of the wrong mental model, not the person holding it.</p>
+        </div>
+      </div>
+      <div class="principle-row">
+        <div class="icon">⚡</div>
+        <div>
+          <h4>One Concept Per Sketch</h4>
+          <p>A sketch can anchor one big idea. Trying to cover the whole module in one sketch dilutes the peg. Write one sketch per <em>core concept</em>, max two per module.</p>
+        </div>
+      </div>
+      <div class="principle-row">
+        <div class="icon">🔗</div>
+        <div>
+          <h4>Tag Back to the Lesson</h4>
+          <p>The last 10 seconds of the sketch must explicitly bridge back to the real concept. "So that's why load balancers exist." The laugh is the hook; the callback is the anchor.</p>
+        </div>
+      </div>
+      <div class="principle-row">
+        <div class="icon">📏</div>
+        <div>
+          <h4>Keep It Tight: 90-120 Seconds</h4>
+          <p>Attention is precious. A tight 2-minute sketch respects the audience's time and forces sharp writing. Every line must serve either the joke or the concept.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2><span class="num">05</span> Example: Module 1 — Architecture Overview</h2>
+    <div class="example-box">
+      <h4>🎭 Sketch: "The Architect Who Designed a Castle on a Sandbar"</h4>
+      <p><strong>Setup:</strong> An enthusiastic architect (you) presents the most beautiful castle blueprint to a client. The client asks, "What's the foundation?" The architect says, "We'll figure that out later."</p>
+      <p style="margin-top: 6px;"><strong>Complication:</strong> The castle sinks. The client is buried in rubble. The architect frantically searches for "foundation" in the blueprint.</p>
+      <p style="margin-top: 6px;"><strong>Punchline:</strong> The architect finds the note: "Foundation: to be added after construction." Freeze frame. Narrator: "That's what happens when you skip architecture design, kids."</p>
+      <p style="margin-top: 6px;"><strong>Callback (10s):</strong> [Back to serious] "The AWS Well-Architected Framework is your foundation. Design it before you build. Let's start."</p>
+    </div>
+    <div class="example-box">
+      <h4>🏛️ Memory Palace Peg</h4>
+      <p>This sketch becomes the <strong>"Sandbar Room"</strong> in the Module 1 memory palace. When the audience recalls the sinking castle, they remember: <em>foundation → Well-Architected Framework → six pillars → design principles.</em> One laugh unlocks the entire module hierarchy.</p>
+    </div>
+  </div>
+
+  <div class="link-bar">
+    <a href="../postprod/memory_palace.html" target="_blank">🏛️ Open Memory Palace Builder →</a>
+  </div>
+
+  <div class="section">
+    <h2><span class="num">06</span> Frequently Asked Questions</h2>
+    <div class="faq-item">
+      <div class="faq-q">❓ I'm not funny. Can I still do this?</div>
+      <div class="faq-a">Yes. The comedy comes from the <em>situation</em>, not the performer. The gap between expectation and reality is inherently funny when you contrast the wrong mental model with the correct one. Write the situation, read it earnestly — the absurdity carries itself.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">❓ Won't comedy undermine the seriousness of the certification?</div>
+      <div class="faq-a">No — it reinforces it. Medical schools use humor to teach high-stakes content. Comedy signals confidence: you know the material so well you can play with it. The audience trusts a teacher who can laugh at the confusion they once felt.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">❓ How is this different from a regular recap?</div>
+      <div class="faq-a">A recap lists facts. A sketch <em>embeds</em> them. The difference is emotional encoding — the audience forms a memory tied to a feeling (laughter), not just to a bullet point. That feeling becomes the retrieval cue.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">❓ Do I need props, costumes, or a set?</div>
+      <div class="faq-a">No. A talking-head delivery with deadpan narration works. Minimal visuals (a single prop, a whiteboard drawing) help but aren't required. The sketch is about the story, not the production value.</div>
+    </div>
+  </div>
+
+  <div class="section" style="text-align: center; padding: 32px 0;">
+    <p style="color: var(--text-muted); font-size: 0.85rem;">The trophy isn't the certificate. The trophy is the laugh that makes the learning stick.</p>
+  </div>
+</div>
+<script src="../../../shared/nav.js"></script>
+<script src="../../../shared/debug-panel.js"></script>
+</body>
+</html>

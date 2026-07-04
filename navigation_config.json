@@ -609,14 +609,19 @@
                   "label": "📽️ Presentation",
                   "url": "https://www.canva.com/design/DAHN3UqZIl4/tJv2gU0sU6QY_gsLscl5YQ/edit?ui=eyJBIjp7IlAiOnsiQSI6IkZBSE1aSzl1LUpFIiwiQiI6dHJ1ZSwiQyI6IkRBSE4zVXFaSWw0In19LCJHIjp7IlQiOnsiQSI6IkZBSE1aSzl1LUpFIiwiQiI6IkRBSE4zVXFaSWw0In19fQ"
                 },
-                {
-                  "label": "📄 Analysis & Video",
-                  "url": "5_Symbols/production/prod/feedback_session_analysis.html"
-                }
-              ]
-            }
-          ]
-        },
+                  {
+                    "label": "📄 Analysis & Video",
+                    "url": "5_Symbols/production/prod/feedback_session_analysis.html"
+                  }
+                ]
+              },
+              {
+                "label": "🎭 Comedy Sketches & Memory Palace",
+                "url": "5_Symbols/production/prod/entertain_memorypalace.html",
+                "description": "End every module with a comedy sketch that doubles as a memory palace peg — a trophy the audience earns for completing the content."
+              }
+            ]
+          },
         {
           "group": true,
           "label": "4. 📋 Shots & Tracking",

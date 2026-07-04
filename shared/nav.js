@@ -350,6 +350,7 @@
       { label: '5. 📸 Shot List & Assets', url: '5_Symbols/production/postprod/production_shotlist.html?module=1&section=1' },
       { label: '6. 🎥 Footage Mapping', url: '5_Symbols/production/prod/footage_mapping.html' },
       { label: '7. ✅ Production Checklist', url: '5_Symbols/production/prod/checklist.html' },
+      { label: '8. 🎭 Comedy Sketches & Memory Palace', url: '5_Symbols/production/prod/entertain_memorypalace.html', description: 'Comedy sketches at the end of modules that double as memory palace pegs — a trophy for the audience.' },
       {
         label: '🛠️ Tools',
         children: [
