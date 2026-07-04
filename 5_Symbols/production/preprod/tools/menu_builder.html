@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&family=Fira+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/emoji-picker-element@1.21.0/index.js" type="module"></script>
+
   <style>
     :root {
       --bg: #030712; --card: rgba(17,24,39,0.92); --card2: rgba(10,16,28,0.95);
@@ -156,9 +156,13 @@
     .emoji-picker-wrap { position: relative; display: inline-block; }
     .emoji-picker-btn { background: rgba(255,255,255,0.06); border: 1px solid var(--border); border-radius: 7px; cursor: pointer; font-size: 1.2rem; padding: 4px 8px; line-height: 1; transition: all 0.15s; }
     .emoji-picker-btn:hover { background: rgba(255,255,255,0.12); border-color: var(--primary); }
-    .emoji-picker-popover { position: absolute; top: 100%; right: 0; z-index: 10001; display: none; margin-top: 6px; }
+    .emoji-picker-popover { position: absolute; top: 100%; right: 0; z-index: 10001; display: none; margin-top: 6px; background: #1a1d2e; border: 1px solid rgba(139,92,246,0.3); border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.6); width: 280px; max-height: 280px; overflow-y: auto; padding: 8px; }
     .emoji-picker-popover.open { display: block; }
-    emoji-picker { --background: #1a1d2e; --border-color: rgba(139,92,246,0.3); --indicator-color: #8b5cf6; --input-border-color: rgba(255,255,255,0.1); --input-font-color: #f3f4f6; --input-placeholder-color: #6b7280; --num-columns: 8; --category-emoji-size: 1.2rem; --emoji-size: 1.4rem; --emoji-padding: 4px; height: 320px; width: 300px; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.6); }
+    .emoji-picker-popover .ep-search { width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 5px 8px; color: #f3f4f6; font-size: 0.78rem; margin-bottom: 6px; outline: none; }
+    .emoji-picker-popover .ep-search:focus { border-color: #8b5cf6; }
+    .emoji-picker-popover .ep-grid { display: flex; flex-wrap: wrap; gap: 2px; }
+    .emoji-picker-popover .ep-emoji { font-size: 1.4rem; cursor: pointer; padding: 3px; border-radius: 5px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; transition: background 0.1s; }
+    .emoji-picker-popover .ep-emoji:hover { background: rgba(139,92,246,0.25); }
   <script src="../../../../shared/seo.js" defer></script>
 </head>
 <body>
@@ -226,9 +230,7 @@
         <input id="fIcon" placeholder="e.g. 🎬" maxlength="4" style="flex:1;">
         <div class="emoji-picker-wrap">
           <button type="button" class="emoji-picker-btn" id="emojiPickerBtn" title="Pick an emoji">😀</button>
-          <div class="emoji-picker-popover" id="emojiPickerPopover">
-            <emoji-picker id="emojiPicker"></emoji-picker>
-          </div>
+          <div class="emoji-picker-popover" id="emojiPickerPopover"></div>
         </div>
       </div>
     </div>
@@ -689,30 +691,65 @@
     return -(++sessionKeyCounter);
   }
 
-  // ── Emoji picker toggle ─────────────────────────────────────────────────────
+  // ── Emoji picker (inline grid, no external dependency) ──────────────────────
+  const COMMON_EMOJIS = [
+    '🎬','📁','📂','🗂️','📄','📝','📋','📌','📍','📎','🔗','📊','📈','📉','📚','📖',
+    '🎯','🎨','🎭','🎤','🎥','🎞️','📹','🎙️','🔊','🔉','🔇','🎵','🎶','🎼',
+    '💻','🖥️','⌨️','🖱️','💾','💿','📀','🖨️','🖍️','✏️','📏','🔧','🛠️','⚙️','🔩',
+    '🚀','☁️','🌐','💡','🔍','🔎','🔒','🔓','🔑','🛡️','🔐','🗝️',
+    '⭐','🌟','✨','🔥','💎','🏆','🥇','🎖️','🏅','🎗️',
+    '❤️','💙','💚','💛','💜','🧡','🖤','🤍','🤎',
+    '✅','❌','⚠️','🚫','🔴','🟠','🟡','🟢','🔵','🟣','⚪','🟤',
+    '👍','👎','👏','🙌','🤝','💪','🧠','👀','🗣️','💬','💭',
+    '👤','👥','🧑','👨','👩','🎓','👑','🎩','🧢',
+    '📅','📆','⏰','🕐','⌛','⏳','📦','📫','📬','📭','📮',
+    '🎉','🎊','🎈','🎁','🧩','🔮','🧿','🎴','🃏','♟️',
+    '🌍','🌎','🌏','🗺️','🧭','🏗️','🏛️','🏠','🏢','🏭','🏗️',
+    '🤖','🧑‍💻','👨‍💻','👩‍💻','🧑‍🏫','👨‍🏫','👩‍🏫',
+    '📡','📻','📺','🖼️','🎆','🎇','🌅','🌄','🌈','⛅','☀️','🌙',
+    '🐛','🪲','🔨','🪛','🧹','🪣','🪜','🧲','⚡','💥','🕸️','🧵',
+  ];
+
+  function buildEmojiGrid(filter) {
+    const popover = document.getElementById('emojiPickerPopover');
+    if (!popover) return;
+    const q = (filter || '').toLowerCase();
+    const filtered = q ? COMMON_EMOJIS.filter(e => e.includes(q)) : COMMON_EMOJIS;
+    popover.innerHTML = '<input class="ep-search" id="epSearch" placeholder="Search emojis..." autofocus>' +
+      '<div class="ep-grid">' + filtered.map(e => '<span class="ep-emoji" data-e="' + e + '">' + e + '</span>').join('') + '</div>';
+    const search = popover.querySelector('.ep-search');
+    if (search) search.focus();
+  }
+
   document.addEventListener('click', e => {
     const btn = e.target.closest('#emojiPickerBtn');
     const popover = document.getElementById('emojiPickerPopover');
-    const picker = document.getElementById('emojiPicker');
-    if (!popover || !picker) return;
+    if (!popover) return;
     if (btn) {
       e.stopPropagation();
+      const wasOpen = popover.classList.contains('open');
       popover.classList.toggle('open');
+      if (!wasOpen) buildEmojiGrid('');
       return;
     }
+    // Close on outside click
     if (popover.classList.contains('open') && !popover.contains(e.target)) {
+      popover.classList.remove('open');
+    }
+    // Emoji click
+    const emoji = e.target.closest('.ep-emoji');
+    if (emoji) {
+      const input = document.getElementById('fIcon');
+      if (input) {
+        input.value = emoji.dataset.e;
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+      }
       popover.classList.remove('open');
     }
   });
 
-  document.addEventListener('emoji-click', e => {
-    const input = document.getElementById('fIcon');
-    const popover = document.getElementById('emojiPickerPopover');
-    if (input && e.detail && e.detail.unicode) {
-      input.value = e.detail.unicode;
-      input.dispatchEvent(new Event('input', { bubbles: true }));
-    }
-    if (popover) popover.classList.remove('open');
+  document.addEventListener('input', e => {
+    if (e.target.id === 'epSearch') buildEmojiGrid(e.target.value);
   });
 
   // ── Add item modal ──────────────────────────────────────────────────────────
