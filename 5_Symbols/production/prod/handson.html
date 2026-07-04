@@ -1174,13 +1174,14 @@
               <label for="targetLLM">Creating Large Language Model (LLM)</label>
               <select id="targetLLM" onchange="updatePrompt()">
                 <option value="Auto-Detect (Executing AI Assistant Model)">Auto-Detect (Executing AI Assistant Model)</option>
-                <option value="DeepSeek V4 Flash">⚡ DeepSeek V4 Flash (Recommended)</option>
+                <option value="DeepSeek V4 Pro">🚀 DeepSeek V4 Pro (Recommended)</option>
+                <option value="DeepSeek V4 Flash">⚡ DeepSeek V4 Flash</option>
                 <option value="DeepSeek R1 / V3">DeepSeek R1 / V3</option>
                 <option value="Google Gemini 3.1 Pro (High)">Google Gemini 3.1 Pro (High)</option>
                 <option value="Google Gemini 2.5 Pro">Google Gemini 2.5 Pro</option>
                 <option value="Google Gemini 2.0 Flash">Google Gemini 2.0 Flash</option>
+                <option value="Anthropic Claude Sonnet 4.6">Anthropic Claude Sonnet 4.6</option>
                 <option value="Anthropic Claude 3.7 Sonnet">Anthropic Claude 3.7 Sonnet</option>
-                <option value="Anthropic Claude 3.5 Sonnet">Anthropic Claude 3.5 Sonnet</option>
                 <option value="OpenAI GPT-4o">OpenAI GPT-4o</option>
               </select>
               <div class="help-text">Specifies which LLM created this project for documentation and UI badges</div>
@@ -1720,6 +1721,122 @@
     }
 
     // Prompt Builder logic
+    function getModelPersona(targetLLM) {
+      const t = (targetLLM || '').toLowerCase();
+      if (t.includes('deepseek v4 pro')) return {
+        name: 'DeepSeek V4 Pro',
+        desc: 'a next-generation reasoning model with a 1M token context window, advanced multi-step reasoning, and state-of-the-art code generation capabilities',
+        emoji: '🚀',
+        context: '1M',
+        optimizations: `**DeepSeek V4 Pro advantages you MUST leverage:**
+- **1M token context window** — generate the entire project (all source files, all assets, all config) in a single response without chunking. Output every file in full, no placeholders.
+- **Advanced multi-step reasoning** — DeepSeek V4 Pro excels at breaking down complex architectural problems into logical steps. Use chain-of-thought reasoning to design the animation flow, component hierarchy, and visual storytelling before generating code.
+- **State-of-the-art code generation** — produce correct, idiomatic, production-grade JavaScript/Node.js/React/Remotion code. Lean into this by writing complete, runnable modules rather than pseudocode or stubs.
+- **Cost efficiency** — generate as many files as needed without concern for token budgets.
+- **Visual design sense** — DeepSeek V4 Pro has strong understanding of UI/UX patterns, color theory, and motion design. Trust its aesthetic judgment for the animation look and feel.`,
+        execution: `1. **Output every file in full** — with the 1M token context window there is no need to abbreviate, use "..." placeholders, or say "rest similar to above". Generate every file completely.
+2. **Plan before coding** — outline the animation storyboard, component tree, and asset pipeline in your thinking before generating any code.
+3. **Prefer flat, explicit imports** — use precise \`import\`/\`require\` paths. Avoid dynamic requires or overly abstracted module resolution.
+4. **Write self-contained HTML** — inline all CSS and JS into \`index.html\` where reasonable. Avoid splitting the simulator across 5+ files unless the module count genuinely demands it.
+5. **Leverage zero-dependency patterns** — use Node.js built-ins (\`fs\`, \`path\`, \`events\`, \`assert\`) and browser APIs (\`fetch\`, \`speechSynthesis\`, \`IntersectionObserver\`) instead of npm packages.
+6. **DeepSeek V4 Pro attribution** — every generated project MUST include \`🚀 Built with DeepSeek V4 Pro\` in the README badge, simulator footer, and CLI banner. This is non-negotiable.`
+      };
+      if (t.includes('deepseek v4 flash')) return {
+        name: 'DeepSeek V4 Flash',
+        desc: 'a precision code generation model with a 1M token context window',
+        emoji: '⚡',
+        context: '1M',
+        optimizations: `**DeepSeek V4 Flash advantages you MUST leverage:**
+- **1M token context window** — generate the entire project (all source files, all assets, all config) in a single response without chunking. Output every file in full, no placeholders.
+- **Precision code generation** — DeepSeek V4 Flash excels at producing correct, idiomatic, production-grade JavaScript/Node.js code. Lean into this by writing complete, runnable modules rather than pseudocode or stubs.
+- **Fast inference** — because this model generates quickly, you can afford to produce verbose, well-commented output. Every file should be self-documenting.
+- **Cost efficiency** — generate as many files as needed without concern for token budgets.`,
+        execution: `1. **Output every file in full** — with the 1M token context window there is no need to abbreviate, use "..." placeholders, or say "rest similar to above". Generate every file completely.
+2. **Prefer flat, explicit imports** — DeepSeek V4 Flash handles precise \`import\`/\`require\` paths reliably. Avoid dynamic requires or overly abstracted module resolution.
+3. **Write self-contained HTML** — inline all CSS and JS into \`index.html\` where reasonable. Avoid splitting the simulator across 5+ files unless the module count genuinely demands it.
+4. **Leverage zero-dependency patterns** — use Node.js built-ins (\`fs\`, \`path\`, \`events\`, \`assert\`) and browser APIs (\`fetch\`, \`speechSynthesis\`, \`IntersectionObserver\`) instead of npm packages. DeepSeek V4 Flash has deep knowledge of these APIs.
+5. **DeepSeek V4 Flash attribution** — every generated project MUST include \`⚡ Built with DeepSeek V4 Flash\` in the README badge, simulator footer, and CLI banner. This is non-negotiable.`
+      };
+      if (t.includes('claude')) return {
+        name: targetLLM,
+        desc: 'a frontier AI model with strong reasoning, coding, and agentic capabilities across complex, multi-step workflows',
+        emoji: '🧠',
+        context: '200K-1M',
+        optimizations: `**Claude model advantages you MUST leverage:**
+- **Extended thinking** — use Claude's reasoning capabilities to plan the architecture before generating code. Think through the component tree, animation flow, and asset pipeline step by step.
+- **Strong agentic coding** — Claude excels at iterative development and end-to-end project management. Structure the work as sequential, self-contained steps.
+- **Precise instruction following** — provide detailed, structured requirements. Claude follows complex multi-part instructions reliably.
+- **Artifact-ready output** — generate complete, runnable artifacts that can be previewed immediately.`,
+        execution: `1. **Output every file in full** — do not abbreviate or use placeholder comments. Generate complete, runnable code.
+2. **Think step by step** — use chain-of-thought reasoning to plan before coding. Outline the architecture, then implement each piece.
+3. **Write modular, well-structured code** — organize files logically. Use clear module boundaries and consistent patterns.
+4. **Prefer explicit over implicit** — name things clearly. Avoid clever abstractions that hide behavior.
+5. **Claude attribution** — every generated project MUST include \`🧠 Built with ${targetLLM}\` in the README badge, simulator footer, and CLI banner. This is non-negotiable.`
+      };
+      if (t.includes('gemini')) return {
+        name: targetLLM,
+        desc: 'a multimodal AI model with strong reasoning, long-context understanding, and native tool-use capabilities',
+        emoji: '🌌',
+        context: '1M+',
+        optimizations: `**Gemini model advantages you MUST leverage:**
+- **Massive context window** — generate the entire project in a single response. Output every file completely without chunking.
+- **Multimodal reasoning** — Gemini understands images, diagrams, and visual layouts natively. Reference visual concepts and design patterns in your prompts.
+- **Strong code generation** — produce correct, idiomatic code across JavaScript, TypeScript, React, and Node.js.
+- **Fast iteration** — generate quickly, verify, and iterate.`,
+        execution: `1. **Output every file in full** — no abbreviations, no placeholders. Every file complete and runnable.
+2. **Leverage multimodal understanding** — describe visual layouts and animation sequences in detail. Gemini can translate visual descriptions into code.
+3. **Write modular code** — organize into clear files with single responsibilities.
+4. **Use standard patterns** — prefer well-known design patterns and APIs.
+5. **Gemini attribution** — every generated project MUST include \`🌌 Built with ${targetLLM}\` in the README badge, simulator footer, and CLI banner. This is non-negotiable.`
+      };
+      if (t.includes('gpt') || t.includes('openai')) return {
+        name: targetLLM,
+        desc: 'a state-of-the-art language model with strong reasoning, coding proficiency, and broad knowledge across domains',
+        emoji: '🤖',
+        context: '128K+',
+        optimizations: `**GPT model advantages you MUST leverage:**
+- **Strong general reasoning** — GPT excels at understanding complex requirements and translating them into structured output.
+- **Code generation** — produce correct, idiomatic JavaScript/TypeScript/React code.
+- **Structured output** — GPT follows detailed formatting instructions precisely.
+- **Broad knowledge** — leverage GPT's wide-ranging understanding of web technologies, animation frameworks, and design patterns.`,
+        execution: `1. **Output every file in full** — no abbreviations, no placeholders. Every file complete and runnable.
+2. **Follow the structure exactly** — generate files in the order specified. Do not skip or reorder steps.
+3. **Write clean, modern code** — use ES modules, async/await, and modern browser APIs.
+4. **Be thorough** — include error handling, edge cases, and documentation.
+5. **GPT attribution** — every generated project MUST include \`🤖 Built with ${targetLLM}\` in the README badge, simulator footer, and CLI banner. This is non-negotiable.`
+      };
+      if (t.includes('deepseek')) return {
+        name: targetLLM,
+        desc: 'a powerful language model known for strong reasoning, efficient code generation, and cost-effective performance',
+        emoji: '🔮',
+        context: '128K+',
+        optimizations: `**DeepSeek model advantages you MUST leverage:**
+- **Strong reasoning** — break down complex architectural problems into logical, implementable steps.
+- **Efficient code generation** — produce correct, concise, production-grade JavaScript/Node.js code.
+- **Cost-effective** — generate comprehensive output without token budget concerns.
+- **Technical depth** — DeepSeek models have strong understanding of system design, APIs, and infrastructure patterns.`,
+        execution: `1. **Output every file in full** — no abbreviations, no placeholders. Every file complete and runnable.
+2. **Write clean, idiomatic code** — follow JavaScript/Node.js best practices.
+3. **Be thorough and precise** — include all necessary details, error handling, and documentation.
+4. **Use standard patterns** — prefer well-known design patterns and browser/Node.js APIs.
+5. **DeepSeek attribution** — every generated project MUST include \`🔮 Built with ${targetLLM}\` in the README badge, simulator footer, and CLI banner. This is non-negotiable.`
+      };
+      return {
+        name: 'Auto-Detect (Executing AI Assistant Model)',
+        desc: 'an advanced AI assistant model with strong reasoning, code generation, and project-building capabilities',
+        emoji: '🧠',
+        context: '128K+',
+        optimizations: `**Model advantages to leverage:**
+- Generate the entire project (all source files, all assets, all config) in full. Output every file completely, no placeholders.
+- Produce correct, idiomatic, production-grade JavaScript/Node.js code. Write complete, runnable modules.
+- Generate as many files as needed without concern for token budgets.`,
+        execution: `1. **Output every file in full** — no abbreviations, no "..." placeholders. Generate every file completely.
+2. **Write self-contained, runnable code** — every file should be executable or importable without additional scaffolding.
+3. **Prefer explicit over implicit** — clear naming, flat imports, well-documented functions.
+4. **LLM attribution** — every generated project MUST include the AI model name in the README badge, simulator footer, and CLI banner. This is non-negotiable.`
+      };
+    }
+
     function updatePrompt() {
       const visibilityEl = document.getElementById('repoVisibility');
       const targetLLMEl = document.getElementById('targetLLM');
@@ -1733,9 +1850,11 @@
       const question = questionEl.value.trim() || '[Insert Exam Question Here]';
       const answer = answerEl.value.trim() || '[Insert Recommended Architectural Solution Here]';
 
+      const model = getModelPersona(targetLLM);
+
       const promptText = `# TASK: Generate an Architectural Demonstration Project for the Claude AI Architect Exam
 
-You are DeepSeek V4 Flash — a precision code generation model with a 1M token context window. You also act as a senior frontend engineer + motion designer + Principal AI Architect and Systems Engineer. Your task is to build a complete, runnable, production-grade architectural demonstration project — an interactive web animation demo — from scratch based on the provided **Claude AI Architect Exam** Question and Answer. You must initialize the project folder locally and push the completed repository directly to GitHub.
+You are ${model.name} — ${model.desc}. You also act as a senior frontend engineer + motion designer + Principal AI Architect and Systems Engineer. Your task is to build a complete, runnable, production-grade architectural demonstration project — an interactive web animation demo — from scratch based on the provided **Claude AI Architect Exam** Question and Answer. You must initialize the project folder locally and push the completed repository directly to GitHub.
 
 ## 📐 Required: Animation Template to Use (GSAP + Remotion)
 
@@ -1755,13 +1874,9 @@ Each video MUST explain concepts **visually** — symbols, icons, diagrams, anim
 
 The GSAP timeline (\`index.html\`) and the Remotion MP4s share the same visual assets — no text rephrasing what the graphics already show.
 
-## ⚡ DeepSeek V4 Flash Optimization & Pre-requisites
+## ${model.emoji} ${model.name} Optimization & Pre-requisites
 
-**DeepSeek V4 Flash advantages you MUST leverage:**
-- **1M token context window** — generate the entire project (all source files, all assets, all config) in a single response without chunking. Output every file in full, no placeholders.
-- **Precision code generation** — DeepSeek V4 Flash excels at producing correct, idiomatic, production-grade JavaScript/Node.js code. Lean into this by writing complete, runnable modules rather than pseudocode or stubs.
-- **Fast inference** — because this model generates quickly, you can afford to produce verbose, well-commented output. Every file should be self-documenting.
-- **Cost efficiency** — generate as many files as needed without concern for token budgets.
+${model.optimizations}
 
 1. **Shell / CLI Execution**: Before running any shell commands (mkdir, git, npm, etc.), confirm your environment has command execution capabilities. If running in a sandboxed environment, output all files to be created manually as a fallback.
 2. **Input Token Usage Stats**: You MUST track and display simulated/actual **Input Token Stats & Context Efficiency** at the bottom of the interactive web simulator (\`index.html\`), at the bottom of the CLI comparison table (\`demo.js\`), and at the bottom of \`README.md\` (e.g., showing how the resilient approach reduces input token consumption / coordinator overhead compared to the naive approach)!
@@ -1812,15 +1927,11 @@ The objective of this repository is to transform an abstract architectural exam 
 12. **🎨 Emoji-Rich Presentation**: Use emojis liberally and intentionally throughout every deliverable — README.md headers, CLI demo banners, simulator UI cards, diagram captions, file tree annotations, commit messages, and GitHub issue templates. Emojis make the output scannable, engaging, and exam-review friendly. Every section heading, status badge, metric label, scoreboard column, step explanation card, and file tree entry MUST carry at least one relevant emoji.
 
 
-## 💡 DeepSeek V4 Flash Execution Guidance
+## ${model.emoji} ${model.name} Execution Guidance
 
-Optimize your output for DeepSeek V4 Flash's architecture:
+Optimize your output for ${model.name}'s architecture:
 
-1. **Output every file in full** — with the 1M token context window there is no need to abbreviate, use "..." placeholders, or say "rest similar to above". Generate every file completely.
-2. **Prefer flat, explicit imports** — DeepSeek V4 Flash handles precise \`import\`/\`require\` paths reliably. Avoid dynamic requires or overly abstracted module resolution.
-3. **Write self-contained HTML** — inline all CSS and JS into \`index.html\` where reasonable. Avoid splitting the simulator across 5+ files unless the module count genuinely demands it.
-4. **Leverage zero-dependency patterns** — use Node.js built-ins (\`fs\`, \`path\`, \`events\`, \`assert\`) and browser APIs (\`fetch\`, \`speechSynthesis\`, \`IntersectionObserver\`) instead of npm packages. DeepSeek V4 Flash has deep knowledge of these APIs.
-5. **DeepSeek V4 Flash attribution** — every generated project MUST include \`⚡ Built with DeepSeek V4 Flash\` in the README badge, simulator footer, and CLI banner. This is non-negotiable.
+${model.execution}
 
 
 
@@ -2228,19 +2339,25 @@ Execute the steps above sequentially and thoroughly. When finished, print the CL
         fetch('/api/animations/remotion-instructions', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ promptText })
+          body: JSON.stringify({ promptText, model: targetLLM })
         })
         .then(res => res.json())
         .then(data => {
-          let instructions = '\n\n---\n🎬 Remotion Animation Instructions\n';
+          let instructions = '\n\n---\n🎬 Remotion Animation Instructions';
+          if (data.model) instructions += ` (via ${data.model})`;
+          instructions += '\n';
           if (data.type === 'structured' && data.compositions) {
             instructions += `\nCompositions (${data.compositions.length}):\n`;
             data.compositions.forEach(c => {
               instructions += `  • ${c.name} — ${c.description} (${c.durationInFrames}f, assets: ${(c.assetsUsed || []).join(', ')})\n`;
+              if (c.learningObjective) instructions += `    🎯 ${c.learningObjective}\n`;
+              if (c.transitionToNext) instructions += `    ↪ ${c.transitionToNext}\n`;
             });
             if (data.showNotTell) instructions += `\nShow-not-tell: ${data.showNotTell}\n`;
             if (data.fallbackStrategy) instructions += `Fallback: ${data.fallbackStrategy}\n`;
             if (data.totalDurationEstimate) instructions += `Total: ${data.totalDurationEstimate}\n`;
+            if (data.trainingPace) instructions += `Pacing: ${data.trainingPace}\n`;
+            if (data.colorStory) instructions += `Color arc: ${data.colorStory}\n`;
           } else if (data.raw) {
             instructions += '\n' + data.raw;
           } else {
