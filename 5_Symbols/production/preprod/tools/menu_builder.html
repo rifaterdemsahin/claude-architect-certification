@@ -101,6 +101,7 @@
     .tree-btn:hover { border-color: var(--border); background: rgba(255,255,255,0.06); }
     .tree-btn.add-child:hover { color: var(--green); border-color: rgba(16,185,129,0.3); }
     .tree-btn.del-item:hover { color: var(--red); border-color: rgba(239,68,68,0.3); }
+    .tree-btn.goto-item:hover { color: var(--teal); border-color: rgba(6,182,212,0.3); }
 
     ol.tree ol.tree { margin-left: 24px; padding-left: 8px; border-left: 1px solid rgba(255,255,255,0.06); min-height: 4px; }
 
@@ -309,6 +310,11 @@
   }
 
   function escHtml(s) { if (s == null) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function resolveItemUrl(url) {
+    if (!url || url === '#') return '#';
+    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('/')) return url;
+    return '../' + url;
+  }
   function extractIcon(label) {
     if (!label) return null;
     const m = label.match(/^(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])\s*/);
@@ -453,6 +459,7 @@
           <span class="item-ts"${tsClass} title="Created: ${escHtml(node.created_at || '')}${tsUpdated ? ' · Updated: ' + escHtml(node.updated_at) : ''}">${ts}${tsUpdated ? ' ✏️' : ''}</span>
           <span class="item-meta">${metaHtml.join(' ')}</span>
           <div class="item-actions">
+            ${node.url ? `<button class="tree-btn goto-item" data-id="${node.id}" data-url="${escHtml(node.url)}" title="Open: ${escHtml(node.url)}">↗️</button>` : ''}
             <button class="tree-btn add-child" data-id="${node.id}" title="Add child">➕</button>
             <button class="tree-btn del-item" data-id="${node.id}" title="Delete" style="opacity:0.5;">🗑</button>
           </div>
@@ -556,6 +563,15 @@
   // ── Event delegation ─────────────────────────────────────────────────────────
   document.addEventListener('click', e => {
     const itemDiv = e.target.closest('.tree-item');
+
+    const gotoBtn = e.target.closest('.goto-item');
+    if (gotoBtn) {
+      e.stopPropagation();
+      e.preventDefault();
+      const url = gotoBtn.dataset.url;
+      if (url) window.open(resolveItemUrl(url), '_blank');
+      return;
+    }
 
     const addBtn = e.target.closest('.add-child');
     if (addBtn) {
