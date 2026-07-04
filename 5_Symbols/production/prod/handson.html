@@ -1969,7 +1969,8 @@ You must create the following directory structure inside the \`<project-name>\` 
 ---
 
 ### [ ] Step 6: Render related videos and embed to the html
-Execute \`npm run render:all\` inside \`remotion/\` — this renders all MP4s into \`remotion/exports/\`: \`exports/scene1-title.mp4\`, \`exports/scene2-naive.mp4\`, \`exports/scene3-resilient.mp4\`, \`exports/scene4-metrics.mp4\`, \`exports/step1-domain.mp4\`, \`exports/step2-cli.mp4\`, \`exports/step4-outro.mp4\`.
+Run \`cd remotion && npm install && npm run render:all\` to render all MP4s into \`remotion/exports/\`: \`exports/scene1-title.mp4\`, \`exports/scene2-naive.mp4\`, \`exports/scene3-resilient.mp4\`, \`exports/scene4-metrics.mp4\`, \`exports/step1-domain.mp4\`, \`exports/step2-cli.mp4\`, \`exports/step4-outro.mp4\`.
+If Remotion fails due to environment constraints (no GPU, headless, missing deps), generate browser-playable placeholder videos instead using the **Canvas API** (render frames via \`canvas.captureStream()\`) or a simple **ffmpeg** MP4 mock. The placeholders must show the same symbolic graphics — icons, arrows, color-coded flows — matching the show-not-tell style.
 Poll each file in \`remotion/exports/\` until it exists and is non-empty. **Do NOT proceed until every MP4 is confirmed complete** — no placeholder paths, no pre-render assumptions.
 Once all renders finish, embed each MP4 with \`<video controls>\` directly into:
   - \`index.html\` — after each corresponding GSAP scene description
