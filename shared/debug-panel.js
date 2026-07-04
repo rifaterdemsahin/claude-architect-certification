@@ -161,14 +161,14 @@
     return { apikey: DB_ANON_KEY, Authorization: `Bearer ${DB_ANON_KEY}` };
   }
 
-  async function viewTable(table) {
+  async function viewTable(table, offset = 0) {
     if (!DB_BASE_URL || !DB_ANON_KEY) {
       push('error', `🗄️ Cannot query ${table}: Supabase URL/key not detected.`);
       return;
     }
-    push('info', `🗄️ Querying ${table} → SELECT * LIMIT 50 …`);
+    push('info', `🗄️ Querying ${table} → SELECT * LIMIT 50 OFFSET ${offset} …`);
     try {
-      const res = await _fetch(`${DB_BASE_URL}/rest/v1/${table}?select=*&limit=50`, {
+      const res = await _fetch(`${DB_BASE_URL}/rest/v1/${table}?select=*&limit=50&offset=${offset}`, {
         headers: authHeaders()
       });
       if (!res.ok) {
@@ -178,10 +178,18 @@
       }
       const data = await res.json();
       const rows = Array.isArray(data) ? data : [data];
-      push('ok', `✅ ${table}: ${rows.length} row(s)`);
+      push('ok', `✅ ${table}: ${rows.length} row(s) at offset ${offset}`);
+
+      const contentRange = res.headers.get('content-range');
+      let total = null;
+      if (contentRange) {
+        const m = contentRange.match(/\/(\d+)$/);
+        if (m) total = parseInt(m[1], 10);
+      }
+
       const e = DB_TABLES.get(table);
       if (e) { e.rows = rows.length; renderDbPanel(); }
-      showTableModal(table, rows);
+      showTableModal(table, rows, offset, total);
     } catch (e) {
       push('error', `🗄️ ${table} query failed: ${e.message}`);
     }
@@ -212,7 +220,8 @@
   }
 
   // Expose for inline onclick handlers
-  window.__dbgViewTable = viewTable;
+  window.__dbgViewTable = (table) => viewTable(table, 0);
+  window.__dbgViewTablePage = viewTable;
   window.__dbgExportTable = exportTable;
 
   // ── Table data modal ─────────────────────────────────────────────────────
@@ -227,7 +236,7 @@
     return s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   }
 
-  function showTableModal(table, rows) {
+  function showTableModal(table, rows, offset = 0, total = null) {
     let modal = document.getElementById('_dbg_modal');
     if (!modal) {
       modal = document.createElement('div');
@@ -247,12 +256,24 @@
       `<tr>${cols.map(c => `<td style="padding:5px 10px;border-bottom:1px solid rgba(255,255,255,0.05);font-size:0.72rem;max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(typeof r[c] === 'object' ? JSON.stringify(r[c]) : String(r[c] ?? ''))}">${fmtCell(r[c])}</td>`).join('')}</tr>`
     ).join('');
 
+    const PAGE_SIZE = 50;
+    const pageNum = total != null ? Math.floor(offset / PAGE_SIZE) + 1 : null;
+    const totalPages = total != null ? Math.ceil(total / PAGE_SIZE) : null;
+    const hasPrev = offset > 0;
+    const hasNext = rows.length === PAGE_SIZE;
+
+    const pageInfo = total != null
+      ? `Page ${pageNum} of ${totalPages} · showing ${offset + 1}–${Math.min(offset + PAGE_SIZE, total)} of ${total} row(s)`
+      : `Offset ${offset} · ${rows.length} row(s) ${hasNext ? '(more)' : '(end)'}`;
+
     modal.innerHTML = `
       <div onclick="event.stopPropagation()" style="background:#0b1020;border:1px solid rgba(139,92,246,0.45);border-radius:12px;width:min(1100px,96vw);max-height:88vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.6);">
-        <div style="display:flex;align-items:center;gap:10px;padding:12px 18px;border-bottom:1px solid rgba(139,92,246,0.25);">
+        <div style="display:flex;align-items:center;gap:10px;padding:12px 18px;border-bottom:1px solid rgba(139,92,246,0.25);flex-wrap:wrap;">
           <span style="font-size:0.85rem;font-weight:800;color:#a78bfa;">🗄️ ${escapeHtml(table)}</span>
-          <span style="font-size:0.7rem;color:#6b7280;">${rows.length} row(s) · ${cols.length} col(s)</span>
-          <div style="margin-left:auto;display:flex;gap:8px;">
+          <span style="font-size:0.7rem;color:#6b7280;">${cols.length} col(s) · ${pageInfo}</span>
+          <div style="margin-left:auto;display:flex;gap:6px;">
+            <button onclick="window.__dbgViewTablePage('${escapeHtml(table)}', ${offset - PAGE_SIZE})" ${hasPrev ? '' : 'disabled'} style="background:rgba(99,102,241,0.2);color:#a5b4fc;border:1px solid rgba(99,102,241,0.4);padding:3px 8px;border-radius:6px;cursor:pointer;font-size:0.68rem;font-weight:700;${hasPrev ? '' : 'opacity:0.35;cursor:not-allowed;'}">◀ Prev</button>
+            <button onclick="window.__dbgViewTablePage('${escapeHtml(table)}', ${offset + PAGE_SIZE})" ${hasNext ? '' : 'disabled'} style="background:rgba(99,102,241,0.2);color:#a5b4fc;border:1px solid rgba(99,102,241,0.4);padding:3px 8px;border-radius:6px;cursor:pointer;font-size:0.68rem;font-weight:700;${hasNext ? '' : 'opacity:0.35;cursor:not-allowed;'}">Next ▶</button>
             <button onclick="window.__dbgExportTable('${escapeHtml(table)}')" style="background:rgba(16,185,129,0.2);color:#6ee7b7;border:1px solid rgba(16,185,129,0.4);padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.7rem;font-weight:700;">⬇ JSON</button>
             <button onclick="document.getElementById('_dbg_modal').style.display='none'" style="background:rgba(239,68,68,0.2);color:#fca5a5;border:1px solid rgba(239,68,68,0.3);padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.7rem;">✕ Close</button>
           </div>

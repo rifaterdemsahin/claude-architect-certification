@@ -623,27 +623,25 @@
   let hoveredItem = null;
 
   document.addEventListener('mouseover', e => {
-    const itemDiv = e.target.closest('.tree-item[data-url]');
-    if (!itemDiv) {
+    const item = e.target.closest('.tree-item[data-url]');
+    if (item && item !== hoveredItem) {
       if (hoverTimer) { clearTimeout(hoverTimer); hoverTimer = null; }
-      if (hoveredItem) { hoveredItem.classList.remove('url-hover-ready'); hoveredItem = null; }
-      return;
+      if (hoveredItem) { hoveredItem.classList.remove('url-hover-ready'); }
+      hoveredItem = item;
+      hoverTimer = setTimeout(() => {
+        if (hoveredItem) hoveredItem.classList.add('url-hover-ready');
+        hoverTimer = null;
+      }, 3000);
     }
-    if (itemDiv === hoveredItem) return;
-    if (hoverTimer) { clearTimeout(hoverTimer); }
-    if (hoveredItem) { hoveredItem.classList.remove('url-hover-ready'); }
-    hoveredItem = itemDiv;
-    hoverTimer = setTimeout(() => {
-      if (hoveredItem) hoveredItem.classList.add('url-hover-ready');
-      hoverTimer = null;
-    }, 3000);
   });
 
   document.addEventListener('mouseout', e => {
-    const itemDiv = e.target.closest('.tree-item[data-url]');
-    if (!itemDiv || (hoveredItem && !itemDiv.contains(e.relatedTarget) && !itemDiv.contains(e.target))) {
+    if (!hoveredItem) return;
+    const rel = e.relatedTarget;
+    if (!rel || !hoveredItem.contains(rel)) {
       if (hoverTimer) { clearTimeout(hoverTimer); hoverTimer = null; }
-      if (hoveredItem) { hoveredItem.classList.remove('url-hover-ready'); hoveredItem = null; }
+      hoveredItem.classList.remove('url-hover-ready');
+      hoveredItem = null;
     }
   });
 
