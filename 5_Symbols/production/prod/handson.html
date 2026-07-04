@@ -1979,6 +1979,18 @@ Stitch all per-scene compositions into \`FullVideo.tsx\` and render \`remotion/e
 **The \`remotion/exports/\` folder is tracked by git — do not add it to any \`.gitignore\`. These MP4s must be committed and deployed.**
 **Show don't tell**: Each video uses only the generated assets (\`docs/step-images/*\`) and minimal on-screen text (≤7 words per concept). The graphics ARE the explanation.
 
+**Expected render summary output at completion:**
+\`\`\`
+Remotion Render Complete ✅
+Composition     File                    Size      Status
+Scene1Title     scene1-title.mp4        487 KB    ✅ Proper Remotion render
+Scene2Naive     scene2-naive.mp4        799 KB    ✅ Proper Remotion render
+Scene3Resilient scene3-resilient.mp4    730 KB    ✅ Proper Remotion render
+Scene4Metrics   scene4-metrics.mp4      525 KB    ✅ Proper Remotion render
+FullVideo       full-video.mp4          2.5 MB    ✅ Stitched all scenes
+\`\`\`
+After rendering, print this exact summary table showing Composition, File, Size, and Status columns. Log any fixes applied (e.g. \`Scene4Metrics.tsx used Remotion's spring() which requires fps context — replaced with interpolate()\`). Then confirm every embed with exact file paths: \`Verification: All N embeds confirmed in index.html and README.md with <video controls> tags referencing relative remotion/exports/*.mp4 paths.\`
+
 ---
 
 ### [ ] Step 7: Generate assets images, audio and embed to html
