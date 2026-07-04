@@ -609,9 +609,10 @@
     const existing = document.getElementById('_dbg_clear_modal');
     if (existing) existing.remove();
 
-    // Count localStorage keys before clearing
-    let lsCount = 0;
-    try { lsCount = localStorage.length; } catch(e) {}
+    // Collect localStorage keys before clearing
+    let lsKeys = [];
+    try { for (let i = 0; i < localStorage.length; i++) lsKeys.push(localStorage.key(i)); } catch(e) {}
+    const lsCount = lsKeys.length;
 
     const modal = document.createElement('div');
     modal.id = '_dbg_clear_modal';
@@ -621,11 +622,15 @@
       'display:flex', 'align-items:center', 'justify-content:center',
       'padding:24px', 'font-family:monospace',
     ].join(';');
+    const lsKeyList = lsKeys.length
+      ? lsKeys.map(k => `<span style="color:#a78bfa;">${k}</span>`).join(', ')
+      : '<span style="color:#6b7280;">(none)</span>';
     modal.innerHTML = `
       <div onclick="event.stopPropagation()" style="background:#0b1020;border:1px solid rgba(139,92,246,0.45);border-radius:12px;width:min(440px,92vw);box-shadow:0 20px 60px rgba(0,0,0,0.6);padding:24px;">
         <div style="font-size:1.1rem;font-weight:800;color:#a78bfa;margin-bottom:16px;">♻️ Clearing Cache…</div>
-        <div id="_dbg_clear_items" style="display:flex;flex-direction:column;gap:10px;">
-          <div id="_dbg_clr_ls" style="color:#6b7280;font-size:0.82rem;">⏳ localStorage · ${lsCount} key(s) — clearing all</div>
+        <div id="_dbg_clear_items" style="display:flex;flex-direction:column;gap:8px;">
+          <div id="_dbg_clr_ls" style="color:#6b7280;font-size:0.82rem;">⏳ localStorage · ${lsCount} key(s)</div>
+          <div style="color:#4b5563;font-size:0.72rem;line-height:1.5;word-break:break-all;">${lsKeyList}</div>
           <div id="_dbg_clr_caches" style="color:#6b7280;font-size:0.82rem;">⏳ Cache Storage API</div>
           <div id="_dbg_clr_sw" style="color:#6b7280;font-size:0.82rem;">⏳ Service Worker registrations</div>
         </div>
