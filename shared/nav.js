@@ -641,9 +641,13 @@
       if (!visible.length) return '';
       var active = isItemActive(item);
       var subLinks = countLeafLinks(item);
+      var hasUrl = item.url ? true : false;
       var h = '<div class="site-nav-subdropdown' + (active ? ' active' : '') + '">' +
-        '<span class="site-subdrop-trigger">' + item.label +
+        '<span class="site-subdrop-trigger">' +
+        '<span class="site-subdrop-trigger-label">' + item.label +
         ' <span class="site-nav-count">' + subLinks + '</span> &raquo;</span>' +
+        (hasUrl ? '<a href="' + resolveUrl(item.url) + '" class="site-subdrop-url-btn" title="' + item.label.replace(/"/g, '&quot;') + '">🔗</a>' : '') +
+        '</span>' +
         '<div class="site-subdrop-menu">';
       h += renderChildren(visible);
       h += '</div></div>';
@@ -727,9 +731,13 @@
         var sections = countVisibleSections(item);
         var statText = totalLinks + ' link' + (totalLinks === 1 ? '' : 's') +
           ' \u00b7 ' + sections + ' section' + (sections === 1 ? '' : 's');
+        var hasUrl = item.url ? true : false;
         html += '<div class="site-nav-dropdown' + activeClass + '">' +
-          '<span class="site-drop-trigger" data-stat="' + statText + '">' + item.label +
+          '<span class="site-drop-trigger" data-stat="' + statText + '">' +
+          '<span class="site-drop-trigger-label">' + item.label +
           ' <span class="site-nav-count">' + totalLinks + '</span> &#9662;</span>' +
+          (hasUrl ? '<a href="' + resolveUrl(item.url) + '" class="site-drop-url-btn" title="' + item.label.replace(/"/g, '&quot;') + '">🔗</a>' : '') +
+          '</span>' +
           '<div class="site-drop-menu">';
         visible.forEach(function (child) {
           html += renderNode(child);
@@ -1176,6 +1184,8 @@
       // Handle subdropdown triggers first
       var subTrigger = e.target.closest('.site-subdrop-trigger');
       if (subTrigger) {
+        // If clicking the 🔗 link, let the browser navigate normally
+        if (e.target.closest('.site-subdrop-url-btn')) return;
         e.preventDefault();
         e.stopPropagation();
         var subdropdown = subTrigger.closest('.site-nav-subdropdown');
@@ -1209,6 +1219,8 @@
       // Handle main dropdown triggers
       var trigger = e.target.closest('.site-drop-trigger');
       if (!trigger) return;
+      // If clicking the 🔗 link, let the browser navigate normally
+      if (e.target.closest('.site-drop-url-btn')) return;
       e.preventDefault();
       e.stopPropagation();
 

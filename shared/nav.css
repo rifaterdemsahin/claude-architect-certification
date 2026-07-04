@@ -68,6 +68,9 @@
   font-size: 0.85rem;
   font-weight: 500;
   transition: all 0.3s;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .site-nav-dropdown:hover .site-drop-trigger {
@@ -124,6 +127,33 @@
   margin-left: 4px;
   background: rgba(139, 92, 246, 0.12);
   border-color: rgba(139, 92, 246, 0.25);
+}
+
+/* 🔗 URL link button on items with both children + url */
+.site-drop-url-btn,
+.site-subdrop-url-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: #9ca3af;
+  font-size: 0.75rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s, background 0.15s;
+  flex-shrink: 0;
+}
+
+.site-drop-trigger:hover .site-drop-url-btn,
+.site-subdrop-trigger:hover .site-subdrop-url-btn {
+  opacity: 1;
+}
+
+.site-drop-url-btn:hover,
+.site-subdrop-url-btn:hover {
+  color: #f3f4f6;
+  background: rgba(139, 92, 246, 0.2);
 }
 
 /* Stats tooltip — only when the dropdown is closed (once open the items
@@ -370,7 +400,9 @@
 }
 
 .site-nav-subdropdown .site-subdrop-trigger {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 4px;
   padding: 10px 16px;
   border-radius: 8px;
   color: #9ca3af;
@@ -723,6 +755,17 @@ html.light-mode .site-drop-trigger:hover,
 html.light-mode .site-subdrop-trigger:hover {
   color: #0f172a !important;
   background: rgba(139, 92, 246, 0.08) !important;
+}
+
+html.light-mode .site-drop-url-btn,
+html.light-mode .site-subdrop-url-btn {
+  color: #475569 !important;
+}
+
+html.light-mode .site-drop-url-btn:hover,
+html.light-mode .site-subdrop-url-btn:hover {
+  color: #0f172a !important;
+  background: rgba(139, 92, 246, 0.12) !important;
 }
 
 html.light-mode .site-drop-menu,
