@@ -296,6 +296,99 @@
       background: rgba(0, 240, 255, 0.4);
     }
 
+    /* Search bar for generated output */
+    .search-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0.75rem;
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: 0.75rem;
+      margin-bottom: 0.75rem;
+      transition: var(--transition);
+    }
+    .search-bar:focus-within {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(0, 240, 255, 0.15);
+    }
+    .search-icon {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      flex-shrink: 0;
+    }
+    .search-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.85rem;
+      padding: 0.2rem 0;
+    }
+    .search-input::placeholder {
+      color: var(--text-dim);
+    }
+    .search-count {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+      white-space: nowrap;
+      min-width: 3rem;
+      text-align: right;
+    }
+    .search-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      width: 28px;
+      height: 28px;
+      border-radius: 0.4rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.7rem;
+      transition: var(--transition);
+      padding: 0;
+      line-height: 1;
+    }
+    .search-btn:hover {
+      background: rgba(0, 240, 255, 0.15);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    .search-btn:disabled {
+      opacity: 0.3;
+      cursor: default;
+    }
+    .search-btn:disabled:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: var(--border-color);
+      color: var(--text-muted);
+    }
+    .search-clear {
+      color: #f87171;
+      border-color: rgba(239, 68, 68, 0.3);
+      font-size: 0.75rem;
+    }
+    .search-clear:hover {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: #ef4444;
+      color: #fff;
+    }
+    mark.search-match {
+      background: rgba(255, 213, 0, 0.35);
+      color: inherit;
+      border-radius: 2px;
+      padding: 0 1px;
+    }
+    mark.search-match.current {
+      background: rgba(255, 213, 0, 0.7);
+      box-shadow: 0 0 6px rgba(255, 213, 0, 0.5);
+    }
+
     .btn-copy, .btn-generate, .btn-copy-form, .btn-clear, .btn-action {
       display: inline-flex;
       align-items: center;
@@ -1078,6 +1171,18 @@
               <div class="help-text">Specifies which LLM created this project for documentation and UI badges</div>
             </div>
 
+            <div class="form-group" style="background: rgba(168, 85, 247, 0.08); border: 1px solid rgba(168, 85, 247, 0.25); border-radius: 0.75rem; padding: 1rem;">
+              <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.4rem;">
+                <span style="font-size: 1.1rem;">📦</span>
+                <span style="font-weight: 700; color: #d8b4fe; font-size: 0.9rem;">Animation Template Reference</span>
+              </div>
+              <p style="color: var(--text-muted); font-size: 0.82rem; line-height: 1.5; margin: 0;">
+                The generated prompt instructs the AI to use
+                <a href="https://github.com/rifaterdemsahin/animation-template-llm-training" target="_blank" style="color: var(--primary);">animation-template-llm-training ↗</a>
+                as the structural foundation for the GSAP cinematic animation (<code style="background: rgba(255,255,255,0.06); padding: 1px 5px; border-radius: 3px; font-size: 0.78rem;">index.html</code>).
+              </p>
+            </div>
+
             <div class="action-buttons" style="display: flex; gap: 0.75rem; margin-top: 1.75rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); flex-wrap: wrap;">
               <button type="button" id="generateBtn" class="btn-generate" onclick="generatePromptAction()" style="flex: 1.2; min-width: 140px;">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
@@ -1106,6 +1211,15 @@
               <svg id="copyIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
               <span id="copyText">Copy Prompt</span>
             </button>
+          </div>
+
+          <div class="search-bar">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchInput" class="search-input" placeholder="Search prompt..." oninput="searchPrompt()" onkeydown="if(event.key==='Enter'){event.preventDefault();if(event.shiftKey)navigateSearch(-1);else navigateSearch(1)}" autocomplete="off">
+            <span id="searchCount" class="search-count"></span>
+            <button class="search-btn" id="searchPrevBtn" onclick="navigateSearch(-1)" title="Previous match">▲</button>
+            <button class="search-btn" id="searchNextBtn" onclick="navigateSearch(1)" title="Next match">▼</button>
+            <button class="search-btn search-clear" onclick="clearSearch()" title="Clear search">✕</button>
           </div>
 
           <div id="promptOutput" class="code-wrapper"></div>
@@ -1562,6 +1676,10 @@
   </div>
 
   <script>
+    let _searchMatchIndex = -1;
+    let _searchMatchCount = 0;
+    let _promptRawText = '';
+
     // Tab switching logic
     function switchTab(tabId, btnEl) {
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -1593,21 +1711,13 @@
 
 You are DeepSeek V4 Flash — a precision code generation model with a 1M token context window. You also act as a senior frontend engineer + motion designer + Principal AI Architect and Systems Engineer. Your task is to build a complete, runnable, production-grade architectural demonstration project — an interactive web animation demo — from scratch based on the provided **Claude AI Architect Exam** Question and Answer. You must initialize the project folder locally and push the completed repository directly to GitHub.
 
-## 📐 Concrete Example of Expected Output
+## 📐 Required: Animation Template to Use
 
-Before you begin, here is a concrete working example of exactly what you must produce — use this as your structural template:
+You MUST use the **Animation Template for LLM Training** as the structural foundation for the cinematic animation (\`index.html\`):
 
-**Example Scenario:** The exam question is *"A document analysis subagent frequently fails on PDF files (corrupted sections, password protection, parse timeouts). Raw exceptions kill the subagent and force the coordinator to retry/skip/fail, causing excessive overhead. What is the best architectural improvement?"*
+📦 **Template Repository:** https://github.com/rifaterdemsahin/animation-template-llm-training/tree/main
 
-**Expected Output (following this exact template):**
-- **Repo name:** \`pdf-agent-error-recovery-demo\`
-- **Side-by-side:** \`src/subagent-naive.js\` (raw throws — coordinator does everything) vs \`src/subagent-resilient.js\` (local retry 3× on transient, structured escalation with \`{status, partialResults, attemptLog}\` on fatal)
-- **CLI benchmark (\`demo.js\`):** ascii table showing \`Coordinator Interventions: 5 → 1\`, \`Token Cost: 12.4k → 3.1k\`, \`Success Rate: 60% → 98%\`
-- **Cinematic animation (\`index.html\`):** Single self-contained HTML file using **GSAP (GreenSock)** via CDN — an auto-playing, timeline-based 4-scene cinematic presentation (not an interactive dashboard). Scene 1: title card, Scene 2: naive approach fails, Scene 3: resilient architecture with visual metaphors, Scene 4: metrics comparison. Screen-record directly for YouTube.
-- **Docs:** \`docs/step-images/\` with 5 "How, What & Why" visual diagrams (use **Excalidraw** at https://excalidraw.com for hand-drawn-style architecture sketches or the server's **Gemini Imagen API** via \`POST /api/infographics/generate\` which pulls the Gemini key from Azure Key Vault) + modal lightbox; \`README.md\` with LLM attribution badge, live demo link, and quickstart
-- **Deployment:** \`.github/workflows/static.yml\` → auto-deploy to GitHub Pages → auto-open \`https://<github-username>.github.io/<repo-name>/\`
-
-Now apply this exact structure to the exam question and answer below.
+Clone this template and adapt its 4-scene GSAP timeline, cinematic scene format, and dark tech aesthetic to your specific exam scenario below. The template provides the GSAP scaffolding — replace the content themes with your scenario's naive vs resilient architecture story.
 
 ## ⚡ DeepSeek V4 Flash Optimization & Pre-requisites
 
@@ -1641,13 +1751,7 @@ The objective of this repository is to transform an abstract architectural exam 
    - **Act 2 — The Resilient Architecture**: Clear the screen. Introduce the three pillars of the resilient solution with distinct visual metaphors (e.g., sandbox isolation for context:fork, validation shield for allowed-tools, token filter for argument-hint). Show it succeeding where the naive approach failed.
    - **Act 3 — The Metrics**: Animate the comparison results (token reduction, blocked destructive actions, success rate) counting up from 0 to final values.
 3. **Quantifiable Metrics & Input Token Stats**: Define clear architectural metrics (e.g., *Coordinator Interventions*, *Error Recovery Rate*, *System Latency*, *Throughput*, *Memory Consumption*, and *Input Token Consumption*) that quantitatively prove the superiority of the resilient approach. You MUST include a dedicated **Input Token Stats & Efficiency Scoreboard** at the bottom of the simulator page (\`index.html\`), CLI tables (\`demo.js\`), and \`README.md\` demonstrating input token savings!
-4. **🎬 Cinematic Auto-Playing Animation (\`index.html\` via GSAP)**: Build a single, self-contained HTML file that acts as a cinematic, timeline-based animated presentation using **GSAP (GreenSock Animation Platform)** via CDN (\`<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"><\\/script>\`). This is NOT an interactive dashboard with buttons — it must be an auto-playing sequence that can be screen-recorded directly for a YouTube video. Key requirements:
-    - Use \`gsap.timeline()\` to orchestrate a precise, time-coded sequence
-    - Trigger on \`window.onload\` — zero user interaction required to start
-    - Chronological scene flow (not tab-based toggling): Scene 1 (Setup) → Scene 2 (Naive fails) → Scene 3 (Resilient succeeds) → Scene 4 (Metrics)
-    - Use visual metaphors over text logs (e.g., show token streams being filtered, show shields blocking destructive commands, show isolation bubbles for sandboxed contexts)
-    - Dark modern aesthetic (cyan #00d4aa, crimson #e94560, deep blue/black backgrounds)
-    - Large, highly legible fonts suitable for 1080p video playback
+4. **🎬 Cinematic Auto-Playing Animation (\`index.html\`)**: Clone the **Animation Template** (see 📐 Required: Animation Template to Use) and adapt its GSAP timeline, 4-scene structure, and dark tech aesthetic to your scenario. This is NOT an interactive dashboard — it must be an auto-playing sequence that can be screen-recorded at 1080p for YouTube. Replace the content themes (tokens, shields, sandboxes) with your scenario's naive → resilient architecture story.
 5. **Step-by-Step "How, What & Why" Visual Explanations & Modal Popup Lightbox (\`index.html\`)**: At each execution step (Step 0 through Step 4), you MUST generate a visual image or architectural illustration that explains:
    - **WHAT** is happening at this architectural layer/stage.
    - **WHY** the resilient pattern is superior to the naive anti-pattern here.
@@ -1669,37 +1773,7 @@ The objective of this repository is to transform an abstract architectural exam 
     - Add pause/resume/stop controls and a speaking indicator badge.
     - **CRITICAL REQUIREMENT**: The narration MUST auto-scroll and highlight the correct section in real-time as the speech progresses. Use \`onboundary\` event on the utterance to track word-level position and sync scrolling.
 12. **🎨 Emoji-Rich Presentation**: Use emojis liberally and intentionally throughout every deliverable — README.md headers, CLI demo banners, simulator UI cards, diagram captions, file tree annotations, commit messages, and GitHub issue templates. Emojis make the output scannable, engaging, and exam-review friendly. Every section heading, status badge, metric label, scoreboard column, step explanation card, and file tree entry MUST carry at least one relevant emoji.
-13. **🖌️ Animation Design Strategy — How to Improve the Animation**: The cinematic animation must teach the concept visually, not just decorate. Apply these specific strategies:
 
-    **A) Pacing — Sequential over Parallel**
-    Viewers can only focus on one thing at a time. NEVER show naive and resilient side-by-side. Instead tell a chronological story: introduce the problem (naive) → show it failing → introduce the hero (resilient) → show it succeeding → reveal the metrics.
-
-    **B) Visual Metaphors (replace text logs with graphics)**
-    Text logs like \`context_access: leaked\` are unreadable in video. Use these visual representations:
-    - **context:fork** → a clean, isolated bubble/sandbox forming around the task, with unrelated tokens bouncing off
-    - **allowed-tools** → a literal shield that shatters unauthorized destructive commands (e.g. DROP TABLE) while allowing safe ones through
-    - **Token flow** → physically show a massive stream of tokens (representing full context history) being blocked/filtered down to just essential tokens by argument-hint
-    - **Security breach** → screen flash red with "System Compromised" warning when naive approach fails
-
-    **C) Focus on Data Flow (Tokens)**
-    Token efficiency is your best metric. Animate it visually: show a firehose of tokens entering the naive agent vs. a filtered stream entering the resilient agent. Animate the token count number counting down from 100% to the actual savings percentage.
-
-    **D) Use GSAP as the Animation Engine**
-    Raw HTML/CSS transitions are hard to sequence for video. GSAP gives you a timeline-based API designed for precise, time-coded animations:
-    - \`gsap.timeline()\` for scene orchestration
-    - \`gsap.to()\` / \`gsap.from()\` for element transitions
-    - \`gsap.utils.snap()\` for metric counters
-    - Easing: \`power2.out\`, \`back.out(1.7)\`, \`elastic.out(1, 0.3)\`
-    - Stagger: \`stagger: 0.15\` for sequential reveals
-14. **📐 Responsive & Screen-Recording-Friendly Layout**: The entire \`index.html\` (including the "How, What & Why" walkthrough section and the GSAP cinematic scenes) MUST be built with a responsive framework that makes it presentable on a projector, large monitor, or screen recording at 1080p. Requirements:
-
-    - Use a single responsive grid framework (CSS Grid or Flexbox) that adapts from mobile up to 1920px wide
-    - All SVG diagrams and Excalidraw sketches in the "How, What & Why" section MUST have \`width: 100%; height: auto; max-width: 1200px; display: block; margin: 0 auto;\` so they fill available horizontal space
-    - The modal popup MUST render SVGs at \`object-fit: contain; max-width: 95vw; max-height: 95vh; width: auto; height: auto;\` — never clip or letterbox diagrams smaller than the viewport
-    - Font size floor: never below 16px body text and 28px for headings in the walkthrough section, so content remains legible on a projected screen
-    - All click targets (modal triggers, navigation chips, buttons) must be minimum 44×44px touch target
-    - The GSAP cinematic scenes should use \`100vw × 100vh\` full-viewport sizing with \`position: fixed\` overlay approach for clean screen-recording output
-    - Test at 1920×1080 before publishing; verify every SVG is legible without zooming
 
 ## 💡 DeepSeek V4 Flash Execution Guidance
 
@@ -1711,32 +1785,7 @@ Optimize your output for DeepSeek V4 Flash's architecture:
 4. **Leverage zero-dependency patterns** — use Node.js built-ins (\`fs\`, \`path\`, \`events\`, \`assert\`) and browser APIs (\`fetch\`, \`speechSynthesis\`, \`IntersectionObserver\`) instead of npm packages. DeepSeek V4 Flash has deep knowledge of these APIs.
 5. **DeepSeek V4 Flash attribution** — every generated project MUST include \`⚡ Built with DeepSeek V4 Flash\` in the README badge, simulator footer, and CLI banner. This is non-negotiable.
 
-## 🎬 Master Prompt — Animation Scene Template for \`index.html\`
 
-Use this exact 4-scene structure when building the GSAP animation in \`index.html\`. Adapt the concept names to match your specific exam scenario.
-
-### Scene 1: The Setup (0-4 seconds)
-- Display a clean, modern title card with the architectural pattern name
-- Fade in the core challenge statement
-
-### Scene 2: The Naive Approach Fails (4-12 seconds)
-- Visual: Show an "Agent" receiving a task
-- Action: Demonstrate **context leakage** — show unrelated/sensitive tokens flooding into the agent's context window
-- Action: Demonstrate a **destructive action** — show the agent attempting a dangerous command and succeeding (no guardrails), screen flashes red with "System Compromised" warning
-
-### Scene 3: The Resilient Architecture Succeeds (12-22 seconds)
-- Clear the screen and introduce the three pillars of your solution
-- **context:fork** → Show the agent placed into a clean, isolated sandbox. Unrelated tokens bounce off the sandbox boundary. Token cost visibly drops.
-- **argument-hint** → Show the system strictly validating input before the agent even spins up
-- **allowed-tools** → Show a firewall/shield. When a destructive command is attempted, the shield lights up bright green and shatters the command, allowing only safe operations through
-
-### Scene 4: The Metrics (22-28 seconds)
-- End with a bold, animated comparison of results
-- Token reduction percentage animating from 0% to actual savings
-- Destructive actions blocked: 100%
-- Counter numbers should \`gsap.to()\` from 0 to final value with \`snap\`
-
----
 
 ## 🔍 5-Phase Output Quality Assurance
 
@@ -1974,6 +2023,8 @@ Execute the steps above sequentially and thoroughly. When finished, print the CL
 
       const promptOutputEl = document.getElementById('promptOutput');
       if (promptOutputEl) promptOutputEl.innerText = promptText;
+      _promptRawText = promptText;
+      clearSearch();
 
       const words = promptText.trim().split(/\s+/).filter(Boolean).length;
       const chars = promptText.length;
@@ -2011,6 +2062,83 @@ Execute the steps above sequentially and thoroughly. When finished, print the CL
           clearIcon.innerHTML = '<polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>';
         }, 1500);
       }
+    }
+
+    // Search in generated prompt
+    function searchPrompt() {
+      const input = document.getElementById('searchInput');
+      const output = document.getElementById('promptOutput');
+      const countEl = document.getElementById('searchCount');
+      const query = input ? input.value : '';
+
+      if (!output) return;
+
+      if (!query.trim()) {
+        clearSearch();
+        return;
+      }
+
+      const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const parts = _promptRawText.split(new RegExp('(' + escaped + ')', 'gi'));
+      const matchCount = (parts.length - 1) / 2;
+
+      if (matchCount === 0) {
+        output.innerHTML = _promptRawText;
+        countEl.textContent = '0/0';
+        document.getElementById('searchPrevBtn').disabled = true;
+        document.getElementById('searchNextBtn').disabled = true;
+        _searchMatchCount = 0;
+        _searchMatchIndex = -1;
+        return;
+      }
+
+      let html = '';
+      for (let i = 0; i < parts.length; i++) {
+        if (i % 2 === 1) {
+          const idx = Math.floor(i / 2);
+          html += '<mark class="search-match' + (idx === 0 ? ' current' : '') + '" data-match-index="' + idx + '">' + parts[i] + '</mark>';
+        } else {
+          html += parts[i].replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+      }
+      output.innerHTML = html;
+
+      _searchMatchCount = matchCount;
+      _searchMatchIndex = 0;
+      countEl.textContent = '1/' + matchCount;
+      document.getElementById('searchPrevBtn').disabled = false;
+      document.getElementById('searchNextBtn').disabled = false;
+
+      const first = output.querySelector('.search-match.current');
+      if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function navigateSearch(dir) {
+      const output = document.getElementById('promptOutput');
+      const countEl = document.getElementById('searchCount');
+      if (!output || _searchMatchCount === 0) return;
+
+      const marks = output.querySelectorAll('.search-match');
+      if (!marks.length) return;
+
+      marks[_searchMatchIndex].classList.remove('current');
+      _searchMatchIndex = (_searchMatchIndex + dir + marks.length) % marks.length;
+      marks[_searchMatchIndex].classList.add('current');
+      marks[_searchMatchIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
+      countEl.textContent = (_searchMatchIndex + 1) + '/' + marks.length;
+    }
+
+    function clearSearch() {
+      const input = document.getElementById('searchInput');
+      const output = document.getElementById('promptOutput');
+      const countEl = document.getElementById('searchCount');
+      if (input) input.value = '';
+      if (output && _promptRawText) output.innerText = _promptRawText;
+      if (countEl) countEl.textContent = '';
+      document.getElementById('searchPrevBtn').disabled = true;
+      document.getElementById('searchNextBtn').disabled = true;
+      _searchMatchCount = 0;
+      _searchMatchIndex = -1;
     }
 
     function copyToClipboard() {
