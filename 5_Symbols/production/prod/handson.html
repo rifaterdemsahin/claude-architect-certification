@@ -2750,35 +2750,51 @@ Execute the steps above sequentially and thoroughly. When finished, print the CL
             }
 
             // Execution Plan — Phases with Spec-Driven Details
-            if (data.executionPlan && data.executionPlan.phases) {
-              instructions += '\n## 📋 Execution Plan — Spec-Driven Phase Breakdown\n';
-              data.executionPlan.phases.forEach(phase => {
-                instructions += `\n### ${phase.phase}\n`;
-                if (phase.steps) {
-                  phase.steps.forEach(step => {
-                    const priorityEmoji = {'critical': '🔴', 'high': '🟠', 'medium': '🟡', 'low': '🟢'};
-                    const pri = priorityEmoji[step.priority] || '⚪';
-                    const tags = step.tags ? step.tags.map(t => `#${t}`).join(' ') : '';
-                    instructions += `  ${step.order}. **${step.file}** ${pri}\n`;
-                    instructions += `     🤖 Agent: ${step.agent}  |  📏 Complexity: ${step.complexity}  |  ~${step.estimatedLines || '?'} lines\n`;
-                    if (step.dependsOn && step.dependsOn.length) instructions += `     ⬆️ Depends on: ${step.dependsOn.join(', ')}\n`;
-                    if (step.templatePattern) instructions += `     📐 Template: ${step.templatePattern}\n`;
-                    if (step.action) instructions += `     🔧 Action: ${step.action}\n`;
-                    if (step.spec) instructions += `     ✅ Spec: ${step.spec}\n`;
-                    if (tags) instructions += `     🏷 ${tags}\n`;
-                    instructions += '\n';
-                  });
-                }
-              });
+            if (data.executionPlan && data.executionPlan.phases && data.executionPlan.phases.length > 0) {
+              var hasRealSteps = false;
+              data.executionPlan.phases.forEach(function(p) { if (p.steps && p.steps.length > 0) hasRealSteps = true; });
+              if (hasRealSteps) {
+                instructions += '\n## 📋 Execution Plan — Spec-Driven Phase Breakdown\n';
+                data.executionPlan.phases.forEach(phase => {
+                  instructions += `\n### ${phase.phase || 'Phase'}\n`;
+                  if (phase.steps) {
+                    phase.steps.forEach(step => {
+                      var order = step.order || step.number || step.id || '#';
+                      var file = step.file || step.name || step.filename || 'unknown';
+                      var agent = step.agent || step.assignedTo || '?';
+                      var complexity = step.complexity || step.size || '?';
+                      var lines = step.estimatedLines || step.lines || '?';
+                      var priorityEmoji = {'critical':'🔴','high':'🟠','medium':'🟡','low':'🟢'};
+                      var pri = priorityEmoji[step.priority] || '⚪';
+                      var tags = (step.tags && step.tags.map) ? step.tags.map(function(t){return '#t'}).join(' ') : '';
+                      if (typeof step.tags === 'string') tags = step.tags;
+                      instructions += `  ${order}. **${file}** ${pri}\n`;
+                      instructions += `     🤖 Agent: ${agent}  |  📏 Complexity: ${complexity}  |  ~${lines} lines\n`;
+                      if (step.dependsOn && step.dependsOn.length) instructions += `     ⬆️ Depends on: ${step.dependsOn.join(', ')}\n`;
+                      if (step.templatePattern) instructions += `     📐 Template: ${step.templatePattern}\n`;
+                      if (step.action) instructions += `     🔧 Action: ${step.action}\n`;
+                      if (step.spec) instructions += `     ✅ Spec: ${step.spec}\n`;
+                      if (tags) instructions += `     🏷 ${tags}\n`;
+                      instructions += '\n';
+                    });
+                  }
+                });
+              }
             }
 
             // File Creation Order (flat summary)
-            if (data.executionPlan && data.executionPlan.fileCreationOrder) {
-              instructions += `\n### 📁 File Creation Order (${data.executionPlan.fileCreationOrder.length} files)\n\n`;
-              data.executionPlan.fileCreationOrder.forEach(f => {
-                const spec = f.spec ? `  // ${f.spec}` : '';
-                instructions += `  ${f.order}. ${f.file} ← ${f.agent}${spec}\n`;
-              });
+            if (data.executionPlan && data.executionPlan.fileCreationOrder && data.executionPlan.fileCreationOrder.length > 0) {
+              var firstF = data.executionPlan.fileCreationOrder[0];
+              if (firstF.file || firstF.name || firstF.order) {
+                instructions += `\n### 📁 File Creation Order (${data.executionPlan.fileCreationOrder.length} files)\n\n`;
+                data.executionPlan.fileCreationOrder.forEach(f => {
+                  var o = f.order || f.number || f.id || '#';
+                  var fl = f.file || f.name || f.filename || 'unknown';
+                  var ag = f.agent || f.assignedTo || '?';
+                  var spec = (f.spec || f.description) ? ('  // ' + (f.spec || f.description)) : '';
+                  instructions += `  ${o}. ${fl} ← ${ag}${spec}\n`;
+                });
+              }
             }
 
             // MoE Agent Design
@@ -2791,13 +2807,25 @@ Execute the steps above sequentially and thoroughly. When finished, print the CL
               if (moe.parallelism) instructions += `  **Parallelism:** ${moe.parallelism}\n`;
               instructions += '\n';
 
+              if (moe.mitigationStrategies && moe.mitigationStrategies.length) {
+                instructions += `### 🛡️ Mitigation Strategies (${moe.mitigationStrategies.length})\n\n`;
+                moe.mitigationStrategies.forEach(function(ms) {
+                  instructions += `  **${ms.scenario || 'Scenario'}**\n`;
+                  instructions += `  ⚠️ Risk: ${ms.risk || ''}\n`;
+                  instructions += `  🛡️ Mitigation: ${ms.mitigation || ''}\n`;
+                  if (ms.agent) instructions += `  🤖 Owner: ${ms.agent}\n`;
+                  if (ms.fallback) instructions += `  🔄 Fallback: ${ms.fallback}\n`;
+                  instructions += '\n';
+                });
+              }
+
               if (moe.agents && moe.agents.length) {
                 instructions += `### Agent Pool (${moe.agents.length} agents)\n\n`;
                 instructions += `  | Agent | Role | Model | Token Budget | Est. Time | Gate | Handoff → |\n`;
                 instructions += `  | ----- | ---- | ----- | ------------ | --------- | ---- | --------- |\n`;
                 moe.agents.forEach(function(a) {
                   var budget = a.tokenBudget ? a.tokenBudget.toLocaleString() : '?';
-                  instructions += `  | **${a.name}** | ${a.role || ''} | ${a.model || ''} | ${budget} | ${a.estTime || ''} | ${a.gate ? a.gate.substring(0,60)+'...' : ''} | ${a.handoffTo || ''} |\n`;
+                  instructions += `  | **${a.name || ''}** | ${a.role || ''} | ${a.model || ''} | ${budget} | ${a.estTime || ''} | ${a.gate ? a.gate.substring(0,60)+'...' : ''} | ${a.handoffTo || ''} |\n`;
                 });
                 instructions += '\n';
               }
@@ -2805,20 +2833,20 @@ Execute the steps above sequentially and thoroughly. When finished, print the CL
               if (moe.qualityGates && moe.qualityGates.length) {
                 instructions += `### 🚦 Quality Gates (${moe.qualityGates.length} checkpoints)\n\n`;
                 moe.qualityGates.forEach(function(g) {
-                  instructions += `  **${g.name}** (${g.agent})\n`;
-                  instructions += `  ✅ Check: ${g.check}\n`;
+                  instructions += `  **${g.name || 'Gate'}** (${g.agent || '?'})\n`;
+                  instructions += `  ✅ Check: ${g.check || ''}\n`;
                   if (g.onFail) instructions += `  ❌ On Fail: ${g.onFail}\n`;
                   instructions += '\n';
                 });
               }
             }
-            if (data.assetPipeline && data.assetPipeline.length) {
+            if (data.assetPipeline && data.assetPipeline.length && data.assetPipeline[0].endpoint) {
               instructions += `\n## 🖼️ Asset Pipeline — API-to-Output Trace (${data.assetPipeline.length} assets)\n\n`;
               data.assetPipeline.forEach(a => {
-                instructions += `  ${a.step}. \`${a.endpoint}\`\n`;
-                instructions += `     📤 Output: ${a.output}\n`;
+                instructions += `  ${a.step || a.order || '#'}. \`${a.endpoint || a.api || '?'}\`\n`;
+                instructions += `     📤 Output: ${a.output || a.path || a.file || '?'}\n`;
                 if (a.topic) instructions += `     📝 Topic: ${a.topic}\n`;
-                instructions += `     🤖 Agent: ${a.agent}\n`;
+                instructions += `     🤖 Agent: ${a.agent || '?'}\n`;
                 if (a.fallback) instructions += `     🔄 Fallback: ${a.fallback}\n`;
                 instructions += '\n';
               });
