@@ -561,6 +561,11 @@
     .img-preview-close:hover { background: rgba(255,255,255,0.15); }
     .img-preview-copy { position: absolute; bottom: 16px; right: 16px; background: rgba(0,0,0,0.65); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 8px 16px; border-radius: 8px; font-size: 0.82rem; font-weight: 600; cursor: pointer; font-family: var(--font-body); backdrop-filter: blur(6px); transition: all 0.2s; z-index: 10; }
     .img-preview-copy:hover { background: rgba(139,92,246,0.7); border-color: rgba(139,92,246,0.8); }
+    .img-preview-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; border-radius: 50%; background: rgba(0,0,0,0.55); border: 1px solid rgba(255,255,255,0.15); color: #fff; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; z-index: 10; backdrop-filter: blur(4px); }
+    .img-preview-nav:hover { background: rgba(139,92,246,0.6); border-color: rgba(139,92,246,0.7); }
+    .img-preview-nav.hidden { display: none; }
+    .img-preview-prev { left: 12px; }
+    .img-preview-next { right: 12px; }
 
     /* Sentence image modal */
     .img-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.78); display: none; align-items: center; justify-content: center; z-index: 10000; backdrop-filter: blur(4px); }
@@ -2511,10 +2516,32 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
     window.openImagePreview = function(url, name) {
       const overlay = document.getElementById('img-preview-overlay');
       const img = overlay.querySelector('img');
+      const prevBtn = overlay.querySelector('.img-preview-prev');
+      const nextBtn = overlay.querySelector('.img-preview-next');
+
+      const thumbs = document.querySelectorAll('.sent-img-thumb img[alt]');
+      const entries = [];
+      thumbs.forEach(t => {
+        const n = t.getAttribute('alt');
+        if (n) entries.push({ url: imgFileUrl(n), name: n });
+      });
+      window._previewImages = entries;
+
+      const idx = entries.findIndex(e => e.url === url);
+      window._previewIdx = idx;
+
       img.src = url;
       img.alt = name || 'Image preview';
       overlay.classList.add('open');
       document.body.style.overflow = 'hidden';
+
+      if (entries.length <= 1) {
+        prevBtn.classList.add('hidden');
+        nextBtn.classList.add('hidden');
+      } else {
+        prevBtn.classList.toggle('hidden', idx <= 0);
+        nextBtn.classList.toggle('hidden', idx >= entries.length - 1);
+      }
     };
 
     window.closeImagePreview = function() {
@@ -2540,10 +2567,29 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
       }
     };
 
+    window.navigatePreviewImage = function(direction) {
+      const entries = window._previewImages;
+      if (!entries || entries.length <= 1) return;
+      const newIdx = (window._previewIdx + direction + entries.length) % entries.length;
+      if (newIdx < 0 || newIdx >= entries.length) return;
+      const e = entries[newIdx];
+      window._previewIdx = newIdx;
+      const overlay = document.getElementById('img-preview-overlay');
+      const img = overlay.querySelector('img');
+      const prevBtn = overlay.querySelector('.img-preview-prev');
+      const nextBtn = overlay.querySelector('.img-preview-next');
+      img.src = e.url;
+      img.alt = e.name;
+      prevBtn.classList.toggle('hidden', newIdx <= 0);
+      nextBtn.classList.toggle('hidden', newIdx >= entries.length - 1);
+    };
+
     document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && document.getElementById('img-preview-overlay').classList.contains('open')) {
-        closeImagePreview();
-      }
+      const overlay = document.getElementById('img-preview-overlay');
+      if (!overlay.classList.contains('open')) return;
+      if (e.key === 'Escape') { closeImagePreview(); }
+      else if (e.key === 'ArrowLeft') { navigatePreviewImage(-1); }
+      else if (e.key === 'ArrowRight') { navigatePreviewImage(1); }
     });
 
     // ── Hover-to-preview: rest the mouse on a thumbnail for 2s to auto-open the original ──
@@ -2842,7 +2888,9 @@ Now, before we move to [NEXT SECTION], let's check your understanding.`;
   <div class="img-preview-overlay" id="img-preview-overlay" onclick="closeImagePreview()">
     <button class="img-preview-close" onclick="event.stopPropagation();closeImagePreview()" title="Close image preview">✕</button>
     <div class="img-preview-box" onclick="event.stopPropagation()">
+      <button class="img-preview-nav img-preview-prev" onclick="event.stopPropagation();navigatePreviewImage(-1)" title="Previous image">◀</button>
       <img src="" alt="Preview">
+      <button class="img-preview-nav img-preview-next" onclick="event.stopPropagation();navigatePreviewImage(1)" title="Next image">▶</button>
       <button class="img-preview-copy" onclick="event.stopPropagation();copyImageToClipboard()" title="Copy image to clipboard">📋 Copy</button>
     </div>
   </div>
