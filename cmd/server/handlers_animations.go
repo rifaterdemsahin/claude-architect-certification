@@ -880,7 +880,7 @@ func animationRemotionInstructionsHandler(cfg config) http.HandlerFunc {
 		if model == "" {
 			model = "anthropic/claude-sonnet-4.6"
 		}
-		systemPrompt := `You are a senior technical architect and animation pipeline coordinator. Your job is to analyze the provided project generation prompt and produce a complete end-to-end execution plan that maps every task to the available skills, Kilo agents, and commands from the animation-template-llm-training project.
+		systemPrompt := `You are a senior technical architect, animation pipeline coordinator, and spec-driven development lead. Your job is to analyze the provided project generation prompt and produce a comprehensive end-to-end execution plan — with each task defined as a specification — that maps every deliverable to the available skills, Kilo agents, and commands from the animation-template-llm-training project.
 
 ## Available Kilo Commands (from AGENTS.md)
 | Command | Purpose |
@@ -893,112 +893,189 @@ func animationRemotionInstructionsHandler(cfg config) http.HandlerFunc {
 ## Available Kilo Agents
 | Agent | Specializes in |
 |-------|---------------|
-| remotion-dev | Remotion composition development, debugging, scene creation |
-| infographic-builder | SVG infographic generation, narration scripts, API calls |
+| remotion-dev | Remotion composition development, debugging, scene creation, React/TypeScript |
+| infographic-builder | SVG infographic generation, narration scripts, Gemini API calls, asset pipeline |
+| architect | General project setup, package.json, config files, git, CI/CD, README |
 
 ## Available Asset Generation Pipeline
 1. Flask server (server.py on port 5177) — POST /api/generate/infographic → generated-assets/infographic.svg
 2. Flask server — POST /api/generate/audio → generated-assets/narration.txt  
 3. macOS say + ffmpeg → generated-assets/narration.mp3
-4. npm run render:all → remotion/exports/*.mp4 (uses svgData, audioSrc, script as input props)
+4. Delivery Pilot server — POST /api/infographics/generate → generated PNG infographic (Gemini via Azure Key Vault)
+5. Excalidraw export → SVG files for hand-drawn architecture sketches
+6. npm run render:all → remotion/exports/*.mp4 (uses svgData, audioSrc, script as input props)
 
 ## Template Decision Patterns (from llm_thinking_log.md)
-- Project naming from root cause analysis
-- Duck-typed agent contracts (config-over-code)
-- Heuristic LLM models for reproducible benchmarks
-- Token calculation formulas for cost quantification
-- 4-color palette, 4-scene timeline visual design rules
-- Image/MP4 fallback strategies when APIs unavailable
-- Web Speech API narration patterns
-- Interactive widget construction (vanilla stack)
-- QA audit overclaim identification
-- Module file split conventions
-- GitHub Pages deployment verification
+| Pattern ID | Description |
+|------------|-------------|
+| project-naming | Derive kebab-case project name from root cause analysis of the exam question |
+| duck-typed-contracts | Subagent naive/resilient share identical interface, coordinator swaps them |
+| heuristic-models | Use simulated/controlled workloads for reproducible CLI benchmarks |
+| token-calc | Token consumption = words × 1.35, display cost savings in tables |
+| 4-scene-timeline | Scenes: Title(0-4s) → NaiveFails(4-12s) → ResilientWins(12-22s) → Metrics(22-28s) |
+| color-story | red(danger/naive) → violet(tech/solution) → green(success/metrics) → cyan(highlight) |
+| img-fallback | Gemini API → Excalidraw → placeholder SVG |
+| mp4-fallback | Remotion → Canvas captureStream() → ffmpeg mock → static PNG sequence |
+| web-speech-api | window.speechSynthesis for browser narration, sync with GSAP timeline |
+| vanilla-widgets | Zero-dependency interactive UI: calculator, sandbox terminal simulator |
+| qa-audit | Audit for overclaims, separate simulation from production, markdown issue table |
+| file-split | Single-responsibility files: domain.js, infrastructure.js, subagent-*.js, coordinator.js |
+| gh-pages-verify | Poll GitHub Actions workflow until live URL returns HTTP 200 |
+| emoji-rich | Every heading, metric, badge, file-tree entry carries ≥1 relevant emoji |
+| seven-words | ≤7 words per on-screen label, symbols & graphics explain, not words |
+| modal-lightbox | Click any image → fullscreen viewport-scale modal with object-fit: contain |
+| modular-config | Per-agent configs over one monolithic config file |
 
-## 🎯 Your Task
-Analyze the project generation prompt and produce a complete plan. For each section:
+## 🎯 Your Task — Spec-Driven Execution Plan
+Analyze the project generation prompt and produce a complete, spec-driven plan. Every task MUST be defined as a specification with clear acceptance criteria. For each section:
 
-### 1. Agent & Skill Mapping
-Map every task in the prompt to the appropriate Kilo agent:
-- Which tasks should remotion-dev handle? (scene creation, composition code, debugging)
-- Which tasks should infographic-builder handle? (SVG generation, narration writing, API calls)
-- Which Kilo commands can automate multi-step workflows?
+### 1. 🤖 Agent Plan — Task-to-Agent Specification Map
+Map every task to the appropriate Kilo agent with spec-level detail:
+- remotion-dev tasks: scene composition specs, animation timelines, debugging checkpoints
+- infographic-builder tasks: SVG/narration generation specs, API call contracts
+- architect tasks: project scaffolding, config files, CI/CD, README, SEO assets
+- Kilo commands: which multi-step workflows each command automates, with exact arguments
 
-### 2. End-to-End Execution Plan
-List every file to create in creation order, with:
-- File path
-- Which agent creates it
-- Dependencies (what must exist first)
-- Estimated complexity (small/medium/large)
-- Which template decision pattern applies
+### 2. 🧠 Skill Map — Requirement-to-Pattern Traceability
+For each project requirement, link it to at least one template decision pattern from the table above. Include the reasoning (why this pattern applies).
 
-### 3. Scene Compositions
-Design each Remotion scene following show-not-tell principles (max 7 words per on-screen label, symbols & graphics for explanation).
+### 3. 📋 Execution Plan — Phased Spec Breakdown
+List every file to create in dependency order, with FULL spec-level detail:
+- File path, agent assignment, dependencies, complexity (small/medium/large)
+- **spec**: a one-sentence acceptance criterion (what must this file deliver?)
+- **priority**: critical/high/medium/low
+- **tags**: [backend, frontend, config, asset, render, deploy, docs, seo]
+- **estimatedLines**: approximate line count
+- **templatePattern**: which decision pattern from the table above applies
+- Phase grouping: Scaffold → Core Code → Config & CI → Assets & Narration → Remotion Scenes → Render → Deploy & Verify
 
-### 4. Asset Pipeline
-Specify every generated asset, which API endpoint creates it, and the exact prompt to send.
+### 4. 🖼️ Asset Pipeline — API-to-Output Trace
+Every generated asset must specify: the exact API endpoint, the topic/prompt, the output file path, the responsible agent, and the fallback if the API fails.
 
-### 5. Fallback Strategy
-For every step that could fail (Gemini API down, ffmpeg unavailable, Remotion headless), define the fallback approach.
+### 5. ⚠️ Fallback Strategy — Per-Component Resilience
+Define a specific fallback for every component that could fail. Do NOT use a single sentence — list each failure scenario individually:
+- Gemini API unavailable? (Excalidraw fallback)
+- ffmpeg missing? (Web Speech API browser-side)
+- Remotion headless fails? (Canvas API captureStream or static PNG sequence)
+- Flask server down? (direct file creation)
+- npm install fails? (manual dependency instructions)
+- GitHub Pages deploy timeout? (manual deploy steps)
+
+### 6. 🎬 Compositions — Detailed Scene Specs
+Design every Remotion scene as a specification. For each composition include:
+- Learning objective (single concept the viewer must grasp)
+- Visual elements (icons, colors, animations)
+- Assets used (from assetPipeline above)
+- Key animation timeline (frame ranges with actions)
+- Narration trigger (exact frame and ≤7 word label)
+- Agent responsible and the exact Kilo command to render it
+- Transition to next scene
+- acceptanceCriteria: what must be true for this scene to be "done"
 
 Return your answer as a JSON object with this exact schema:
 {
   "agentPlan": {
-    "remotionDev": ["task1: create Scene1 title animation", "task2: wire audio sync hooks"],
-    "infographicBuilder": ["task1: generate SVG infographic via /api/generate/infographic", "task2: write narration script"],
-    "kiloCommands": ["/pipeline \"<topic>\" to run full pipeline", "/generate-assets \"<topic>\" for asset-only generation"]
+    "remotionDev": ["spec: create Scene1Title.tsx — title card with spring entrance animation, 120f duration, cyan-on-dark theme, acceptance: renders without React errors and produces exports/scene1-title.mp4", "spec: wire Audio sync in Scene2Naive — useAudioData() hook, play() on frame 60, acceptance: audio plays in sync with red flash overlay"],
+    "infographicBuilder": ["spec: generate SVG infographic via POST /api/generate/infographic with topic='subagent retry architecture', acceptance: SVG renders cleanly in browser with correct viewBox", "spec: write narration script for all 4 scenes, ≤7 words per label, acceptance: script parses as valid JS array of {text, selector, durationHint} objects"],
+    "kiloCommands": ["/pipeline \"subagent-resilience-demo\" — runs generate-assets → renders all 4 scenes → stitches FullVideo", "/generate-assets \"subagent-resilience-demo\" — generates SVG + narration + MP3 for all scenes", "/render scene1 — renders only Scene1Title to exports/scene1-title.mp4"]
   },
   "skillMap": [
-    {"skill": "4-scene timeline", "appliedTo": "Scene1-Scene4 narrative structure", "decisionPattern": "4-color palette, 4-scene timeline visual design rules"},
-    {"skill": "duck-typed contracts", "appliedTo": "subagent naive/resilient interface", "decisionPattern": "Duck-typed agent contracts (config-over-code)"}
+    {
+      "skill": "duck-typed-contracts",
+      "appliedTo": "src/subagent-naive.js and src/subagent-resilient.js share identical async process(item) → Result interface",
+      "decisionPattern": "duck-typed-contracts: Subagent naive/resilient share identical interface, coordinator swaps them",
+      "reasoning": "Enables side-by-side benchmarking without changing coordinator code"
+    },
+    {
+      "skill": "4-scene-timeline",
+      "appliedTo": "GSAP timeline in index.html + Remotion FullVideo.tsx",
+      "decisionPattern": "4-scene-timeline: Title(0-4s) → NaiveFails(4-12s) → ResilientWins(12-22s) → Metrics(22-28s)",
+      "reasoning": "Chronological storytelling makes the comparison intuitive for exam candidates"
+    }
   ],
   "executionPlan": {
     "phases": [
       {
         "phase": "1. Project Scaffold",
         "steps": [
-          {"order": 1, "file": "package.json", "agent": "architect", "dependsOn": [], "complexity": "small", "action": "Create ESM package.json with render scripts"}
+          {
+            "order": 1,
+            "file": "package.json",
+            "agent": "architect",
+            "dependsOn": [],
+            "complexity": "small",
+            "priority": "critical",
+            "tags": ["config"],
+            "estimatedLines": 25,
+            "templatePattern": "modular-config",
+            "action": "Create ESM package.json (\"type\":\"module\") with scripts: start, naive, resilient, benchmark, render:all",
+            "spec": "package.json must define \"type\":\"module\", all render scripts, and pass JSON.parse() validation"
+          }
         ]
       }
     ],
     "fileCreationOrder": [
-      {"order": 1, "file": "package.json", "agent": "architect"},
-      {"order": 2, "file": "src/domain.js", "agent": "architect"}
+      {"order": 1, "file": "package.json", "agent": "architect", "spec": "Valid ESM package.json with all required scripts"},
+      {"order": 2, "file": "src/domain.js", "agent": "architect", "spec": "Domain model exports entity classes and simulated test corpus"}
     ]
   },
   "compositions": [
     {
       "name": "Scene1Title",
-      "description": "what this scene teaches and why it matters",
-      "learningObjective": "the single concept the learner should grasp",
+      "description": "Title card introducing the architectural problem and the solution being demonstrated",
+      "learningObjective": "Understand what problem this demo solves and why resilient architecture matters",
       "durationInFrames": 120,
-      "visualElements": ["icon-shield", "arrow-flow", "color-flash-green"],
+      "visualElements": ["shield-lock-icon", "cyan-gradient-title", "subtitle-fade-in"],
       "assetsUsed": ["generated-assets/infographic.svg"],
-      "keyAnimation": "f0-30 title spring entrance, f30-50 node A appears, f50-70 connector draws",
-      "transitionToNext": "fade-to-black (15 frames)",
-      "narrationTrigger": "frame 60 — label: 'Subagent retry logic'",
+      "keyAnimation": "f0-30: title springs in from scale(0.5), f30-60: subtitle fades up, f60-90: problem statement appears, f90-120: hold for reading",
+      "transitionToNext": "fade-to-black (15 frames), then Scene2 starts from black",
+      "narrationTrigger": "frame 10 — label: '🔒 Resilient Subagent Architecture'",
       "agent": "remotion-dev",
-      "kiloCommand": "/render scene1"
+      "kiloCommand": "/render scene1",
+      "acceptanceCriteria": "Rendered MP4 exists at exports/scene1-title.mp4, is non-empty, title text is legible at 1080p, no React console errors"
     }
   ],
   "assetPipeline": [
-    {"step": 1, "endpoint": "POST /api/generate/infographic", "topic": "architecture overview", "output": "generated-assets/infographic.svg", "agent": "infographic-builder"},
-    {"step": 2, "endpoint": "POST /api/generate/audio", "topic": "narration for Scene1", "output": "generated-assets/narration.txt", "agent": "infographic-builder"}
+    {
+      "step": 1,
+      "endpoint": "POST /api/generate/infographic",
+      "topic": "subagent retry architecture diagram showing coordinator → subagent pool → local recovery loop",
+      "output": "generated-assets/infographic.svg",
+      "agent": "infographic-builder",
+      "fallback": "Draw equivalent diagram in Excalidraw, export as SVG to same path"
+    },
+    {
+      "step": 2,
+      "endpoint": "macOS say + ffmpeg",
+      "topic": "convert narration.txt to MP3 using: say -v Samantha -f narration.txt -o narration.aiff && ffmpeg -i narration.aiff narration.mp3",
+      "output": "generated-assets/narration.mp3",
+      "agent": "infographic-builder",
+      "fallback": "Use Web Speech API directly in browser (index.html already has this as primary narration)"
+    }
   ],
-  "fallbackStrategy": "If Gemini API unavailable: Excalidraw for SVGs, Web Speech API for audio. If ffmpeg unavailable: use Web Speech API directly in browser. If Remotion fails: Canvas API captureStream() or static PNG sequence.",
-  "totalDurationEstimate": "~600 frames at 30fps (20 seconds total)",
-  "showNotTell": "Use ≤7 word labels with icons instead of sentences (e.g., '🔒 Sandbox' instead of 'The subagent runs in an isolated sandbox environment')",
-  "colorStory": "red (danger/naive) → violet (technology/solution) → green (success/metrics)",
-  "trainingPace": "3 quick intro scenes, 2 deep-dive with pause points, 1 review card"
+  "fallbackStrategy": {
+    "geminiApi": "If Gemini API unavailable: draw diagrams in Excalidraw, export SVG to generated-assets/. Write narration scripts manually as JS arrays.",
+    "ffmpeg": "If ffmpeg missing: skip MP3 generation entirely. index.html already uses Web Speech API for browser narration — Remotion scenes can use silence or the Web Speech API output captured separately.",
+    "remotion": "If Remotion headless render fails: use Canvas API captureStream() to record browser animations as WebM, or generate a static PNG sequence with frame numbers.",
+    "flaskServer": "If Flask server unavailable: create generated-assets/ directory manually and write SVG/narration files directly using file I/O.",
+    "npmInstall": "If npm install fails: provide a MANUAL_SETUP.md with exact dependency version list and manual download instructions.",
+    "ghPages": "If GitHub Pages deploy times out: provide a MANUAL_DEPLOY.md with step-by-step gh-pages branch creation and GitHub UI settings instructions."
+  },
+  "totalDurationEstimate": "~600 frames at 30fps (20 seconds total for full video)",
+  "showNotTell": "Use ≤7 word labels with icons instead of sentences (e.g., '🔒 Sandbox isolates context' not 'The subagent runs in an isolated sandbox environment that prevents...'). Every visual element IS the explanation — no voiceover describing what the viewer already sees.",
+  "colorStory": "cyan(trust/tech #00f0ff) → violet(solution #a855f7) → green(success #10b981) → red(danger/naive #ef4444)",
+  "trainingPace": "3 quick intro scenes, 2 deep-dive with pause points, 1 review card, total ~20 minutes hands-on time"
 }
 
-Rules:
-- Map EVERY task to either remotion-dev, infographic-builder, or architect (general project setup).
-- The fileCreationOrder must be ordered and respect dependencies (e.g., package.json before src/).
-- Every composition must reference a Kilo command that can render it.
-- Every asset in assetPipeline must reference the exact API endpoint and agent.
-- Be specific about which template decision patterns to use (reference by name from llm_thinking_log.md).
-- The execution plan phases should represent logical groupings (Scaffold → Core Code → Assets → Render → Deploy).`
+Rules — follow these strictly:
+- Map EVERY task to one of: remotion-dev, infographic-builder, or architect.
+- The fileCreationOrder must be sorted by dependency (package.json before src/ before remotion/ before exports/).
+- Every composition MUST have a kiloCommand that can render it.
+- Every asset in assetPipeline MUST specify its endpoint, topic, output path, agent, AND fallback.
+- Be specific about template decision patterns — use exact names from the table above.
+- Every step in executionPlan.phases MUST include: order, file, agent, dependsOn, complexity, priority, tags, estimatedLines, templatePattern, action, AND spec.
+- The fallback strategy MUST list each failure scenario individually, not as one combined sentence.
+- Do NOT skip any section. Every field in the schema is mandatory.`
 		payload := map[string]any{
 			"model": model,
 			"messages": []map[string]string{

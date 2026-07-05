@@ -2374,87 +2374,122 @@ Execute the steps above sequentially and thoroughly. When finished, print the CL
           if (data.type === 'structured') {
             // Agent Plan
             if (data.agentPlan) {
-              instructions += '\n## 🤖 Agent Plan\n';
+              instructions += '\n## 🤖 Agent Plan — Task-to-Agent Specification Map\n';
               if (data.agentPlan.remotionDev && data.agentPlan.remotionDev.length) {
-                instructions += '\n**remotion-dev:**\n';
-                data.agentPlan.remotionDev.forEach(t => instructions += `  • ${t}\n`);
+                instructions += '\n### remotion-dev (Scene Compositions)\n';
+                data.agentPlan.remotionDev.forEach(t => instructions += `  🎬 ${t}\n`);
               }
               if (data.agentPlan.infographicBuilder && data.agentPlan.infographicBuilder.length) {
-                instructions += '\n**infographic-builder:**\n';
-                data.agentPlan.infographicBuilder.forEach(t => instructions += `  • ${t}\n`);
+                instructions += '\n### infographic-builder (Asset Generation)\n';
+                data.agentPlan.infographicBuilder.forEach(t => instructions += `  🎨 ${t}\n`);
               }
               if (data.agentPlan.kiloCommands && data.agentPlan.kiloCommands.length) {
-                instructions += '\n**kilo commands:**\n';
-                data.agentPlan.kiloCommands.forEach(t => instructions += `  • ${t}\n`);
+                instructions += '\n### ⚡ Kilo Commands (Automation)\n';
+                data.agentPlan.kiloCommands.forEach(t => instructions += `  ⚡ ${t}\n`);
               }
             }
 
             // Skill Map
             if (data.skillMap && data.skillMap.length) {
-              instructions += '\n## 🧠 Skill Map\n';
+              instructions += `\n## 🧠 Skill Map — Requirement-to-Pattern Traceability (${data.skillMap.length} mappings)\n\n`;
               data.skillMap.forEach(s => {
-                instructions += `  • **${s.skill}** → ${s.appliedTo}\n`;
-                if (s.decisionPattern) instructions += `    📐 ${s.decisionPattern}\n`;
+                instructions += `  🔗 **${s.skill}**\n`;
+                instructions += `     → Applies to: ${s.appliedTo}\n`;
+                if (s.decisionPattern) instructions += `     📐 Pattern: ${s.decisionPattern}\n`;
+                if (s.reasoning) instructions += `     💡 Why: ${s.reasoning}\n`;
+                instructions += '\n';
               });
             }
 
-            // Execution Plan
+            // Execution Plan — Phases with Spec-Driven Details
             if (data.executionPlan && data.executionPlan.phases) {
-              instructions += '\n## 📋 Execution Plan\n';
+              instructions += '\n## 📋 Execution Plan — Spec-Driven Phase Breakdown\n';
               data.executionPlan.phases.forEach(phase => {
                 instructions += `\n### ${phase.phase}\n`;
                 if (phase.steps) {
                   phase.steps.forEach(step => {
-                    instructions += `  ${step.order}. **${step.file}** (${step.agent}, ${step.complexity}, depends: ${step.dependsOn.join(', ') || 'none'})\n`;
-                    if (step.action) instructions += `     → ${step.action}\n`;
+                    const priorityEmoji = {'critical': '🔴', 'high': '🟠', 'medium': '🟡', 'low': '🟢'};
+                    const pri = priorityEmoji[step.priority] || '⚪';
+                    const tags = step.tags ? step.tags.map(t => `#${t}`).join(' ') : '';
+                    instructions += `  ${step.order}. **${step.file}** ${pri}\n`;
+                    instructions += `     🤖 Agent: ${step.agent}  |  📏 Complexity: ${step.complexity}  |  ~${step.estimatedLines || '?'} lines\n`;
+                    if (step.dependsOn && step.dependsOn.length) instructions += `     ⬆️ Depends on: ${step.dependsOn.join(', ')}\n`;
+                    if (step.templatePattern) instructions += `     📐 Template: ${step.templatePattern}\n`;
+                    if (step.action) instructions += `     🔧 Action: ${step.action}\n`;
+                    if (step.spec) instructions += `     ✅ Spec: ${step.spec}\n`;
+                    if (tags) instructions += `     🏷 ${tags}\n`;
+                    instructions += '\n';
                   });
                 }
               });
             }
 
-            // File Creation Order (flat)
+            // File Creation Order (flat summary)
             if (data.executionPlan && data.executionPlan.fileCreationOrder) {
-              instructions += '\n### File Creation Order\n';
+              instructions += `\n### 📁 File Creation Order (${data.executionPlan.fileCreationOrder.length} files)\n\n`;
               data.executionPlan.fileCreationOrder.forEach(f => {
-                instructions += `  ${f.order}. ${f.file} ← ${f.agent}\n`;
+                const spec = f.spec ? `  // ${f.spec}` : '';
+                instructions += `  ${f.order}. ${f.file} ← ${f.agent}${spec}\n`;
               });
             }
 
             // Asset Pipeline
             if (data.assetPipeline && data.assetPipeline.length) {
-              instructions += '\n## 🖼️ Asset Pipeline\n';
+              instructions += `\n## 🖼️ Asset Pipeline — API-to-Output Trace (${data.assetPipeline.length} assets)\n\n`;
               data.assetPipeline.forEach(a => {
-                instructions += `  ${a.step}. \`${a.endpoint}\` → ${a.output} (${a.agent})\n`;
-                if (a.topic) instructions += `     Topic: ${a.topic}\n`;
+                instructions += `  ${a.step}. \`${a.endpoint}\`\n`;
+                instructions += `     📤 Output: ${a.output}\n`;
+                if (a.topic) instructions += `     📝 Topic: ${a.topic}\n`;
+                instructions += `     🤖 Agent: ${a.agent}\n`;
+                if (a.fallback) instructions += `     🔄 Fallback: ${a.fallback}\n`;
+                instructions += '\n';
               });
             }
 
-            // Fallback Strategy
+            // Fallback Strategy — Per-component
             if (data.fallbackStrategy) {
-              instructions += `\n## ⚠️ Fallback Strategy\n  ${data.fallbackStrategy}\n`;
+              instructions += '\n## ⚠️ Fallback Strategy — Per-Component Resilience\n';
+              if (typeof data.fallbackStrategy === 'object') {
+                Object.keys(data.fallbackStrategy).forEach(key => {
+                  const labels = {
+                    geminiApi: '🔮 Gemini API',
+                    ffmpeg: '🎵 ffmpeg',
+                    remotion: '🎬 Remotion Render',
+                    flaskServer: '🌐 Flask Server',
+                    npmInstall: '📦 npm Install',
+                    ghPages: '🚀 GitHub Pages Deploy'
+                  };
+                  instructions += `\n  **${labels[key] || key}:** ${data.fallbackStrategy[key]}\n`;
+                });
+              } else {
+                instructions += `\n  ${data.fallbackStrategy}\n`;
+              }
             }
 
-            // Compositions
+            // Compositions — Detailed Scene Specs
             if (data.compositions && data.compositions.length) {
-              instructions += `\n## 🎬 Compositions (${data.compositions.length})\n`;
-              data.compositions.forEach(c => {
-                instructions += `\n  **${c.name}** — ${c.description}\n`;
-                if (c.learningObjective) instructions += `   🎯 ${c.learningObjective}\n`;
-                if (c.durationInFrames) instructions += `   ⏱ ${c.durationInFrames}f\n`;
-                if (c.visualElements) instructions += `   🎨 ${c.visualElements.join(', ')}\n`;
-                if (c.assetsUsed) instructions += `   📁 ${c.assetsUsed.join(', ')}\n`;
-                if (c.keyAnimation) instructions += `   🔄 ${c.keyAnimation}\n`;
-                if (c.transitionToNext) instructions += `   ↪ ${c.transitionToNext}\n`;
-                if (c.narrationTrigger) instructions += `   🔊 ${c.narrationTrigger}\n`;
-                if (c.agent) instructions += `   🤖 Agent: ${c.agent}\n`;
-                if (c.kiloCommand) instructions += `   ⚡ ${c.kiloCommand}\n`;
+              instructions += `\n## 🎬 Compositions — Scene Specifications (${data.compositions.length} scenes)\n`;
+              data.compositions.forEach((c, i) => {
+                instructions += `\n  ### Scene ${i + 1}: ${c.name}\n`;
+                instructions += `  📖 ${c.description}\n`;
+                if (c.learningObjective) instructions += `  🎯 Learning Objective: ${c.learningObjective}\n`;
+                if (c.durationInFrames) instructions += `  ⏱ Duration: ${c.durationInFrames} frames (${((c.durationInFrames || 0) / 30).toFixed(1)}s at 30fps)\n`;
+                if (c.visualElements) instructions += `  🎨 Visual Elements: ${c.visualElements.join(', ')}\n`;
+                if (c.assetsUsed) instructions += `  📁 Assets: ${c.assetsUsed.join(', ')}\n`;
+                if (c.keyAnimation) instructions += `  🔄 Key Animation: ${c.keyAnimation}\n`;
+                if (c.transitionToNext) instructions += `  ↪ Transition: ${c.transitionToNext}\n`;
+                if (c.narrationTrigger) instructions += `  🔊 Narration: ${c.narrationTrigger}\n`;
+                if (c.agent) instructions += `  🤖 Agent: ${c.agent}\n`;
+                if (c.kiloCommand) instructions += `  ⚡ Kilo Command: ${c.kiloCommand}\n`;
+                if (c.acceptanceCriteria) instructions += `  ✅ Acceptance: ${c.acceptanceCriteria}\n`;
               });
             }
 
+            // Summary metadata
             if (data.trainingPace) instructions += `\n## 🏃 Training Pace\n  ${data.trainingPace}\n`;
             if (data.colorStory) instructions += `\n## 🎨 Color Story\n  ${data.colorStory}\n`;
             if (data.showNotTell) instructions += `\n## ✏️ Show Don't Tell\n  ${data.showNotTell}\n`;
-            if (data.totalDurationEstimate) instructions += `\n## ⏳ Total Duration\n  ${data.totalDurationEstimate}\n`;
+            if (data.totalDurationEstimate) instructions += `\n## ⏳ Total Duration Estimate\n  ${data.totalDurationEstimate}\n`;
 
           } else if (data.raw) {
             instructions += '\n' + data.raw;
