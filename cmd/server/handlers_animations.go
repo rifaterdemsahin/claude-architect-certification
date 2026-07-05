@@ -29,6 +29,47 @@ func clampLen(s string, n int) string {
 	return s
 }
 
+func normalizeModelForOpenRouter(displayName string) string {
+	t := strings.ToLower(displayName)
+	if t == "" || strings.Contains(t, "auto-detect") || strings.Contains(t, "executing ai") {
+		return "anthropic/claude-sonnet-4.6"
+	}
+	if strings.Contains(t, "deepseek v4 pro") || strings.Contains(t, "deepseek-v4-pro") {
+		return "deepseek/deepseek-v4-pro"
+	}
+	if strings.Contains(t, "deepseek v4 flash") || strings.Contains(t, "deepseek-v4-flash") {
+		return "deepseek/deepseek-v4-flash"
+	}
+	if strings.Contains(t, "deepseek r1") || strings.Contains(t, "deepseek v3") {
+		return "deepseek/deepseek-r1"
+	}
+	if strings.Contains(t, "gemini 3.1") || strings.Contains(t, "gemini 2.5 pro") || strings.Contains(t, "gemini-2.5") {
+		return "google/gemini-2.5-pro-preview-05-06"
+	}
+	if strings.Contains(t, "gemini 2.0 flash") || strings.Contains(t, "gemini-2.0-flash") {
+		return "google/gemini-2.0-flash-001"
+	}
+	if strings.Contains(t, "claude sonnet 4.6") || strings.Contains(t, "claude-sonnet-4.6") {
+		return "anthropic/claude-sonnet-4.6"
+	}
+	if strings.Contains(t, "claude 3.7") {
+		return "anthropic/claude-3.7-sonnet"
+	}
+	if strings.Contains(t, "gpt-4o") || strings.Contains(t, "openai") {
+		return "openai/gpt-4o"
+	}
+	if strings.Contains(t, "deepseek") {
+		return "deepseek/deepseek-chat"
+	}
+	if strings.Contains(t, "gemini") {
+		return "google/gemini-2.5-pro-preview-05-06"
+	}
+	if strings.Contains(t, "claude") {
+		return "anthropic/claude-sonnet-4.6"
+	}
+	return displayName
+}
+
 func animationTypeMetas() []AnimationTypeMeta {
 	brand := `BRAND KIT: background #030712 → deep navy; primary #8b5cf6 (violet); secondary #3b82f6 (blue); success #10b981; text #f3f4f6; muted #9ca3af. Fonts: 'Outfit' (headings, 800/900), 'Plus Jakarta Sans' (body). 1920x1080, 30fps. Easing: Remotion spring() for entrances, interpolate() with Easing.inOut for exits. Always export h264 MP4.`
 	mk := func(name, goal, choreography string) string {
@@ -399,7 +440,9 @@ Instructions:
 		defer hresp.Body.Close()
 		b, _ := io.ReadAll(hresp.Body)
 		if hresp.StatusCode != http.StatusOK {
-			http.Error(w, fmt.Sprintf(`{"error":"OpenRouter HTTP %d: %s"}`, hresp.StatusCode, b), http.StatusBadGateway)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadGateway)
+			json.NewEncoder(w).Encode(map[string]string{"error": fmt.Sprintf("OpenRouter HTTP %d", hresp.StatusCode), "detail": string(b)})
 			return
 		}
 
@@ -423,7 +466,9 @@ Instructions:
 
 		var parsed map[string]any
 		if err := json.Unmarshal([]byte(content), &parsed); err != nil {
-			http.Error(w, fmt.Sprintf(`{"error":"OpenRouter did not return valid JSON. Content was: %s"}`, content), http.StatusBadGateway)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadGateway)
+			json.NewEncoder(w).Encode(map[string]string{"error": "OpenRouter did not return valid JSON", "detail": content})
 			return
 		}
 
@@ -880,6 +925,7 @@ func animationRemotionInstructionsHandler(cfg config) http.HandlerFunc {
 		if model == "" {
 			model = "anthropic/claude-sonnet-4.6"
 		}
+		model = normalizeModelForOpenRouter(model)
 		systemPrompt := `You are a senior technical architect, animation pipeline coordinator, and spec-driven development lead. Your job is to analyze the provided project generation prompt and produce a comprehensive end-to-end execution plan — with each task defined as a specification — that maps every deliverable to the available skills, Kilo agents, and commands from the animation-template-llm-training project.
 
 ## Available Kilo Commands (from AGENTS.md)
@@ -1106,7 +1152,9 @@ Rules — follow these strictly:
 		defer hresp.Body.Close()
 		b, _ := io.ReadAll(hresp.Body)
 		if hresp.StatusCode != http.StatusOK {
-			http.Error(w, fmt.Sprintf(`{"error":"OpenRouter HTTP %d: %s"}`, hresp.StatusCode, b), http.StatusBadGateway)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadGateway)
+			json.NewEncoder(w).Encode(map[string]string{"error": fmt.Sprintf("OpenRouter HTTP %d", hresp.StatusCode), "detail": string(b)})
 			return
 		}
 
@@ -1118,7 +1166,20 @@ Rules — follow these strictly:
 			} `json:"choices"`
 		}
 		if err := json.Unmarshal(b, &orResp); err != nil || len(orResp.Choices) == 0 {
-			http.Error(w, `{"error":"invalid OpenRouter response"}`, http.StatusBadGateway)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadGateway)
+			detail := map[string]any{"error": "invalid OpenRouter response"}
+			if err != nil {
+				detail["parseError"] = err.Error()
+			} else {
+				detail["parseError"] = "no choices returned"
+			}
+			if len(b) > 0 {
+				end := len(b)
+				if end > 500 { end = 500 }
+				detail["rawBody"] = string(b[:end])
+			}
+			json.NewEncoder(w).Encode(detail)
 			return
 		}
 

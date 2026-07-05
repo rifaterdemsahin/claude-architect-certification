@@ -262,38 +262,174 @@
       position: relative;
     }
 
-    .code-wrapper {
-      background: var(--code-bg);
-      border: 1px solid rgba(0, 240, 255, 0.2);
+    .markdown-output {
+      background: rgba(10, 15, 25, 0.6);
+      border: 1px solid var(--border-color);
       border-radius: 0.85rem;
-      padding: 1.25rem;
-      height: 640px;
+      padding: 1.5rem 2rem;
+      max-height: none;
+      min-height: 200px;
       overflow-y: auto;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.825rem;
-      line-height: 1.6;
-      color: #e2e8f0;
-      white-space: pre-wrap;
-      word-break: break-word;
-      box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.5);
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.9rem;
+      line-height: 1.75;
+      color: var(--text-main);
     }
 
-    .code-wrapper::-webkit-scrollbar {
+    .markdown-output h1 {
+      font-size: 1.65rem;
+      font-weight: 800;
+      margin: 1.5rem 0 0.75rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .markdown-output h1:first-child { margin-top: 0; }
+
+    .markdown-output h2 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin: 1.4rem 0 0.65rem;
+      color: #d8b4fe;
+    }
+    .markdown-output h2:first-child { margin-top: 0; }
+
+    .markdown-output h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin: 1.1rem 0 0.5rem;
+      color: var(--primary);
+    }
+
+    .markdown-output h4 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 0.85rem 0 0.35rem;
+      color: var(--text-main);
+    }
+
+    .markdown-output p {
+      margin: 0.5rem 0;
+      color: var(--text-main);
+      line-height: 1.7;
+    }
+
+    .markdown-output strong {
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .markdown-output em {
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    .markdown-output code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.83em;
+      background: rgba(0, 240, 255, 0.08);
+      color: var(--primary);
+      padding: 0.15em 0.4em;
+      border-radius: 4px;
+      border: 1px solid rgba(0, 240, 255, 0.15);
+    }
+
+    .markdown-output pre {
+      background: var(--code-bg);
+      border: 1px solid rgba(0, 240, 255, 0.15);
+      border-radius: 0.65rem;
+      padding: 1rem 1.25rem;
+      overflow-x: auto;
+      margin: 0.75rem 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.5;
+      color: #e2e8f0;
+      white-space: pre;
+    }
+    .markdown-output pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      color: inherit;
+    }
+
+    .markdown-output ul, .markdown-output ol {
+      margin: 0.4rem 0 0.6rem 0;
+      padding-left: 1.5rem;
+    }
+    .markdown-output li {
+      margin-bottom: 0.2rem;
+      color: var(--text-main);
+      line-height: 1.6;
+    }
+
+    .markdown-output blockquote {
+      border-left: 3px solid var(--secondary);
+      margin: 0.75rem 0;
+      padding: 0.5rem 1rem;
+      background: rgba(168, 85, 247, 0.06);
+      border-radius: 0 0.5rem 0.5rem 0;
+      color: #c4b5fd;
+    }
+
+    .markdown-output hr {
+      border: none;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border-color), transparent);
+      margin: 1.25rem 0;
+    }
+
+    .markdown-output table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0.75rem 0;
+      font-size: 0.85rem;
+    }
+    .markdown-output th {
+      background: rgba(0, 240, 255, 0.08);
+      color: var(--primary);
+      font-weight: 600;
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+      border-bottom: 2px solid rgba(0, 240, 255, 0.2);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .markdown-output td {
+      padding: 0.4rem 0.75rem;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      color: var(--text-main);
+    }
+    .markdown-output tr:hover td {
+      background: rgba(255,255,255,0.02);
+    }
+
+    .markdown-output::-webkit-scrollbar {
       width: 8px;
     }
-
-    .code-wrapper::-webkit-scrollbar-track {
+    .markdown-output::-webkit-scrollbar-track {
       background: rgba(0, 0, 0, 0.2);
       border-radius: 8px;
     }
-
-    .code-wrapper::-webkit-scrollbar-thumb {
+    .markdown-output::-webkit-scrollbar-thumb {
       background: rgba(255, 255, 255, 0.15);
       border-radius: 8px;
     }
-
-    .code-wrapper::-webkit-scrollbar-thumb:hover {
+    .markdown-output::-webkit-scrollbar-thumb:hover {
       background: rgba(0, 240, 255, 0.4);
+    }
+
+    .output-actions-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-color);
     }
 
     /* Search bar for generated output */
@@ -1228,10 +1364,6 @@
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
               Generated Output Prompt
             </div>
-            <button type="button" id="copyBtn" class="btn-copy" onclick="copyToClipboard()">
-              <svg id="copyIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-              <span id="copyText">Copy Prompt</span>
-            </button>
           </div>
 
           <div class="search-bar">
@@ -1247,6 +1379,10 @@
             <span class="or-spinner" style="display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(168, 85, 247, 0.3); border-top-color: #a855f7; border-radius: 50%; animation: orSpin 0.8s linear infinite;"></span>
             <span id="orStatusText">Querying OpenRouter for Remotion animation instructions…</span>
           </div>
+          <div id="orErrorBox" style="display: none; padding: 0.75rem 1rem; border-radius: 0.5rem; margin-bottom: 0.5rem; font-size: 0.8rem; background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171;">
+            <div style="font-weight: 700; margin-bottom: 0.35rem;"><span id="orErrorTitle">❌ OpenRouter Error</span></div>
+            <div id="orErrorDetail" style="color: #fca5a5; word-break: break-word; line-height: 1.5; max-height: 120px; overflow-y: auto; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;"></div>
+          </div>
           <style>
             @keyframes orSpin { to { transform: rotate(360deg); } }
             .or-status.success { background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.25); color: #34d399; }
@@ -1254,13 +1390,23 @@
             .or-status.success .or-spinner, .or-status.error .or-spinner { display: none; }
           </style>
 
-          <div id="promptOutput" class="code-wrapper"></div>
+          <div id="promptOutput" class="markdown-output">
+            <p style="color: var(--text-dim);">Enter your exam question and architectural solution above, then click <strong style="color: var(--primary);">Generate Prompt</strong> to build your project prompt.</p>
+          </div>
 
-          <div class="panel-header" style="margin-top: 1rem; margin-bottom: 0; padding-bottom: 0; border-bottom: none;">
-            <div class="stats-bar">
+          <div class="output-actions-bar">
+            <button type="button" id="copyBtn" class="btn-copy" onclick="copyToClipboard()" style="flex: 1;">
+              <svg id="copyIcon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              <span id="copyText">Copy Full Prompt</span>
+            </button>
+            <button type="button" id="readAloudBtn" class="btn-repo" onclick="toggleReadAloud()" style="background: rgba(0, 240, 255, 0.1); color: #00f0ff; border-color: rgba(0, 240, 255, 0.3); flex: 1; font-weight: 600; padding: 0.75rem 1.25rem; border-radius: 0.75rem;">
+              <span id="readAloudIcon">🔊</span>
+              <span id="readAloudText">Read Aloud</span>
+            </button>
+            <div class="stats-bar" style="flex-shrink: 0;">
               <div class="stat-item">Words: <span id="wordCount" class="stat-value">0</span></div>
-              <div class="stat-item">Characters: <span id="charCount" class="stat-value">0</span></div>
-              <div class="stat-item">Estimated Tokens: <span id="tokenCount" class="stat-value">0</span></div>
+              <div class="stat-item">Chars: <span id="charCount" class="stat-value">0</span></div>
+              <div class="stat-item">Tokens: <span id="tokenCount" class="stat-value">~0</span></div>
             </div>
           </div>
         </div>
@@ -1726,6 +1872,111 @@
     }
 
     // Prompt Builder logic
+    function _renderMarkdown(text) {
+      if (!text) return '';
+      var html = text;
+      html = html.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      html = html.replace(/```(\w*)\n([\s\S]*?)```/g, function(m, lang, code) {
+        return '<pre><code>' + code.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</code></pre>';
+      });
+      html = html.replace(/^#### (.+)$/gm, '<h4>$1</h4>');
+      html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+      html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+      html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
+      html = html.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
+      html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+      html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+      html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+      html = html.replace(/^---+/gm, '<hr>');
+      html = html.replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>');
+      var lines = html.split('\n');
+      var result = [];
+      var inList = false;
+      var listType = '';
+      for (var i = 0; i < lines.length; i++) {
+        var line = lines[i];
+        var olMatch = line.match(/^(\d+)\. (.+)/);
+        var ulMatch = line.match(/^[-*] (.+)/);
+        var tableRow = line.match(/^\|(.+)\|$/);
+        if (olMatch) {
+          if (inList && listType !== 'ol') { result.push('</' + listType + '>'); inList = false; }
+          if (!inList) { result.push('<ol>'); inList = true; listType = 'ol'; }
+          result.push('<li>' + olMatch[2] + '</li>');
+        } else if (ulMatch) {
+          if (inList && listType !== 'ul') { result.push('</' + listType + '>'); inList = false; }
+          if (!inList) { result.push('<ul>'); inList = true; listType = 'ul'; }
+          result.push('<li>' + ulMatch[1] + '</li>');
+        } else if (tableRow && !line.match(/^[\|\s\-:]+$/)) {
+          if (inList) { result.push('</' + listType + '>'); inList = false; }
+          // crude table handling: wrap consecutive pipe lines in a table
+          var cells = line.replace(/^\|/, '').replace(/\|$/, '').split('|');
+          var isHeader = (i + 1 < lines.length && lines[i + 1].match(/^[\|\s\-:]+$/));
+          var tag = isHeader ? 'th' : 'td';
+          // check if this is the first row of a new table
+          if (i === 0 || (i > 0 && !lines[i - 1].match(/^\|(.+)\|$/) && !lines[i - 1].match(/^[\|\s\-:]+$/))) {
+            result.push('<table>');
+          }
+          result.push('<tr>' + cells.map(function(c) { return '<' + tag + '>' + c.trim() + '</' + tag + '>'; }).join('') + '</tr>');
+          // close table if next line is not a table continuation
+          if (i + 1 >= lines.length || (!lines[i + 1].match(/^\|(.+)\|$/) && !lines[i + 1].match(/^[\|\s\-:]+$/))) {
+            result.push('</table>');
+          }
+          // skip next line if it's a separator
+          if (i + 1 < lines.length && lines[i + 1].match(/^[\|\s\-:]+$/)) { i++; }
+        } else {
+          if (inList) { result.push('</' + listType + '>'); inList = false; }
+          if (line.trim() === '') {
+            result.push('');
+          } else if (line.match(/^<(h[1-4]|hr|blockquote|table|pre|ol|ul)>/)) {
+            result.push(line);
+          } else {
+            result.push('<p>' + line + '</p>');
+          }
+        }
+      }
+      if (inList) result.push('</' + listType + '>');
+      return result.join('\n');
+    }
+
+    function _highlightMatches(containerEl, query) {
+      if (!query || !query.trim()) return 0;
+      var escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      var regex = new RegExp('(' + escaped + ')', 'gi');
+      var walker = document.createTreeWalker(containerEl, NodeFilter.SHOW_TEXT, null, false);
+      var textNodes = [];
+      while (walker.nextNode()) { textNodes.push(walker.currentNode); }
+      _searchMatchCount = 0;
+      for (var n = 0; n < textNodes.length; n++) {
+        var node = textNodes[n];
+        var parent = node.parentNode;
+        if (parent && (parent.tagName === 'SCRIPT' || parent.tagName === 'STYLE' || parent.tagName === 'MARK')) continue;
+        var text = node.nodeValue;
+        if (!regex.test(text)) continue;
+        regex.lastIndex = 0;
+        var frag = document.createDocumentFragment();
+        var lastIdx = 0;
+        var match;
+        while ((match = regex.exec(text)) !== null) {
+          if (match.index > lastIdx) {
+            frag.appendChild(document.createTextNode(text.substring(lastIdx, match.index)));
+          }
+          var mark = document.createElement('mark');
+          mark.className = 'search-match';
+          if (_searchMatchCount === 0) mark.className += ' current';
+          mark.setAttribute('data-match-index', _searchMatchCount);
+          mark.textContent = match[0];
+          frag.appendChild(mark);
+          _searchMatchCount++;
+          lastIdx = regex.lastIndex;
+        }
+        if (lastIdx < text.length) {
+          frag.appendChild(document.createTextNode(text.substring(lastIdx)));
+        }
+        parent.replaceChild(frag, node);
+      }
+      return _searchMatchCount;
+    }
+
     function getModelPersona(targetLLM) {
       const t = (targetLLM || '').toLowerCase();
       if (t.includes('deepseek v4 pro')) return {
@@ -2175,9 +2426,10 @@ open "https://<github-username>.github.io/<project-name>/"
 Execute the steps above sequentially and thoroughly. When finished, print the CLI verification output (including the Input Token Stats summary at the bottom), confirm the successful git push to GitHub (\`https://github.com/<github-username>/<project-name>\`), confirm that the GitHub Actions static deployment has completed, confirm that you have automatically opened the live GitHub Pages URL in the browser (\`https://<github-username>.github.io/<project-name>/\`), and provide clickable local and live links to the generated \`README.md\` and \`index.html\` files.`;
 
       const promptOutputEl = document.getElementById('promptOutput');
-      if (promptOutputEl) promptOutputEl.innerText = promptText;
+      if (promptOutputEl) promptOutputEl.innerHTML = _renderMarkdown(promptText);
       _promptRawText = promptText;
-      clearSearch();
+      _searchMatchIndex = -1;
+      _searchMatchCount = 0;
 
       const words = promptText.trim().split(/\s+/).filter(Boolean).length;
       const chars = promptText.length;
@@ -2198,7 +2450,7 @@ Execute the steps above sequentially and thoroughly. When finished, print the CL
       document.getElementById('repoVisibility').value = 'public';
       if (document.getElementById('targetLLM')) document.getElementById('targetLLM').value = 'Auto-Detect (Executing AI Assistant Model)';
       
-      document.getElementById('promptOutput').innerText = '// Prompt deleted.\n// Enter your exam question and recommended architectural solution above, then click "Generate Prompt" to create your project prompt.';
+      document.getElementById('promptOutput').innerHTML = '<p style="color: var(--text-dim);">Prompt cleared. Enter your exam question and architectural solution above, then click <strong style="color: var(--primary);">Generate Prompt</strong> to build your project prompt.</p>';
       document.getElementById('wordCount').innerText = '0';
       document.getElementById('charCount').innerText = '0';
       document.getElementById('tokenCount').innerText = '0';
@@ -2231,12 +2483,10 @@ Execute the steps above sequentially and thoroughly. When finished, print the CL
         return;
       }
 
-      const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const parts = _promptRawText.split(new RegExp('(' + escaped + ')', 'gi'));
-      const matchCount = (parts.length - 1) / 2;
+      output.innerHTML = _renderMarkdown(_promptRawText);
+      var count = _highlightMatches(output, query);
 
-      if (matchCount === 0) {
-        output.innerHTML = _promptRawText;
+      if (count === 0) {
         countEl.textContent = '0/0';
         document.getElementById('searchPrevBtn').disabled = true;
         document.getElementById('searchNextBtn').disabled = true;
@@ -2245,25 +2495,13 @@ Execute the steps above sequentially and thoroughly. When finished, print the CL
         return;
       }
 
-      let html = '';
-      for (let i = 0; i < parts.length; i++) {
-        if (i % 2 === 1) {
-          const idx = Math.floor(i / 2);
-          html += '<mark class="search-match' + (idx === 0 ? ' current' : '') + '" data-match-index="' + idx + '">' + parts[i] + '</mark>';
-        } else {
-          html += parts[i].replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        }
-      }
-      output.innerHTML = html;
-
-      _searchMatchCount = matchCount;
       _searchMatchIndex = 0;
-      countEl.textContent = '1/' + matchCount;
-      document.getElementById('searchPrevBtn').disabled = false;
-      document.getElementById('searchNextBtn').disabled = false;
+      countEl.textContent = '1/' + count;
+      document.getElementById('searchPrevBtn').disabled = count <= 1;
+      document.getElementById('searchNextBtn').disabled = count <= 1;
 
-      const first = output.querySelector('.search-match.current');
-      if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      var marks = output.querySelectorAll('.search-match');
+      if (marks.length > 0) marks[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
     function navigateSearch(dir) {
@@ -2286,7 +2524,7 @@ Execute the steps above sequentially and thoroughly. When finished, print the CL
       const output = document.getElementById('promptOutput');
       const countEl = document.getElementById('searchCount');
       if (input) input.value = '';
-      if (output && _promptRawText) output.innerText = _promptRawText;
+      if (output && _promptRawText) output.innerHTML = _renderMarkdown(_promptRawText);
       if (countEl) countEl.textContent = '';
       document.getElementById('searchPrevBtn').disabled = true;
       document.getElementById('searchNextBtn').disabled = true;
@@ -2332,6 +2570,63 @@ Execute the steps above sequentially and thoroughly. When finished, print the CL
       });
     }
 
+    var _speechSynth = window.speechSynthesis;
+    var _speaking = false;
+    var _speechUtterance = null;
+
+    function toggleReadAloud() {
+      if (!_speechSynth) { alert('Speech synthesis not supported in this browser.'); return; }
+      if (_speaking) {
+        _speechSynth.cancel();
+        _speaking = false;
+        _speechUtterance = null;
+        updateReadAloudButton(false);
+        return;
+      }
+      var text = document.getElementById('promptOutput').innerText;
+      if (!text || text.length < 20) { alert('No prompt content to read. Generate a prompt first.'); return; }
+      var utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 0.95;
+      utterance.pitch = 1.0;
+      utterance.onstart = function() { updateReadAloudButton(true); };
+      utterance.onend = function() { _speaking = false; updateReadAloudButton(false); };
+      utterance.onerror = function() { _speaking = false; updateReadAloudButton(false); };
+      _speechUtterance = utterance;
+      _speaking = true;
+      _speechSynth.speak(utterance);
+    }
+
+    function updateReadAloudButton(speaking) {
+      var icon = document.getElementById('readAloudIcon');
+      var text = document.getElementById('readAloudText');
+      var btn = document.getElementById('readAloudBtn');
+      if (speaking) {
+        if (icon) icon.innerText = '⏹';
+        if (text) text.innerText = 'Stop Reading';
+        if (btn) { btn.style.background = 'rgba(239, 68, 68, 0.2)'; btn.style.color = '#f87171'; btn.style.borderColor = 'rgba(239, 68, 68, 0.4)'; }
+      } else {
+        if (icon) icon.innerText = '🔊';
+        if (text) text.innerText = 'Read Aloud';
+        if (btn) { btn.style.background = 'rgba(0, 240, 255, 0.1)'; btn.style.color = '#00f0ff'; btn.style.borderColor = 'rgba(0, 240, 255, 0.3)'; }
+      }
+    }
+
+    function showOrError(data) {
+      var box = document.getElementById('orErrorBox');
+      var title = document.getElementById('orErrorTitle');
+      var detail = document.getElementById('orErrorDetail');
+      if (!box || !detail) return;
+      box.style.display = 'block';
+      var msg = data.error || 'Unknown OpenRouter error';
+      if (data.parseError) msg += ' | Parse: ' + data.parseError;
+      if (data.detail) msg += ' | Detail: ' + data.detail;
+      if (title) title.innerText = '❌ ' + msg;
+      var body = data.rawBody || '';
+      if (!body && data.detail) body = data.detail;
+      detail.innerText = body;
+      if (!body) detail.style.display = 'none'; else detail.style.display = 'block';
+    }
+
     function generatePromptAction() {
       updatePrompt();
       const genBtn = document.getElementById('generateBtn');
@@ -2365,8 +2660,23 @@ Execute the steps above sequentially and thoroughly. When finished, print the CL
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ promptText, model: (document.getElementById('targetLLM') || {}).value || 'Auto-Detect' })
         })
-        .then(res => res.json())
+        .then(function(res) {
+          var ct = (res.headers.get('content-type') || '').toLowerCase();
+          if (ct.indexOf('application/json') !== -1) return res.json();
+          return res.text().then(function(t) {
+            try { var j = JSON.parse(t); return j; }
+            catch(e) { throw new Error('OpenRouter error: ' + t.substring(0, 500)); }
+          });
+        })
         .then(data => {
+          if (data.error) {
+            showOrError(data);
+            if (orStatus) {
+              orStatus.className = 'or-status error';
+              orStatusText.innerText = '❌ OpenRouter error — ' + data.error;
+            }
+            return;
+          }
           let instructions = '\n\n---\n🎬 End-to-End Execution Plan';
           if (data.model) instructions += ` (via ${data.model})`;
           instructions += '\n';
@@ -2497,7 +2807,7 @@ Execute the steps above sequentially and thoroughly. When finished, print the CL
             instructions += '\n' + JSON.stringify(data, null, 2);
           }
           _promptRawText += instructions;
-          if (outputEl) outputEl.innerText = _promptRawText;
+          if (outputEl) { outputEl.innerHTML = _renderMarkdown(_promptRawText); window._lastOutputEl = outputEl; }
           clearSearch();
           updateStats();
           if (orStatus) {
@@ -2507,14 +2817,10 @@ Execute the steps above sequentially and thoroughly. When finished, print the CL
           }
         })
         .catch(err => {
-          const errMsg = `\n\n---\n❌ OpenRouter call failed: ${err.message}`;
-          _promptRawText += errMsg;
-          if (outputEl) outputEl.innerText = _promptRawText;
-          clearSearch();
-          updateStats();
+          showOrError({ error: err.message || 'OpenRouter request failed', rawBody: '' });
           if (orStatus) {
             orStatus.className = 'or-status error';
-            orStatusText.innerText = `❌ OpenRouter call failed: ${err.message}`;
+            orStatusText.innerText = '❌ OpenRouter call failed: ' + err.message;
             setTimeout(() => { if (orStatus) orStatus.style.display = 'none'; }, 6000);
           }
         });
