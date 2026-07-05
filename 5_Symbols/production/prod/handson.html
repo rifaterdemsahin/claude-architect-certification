@@ -2617,14 +2617,19 @@ Execute the steps above sequentially and thoroughly. When finished, print the CL
       var detail = document.getElementById('orErrorDetail');
       if (!box || !detail) return;
       box.style.display = 'block';
-      var msg = data.error || 'Unknown OpenRouter error';
+      var msg = '❌ ' + (data.error || 'Unknown OpenRouter error');
       if (data.parseError) msg += ' | Parse: ' + data.parseError;
-      if (data.detail) msg += ' | Detail: ' + data.detail;
-      if (title) title.innerText = '❌ ' + msg;
+      if (data.detail && data.detail !== data.error) msg += ' | Detail: ' + data.detail;
+      if (title) title.innerText = msg;
+      var parts = [];
+      if (data.httpStatus) parts.push('HTTP: ' + data.httpStatus);
+      if (data.bodyLength !== undefined) parts.push('Body: ' + data.bodyLength + ' bytes');
+      if (data.contentType) parts.push('Content-Type: ' + data.contentType);
       var body = data.rawBody || '';
       if (!body && data.detail) body = data.detail;
-      detail.innerText = body;
-      if (!body) detail.style.display = 'none'; else detail.style.display = 'block';
+      var info = parts.join(' | ') + (body ? '\n\n' + body : '');
+      detail.innerText = info;
+      detail.style.display = info ? 'block' : 'none';
     }
 
     function generatePromptAction() {

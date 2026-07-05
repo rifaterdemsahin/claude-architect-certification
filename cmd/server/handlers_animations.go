@@ -32,7 +32,7 @@ func clampLen(s string, n int) string {
 func normalizeModelForOpenRouter(displayName string) string {
 	t := strings.ToLower(displayName)
 	if t == "" || strings.Contains(t, "auto-detect") || strings.Contains(t, "executing ai") {
-		return "anthropic/claude-sonnet-4.6"
+		return "deepseek/deepseek-v4-pro"
 	}
 	if strings.Contains(t, "deepseek v4 pro") || strings.Contains(t, "deepseek-v4-pro") {
 		return "deepseek/deepseek-v4-pro"
@@ -65,10 +65,57 @@ func normalizeModelForOpenRouter(displayName string) string {
 		return "google/gemini-2.5-pro-preview-05-06"
 	}
 	if strings.Contains(t, "claude") {
-		return "anthropic/claude-sonnet-4.6"
+		return "deepseek/deepseek-v4-pro"
 	}
 	return displayName
 }
+
+func extractJSONFromLLM(raw string) string {
+	text := strings.TrimSpace(raw)
+	text = strings.TrimPrefix(text, "```json")
+	text = strings.TrimPrefix(text, "```")
+	text = strings.TrimSuffix(text, "```")
+	text = strings.TrimSpace(text)
+	start := strings.Index(text, "{")
+	if start == -1 {
+		start = strings.Index(text, "[")
+	}
+	if start == -1 {
+		return text
+	}
+	end := strings.LastIndex(text, "}")
+	if end == -1 || end < start {
+		end = strings.LastIndex(text, "]")
+	}
+	if end == -1 || end < start {
+		return text
+	}
+	return text[start : end+1]
+}
+
+func summarizePromptForOpenRouter(fullPrompt string) string {
+	if len(fullPrompt) <= 4000 {
+		return fullPrompt
+	}
+	parts := []string{}
+	if idx := strings.Index(fullPrompt, "## 📝 Input: Exam Scenario"); idx != -1 {
+		parts = append(parts, fullPrompt[idx:min(idx+2000, len(fullPrompt))])
+	}
+	if idx := strings.Index(fullPrompt, "## 📁 Required Project Layout"); idx != -1 {
+		end := idx + 2500
+		if idx2 := strings.Index(fullPrompt, "## 🚀 Final Deliverable"); idx2 != -1 && idx2 < end {
+			end = idx2
+		}
+		if end > len(fullPrompt) { end = len(fullPrompt) }
+		parts = append(parts, fullPrompt[idx:end])
+	}
+	if len(parts) == 0 {
+		return fmt.Sprintf("Analysis target (abbreviated):\n%s", fullPrompt[:min(4000, len(fullPrompt))])
+	}
+	return fmt.Sprintf("Analysis target - exam scenario + required project layout (from full prompt):\n\n%s", strings.Join(parts, "\n\n...\n\n"))
+}
+
+func min(a, b int) int { if a < b { return a }; return b }
 
 func animationTypeMetas() []AnimationTypeMeta {
 	brand := `BRAND KIT: background #030712 → deep navy; primary #8b5cf6 (violet); secondary #3b82f6 (blue); success #10b981; text #f3f4f6; muted #9ca3af. Fonts: 'Outfit' (headings, 800/900), 'Plus Jakarta Sans' (body). 1920x1080, 30fps. Easing: Remotion spring() for entrances, interpolate() with Easing.inOut for exits. Always export h264 MP4.`
@@ -362,7 +409,7 @@ func animationOpenRouterPrepareHandler(cfg config) http.HandlerFunc {
 		ModuleName    string `json:"moduleName"`
 		VideoName     string `json:"videoName"`
 	}
-	const model = "anthropic/claude-sonnet-4.6"
+	const model = "deepseek/deepseek-v4-pro"
 	return func(w http.ResponseWriter, r *http.Request) {
 		setCORS(w, r)
 		w.Header().Set("Content-Type", "application/json")
@@ -458,11 +505,7 @@ Instructions:
 			return
 		}
 
-		content := strings.TrimSpace(orResp.Choices[0].Message.Content)
-		content = strings.TrimPrefix(content, "```json")
-		content = strings.TrimPrefix(content, "```")
-		content = strings.TrimSuffix(content, "```")
-		content = strings.TrimSpace(content)
+		content := extractJSONFromLLM(orResp.Choices[0].Message.Content)
 
 		var parsed map[string]any
 		if err := json.Unmarshal([]byte(content), &parsed); err != nil {
@@ -923,216 +966,44 @@ func animationRemotionInstructionsHandler(cfg config) http.HandlerFunc {
 
 		model := req.Model
 		if model == "" {
-			model = "anthropic/claude-sonnet-4.6"
+			model = os.Getenv("OPENROUTER_MODEL")
+			if model == "" {
+				model = "deepseek/deepseek-v4-pro"
+			}
 		}
 		model = normalizeModelForOpenRouter(model)
-		systemPrompt := `You are a senior technical architect, animation pipeline coordinator, and spec-driven development lead. Your job is to analyze the provided project generation prompt and produce a comprehensive end-to-end execution plan — with each task defined as a specification — that maps every deliverable to the available skills, Kilo agents, and commands from the animation-template-llm-training project.
+		systemPrompt := `Extract an end-to-end execution plan from the project prompt below. Use agents: remotion-dev (Remotion scenes), infographic-builder (SVG/narration), architect (setup). Kilo commands: /pipeline, /render, /generate-assets, /serve. Template patterns: duck-typed-contracts, 4-scene-timeline, color-story, img-fallback, mp4-fallback, web-speech-api, vanilla-widgets, qa-audit, file-split, emoji-rich, seven-words, modal-lightbox.
 
-## Available Kilo Commands (from AGENTS.md)
-| Command | Purpose |
-|---------|---------|
-| /pipeline "<topic>" | Full pipeline: generate assets + render all videos |
-| /render [scene] | Render-only: render Remotion MP4s from existing assets |
-| /generate-assets "<topic>" | Generate SVG + narration + MP3 via Gemini |
-| /serve | Start Flask dev server (port 5177) |
-
-## Available Kilo Agents
-| Agent | Specializes in |
-|-------|---------------|
-| remotion-dev | Remotion composition development, debugging, scene creation, React/TypeScript |
-| infographic-builder | SVG infographic generation, narration scripts, Gemini API calls, asset pipeline |
-| architect | General project setup, package.json, config files, git, CI/CD, README |
-
-## Available Asset Generation Pipeline
-1. Flask server (server.py on port 5177) — POST /api/generate/infographic → generated-assets/infographic.svg
-2. Flask server — POST /api/generate/audio → generated-assets/narration.txt  
-3. macOS say + ffmpeg → generated-assets/narration.mp3
-4. Delivery Pilot server — POST /api/infographics/generate → generated PNG infographic (Gemini via Azure Key Vault)
-5. Excalidraw export → SVG files for hand-drawn architecture sketches
-6. npm run render:all → remotion/exports/*.mp4 (uses svgData, audioSrc, script as input props)
-
-## Template Decision Patterns (from llm_thinking_log.md)
-| Pattern ID | Description |
-|------------|-------------|
-| project-naming | Derive kebab-case project name from root cause analysis of the exam question |
-| duck-typed-contracts | Subagent naive/resilient share identical interface, coordinator swaps them |
-| heuristic-models | Use simulated/controlled workloads for reproducible CLI benchmarks |
-| token-calc | Token consumption = words × 1.35, display cost savings in tables |
-| 4-scene-timeline | Scenes: Title(0-4s) → NaiveFails(4-12s) → ResilientWins(12-22s) → Metrics(22-28s) |
-| color-story | red(danger/naive) → violet(tech/solution) → green(success/metrics) → cyan(highlight) |
-| img-fallback | Gemini API → Excalidraw → placeholder SVG |
-| mp4-fallback | Remotion → Canvas captureStream() → ffmpeg mock → static PNG sequence |
-| web-speech-api | window.speechSynthesis for browser narration, sync with GSAP timeline |
-| vanilla-widgets | Zero-dependency interactive UI: calculator, sandbox terminal simulator |
-| qa-audit | Audit for overclaims, separate simulation from production, markdown issue table |
-| file-split | Single-responsibility files: domain.js, infrastructure.js, subagent-*.js, coordinator.js |
-| gh-pages-verify | Poll GitHub Actions workflow until live URL returns HTTP 200 |
-| emoji-rich | Every heading, metric, badge, file-tree entry carries ≥1 relevant emoji |
-| seven-words | ≤7 words per on-screen label, symbols & graphics explain, not words |
-| modal-lightbox | Click any image → fullscreen viewport-scale modal with object-fit: contain |
-| modular-config | Per-agent configs over one monolithic config file |
-
-## 🎯 Your Task — Spec-Driven Execution Plan
-Analyze the project generation prompt and produce a complete, spec-driven plan. Every task MUST be defined as a specification with clear acceptance criteria. For each section:
-
-### 1. 🤖 Agent Plan — Task-to-Agent Specification Map
-Map every task to the appropriate Kilo agent with spec-level detail:
-- remotion-dev tasks: scene composition specs, animation timelines, debugging checkpoints
-- infographic-builder tasks: SVG/narration generation specs, API call contracts
-- architect tasks: project scaffolding, config files, CI/CD, README, SEO assets
-- Kilo commands: which multi-step workflows each command automates, with exact arguments
-
-### 2. 🧠 Skill Map — Requirement-to-Pattern Traceability
-For each project requirement, link it to at least one template decision pattern from the table above. Include the reasoning (why this pattern applies).
-
-### 3. 📋 Execution Plan — Phased Spec Breakdown
-List every file to create in dependency order, with FULL spec-level detail:
-- File path, agent assignment, dependencies, complexity (small/medium/large)
-- **spec**: a one-sentence acceptance criterion (what must this file deliver?)
-- **priority**: critical/high/medium/low
-- **tags**: [backend, frontend, config, asset, render, deploy, docs, seo]
-- **estimatedLines**: approximate line count
-- **templatePattern**: which decision pattern from the table above applies
-- Phase grouping: Scaffold → Core Code → Config & CI → Assets & Narration → Remotion Scenes → Render → Deploy & Verify
-
-### 4. 🖼️ Asset Pipeline — API-to-Output Trace
-Every generated asset must specify: the exact API endpoint, the topic/prompt, the output file path, the responsible agent, and the fallback if the API fails.
-
-### 5. ⚠️ Fallback Strategy — Per-Component Resilience
-Define a specific fallback for every component that could fail. Do NOT use a single sentence — list each failure scenario individually:
-- Gemini API unavailable? (Excalidraw fallback)
-- ffmpeg missing? (Web Speech API browser-side)
-- Remotion headless fails? (Canvas API captureStream or static PNG sequence)
-- Flask server down? (direct file creation)
-- npm install fails? (manual dependency instructions)
-- GitHub Pages deploy timeout? (manual deploy steps)
-
-### 6. 🎬 Compositions — Detailed Scene Specs
-Design every Remotion scene as a specification. For each composition include:
-- Learning objective (single concept the viewer must grasp)
-- Visual elements (icons, colors, animations)
-- Assets used (from assetPipeline above)
-- Key animation timeline (frame ranges with actions)
-- Narration trigger (exact frame and ≤7 word label)
-- Agent responsible and the exact Kilo command to render it
-- Transition to next scene
-- acceptanceCriteria: what must be true for this scene to be "done"
-
-Return your answer as a JSON object with this exact schema:
+Return ONLY this JSON (no markdown fences, no text before or after):
 {
-  "agentPlan": {
-    "remotionDev": ["spec: create Scene1Title.tsx — title card with spring entrance animation, 120f duration, cyan-on-dark theme, acceptance: renders without React errors and produces exports/scene1-title.mp4", "spec: wire Audio sync in Scene2Naive — useAudioData() hook, play() on frame 60, acceptance: audio plays in sync with red flash overlay"],
-    "infographicBuilder": ["spec: generate SVG infographic via POST /api/generate/infographic with topic='subagent retry architecture', acceptance: SVG renders cleanly in browser with correct viewBox", "spec: write narration script for all 4 scenes, ≤7 words per label, acceptance: script parses as valid JS array of {text, selector, durationHint} objects"],
-    "kiloCommands": ["/pipeline \"subagent-resilience-demo\" — runs generate-assets → renders all 4 scenes → stitches FullVideo", "/generate-assets \"subagent-resilience-demo\" — generates SVG + narration + MP3 for all scenes", "/render scene1 — renders only Scene1Title to exports/scene1-title.mp4"]
+  "agentPlan": {"remotionDev":["spec:..."],"infographicBuilder":["spec:..."],"kiloCommands":["/pipeline \"topic\""]},
+  "skillMap":[{"skill":"pattern-name","appliedTo":"what it applies to","decisionPattern":"desc","reasoning":"why"}],
+  "executionPlan":{
+    "phases":[{"phase":"1. Scaffold","steps":[{"order":1,"file":"package.json","agent":"architect","dependsOn":[],"complexity":"small","priority":"critical","tags":["config"],"estimatedLines":25,"templatePattern":"modular-config","action":"Create ESM package.json","spec":"Valid ESM package.json with render scripts"}]}],
+    "fileCreationOrder":[{"order":1,"file":"package.json","agent":"architect","spec":"ESM config"}]
   },
-  "skillMap": [
-    {
-      "skill": "duck-typed-contracts",
-      "appliedTo": "src/subagent-naive.js and src/subagent-resilient.js share identical async process(item) → Result interface",
-      "decisionPattern": "duck-typed-contracts: Subagent naive/resilient share identical interface, coordinator swaps them",
-      "reasoning": "Enables side-by-side benchmarking without changing coordinator code"
-    },
-    {
-      "skill": "4-scene-timeline",
-      "appliedTo": "GSAP timeline in index.html + Remotion FullVideo.tsx",
-      "decisionPattern": "4-scene-timeline: Title(0-4s) → NaiveFails(4-12s) → ResilientWins(12-22s) → Metrics(22-28s)",
-      "reasoning": "Chronological storytelling makes the comparison intuitive for exam candidates"
-    }
-  ],
-  "executionPlan": {
-    "phases": [
-      {
-        "phase": "1. Project Scaffold",
-        "steps": [
-          {
-            "order": 1,
-            "file": "package.json",
-            "agent": "architect",
-            "dependsOn": [],
-            "complexity": "small",
-            "priority": "critical",
-            "tags": ["config"],
-            "estimatedLines": 25,
-            "templatePattern": "modular-config",
-            "action": "Create ESM package.json (\"type\":\"module\") with scripts: start, naive, resilient, benchmark, render:all",
-            "spec": "package.json must define \"type\":\"module\", all render scripts, and pass JSON.parse() validation"
-          }
-        ]
-      }
-    ],
-    "fileCreationOrder": [
-      {"order": 1, "file": "package.json", "agent": "architect", "spec": "Valid ESM package.json with all required scripts"},
-      {"order": 2, "file": "src/domain.js", "agent": "architect", "spec": "Domain model exports entity classes and simulated test corpus"}
-    ]
-  },
-  "compositions": [
-    {
-      "name": "Scene1Title",
-      "description": "Title card introducing the architectural problem and the solution being demonstrated",
-      "learningObjective": "Understand what problem this demo solves and why resilient architecture matters",
-      "durationInFrames": 120,
-      "visualElements": ["shield-lock-icon", "cyan-gradient-title", "subtitle-fade-in"],
-      "assetsUsed": ["generated-assets/infographic.svg"],
-      "keyAnimation": "f0-30: title springs in from scale(0.5), f30-60: subtitle fades up, f60-90: problem statement appears, f90-120: hold for reading",
-      "transitionToNext": "fade-to-black (15 frames), then Scene2 starts from black",
-      "narrationTrigger": "frame 10 — label: '🔒 Resilient Subagent Architecture'",
-      "agent": "remotion-dev",
-      "kiloCommand": "/render scene1",
-      "acceptanceCriteria": "Rendered MP4 exists at exports/scene1-title.mp4, is non-empty, title text is legible at 1080p, no React console errors"
-    }
-  ],
-  "assetPipeline": [
-    {
-      "step": 1,
-      "endpoint": "POST /api/generate/infographic",
-      "topic": "subagent retry architecture diagram showing coordinator → subagent pool → local recovery loop",
-      "output": "generated-assets/infographic.svg",
-      "agent": "infographic-builder",
-      "fallback": "Draw equivalent diagram in Excalidraw, export as SVG to same path"
-    },
-    {
-      "step": 2,
-      "endpoint": "macOS say + ffmpeg",
-      "topic": "convert narration.txt to MP3 using: say -v Samantha -f narration.txt -o narration.aiff && ffmpeg -i narration.aiff narration.mp3",
-      "output": "generated-assets/narration.mp3",
-      "agent": "infographic-builder",
-      "fallback": "Use Web Speech API directly in browser (index.html already has this as primary narration)"
-    }
-  ],
-  "fallbackStrategy": {
-    "geminiApi": "If Gemini API unavailable: draw diagrams in Excalidraw, export SVG to generated-assets/. Write narration scripts manually as JS arrays.",
-    "ffmpeg": "If ffmpeg missing: skip MP3 generation entirely. index.html already uses Web Speech API for browser narration — Remotion scenes can use silence or the Web Speech API output captured separately.",
-    "remotion": "If Remotion headless render fails: use Canvas API captureStream() to record browser animations as WebM, or generate a static PNG sequence with frame numbers.",
-    "flaskServer": "If Flask server unavailable: create generated-assets/ directory manually and write SVG/narration files directly using file I/O.",
-    "npmInstall": "If npm install fails: provide a MANUAL_SETUP.md with exact dependency version list and manual download instructions.",
-    "ghPages": "If GitHub Pages deploy times out: provide a MANUAL_DEPLOY.md with step-by-step gh-pages branch creation and GitHub UI settings instructions."
-  },
-  "totalDurationEstimate": "~600 frames at 30fps (20 seconds total for full video)",
-  "showNotTell": "Use ≤7 word labels with icons instead of sentences (e.g., '🔒 Sandbox isolates context' not 'The subagent runs in an isolated sandbox environment that prevents...'). Every visual element IS the explanation — no voiceover describing what the viewer already sees.",
-  "colorStory": "cyan(trust/tech #00f0ff) → violet(solution #a855f7) → green(success #10b981) → red(danger/naive #ef4444)",
-  "trainingPace": "3 quick intro scenes, 2 deep-dive with pause points, 1 review card, total ~20 minutes hands-on time"
-}
-
-Rules — follow these strictly:
-- Map EVERY task to one of: remotion-dev, infographic-builder, or architect.
-- The fileCreationOrder must be sorted by dependency (package.json before src/ before remotion/ before exports/).
-- Every composition MUST have a kiloCommand that can render it.
-- Every asset in assetPipeline MUST specify its endpoint, topic, output path, agent, AND fallback.
-- Be specific about template decision patterns — use exact names from the table above.
-- Every step in executionPlan.phases MUST include: order, file, agent, dependsOn, complexity, priority, tags, estimatedLines, templatePattern, action, AND spec.
-- The fallback strategy MUST list each failure scenario individually, not as one combined sentence.
-- Do NOT skip any section. Every field in the schema is mandatory.`
+  "compositions":[{"name":"Scene1Title","description":"...","learningObjective":"...","durationInFrames":120,"visualElements":[],"assetsUsed":[],"keyAnimation":"...","transitionToNext":"fade-to-black","narrationTrigger":"frame N - label","agent":"remotion-dev","kiloCommand":"/render scene1","acceptanceCriteria":"MP4 exists and is valid"}],
+  "assetPipeline":[{"step":1,"endpoint":"POST /api/generate/infographic","topic":"...","output":"generated-assets/file.svg","agent":"infographic-builder","fallback":"Excalidraw"}],
+  "fallbackStrategy":{"geminiApi":"Excalidraw","ffmpeg":"Web Speech API","remotion":"Canvas API","flaskServer":"Manual file I/O","npmInstall":"MANUAL_SETUP.md","ghPages":"MANUAL_DEPLOY.md"},
+  "totalDurationEstimate":"~600f at 30fps","showNotTell":"≤7 words","colorStory":"cyan→violet→green→red","trainingPace":"..."
+}`
 		payload := map[string]any{
 			"model": model,
 			"messages": []map[string]string{
 				{"role": "system", "content": systemPrompt},
-				{"role": "user", "content": fmt.Sprintf("Here is the project generation prompt. Extract Remotion animation instructions from it:\n\n%s", req.PromptText)},
+				{"role": "user", "content": summarizePromptForOpenRouter(req.PromptText)},
 			},
 			"temperature": 0.3,
-			"max_tokens":  8192,
+			"max_tokens":  16384,
 		}
 		body, _ := json.Marshal(payload)
-		ctx, cancel := context.WithTimeout(r.Context(), 60*time.Second)
+		timeoutSec := 180
+		if tv := os.Getenv("OPENROUTER_TIMEOUT_SEC"); tv != "" {
+			if parsed, err := strconv.Atoi(tv); err == nil && parsed > 0 {
+				timeoutSec = parsed
+			}
+		}
+		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeoutSec)*time.Second)
 		defer cancel()
 		hreq, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://openrouter.ai/api/v1/chat/completions", bytes.NewReader(body))
 		if err != nil {
@@ -1143,10 +1014,14 @@ Rules — follow these strictly:
 		hreq.Header.Set("Authorization", "Bearer "+apiKey)
 		hreq.Header.Set("HTTP-Referer", "https://github.com/rifaterdemsahin/claude-architect-certification")
 		hreq.Header.Set("X-Title", "Claude Architect Certification")
+		hreq.Close = true
 
-		hresp, err := http.DefaultClient.Do(hreq)
+		client := &http.Client{Timeout: time.Duration(timeoutSec) * time.Second}
+		hresp, err := client.Do(hreq)
 		if err != nil {
-			http.Error(w, `{"error":"OpenRouter call failed"}`, http.StatusBadGateway)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadGateway)
+			json.NewEncoder(w).Encode(map[string]string{"error": "OpenRouter call failed", "detail": err.Error()})
 			return
 		}
 		defer hresp.Body.Close()
@@ -1168,7 +1043,12 @@ Rules — follow these strictly:
 		if err := json.Unmarshal(b, &orResp); err != nil || len(orResp.Choices) == 0 {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusBadGateway)
-			detail := map[string]any{"error": "invalid OpenRouter response"}
+			detail := map[string]any{
+				"error":        "invalid OpenRouter response",
+				"httpStatus":   hresp.StatusCode,
+				"bodyLength":   len(b),
+				"contentType":  hresp.Header.Get("Content-Type"),
+			}
 			if err != nil {
 				detail["parseError"] = err.Error()
 			} else {
@@ -1183,11 +1063,7 @@ Rules — follow these strictly:
 			return
 		}
 
-		content := strings.TrimSpace(orResp.Choices[0].Message.Content)
-		content = strings.TrimPrefix(content, "```json")
-		content = strings.TrimPrefix(content, "```")
-		content = strings.TrimSuffix(content, "```")
-		content = strings.TrimSpace(content)
+		content := extractJSONFromLLM(orResp.Choices[0].Message.Content)
 
 		var parsed map[string]any
 		if err := json.Unmarshal([]byte(content), &parsed); err != nil {
