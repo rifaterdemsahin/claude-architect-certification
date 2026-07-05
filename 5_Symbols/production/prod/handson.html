@@ -2363,25 +2363,99 @@ Execute the steps above sequentially and thoroughly. When finished, print the CL
         fetch('/api/animations/remotion-instructions', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ promptText, model: targetLLM })
+          body: JSON.stringify({ promptText, model: (document.getElementById('targetLLM') || {}).value || 'Auto-Detect' })
         })
         .then(res => res.json())
         .then(data => {
-          let instructions = '\n\n---\n🎬 Remotion Animation Instructions';
+          let instructions = '\n\n---\n🎬 End-to-End Execution Plan';
           if (data.model) instructions += ` (via ${data.model})`;
           instructions += '\n';
-          if (data.type === 'structured' && data.compositions) {
-            instructions += `\nCompositions (${data.compositions.length}):\n`;
-            data.compositions.forEach(c => {
-              instructions += `  • ${c.name} — ${c.description} (${c.durationInFrames}f, assets: ${(c.assetsUsed || []).join(', ')})\n`;
-              if (c.learningObjective) instructions += `    🎯 ${c.learningObjective}\n`;
-              if (c.transitionToNext) instructions += `    ↪ ${c.transitionToNext}\n`;
-            });
-            if (data.showNotTell) instructions += `\nShow-not-tell: ${data.showNotTell}\n`;
-            if (data.fallbackStrategy) instructions += `Fallback: ${data.fallbackStrategy}\n`;
-            if (data.totalDurationEstimate) instructions += `Total: ${data.totalDurationEstimate}\n`;
-            if (data.trainingPace) instructions += `Pacing: ${data.trainingPace}\n`;
-            if (data.colorStory) instructions += `Color arc: ${data.colorStory}\n`;
+
+          if (data.type === 'structured') {
+            // Agent Plan
+            if (data.agentPlan) {
+              instructions += '\n## 🤖 Agent Plan\n';
+              if (data.agentPlan.remotionDev && data.agentPlan.remotionDev.length) {
+                instructions += '\n**remotion-dev:**\n';
+                data.agentPlan.remotionDev.forEach(t => instructions += `  • ${t}\n`);
+              }
+              if (data.agentPlan.infographicBuilder && data.agentPlan.infographicBuilder.length) {
+                instructions += '\n**infographic-builder:**\n';
+                data.agentPlan.infographicBuilder.forEach(t => instructions += `  • ${t}\n`);
+              }
+              if (data.agentPlan.kiloCommands && data.agentPlan.kiloCommands.length) {
+                instructions += '\n**kilo commands:**\n';
+                data.agentPlan.kiloCommands.forEach(t => instructions += `  • ${t}\n`);
+              }
+            }
+
+            // Skill Map
+            if (data.skillMap && data.skillMap.length) {
+              instructions += '\n## 🧠 Skill Map\n';
+              data.skillMap.forEach(s => {
+                instructions += `  • **${s.skill}** → ${s.appliedTo}\n`;
+                if (s.decisionPattern) instructions += `    📐 ${s.decisionPattern}\n`;
+              });
+            }
+
+            // Execution Plan
+            if (data.executionPlan && data.executionPlan.phases) {
+              instructions += '\n## 📋 Execution Plan\n';
+              data.executionPlan.phases.forEach(phase => {
+                instructions += `\n### ${phase.phase}\n`;
+                if (phase.steps) {
+                  phase.steps.forEach(step => {
+                    instructions += `  ${step.order}. **${step.file}** (${step.agent}, ${step.complexity}, depends: ${step.dependsOn.join(', ') || 'none'})\n`;
+                    if (step.action) instructions += `     → ${step.action}\n`;
+                  });
+                }
+              });
+            }
+
+            // File Creation Order (flat)
+            if (data.executionPlan && data.executionPlan.fileCreationOrder) {
+              instructions += '\n### File Creation Order\n';
+              data.executionPlan.fileCreationOrder.forEach(f => {
+                instructions += `  ${f.order}. ${f.file} ← ${f.agent}\n`;
+              });
+            }
+
+            // Asset Pipeline
+            if (data.assetPipeline && data.assetPipeline.length) {
+              instructions += '\n## 🖼️ Asset Pipeline\n';
+              data.assetPipeline.forEach(a => {
+                instructions += `  ${a.step}. \`${a.endpoint}\` → ${a.output} (${a.agent})\n`;
+                if (a.topic) instructions += `     Topic: ${a.topic}\n`;
+              });
+            }
+
+            // Fallback Strategy
+            if (data.fallbackStrategy) {
+              instructions += `\n## ⚠️ Fallback Strategy\n  ${data.fallbackStrategy}\n`;
+            }
+
+            // Compositions
+            if (data.compositions && data.compositions.length) {
+              instructions += `\n## 🎬 Compositions (${data.compositions.length})\n`;
+              data.compositions.forEach(c => {
+                instructions += `\n  **${c.name}** — ${c.description}\n`;
+                if (c.learningObjective) instructions += `   🎯 ${c.learningObjective}\n`;
+                if (c.durationInFrames) instructions += `   ⏱ ${c.durationInFrames}f\n`;
+                if (c.visualElements) instructions += `   🎨 ${c.visualElements.join(', ')}\n`;
+                if (c.assetsUsed) instructions += `   📁 ${c.assetsUsed.join(', ')}\n`;
+                if (c.keyAnimation) instructions += `   🔄 ${c.keyAnimation}\n`;
+                if (c.transitionToNext) instructions += `   ↪ ${c.transitionToNext}\n`;
+                if (c.narrationTrigger) instructions += `   🔊 ${c.narrationTrigger}\n`;
+                if (c.agent) instructions += `   🤖 Agent: ${c.agent}\n`;
+                if (c.kiloCommand) instructions += `   ⚡ ${c.kiloCommand}\n`;
+              });
+            }
+
+            if (data.trainingPace) instructions += `\n## 🏃 Training Pace\n  ${data.trainingPace}\n`;
+            if (data.colorStory) instructions += `\n## 🎨 Color Story\n  ${data.colorStory}\n`;
+            if (data.showNotTell) instructions += `\n## ✏️ Show Don't Tell\n  ${data.showNotTell}\n`;
+            if (data.totalDurationEstimate) instructions += `\n## ⏳ Total Duration\n  ${data.totalDurationEstimate}\n`;
+
           } else if (data.raw) {
             instructions += '\n' + data.raw;
           } else {
