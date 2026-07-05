@@ -972,20 +972,50 @@ func animationRemotionInstructionsHandler(cfg config) http.HandlerFunc {
 			}
 		}
 		model = normalizeModelForOpenRouter(model)
-		systemPrompt := `Extract an end-to-end execution plan from the project prompt below. Use agents: remotion-dev (Remotion scenes), infographic-builder (SVG/narration), architect (setup). Kilo commands: /pipeline, /render, /generate-assets, /serve. Template patterns: duck-typed-contracts, 4-scene-timeline, color-story, img-fallback, mp4-fallback, web-speech-api, vanilla-widgets, qa-audit, file-split, emoji-rich, seven-words, modal-lightbox.
+		systemPrompt := `You are designing a Mixture-of-Experts (MoE) agent architecture for an automated course-content pipeline. Analyze the project prompt below and produce a full execution plan including the MoE agent coordination design.
 
-Return ONLY this JSON (no markdown fences, no text before or after):
+## MoE Agent Pool
+| Agent | Role | Model |
+|-------|------|-------|
+| sanity-agent | Validates input questions/answers for completeness, checks output JSON schema, rejects malformed requests | Gemini 2.0 Flash (fast, cheap) |
+| architecture-agent | Verifies the 7-step flywheel applies, fixes structural gaps, ensures patterns from llm_thinking_log.md are followed | Claude Sonnet 4.6 (reasoning) |
+| remotion-agent | Designs scene compositions with exact frame timings, visual elements, transitions, and acceptance criteria | DeepSeek V4 Pro (creative) |
+| infographic-builder | Generates SVG assets, writes narration scripts, handles API calls to Gemini/Excalidraw | Gemini 3.1 Pro (multimodal) |
+| architect-agent | Project scaffolding: package.json, configs, git, CI/CD, README, SEO assets | Any (setup) |
+
+## Agent Handoff Protocol
+sanity-agent → architecture-agent → [remotion-agent + infographic-builder] → architect-agent → sanity-agent (final gate)
+
+## MoE Output Required
+Return ONLY this JSON (no fences, no text before/after):
 {
   "agentPlan": {"remotionDev":["spec:..."],"infographicBuilder":["spec:..."],"kiloCommands":["/pipeline \"topic\""]},
-  "skillMap":[{"skill":"pattern-name","appliedTo":"what it applies to","decisionPattern":"desc","reasoning":"why"}],
-  "executionPlan":{
-    "phases":[{"phase":"1. Scaffold","steps":[{"order":1,"file":"package.json","agent":"architect","dependsOn":[],"complexity":"small","priority":"critical","tags":["config"],"estimatedLines":25,"templatePattern":"modular-config","action":"Create ESM package.json","spec":"Valid ESM package.json with render scripts"}]}],
-    "fileCreationOrder":[{"order":1,"file":"package.json","agent":"architect","spec":"ESM config"}]
+  "skillMap":[{"skill":"pattern-name","appliedTo":"...","decisionPattern":"...","reasoning":"..."}],
+  "executionPlan":{ "phases":[...], "fileCreationOrder":[...] },
+  "moeDesign": {
+    "agents": [
+      {"name":"sanity-agent","role":"Input/output validation","tokenBudget":500,"estTime":"2-5s","model":"gemini-2.0-flash","gate":"Schema check: question has >20 chars, answer is non-trivial, output JSON validates","handoffTo":"architecture-agent"},
+      {"name":"architecture-agent","role":"Structural verification against 7-step flywheel","tokenBudget":2000,"estTime":"8-15s","model":"claude-sonnet-4.6","gate":"All 7 flywheel steps mapped, template patterns referenced, missing sections flagged","handoffTo":"remotion-agent"},
+      {"name":"remotion-agent","role":"Scene composition design with frame timings","tokenBudget":4000,"estTime":"15-30s","model":"deepseek-v4-pro","gate":"Every scene has duration, visualElements, keyAnimation, acceptanceCriteria","handoffTo":"architect-agent"},
+      {"name":"infographic-builder","role":"SVG and narration asset generation","tokenBudget":3000,"estTime":"10-25s","model":"gemini-3.1-pro","gate":"Asset output paths exist, prompts are actionable, fallbacks documented","handoffTo":"architect-agent"},
+      {"name":"architect-agent","role":"File scaffolding, config, README, SEO","tokenBudget":1000,"estTime":"3-8s","model":"any","gate":"Package.json valid, git init done, all 8 required files accounted for","handoffTo":"sanity-agent"}
+    ],
+    "handoffProtocol": "sanity → architecture → [remotion + infographic in parallel] → architect → sanity (final gate). Each agent validates upstream output before starting. Failed gates trigger rework loop to previous agent.",
+    "qualityGates": [
+      {"name":"Input Sanity","agent":"sanity-agent","check":"Question >20 chars, answer non-trivial, both fields populated","onFail":"Reject and prompt user"},
+      {"name":"Architecture Gate","agent":"architecture-agent","check":"7 flywheel steps mapped, template patterns from llm_thinking_log.md referenced","onFail":"Flag missing step, request architecture-agent re-evaluate"},
+      {"name":"Scene Quality Gate","agent":"remotion-agent","check":"Every scene has name, duration, visualElements[], keyAnimation, acceptanceCriteria","onFail":"Rework scene that failed"},
+      {"name":"Asset Quality Gate","agent":"infographic-builder","check":"All assetPipeline entries have endpoint, topic, output path, fallback","onFail":"Regenerate missing asset spec"},
+      {"name":"Final Schema Gate","agent":"sanity-agent","check":"Output JSON parses, all required fields present in every section","onFail":"Loop to architect-agent for fix"}
+    ],
+    "totalEstimatedTokens": 10500,
+    "totalEstimatedTime": "38-83s",
+    "parallelism": "remotion-agent and infographic-builder run concurrently after architecture-agent approval"
   },
-  "compositions":[{"name":"Scene1Title","description":"...","learningObjective":"...","durationInFrames":120,"visualElements":[],"assetsUsed":[],"keyAnimation":"...","transitionToNext":"fade-to-black","narrationTrigger":"frame N - label","agent":"remotion-dev","kiloCommand":"/render scene1","acceptanceCriteria":"MP4 exists and is valid"}],
-  "assetPipeline":[{"step":1,"endpoint":"POST /api/generate/infographic","topic":"...","output":"generated-assets/file.svg","agent":"infographic-builder","fallback":"Excalidraw"}],
-  "fallbackStrategy":{"geminiApi":"Excalidraw","ffmpeg":"Web Speech API","remotion":"Canvas API","flaskServer":"Manual file I/O","npmInstall":"MANUAL_SETUP.md","ghPages":"MANUAL_DEPLOY.md"},
-  "totalDurationEstimate":"~600f at 30fps","showNotTell":"≤7 words","colorStory":"cyan→violet→green→red","trainingPace":"..."
+  "compositions":[...],
+  "assetPipeline":[...],
+  "fallbackStrategy":{...},
+  "totalDurationEstimate":"...","showNotTell":"...","colorStory":"...","trainingPace":"..."
 }`
 		payload := map[string]any{
 			"model": model,
@@ -1039,6 +1069,13 @@ Return ONLY this JSON (no markdown fences, no text before or after):
 					Content string `json:"content"`
 				} `json:"message"`
 			} `json:"choices"`
+			Usage *struct {
+				PromptTokens              int `json:"prompt_tokens"`
+				CompletionTokens          int `json:"completion_tokens"`
+				TotalTokens               int `json:"total_tokens"`
+				CacheReadInputTokens      int `json:"cache_read_input_tokens"`
+				CacheCreationInputTokens  int `json:"cache_creation_input_tokens"`
+			} `json:"usage"`
 		}
 		if err := json.Unmarshal(b, &orResp); err != nil || len(orResp.Choices) == 0 {
 			w.Header().Set("Content-Type", "application/json")
@@ -1076,6 +1113,15 @@ Return ONLY this JSON (no markdown fences, no text before or after):
 		}
 		parsed["type"] = "structured"
 		parsed["model"] = model
+		if orResp.Usage != nil {
+			parsed["tokenUsage"] = map[string]any{
+				"prompt":       orResp.Usage.PromptTokens,
+				"completion":   orResp.Usage.CompletionTokens,
+				"total":        orResp.Usage.TotalTokens,
+				"cacheRead":    orResp.Usage.CacheReadInputTokens,
+				"cacheCreated": orResp.Usage.CacheCreationInputTokens,
+			}
+		}
 		json.NewEncoder(w).Encode(parsed)
 	}
 }

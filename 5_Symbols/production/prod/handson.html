@@ -1378,6 +1378,7 @@
           <div id="orStatus" class="or-status" style="display: none; align-items: center; gap: 0.5rem; padding: 0.4rem 0.75rem; border-radius: 0.5rem; margin-bottom: 0.5rem; font-size: 0.8rem; font-weight: 600; background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.25); color: #c084fc;">
             <span class="or-spinner" style="display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(168, 85, 247, 0.3); border-top-color: #a855f7; border-radius: 50%; animation: orSpin 0.8s linear infinite;"></span>
             <span id="orStatusText">Querying OpenRouter for Remotion animation instructions…</span>
+            <span id="orTimer" style="margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--primary); min-width: 2.5rem; text-align: right;">0s</span>
           </div>
           <div id="orErrorBox" style="display: none; padding: 0.75rem 1rem; border-radius: 0.5rem; margin-bottom: 0.5rem; font-size: 0.8rem; background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171;">
             <div style="font-weight: 700; margin-bottom: 0.35rem;"><span id="orErrorTitle">❌ OpenRouter Error</span></div>
@@ -1975,6 +1976,21 @@
         parent.replaceChild(frag, node);
       }
       return _searchMatchCount;
+    }
+
+    function getModelPricing(modelName) {
+      var m = (modelName || '').toLowerCase();
+      if (m.indexOf('deepseek-v4-pro') !== -1 || m.indexOf('deepseek v4 pro') !== -1) return { inputPerM: 2.50, outputPerM: 8.00 };
+      if (m.indexOf('deepseek-v4-flash') !== -1 || m.indexOf('deepseek v4 flash') !== -1) return { inputPerM: 0.20, outputPerM: 0.50 };
+      if (m.indexOf('deepseek') !== -1) return { inputPerM: 0.50, outputPerM: 2.00 };
+      if (m.indexOf('claude-sonnet-4.6') !== -1 || m.indexOf('claude sonnet 4.6') !== -1) return { inputPerM: 3.00, outputPerM: 15.00 };
+      if (m.indexOf('claude 3.7') !== -1 || m.indexOf('claude 3.7') !== -1) return { inputPerM: 3.00, outputPerM: 15.00 };
+      if (m.indexOf('claude') !== -1) return { inputPerM: 3.00, outputPerM: 15.00 };
+      if (m.indexOf('gemini-2.5') !== -1 || m.indexOf('gemini 2.5') !== -1 || m.indexOf('gemini 3.1') !== -1) return { inputPerM: 1.25, outputPerM: 10.00 };
+      if (m.indexOf('gemini-2.0-flash') !== -1 || m.indexOf('gemini 2.0 flash') !== -1) return { inputPerM: 0.10, outputPerM: 0.40 };
+      if (m.indexOf('gemini') !== -1) return { inputPerM: 0.50, outputPerM: 2.00 };
+      if (m.indexOf('gpt-4o') !== -1 || m.indexOf('gpt 4o') !== -1) return { inputPerM: 2.50, outputPerM: 10.00 };
+      return { inputPerM: 0.50, outputPerM: 2.00 };
     }
 
     function getModelPersona(targetLLM) {
@@ -2654,11 +2670,26 @@ Execute the steps above sequentially and thoroughly. When finished, print the CL
       if (promptText && promptText.length > 100) {
         const orStatus = document.getElementById('orStatus');
         const orStatusText = document.getElementById('orStatusText');
+        const orTimer = document.getElementById('orTimer');
+        var _orStart = Date.now();
+        var _orTicker = null;
+
+        function orTick() {
+          var elapsed = Math.floor((Date.now() - _orStart) / 1000);
+          if (orTimer) orTimer.innerText = elapsed + 's';
+        }
+        function orDone(elapsed) {
+          if (_orTicker) { clearInterval(_orTicker); _orTicker = null; }
+          if (orTimer) orTimer.innerText = elapsed + 's';
+        }
+
         if (orStatus) {
           orStatus.style.display = 'flex';
           orStatus.className = 'or-status';
-          orStatusText.innerText = 'Querying OpenRouter for Remotion animation instructions…';
+          orStatusText.innerText = 'Querying OpenRouter…';
+          if (orTimer) orTimer.innerText = '0s';
         }
+        _orTicker = setInterval(orTick, 200);
 
         fetch('/api/animations/remotion-instructions', {
           method: 'POST',
@@ -2674,6 +2705,8 @@ Execute the steps above sequentially and thoroughly. When finished, print the CL
           });
         })
         .then(data => {
+          var elapsed = Math.floor((Date.now() - _orStart) / 1000);
+          orDone(elapsed);
           if (data.error) {
             showOrError(data);
             if (orStatus) {
@@ -2748,7 +2781,37 @@ Execute the steps above sequentially and thoroughly. When finished, print the CL
               });
             }
 
-            // Asset Pipeline
+            // MoE Agent Design
+            if (data.moeDesign) {
+              var moe = data.moeDesign;
+              instructions += '\n## 🧠 Mixture-of-Experts (MoE) Agent Design\n\n';
+              instructions += `  **Handoff Protocol:** ${moe.handoffProtocol || 'sanity → architecture → [remotion + infographic] → architect → sanity'}\n`;
+              if (moe.totalEstimatedTokens) instructions += `  **Total Token Budget:** ${moe.totalEstimatedTokens.toLocaleString()} tokens\n`;
+              if (moe.totalEstimatedTime) instructions += `  **Total Est. Time:** ${moe.totalEstimatedTime}\n`;
+              if (moe.parallelism) instructions += `  **Parallelism:** ${moe.parallelism}\n`;
+              instructions += '\n';
+
+              if (moe.agents && moe.agents.length) {
+                instructions += `### Agent Pool (${moe.agents.length} agents)\n\n`;
+                instructions += `  | Agent | Role | Model | Token Budget | Est. Time | Gate | Handoff → |\n`;
+                instructions += `  | ----- | ---- | ----- | ------------ | --------- | ---- | --------- |\n`;
+                moe.agents.forEach(function(a) {
+                  var budget = a.tokenBudget ? a.tokenBudget.toLocaleString() : '?';
+                  instructions += `  | **${a.name}** | ${a.role || ''} | ${a.model || ''} | ${budget} | ${a.estTime || ''} | ${a.gate ? a.gate.substring(0,60)+'...' : ''} | ${a.handoffTo || ''} |\n`;
+                });
+                instructions += '\n';
+              }
+
+              if (moe.qualityGates && moe.qualityGates.length) {
+                instructions += `### 🚦 Quality Gates (${moe.qualityGates.length} checkpoints)\n\n`;
+                moe.qualityGates.forEach(function(g) {
+                  instructions += `  **${g.name}** (${g.agent})\n`;
+                  instructions += `  ✅ Check: ${g.check}\n`;
+                  if (g.onFail) instructions += `  ❌ On Fail: ${g.onFail}\n`;
+                  instructions += '\n';
+                });
+              }
+            }
             if (data.assetPipeline && data.assetPipeline.length) {
               instructions += `\n## 🖼️ Asset Pipeline — API-to-Output Trace (${data.assetPipeline.length} assets)\n\n`;
               data.assetPipeline.forEach(a => {
@@ -2806,6 +2869,28 @@ Execute the steps above sequentially and thoroughly. When finished, print the CL
             if (data.showNotTell) instructions += `\n## ✏️ Show Don't Tell\n  ${data.showNotTell}\n`;
             if (data.totalDurationEstimate) instructions += `\n## ⏳ Total Duration Estimate\n  ${data.totalDurationEstimate}\n`;
 
+            // Token Economics
+            if (data.tokenUsage) {
+              var tu = data.tokenUsage;
+              var modelName = data.model || 'Unknown';
+              var pricing = getModelPricing(modelName);
+              var inputCost = (tu.prompt * pricing.inputPerM / 1000000).toFixed(5);
+              var outputCost = (tu.completion * pricing.outputPerM / 1000000).toFixed(5);
+              var totalCost = (parseFloat(inputCost) + parseFloat(outputCost)).toFixed(5);
+              var cacheLabel = (tu.cacheRead || tu.cacheCreated) ? ((tu.cacheRead || tu.cacheCreated).toLocaleString()) : 'N/A';
+              instructions += '\n## 🧮 Generation Token Economics\n\n';
+              instructions += `  | Metric | Count |\n`;
+              instructions += `  | ------ | ----- |\n`;
+              instructions += `  | **Model** | ${modelName} |\n`;
+              instructions += `  | **Prompt Tokens** | ${(tu.prompt || 0).toLocaleString()} |\n`;
+              instructions += `  | **Completion Tokens** | ${(tu.completion || 0).toLocaleString()} |\n`;
+              if (tu.cacheRead) instructions += `  | **Cached (Read)** | ${tu.cacheRead.toLocaleString()} |\n`;
+              if (tu.cacheCreated) instructions += `  | **Cached (Created)** | ${tu.cacheCreated.toLocaleString()} |\n`;
+              instructions += `  | **Total Tokens** | ${(tu.total || 0).toLocaleString()} |\n`;
+              instructions += `  | **Estimated Cost** | $${totalCost} |\n`;
+              instructions += `  | **Pricing** | $${pricing.inputPerM}/M prompt, $${pricing.outputPerM}/M completion |\n`;
+            }
+
           } else if (data.raw) {
             instructions += '\n' + data.raw;
           } else {
@@ -2817,15 +2902,19 @@ Execute the steps above sequentially and thoroughly. When finished, print the CL
           updateStats();
           if (orStatus) {
             orStatus.className = 'or-status success';
-            orStatusText.innerText = '✅ Remotion animation instructions received';
-            setTimeout(() => { if (orStatus) orStatus.style.display = 'none'; }, 4000);
+            orStatusText.innerText = '✅ Instructions received';
+            setTimeout(() => { if (orStatus) orStatus.style.display = 'none'; }, 5000);
           }
+          var elapsed = Math.floor((Date.now() - _orStart) / 1000);
+          if (orTimer) orTimer.innerText = '⏱ ' + elapsed + 's';
         })
         .catch(err => {
+          var elapsed = Math.floor((Date.now() - _orStart) / 1000);
+          orDone(elapsed);
           showOrError({ error: err.message || 'OpenRouter request failed', rawBody: '' });
           if (orStatus) {
             orStatus.className = 'or-status error';
-            orStatusText.innerText = '❌ OpenRouter call failed: ' + err.message;
+            orStatusText.innerText = '❌ Failed after ' + elapsed + 's: ' + err.message;
             setTimeout(() => { if (orStatus) orStatus.style.display = 'none'; }, 6000);
           }
         });
