@@ -54,7 +54,7 @@ func homeHandler(tmpl *template.Template, cfg config, navConfigJS template.JS) h
 		}
 
 		var favs []NavFav
-		if err := supabaseGet(ctx, cfg, "nav_favorites", "select=url,label&order=created_at.asc", &favs); err != nil {
+		if err := supabaseGet(ctx, cfg, "nav_favorites", "select=url,label&order=updated_at.desc", &favs); err != nil {
 			log.Printf("nav_favorites fetch: %v", err)
 		}
 		favsJSON, _ := json.Marshal(favs)
@@ -148,6 +148,21 @@ func envStatusHandler(cfg config) http.HandlerFunc {
 
 func navFavsHandler(cfg config) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+		defer cancel()
+
+		if r.Method == http.MethodDelete {
+			u := r.URL.Query().Get("url")
+			if u == "" {
+				http.Error(w, "bad request: missing url", http.StatusBadRequest)
+				return
+			}
+			_ = supabaseDelete(ctx, cfg, "nav_favorites", "url=eq."+url.QueryEscape(u))
+			fmt.Fprint(w, `{"favorited":false}`)
+			return
+		}
+
 		if r.Method != http.MethodPost {
 			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 			return
@@ -158,20 +173,8 @@ func navFavsHandler(cfg config) http.HandlerFunc {
 			return
 		}
 
-		ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
-		defer cancel()
-
-		var existing []NavFav
-		q := "url=eq." + url.QueryEscape(req.URL) + "&select=url"
-		_ = supabaseGet(ctx, cfg, "nav_favorites", q, &existing)
-
-		w.Header().Set("Content-Type", "application/json")
-		if len(existing) > 0 {
-			_ = supabaseDelete(ctx, cfg, "nav_favorites", "url=eq."+url.QueryEscape(req.URL))
-			fmt.Fprint(w, `{"favorited":false}`)
-		} else {
-			_ = supabasePost(ctx, cfg, "nav_favorites", req)
-			fmt.Fprint(w, `{"favorited":true}`)
-		}
+		_ = supabaseDelete(ctx, cfg, "nav_favorites", "url=eq."+url.QueryEscape(req.URL))
+		_ = supabasePost(ctx, cfg, "nav_favorites", req)
+		fmt.Fprint(w, `{"favorited":true}`)
 	}
 }

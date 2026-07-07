@@ -194,16 +194,19 @@
     });
   }
 
-  function toggleFav(resolvedUrl, label) {
+  function favPage(resolvedUrl, label) {
     var favs = getFavs().slice();
     var idx = -1;
     for (var k = 0; k < favs.length; k++) {
       if (favs[k].url === resolvedUrl) { idx = k; break; }
     }
-    var nowFav;
-    if (idx > -1) { favs.splice(idx, 1); nowFav = false; }
-    else { favs.push({ url: resolvedUrl, label: label }); nowFav = true; }
-    window.__NAV_FAVS__ = favs; // optimistic update
+    if (idx === -1) {
+      favs.push({ url: resolvedUrl, label: label });
+    } else {
+      favs.splice(idx, 1);
+      favs.unshift({ url: resolvedUrl, label: label });
+    }
+    window.__NAV_FAVS__ = favs;
 
     try {
       document.cookie = "nav_favs=" + encodeURIComponent(JSON.stringify(favs)) + "; path=/; max-age=31536000";
@@ -218,7 +221,46 @@
     var btns = document.querySelectorAll('.nav-star[data-fav-url]');
     for (var b = 0; b < btns.length; b++) {
       if (btns[b].getAttribute('data-fav-url') === resolvedUrl) {
-        btns[b].textContent = nowFav ? '★' : '☆';
+        btns[b].textContent = '\u2605';
+        btns[b].classList.add('nav-star--on');
+      }
+    }
+    updateFavsDropdown();
+  }
+
+  function toggleFav(resolvedUrl, label) {
+    var favs = getFavs().slice();
+    var idx = -1;
+    for (var k = 0; k < favs.length; k++) {
+      if (favs[k].url === resolvedUrl) { idx = k; break; }
+    }
+    var nowFav;
+    if (idx > -1) {
+      favs.splice(idx, 1); nowFav = false;
+      try {
+        var delCookie = "nav_favs=" + encodeURIComponent(JSON.stringify(favs)) + "; path=/; max-age=31536000";
+        document.cookie = delCookie;
+      } catch(e) {}
+      fetch((window.API_BASE || '') + '/api/nav/favs?url=' + encodeURIComponent(resolvedUrl), {
+        method: 'DELETE'
+      }).catch(function (e) { console.warn('nav favs delete failed', e); });
+    } else {
+      favs.push({ url: resolvedUrl, label: label }); nowFav = true;
+      try {
+        document.cookie = "nav_favs=" + encodeURIComponent(JSON.stringify(favs)) + "; path=/; max-age=31536000";
+      } catch(e) {}
+      fetch((window.API_BASE || '') + '/api/nav/favs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: resolvedUrl, label: label })
+      }).catch(function (e) { console.warn('nav favs sync failed', e); });
+    }
+    window.__NAV_FAVS__ = favs;
+
+    var btns = document.querySelectorAll('.nav-star[data-fav-url]');
+    for (var b = 0; b < btns.length; b++) {
+      if (btns[b].getAttribute('data-fav-url') === resolvedUrl) {
+        btns[b].textContent = nowFav ? '\u2605' : '\u2606';
         if (nowFav) btns[b].classList.add('nav-star--on');
         else btns[b].classList.remove('nav-star--on');
       }
@@ -230,12 +272,17 @@
     var favs = getFavs();
     var container = document.getElementById('site-nav-favs');
     if (!container) return;
-    if (!favs.length) { container.style.display = 'none'; return; }
     container.style.display = '';
     var menu = container.querySelector('.site-drop-menu');
-    menu.innerHTML = favs.map(function (f) {
-      return buildDropItemHtml(f.url, f.label, '', true);
-    }).join('');
+    var countEl = document.getElementById('site-nav-favs-count');
+    if (countEl) countEl.textContent = favs.length || '';
+    if (favs.length) {
+      menu.innerHTML = favs.map(function (f) {
+        return buildDropItemHtml(f.url, f.label, '', true);
+      }).join('');
+    } else {
+      menu.innerHTML = '<div class="site-drop-item" style="padding:8px 16px;opacity:0.6;font-size:0.85rem;white-space:nowrap;">No favorites yet \u2014 click \u2606 to add this page</div>';
+    }
   }
 
   /* ---- builds a dropdown row: link + star button ---- */
@@ -719,11 +766,15 @@
       '</div>' +
       '<div class="site-nav-links">';
 
-    // Favorites dropdown — shown only when there are favorites
-    html += '<div class="site-nav-dropdown" id="site-nav-favs"' + (favs.length ? '' : ' style="display:none"') + '>' +
-      '<span class="site-drop-trigger">⭐ Favorites &#9662;</span>' +
+    // Favorites dropdown — always visible
+    html += '<div class="site-nav-dropdown" id="site-nav-favs">' +
+      '<span class="site-drop-trigger">⭐ <span id="site-nav-favs-count">' + (favs.length || '') + '</span> &#9662;</span>' +
       '<div class="site-drop-menu">';
-    html += favs.map(function (f) { return buildDropItemHtml(f.url, f.label, '', true); }).join('');
+    if (favs.length) {
+      html += favs.map(function (f) { return buildDropItemHtml(f.url, f.label, '', true); }).join('');
+    } else {
+      html += '<div class="site-drop-item" style="padding:8px 16px;opacity:0.6;font-size:0.85rem;white-space:nowrap;">No favorites yet \u2014 click \u2606 to add this page</div>';
+    }
     html += '</div></div>';
 
     items.forEach(function (item) {
@@ -783,7 +834,7 @@
       'style="display:inline-flex;align-items:center;justify-content:center;margin-left:10px;width:30px;height:30px;border-radius:50%;' +
       'background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:inherit;' +
       'font-size:1.1rem;cursor:pointer;transition:all 0.2s;line-height:1;" ' +
-      'title="' + (isCurrentFav ? 'Remove from favorites' : 'Add to favorites') + '">' +
+      'title="' + (isCurrentFav ? 'Bump to top of favorites' : 'Add to favorites') + '">' +
       pageFavStar + '</button>';
 
     html += '</div></div>';
@@ -816,7 +867,11 @@
       if (!btn.classList.contains('nav-star')) return;
       e.preventDefault();
       e.stopPropagation();
-      toggleFav(btn.getAttribute('data-fav-url'), btn.getAttribute('data-fav-label'));
+      if (btn.id === 'site-nav-page-fav') {
+        favPage(btn.getAttribute('data-fav-url'), btn.getAttribute('data-fav-label'));
+      } else {
+        toggleFav(btn.getAttribute('data-fav-url'), btn.getAttribute('data-fav-label'));
+      }
     });
   }
 

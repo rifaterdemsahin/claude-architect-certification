@@ -83,7 +83,7 @@ func axiomErrorsHandler(tmpl *template.Template, cfg config, navConfigJS templat
 		var favs []NavFav
 		ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
 		defer cancel()
-		if err := supabaseGet(ctx, cfg, "nav_favorites", "select=url,label&order=created_at.asc", &favs); err != nil {
+		if err := supabaseGet(ctx, cfg, "nav_favorites", "select=url,label&order=updated_at.desc", &favs); err != nil {
 			log.Printf("nav_favorites fetch: %v", err)
 		}
 		favsJSON, _ := json.Marshal(favs)
