@@ -176,15 +176,22 @@
   /* ---- Favorites helpers (backed by Supabase via /api/nav/favs) ---- */
 
   function getFavs() {
-    if (window.__NAV_FAVS__) return window.__NAV_FAVS__;
-    try {
-      var match = document.cookie.match(new RegExp('(^| )nav_favs=([^;]+)'));
-      if (match) {
-        window.__NAV_FAVS__ = JSON.parse(decodeURIComponent(match[2]));
-        return window.__NAV_FAVS__;
-      }
-    } catch(e) {}
-    return [];
+    var raw;
+    if (window.__NAV_FAVS__) raw = window.__NAV_FAVS__;
+    else {
+      try {
+        var match = document.cookie.match(new RegExp('(^| )nav_favs=([^;]+)'));
+        if (match) {
+          window.__NAV_FAVS__ = JSON.parse(decodeURIComponent(match[2]));
+          raw = window.__NAV_FAVS__;
+        }
+      } catch(e) {}
+    }
+    if (!raw || !raw.length) return [];
+    var curOrigin = window.location.origin;
+    return raw.filter(function(f) {
+      try { return new URL(f.url).origin === curOrigin; } catch(_) { return true; }
+    });
   }
 
   function toggleFav(resolvedUrl, label) {
