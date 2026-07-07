@@ -5,3 +5,6 @@
 - DO NOT make the user ask or prompt for the server to be started or shown.
 - First verify if it is running by calling `curl -s http://localhost:8080 >/dev/null`. If that fails (not running), build and launch it asynchronously without waiting for prompting.
 - At the very start of your initial response when starting a session or logging in, ALWAYS display the clickable link http://localhost:8080/ so the user can immediately see and access it.
+
+## 🌐 Remind to Verify on fly.dev After Push
+- After committing and pushing a fix that affects the production deployment (e.g., shared JS, server handlers, templates), always remind the user to open `https://claude-architect-certification.fly.dev/` (and any specific affected page) in Chrome so they can verify the fix on the live production site.
