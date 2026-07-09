@@ -325,7 +325,10 @@
         {
           label: '🛠️ Tools',
           children: [
-            { group: true, label: '💻 Dev Environment', children: [
+          { group: true, label: '🎞️ Animation Prep', children: [
+            { label: '🎞️ Animation Assistant', url: 'https://animation-assistant.fly.dev/pages/tools.html', description: 'Animation preparation tools and assistant.' }
+          ]},
+          { group: true, label: '💻 Dev Environment', children: [
               { label: '🌊 Wave Terminal', url: '5_Symbols/production/preprod/tools/wave_terminal.html', description: 'Configuration and layout for Wave Terminal.' },
               { label: '🔄 Before & After Restart', url: '5_Symbols/production/preprod/tools/before_after_restart.html', description: 'Understanding state preservation and environment behavior before and after restarting your sessions.' }
             ]},
@@ -338,7 +341,8 @@
               { label: '🔥 Supabase', url: 'https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/' },
               { label: '🗃 Preprod Data Admin', url: '5_Symbols/production/preprod/tools/admin.html' },
               { label: '🗄️ Database Analysis', url: '5_Symbols/production/preprod/tools/database_analysis.html', description: 'Collapsible analysis of every Supabase table: row counts, columns, and relationships.' },
-              { label: '🕸️ Database ERD', url: '5_Symbols/production/preprod/tools/database_erd.html', description: 'Interactive visual Entity-Relationship Diagram of the Supabase database.' }
+              { label: '🕸️ Database ERD', url: '5_Symbols/production/preprod/tools/database_erd.html', description: 'Interactive visual Entity-Relationship Diagram of the Supabase database.' },
+              { label: '📁 Google Drive Projects', url: 'https://drive.google.com/drive/project/1v5YPteobDvpxl3iJi8R7hfXjKkC4PCCm', description: 'Google Drive project hub for the course.' }
             ]},
             { group: true, label: '📊 Logs & Monitoring', children: [
               { label: '📡 Axiom Errors Admin', url: '/admin/errors' },
@@ -505,6 +509,9 @@
             { label: '📺 YouTube Studio', url: 'https://studio.youtube.com/' },
             { label: '🎬 Channel Playlist', url: 'https://www.youtube.com/watch?v=F8IBooe3bXY&list=PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy/' },
             { label: '🎬 Studio Playlist Editor', url: 'https://studio.youtube.com/playlist/PLEaC7OEmKSrcrDQrZMEQGlMUge7q4Peiy/edit' }
+          ]},
+          { group: true, label: '🎙️ Recording', children: [
+            { label: '🎙️ Record & Transcribe', url: 'https://record-and-transcribe.fly.dev/', description: 'Records audio and transcribes to text.' }
           ]},
           { group: true, label: '🤖 Guides', children: [
             { label: '✨ Gemini Guide', url: 'gemini.md' },
