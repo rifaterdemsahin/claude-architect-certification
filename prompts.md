@@ -4,6 +4,18 @@ Every prompt used in this project is recorded here. This serves as an audit trai
 
 ---
 
+## 2026-07-12 | Claude Code | Pull pm-skills Plugin Marketplace
+
+**Purpose:** Register the `phuryn/pm-skills` Claude Code plugin marketplace (68 PM skills / 42 workflows across 9 plugins — discovery, strategy, execution, market research, data analytics, go-to-market, marketing/growth, toolkit, AI shipping) so they're available to invoke during `4_Formula` planning work.
+
+**Prompt:** "pull the skills > https://github.com/phuryn/pm-skills > running this is the responsibility of the formula agent."
+
+**Action:** `claude plugin marketplace add phuryn/pm-skills --scope project` + `claude plugin install <name>@pm-skills -s project` for all 9 plugins. Both the marketplace source and `enabledPlugins` are declared in `.claude/settings.json` (project scope) so the skills travel with the repo for any agent. Registration only — invoking individual skills (e.g. `write-prd`, `plan-okrs`, `pre-mortem`) during planning is the `4_Formula` stage's responsibility per the user's instruction.
+
+**Outcome:** `.claude/settings.json` now declares `extraKnownMarketplaces.pm-skills` and 9 `enabledPlugins` entries. Requires a session restart to appear in the live skill list.
+
+---
+
 ## 2026-06-09 | Claude Code | GitHub Pages + Supabase Stateful Formula
 
 **Purpose:** Document the formula for building a stateful N-tier application using GitHub Pages as the static frontend and Supabase as the data/logic tier, minimising hosting cost.

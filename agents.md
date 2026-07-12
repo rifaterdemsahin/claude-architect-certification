@@ -26,6 +26,12 @@ This document defines how AI agents interact with the **Claude AI Certification 
 
 ## 📅 Agent Activity Log
 
+### 2026-07-12
+- **Task:** 🔌 Pull the `phuryn/pm-skills` Claude Code plugin marketplace so its 9 product-management plugins (68 skills / 42 workflows) are available for `4_Formula` planning work.
+- **Action:** Registered the marketplace and installed all 9 plugins (`pm-product-discovery`, `pm-product-strategy`, `pm-execution`, `pm-market-research`, `pm-data-analytics`, `pm-go-to-market`, `pm-marketing-growth`, `pm-toolkit`, `pm-ai-shipping`) at **project scope**, so both `extraKnownMarketplaces.pm-skills` and `enabledPlugins` live in `.claude/settings.json` and are versioned with the repo. Per the user's instruction, this step only *pulls* the skills — deciding when/which to invoke during planning (e.g. `write-prd`, `plan-okrs`, `pre-mortem`, `retro`) is the responsibility of whichever agent is operating in `4_Formula` at the time. Documented in `prompts.md`.
+- **Verification:** `claude plugin marketplace list` shows `pm-skills`; `claude plugin details pm-execution@pm-skills` lists 27 skills; `.claude/settings.json` contains all 9 `enabledPlugins` entries plus the marketplace source. New skills/commands require a session restart to appear live.
+- **Status:** IMPLEMENTED, COMMITTED, PUSHED.
+
 ### 2026-07-02
 - **Task:** Update customer development framework page with specific validation milestones and timeline gates.
 - **Action:** Updated `5_Symbols/production/preprod/customer_development.html` with explicit gate descriptions for Customer Discovery ($10 YouTube join model vs $100 exam / 6-month penalty, plus self-learning technique discovery goal using Delivery Pilot and video production), Customer Validation ($10k lifetime revenue), Customer Creation (monthly course creation cycle), and Company Building (full-time independence with no extra contracts). Documented in `4_Formula/llm_thinking_log.md`.
