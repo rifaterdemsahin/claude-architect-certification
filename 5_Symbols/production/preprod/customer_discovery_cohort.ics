@@ -47,7 +47,106 @@ DTSTAMP:20260627T000000Z
 DTSTART:20260726T200000Z
 DTEND:20260726T220000Z
 SUMMARY:Cohort Call — Week 5 / Module 5 + Certification (Claude AI Certification)
-DESCRIPTION:Final 2-hour customer-discovery cohort call. Walk Module 5\, wrap up\, and the whole cohort gets certified together. Host: Rifat Erdem Sahin. Async channel: WhatsApp. Live: Google Meet.\n\nPage: https://claude-architect-certification.fly.dev/5_Symbols/production/preprod/customer_discovery_interviews.html
+DESCRIPTION:Final module call. Walk Module 5\, wrap up\, and the whole cohort gets certified together. Hands-on real-world sessions continue weekly after this call. Host: Rifat Erdem Sahin. Async channel: WhatsApp. Live: Google Meet.\n\nPage: https://claude-architect-certification.fly.dev/5_Symbols/production/preprod/customer_discovery_interviews.html
+LOCATION:Google Meet
+END:VEVENT
+BEGIN:VEVENT
+UID:cdc-week6-handson1@claude-architect-certification.fly.dev
+DTSTAMP:20260627T000000Z
+DTSTART:20260802T200000Z
+DTEND:20260802T220000Z
+SUMMARY:Cohort Call — Week 6 (Hands-On Session 1: AI in the Real World)
+DESCRIPTION:Weekly 2-hour hands-on cohort call — apply AI in real-world scenarios. Please watch the previous session recordings before joining. Host: Rifat Erdem Sahin. Async channel: WhatsApp. Live: Google Meet.\n\nPage: https://claude-architect-certification.fly.dev/5_Symbols/production/preprod/customer_discovery_interviews.html
+LOCATION:Google Meet
+END:VEVENT
+BEGIN:VEVENT
+UID:cdc-week7-handson2@claude-architect-certification.fly.dev
+DTSTAMP:20260627T000000Z
+DTSTART:20260809T200000Z
+DTEND:20260809T220000Z
+SUMMARY:Cohort Call — Week 7 (Hands-On Session 2: AI in the Real World)
+DESCRIPTION:Weekly 2-hour hands-on cohort call — apply AI in real-world scenarios. Please watch the previous session recordings before joining. Host: Rifat Erdem Sahin. Async channel: WhatsApp. Live: Google Meet.\n\nPage: https://claude-architect-certification.fly.dev/5_Symbols/production/preprod/customer_discovery_interviews.html
+LOCATION:Google Meet
+END:VEVENT
+BEGIN:VEVENT
+UID:cdc-week8-handson3@claude-architect-certification.fly.dev
+DTSTAMP:20260627T000000Z
+DTSTART:20260816T200000Z
+DTEND:20260816T220000Z
+SUMMARY:Cohort Call — Week 8 (Hands-On Session 3: AI in the Real World)
+DESCRIPTION:Weekly 2-hour hands-on cohort call — apply AI in real-world scenarios. Please watch the previous session recordings before joining. Host: Rifat Erdem Sahin. Async channel: WhatsApp. Live: Google Meet.\n\nPage: https://claude-architect-certification.fly.dev/5_Symbols/production/preprod/customer_discovery_interviews.html
+LOCATION:Google Meet
+END:VEVENT
+BEGIN:VEVENT
+UID:cdc-week9-handson4@claude-architect-certification.fly.dev
+DTSTAMP:20260627T000000Z
+DTSTART:20260823T200000Z
+DTEND:20260823T220000Z
+SUMMARY:Cohort Call — Week 9 (Hands-On Session 4: AI in the Real World)
+DESCRIPTION:Weekly 2-hour hands-on cohort call — apply AI in real-world scenarios. Please watch the previous session recordings before joining. Host: Rifat Erdem Sahin. Async channel: WhatsApp. Live: Google Meet.\n\nPage: https://claude-architect-certification.fly.dev/5_Symbols/production/preprod/customer_discovery_interviews.html
+LOCATION:Google Meet
+END:VEVENT
+BEGIN:VEVENT
+UID:cdc-week10-handson5@claude-architect-certification.fly.dev
+DTSTAMP:20260627T000000Z
+DTSTART:20260830T200000Z
+DTEND:20260830T220000Z
+SUMMARY:Cohort Call — Week 10 (Hands-On Session 5: AI in the Real World)
+DESCRIPTION:Weekly 2-hour hands-on cohort call — apply AI in real-world scenarios. Please watch the previous session recordings before joining. Host: Rifat Erdem Sahin. Async channel: WhatsApp. Live: Google Meet.\n\nPage: https://claude-architect-certification.fly.dev/5_Symbols/production/preprod/customer_discovery_interviews.html
+LOCATION:Google Meet
+END:VEVENT
+BEGIN:VEVENT
+UID:cdc-week11-handson6@claude-architect-certification.fly.dev
+DTSTAMP:20260627T000000Z
+DTSTART:20260906T200000Z
+DTEND:20260906T220000Z
+SUMMARY:Cohort Call — Week 11 (Hands-On Session 6: AI in the Real World)
+DESCRIPTION:Weekly 2-hour hands-on cohort call — apply AI in real-world scenarios. Please watch the previous session recordings before joining. Host: Rifat Erdem Sahin. Async channel: WhatsApp. Live: Google Meet.\n\nPage: https://claude-architect-certification.fly.dev/5_Symbols/production/preprod/customer_discovery_interviews.html
+LOCATION:Google Meet
+END:VEVENT
+BEGIN:VEVENT
+UID:cdc-week12-handson7@claude-architect-certification.fly.dev
+DTSTAMP:20260627T000000Z
+DTSTART:20260913T200000Z
+DTEND:20260913T220000Z
+SUMMARY:Cohort Call — Week 12 (Hands-On Session 7: AI in the Real World)
+DESCRIPTION:Weekly 2-hour hands-on cohort call — apply AI in real-world scenarios. Please watch the previous session recordings before joining. Host: Rifat Erdem Sahin. Async channel: WhatsApp. Live: Google Meet.\n\nPage: https://claude-architect-certification.fly.dev/5_Symbols/production/preprod/customer_discovery_interviews.html
+LOCATION:Google Meet
+END:VEVENT
+BEGIN:VEVENT
+UID:cdc-week13-handson8@claude-architect-certification.fly.dev
+DTSTAMP:20260627T000000Z
+DTSTART:20260920T200000Z
+DTEND:20260920T220000Z
+SUMMARY:Cohort Call — Week 13 (Hands-On Session 8: AI in the Real World)
+DESCRIPTION:Weekly 2-hour hands-on cohort call — apply AI in real-world scenarios. Please watch the previous session recordings before joining. Host: Rifat Erdem Sahin. Async channel: WhatsApp. Live: Google Meet.\n\nPage: https://claude-architect-certification.fly.dev/5_Symbols/production/preprod/customer_discovery_interviews.html
+LOCATION:Google Meet
+END:VEVENT
+BEGIN:VEVENT
+UID:cdc-week14-handson9@claude-architect-certification.fly.dev
+DTSTAMP:20260627T000000Z
+DTSTART:20260927T200000Z
+DTEND:20260927T220000Z
+SUMMARY:Cohort Call — Week 14 (Hands-On Session 9: AI in the Real World)
+DESCRIPTION:Weekly 2-hour hands-on cohort call — apply AI in real-world scenarios. Please watch the previous session recordings before joining. Host: Rifat Erdem Sahin. Async channel: WhatsApp. Live: Google Meet.\n\nPage: https://claude-architect-certification.fly.dev/5_Symbols/production/preprod/customer_discovery_interviews.html
+LOCATION:Google Meet
+END:VEVENT
+BEGIN:VEVENT
+UID:cdc-week15-handson10@claude-architect-certification.fly.dev
+DTSTAMP:20260627T000000Z
+DTSTART:20261004T200000Z
+DTEND:20261004T220000Z
+SUMMARY:Cohort Call — Week 15 (Hands-On Session 10: AI in the Real World)
+DESCRIPTION:Weekly 2-hour hands-on cohort call — apply AI in real-world scenarios. Please watch the previous session recordings before joining. Host: Rifat Erdem Sahin. Async channel: WhatsApp. Live: Google Meet.\n\nPage: https://claude-architect-certification.fly.dev/5_Symbols/production/preprod/customer_discovery_interviews.html
+LOCATION:Google Meet
+END:VEVENT
+BEGIN:VEVENT
+UID:cdc-week16-handson11@claude-architect-certification.fly.dev
+DTSTAMP:20260627T000000Z
+DTSTART:20261011T200000Z
+DTEND:20261011T220000Z
+SUMMARY:Cohort Call — Week 16 (Hands-On Session 11: AI in the Real World — Wrap-Up)
+DESCRIPTION:Final 2-hour hands-on cohort call — closing retro and real-world AI wrap-up. Please watch the previous session recordings before joining. Host: Rifat Erdem Sahin. Async channel: WhatsApp. Live: Google Meet.\n\nPage: https://claude-architect-certification.fly.dev/5_Symbols/production/preprod/customer_discovery_interviews.html
 LOCATION:Google Meet
 END:VEVENT
 END:VCALENDAR
