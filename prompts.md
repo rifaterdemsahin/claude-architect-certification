@@ -4,6 +4,17 @@ Every prompt used in this project is recorded here. This serves as an audit trai
 
 ---
 
+## 2026-07-18 | Claude Code | Self-Learning Menu (Production) + Canva Animation Drive Link
+
+**Purpose:** Link the existing but unlinked `self_learning.html` pedagogy page into navigation and specifically add a "Self Learning" menu group under Production (Preprod already had one, live via Supabase); add a Canva animation-building Google Drive folder to Post-Production tools.
+
+**Prompt 1:** "add a self learning menu in production edit decision list create the https://edit-decision-list.fly.dev/3_Simulation/samples.html"
+**Prompt 2 (mid-turn):** "add this to post production tools for canva animation building > https://drive.google.com/drive/folders/1wlUpWAVZGbMK_W3DDR2uXa4xGBualgfC"
+
+**Outcome:** Fixed a broken relative script path in `self_learning.html` (nav.js 404'd, so it had no visible navigation at all). Linked it into `5_Symbols/production/preprod/index.html` and the debug-menu fallback arrays. Discovered the live project menu is Supabase-backed (`navigation_menus` table via `shared/nav.js`), not the static `navigation_config.json`; used the `menu_builder.html` admin tool to add the missing "Self Learning" group under Production. Added the Canva Drive folder card to `5_Symbols/production/postprod/index.html` and its nav entries. The `edit-decision-list.fly.dev` URL turned out to reference an unrelated sibling project — left untouched. See `4_Formula/llm_thinking_log.md` (2026-07-18 entry) for full detail.
+
+---
+
 ## 2026-07-12 | Claude Code | Pull pm-skills Plugin Marketplace
 
 **Purpose:** Register the `phuryn/pm-skills` Claude Code plugin marketplace (68 PM skills / 42 workflows across 9 plugins — discovery, strategy, execution, market research, data analytics, go-to-market, marketing/growth, toolkit, AI shipping) so they're available to invoke during `4_Formula` planning work.

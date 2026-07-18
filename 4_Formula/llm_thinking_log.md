@@ -2587,3 +2587,23 @@ Add a "YouTube Paywall" page under Post Prod explaining how YouTube Channel Memb
 - Start local server on port 8080.
 - Open `http://localhost:8080/5_Symbols/production/prod/handson.html` in Google Chrome and verify all tabs, copy buttons, checkboxes, and navigation menus.
 
+---
+
+## 2026-07-18 — 🧠 Self-Learning Menu (Production) + Canva Animation Drive Link
+
+### 🎯 Objective
+1. User asked to "add a self learning menu in production." Investigation found `5_Symbols/production/preprod/self_learning.html` already existed (Pedagogical Engine page) but was linked nowhere, AND had a broken script path (`../../../../shared/nav.js`, one `../` too many) so its nav never rendered.
+2. User separately asked to add a Google Drive folder (`https://drive.google.com/drive/folders/1wlUpWAVZGbMK_W3DDR2uXa4xGBualgfC`) for Canva animation building to "post production tools."
+3. A stray URL `https://edit-decision-list.fly.dev/3_Simulation/samples.html` in the original request turned out to reference a **separate sibling project** (`/Users/rifaterdemsahin/projects/edit-decision-list`, its own git repo/Fly app) — out of scope for this repo; `samples.html` already exists there. Not touched.
+
+### 📐 Approach
+- Fixed the `self_learning.html` script path bug (3 `../` to match its actual depth under `5_Symbols/production/preprod/`).
+- Linked it into `5_Symbols/production/preprod/index.html` (new step card + file row) and into the **debug menu** fallback arrays (`navigation_config.json`, `index.html`, `markdown_renderer.html`) next to Customer-Discovery Interviews.
+- Discovered mid-task that the **live project-menu nav is actually Supabase-backed** (`navigation_menus` table, read via `shared/nav.js`), not the static `navigation_config.json` — that file is only a fallback. Confirmed via the running site that Preprod already has a "10. 🧠 Self Learning" group (3 items) sourced from Supabase, but **Production has none** — that gap is the real ask. Used the existing `5_Symbols/production/preprod/tools/menu_builder.html` admin tool (drag-and-drop editor over the `navigation_menus` table) to add a "5. 🧠 Self Learning" group under Production, sort order 5, matching the pattern of sibling groups (`4. Shots & Tracking`, etc.) — **in progress, browser tab hung after clicking Save (likely a confirm() dialog blocking the page); resuming this step once unblocked.**
+- Added the Canva Animation Building Drive folder as a new card + file row in `5_Symbols/production/postprod/index.html` (🛠 Tools group) and as a nav entry under Post Prod → Tools → Design in `navigation_config.json`/`index.html`/`markdown_renderer.html`, next to the existing Canva/Thumbnails links.
+
+### ✅ Verification
+- Freed port 8080 (was occupied by the unrelated `edit-decision-list` server), rebuilt and ran this repo's own Go server.
+- Confirmed in Chrome: `self_learning.html` now renders the shared nav (previously blank/broken); reachable from the Preprod menu; `postprod/index.html` shows the new Canva Animation Building card.
+- Supabase-side "Self Learning" group under Production still needs to be confirmed saved once the stuck menu_builder tab is resolved.
+
