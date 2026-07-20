@@ -89,6 +89,26 @@
       background: #7c3aed;
       transform: translateY(-2px);
     }
+
+    .search-wrap { max-width: 480px; margin: 20px auto 0; position: relative; }
+    .search-wrap input {
+      width: 100%;
+      padding: 12px 16px 12px 42px;
+      border-radius: 12px;
+      border: 1px solid rgba(139,92,246,0.3);
+      background: rgba(17,24,39,0.85);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-wrap input:focus { border-color: var(--primary); }
+    .search-wrap .search-icon {
+      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+      color: var(--text-muted); font-size: 0.95rem; pointer-events: none;
+    }
+    .embed-card.hidden { display: none; }
   </style>
   <script src="../../../shared/nav.js"></script>
 </head>
@@ -104,7 +124,35 @@
         <span>📅</span> View Cohort Call Schedule
       </a>
     </p>
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="cohortSearch" placeholder="Search cohort calls (e.g. Week 3, Module 2)…" oninput="filterCohortCalls(this.value)">
+    </div>
   </header>
+
+  <div class="embed-card">
+    <h2>🎥 Cohort Call — Week 4 / Module 4 · 2026/07/19 21:00 BST</h2>
+    <div style="margin-bottom: 16px;">
+      <a href="https://drive.google.com/file/d/16Rl_jtMI3hBZi6jJec9nylkCDZRu2AZJ/view?usp=drivesdk" target="_blank" class="btn">
+        <span>↗️</span> Open in Google Drive
+      </a>
+    </div>
+    <div class="embed-container">
+      <iframe src="https://drive.google.com/file/d/16Rl_jtMI3hBZi6jJec9nylkCDZRu2AZJ/preview" allow="autoplay"></iframe>
+    </div>
+  </div>
+
+  <div class="embed-card">
+    <h2>📄 Cohort Call — Week 4 / Module 4 Notes</h2>
+    <div style="margin-bottom: 16px;">
+      <a href="https://docs.google.com/document/d/1PVhDOxy6is7efb7Sxdf1kfAG6cmQH5pd18js-UR8_qM/edit?usp=drivesdk" target="_blank" class="btn">
+        <span>↗️</span> Open Full Document
+      </a>
+    </div>
+    <div class="embed-container embed-doc">
+      <iframe src="https://docs.google.com/document/d/1PVhDOxy6is7efb7Sxdf1kfAG6cmQH5pd18js-UR8_qM/preview"></iframe>
+    </div>
+  </div>
 
   <div class="embed-card">
     <h2>🎥 Cohort Call — Week 3 / Module 3 · 2026/07/12 21:00 BST</h2>
@@ -182,6 +230,17 @@
     <p><a href="../../../index.html" style="color: var(--secondary); text-decoration: none;">← Back to Project Hub</a></p>
   </footer>
 </div>
+
+<script>
+  function filterCohortCalls(query) {
+    var q = query.trim().toLowerCase();
+    document.querySelectorAll('.embed-card').forEach(function (card) {
+      var heading = card.querySelector('h2');
+      var text = heading ? heading.textContent.toLowerCase() : '';
+      card.classList.toggle('hidden', q !== '' && text.indexOf(q) === -1);
+    });
+  }
+</script>
 
 </body>
 </html>
