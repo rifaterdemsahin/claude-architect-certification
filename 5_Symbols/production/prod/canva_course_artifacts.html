@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Canva Course Artifacts | Claude AI Certification</title>
+  <meta name="description" content="Live inventory of Canva designs synced into Supabase, with editable production notes per artifact.">
+  <meta name="keywords" content="Canva, Supabase, Course Artifacts, Production Dashboard, MCP">
+  <meta name="author" content="Rifat Erdem Sahin">
+  <link rel="icon" type="image/png" href="../../../favicon.png">
+
+  <!-- Supabase Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Google Fonts & FontAwesome -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --bg-dark: #030712;
+      --bg-card: rgba(17, 24, 39, 0.85);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --primary: #8b5cf6;
+      --secondary: #3b82f6;
+      --accent: #10b981;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --font-title: 'Outfit', sans-serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-dark);
+      background-image:
+        radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.05) 0%, transparent 40%);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      line-height: 1.6;
+      padding-bottom: 80px;
+    }
+
+    .container { max-width: 1300px; margin: 0 auto; padding: 0 24px; }
+
+    header {
+      padding: 40px 0 20px 0;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      margin-bottom: 24px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 16px;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      border-radius: 100px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #93c5fd;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      font-family: var(--font-title);
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+      background: linear-gradient(to right, #f3f4f6, #9ca3af);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    header p { color: var(--text-muted); max-width: 800px; }
+
+    .mcp-banner {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin-bottom: 24px;
+      font-size: 0.9rem;
+      color: #6ee7b7;
+    }
+    .mcp-banner i { font-size: 1.2rem; }
+
+    .links-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .btn-ext {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-weight: 700;
+      text-decoration: none;
+      font-size: 0.85rem;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.2s;
+    }
+    .btn-ext:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--primary);
+    }
+    .btn-ext.supabase:hover { border-color: var(--accent); color: #6ee7b7; }
+
+    .stats-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 20px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    .stat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    .stat-value {
+      font-family: var(--font-title);
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .toolbar input {
+      flex: 1;
+      min-width: 220px;
+      padding: 10px 14px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .toolbar input:focus { outline: none; border-color: var(--primary); }
+
+    .table-wrap {
+      background: var(--bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      overflow: auto;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; min-width: 1100px; }
+    thead th {
+      position: sticky;
+      top: 0;
+      background: #0f172a;
+      text-align: left;
+      padding: 12px 14px;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+      z-index: 1;
+    }
+    tbody td {
+      padding: 10px 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      vertical-align: top;
+    }
+    tbody tr:hover { background: rgba(255, 255, 255, 0.02); }
+
+    .title-cell { font-weight: 600; max-width: 260px; }
+    .muted { color: var(--text-muted); font-size: 0.78rem; }
+    .type-pill {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 100px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      background: rgba(139, 92, 246, 0.15);
+      color: #c084fc;
+      border: 1px solid rgba(139, 92, 246, 0.3);
+    }
+    .link-cell a {
+      color: #60a5fa;
+      text-decoration: none;
+      font-size: 0.8rem;
+      margin-right: 10px;
+      white-space: nowrap;
+    }
+    .link-cell a:hover { color: #93c5fd; }
+
+    .note-input {
+      width: 100%;
+      min-width: 220px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 8px 10px;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.82rem;
+      resize: vertical;
+      min-height: 38px;
+    }
+    .note-input:focus { outline: none; border-color: var(--primary); }
+    .note-status {
+      font-size: 0.7rem;
+      margin-top: 4px;
+      height: 14px;
+      color: var(--text-muted);
+    }
+    .note-status.saved { color: #6ee7b7; }
+    .note-status.error { color: #fca5a5; }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #1f2937;
+      border: 1px solid var(--primary);
+      padding: 14px 24px;
+      border-radius: 10px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      z-index: 1000;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+      font-weight: 500;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+  </style>
+
+  <script src="../../../shared/nav.js" defer></script>
+  <script src="../../../shared/debug-panel.js" defer></script>
+  <script src="../../../shared/seo.js" defer></script>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div class="badge">🎨 Canva Integration</div>
+      <h1>Canva Course Artifacts</h1>
+      <p>Live inventory of every Canva design and asset synced into the <code>canva_course_artifacts</code> Supabase table. Add production notes inline — they save straight back to the database.</p>
+    </header>
+
+    <div class="mcp-banner">
+      <i class="fa-solid fa-robot"></i>
+      <span>This table is getting populated by the <strong>Canva MCP</strong> — new designs, folders, and pages sync into <code>canva_course_artifacts</code> automatically as they're created or edited in Canva.</span>
+    </div>
+
+    <div class="links-row">
+      <a class="btn-ext supabase" href="https://supabase.com/dashboard/project/rmekfsdhglyiralxvkwc/editor/19572?schema=public" target="_blank" rel="noopener">
+        <i class="fa-solid fa-database"></i> Open Table in Supabase
+      </a>
+      <a class="btn-ext" href="https://www.canva.com/folder/FAHMZK9u-JE" target="_blank" rel="noopener">
+        <i class="fa-brands fa-canva"></i> Canva Course Folder
+      </a>
+    </div>
+
+    <div class="stats-container">
+      <div class="stat-card">
+        <div class="stat-header"><span>🗂️ Total Artifacts</span><i class="fa-solid fa-layer-group"></i></div>
+        <div class="stat-value" id="stat-total">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-header"><span>📝 With Notes</span><i class="fa-solid fa-note-sticky"></i></div>
+        <div class="stat-value" id="stat-notes">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-header"><span>📄 Total Pages</span><i class="fa-solid fa-file"></i></div>
+        <div class="stat-value" id="stat-pages">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-header"><span>🕒 Last Synced</span><i class="fa-solid fa-clock-rotate-left"></i></div>
+        <div class="stat-value" id="stat-synced" style="font-size:1.1rem;">—</div>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <input id="search" type="text" placeholder="Search title, type, or folder…" oninput="renderTable()">
+      <div id="conn-status" class="muted">Connecting to Supabase…</div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr id="table-head"></tr>
+        </thead>
+        <tbody id="table-body">
+          <tr><td colspan="7" style="text-align:center; padding:40px; color:var(--text-muted);">
+            <i class="fa-solid fa-spinner fa-spin fa-2xl" style="margin-bottom:14px;"></i>
+            <div>Loading canva_course_artifacts…</div>
+          </td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="toast" id="toast-notif"></div>
+
+  <script>
+    const SUPABASE_URL  = 'https://rmekfsdhglyiralxvkwc.supabase.co';
+    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZWtmc2RoZ2x5aXJhbHh2a3djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NzYzODgsImV4cCI6MjA5NjM1MjM4OH0.ay6HsmO_CbMGDXL_Dv4DT-paAIAOqlQPfmqqx_mexSU';
+
+    let db = null;
+    let artifacts = [];
+    let sortKey = 'inserted_at';
+    let sortDir = -1;
+    const saveTimers = {};
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.supabase) {
+        db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+        loadArtifacts();
+      } else {
+        document.getElementById('conn-status').innerText = 'Failed to load Supabase SDK';
+      }
+    });
+
+    async function loadArtifacts() {
+      try {
+        const { data, error } = await db
+          .from('canva_course_artifacts')
+          .select('*')
+          .order('inserted_at', { ascending: false });
+        if (error) throw error;
+        artifacts = data || [];
+        document.getElementById('conn-status').innerText = `✓ Connected — ${artifacts.length} rows`;
+        updateStats();
+        renderTable();
+      } catch (err) {
+        document.getElementById('conn-status').innerText = 'Error: ' + err.message;
+        document.getElementById('table-body').innerHTML = `
+          <tr><td colspan="7" style="text-align:center; padding:40px; color:var(--error);">
+            ⚠️ Failed to load canva_course_artifacts: ${escapeHtml(err.message)}
+          </td></tr>`;
+      }
+    }
+
+    function updateStats() {
+      document.getElementById('stat-total').innerText = artifacts.length;
+      document.getElementById('stat-notes').innerText = artifacts.filter(a => (a.note || '').trim().length > 0).length;
+      document.getElementById('stat-pages').innerText = artifacts.reduce((sum, a) => sum + (a.page_count || 0), 0);
+      const latest = artifacts.reduce((max, a) => {
+        const t = a.updated_at_canva || a.inserted_at;
+        return (!max || (t && t > max)) ? t : max;
+      }, null);
+      document.getElementById('stat-synced').innerText = latest ? new Date(latest).toLocaleString() : '—';
+    }
+
+    function sortRows(rows) {
+      return rows.slice().sort((a, b) => {
+        const va = (a[sortKey] ?? '').toString().toLowerCase();
+        const vb = (b[sortKey] ?? '').toString().toLowerCase();
+        if (va < vb) return -1 * sortDir;
+        if (va > vb) return 1 * sortDir;
+        return 0;
+      });
+    }
+
+    function setSort(key) {
+      if (sortKey === key) { sortDir *= -1; } else { sortKey = key; sortDir = 1; }
+      renderTable();
+    }
+
+    function renderTable() {
+      const q = (document.getElementById('search').value || '').toLowerCase();
+      let rows = artifacts;
+      if (q) {
+        rows = rows.filter(a =>
+          (a.title || '').toLowerCase().includes(q) ||
+          (a.item_type || '').toLowerCase().includes(q) ||
+          (a.folder_path || '').toLowerCase().includes(q)
+        );
+      }
+      rows = sortRows(rows);
+
+      const arrow = (key) => sortKey === key ? (sortDir === 1 ? ' ▲' : ' ▼') : '';
+      document.getElementById('table-head').innerHTML = `
+        <th onclick="setSort('title')">Title${arrow('title')}</th>
+        <th onclick="setSort('item_type')">Type${arrow('item_type')}</th>
+        <th onclick="setSort('folder_path')">Folder${arrow('folder_path')}</th>
+        <th onclick="setSort('page_count')">Pages${arrow('page_count')}</th>
+        <th>Links</th>
+        <th onclick="setSort('updated_at_canva')">Updated (Canva)${arrow('updated_at_canva')}</th>
+        <th style="min-width:240px;">📝 Note</th>
+      `;
+
+      const body = document.getElementById('table-body');
+      if (!rows.length) {
+        body.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:40px; color:var(--text-muted);">No artifacts match your search.</td></tr>`;
+        return;
+      }
+
+      body.innerHTML = rows.map(a => `
+        <tr>
+          <td class="title-cell">${escapeHtml(a.title || '')}<div class="muted">${escapeHtml(a.canva_design_id || '')}</div></td>
+          <td><span class="type-pill">${escapeHtml(a.item_type || '—')}</span></td>
+          <td class="muted">${escapeHtml(a.folder_path || '—')}</td>
+          <td>${a.page_count ?? '—'}</td>
+          <td class="link-cell">
+            ${a.view_url ? `<a href="${escapeAttr(a.view_url)}" target="_blank" rel="noopener">View ↗</a>` : ''}
+            ${a.edit_url ? `<a href="${escapeAttr(a.edit_url)}" target="_blank" rel="noopener">Edit ↗</a>` : ''}
+          </td>
+          <td class="muted">${a.updated_at_canva ? new Date(a.updated_at_canva).toLocaleString() : '—'}</td>
+          <td>
+            <textarea class="note-input" rows="2" placeholder="Add a note…"
+              oninput="onNoteInput(${a.id}, this)">${escapeHtml(a.note || '')}</textarea>
+            <div class="note-status" id="note-status-${a.id}"></div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function onNoteInput(id, el) {
+      const statusEl = document.getElementById(`note-status-${id}`);
+      statusEl.className = 'note-status';
+      statusEl.innerText = 'Editing…';
+      clearTimeout(saveTimers[id]);
+      saveTimers[id] = setTimeout(() => saveNote(id, el.value, statusEl), 600);
+    }
+
+    async function saveNote(id, value, statusEl) {
+      try {
+        const { error } = await db
+          .from('canva_course_artifacts')
+          .update({ note: value })
+          .eq('id', id);
+        if (error) throw error;
+        const row = artifacts.find(a => a.id === id);
+        if (row) row.note = value;
+        statusEl.className = 'note-status saved';
+        statusEl.innerText = '✓ Saved';
+        updateStats();
+      } catch (err) {
+        statusEl.className = 'note-status error';
+        statusEl.innerText = 'Failed to save: ' + err.message;
+        showToast('Failed to save note: ' + err.message);
+      }
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+    }
+    function escapeAttr(s) { return escapeHtml(s); }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast-notif');
+      t.innerText = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3500);
+    }
+  </script>
+</body>
+</html>

@@ -403,6 +403,11 @@
               "description": "Canva folder holding the course design assets, slides, and graphics."
             },
             {
+              "label": "📋 Canva Course Artifacts",
+              "url": "5_Symbols/production/prod/canva_course_artifacts.html",
+              "description": "Live Supabase-backed table of Canva artifacts (auto-synced by Canva MCP) with editable per-row notes."
+            },
+            {
               "label": "🧮 Cohort Production Whiteboard",
               "url": "https://canva.link/iahtnqhu0rdkq8z",
               "description": "Cohort production whiteboard — shared Canva board for collaborative planning across the production cohort."
@@ -467,6 +472,17 @@
             {
               "label": "✅ Asset Checklist",
               "url": "5_Symbols/production/postprod/asset_checklist.html"
+            }
+          ]
+        },
+        {
+          "group": true,
+          "label": "5. 🧠 Self Learning",
+          "children": [
+            {
+              "label": "🧠 Self Learning Concept",
+              "url": "5_Symbols/production/preprod/self_learning.html",
+              "description": "Feynman technique, Lacanian visual review, and Semblance error solving."
             }
           ]
         },
