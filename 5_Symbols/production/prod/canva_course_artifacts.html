@@ -403,9 +403,22 @@
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZWtmc2RoZ2x5aXJhbHh2a3djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NzYzODgsImV4cCI6MjA5NjM1MjM4OH0.ay6HsmO_CbMGDXL_Dv4DT-paAIAOqlQPfmqqx_mexSU';
 
     const CATEGORIES = [
-      'questions', 'animations', 'research', 'organizer', 'video', 'template',
-      'whiteboard', 'slide', 'broll', 'aroll', 'export', 'thumbnail', 'script', 'plan'
+      { key: 'animations', emoji: '🎞️' },
+      { key: 'aroll',      emoji: '🎙️' },
+      { key: 'broll',      emoji: '🎦' },
+      { key: 'export',     emoji: '📤' },
+      { key: 'organizer',  emoji: '🗂️' },
+      { key: 'plan',       emoji: '📋' },
+      { key: 'questions',  emoji: '❓' },
+      { key: 'research',   emoji: '🔬' },
+      { key: 'script',     emoji: '📝' },
+      { key: 'slide',      emoji: '🖼️' },
+      { key: 'template',   emoji: '📐' },
+      { key: 'thumbnail',  emoji: '📸' },
+      { key: 'video',      emoji: '🎥' },
+      { key: 'whiteboard', emoji: '✏️' }
     ];
+    const CATEGORY_EMOJI = Object.fromEntries(CATEGORIES.map(c => [c.key, c.emoji]));
 
     let db = null;
     let artifacts = [];
@@ -531,9 +544,9 @@
       const chipsHtml = catChipsHtml(selected);
       const optionsHtml = CATEGORIES.map(c => `
         <label class="cat-option">
-          <input type="checkbox" value="${c}" ${selected.includes(c) ? 'checked' : ''}
-            onchange="onCategoryToggle(${a.id}, '${c}', this.checked)">
-          ${escapeHtml(c)}
+          <input type="checkbox" value="${c.key}" ${selected.includes(c.key) ? 'checked' : ''}
+            onchange="onCategoryToggle(${a.id}, '${c.key}', this.checked)">
+          ${c.emoji} ${escapeHtml(c.key)}
         </label>`).join('');
       return `
         <div class="cat-select" data-id="${a.id}">
@@ -547,7 +560,7 @@
 
     function catChipsHtml(selected) {
       return selected.length
-        ? selected.map(c => `<span class="cat-chip">${escapeHtml(c)}</span>`).join('')
+        ? selected.map(c => `<span class="cat-chip">${CATEGORY_EMOJI[c] || ''} ${escapeHtml(c)}</span>`).join('')
         : '<span class="cat-placeholder">Select…</span>';
     }
 
