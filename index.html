@@ -360,6 +360,58 @@
       text-align: center;
     }
 
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 2.5rem;
+      align-items: start;
+      text-align: center;
+      max-width: 1400px;
+      margin: 4rem auto 2rem auto;
+      padding: 0 2rem;
+    }
+    .hero-grid .hero-section {
+      margin: 0;
+      padding: 0;
+      max-width: none;
+    }
+    .hero-embed {
+      position: sticky;
+      top: 2rem;
+    }
+    .hero-embed-frame {
+      position: relative;
+      width: 100%;
+      height: 0;
+      padding-top: 75%;
+      overflow: hidden;
+      border-radius: 16px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.4);
+    }
+    .hero-embed-frame iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    .hero-embed-caption {
+      display: block;
+      margin-top: 0.75rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      text-align: center;
+    }
+    .hero-embed-caption:hover { color: var(--accent-violet); }
+    @media (max-width: 960px) {
+      .hero-grid {
+        grid-template-columns: 1fr;
+      }
+      .hero-embed { position: static; }
+    }
+
     .hero-badge {
       display: inline-flex;
       align-items: center;
@@ -1167,48 +1219,65 @@
        Do NOT add a hardcoded <header>/nav here — it causes a double menu. -->
 
   <!-- Hero Section -->
-  <section class="hero-section">
-    <div class="hero-badge">
-      <i class="fa-solid fa-award"></i> Enterprise Systems & Integration
-    </div>
-    <h1 class="hero-title">Claude AI Certification for Architects</h1>
-    <p class="hero-subtitle">
-      A hands-on, production-grade guide to building secure, optimized, and sovereign AI workflows at enterprise scale. Learn system topologies, custom MCP servers, and prompt optimization.
-    </p>
-
-    <!-- ── Value Proposition ── -->
-    <div class="value-prop">
-      <div class="value-prop-headline">
-        🎯 We prep you for the hard, expensive AI certificates — so you pass the first time.
+  <div class="hero-grid">
+    <section class="hero-section">
+      <div class="hero-badge">
+        <i class="fa-solid fa-award"></i> Enterprise Systems & Integration
       </div>
-      <p class="value-prop-lead">
-        AI certifications are <strong>costly and slow to retake</strong>. Fail the
-        <strong>Claude AI Architect certificate</strong>, for example, and you wait
-        <strong>6 months</strong> for another seat and lose your <strong>$100</strong> exam fee.
-        Our prep <strong>saves you that time</strong> and <strong>raises your odds of passing</strong>.
+      <h1 class="hero-title">Claude AI Certification for Architects</h1>
+      <p class="hero-subtitle">
+        A hands-on, production-grade guide to building secure, optimized, and sovereign AI workflows at enterprise scale. Learn system topologies, custom MCP servers, and prompt optimization.
       </p>
-      <div class="value-prop-grid">
-        <div class="value-prop-card">
-          <div class="vp-icon">⏳</div>
-          <h4>The pain</h4>
-          <p>Hard exams, long re-sit waits, and hundreds of dollars lost on every failed attempt.</p>
+
+      <!-- ── Value Proposition ── -->
+      <div class="value-prop">
+        <div class="value-prop-headline">
+          🎯 We prep you for the hard, expensive AI certificates — so you pass the first time.
         </div>
-        <div class="value-prop-card">
-          <div class="vp-icon">⚡</div>
-          <h4>The value</h4>
-          <p>Save months of trial-and-error and walk in prepared — increasing your chance to pass.</p>
+        <p class="value-prop-lead">
+          AI certifications are <strong>costly and slow to retake</strong>. Fail the
+          <strong>Claude AI Architect certificate</strong>, for example, and you wait
+          <strong>6 months</strong> for another seat and lose your <strong>$100</strong> exam fee.
+          Our prep <strong>saves you that time</strong> and <strong>raises your odds of passing</strong>.
+        </p>
+        <div class="value-prop-grid">
+          <div class="value-prop-card">
+            <div class="vp-icon">⏳</div>
+            <h4>The pain</h4>
+            <p>Hard exams, long re-sit waits, and hundreds of dollars lost on every failed attempt.</p>
+          </div>
+          <div class="value-prop-card">
+            <div class="vp-icon">⚡</div>
+            <h4>The value</h4>
+            <p>Save months of trial-and-error and walk in prepared — increasing your chance to pass.</p>
+          </div>
+          <div class="value-prop-card">
+            <div class="vp-icon">🎥</div>
+            <h4>The offer</h4>
+            <p>A <strong>$10 YouTube membership</strong> unlocks the talking-head recordings — see the teaching quality and the real certificate, verified for you, before you commit.</p>
+          </div>
         </div>
-        <div class="value-prop-card">
-          <div class="vp-icon">🎥</div>
-          <h4>The offer</h4>
-          <p>A <strong>$10 YouTube membership</strong> unlocks the talking-head recordings — see the teaching quality and the real certificate, verified for you, before you commit.</p>
-        </div>
+        <a href="https://www.youtube.com/@RifatErdemSahin/join" target="_blank" rel="noopener" class="btn btn-primary value-prop-cta">
+          <i class="fa-brands fa-youtube"></i> Join the membership — $10/mo
+        </a>
       </div>
-      <a href="https://www.youtube.com/@RifatErdemSahin/join" target="_blank" rel="noopener" class="btn btn-primary value-prop-cta">
-        <i class="fa-brands fa-youtube"></i> Join the membership — $10/mo
+    </section>
+
+    <!-- ── Production Pipeline Embed ── -->
+    <aside class="hero-embed">
+      <div class="hero-embed-frame">
+        <iframe
+          loading="lazy"
+          src="https://www.canva.com/design/DAHQxbWbf0A/yVzh-uGIehU07Ro0DiIV8Q/view?embed"
+          allow="fullscreen"
+          allowfullscreen>
+        </iframe>
+      </div>
+      <a class="hero-embed-caption" href="https://www.canva.com/design/DAHQxbWbf0A/yVzh-uGIehU07Ro0DiIV8Q/view" target="_blank" rel="noopener">
+        🚀 Infographic — Video Production Pipeline (Canva) ↗
       </a>
-    </div>
-  </section>
+    </aside>
+  </div>
 
   <!-- Interactive Simulator Card -->
   <section class="simulator-container">
