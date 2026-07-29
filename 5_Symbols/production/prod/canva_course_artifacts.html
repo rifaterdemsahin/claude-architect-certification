@@ -221,6 +221,73 @@
     }
     .link-cell a:hover { color: #93c5fd; }
 
+    .cat-select {
+      position: relative;
+      min-width: 180px;
+    }
+    .cat-trigger {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 4px;
+      min-height: 34px;
+      padding: 6px 28px 6px 8px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      cursor: pointer;
+      position: relative;
+    }
+    .cat-trigger:hover { border-color: var(--primary); }
+    .cat-trigger i {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 0.7rem;
+    }
+    .cat-chip {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 100px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      background: rgba(16, 185, 129, 0.15);
+      color: #6ee7b7;
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      white-space: nowrap;
+    }
+    .cat-placeholder { color: var(--text-muted); font-size: 0.8rem; }
+    .cat-dropdown {
+      display: none;
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      min-width: 200px;
+      max-height: 240px;
+      overflow-y: auto;
+      background: #0f172a;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 8px;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.5);
+      padding: 6px;
+      z-index: 30;
+    }
+    .cat-dropdown.show { display: block; }
+    .cat-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .cat-option:hover { background: rgba(255, 255, 255, 0.06); }
+    .cat-option input { accent-color: var(--primary); cursor: pointer; }
+
     .note-input {
       width: 100%;
       min-width: 220px;
@@ -320,7 +387,7 @@
           <tr id="table-head"></tr>
         </thead>
         <tbody id="table-body">
-          <tr><td colspan="7" style="text-align:center; padding:40px; color:var(--text-muted);">
+          <tr><td colspan="8" style="text-align:center; padding:40px; color:var(--text-muted);">
             <i class="fa-solid fa-spinner fa-spin fa-2xl" style="margin-bottom:14px;"></i>
             <div>Loading canva_course_artifacts…</div>
           </td></tr>
@@ -335,11 +402,22 @@
     const SUPABASE_URL  = 'https://rmekfsdhglyiralxvkwc.supabase.co';
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtZWtmc2RoZ2x5aXJhbHh2a3djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NzYzODgsImV4cCI6MjA5NjM1MjM4OH0.ay6HsmO_CbMGDXL_Dv4DT-paAIAOqlQPfmqqx_mexSU';
 
+    const CATEGORIES = [
+      'questions', 'animations', 'research', 'organizer', 'video', 'template',
+      'whiteboard', 'slide', 'broll', 'aroll', 'export', 'thumbnail', 'script', 'plan'
+    ];
+
     let db = null;
     let artifacts = [];
     let sortKey = 'inserted_at';
     let sortDir = -1;
     const saveTimers = {};
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.cat-select')) {
+        document.querySelectorAll('.cat-dropdown.show').forEach(el => el.classList.remove('show'));
+      }
+    });
 
     document.addEventListener('DOMContentLoaded', () => {
       if (window.supabase) {
@@ -364,7 +442,7 @@
       } catch (err) {
         document.getElementById('conn-status').innerText = 'Error: ' + err.message;
         document.getElementById('table-body').innerHTML = `
-          <tr><td colspan="7" style="text-align:center; padding:40px; color:var(--error);">
+          <tr><td colspan="8" style="text-align:center; padding:40px; color:var(--error);">
             ⚠️ Failed to load canva_course_artifacts: ${escapeHtml(err.message)}
           </td></tr>`;
       }
@@ -403,7 +481,8 @@
         rows = rows.filter(a =>
           (a.title || '').toLowerCase().includes(q) ||
           (a.item_type || '').toLowerCase().includes(q) ||
-          (a.folder_path || '').toLowerCase().includes(q)
+          (a.folder_path || '').toLowerCase().includes(q) ||
+          (Array.isArray(a.category) && a.category.some(c => c.toLowerCase().includes(q)))
         );
       }
       rows = sortRows(rows);
@@ -413,6 +492,7 @@
         <th onclick="setSort('title')">Title${arrow('title')}</th>
         <th onclick="setSort('item_type')">Type${arrow('item_type')}</th>
         <th onclick="setSort('folder_path')">Folder${arrow('folder_path')}</th>
+        <th style="min-width:200px;">🏷️ Category</th>
         <th onclick="setSort('page_count')">Pages${arrow('page_count')}</th>
         <th>Links</th>
         <th onclick="setSort('updated_at_canva')">Updated (Canva)${arrow('updated_at_canva')}</th>
@@ -421,7 +501,7 @@
 
       const body = document.getElementById('table-body');
       if (!rows.length) {
-        body.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:40px; color:var(--text-muted);">No artifacts match your search.</td></tr>`;
+        body.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:40px; color:var(--text-muted);">No artifacts match your search.</td></tr>`;
         return;
       }
 
@@ -430,6 +510,7 @@
           <td class="title-cell">${escapeHtml(a.title || '')}<div class="muted">${escapeHtml(a.canva_design_id || '')}</div></td>
           <td><span class="type-pill">${escapeHtml(a.item_type || '—')}</span></td>
           <td class="muted">${escapeHtml(a.folder_path || '—')}</td>
+          <td>${renderCategoryCell(a)}</td>
           <td>${a.page_count ?? '—'}</td>
           <td class="link-cell">
             ${a.view_url ? `<a href="${escapeAttr(a.view_url)}" target="_blank" rel="noopener">View ↗</a>` : ''}
@@ -443,6 +524,63 @@
           </td>
         </tr>
       `).join('');
+    }
+
+    function renderCategoryCell(a) {
+      const selected = Array.isArray(a.category) ? a.category : [];
+      const chipsHtml = catChipsHtml(selected);
+      const optionsHtml = CATEGORIES.map(c => `
+        <label class="cat-option">
+          <input type="checkbox" value="${c}" ${selected.includes(c) ? 'checked' : ''}
+            onchange="onCategoryToggle(${a.id}, '${c}', this.checked)">
+          ${escapeHtml(c)}
+        </label>`).join('');
+      return `
+        <div class="cat-select" data-id="${a.id}">
+          <div class="cat-trigger" onclick="toggleCatDropdown(${a.id})">
+            <span class="cat-chips" id="cat-chips-${a.id}">${chipsHtml}</span>
+            <i class="fa-solid fa-chevron-down"></i>
+          </div>
+          <div class="cat-dropdown" id="cat-dropdown-${a.id}">${optionsHtml}</div>
+        </div>`;
+    }
+
+    function catChipsHtml(selected) {
+      return selected.length
+        ? selected.map(c => `<span class="cat-chip">${escapeHtml(c)}</span>`).join('')
+        : '<span class="cat-placeholder">Select…</span>';
+    }
+
+    function toggleCatDropdown(id) {
+      document.querySelectorAll('.cat-dropdown.show').forEach(el => {
+        if (el.id !== `cat-dropdown-${id}`) el.classList.remove('show');
+      });
+      document.getElementById(`cat-dropdown-${id}`).classList.toggle('show');
+    }
+
+    async function onCategoryToggle(id, cat, checked) {
+      const row = artifacts.find(a => a.id === id);
+      if (!row) return;
+      const prev = Array.isArray(row.category) ? row.category.slice() : [];
+      let next = prev.slice();
+      if (checked) {
+        if (!next.includes(cat)) next.push(cat);
+      } else {
+        next = next.filter(c => c !== cat);
+      }
+      row.category = next;
+      document.getElementById(`cat-chips-${id}`).innerHTML = catChipsHtml(next);
+      try {
+        const { error } = await db
+          .from('canva_course_artifacts')
+          .update({ category: next })
+          .eq('id', id);
+        if (error) throw error;
+      } catch (err) {
+        row.category = prev;
+        document.getElementById(`cat-chips-${id}`).innerHTML = catChipsHtml(prev);
+        showToast('Failed to save category: ' + err.message);
+      }
     }
 
     function onNoteInput(id, el) {
