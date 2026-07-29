@@ -610,10 +610,15 @@ function uploadFiles(files) {
   if (errorList) errorList.innerHTML = '';
   
   let done = 0, total = files.length;
-  let failedUploads = [];
+  let possiblyFailedUploads = [];
   progressWrap.style.display = 'block';
   progressFill.style.width = '0%';
   progressFill.style.background = 'var(--primary)';
+
+  const sanitizeBlobName = (filename) => {
+    let name = (filename || '').replace(/\//g, '_').replace(/\\/g, '_');
+    return name || 'file';
+  };
 
   Array.from(files).reduce((chain, file) => chain.then(async () => {
     const updateProgress = (loaded, totalBytes) => {
@@ -651,12 +656,61 @@ function uploadFiles(files) {
       progressFill.style.width = Math.round(done/total*100) + '%';
       toast('Uploaded: ' + file.name, 'success');
     } catch (e) {
-      console.error('Upload failed for', file.name, e);
-      failedUploads.push({ name: file.name, error: e });
-      toast('Upload failed: ' + file.name, 'error');
+      console.warn('Upload API reported error for', file.name, e);
+      possiblyFailedUploads.push({ file: file, error: e });
     }
   }), Promise.resolve())
-  .then(() => {
+  .then(async () => {
+    let failedUploads = [];
+
+    if (possiblyFailedUploads.length > 0) {
+      progressLabel.textContent = 'Verifying storage status of files…';
+      try {
+        // Wait a short moment to allow Azure write commits to propagate
+        await new Promise(resolve => setTimeout(resolve, 800));
+
+        // Fetch the fresh list from the server to check if it actually exists in Azure
+        const serverFiles = await fetch('/api/research/files?container=' + CONTAINER)
+          .then(r => r.ok ? r.json() : []);
+        
+        const serverFileNames = new Set((serverFiles || []).map(f => f.name));
+
+        for (const item of possiblyFailedUploads) {
+          const expectedName = sanitizeBlobName(item.file.name);
+          if (serverFileNames.has(expectedName)) {
+            console.log('Verified upload completed successfully despite error for:', expectedName);
+            
+            // Generate metadata retrospectively
+            let thumbName = null;
+            const thumbBlob = await makeThumbnail(item.file);
+            if (thumbBlob) {
+              thumbName = THUMB_PREFIX + expectedName;
+              try { 
+                await uploadOne(thumbBlob, thumbName); 
+              } catch (e) { 
+                console.warn('Retrospective thumbnail upload failed:', e); 
+                thumbName = null; 
+              }
+            }
+            recordAsset(expectedName, thumbName, item.file.type, item.file.size);
+            
+            done++;
+            toast('Uploaded (verified): ' + expectedName, 'success');
+          } else {
+            failedUploads.push({ name: item.file.name, error: item.error });
+            toast('Upload failed: ' + item.file.name, 'error');
+          }
+        }
+      } catch (err) {
+        console.error('Failed to verify uploads against storage:', err);
+        possiblyFailedUploads.forEach(item => {
+          failedUploads.push({ name: item.file.name, error: item.error });
+        });
+      }
+    }
+
+    progressFill.style.width = Math.round(done/total*100) + '%';
+
     if (failedUploads.length > 0) {
       progressLabel.textContent = `Upload completed with errors. (${done}/${total} successful)`;
       progressFill.style.background = 'var(--red)';
