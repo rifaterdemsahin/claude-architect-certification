@@ -61,6 +61,7 @@
     .lightbox-close { position: absolute; top: -18px; right: -18px; background: rgba(139,92,246,0.9); border: none; color: white; font-size: 1.1rem; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
     .lightbox-caption { text-align: center; color: #9ca3af; font-size: 0.82rem; margin-top: 10px; max-width: 88vw; word-break: break-all; }
     .img-thumb { cursor: zoom-in; }
+    .btn-ghost:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
   </style>
 <script src="../../../../shared/seo.js" defer></script></head>
 <body>
@@ -112,6 +113,13 @@
     <div class="progress-bar-track"><div class="progress-bar-fill" id="progress-fill"></div></div>
   </div>
 
+  <div id="upload-errors" style="display:none; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.35); border-radius: 12px; padding: 16px 20px; margin-bottom: 24px; font-size: 0.85rem; color: #f87171;">
+    <div style="font-weight: 700; margin-bottom: 8px; font-family: var(--font-h); font-size: 0.95rem; display: flex; align-items: center; gap: 6px;">
+      <span>🚨</span> Upload Errors:
+    </div>
+    <ul id="upload-errors-list" style="margin-left: 20px; line-height: 1.5; list-style-type: disc;"></ul>
+  </div>
+
   <!-- Last Uploaded Spotlight Section -->
   <div id="last-uploaded-wrap" style="display:none; margin-bottom: 32px;">
     <div style="font-family: var(--font-h); font-size: 1.15rem; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 10px;">
@@ -124,20 +132,39 @@
   </div>
 
   <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 18px;">
-    <div class="section-title" style="margin-bottom: 0;">🗂 Uploaded Images <span id="count" style="color:var(--muted);font-size:0.85rem;font-weight:400"></span></div>
-    <div class="sort-controls" style="display: flex; align-items: center; gap: 8px;">
-      <label for="sort-select" style="font-size: 0.82rem; color: var(--muted); font-weight: 600;">⇄ Sort by:</label>
+    <div class="section-title" style="margin-bottom: 0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+      <span>🗂 Uploaded Images</span>
+      <span id="count" style="color:var(--muted);font-size:0.85rem;font-weight:400"></span>
+      <span id="cache-indicator" style="font-size:0.75rem; font-weight:600; opacity:0.85; margin-left: 10px;"></span>
+    </div>
+    <div class="sort-controls" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+      <label for="sort-select" style="font-size: 0.82rem; color: var(--muted); font-weight: 600;">⇄ Sort:</label>
       <select id="sort-select" onchange="applySort()" style="background: rgba(255,255,255,0.06); border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; color: var(--text); font-size: 0.82rem; font-weight: 600; outline: none; cursor: pointer; transition: border-color 0.2s;">
-        <option value="newest">📅 Upload Date: Newest First</option>
-        <option value="oldest">📅 Upload Date: Oldest First</option>
+        <option value="newest">📅 Newest First</option>
+        <option value="oldest">📅 Oldest First</option>
         <option value="name_asc">🔤 Name: A to Z</option>
         <option value="name_desc">🔤 Name: Z to A</option>
         <option value="size_desc">📏 Size: Largest First</option>
         <option value="size_asc">📏 Size: Smallest First</option>
       </select>
+
+      <label for="page-size-select" style="font-size: 0.82rem; color: var(--muted); font-weight: 600; margin-left: 8px;">📄 Page size:</label>
+      <select id="page-size-select" onchange="applyPageSize()" style="background: rgba(255,255,255,0.06); border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; color: var(--text); font-size: 0.82rem; font-weight: 600; outline: none; cursor: pointer; transition: border-color 0.2s;">
+        <option value="12" selected>12 items</option>
+        <option value="24">24 items</option>
+        <option value="48">48 items</option>
+        <option value="96">96 items</option>
+      </select>
     </div>
   </div>
   <div class="gallery" id="gallery"><div class="empty-state">Loading…</div></div>
+
+  <!-- Pagination Controls -->
+  <div id="pagination-controls" style="display: none; align-items: center; justify-content: center; gap: 16px; margin-top: 36px; padding: 12px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; max-width: 480px; margin-left: auto; margin-right: auto;">
+    <button id="btn-prev" class="btn-sm btn-ghost" onclick="prevPage()" style="padding: 8px 16px; font-weight: 700; border-radius: 8px;">◀ Previous</button>
+    <span id="page-info" style="font-size: 0.88rem; color: var(--text); font-weight: 700; font-family: var(--font-h);">Page 1 of 1</span>
+    <button id="btn-next" class="btn-sm btn-ghost" onclick="nextPage()" style="padding: 8px 16px; font-weight: 700; border-radius: 8px;">Next ▶</button>
+  </div>
 </div>
 
 <div class="toast" id="toast" style="opacity:0;pointer-events:none"></div>
@@ -258,10 +285,14 @@ function renderLastUploaded(files, thumbSet) {
   wrap.style.display = 'block';
 }
 
+let currentPage = 1;
+let pageSize = 12;
+let sortedFiles = [];
+
 function applySort() {
   const sortVal = document.getElementById('sort-select')?.value || 'newest';
-  const files = [...allLoadedFiles];
-  files.sort((a, b) => {
+  sortedFiles = [...allLoadedFiles];
+  sortedFiles.sort((a, b) => {
     if (sortVal === 'newest') {
       const tA = a.lastModified ? new Date(a.lastModified).getTime() : 0;
       const tB = b.lastModified ? new Date(b.lastModified).getTime() : 0;
@@ -282,16 +313,34 @@ function applySort() {
     return 0;
   });
 
+  currentPage = 1;
+  renderPage();
+}
+
+function renderPage() {
   const gallery = document.getElementById('gallery');
-  document.getElementById('count').textContent = '(' + files.length + ')';
+  const countEl = document.getElementById('count');
   const topCountEl = document.getElementById('top-count');
-  if (topCountEl) topCountEl.textContent = '(' + files.length + ' total)';
-  if (files.length === 0) {
+  
+  if (countEl) countEl.textContent = '(' + sortedFiles.length + ')';
+  if (topCountEl) topCountEl.textContent = '(' + sortedFiles.length + ' total)';
+  
+  if (sortedFiles.length === 0) {
     gallery.innerHTML = '<div class="empty-state">No images yet — upload one above.</div>';
+    document.getElementById('pagination-controls').style.display = 'none';
     return;
   }
+  
+  const totalPages = Math.ceil(sortedFiles.length / pageSize);
+  if (currentPage > totalPages) currentPage = totalPages;
+  if (currentPage < 1) currentPage = 1;
+  
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, sortedFiles.length);
+  const pageFiles = sortedFiles.slice(startIndex, endIndex);
+  
   gallery.innerHTML = '';
-  files.forEach(f => {
+  pageFiles.forEach(f => {
     const card = document.createElement('div');
     card.className = 'img-card';
     const isImg = /^image\//i.test(f.contentType);
@@ -325,26 +374,127 @@ function applySort() {
       </div>`;
     gallery.appendChild(card);
   });
+
+  // Render pagination info
+  const pageControls = document.getElementById('pagination-controls');
+  if (pageControls) {
+    if (totalPages <= 1) {
+      pageControls.style.display = 'none';
+    } else {
+      pageControls.style.display = 'flex';
+      document.getElementById('page-info').textContent = `Page ${currentPage} of ${totalPages}`;
+      document.getElementById('btn-prev').disabled = (currentPage === 1);
+      document.getElementById('btn-next').disabled = (currentPage === totalPages);
+    }
+  }
+
   updateAllRelationsUI();
-  backfillThumbnails(files, allThumbSet);
+  backfillThumbnails(pageFiles, allThumbSet);
 }
 
-function loadGallery() {
+window.prevPage = function() {
+  if (currentPage > 1) {
+    currentPage--;
+    renderPage();
+  }
+};
+
+window.nextPage = function() {
+  const totalPages = Math.ceil(sortedFiles.length / pageSize);
+  if (currentPage < totalPages) {
+    currentPage++;
+    renderPage();
+  }
+};
+
+window.applyPageSize = function() {
+  const sizeSelect = document.getElementById('page-size-select');
+  if (sizeSelect) {
+    pageSize = parseInt(sizeSelect.value, 10);
+    currentPage = 1;
+    renderPage();
+  }
+};
+
+const CACHE_KEY = 'cache_research_files_' + CONTAINER;
+const CACHE_TTL = 60000; // 60 seconds TTL
+
+function loadGallery(force = false) {
+  if (force) {
+    sessionStorage.removeItem(CACHE_KEY);
+  }
+  let cached = null;
+  if (!force) {
+    try {
+      const raw = sessionStorage.getItem(CACHE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Date.now() - parsed.timestamp < CACHE_TTL) {
+          cached = parsed;
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to read cache:', e);
+    }
+  }
+
+  if (cached) {
+    allThumbSet = new Set(cached.thumbs);
+    allLoadedFiles = cached.allFiles;
+    showCacheIndicator(true);
+    renderLastUploaded(allLoadedFiles, allThumbSet);
+    applySort();
+    return;
+  }
+
+  showCacheIndicator(false, true);
+
   fetch('/api/research/files?container=' + CONTAINER)
     .then(r => r.json())
     .then(allFiles => {
-      const gallery = document.getElementById('gallery');
       allThumbSet = new Set(
         (allFiles || []).filter(f => f.name.startsWith(THUMB_PREFIX)).map(f => f.name)
       );
       allLoadedFiles = (allFiles || []).filter(f => !f.name.startsWith(THUMB_PREFIX));
+      
+      try {
+        const data = {
+          timestamp: Date.now(),
+          allFiles: allLoadedFiles,
+          thumbs: Array.from(allThumbSet)
+        };
+        sessionStorage.setItem(CACHE_KEY, JSON.stringify(data));
+      } catch (e) {
+        console.warn('Failed to write cache:', e);
+      }
+      
+      showCacheIndicator(false);
       renderLastUploaded(allLoadedFiles, allThumbSet);
       applySort();
     })
     .catch(e => {
       document.getElementById('gallery').innerHTML = '<div class="empty-state">Failed to load: ' + e.message + '</div>';
+      showCacheIndicator(false);
     });
 }
+
+function showCacheIndicator(fromCache, isLoading = false) {
+  const indicator = document.getElementById('cache-indicator');
+  if (!indicator) return;
+  if (isLoading) {
+    indicator.innerHTML = '🔄 Loading...';
+    indicator.style.color = 'var(--muted)';
+  } else if (fromCache) {
+    indicator.innerHTML = '⚡ Cached (<span onclick="forceRefresh()" style="text-decoration: underline; cursor: pointer; color: var(--primary);">Refresh</span>)';
+    indicator.style.color = 'var(--green)';
+  } else {
+    indicator.innerHTML = '';
+  }
+}
+
+window.forceRefresh = function() {
+  loadGallery(true);
+};
 
 const THUMB_PREFIX = '__thumb__';
 const THUMB_MAX = 320; // longest edge, px
@@ -373,11 +523,38 @@ function makeThumbnail(file) {
   });
 }
 
-function uploadOne(file, name) {
-  const fd = new FormData();
-  fd.append('file', name ? new File([file], name, { type: file.type }) : file);
-  return fetch('/api/research/upload?container=' + CONTAINER, { method: 'POST', body: fd })
-    .then(r => r.ok ? r.json() : r.text().then(t => Promise.reject(t)));
+function uploadOne(file, name, onProgress) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    const fd = new FormData();
+    fd.append('file', name ? new File([file], name, { type: file.type }) : file);
+
+    if (onProgress) {
+      xhr.upload.addEventListener('progress', e => {
+        if (e.lengthComputable) {
+          onProgress(e.loaded, e.total);
+        }
+      });
+    }
+
+    xhr.addEventListener('load', () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          resolve(JSON.parse(xhr.responseText));
+        } catch (err) {
+          resolve({ ok: true });
+        }
+      } else {
+        reject(xhr.responseText || `HTTP ${xhr.status}`);
+      }
+    });
+
+    xhr.addEventListener('error', () => reject('Network error'));
+    xhr.addEventListener('abort', () => reject('Upload aborted'));
+
+    xhr.open('POST', '/api/research/upload?container=' + CONTAINER);
+    xhr.send(fd);
+  });
 }
 
 // Backfill: for images uploaded before this feature (no __thumb__ blob),
@@ -426,15 +603,32 @@ function uploadFiles(files) {
   const progressWrap = document.getElementById('progress-wrap');
   const progressFill = document.getElementById('progress-fill');
   const progressLabel = document.getElementById('progress-label');
+  const errorContainer = document.getElementById('upload-errors');
+  const errorList = document.getElementById('upload-errors-list');
+  
+  if (errorContainer) errorContainer.style.display = 'none';
+  if (errorList) errorList.innerHTML = '';
+  
   let done = 0, total = files.length;
+  let failedUploads = [];
   progressWrap.style.display = 'block';
   progressFill.style.width = '0%';
+  progressFill.style.background = 'var(--primary)';
 
   Array.from(files).reduce((chain, file) => chain.then(async () => {
-    progressLabel.textContent = `Uploading ${file.name} (${done+1}/${total})…`;
+    const updateProgress = (loaded, totalBytes) => {
+      const loadedKB = (loaded / 1024).toFixed(1);
+      const totalKB = (totalBytes / 1024).toFixed(1);
+      const pct = Math.round((loaded / totalBytes) * 100);
+      progressLabel.textContent = `Uploading ${file.name} (${done+1}/${total}): ${loadedKB} KB / ${totalKB} KB (${pct}%)`;
+      progressFill.style.width = Math.round(((done + loaded/totalBytes) / total) * 100) + '%';
+    };
+
+    updateProgress(0, file.size || 1);
+    
     try {
       // 1. Upload the original blob.
-      await uploadOne(file);
+      await uploadOne(file, null, updateProgress);
 
       // 2. Auto-generate + upload a thumbnail (best-effort).
       let thumbName = null;
@@ -442,8 +636,12 @@ function uploadFiles(files) {
       const thumbBlob = await makeThumbnail(file);
       if (thumbBlob) {
         thumbName = THUMB_PREFIX + file.name;
-        try { await uploadOne(thumbBlob, thumbName); }
-        catch (e) { console.warn('Thumbnail upload failed:', e); thumbName = null; }
+        try { 
+          await uploadOne(thumbBlob, thumbName); 
+        } catch (e) { 
+          console.warn('Thumbnail upload failed:', e); 
+          thumbName = null; 
+        }
       }
 
       // 3. Record the reference in Supabase (non-fatal).
@@ -453,12 +651,30 @@ function uploadFiles(files) {
       progressFill.style.width = Math.round(done/total*100) + '%';
       toast('Uploaded: ' + file.name, 'success');
     } catch (e) {
-      toast('Upload failed: ' + e, 'error');
+      console.error('Upload failed for', file.name, e);
+      failedUploads.push({ name: file.name, error: e });
+      toast('Upload failed: ' + file.name, 'error');
     }
   }), Promise.resolve())
   .then(() => {
-    setTimeout(() => { progressWrap.style.display = 'none'; }, 1200);
-    loadGallery();
+    if (failedUploads.length > 0) {
+      progressLabel.textContent = `Upload completed with errors. (${done}/${total} successful)`;
+      progressFill.style.background = 'var(--red)';
+      if (errorContainer && errorList) {
+        errorList.innerHTML = failedUploads.map(f => `
+          <li>
+            <strong>${escHtml(f.name)}</strong>: <span style="font-family: monospace;">${escHtml(f.error)}</span>
+          </li>
+        `).join('');
+        errorContainer.style.display = 'block';
+      }
+      setTimeout(() => { progressWrap.style.display = 'none'; }, 6000);
+    } else {
+      progressLabel.textContent = 'All uploads completed!';
+      progressFill.style.background = 'var(--primary)';
+      setTimeout(() => { progressWrap.style.display = 'none'; }, 1500);
+    }
+    loadGallery(true);
   });
 }
 
@@ -472,7 +688,7 @@ function deleteFile(name) {
         // Best-effort cleanup of the auto-generated thumbnail and the Supabase record.
         fetch('/api/research/file?container=' + CONTAINER + '&name=' + encodeURIComponent(THUMB_PREFIX + name), { method: 'DELETE' }).catch(() => {});
         forgetAsset(name);
-        loadGallery();
+        loadGallery(true);
       } else toast('Delete failed', 'error');
     })
     .catch(e => toast('Delete error: ' + e.message, 'error'));
@@ -985,10 +1201,49 @@ function applyVideoFilter(videoId, countEl) {
 
 // Init
 loadSupabaseData();
-fetch('/api/research/files?container=' + CONTAINER)
-  .then(r => { setStatus(r.ok); return r.json(); })
-  .then(() => loadGallery())
-  .catch(() => { setStatus(false); document.getElementById('gallery').innerHTML = '<div class="empty-state">Azure Storage not available.</div>'; });
+try {
+  const cached = sessionStorage.getItem(CACHE_KEY);
+  if (cached) {
+    const parsed = JSON.parse(cached);
+    if (Date.now() - parsed.timestamp < CACHE_TTL) {
+      setStatus(true);
+      loadGallery();
+    } else {
+      fetchAndInit();
+    }
+  } else {
+    fetchAndInit();
+  }
+} catch (e) {
+  fetchAndInit();
+}
+
+function fetchAndInit() {
+  fetch('/api/research/files?container=' + CONTAINER)
+    .then(r => { setStatus(r.ok); return r.json(); })
+    .then(allFiles => {
+      allThumbSet = new Set(
+        (allFiles || []).filter(f => f.name.startsWith(THUMB_PREFIX)).map(f => f.name)
+      );
+      allLoadedFiles = (allFiles || []).filter(f => !f.name.startsWith(THUMB_PREFIX));
+      
+      try {
+        const data = {
+          timestamp: Date.now(),
+          allFiles: allLoadedFiles,
+          thumbs: Array.from(allThumbSet)
+        };
+        sessionStorage.setItem(CACHE_KEY, JSON.stringify(data));
+      } catch (e) {
+        console.warn('Failed to write cache:', e);
+      }
+      loadGallery();
+    })
+    .catch(() => { 
+      setStatus(false); 
+      document.getElementById('gallery').innerHTML = '<div class="empty-state">Azure Storage not available.</div>'; 
+    });
+}
 </script>
 <script src="../../../../shared/debug-panel.js"></script>
 </body>
