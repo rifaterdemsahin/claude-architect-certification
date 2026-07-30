@@ -793,12 +793,14 @@ html.light-mode .site-subdrop-menu a:hover {
 
 html.light-mode .site-nav-admin-signin,
 html.light-mode .site-nav-admin-signout,
-html.light-mode .site-nav-theme-toggle {
+html.light-mode .site-nav-theme-toggle,
+html.light-mode .site-nav-print {
   border-color: rgba(0,0,0,0.15) !important;
   color: #475569 !important;
 }
 
-html.light-mode .site-nav-theme-toggle:hover {
+html.light-mode .site-nav-theme-toggle:hover,
+html.light-mode .site-nav-print:hover {
   background: rgba(0,0,0,0.05) !important;
 }
 

@@ -830,6 +830,14 @@
       'title="Toggle Light/Dark Mode">' +
       '<span class="site-nav-theme-label">' + themeIcon + '</span></button>';
 
+    // 🖨️ Print chip
+    html += '<button id="site-nav-print" class="site-nav-print" ' +
+      'style="display:inline-flex;align-items:center;gap:6px;margin-left:10px;padding:4px 10px;border-radius:20px;' +
+      'background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:inherit;' +
+      'font-size:0.85rem;white-space:nowrap;cursor:pointer;transition:all 0.2s;" ' +
+      'title="Print to PDF with Color">' +
+      '<span class="site-nav-print-label">🖨️ Print</span></button>';
+
     // ⭐ Current Page Favorite chip
     var currentUrl = resolveUrl(window.location.pathname.replace(/^.*\/5_Symbols/, '5_Symbols').replace(/^\//, '') + window.location.search);
     if (window.location.pathname.endsWith('index.html') && !window.location.pathname.includes('5_Symbols')) currentUrl = resolveUrl('index.html');
@@ -865,6 +873,15 @@
         try { localStorage.setItem('theme', isLight ? 'light' : 'dark'); } catch(e){}
         var label = themeToggle.querySelector('.site-nav-theme-label');
         if (label) label.textContent = isLight ? '🌙 Dark' : '☀️ Light';
+      });
+    }
+
+    // Print listener
+    var printBtn = document.getElementById('site-nav-print');
+    if (printBtn) {
+      printBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        window.print();
       });
     }
 

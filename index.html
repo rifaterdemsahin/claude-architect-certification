@@ -1209,6 +1209,108 @@
       text-align: center;
       padding: 1rem;
     }
+
+    /* 🖨️ Print to PDF color styling targeting center panels */
+    @media print {
+      body {
+        background-color: #0b0f19 !important;
+        background-image: none !important;
+        color: #f8fafc !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      
+      /* Hide all non-printable/chrome elements */
+      #site-nav,
+      .hero-grid,
+      .cert-container,
+      footer,
+      .debug-toggle-btn,
+      .debug-menu-overlay,
+      #site-nav-theme-toggle,
+      #site-nav-print,
+      #site-nav-page-fav,
+      #site-nav-admin,
+      .favorites-container,
+      .favorites-chip {
+        display: none !important;
+      }
+      
+      /* Hide interactive simulator controls but keep the visual diagram and terminal */
+      .simulation-controls {
+        display: none !important;
+      }
+      
+      /* Force display-only state for simulator terminal */
+      .status-terminal {
+        background-color: rgba(15, 23, 42, 0.9) !important;
+        border-color: var(--border-color) !important;
+      }
+
+      /* Make the center panels full-width on the printed page */
+      .simulator-container,
+      .metadata-section,
+      .dashboard-grid {
+        max-width: 100% !important;
+        width: 100% !important;
+        margin: 0 0 2rem 0 !important;
+        padding: 0 !important;
+      }
+      
+      /* Ensure two-column layout for dashboard items fit side-by-side beautifully */
+      .dashboard-grid {
+        display: grid !important;
+        grid-template-columns: 1.1fr 0.9fr !important;
+        gap: 2rem !important;
+      }
+
+      /* Glass cards colors and design styling */
+      .glass-card {
+        background-color: #161c2d !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        box-shadow: none !important;
+        break-inside: avoid;
+        page-break-inside: avoid;
+        border-radius: 16px !important;
+        padding: 1.5rem !important;
+      }
+      
+      /* Ensure SVG icons and colored text stand out */
+      .card-title,
+      .card-title i,
+      .step-number,
+      .step-title,
+      .module-badge,
+      .meta-table th,
+      .meta-table td,
+      .link-tag,
+      .node,
+      .flow-line {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      
+      /* Table styling details for print */
+      .meta-table {
+        background: #161c2d !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+      }
+      
+      .meta-table th {
+        background: rgba(139, 92, 246, 0.2) !important;
+        color: #ffffff !important;
+      }
+      
+      .meta-table td {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+      }
+
+      /* Page configuration */
+      @page {
+        size: A4 portrait;
+        margin: 1.2cm;
+      }
+    }
   </style>
   <script src="shared/schema-modal.js"></script>
   <script src="shared/nav.js" defer></script>
