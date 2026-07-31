@@ -85,6 +85,7 @@
     <a href="audio.html" class="btn-sm btn-ghost" style="padding: 8px 16px; border-radius: 10px; font-weight: 700;">🎵 Audio Mode</a>
     <a href="videos.html" class="btn-sm btn-ghost" style="padding: 8px 16px; border-radius: 10px; font-weight: 700;">🎬 Video Mode</a>
     <a href="notes.html" class="btn-sm btn-ghost" style="padding: 8px 16px; border-radius: 10px; font-weight: 700;">📝 Note Mode</a>
+    <button class="btn-sm btn-ghost" onclick="runAllOcr()" style="padding: 8px 16px; border-radius: 10px; font-weight: 700; background: rgba(59,130,246,0.1); border-color: var(--blue); color: var(--text);" title="Scan all images that don't have OCR text yet">🔍 OCR All Images</button>
   </div>
 
   <div class="status-bar" id="status-bar">⏳ Connecting…</div>
@@ -255,6 +256,7 @@ function renderLastUploaded(files, thumbSet) {
   const dateStr = latestFile.lastModified ? new Date(latestFile.lastModified).toLocaleString() : 'Unknown date';
 
   const noteMarkup = renderNoteMarkup(CONTAINER, latestFile.name);
+  const ocrMarkup = renderOcrMarkup(CONTAINER, latestFile.name);
   const relMarkup = renderRelationsMarkup(CONTAINER, latestFile.name);
 
   card.innerHTML = `
@@ -277,6 +279,9 @@ function renderLastUploaded(files, thumbSet) {
       </div>
       <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 10px 14px; margin-top: 4px;">
         ${noteMarkup}
+      </div>
+      <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 10px 14px; margin-top: 4px;">
+        ${ocrMarkup}
       </div>
       <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 10px 14px; margin-top: 2px;">
         ${relMarkup}
@@ -353,6 +358,7 @@ function renderPage() {
       : fileUrl;
     const imgUrl = fileUrl;
     const noteMarkup = renderNoteMarkup(CONTAINER, f.name);
+    const ocrMarkup = renderOcrMarkup(CONTAINER, f.name);
     const relMarkup = renderRelationsMarkup(CONTAINER, f.name);
     const needsAttr = (isImg && !hasThumb) ? ` data-needs-thumb="1" data-name="${f.name.replace(/"/g,'&quot;')}"` : '';
     const timeAgo = formatTimeAgo(f.lastModified);
@@ -367,6 +373,7 @@ function renderPage() {
           <span style="font-size:0.68rem; color:var(--muted); background:rgba(255,255,255,0.05); padding:1px 6px; border-radius:4px;" title="${f.lastModified ? new Date(f.lastModified).toLocaleString() : ''}">⏱ ${timeAgo}</span>
         </div>
         ${noteMarkup}
+        ${ocrMarkup}
         ${relMarkup}
       </div>
       <div class="img-actions" style="display:flex; justify-content:space-between; align-items:center; gap:6px; padding: 0 12px 10px;">
@@ -861,6 +868,85 @@ function updateNoteDisplay(container, name, desc) {
   });
 }
 
+const OCR_STORE_KEY = 'research_ocr_texts';
+let ocrRegistry = {};
+let ocrCounter = 0;
+let ocrCache = {};
+
+function getLocalOcrTexts() {
+  try { return JSON.parse(localStorage.getItem(OCR_STORE_KEY)) || {}; }
+  catch { return {}; }
+}
+function mirrorLocalOcrText(k, text) {
+  const all = getLocalOcrTexts();
+  if (text) all[k] = text; else delete all[k];
+  localStorage.setItem(OCR_STORE_KEY, JSON.stringify(all));
+}
+function getOcrText(container, name) {
+  const k = descKey(container, name);
+  if (k in ocrCache) return ocrCache[k] || '';
+  return getLocalOcrTexts()[k] || '';
+}
+async function setOcrText(container, name, text) {
+  const clean = (text || '').trim();
+  const k = descKey(container, name);
+  ocrCache[k] = clean;
+  mirrorLocalOcrText(k, clean);
+  try {
+    const { error } = await client.from('research_assets').upsert({
+      container: container,
+      item_name: name,
+      ocr_text: clean || null,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'container,item_name' });
+    if (error) {
+      console.warn('Supabase ocr save warning:', error.message);
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.warn('OCR saved locally but Supabase write failed:', e);
+    return false;
+  }
+}
+
+function updateOcrDisplay(container, name, text) {
+  Object.keys(ocrRegistry).forEach(regId => {
+    const item = ocrRegistry[regId];
+    if (item && item.container === container && item.name === name) {
+      const el = document.getElementById(regId);
+      if (el) {
+        const txtEl = el.querySelector('.img-ocr-text');
+        const hasOcr = !!text;
+        if (hasOcr) {
+          txtEl.textContent = text;
+          txtEl.style.color = 'var(--text)';
+          txtEl.style.fontStyle = 'normal';
+        } else {
+          txtEl.textContent = 'No OCR text yet — click OCR button.';
+          txtEl.style.color = 'var(--muted)';
+          txtEl.style.fontStyle = 'italic';
+        }
+      }
+    }
+  });
+}
+
+function renderOcrMarkup(container, fileName) {
+  const id = 'ocr-' + (ocrCounter++);
+  ocrRegistry[id] = { container, name: fileName };
+  const text = getOcrText(container, fileName);
+  const hasOcr = !!text;
+  return `
+    <div class="img-ocr-wrap" id="${id}" style="margin-top:8px; padding-top:6px; border-top:1px solid rgba(139,92,246,0.15); text-align:left;">
+      <div style="font-size:0.7rem; font-weight:bold; color:var(--muted); margin-bottom:4px; display:flex; align-items:center; justify-content:space-between; gap:4px;">
+        <span>🔍 OCR Text:</span>
+      </div>
+      <div class="img-ocr-text" style="font-size:0.75rem; color:${hasOcr ? 'var(--text)' : 'var(--muted)'}; background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.06); border-radius:6px; padding:6px 8px; font-style:${hasOcr ? 'normal' : 'italic'}; max-height:80px; overflow-y:auto; line-height:1.4; word-break:break-word;">${hasOcr ? escHtml(text) : 'No OCR text yet — click OCR button.'}</div>
+    </div>
+  `;
+}
+
 function escHtml(s) {
   const d = document.createElement('div');
   d.textContent = s == null ? '' : s;
@@ -1006,7 +1092,7 @@ async function loadSupabaseData() {
     client.from('videos').select('id, title, video_number, modules(module_number)').order('id'),
     client.from('research_relationships').select('*'),
     client.from('sentences').select('id, sentence_type, section, sentence_text, script_id, scripts(video_id)').order('sort_order'),
-    client.from('research_assets').select('item_name, description').eq('container', CONTAINER),
+    client.from('research_assets').select('item_name, description, ocr_text').eq('container', CONTAINER),
     client.from('outline').select('id, module_number, content_type, content').eq('video_number', 0).order('module_number'),
     client.from('objective_links').select('*').eq('container', CONTAINER)
   ]);
@@ -1038,6 +1124,11 @@ async function loadSupabaseData() {
         const k = descKey(CONTAINER, r.item_name);
         descCache[k] = r.description;
         mirrorLocalDescription(k, r.description);
+      }
+      if (r.ocr_text) {
+        const k = descKey(CONTAINER, r.item_name);
+        ocrCache[k] = r.ocr_text;
+        mirrorLocalOcrText(k, r.ocr_text);
       }
     });
   }
@@ -1405,20 +1496,12 @@ window.runOcr = async function(container, name, btn) {
       return;
     }
 
-    const currentNote = getDescription(container, name);
-    let newNote = text;
-    if (currentNote) {
-      if (confirm('Append OCR text to existing note? Cancel to replace.')) {
-        newNote = currentNote + '\n\n[OCR]: ' + text;
-      }
-    }
-
-    const ok = await setDescription(container, name, newNote);
+    const ok = await setOcrText(container, name, text);
     if (ok) {
-      toast('OCR complete & note updated!', 'success');
-      updateNoteDisplay(container, name, newNote);
+      toast('OCR complete & saved!', 'success');
+      updateOcrDisplay(container, name, text);
     } else {
-      toast('OCR successful, but note failed to save to Supabase.', 'error');
+      toast('OCR successful, but failed to save to Supabase.', 'error');
     }
   } catch (err) {
     console.error('OCR Error:', err);
@@ -1427,6 +1510,66 @@ window.runOcr = async function(container, name, btn) {
     btn.disabled = false;
     btn.innerHTML = origText;
   }
+};
+
+window.runAllOcr = async function() {
+  if (!window.requireAdmin || !window.requireAdmin('run ocr')) return;
+  
+  // Find raster images that don't have OCR text yet
+  const pending = allLoadedFiles.filter(f => {
+    const isImg = /^image\//i.test(f.contentType);
+    if (!isImg) return false;
+    const text = getOcrText(CONTAINER, f.name);
+    return !text;
+  });
+
+  if (pending.length === 0) {
+    toast('All images already have OCR text!', 'info');
+    return;
+  }
+
+  if (!confirm(`Run OCR on ${pending.length} images? This will process them sequentially.`)) return;
+
+  let done = 0;
+  toast(`Running OCR on ${pending.length} images...`, 'info');
+
+  for (const f of pending) {
+    // Find OCR button on page for this image
+    const btn = Array.from(document.querySelectorAll(`button[onclick*="${f.name.replace(/'/g, "\\'")}"]`))
+      .find(b => b.classList.contains('btn-ocr'));
+    const origText = btn ? btn.innerHTML : '';
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '⏳ Scan…';
+    }
+
+    try {
+      const r = await fetch('/api/research/ocr', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ container: CONTAINER, name: f.name })
+      });
+      if (r.ok) {
+        const data = await r.json();
+        const text = (data.text || '').trim();
+        if (text) {
+          await setOcrText(CONTAINER, f.name, text);
+          updateOcrDisplay(CONTAINER, f.name, text);
+          done++;
+        }
+      }
+    } catch (err) {
+      console.warn(`OCR failed for ${f.name}:`, err);
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = origText;
+      }
+    }
+  }
+
+  toast(`Bulk OCR completed: ${done} images updated.`, 'success');
+  loadGallery(true); // reload cached data
 };
 
 function fetchAndInit() {
