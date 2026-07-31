@@ -38,6 +38,7 @@ func main() {
 	mux.Handle("/api/research/files", observe(cfg, researchFilesHandler(cfg)))
 	mux.Handle("/api/research/file", observe(cfg, researchFileHandler(cfg)))
 	mux.Handle("/api/research/rename", observe(cfg, researchRenameHandler(cfg)))
+	mux.Handle("/api/research/ocr", observe(cfg, researchOcrHandler(cfg)))
 	mux.Handle("/api/explanations/generate", observe(cfg, generateExplanationHandler(cfg)))
 	mux.Handle("/api/explanations", observe(cfg, explanationsHandler(cfg)))
 	mux.Handle("/api/images/generate", observe(cfg, imageGenerateHandler(cfg)))

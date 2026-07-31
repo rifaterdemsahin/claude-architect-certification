@@ -267,6 +267,7 @@ function renderLastUploaded(files, thumbSet) {
         <span style="font-size: 1.1rem; font-weight: 800; color: #fff; word-break: break-all;" title="${latestFile.name}">${latestFile.name}</span>
         <div style="display: flex; gap: 6px;">
           <a class="btn-sm btn-ghost" href="${imgUrl}" download="${latestFile.name}" style="text-decoration: none;">⬇ Save</a>
+          <button class="btn-sm btn-ghost btn-ocr" data-require-admin="true" onclick="runOcr('${CONTAINER}', '${latestFile.name.replace(/'/g,"\\'")}', this)" title="Scan text using AI OCR">🔍 OCR</button>
           <button class="btn-sm btn-danger btn-del" data-require-admin="true" onclick="deleteFile('${latestFile.name.replace(/'/g,"\\'")}')">🗑 Delete</button>
         </div>
       </div>
@@ -368,8 +369,11 @@ function renderPage() {
         ${noteMarkup}
         ${relMarkup}
       </div>
-      <div class="img-actions">
-        <a class="btn-sm btn-ghost" href="${imgUrl}" download="${f.name}">⬇ Save</a>
+      <div class="img-actions" style="display:flex; justify-content:space-between; align-items:center; gap:6px; padding: 0 12px 10px;">
+        <div style="display:flex; gap:6px;">
+          <a class="btn-sm btn-ghost" href="${imgUrl}" download="${f.name}">⬇ Save</a>
+          <button class="btn-sm btn-ghost btn-ocr" data-require-admin="true" onclick="runOcr('${CONTAINER}', '${f.name.replace(/'/g,"\\'")}', this)" title="Scan text using AI OCR">🔍 OCR</button>
+        </div>
         <button class="btn-sm btn-danger btn-del" data-require-admin="true" onclick="deleteFile('${f.name.replace(/'/g,"\\'")}')">🗑</button>
       </div>`;
     gallery.appendChild(card);
@@ -818,11 +822,44 @@ const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 let allVideos = [];
 let allRelationships = [];
 let allSentences = [];
+let allObjectives = [];
+let allObjectiveLinks = [];
 
 const DESC_STORE_KEY = 'research_descriptions';
 let descRegistry = {};
 let descCounter = 0;
 let descCache = {};
+
+function updateNoteDisplay(container, name, desc) {
+  Object.keys(descRegistry).forEach(regId => {
+    const item = descRegistry[regId];
+    if (item && item.container === container && item.name === name) {
+      const el = document.getElementById(regId);
+      if (el) {
+        const view = el.querySelector('.img-note-view');
+        const txtEl = el.querySelector('.img-note-text');
+        const btn = el.querySelector('button[onclick^="editNote"]');
+        const hasDesc = !!desc;
+        if (hasDesc) {
+          txtEl.textContent = desc;
+          txtEl.style.color = 'var(--text)';
+          txtEl.style.fontStyle = 'normal';
+          if (btn) btn.innerHTML = '✎ Edit';
+          view.removeAttribute('data-empty');
+        } else {
+          txtEl.textContent = 'No note yet — click Add Note.';
+          txtEl.style.color = 'var(--muted)';
+          txtEl.style.fontStyle = 'italic';
+          if (btn) btn.innerHTML = '✎ Add Note';
+          view.setAttribute('data-empty', '1');
+        }
+        view.style.display = 'block';
+        const editEl = el.querySelector('.img-note-edit');
+        if (editEl) editEl.style.display = 'none';
+      }
+    }
+  });
+}
 
 function escHtml(s) {
   const d = document.createElement('div');
@@ -925,35 +962,7 @@ window.saveNote = async function(id) {
   const ok = await setDescription(container, name, text);
   if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = origText; }
 
-  Object.keys(descRegistry).forEach(regId => {
-    const item = descRegistry[regId];
-    if (item && item.container === container && item.name === name) {
-      const el = document.getElementById(regId);
-      if (el) {
-        const view = el.querySelector('.img-note-view');
-        const txtEl = el.querySelector('.img-note-text');
-        const btn = el.querySelector('button[onclick^="editNote"]');
-        const desc = getDescription(container, name);
-        const hasDesc = !!desc;
-        if (hasDesc) {
-          txtEl.textContent = desc;
-          txtEl.style.color = 'var(--text)';
-          txtEl.style.fontStyle = 'normal';
-          if (btn) btn.innerHTML = '✎ Edit';
-          view.removeAttribute('data-empty');
-        } else {
-          txtEl.textContent = 'No note yet — click Add Note.';
-          txtEl.style.color = 'var(--muted)';
-          txtEl.style.fontStyle = 'italic';
-          if (btn) btn.innerHTML = '✎ Add Note';
-          view.setAttribute('data-empty', '1');
-        }
-        view.style.display = 'block';
-        const editEl = el.querySelector('.img-note-edit');
-        if (editEl) editEl.style.display = 'none';
-      }
-    }
-  });
+  updateNoteDisplay(container, name, text);
 
   if (ok) toast('Note saved for ' + name, 'success');
   else toast('Note saved locally (offline/sync warning)', 'success');
@@ -990,12 +999,16 @@ async function loadSupabaseData() {
     { data: vids,  error: err1 },
     { data: rels,  error: err2 },
     { data: sents, error: err3 },
-    { data: assets, error: err4 }
+    { data: assets, error: err4 },
+    { data: outlineList, error: err5 },
+    { data: objLinks, error: err6 }
   ] = await Promise.all([
     client.from('videos').select('id, title, video_number, modules(module_number)').order('id'),
     client.from('research_relationships').select('*'),
     client.from('sentences').select('id, sentence_type, section, sentence_text, script_id, scripts(video_id)').order('sort_order'),
-    client.from('research_assets').select('item_name, description').eq('container', CONTAINER)
+    client.from('research_assets').select('item_name, description').eq('container', CONTAINER),
+    client.from('outline').select('id, module_number, content_type, content').eq('video_number', 0).order('module_number'),
+    client.from('objective_links').select('*').eq('container', CONTAINER)
   ]);
 
   if (err1) console.error('Error loading course videos:', err1);
@@ -1029,6 +1042,12 @@ async function loadSupabaseData() {
     });
   }
 
+  if (err5) console.error('Error loading objectives:', err5);
+  else allObjectives = outlineList || [];
+
+  if (err6) console.error('Error loading objective links:', err6);
+  else allObjectiveLinks = objLinks || [];
+
   updateAllRelationsUI();
   if (typeof applySort === 'function') applySort();
 }
@@ -1038,6 +1057,8 @@ function renderRelationsMarkup(container, fileName) {
   const listId     = `list-${container}-${CSS.escape(fileName)}`;
   const sentDropId = `sent-drop-${container}-${CSS.escape(fileName)}`;
   const sentListId = `sent-list-${container}-${CSS.escape(fileName)}`;
+  const objDropId  = `obj-drop-${container}-${CSS.escape(fileName)}`;
+  const objListId  = `obj-list-${container}-${CSS.escape(fileName)}`;
   const safeFile   = fileName.replace(/'/g, "\\'");
   return `
     <div style="margin-top:8px; padding-top:6px; border-top:1px solid rgba(255,255,255,0.06); text-align:left;">
@@ -1058,6 +1079,16 @@ function renderRelationsMarkup(container, fileName) {
         </select>
       </div>
       <div id="${sentListId}" data-container="${container}" data-name="${fileName}" data-kind="sentence" style="display:flex; flex-wrap:wrap; gap:4px; margin-top:4px;">
+        <span style="font-size:0.65rem; color:var(--muted)">None linked</span>
+      </div>
+
+      <div style="margin-top:6px; padding-top:5px; border-top:1px solid rgba(255,255,255,0.04); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:4px;">
+        <span style="font-size:0.7rem; font-weight:bold; color:var(--muted);">🎯 Link to Objective/KR:</span>
+        <select id="${objDropId}" data-require-admin="true" data-container="${container}" data-name="${fileName}" onchange="linkAssetToObjective('${container}', '${safeFile}', this)" style="background:rgba(255,255,255,0.08); border:1px solid rgba(139,92,246,0.3); border-radius:4px; color:var(--text); font-size:0.65rem; padding:1px 3px; outline:none; max-width: 140px; cursor:pointer;">
+          <option value="">-- choose objective --</option>
+        </select>
+      </div>
+      <div id="${objListId}" data-container="${container}" data-name="${fileName}" style="display:flex; flex-wrap:wrap; gap:4px; margin-top:4px;">
         <span style="font-size:0.65rem; color:var(--muted)">None linked</span>
       </div>
     </div>
@@ -1131,6 +1162,24 @@ function updateAllRelationsUI() {
     select.value = currentVal;
   });
 
+  // Objective dropdowns
+  document.querySelectorAll('select[id^="obj-drop-"]').forEach(select => {
+    const currentVal = select.value;
+    const container = select.dataset.container;
+    const name = select.dataset.name;
+
+    const options = allObjectives.map(obj => {
+      const typeLabel = obj.content_type === 'objective' ? 'Obj' : 'KR';
+      const text = `M${obj.module_number} ${typeLabel}: ${obj.content.slice(0, 48)}${obj.content.length > 48 ? '…' : ''}`;
+      return { id: obj.id, text: text };
+    });
+
+    select.innerHTML = '<option value="">-- choose objective --</option>' + options.map(o => {
+      return `<option value="${o.id}">${o.text}</option>`;
+    }).join('');
+    select.value = currentVal;
+  });
+
   // Video link badges
   document.querySelectorAll('div[id^="list-"]:not([data-kind])').forEach(el => {
     const container = el.dataset.container;
@@ -1167,6 +1216,28 @@ function updateAllRelationsUI() {
       return `<span style="display:inline-flex;align-items:center;gap:3px;background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.3);border-radius:4px;padding:2px 4px;font-size:0.65rem;color:var(--text);" title="${sent ? sent.sentence_text.replace(/"/g,'&quot;') : ''}">
         📋 ${preview}
         <span style="cursor:pointer;font-weight:bold;color:var(--muted);font-size:0.75rem;" data-require-admin="true" onclick="unlinkAssetFromSentence('${container}','${name.replace(/'/g,"\\'")}',${r.sentence_id},event)">✕</span>
+      </span>`;
+    }).join('');
+  });
+
+  // Objective link badges
+  document.querySelectorAll('div[id^="obj-list-"]').forEach(el => {
+    const container = el.dataset.container;
+    const name = el.dataset.name;
+    if (!container || !name) return;
+    const matched = allObjectiveLinks.filter(l => l.container === container && l.item_name === name);
+    if (!matched.length) { el.innerHTML = '<span style="font-size:0.65rem; color:var(--muted)">None linked</span>'; return; }
+    el.innerHTML = matched.map(l => {
+      const objInfo = allObjectives.find(obj => obj.id === l.outline_id);
+      let label = `Obj #${l.outline_id}`;
+      if (objInfo) {
+        const typeLabel = objInfo.content_type === 'objective' ? 'Obj' : 'KR';
+        label = `M${objInfo.module_number} ${typeLabel}`;
+      }
+      const titleAttr = objInfo ? objInfo.content.replace(/"/g, '&quot;') : '';
+      return `<span style="display:inline-flex;align-items:center;gap:3px;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);border-radius:4px;padding:2px 4px;font-size:0.65rem;color:var(--text);" title="${titleAttr}">
+        🎯 ${label}
+        <span style="cursor:pointer;font-weight:bold;color:var(--muted);font-size:0.75rem;" data-require-admin="true" onclick="unlinkAssetFromObjective('${container}','${name.replace(/'/g,"\\'")}',${l.outline_id},event)">✕</span>
       </span>`;
     }).join('');
   });
@@ -1220,6 +1291,45 @@ async function unlinkAssetFromSentence(container, itemName, sentenceId, e) {
   else { allRelationships = allRelationships.filter(r => !(r.container === container && r.item_name === itemName && r.sentence_id === sentenceId)); updateAllRelationsUI(); }
 }
 
+async function linkAssetToObjective(container, itemName, select) {
+  if (!window.requireAdmin || !window.requireAdmin('link objectives')) return;
+  const outlineId = parseInt(select.value, 10);
+  if (isNaN(outlineId)) return;
+  const exists = allObjectiveLinks.some(l => l.container === container && l.item_name === itemName && l.outline_id === outlineId);
+  if (exists) {
+    alert('This asset is already linked to this objective.');
+    select.value = "";
+    return;
+  }
+  const displayLabel = `Research Image: ${itemName}`;
+  const { data, error } = await client.from('objective_links').insert({
+    outline_id: outlineId,
+    object_type: 'research',
+    label: displayLabel,
+    url: `/5_Symbols/production/preprod/research/images.html`,
+    container: container,
+    item_name: itemName
+  }).select();
+
+  if (error) alert('Link failed: ' + error.message);
+  else {
+    allObjectiveLinks.push(...(data || [{ container, item_name: itemName, outline_id: outlineId }]));
+    updateAllRelationsUI();
+  }
+  select.value = "";
+}
+
+async function unlinkAssetFromObjective(container, itemName, outlineId, e) {
+  if (e) e.stopPropagation();
+  if (!window.requireAdmin || !window.requireAdmin('unlink objectives')) return;
+  const { error } = await client.from('objective_links').delete().eq('container', container).eq('item_name', itemName).eq('outline_id', outlineId);
+  if (error) alert('Unlink failed: ' + error.message);
+  else {
+    allObjectiveLinks = allObjectiveLinks.filter(l => !(l.container === container && l.item_name === itemName && l.outline_id === outlineId));
+    updateAllRelationsUI();
+  }
+}
+
 function applyVideoFilter(videoId, countEl) {
   const matchedRels = allRelationships.filter(r => String(r.video_id) === String(videoId));
   let matched = 0;
@@ -1271,6 +1381,53 @@ try {
 } catch (e) {
   fetchAndInit();
 }
+
+window.runOcr = async function(container, name, btn) {
+  if (!window.requireAdmin || !window.requireAdmin('run ocr')) return;
+  const origText = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '⏳ Scanning…';
+
+  try {
+    const r = await fetch('/api/research/ocr', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ container: container, name: name })
+    });
+    if (!r.ok) {
+      const err = await r.json().catch(() => ({ error: `HTTP ${r.status}` }));
+      throw new Error(err.error || 'Server error');
+    }
+    const data = await r.json();
+    const text = (data.text || '').trim();
+    if (!text) {
+      toast('AI did not detect any readable text in this image.', 'info');
+      return;
+    }
+
+    const currentNote = getDescription(container, name);
+    let newNote = text;
+    if (currentNote) {
+      if (confirm('Append OCR text to existing note? Cancel to replace.')) {
+        newNote = currentNote + '\n\n[OCR]: ' + text;
+      }
+    }
+
+    const ok = await setDescription(container, name, newNote);
+    if (ok) {
+      toast('OCR complete & note updated!', 'success');
+      updateNoteDisplay(container, name, newNote);
+    } else {
+      toast('OCR successful, but note failed to save to Supabase.', 'error');
+    }
+  } catch (err) {
+    console.error('OCR Error:', err);
+    toast('OCR Failed: ' + err.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = origText;
+  }
+};
 
 function fetchAndInit() {
   fetch('/api/research/files?container=' + CONTAINER)

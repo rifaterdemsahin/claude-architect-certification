@@ -533,3 +533,156 @@ func researchRenameHandler(cfg config) http.HandlerFunc {
 		json.NewEncoder(w).Encode(map[string]string{"ok": "true", "name": to, "thumbnail": newThumb})
 	}
 }
+
+func researchOcrHandler(cfg config) http.HandlerFunc {
+	type OCRRequest struct {
+		Container string `json:"container"`
+		Name      string `json:"name"`
+	}
+	type OCRResponse struct {
+		Text string `json:"text"`
+	}
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		if r.Method != http.MethodPost {
+			http.Error(w, `{"error":"method not allowed"}`, http.StatusMethodNotAllowed)
+			return
+		}
+
+		var req OCRRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, `{"error":"invalid request body"}`, http.StatusBadRequest)
+			return
+		}
+
+		if !allowedResearchContainers[req.Container] || req.Name == "" {
+			http.Error(w, `{"error":"invalid params"}`, http.StatusBadRequest)
+			return
+		}
+
+		if cfg.azureAccountName == "" {
+			http.Error(w, `{"error":"Azure Storage not configured"}`, http.StatusServiceUnavailable)
+			return
+		}
+
+		apiKey := cfg.getSecret("OPENROUTER_API_KEY")
+		if apiKey == "" {
+			http.Error(w, `{"error":"OPENROUTER_API_KEY missing from server configuration"}`, http.StatusServiceUnavailable)
+			return
+		}
+
+		// 1. Download the image data from Azure Blob Storage
+		data, contentType, err := downloadBlobFromAzure(r.Context(), cfg, req.Container, req.Name)
+		if err != nil {
+			log.Printf("Failed to download blob for OCR: %v", err)
+			http.Error(w, fmt.Sprintf(`{"error":"failed to download image: %v"}`, err), http.StatusBadGateway)
+			return
+		}
+
+		// Check if it's an image
+		if !strings.HasPrefix(contentType, "image/") {
+			ext := strings.ToLower(path.Ext(req.Name))
+			isImgExt := ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".webp" || ext == ".gif" || ext == ".svg"
+			if !isImgExt {
+				http.Error(w, `{"error":"file is not an image"}`, http.StatusBadRequest)
+				return
+			}
+			if ext == ".png" {
+				contentType = "image/png"
+			} else if ext == ".webp" {
+				contentType = "image/webp"
+			} else if ext == ".gif" {
+				contentType = "image/gif"
+			} else {
+				contentType = "image/jpeg"
+			}
+		}
+
+		base64Image := base64.StdEncoding.EncodeToString(data)
+		dataURL := fmt.Sprintf("data:%s;base64,%s", contentType, base64Image)
+
+		// 2. Query OpenRouter with the image
+		prompt := "Extract all visible text from this image using OCR. Return ONLY the extracted text. Do not write any introduction, commentary, or wrapper formatting. If no text is found, return nothing."
+
+		ctx, cancel := context.WithTimeout(r.Context(), 45*time.Second)
+		defer cancel()
+
+		orURL := "https://openrouter.ai/api/v1/chat/completions"
+		reqBody := map[string]any{
+			"model": "google/gemini-2.5-flash",
+			"messages": []map[string]any{
+				{
+					"role": "user",
+					"content": []map[string]any{
+						{
+							"type": "text",
+							"text": prompt,
+						},
+						{
+							"type": "image_url",
+							"image_url": map[string]string{
+								"url": dataURL,
+							},
+						},
+					},
+				},
+			},
+		}
+
+		b, err := json.Marshal(reqBody)
+		if err != nil {
+			http.Error(w, `{"error":"failed to marshal request"}`, http.StatusInternalServerError)
+			return
+		}
+
+		hreq, err := http.NewRequestWithContext(ctx, "POST", orURL, bytes.NewReader(b))
+		if err != nil {
+			http.Error(w, `{"error":"failed to build request"}`, http.StatusInternalServerError)
+			return
+		}
+
+		hreq.Header.Set("Content-Type", "application/json")
+		hreq.Header.Set("Authorization", "Bearer "+apiKey)
+		hreq.Header.Set("HTTP-Referer", "https://claude-architect-certification.com")
+		hreq.Header.Set("X-Title", "Claude Architect Certification")
+
+		hresp, err := http.DefaultClient.Do(hreq)
+		if err != nil {
+			log.Printf("OpenRouter OCR API call failed: %v", err)
+			http.Error(w, `{"error":"OpenRouter API call failed"}`, http.StatusBadGateway)
+			return
+		}
+		defer hresp.Body.Close()
+
+		if hresp.StatusCode >= 400 {
+			respBody, _ := io.ReadAll(hresp.Body)
+			log.Printf("OpenRouter API returned error %d: %s", hresp.StatusCode, respBody)
+			http.Error(w, fmt.Sprintf(`{"error":"OpenRouter API returned HTTP %d"}`, hresp.StatusCode), http.StatusBadGateway)
+			return
+		}
+
+		var orResp struct {
+			Choices []struct {
+				Message struct {
+					Content string `json:"content"`
+				} `json:"message"`
+			} `json:"choices"`
+		}
+
+		if err := json.NewDecoder(hresp.Body).Decode(&orResp); err != nil {
+			http.Error(w, `{"error":"failed to decode response"}`, http.StatusInternalServerError)
+			return
+		}
+
+		extractedText := ""
+		if len(orResp.Choices) > 0 {
+			extractedText = strings.TrimSpace(orResp.Choices[0].Message.Content)
+		}
+
+		resp := OCRResponse{
+			Text: extractedText,
+		}
+		json.NewEncoder(w).Encode(resp)
+	}
+}
