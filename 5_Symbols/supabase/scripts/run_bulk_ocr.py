@@ -120,7 +120,7 @@ for idx, img in enumerate(pending):
             print(f"Extracted OCR Text length: {len(text)} characters.")
             
             # Upsert into Supabase
-            upsert_url = f"{supabase_url}/rest/v1/research_assets"
+            upsert_url = f"{supabase_url}/rest/v1/research_assets?on_conflict=container,item_name"
             upsert_data = {
                 "container": "research-images",
                 "item_name": filename,
