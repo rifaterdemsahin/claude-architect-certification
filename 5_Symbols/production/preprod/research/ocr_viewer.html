@@ -210,6 +210,16 @@ async function loadData() {
     });
 
     renderImageList();
+
+    // Auto-select file if name/file query string parameter is present
+    const params = new URLSearchParams(location.search);
+    const targetName = params.get('name') || params.get('file');
+    if (targetName) {
+      const matched = allLoadedFiles.find(f => f.name === targetName);
+      if (matched) {
+        selectImage(matched);
+      }
+    }
   } catch (err) {
     console.error('File load failed:', err);
     document.getElementById('image-list-container').innerHTML = `

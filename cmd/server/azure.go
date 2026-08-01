@@ -603,7 +603,7 @@ func researchOcrHandler(cfg config) http.HandlerFunc {
 		dataURL := fmt.Sprintf("data:%s;base64,%s", contentType, base64Image)
 
 		// 2. Query OpenRouter with the image
-		prompt := "Extract all visible text from this image using OCR. Return ONLY the extracted text. Do not write any introduction, commentary, or wrapper formatting. If no text is found, return nothing."
+		prompt := "Analyze this image and explain it in proper, clean Markdown format. Include a title representing the image content, a short descriptive overview explaining what the image depicts (e.g. system architecture, data flow diagram, code screenshot, or slide), and a structured list of all visible text organized cleanly under headings, bullet points, tables, or code blocks as appropriate. Do not include raw conversational greetings or sign-offs."
 
 		ctx, cancel := context.WithTimeout(r.Context(), 45*time.Second)
 		defer cancel()
