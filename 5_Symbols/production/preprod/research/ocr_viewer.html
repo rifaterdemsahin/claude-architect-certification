@@ -99,8 +99,14 @@
     <!-- Sidebar Image List -->
     <div class="sidebar">
       <h3 style="font-family: var(--font-h); font-size: 0.95rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em;">📷 Available Images</h3>
-      <div id="search-box" style="margin-top: 10px;">
+      <div id="search-box" style="margin-top: 10px; margin-bottom: 12px;">
         <input type="text" id="img-search" placeholder="Filter images..." style="width:100%; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:8px 12px; color:#fff; font-size:0.8rem; outline:none;">
+      </div>
+      <div id="pinned-active-container" style="margin-bottom: 14px;"></div>
+      <div class="sidebar-pagination" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; font-size:0.75rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">
+        <button class="btn-sm btn-ghost" id="sb-prev" onclick="changeSidebarPage(-1)" style="padding:4px 8px; font-size: 0.7rem;" disabled>◀ Prev</button>
+        <span id="sb-page-info" style="color:var(--muted); font-weight:700;">Page 1</span>
+        <button class="btn-sm btn-ghost" id="sb-next" onclick="changeSidebarPage(1)" style="padding:4px 8px; font-size: 0.7rem;" disabled>Next ▶</button>
       </div>
       <div class="img-list" id="image-list-container">
         <!-- populated dynamically -->
@@ -230,22 +236,61 @@ async function loadData() {
   }
 }
 
+let sidebarCurrentPage = 1;
+const sidebarPageSize = 10;
+
 function renderImageList() {
   const container = document.getElementById('image-list-container');
+  const pinnedContainer = document.getElementById('pinned-active-container');
   const query = document.getElementById('img-search').value.toLowerCase();
   
+  // Filter list
   const filtered = allLoadedFiles.filter(f => f.name.toLowerCase().includes(query));
   
+  // Render pinned active item at the top
+  if (selectedFile) {
+    const hasOcr = !!dbAssets[selectedFile.name];
+    pinnedContainer.innerHTML = `
+      <h4 style="font-size:0.7rem; font-weight:bold; color:var(--muted); margin-bottom:4px; text-transform:uppercase;">📌 Active Selection</h4>
+      <div class="img-list-item active" onclick="selectImage(selectedFile)" style="border-color: var(--primary); background: rgba(139,92,246,0.12);">
+        <div class="img-list-name" title="${selectedFile.name}">${selectedFile.name}</div>
+        <div class="img-list-meta">
+          <span>${hasOcr ? '📝 Has OCR' : '⚪ No OCR'}</span>
+          <span>⏱ ${formatTimeAgo(selectedFile.lastModified)}</span>
+        </div>
+      </div>
+      <div style="border-bottom:1px dashed rgba(255,255,255,0.08); margin:12px 0 6px 0;"></div>
+    `;
+  } else {
+    pinnedContainer.innerHTML = '';
+  }
+
   if (filtered.length === 0) {
     container.innerHTML = `<div style="padding:20px 0; text-align:center; color:var(--muted); font-size:0.8rem;">No matching images found.</div>`;
+    document.getElementById('sb-prev').disabled = true;
+    document.getElementById('sb-next').disabled = true;
+    document.getElementById('sb-page-info').textContent = 'Page 0 of 0';
     return;
   }
   
+  // Paginate filtered list
+  const totalPages = Math.ceil(filtered.length / sidebarPageSize);
+  if (sidebarCurrentPage > totalPages) sidebarCurrentPage = totalPages;
+  if (sidebarCurrentPage < 1) sidebarCurrentPage = 1;
+  
+  const startIdx = (sidebarCurrentPage - 1) * sidebarPageSize;
+  const pageItems = filtered.slice(startIdx, startIdx + sidebarPageSize);
+  
   container.innerHTML = '';
-  filtered.forEach(f => {
+  pageItems.forEach(f => {
+    // If it's already selected and pinned at the top, skip duplicate showing in list
+    if (selectedFile && f.name === selectedFile.name) {
+      return; 
+    }
+
     const item = document.createElement('div');
     const hasOcr = !!dbAssets[f.name];
-    item.className = 'img-list-item' + (selectedFile && selectedFile.name === f.name ? ' active' : '');
+    item.className = 'img-list-item';
     item.onclick = () => selectImage(f);
     
     item.innerHTML = `
@@ -257,7 +302,21 @@ function renderImageList() {
     `;
     container.appendChild(item);
   });
+
+  // Update pagination controls
+  const prevBtn = document.getElementById('sb-prev');
+  const nextBtn = document.getElementById('sb-next');
+  const infoEl = document.getElementById('sb-page-info');
+  
+  prevBtn.disabled = (sidebarCurrentPage === 1);
+  nextBtn.disabled = (sidebarCurrentPage === totalPages);
+  infoEl.textContent = `Page ${sidebarCurrentPage} of ${totalPages}`;
 }
+
+window.changeSidebarPage = function(delta) {
+  sidebarCurrentPage += delta;
+  renderImageList();
+};
 
 function formatTimeAgo(dateStr) {
   if (!dateStr) return 'unknown';
