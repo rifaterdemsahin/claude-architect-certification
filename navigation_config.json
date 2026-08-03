@@ -448,6 +448,11 @@
                   {
                     "label": "📄 Analysis & Video",
                     "url": "5_Symbols/production/prod/feedback_session_analysis.html"
+                  },
+                  {
+                    "label": "📝 Self-Assessments",
+                    "url": "https://rifaterdemsahin.github.io/ai-cohort-assignments/",
+                    "description": "Cohort self-assessment checklists — track progress after each module."
                   }
                 ]
               },
