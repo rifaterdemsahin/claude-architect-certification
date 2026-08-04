@@ -39,7 +39,16 @@
       padding: 5px 12px; transition: all 0.2s;
     }
     .task-link:hover { background: rgba(139,92,246,0.12); }
+    .task-link + .task-link { margin-left: 8px; }
     .last-done { font-size: 0.75rem; color: var(--muted); margin-top: 6px; }
+    .template-box {
+      margin-top: 12px; background: rgba(0,0,0,0.3); border: 1px dashed rgba(139,92,246,0.25);
+      border-radius: 10px; padding: 12px 14px;
+    }
+    .template-box h4 { font-family: var(--font-h); font-size: 0.78rem; color: #c4b5fd; margin-bottom: 8px; font-weight: 700; }
+    .template-box ol { padding-left: 18px; }
+    .template-box li { font-size: 0.83rem; color: var(--text); margin-bottom: 5px; }
+    .template-box li strong { color: #fcd34d; }
   </style>
   <script src="../../../shared/nav.js" defer></script>
 <script src="../../../shared/seo.js" defer></script></head>
@@ -58,7 +67,13 @@ const TASKS = [
     name: '📰 Publish LinkedIn Newsletter',
     freq: 'Weekly',
     desc: 'Write and publish this week\'s issue of the LinkedIn newsletter.',
-    link: 'https://www.linkedin.com/newsletters/7490354292390940672/'
+    link: 'https://www.linkedin.com/newsletters/7490354292390940672/',
+    sample: 'https://www.linkedin.com/pulse/building-ai-powered-second-brain-obsidian-from-digital-erdem-sahin-isyee/',
+    template: [
+      'Helper stages for the cohorts — what the cohort is working through this week, walked step by step.',
+      'Animations generated this week — showcase the visuals/animations produced for that week\'s module.',
+      'Promote the solution — tie it back to the problem it solves and point readers to the certification.'
+    ]
   }
 ];
 
@@ -89,7 +104,12 @@ function render() {
         </div>
         <div class="task-desc">${t.desc}</div>
         <a class="task-link" href="${t.link}" target="_blank" rel="noopener">🔗 Open</a>
+        ${t.sample ? `<a class="task-link" href="${t.sample}" target="_blank" rel="noopener">📄 Sample Post</a>` : ''}
         <div class="last-done" id="last-${t.id}">Last completed: ${lastDone}</div>
+        ${t.template ? `<div class="template-box">
+          <h4>🧩 Content Structure</h4>
+          <ol>${t.template.map(step => `<li>${step}</li>`).join('')}</ol>
+        </div>` : ''}
       </div>
     </div>`;
   }).join('');
