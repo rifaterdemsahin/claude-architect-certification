@@ -130,6 +130,11 @@
               "description": "Critical path overview and pre-production checklists."
             },
             {
+              "label": "🔁 Recurring Tasks",
+              "url": "5_Symbols/production/preprod/recurring_tasks.html",
+              "description": "Weekly & recurring production activities — e.g. LinkedIn Newsletter."
+            },
+            {
               "group": true,
               "label": "🎞️ Animation Prep",
               "children": [
@@ -846,6 +851,11 @@
             {
               "label": "📣 LinkedIn Promotion Helper",
               "url": "5_Symbols/production/postprod/linkedin_promotion.html"
+            },
+            {
+              "label": "📰 LinkedIn Newsletter",
+              "url": "https://www.linkedin.com/newsletters/7490354292390940672/",
+              "description": "Weekly recurring — publish the LinkedIn newsletter issue for this week."
             }
           ]
         },
