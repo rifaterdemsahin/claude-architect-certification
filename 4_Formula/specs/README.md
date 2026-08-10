@@ -104,6 +104,7 @@ Hand-authored specs (e.g. `5_Symbols_production_postprod_lower_thirds_spec.md` a
 - [5_Symbols_production_preprod_tools_database_erd_spec.md](5_Symbols_production_preprod_tools_database_erd_spec.md)
 - [5_Symbols_production_preprod_ways_of_working_spec.md](5_Symbols_production_preprod_ways_of_working_spec.md)
 - [5_Symbols_production_prod_checklist_spec.md](5_Symbols_production_prod_checklist_spec.md)
+- [5_Symbols_production_prod_feedback_session_analysis_spec.md](5_Symbols_production_prod_feedback_session_analysis_spec.md)
 - [5_Symbols_production_prod_footage_mapping_spec.md](5_Symbols_production_prod_footage_mapping_spec.md)
 - [5_Symbols_production_prod_google_drive_folder_creator_spec.md](5_Symbols_production_prod_google_drive_folder_creator_spec.md)
 - [5_Symbols_production_prod_google_drive_links_spec.md](5_Symbols_production_prod_google_drive_links_spec.md)

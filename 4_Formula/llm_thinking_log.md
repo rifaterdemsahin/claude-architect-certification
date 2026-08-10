@@ -2607,3 +2607,16 @@ Add a "YouTube Paywall" page under Post Prod explaining how YouTube Channel Memb
 - Confirmed in Chrome: `self_learning.html` now renders the shared nav (previously blank/broken); reachable from the Preprod menu; `postprod/index.html` shows the new Canva Animation Building card.
 - Supabase-side "Self Learning" group under Production still needs to be confirmed saved once the stuck menu_builder tab is resolved.
 
+## 2026-08-10 — 💬 Add Week 7 Cohort Session to Feedback Session Analysis
+
+### 🎯 Objective
+Add the Week 7 cohort call recording and document notes to the Feedback Session Analysis page (`5_Symbols/production/prod/feedback_session_analysis.html`).
+
+### 🧭 Architecture & Design Choices
+- **Week / Module Matching**: Determined Week 7 details. Video URL: `https://drive.google.com/file/d/113F5eum5cV027EAl10SUnn63PlNT40lx/view?usp=sharing` (ID: `113F5eum5cV027EAl10SUnn63PlNT40lx`) and Notes URL: `https://docs.google.com/document/d/1KGMeo7ITeu5TGjH3nL59RrsLJRXcWYxFmGsxHRKMezg/edit?usp=sharing` (ID: `1KGMeo7ITeu5TGjH3nL59RrsLJRXcWYxFmGsxHRKMezg`).
+- **Date mapping**: Cross-referenced with `customer_discovery_interviews.html` to find Week 7 corresponds to `Sun, 9 Aug 2026`. The formatted date is `2026/08/09 21:00 BST`.
+- **Card Insertion**: Inserted two new `.embed-card` blocks immediately above the Week 6 cards, ensuring the video card comes first, followed by the notes document card, and maintaining consistent CSS structure.
+
+### ✅ Verification
+- Rebuilt Go server (`go build ./... && go vet ./...`).
+- Confirmed the page opens in Google Chrome and loads correctly.
